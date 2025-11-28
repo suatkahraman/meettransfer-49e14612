@@ -6,7 +6,7 @@ export const Footer = () => {
       <div className="container max-w-7xl mx-auto">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold">Elite Transfer</h3>
+            <h3 className="text-2xl font-bold">Meet Transfer</h3>
             <p className="text-white/80 font-sans text-sm leading-relaxed">
               Premium airport transfer and chauffeur service providing luxury transportation across Turkey.
             </p>
@@ -52,7 +52,7 @@ export const Footer = () => {
         </div>
 
         <div className="border-t border-white/20 pt-8 text-center text-white/60 font-sans text-sm">
-          <p>© 2024 Elite Transfer. All rights reserved.</p>
+          <p>© 2024 Meet Transfer. All rights reserved.</p>
         </div>
       </div>
     </footer>

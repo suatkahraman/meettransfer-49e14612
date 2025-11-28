@@ -8,7 +8,7 @@ export const Header = () => {
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center">
             <h1 className="text-2xl md:text-3xl font-bold text-white">
-              Elite Transfer
+              Meet Transfer
             </h1>
           </div>
 
