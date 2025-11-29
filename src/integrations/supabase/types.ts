@@ -14,7 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          booking_type: string
+          created_at: string | null
+          dropoff_location: string | null
+          duration_hours: number | null
+          flight_number: string | null
+          id: string
+          passenger_email: string
+          passenger_name: string
+          passenger_phone: string
+          passengers: number
+          pickup_date: string
+          pickup_location: string
+          pickup_time: string
+          special_requests: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+          vehicle_type: string
+        }
+        Insert: {
+          booking_type: string
+          created_at?: string | null
+          dropoff_location?: string | null
+          duration_hours?: number | null
+          flight_number?: string | null
+          id?: string
+          passenger_email: string
+          passenger_name: string
+          passenger_phone: string
+          passengers: number
+          pickup_date: string
+          pickup_location: string
+          pickup_time: string
+          special_requests?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+          vehicle_type: string
+        }
+        Update: {
+          booking_type?: string
+          created_at?: string | null
+          dropoff_location?: string | null
+          duration_hours?: number | null
+          flight_number?: string | null
+          id?: string
+          passenger_email?: string
+          passenger_name?: string
+          passenger_phone?: string
+          passengers?: number
+          pickup_date?: string
+          pickup_location?: string
+          pickup_time?: string
+          special_requests?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
