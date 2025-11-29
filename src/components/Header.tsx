@@ -1,12 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Menu, Phone } from "lucide-react";
+import { Menu, Phone, LogOut, User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export const Header = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <header className="absolute top-0 left-0 right-0 z-50 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          <div className="flex items-center">
+          <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
             <h1 className="text-2xl md:text-3xl font-bold text-white">
               Meet Transfer
             </h1>
@@ -22,10 +27,36 @@ export const Header = () => {
             <a href="#about" className="text-white/90 hover:text-white transition-colors font-sans">
               About
             </a>
-            <Button variant="accent" size="sm" className="ml-4">
-              <Phone className="h-4 w-4 mr-2" />
-              Contact
-            </Button>
+            
+            {user ? (
+              <div className="flex items-center gap-2 ml-4">
+                <Button
+                  variant="accent"
+                  size="sm"
+                  onClick={() => navigate('/bookings')}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  My Bookings
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={signOut}
+                  className="text-white hover:bg-white/10"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="accent"
+                size="sm"
+                onClick={() => navigate('/auth')}
+                className="ml-4"
+              >
+                Sign In
+              </Button>
+            )}
           </nav>
 
           <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-white/10">
