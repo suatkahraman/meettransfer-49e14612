@@ -5,3 +5,9 @@ verify_jwt = true
 
 [functions.setup-initial-admin]
 verify_jwt = false
+
+[functions.create-notification]
+verify_jwt = true
+
+[functions.notify-admin-new-reservation]
+verify_jwt = true

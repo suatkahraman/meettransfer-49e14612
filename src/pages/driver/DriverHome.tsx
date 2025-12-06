@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, MapPin, Calendar, Clock, User, Plane, CreditCard, Calculator } from 'lucide-react';
 import { format } from 'date-fns';
+import NotificationBell from '@/components/NotificationBell';
 
 interface Reservation {
   id: string;
@@ -66,6 +67,7 @@ const DriverHome = () => {
       <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
         <h1 className="text-2xl font-serif">Driver Panel</h1>
         <div className="flex items-center gap-4">
+          <NotificationBell />
           <Button variant="ghost" onClick={() => navigate('/driver/accounting')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <Calculator className="h-4 w-4 mr-2" />
             Accounting
