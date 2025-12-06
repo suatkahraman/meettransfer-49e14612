@@ -15,11 +15,14 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "NAV Airport", to: "Göreme", price: "€35" },
-  { from: "NAV Airport", to: "Ürgüp", price: "€40" },
-  { from: "ASR Airport", to: "Göreme", price: "€65" },
-  { from: "ASR Airport", to: "Ürgüp", price: "€70" },
-  { from: "NAV Airport", to: "Uçhisar", price: "€35" },
+  { from: "NAV Airport", to: "Göreme", price: "$40" },
+  { from: "NAV Airport", to: "Ürgüp", price: "$45" },
+  { from: "NAV Airport", to: "Avanos", price: "$40" },
+  { from: "NAV Airport", to: "Uçhisar", price: "$40" },
+  { from: "ASR Airport", to: "Göreme", price: "$55" },
+  { from: "ASR Airport", to: "Ürgüp", price: "$60" },
+  { from: "ASR Airport", to: "Avanos", price: "$55" },
+  { from: "ASR Airport", to: "Uçhisar", price: "$55" },
 ];
 
 const faqItems = [

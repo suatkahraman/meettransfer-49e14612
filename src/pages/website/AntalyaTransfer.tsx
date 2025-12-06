@@ -15,11 +15,13 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "AYT Airport", to: "Lara", price: "€25" },
-  { from: "AYT Airport", to: "Belek", price: "€35" },
-  { from: "AYT Airport", to: "Side", price: "€50" },
-  { from: "AYT Airport", to: "Alanya", price: "€70" },
-  { from: "AYT Airport", to: "Kemer", price: "€45" },
+  { from: "AYT Airport", to: "Lara", price: "$35" },
+  { from: "AYT Airport", to: "Kundu", price: "$40" },
+  { from: "AYT Airport", to: "Belek", price: "$45" },
+  { from: "AYT Airport", to: "Side", price: "$65" },
+  { from: "AYT Airport", to: "Manavgat", price: "$70" },
+  { from: "AYT Airport", to: "Alanya", price: "$90" },
+  { from: "AYT Airport", to: "Kemer", price: "$55" },
 ];
 
 const faqItems = [
