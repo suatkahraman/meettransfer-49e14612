@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -25,41 +26,77 @@ import AdminDrivers from "./pages/admin/AdminDrivers";
 import AdminAccounting from "./pages/admin/AdminAccounting";
 import AdminSettings from "./pages/admin/AdminSettings";
 
+// Website Pages
+import IstanbulTransfer from "./pages/website/IstanbulTransfer";
+import AntalyaTransfer from "./pages/website/AntalyaTransfer";
+import BodrumTransfer from "./pages/website/BodrumTransfer";
+import DalamanTransfer from "./pages/website/DalamanTransfer";
+import IzmirTransfer from "./pages/website/IzmirTransfer";
+import CappadociaTransfer from "./pages/website/CappadociaTransfer";
+import EphesusPamukkale from "./pages/website/EphesusPamukkale";
+import LuxuryChauffeur from "./pages/website/LuxuryChauffeur";
+import FleetPage from "./pages/website/FleetPage";
+import AboutPage from "./pages/website/AboutPage";
+import ContactPage from "./pages/website/ContactPage";
+import ReviewsPage from "./pages/website/ReviewsPage";
+import DestinationsPage from "./pages/website/DestinationsPage";
+import WhatsAppBooking from "./pages/website/WhatsAppBooking";
+import TermsPage from "./pages/website/TermsPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            
-            {/* Customer Routes */}
-            <Route path="/customer" element={<CustomerHome />} />
-            <Route path="/customer/bookings" element={<CustomerBookings />} />
-            
-            {/* Driver Routes */}
-            <Route path="/driver" element={<DriverHome />} />
-            <Route path="/driver/job/:id" element={<DriverJobDetails />} />
-            <Route path="/driver/accounting" element={<DriverAccounting />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/reservations" element={<AdminReservations />} />
-            <Route path="/admin/reservations/:id" element={<AdminEditReservation />} />
-            <Route path="/admin/drivers" element={<AdminDrivers />} />
-            <Route path="/admin/accounting" element={<AdminAccounting />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              
+              {/* Website Pages */}
+              <Route path="/destinations" element={<DestinationsPage />} />
+              <Route path="/fleet" element={<FleetPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/reviews" element={<ReviewsPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/whatsapp-booking" element={<WhatsAppBooking />} />
+              <Route path="/istanbul-transfer" element={<IstanbulTransfer />} />
+              <Route path="/antalya-transfer" element={<AntalyaTransfer />} />
+              <Route path="/bodrum-transfer" element={<BodrumTransfer />} />
+              <Route path="/dalaman-transfer" element={<DalamanTransfer />} />
+              <Route path="/izmir-transfer" element={<IzmirTransfer />} />
+              <Route path="/cappadocia-transfer" element={<CappadociaTransfer />} />
+              <Route path="/ephesus-pamukkale" element={<EphesusPamukkale />} />
+              <Route path="/luxury-chauffeur" element={<LuxuryChauffeur />} />
+              
+              {/* Customer Routes */}
+              <Route path="/customer" element={<CustomerHome />} />
+              <Route path="/customer/bookings" element={<CustomerBookings />} />
+              
+              {/* Driver Routes */}
+              <Route path="/driver" element={<DriverHome />} />
+              <Route path="/driver/job/:id" element={<DriverJobDetails />} />
+              <Route path="/driver/accounting" element={<DriverAccounting />} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/reservations" element={<AdminReservations />} />
+              <Route path="/admin/reservations/:id" element={<AdminEditReservation />} />
+              <Route path="/admin/drivers" element={<AdminDrivers />} />
+              <Route path="/admin/accounting" element={<AdminAccounting />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 
