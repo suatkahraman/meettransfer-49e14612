@@ -25,6 +25,7 @@ import AdminEditReservation from "./pages/admin/AdminEditReservation";
 import AdminDrivers from "./pages/admin/AdminDrivers";
 import AdminAccounting from "./pages/admin/AdminAccounting";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminSetup from "./pages/admin/AdminSetup";
 
 // Website Pages
 import IstanbulTransfer from "./pages/website/IstanbulTransfer";
@@ -85,6 +86,7 @@ const App = () => (
               
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/setup" element={<AdminSetup />} />
               <Route path="/admin/reservations" element={<AdminReservations />} />
               <Route path="/admin/reservations/:id" element={<AdminEditReservation />} />
               <Route path="/admin/drivers" element={<AdminDrivers />} />

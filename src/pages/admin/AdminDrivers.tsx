@@ -100,55 +100,45 @@ const AdminDrivers = () => {
         fetchDrivers();
       }
     } else {
-      // Create new driver - first create user, then driver record
+      // Create new driver via edge function
       if (!formData.email || !formData.password) {
         toast.error('Email and password are required for new drivers');
         return;
       }
 
-      // Create the user first via signup
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.name,
-          },
-        },
-      });
-
-      if (signUpError || !signUpData.user) {
-        toast.error(signUpError?.message || 'Failed to create user');
+      if (!formData.name || !formData.phone) {
+        toast.error('Name and phone are required');
         return;
       }
 
-      // Update the user's role to driver
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .update({ role: 'driver' })
-        .eq('user_id', signUpData.user.id);
-
-      if (roleError) {
-        console.error('Role update error:', roleError);
-      }
-
-      // Create the driver record
-      const { error: driverError } = await supabase
-        .from('drivers')
-        .insert({
-          user_id: signUpData.user.id,
-          name: formData.name,
-          phone: formData.phone,
-          region: formData.region || null,
-          commission_rate: parseFloat(formData.commission_rate),
+      try {
+        const { data, error } = await supabase.functions.invoke('create-user-account', {
+          body: {
+            email: formData.email,
+            password: formData.password,
+            role: 'driver',
+            name: formData.name,
+            phone: formData.phone,
+            region: formData.region || null,
+            commission_rate: parseFloat(formData.commission_rate) || 10,
+          },
         });
 
-      if (driverError) {
-        toast.error('Failed to create driver record');
-      } else {
-        toast.success('Driver created successfully');
+        if (error) {
+          toast.error(error.message || 'Failed to create driver');
+          return;
+        }
+
+        if (data?.error) {
+          toast.error(data.error);
+          return;
+        }
+
+        toast.success('Driver created successfully!');
         setDialogOpen(false);
         fetchDrivers();
+      } catch (err: any) {
+        toast.error(err.message || 'Failed to create driver');
       }
     }
   };
