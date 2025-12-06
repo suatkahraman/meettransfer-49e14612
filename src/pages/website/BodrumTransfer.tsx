@@ -8,6 +8,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import bodrumMeetTransfer from "@/assets/bodrum-meet-transfer.png";
 
 const destinations = [
   "Yalıkavak", "Türkbükü", "Gümüşlük", "Bodrum Center", "Gündoğan",
@@ -87,6 +88,41 @@ const BodrumTransfer = () => {
         </section>
 
         <FeatureList />
+
+        <section className="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h2 className="text-2xl font-bold mb-4">City Transfer Service</h2>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Whether you're arriving at Milas-Bodrum Airport or need a transfer within the peninsula, 
+              our professional drivers will meet you with a personalized name sign and ensure a smooth journey.
+            </p>
+            <ul className="space-y-2 text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-accent" />
+                Meet & Greet at arrival hall
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-accent" />
+                Door-to-door service to any location
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-accent" />
+                Professional English-speaking drivers
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-accent" />
+                Flexible scheduling for your convenience
+              </li>
+            </ul>
+          </div>
+          <div className="rounded-2xl overflow-hidden shadow-lg">
+            <img 
+              src={bodrumMeetTransfer} 
+              alt="Meet Transfer service at Bodrum Airport - driver greeting passenger with name sign"
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        </section>
 
         <section>
           <h2 className="text-2xl font-bold mb-4">Popular Destinations</h2>
