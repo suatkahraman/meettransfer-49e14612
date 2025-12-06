@@ -7,8 +7,18 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Percent } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Percent, Loader2 } from 'lucide-react';
+
+const regions = [
+  { value: 'Istanbul', label: 'Istanbul' },
+  { value: 'Antalya', label: 'Antalya' },
+  { value: 'Bodrum', label: 'Bodrum' },
+  { value: 'Dalaman', label: 'Dalaman' },
+  { value: 'Izmir', label: 'Izmir' },
+  { value: 'Cappadocia', label: 'Cappadocia' },
+];
 
 interface Driver {
   id: string;
@@ -26,11 +36,12 @@ const AdminDrivers = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     region: '',
-    commission_rate: '10',
+    commission_rate: '70',
     email: '',
     password: '',
   });
@@ -59,7 +70,7 @@ const AdminDrivers = () => {
       name: '',
       phone: '',
       region: '',
-      commission_rate: '10',
+      commission_rate: '70',
       email: '',
       password: '',
     });
@@ -80,38 +91,45 @@ const AdminDrivers = () => {
   };
 
   const handleSubmit = async () => {
-    if (editingDriver) {
-      // Update existing driver
-      const { error } = await supabase
-        .from('drivers')
-        .update({
-          name: formData.name,
-          phone: formData.phone,
-          region: formData.region || null,
-          commission_rate: parseFloat(formData.commission_rate),
-        })
-        .eq('id', editingDriver.id);
+    setIsSubmitting(true);
+    
+    try {
+      if (editingDriver) {
+        // Update existing driver
+        const { error } = await supabase
+          .from('drivers')
+          .update({
+            name: formData.name,
+            phone: formData.phone,
+            region: formData.region || null,
+            commission_rate: parseFloat(formData.commission_rate),
+          })
+          .eq('id', editingDriver.id);
 
-      if (error) {
-        toast.error('Failed to update driver');
+        if (error) {
+          toast.error('Failed to update driver');
+        } else {
+          toast.success('Driver updated');
+          setDialogOpen(false);
+          fetchDrivers();
+        }
       } else {
-        toast.success('Driver updated');
-        setDialogOpen(false);
-        fetchDrivers();
-      }
-    } else {
-      // Create new driver via edge function
-      if (!formData.email || !formData.password) {
-        toast.error('Email and password are required for new drivers');
-        return;
-      }
+        // Create new driver via edge function
+        if (!formData.email || !formData.password) {
+          toast.error('Email and password are required for new drivers');
+          return;
+        }
 
-      if (!formData.name || !formData.phone) {
-        toast.error('Name and phone are required');
-        return;
-      }
+        if (!formData.name || !formData.phone) {
+          toast.error('Name and phone are required');
+          return;
+        }
 
-      try {
+        if (!formData.region) {
+          toast.error('Please select a region');
+          return;
+        }
+
         const { data, error } = await supabase.functions.invoke('create-user-account', {
           body: {
             email: formData.email,
@@ -119,8 +137,8 @@ const AdminDrivers = () => {
             role: 'driver',
             name: formData.name,
             phone: formData.phone,
-            region: formData.region || null,
-            commission_rate: parseFloat(formData.commission_rate) || 10,
+            region: formData.region,
+            commission_rate: parseFloat(formData.commission_rate) || 70,
           },
         });
 
@@ -134,12 +152,14 @@ const AdminDrivers = () => {
           return;
         }
 
-        toast.success('Driver created successfully!');
+        toast.success('Driver has been created successfully!');
         setDialogOpen(false);
         fetchDrivers();
-      } catch (err: any) {
-        toast.error(err.message || 'Failed to create driver');
       }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create driver');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -252,21 +272,31 @@ const AdminDrivers = () => {
             </div>
             <div className="space-y-2">
               <Label>Region</Label>
-              <Input
-                value={formData.region}
-                onChange={(e) => setFormData({...formData, region: e.target.value})}
-              />
+              <Select value={formData.region} onValueChange={(v) => setFormData({...formData, region: v})}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Select region" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  {regions.map(region => (
+                    <SelectItem key={region.value} value={region.value}>
+                      {region.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
-              <Label>Commission Rate (%)</Label>
+              <Label>Driver Payout (%)</Label>
               <Input
                 type="number"
                 min="0"
                 max="100"
+                placeholder="70"
                 value={formData.commission_rate}
                 onChange={(e) => setFormData({...formData, commission_rate: e.target.value})}
                 required
               />
+              <p className="text-xs text-muted-foreground">Percentage the driver receives from each job</p>
             </div>
             {!editingDriver && (
               <>
@@ -276,6 +306,7 @@ const AdminDrivers = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    placeholder="driver@example.com"
                     required
                   />
                 </div>
@@ -285,6 +316,7 @@ const AdminDrivers = () => {
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    placeholder="Minimum 6 characters"
                     required
                   />
                 </div>
@@ -292,8 +324,19 @@ const AdminDrivers = () => {
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit}>{editingDriver ? 'Update' : 'Create'}</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {editingDriver ? 'Updating...' : 'Creating...'}
+                </>
+              ) : (
+                editingDriver ? 'Update' : 'Create Driver'
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
