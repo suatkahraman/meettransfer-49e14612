@@ -13,6 +13,77 @@ serve(async (req) => {
 
   try {
     const { messages } = await req.json();
+    
+    // Input validation
+    if (!messages || !Array.isArray(messages)) {
+      console.error("Invalid messages format");
+      return new Response(JSON.stringify({ error: "Invalid request: messages must be an array" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Limit number of messages to prevent abuse
+    const MAX_MESSAGES = 50;
+    if (messages.length > MAX_MESSAGES) {
+      console.error(`Too many messages: ${messages.length}`);
+      return new Response(JSON.stringify({ error: `Too many messages. Maximum ${MAX_MESSAGES} allowed.` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate and sanitize each message
+    const MAX_MESSAGE_LENGTH = 4000;
+    const validRoles = ['user', 'assistant'];
+    const sanitizedMessages = [];
+
+    for (const msg of messages) {
+      // Validate message structure
+      if (!msg || typeof msg !== 'object') {
+        console.error("Invalid message object");
+        return new Response(JSON.stringify({ error: "Invalid message format" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Validate role
+      if (!validRoles.includes(msg.role)) {
+        console.error(`Invalid role: ${msg.role}`);
+        return new Response(JSON.stringify({ error: "Invalid message role. Must be 'user' or 'assistant'." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Validate and truncate content
+      if (typeof msg.content !== 'string') {
+        console.error("Message content must be a string");
+        return new Response(JSON.stringify({ error: "Message content must be a string" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const content = msg.content.slice(0, MAX_MESSAGE_LENGTH).trim();
+      if (!content) {
+        continue; // Skip empty messages
+      }
+
+      sanitizedMessages.push({
+        role: msg.role,
+        content: content
+      });
+    }
+
+    if (sanitizedMessages.length === 0) {
+      return new Response(JSON.stringify({ error: "No valid messages provided" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -20,7 +91,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Processing chat request with", messages.length, "messages");
+    console.log("Processing chat request with", sanitizedMessages.length, "validated messages");
 
     const systemPrompt = `You are a friendly and helpful customer support assistant for Meet Transfer, a premium airport transfer and chauffeur service in Turkey.
 
@@ -50,7 +121,7 @@ Be concise, professional, and helpful. If asked about specific prices, suggest t
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...sanitizedMessages,
         ],
         stream: true,
       }),
