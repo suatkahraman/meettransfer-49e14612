@@ -50,10 +50,34 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Check if user has admin role
+    const { data: roleData, error: roleError } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle()
+
+    if (roleError) {
+      console.error('Error checking user role:', roleError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to verify permissions' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!roleData) {
+      console.warn(`Non-admin user ${user.id} attempted to create notification`)
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Admin role required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const body: CreateNotificationRequest = await req.json()
     const { user_id, reservation_id, title, message, type } = body
 
-    console.log(`Creating notification for user ${user_id}: ${title}`)
+    console.log(`Admin ${user.id} creating notification for user ${user_id}: ${title}`)
 
     // Create the notification using admin client (bypasses RLS)
     const { data, error } = await supabaseAdmin
