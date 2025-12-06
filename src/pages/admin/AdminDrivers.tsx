@@ -1,0 +1,314 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Percent } from 'lucide-react';
+
+interface Driver {
+  id: string;
+  user_id: string;
+  name: string;
+  phone: string;
+  region: string | null;
+  commission_rate: number;
+  active: boolean;
+}
+
+const AdminDrivers = () => {
+  const navigate = useNavigate();
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    region: '',
+    commission_rate: '10',
+    email: '',
+    password: '',
+  });
+
+  const fetchDrivers = async () => {
+    const { data, error } = await supabase
+      .from('drivers')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      console.error('Error:', error);
+    } else {
+      setDrivers(data || []);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
+
+  const openAddDialog = () => {
+    setEditingDriver(null);
+    setFormData({
+      name: '',
+      phone: '',
+      region: '',
+      commission_rate: '10',
+      email: '',
+      password: '',
+    });
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (driver: Driver) => {
+    setEditingDriver(driver);
+    setFormData({
+      name: driver.name,
+      phone: driver.phone,
+      region: driver.region || '',
+      commission_rate: driver.commission_rate.toString(),
+      email: '',
+      password: '',
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    if (editingDriver) {
+      // Update existing driver
+      const { error } = await supabase
+        .from('drivers')
+        .update({
+          name: formData.name,
+          phone: formData.phone,
+          region: formData.region || null,
+          commission_rate: parseFloat(formData.commission_rate),
+        })
+        .eq('id', editingDriver.id);
+
+      if (error) {
+        toast.error('Failed to update driver');
+      } else {
+        toast.success('Driver updated');
+        setDialogOpen(false);
+        fetchDrivers();
+      }
+    } else {
+      // Create new driver - first create user, then driver record
+      if (!formData.email || !formData.password) {
+        toast.error('Email and password are required for new drivers');
+        return;
+      }
+
+      // Create the user first via signup
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+          },
+        },
+      });
+
+      if (signUpError || !signUpData.user) {
+        toast.error(signUpError?.message || 'Failed to create user');
+        return;
+      }
+
+      // Update the user's role to driver
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .update({ role: 'driver' })
+        .eq('user_id', signUpData.user.id);
+
+      if (roleError) {
+        console.error('Role update error:', roleError);
+      }
+
+      // Create the driver record
+      const { error: driverError } = await supabase
+        .from('drivers')
+        .insert({
+          user_id: signUpData.user.id,
+          name: formData.name,
+          phone: formData.phone,
+          region: formData.region || null,
+          commission_rate: parseFloat(formData.commission_rate),
+        });
+
+      if (driverError) {
+        toast.error('Failed to create driver record');
+      } else {
+        toast.success('Driver created successfully');
+        setDialogOpen(false);
+        fetchDrivers();
+      }
+    }
+  };
+
+  const toggleActive = async (driver: Driver) => {
+    const { error } = await supabase
+      .from('drivers')
+      .update({ active: !driver.active })
+      .eq('id', driver.id);
+
+    if (error) {
+      toast.error('Failed to update driver status');
+    } else {
+      toast.success(driver.active ? 'Driver deactivated' : 'Driver activated');
+      fetchDrivers();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-serif">Drivers</h1>
+        </div>
+        <Button onClick={openAddDialog} className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Driver
+        </Button>
+      </header>
+
+      <main className="container mx-auto py-8 px-4">
+        {loading ? (
+          <div className="text-center py-12">Loading...</div>
+        ) : drivers.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">No drivers yet</div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {drivers.map((driver) => (
+              <Card key={driver.id} className={!driver.active ? 'opacity-60' : ''}>
+                <CardContent className="pt-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="font-semibold text-lg">{driver.name}</h3>
+                      <Badge variant={driver.active ? 'default' : 'secondary'}>
+                        {driver.active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="icon" onClick={() => openEditDialog(driver)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => toggleActive(driver)}
+                        className={driver.active ? 'text-destructive hover:text-destructive' : 'text-green-600 hover:text-green-600'}
+                      >
+                        {driver.active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span>{driver.phone}</span>
+                    </div>
+                    {driver.region && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span>{driver.region}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <Percent className="h-4 w-4 text-muted-foreground" />
+                      <span>{driver.commission_rate}% commission</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </main>
+
+      {/* Add/Edit Driver Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingDriver ? 'Edit Driver' : 'Add New Driver'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Name</Label>
+              <Input
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Phone</Label>
+              <Input
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Region</Label>
+              <Input
+                value={formData.region}
+                onChange={(e) => setFormData({...formData, region: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Commission Rate (%)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={formData.commission_rate}
+                onChange={(e) => setFormData({...formData, commission_rate: e.target.value})}
+                required
+              />
+            </div>
+            {!editingDriver && (
+              <>
+                <div className="space-y-2">
+                  <Label>Email (for login)</Label>
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Password</Label>
+                  <Input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    required
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSubmit}>{editingDriver ? 'Update' : 'Create'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default AdminDrivers;

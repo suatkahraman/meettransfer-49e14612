@@ -85,6 +85,42 @@ export type Database = {
           },
         ]
       }
+      drivers: {
+        Row: {
+          active: boolean | null
+          commission_rate: number | null
+          created_at: string | null
+          id: string
+          name: string
+          phone: string
+          region: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          commission_rate?: number | null
+          created_at?: string | null
+          id?: string
+          name: string
+          phone: string
+          region?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          commission_rate?: number | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          phone?: string
+          region?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -109,15 +145,113 @@ export type Database = {
         }
         Relationships: []
       }
+      reservations: {
+        Row: {
+          admin_notes: string | null
+          created_at: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string
+          driver_cash: boolean | null
+          driver_id: string | null
+          dropoff: string
+          flight_number: string | null
+          id: string
+          payment_type: string
+          pickup: string
+          pickup_date: string
+          pickup_time: string
+          price: number | null
+          status: string
+          updated_at: string | null
+          vehicle_type: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone: string
+          driver_cash?: boolean | null
+          driver_id?: string | null
+          dropoff: string
+          flight_number?: string | null
+          id?: string
+          payment_type: string
+          pickup: string
+          pickup_date: string
+          pickup_time: string
+          price?: number | null
+          status?: string
+          updated_at?: string | null
+          vehicle_type: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string
+          driver_cash?: boolean | null
+          driver_id?: string | null
+          dropoff?: string
+          flight_number?: string | null
+          id?: string
+          payment_type?: string
+          pickup?: string
+          pickup_date?: string
+          pickup_time?: string
+          price?: number | null
+          status?: string
+          updated_at?: string | null
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "driver" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -244,6 +378,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "driver", "customer"],
+    },
   },
 } as const

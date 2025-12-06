@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       toast.success('Welcome back!');
-      navigate('/');
+      // Navigation handled by Auth page based on role
       return { error: null };
     } catch (error: any) {
       toast.error('An error occurred during sign in');
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       toast.success('Account created successfully!');
-      navigate('/');
+      // Navigation handled by Auth page based on role
       return { error: null };
     } catch (error: any) {
       toast.error('An error occurred during sign up');

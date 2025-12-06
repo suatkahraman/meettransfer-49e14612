@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { z } from 'zod';
-import { useEffect } from 'react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -16,6 +16,7 @@ const loginSchema = z.object({
 
 const signupSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters').max(100),
+  phone: z.string().min(5, 'Phone number is required'),
   email: z.string().email('Invalid email address').max(255),
   password: z.string().min(6, 'Password must be at least 6 characters').max(100),
 });
@@ -24,14 +25,21 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { signIn, signUp, user } = useAuth();
+  const { role, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
+  // Role-based redirect after login
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (user && !roleLoading && role) {
+      if (role === 'admin') {
+        navigate('/admin');
+      } else if (role === 'driver') {
+        navigate('/driver');
+      } else {
+        navigate('/customer');
+      }
     }
-  }, [user, navigate]);
+  }, [user, role, roleLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -67,11 +75,12 @@ const Auth = () => {
 
     const formData = new FormData(e.currentTarget);
     const fullName = formData.get('fullName') as string;
+    const phone = formData.get('phone') as string;
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
     try {
-      const validation = signupSchema.parse({ fullName, email, password });
+      const validation = signupSchema.parse({ fullName, phone, email, password });
       await signUp(validation.email, validation.password, validation.fullName);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -89,10 +98,10 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-ocean-deep via-ocean to-ocean-light p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-display">Meet Transfer</CardTitle>
+          <CardTitle className="text-3xl font-serif">Meet Transfer</CardTitle>
           <CardDescription>Sign in to manage your bookings</CardDescription>
         </CardHeader>
         <CardContent>
@@ -106,29 +115,13 @@ const Auth = () => {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="login-email">Email</Label>
-                  <Input
-                    id="login-email"
-                    name="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    required
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email}</p>
-                  )}
+                  <Input id="login-email" name="email" type="email" placeholder="your@email.com" required />
+                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="login-password">Password</Label>
-                  <Input
-                    id="login-password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                  />
-                  {errors.password && (
-                    <p className="text-sm text-destructive">{errors.password}</p>
-                  )}
+                  <Input id="login-password" name="password" type="password" placeholder="••••••••" required />
+                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Signing in...' : 'Sign In'}
@@ -140,42 +133,23 @@ const Auth = () => {
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Full Name</Label>
-                  <Input
-                    id="signup-name"
-                    name="fullName"
-                    type="text"
-                    placeholder="John Doe"
-                    required
-                  />
-                  {errors.fullName && (
-                    <p className="text-sm text-destructive">{errors.fullName}</p>
-                  )}
+                  <Input id="signup-name" name="fullName" type="text" placeholder="John Doe" required />
+                  {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-phone">Phone</Label>
+                  <Input id="signup-phone" name="phone" type="tel" placeholder="+90 5XX XXX XXXX" required />
+                  {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    name="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    required
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email}</p>
-                  )}
+                  <Input id="signup-email" name="email" type="email" placeholder="your@email.com" required />
+                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                  />
-                  {errors.password && (
-                    <p className="text-sm text-destructive">{errors.password}</p>
-                  )}
+                  <Input id="signup-password" name="password" type="password" placeholder="••••••••" required />
+                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Creating account...' : 'Create Account'}
