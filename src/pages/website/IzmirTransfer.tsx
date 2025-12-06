@@ -15,11 +15,12 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "ADB Airport", to: "Izmir Center", price: "€25" },
-  { from: "ADB Airport", to: "Çeşme", price: "€60" },
-  { from: "ADB Airport", to: "Alaçatı", price: "€55" },
-  { from: "ADB Airport", to: "Kuşadası", price: "€70" },
-  { from: "ADB Airport", to: "Selçuk", price: "€50" },
+  { from: "ADB Airport", to: "Izmir Center", price: "$35" },
+  { from: "ADB Airport", to: "Alsancak", price: "$40" },
+  { from: "ADB Airport", to: "Konak", price: "$40" },
+  { from: "ADB Airport", to: "Çeşme", price: "$110" },
+  { from: "ADB Airport", to: "Alaçatı", price: "$100" },
+  { from: "ADB Airport", to: "Kuşadası", price: "$85" },
 ];
 
 const faqItems = [
