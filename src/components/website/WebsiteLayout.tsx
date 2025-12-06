@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import WebsiteHeader from "./WebsiteHeader";
 import BottomNavigation from "./BottomNavigation";
+import ChatBot from "./ChatBot";
 
 interface WebsiteLayoutProps {
   children: ReactNode;
@@ -13,6 +14,7 @@ const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) =
       <WebsiteHeader />
       <main className={showBottomNav ? "pb-20" : ""}>{children}</main>
       {showBottomNav && <BottomNavigation />}
+      <ChatBot />
     </div>
   );
 };
