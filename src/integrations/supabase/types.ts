@@ -121,6 +121,47 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          reservation_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          reservation_id?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          reservation_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -153,7 +194,11 @@ export type Database = {
           customer_name: string
           customer_phone: string
           driver_cash: boolean | null
+          driver_cash_amount: number | null
+          driver_confirmed: boolean | null
+          driver_earning: number | null
           driver_id: string | null
+          driver_notes: string | null
           dropoff: string
           flight_number: string | null
           id: string
@@ -173,7 +218,11 @@ export type Database = {
           customer_name: string
           customer_phone: string
           driver_cash?: boolean | null
+          driver_cash_amount?: number | null
+          driver_confirmed?: boolean | null
+          driver_earning?: number | null
           driver_id?: string | null
+          driver_notes?: string | null
           dropoff: string
           flight_number?: string | null
           id?: string
@@ -193,7 +242,11 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           driver_cash?: boolean | null
+          driver_cash_amount?: number | null
+          driver_confirmed?: boolean | null
+          driver_earning?: number | null
           driver_id?: string | null
+          driver_notes?: string | null
           dropoff?: string
           flight_number?: string | null
           id?: string

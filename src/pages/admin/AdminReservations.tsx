@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import NotificationBell from '@/components/NotificationBell';
 
 interface Reservation {
   id: string;
@@ -121,6 +122,12 @@ const AdminReservations = () => {
   const handleAssignDriver = async () => {
     if (!assignDialog.reservationId || !selectedDriver) return;
 
+    // Get the reservation details for notification message
+    const reservation = reservations.find(r => r.id === assignDialog.reservationId);
+    
+    // Get the driver's user_id
+    const selectedDriverData = drivers.find(d => d.id === selectedDriver);
+
     const { error } = await supabase
       .from('reservations')
       .update({ 
@@ -132,6 +139,32 @@ const AdminReservations = () => {
     if (error) {
       toast.error('Failed to assign driver');
     } else {
+      // Create notification for driver
+      if (selectedDriverData && reservation) {
+        try {
+          // Get driver's user_id from drivers table
+          const { data: driverData } = await supabase
+            .from('drivers')
+            .select('user_id')
+            .eq('id', selectedDriver)
+            .single();
+
+          if (driverData?.user_id) {
+            await supabase.functions.invoke('create-notification', {
+              body: {
+                user_id: driverData.user_id,
+                reservation_id: assignDialog.reservationId,
+                title: 'New Job Assigned',
+                message: `You have a new transfer: ${reservation.pickup} → ${reservation.dropoff} on ${format(new Date(reservation.pickup_date), 'PP')} at ${reservation.pickup_time}.`,
+                type: 'driver_assigned'
+              }
+            });
+          }
+        } catch (err) {
+          console.error('Failed to create notification:', err);
+        }
+      }
+
       toast.success('Driver assigned successfully');
       setAssignDialog({ open: false, reservationId: null });
       setSelectedDriver('');
@@ -164,6 +197,7 @@ const AdminReservations = () => {
           </Button>
           <h1 className="text-2xl font-serif">Reservations</h1>
         </div>
+        <NotificationBell />
       </header>
 
       <main className="container mx-auto py-8 px-4">

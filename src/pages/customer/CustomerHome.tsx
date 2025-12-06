@@ -89,7 +89,7 @@ const CustomerHome = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from('reservations').insert({
+      const { data: insertedReservation, error } = await supabase.from('reservations').insert({
         customer_id: user?.id,
         customer_name: result.data.passengerName.trim(),
         customer_phone: result.data.passengerPhone.trim(),
@@ -102,9 +102,24 @@ const CustomerHome = () => {
         price: price,
         payment_type: result.data.paymentType,
         status: 'new',
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // Notify admin about new reservation
+      try {
+        await supabase.functions.invoke('notify-admin-new-reservation', {
+          body: {
+            reservation_id: insertedReservation.id,
+            customer_name: result.data.passengerName.trim(),
+            pickup: result.data.pickup,
+            dropoff: result.data.dropoff.trim(),
+            pickup_date: result.data.date,
+          }
+        });
+      } catch (notifyError) {
+        console.error('Failed to notify admin:', notifyError);
+      }
 
       toast.success('Booking created successfully!');
       navigate('/customer/bookings');

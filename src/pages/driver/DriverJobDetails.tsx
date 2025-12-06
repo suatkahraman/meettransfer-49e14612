@@ -5,10 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Phone, Plane, Car, CreditCard, CheckCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, FileText } from 'lucide-react';
 import { format } from 'date-fns';
+import NotificationBell from '@/components/NotificationBell';
 
 interface Reservation {
   id: string;
@@ -23,9 +27,14 @@ interface Reservation {
   payment_type: string;
   price: number;
   status: string;
+  driver_confirmed: boolean;
+  driver_earning: number | null;
+  driver_cash_amount: number | null;
+  driver_notes: string | null;
 }
 
 const statusColors: Record<string, string> = {
+  new: 'bg-gray-500/20 text-gray-700',
   assigned: 'bg-yellow-500/20 text-yellow-700',
   active: 'bg-blue-500/20 text-blue-700',
   completed: 'bg-green-500/20 text-green-700',
@@ -33,12 +42,18 @@ const statusColors: Record<string, string> = {
 
 const DriverJobDetails = () => {
   const { id } = useParams();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [showCashDialog, setShowCashDialog] = useState(false);
+  
+  // Driver editable fields
+  const [driverEarning, setDriverEarning] = useState('');
+  const [driverCashAmount, setDriverCashAmount] = useState('');
+  const [driverNotes, setDriverNotes] = useState('');
+  const [savingFinancials, setSavingFinancials] = useState(false);
 
   useEffect(() => {
     const fetchReservation = async () => {
@@ -48,19 +63,70 @@ const DriverJobDetails = () => {
         .from('reservations')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error:', error);
         toast.error('Failed to load job details');
-      } else {
+      } else if (data) {
         setReservation(data);
+        setDriverEarning(data.driver_earning?.toString() || '');
+        setDriverCashAmount(data.driver_cash_amount?.toString() || '');
+        setDriverNotes(data.driver_notes || '');
       }
       setLoading(false);
     };
 
     fetchReservation();
   }, [id]);
+
+  const confirmJob = async () => {
+    if (!id) return;
+    setUpdating(true);
+
+    const { error } = await supabase
+      .from('reservations')
+      .update({ 
+        driver_confirmed: true,
+        status: 'active'
+      })
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Failed to confirm job');
+    } else {
+      toast.success('Job confirmed successfully!');
+      setReservation(prev => prev ? { ...prev, driver_confirmed: true, status: 'active' } : null);
+    }
+    setUpdating(false);
+  };
+
+  const saveFinancials = async () => {
+    if (!id) return;
+    setSavingFinancials(true);
+
+    const { error } = await supabase
+      .from('reservations')
+      .update({
+        driver_earning: driverEarning ? parseFloat(driverEarning) : null,
+        driver_cash_amount: driverCashAmount ? parseFloat(driverCashAmount) : null,
+        driver_notes: driverNotes || null
+      })
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Failed to save financial data');
+    } else {
+      toast.success('Driver financial data saved!');
+      setReservation(prev => prev ? {
+        ...prev,
+        driver_earning: driverEarning ? parseFloat(driverEarning) : null,
+        driver_cash_amount: driverCashAmount ? parseFloat(driverCashAmount) : null,
+        driver_notes: driverNotes || null
+      } : null);
+    }
+    setSavingFinancials(false);
+  };
 
   const updateStatus = async (newStatus: string, driverCash?: boolean) => {
     if (!id) return;
@@ -97,7 +163,7 @@ const DriverJobDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -119,12 +185,16 @@ const DriverJobDetails = () => {
           </Button>
           <h1 className="text-2xl font-serif">Job Details</h1>
         </div>
-        <Badge className={statusColors[reservation.status]}>
-          {reservation.status}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <Badge className={statusColors[reservation.status]}>
+            {reservation.status}
+          </Badge>
+        </div>
       </header>
 
-      <main className="container mx-auto py-8 px-4 max-w-2xl">
+      <main className="container mx-auto py-8 px-4 max-w-2xl space-y-6">
+        {/* Job Info Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -202,44 +272,127 @@ const DriverJobDetails = () => {
 
             <div className="bg-muted p-4 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Price</span>
+                <span className="text-muted-foreground">Total Price</span>
                 <span className="text-2xl font-bold text-primary">€{reservation.price}</span>
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Action Buttons */}
-            <div className="space-y-3 pt-4">
-              {reservation.status === 'assigned' && (
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  onClick={() => updateStatus('active')}
-                  disabled={updating}
-                >
-                  <CheckCircle className="h-5 w-5 mr-2" />
-                  Passenger Picked Up
-                </Button>
-              )}
-              
-              {reservation.status === 'active' && (
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  onClick={handleComplete}
-                  disabled={updating}
-                >
-                  <CheckCircle className="h-5 w-5 mr-2" />
-                  Trip Completed
-                </Button>
-              )}
-
-              {reservation.status === 'completed' && (
-                <div className="text-center py-4">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
-                  <p className="text-lg font-medium text-green-600">Trip Completed</p>
-                </div>
-              )}
+        {/* Driver Financial Data Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Driver Financial Data
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="driver_earning">Your Earning (Budget / Hakediş)</Label>
+              <Input
+                id="driver_earning"
+                type="number"
+                placeholder="e.g., 70"
+                value={driverEarning}
+                onChange={(e) => setDriverEarning(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Your expected earning from this job
+              </p>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="driver_cash">Cash Collected from Passenger (Nakit)</Label>
+              <Input
+                id="driver_cash"
+                type="number"
+                placeholder="e.g., 100"
+                value={driverCashAmount}
+                onChange={(e) => setDriverCashAmount(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="driver_notes">Notes / Additional Info</Label>
+              <Textarea
+                id="driver_notes"
+                placeholder="Delays, extra stops, special situations..."
+                value={driverNotes}
+                onChange={(e) => setDriverNotes(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <Button 
+              onClick={saveFinancials} 
+              disabled={savingFinancials}
+              className="w-full"
+            >
+              {savingFinancials ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Cash & Budget
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons Card */}
+        <Card>
+          <CardContent className="pt-6 space-y-3">
+            {reservation.status === 'assigned' && !reservation.driver_confirmed && (
+              <Button 
+                className="w-full" 
+                size="lg"
+                onClick={confirmJob}
+                disabled={updating}
+              >
+                {updating ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                )}
+                Confirm Job
+              </Button>
+            )}
+
+            {(reservation.status === 'assigned' && reservation.driver_confirmed) && (
+              <Button 
+                className="w-full" 
+                size="lg"
+                onClick={() => updateStatus('active')}
+                disabled={updating}
+              >
+                <CheckCircle className="h-5 w-5 mr-2" />
+                Passenger Picked Up
+              </Button>
+            )}
+            
+            {reservation.status === 'active' && (
+              <Button 
+                className="w-full" 
+                size="lg"
+                onClick={handleComplete}
+                disabled={updating}
+              >
+                <CheckCircle className="h-5 w-5 mr-2" />
+                Trip Completed
+              </Button>
+            )}
+
+            {reservation.status === 'completed' && (
+              <div className="text-center py-4">
+                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
+                <p className="text-lg font-medium text-green-600">Trip Completed</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>

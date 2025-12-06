@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfDay, endOfDay, format } from 'date-fns';
+import NotificationBell from '@/components/NotificationBell';
 
 interface KPIs {
   newToday: number;
@@ -96,9 +97,12 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
         <h1 className="text-2xl font-serif">Admin Dashboard</h1>
-        <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
-          <LogOut className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
       </header>
 
       <main className="container mx-auto py-8 px-4">
