@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -75,23 +76,23 @@ const App = () => (
               <Route path="/ephesus-pamukkale" element={<EphesusPamukkale />} />
               <Route path="/luxury-chauffeur" element={<LuxuryChauffeur />} />
               
-              {/* Customer Routes */}
-              <Route path="/customer" element={<CustomerHome />} />
-              <Route path="/customer/bookings" element={<CustomerBookings />} />
+              {/* Customer Routes - Protected */}
+              <Route path="/customer" element={<CustomerRoute><CustomerHome /></CustomerRoute>} />
+              <Route path="/customer/bookings" element={<CustomerRoute><CustomerBookings /></CustomerRoute>} />
               
-              {/* Driver Routes */}
-              <Route path="/driver" element={<DriverHome />} />
-              <Route path="/driver/job/:id" element={<DriverJobDetails />} />
-              <Route path="/driver/accounting" element={<DriverAccounting />} />
+              {/* Driver Routes - Protected */}
+              <Route path="/driver" element={<DriverRoute><DriverHome /></DriverRoute>} />
+              <Route path="/driver/job/:id" element={<DriverRoute><DriverJobDetails /></DriverRoute>} />
+              <Route path="/driver/accounting" element={<DriverRoute><DriverAccounting /></DriverRoute>} />
               
-              {/* Admin Routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
+              {/* Admin Routes - Protected (except setup which is for initial admin creation) */}
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/setup" element={<AdminSetup />} />
-              <Route path="/admin/reservations" element={<AdminReservations />} />
-              <Route path="/admin/reservations/:id" element={<AdminEditReservation />} />
-              <Route path="/admin/drivers" element={<AdminDrivers />} />
-              <Route path="/admin/accounting" element={<AdminAccounting />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin/reservations" element={<AdminRoute><AdminReservations /></AdminRoute>} />
+              <Route path="/admin/reservations/:id" element={<AdminRoute><AdminEditReservation /></AdminRoute>} />
+              <Route path="/admin/drivers" element={<AdminRoute><AdminDrivers /></AdminRoute>} />
+              <Route path="/admin/accounting" element={<AdminRoute><AdminAccounting /></AdminRoute>} />
+              <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
