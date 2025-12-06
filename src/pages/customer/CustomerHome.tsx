@@ -10,6 +10,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard } from 'lucide-react';
+import { z } from 'zod';
+
+const reservationSchema = z.object({
+  pickup: z.string().min(1, "Please select a pickup airport"),
+  dropoff: z.string().trim().min(2, "Drop-off location must be at least 2 characters").max(200, "Drop-off location is too long"),
+  date: z.string().min(1, "Please select a pickup date"),
+  time: z.string().min(1, "Please select a pickup time"),
+  flightNumber: z.string().trim().max(20, "Flight number is too long").optional().or(z.literal('')),
+  passengerName: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
+  passengerPhone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20, "Phone number is too long").regex(/^[+\d\s\-()]+$/, "Invalid phone number format"),
+  vehicleType: z.string().min(1, "Please select a vehicle type"),
+  paymentType: z.string().min(1, "Please select a payment type"),
+});
 
 const airports = [
   { code: 'IST', name: 'Istanbul Airport' },
@@ -39,6 +52,7 @@ const CustomerHome = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     pickup: '',
     dropoff: '',
@@ -56,21 +70,37 @@ const CustomerHome = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    // Validate form data
+    const result = reservationSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      toast.error('Please fix the validation errors');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const { error } = await supabase.from('reservations').insert({
         customer_id: user?.id,
-        customer_name: formData.passengerName,
-        customer_phone: formData.passengerPhone,
-        pickup: formData.pickup,
-        dropoff: formData.dropoff,
-        pickup_date: formData.date,
-        pickup_time: formData.time,
-        flight_number: formData.flightNumber,
-        vehicle_type: formData.vehicleType,
+        customer_name: result.data.passengerName.trim(),
+        customer_phone: result.data.passengerPhone.trim(),
+        pickup: result.data.pickup,
+        dropoff: result.data.dropoff.trim(),
+        pickup_date: result.data.date,
+        pickup_time: result.data.time,
+        flight_number: result.data.flightNumber?.trim() || null,
+        vehicle_type: result.data.vehicleType,
         price: price,
-        payment_type: formData.paymentType,
+        payment_type: result.data.paymentType,
         status: 'new',
       });
 
@@ -116,7 +146,7 @@ const CustomerHome = () => {
                   Pickup Airport
                 </Label>
                 <Select value={formData.pickup} onValueChange={(v) => setFormData({...formData, pickup: v})}>
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.pickup ? 'border-destructive' : ''}>
                     <SelectValue placeholder="Select airport" />
                   </SelectTrigger>
                   <SelectContent>
@@ -127,6 +157,7 @@ const CustomerHome = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
               </div>
 
               {/* Drop-off Location */}
@@ -139,8 +170,10 @@ const CustomerHome = () => {
                   placeholder="Hotel name or address"
                   value={formData.dropoff}
                   onChange={(e) => setFormData({...formData, dropoff: e.target.value})}
-                  required
+                  className={errors.dropoff ? 'border-destructive' : ''}
+                  maxLength={200}
                 />
+                {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
               </div>
 
               {/* Date & Time */}
@@ -154,8 +187,9 @@ const CustomerHome = () => {
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    required
+                    className={errors.date ? 'border-destructive' : ''}
                   />
+                  {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Time</Label>
@@ -163,8 +197,9 @@ const CustomerHome = () => {
                     type="time"
                     value={formData.time}
                     onChange={(e) => setFormData({...formData, time: e.target.value})}
-                    required
+                    className={errors.time ? 'border-destructive' : ''}
                   />
+                  {errors.time && <p className="text-sm text-destructive">{errors.time}</p>}
                 </div>
               </div>
 
@@ -178,6 +213,7 @@ const CustomerHome = () => {
                   placeholder="e.g., TK1234"
                   value={formData.flightNumber}
                   onChange={(e) => setFormData({...formData, flightNumber: e.target.value})}
+                  maxLength={20}
                 />
               </div>
 
@@ -192,8 +228,10 @@ const CustomerHome = () => {
                     placeholder="Full name"
                     value={formData.passengerName}
                     onChange={(e) => setFormData({...formData, passengerName: e.target.value})}
-                    required
+                    className={errors.passengerName ? 'border-destructive' : ''}
+                    maxLength={100}
                   />
+                  {errors.passengerName && <p className="text-sm text-destructive">{errors.passengerName}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
@@ -204,8 +242,10 @@ const CustomerHome = () => {
                     placeholder="+90 5XX XXX XXXX"
                     value={formData.passengerPhone}
                     onChange={(e) => setFormData({...formData, passengerPhone: e.target.value})}
-                    required
+                    className={errors.passengerPhone ? 'border-destructive' : ''}
+                    maxLength={20}
                   />
+                  {errors.passengerPhone && <p className="text-sm text-destructive">{errors.passengerPhone}</p>}
                 </div>
               </div>
 
