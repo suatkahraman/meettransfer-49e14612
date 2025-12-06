@@ -186,9 +186,40 @@ export type Database = {
         }
         Relationships: []
       }
+      reservation_admin_notes: {
+        Row: {
+          created_at: string | null
+          id: string
+          notes: string | null
+          reservation_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          reservation_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          reservation_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservation_admin_notes_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: true
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reservations: {
         Row: {
-          admin_notes: string | null
           created_at: string | null
           customer_id: string | null
           customer_name: string
@@ -212,7 +243,6 @@ export type Database = {
           vehicle_type: string
         }
         Insert: {
-          admin_notes?: string | null
           created_at?: string | null
           customer_id?: string | null
           customer_name: string
@@ -236,7 +266,6 @@ export type Database = {
           vehicle_type: string
         }
         Update: {
-          admin_notes?: string | null
           created_at?: string | null
           customer_id?: string | null
           customer_name?: string

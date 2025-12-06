@@ -46,9 +46,10 @@ const AdminEditReservation = () => {
     const fetchData = async () => {
       if (!id) return;
 
-      const [reservationResult, driversResult] = await Promise.all([
+      const [reservationResult, driversResult, adminNotesResult] = await Promise.all([
         supabase.from('reservations').select('*').eq('id', id).single(),
         supabase.from('drivers').select('id, name').eq('active', true),
+        supabase.from('reservation_admin_notes').select('notes').eq('reservation_id', id).maybeSingle(),
       ]);
 
       if (reservationResult.error) {
@@ -71,7 +72,7 @@ const AdminEditReservation = () => {
         price: r.price?.toString() || '',
         status: r.status || '',
         driver_id: r.driver_id || '',
-        admin_notes: r.admin_notes || '',
+        admin_notes: adminNotesResult.data?.notes || '',
       });
 
       setDrivers(driversResult.data || []);
@@ -85,7 +86,8 @@ const AdminEditReservation = () => {
     e.preventDefault();
     setSaving(true);
 
-    const { error } = await supabase
+    // Update reservation (without admin_notes)
+    const { error: reservationError } = await supabase
       .from('reservations')
       .update({
         customer_name: formData.customer_name,
@@ -100,16 +102,41 @@ const AdminEditReservation = () => {
         price: parseFloat(formData.price) || 0,
         status: formData.status,
         driver_id: formData.driver_id || null,
-        admin_notes: formData.admin_notes || null,
       })
       .eq('id', id);
 
-    if (error) {
+    if (reservationError) {
       toast.error('Failed to update reservation');
-    } else {
-      toast.success('Reservation updated');
-      navigate('/admin/reservations');
+      setSaving(false);
+      return;
     }
+
+    // Upsert admin notes in separate table
+    if (formData.admin_notes) {
+      const { error: notesError } = await supabase
+        .from('reservation_admin_notes')
+        .upsert({
+          reservation_id: id,
+          notes: formData.admin_notes,
+        }, {
+          onConflict: 'reservation_id'
+        });
+
+      if (notesError) {
+        toast.error('Failed to save admin notes');
+        setSaving(false);
+        return;
+      }
+    } else {
+      // Delete notes if empty
+      await supabase
+        .from('reservation_admin_notes')
+        .delete()
+        .eq('reservation_id', id);
+    }
+
+    toast.success('Reservation updated');
+    navigate('/admin/reservations');
     setSaving(false);
   };
 
