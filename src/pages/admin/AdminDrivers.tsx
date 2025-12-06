@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Percent, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Percent, Loader2, Eye } from 'lucide-react';
 
 const regions = [
   { value: 'Istanbul', label: 'Istanbul' },
@@ -35,6 +35,8 @@ const AdminDrivers = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [viewingDriver, setViewingDriver] = useState<Driver | null>(null);
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -209,8 +211,24 @@ const AdminDrivers = () => {
                         {driver.active ? 'Active' : 'Inactive'}
                       </Badge>
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="icon" onClick={() => openEditDialog(driver)}>
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => {
+                          setViewingDriver(driver);
+                          setViewDialogOpen(true);
+                        }}
+                        title="View Details"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        onClick={() => openEditDialog(driver)}
+                        title="Edit Driver"
+                      >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button 
@@ -218,6 +236,7 @@ const AdminDrivers = () => {
                         size="icon"
                         onClick={() => toggleActive(driver)}
                         className={driver.active ? 'text-destructive hover:text-destructive' : 'text-green-600 hover:text-green-600'}
+                        title={driver.active ? 'Deactivate Driver' : 'Activate Driver'}
                       >
                         {driver.active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                       </Button>
@@ -237,7 +256,7 @@ const AdminDrivers = () => {
                     )}
                     <div className="flex items-center gap-2">
                       <Percent className="h-4 w-4 text-muted-foreground" />
-                      <span>{driver.commission_rate}% commission</span>
+                      <span>{driver.commission_rate}% payout</span>
                     </div>
                   </div>
                 </CardContent>
@@ -337,6 +356,66 @@ const AdminDrivers = () => {
                 editingDriver ? 'Update' : 'Create Driver'
               )}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Driver Details Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Driver Details</DialogTitle>
+          </DialogHeader>
+          {viewingDriver && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-2xl font-semibold text-primary">
+                    {viewingDriver.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold">{viewingDriver.name}</h3>
+                  <Badge variant={viewingDriver.active ? 'default' : 'secondary'}>
+                    {viewingDriver.active ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="grid gap-3 pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Phone className="h-4 w-4" /> Phone
+                  </span>
+                  <span className="font-medium">{viewingDriver.phone}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <MapPin className="h-4 w-4" /> Region
+                  </span>
+                  <span className="font-medium">{viewingDriver.region || 'Not assigned'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Percent className="h-4 w-4" /> Payout Rate
+                  </span>
+                  <span className="font-medium">{viewingDriver.commission_rate}%</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setViewDialogOpen(false);
+                if (viewingDriver) openEditDialog(viewingDriver);
+              }}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit Driver
+            </Button>
+            <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
