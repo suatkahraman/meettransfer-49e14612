@@ -34,9 +34,17 @@ Deno.serve(async (req) => {
     const body: SetupAdminRequest = await req.json()
     const { email, password, name, phone, setupKey } = body
 
-    // Simple setup key validation - change this to a more secure method in production
-    // This prevents random people from creating admin accounts
-    if (setupKey !== 'MEET_TRANSFER_SETUP_2025') {
+    // Validate setup key from environment secret
+    const expectedSetupKey = Deno.env.get('ADMIN_SETUP_KEY')
+    if (!expectedSetupKey) {
+      console.error('ADMIN_SETUP_KEY environment variable not configured')
+      return new Response(
+        JSON.stringify({ error: 'Setup key not configured on server' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!setupKey || setupKey !== expectedSetupKey) {
       console.error('Invalid setup key provided')
       return new Response(
         JSON.stringify({ error: 'Invalid setup key' }),
