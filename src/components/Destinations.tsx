@@ -16,7 +16,7 @@ const destinations = [
     image: "https://images.unsplash.com/photo-1583037189850-1921ae7c6c22?w=800&q=80",
   },
   {
-    route: "Bodrum ⇄ Peninsula",
+    route: "Bodrum ⇄ City Transfer",
     airports: "BJV",
     description: "Premium service to Bodrum Peninsula, Turgutreis, Gümbet and surrounding areas.",
     image: "https://images.unsplash.com/photo-1605555274610-2a593f17d686?w=800&q=80",
@@ -34,9 +34,7 @@ export const Destinations = () => {
     <section className="py-20 px-4 bg-gradient-to-b from-background to-muted/30">
       <div className="container max-w-7xl mx-auto">
         <div className="text-center mb-12 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-            Top Destinations
-          </h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground">Top Destinations</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-sans">
             Discover our most popular routes with professional drivers and luxury vehicles
           </p>
@@ -61,15 +59,11 @@ export const Destinations = () => {
                     <MapPin className="h-3 w-3" />
                     <span className="font-sans">{destination.airports}</span>
                   </div>
-                  <h3 className="text-white font-bold text-lg">
-                    {destination.route}
-                  </h3>
+                  <h3 className="text-white font-bold text-lg">{destination.route}</h3>
                 </div>
               </div>
               <div className="p-5 space-y-4">
-                <p className="text-sm text-muted-foreground font-sans leading-relaxed">
-                  {destination.description}
-                </p>
+                <p className="text-sm text-muted-foreground font-sans leading-relaxed">{destination.description}</p>
                 <Button
                   variant="ghost"
                   className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300"
