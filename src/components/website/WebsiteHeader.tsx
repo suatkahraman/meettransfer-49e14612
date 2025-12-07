@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { LogIn, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "./LanguageSelector";
@@ -19,7 +19,10 @@ const WebsiteHeader = () => {
   const { t } = useLanguage();
   const { user, signOut } = useAuth();
   const { role } = useUserRole();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const isActive = (path: string) => location.pathname === path;
 
   const navLinks = [
     { path: "/services", label: "Services" },
@@ -54,7 +57,11 @@ const WebsiteHeader = () => {
             <Link
               key={link.path}
               to={link.path}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className={`text-sm font-medium transition-colors ${
+                isActive(link.path) 
+                  ? "text-primary font-semibold" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
               {link.label}
             </Link>
@@ -126,11 +133,18 @@ const WebsiteHeader = () => {
               className="w-56 bg-card border border-border z-50"
             >
               {navLinks.map((link) => (
-                <DropdownMenuItem key={link.path} asChild>
+                <DropdownMenuItem 
+                  key={link.path} 
+                  asChild
+                  className={isActive(link.path) ? "bg-primary/10 text-primary font-semibold" : ""}
+                >
                   <Link
                     to={link.path}
-                    className="w-full cursor-pointer"
+                    className="w-full cursor-pointer flex items-center gap-2"
                   >
+                    {isActive(link.path) && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    )}
                     {link.label}
                   </Link>
                 </DropdownMenuItem>
