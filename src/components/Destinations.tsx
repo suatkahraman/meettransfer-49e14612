@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowRight } from "lucide-react";
 import cappadociaTransfer from "@/assets/cappadocia-transfer.png";
+import bodrumTransfer from "@/assets/bodrum-transfer.png";
 
 const destinations = [{
   route: "Istanbul ⇄ Hotels",
@@ -17,7 +18,7 @@ const destinations = [{
   route: "Bodrum ⇄ City Transfer",
   airports: "BJV",
   description: "Premium service to Bodrum Peninsula, Turgutreis, Gümbet and surrounding areas.",
-  image: "https://images.unsplash.com/photo-1605555274610-2a593f17d686?w=800&q=80"
+  image: bodrumTransfer
 }, {
   route: "Cappadocia Tours",
   airports: "NAV / ASR",
