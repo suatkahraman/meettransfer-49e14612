@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
+import meetTransferLogo from "@/assets/meet-transfer-logo.jpg";
 
 const WebsiteHeader = () => {
   const { t } = useLanguage();
@@ -30,7 +31,12 @@ const WebsiteHeader = () => {
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-3">
+          <img 
+            src={meetTransferLogo} 
+            alt="Meet Transfer Logo" 
+            className="h-10 w-10 rounded-full object-cover"
+          />
           <span className="font-serif text-xl font-bold">Meet Transfer</span>
         </Link>
 
