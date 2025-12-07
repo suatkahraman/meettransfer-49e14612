@@ -14,11 +14,11 @@ const WebsiteHeader = () => {
   const { role } = useUserRole();
 
   const navLinks = [
+    { path: "/services", label: "Services" },
     { path: "/destinations", label: t("cities") },
     { path: "/fleet", label: t("fleet") },
     { path: "/about", label: t("about") },
     { path: "/contact", label: t("contact") },
-    { path: "/reviews", label: t("reviews") },
   ];
 
   // Get dashboard path based on role

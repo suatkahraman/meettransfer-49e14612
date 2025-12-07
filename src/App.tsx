@@ -50,6 +50,7 @@ import ReviewsPage from "./pages/website/ReviewsPage";
 import DestinationsPage from "./pages/website/DestinationsPage";
 import WhatsAppBooking from "./pages/website/WhatsAppBooking";
 import TermsPage from "./pages/website/TermsPage";
+import ServicesPage from "./pages/website/ServicesPage";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => (
               <Route path="/install" element={<InstallApp />} />
               
               {/* Website Pages */}
+              <Route path="/services" element={<ServicesPage />} />
               <Route path="/destinations" element={<DestinationsPage />} />
               <Route path="/fleet" element={<FleetPage />} />
               <Route path="/about" element={<AboutPage />} />
