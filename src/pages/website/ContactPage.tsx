@@ -11,30 +11,38 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
-const contactInfo = [
+const globalOffices = [
   {
-    icon: Phone,
-    title: "Phone",
-    value: "+90 530 123 4567",
-    href: "tel:+905301234567",
+    flag: "🇹🇷",
+    country: "Türkiye",
+    city: "İstanbul Headquarters",
+    address: "Istanbul Airport (IST) – VIP Meet & Greet Terminal Office",
+    phone: "+90 532 174 8390",
+    email: "info@meettransfer.com",
   },
   {
-    icon: MessageCircle,
-    title: "WhatsApp",
-    value: "+90 530 123 4567",
-    href: "https://wa.me/905301234567",
+    flag: "🇺🇸",
+    country: "USA",
+    city: "Los Angeles",
+    address: "La Fashion District, Los Angeles, CA 854",
+    phone: "+1 205 650 8400",
+    email: null,
   },
   {
-    icon: Mail,
-    title: "Email",
-    value: "info@meettransfer.com",
-    href: "mailto:info@meettransfer.com",
+    flag: "🇩🇪",
+    country: "Germany",
+    city: "Berlin",
+    address: "Street Business Center, Berlin 245",
+    phone: "+1 205 650 8400",
+    email: null,
   },
   {
-    icon: MapPin,
-    title: "Office",
-    value: "Istanbul, Turkey",
-    href: null,
+    flag: "🇦🇪",
+    country: "UAE",
+    city: "Dubai",
+    address: "Downtown Business Tower, Dubai 35",
+    phone: "+1 205 650 8400",
+    email: null,
   },
 ];
 
@@ -67,30 +75,65 @@ const ContactPage = () => {
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
-        {/* Contact Info Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {contactInfo.map((item) => (
-            <Card key={item.title}>
-              <CardContent className="p-4 text-center">
-                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-3">
-                  <item.icon className="h-5 w-5 text-accent" />
-                </div>
-                <div className="font-medium text-sm mb-1">{item.title}</div>
-                {item.href ? (
-                  <a
-                    href={item.href}
-                    className="text-sm text-muted-foreground hover:text-accent transition-colors"
-                    target={item.href.startsWith("http") ? "_blank" : undefined}
-                  >
-                    {item.value}
-                  </a>
-                ) : (
-                  <div className="text-sm text-muted-foreground">{item.value}</div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Global Offices Section */}
+        <section>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">
+              🌍 Meet Transfer – Global Office Locations
+            </h2>
+            <p className="text-muted-foreground">
+              Serving you from multiple locations worldwide
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {globalOffices.map((office) => (
+              <Card key={office.city} className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <span className="text-4xl">{office.flag}</span>
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <h3 className="font-bold text-lg">
+                          {office.country} Office – {office.city}
+                        </h3>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-start gap-2">
+                          <MapPin className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-muted-foreground">{office.address}</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-accent flex-shrink-0" />
+                          <a 
+                            href={`tel:${office.phone.replace(/\s/g, '')}`}
+                            className="text-muted-foreground hover:text-accent transition-colors"
+                          >
+                            {office.phone}
+                          </a>
+                        </div>
+                        
+                        {office.email && (
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-accent flex-shrink-0" />
+                            <a 
+                              href={`mailto:${office.email}`}
+                              className="text-muted-foreground hover:text-accent transition-colors"
+                            >
+                              {office.email}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
 
         {/* WhatsApp CTA */}
         <div className="bg-secondary rounded-2xl p-8 text-center">
