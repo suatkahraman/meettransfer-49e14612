@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowRight } from "lucide-react";
+import cappadociaTransfer from "@/assets/cappadocia-transfer.png";
+
 const destinations = [{
   route: "Istanbul ⇄ Hotels",
   airports: "IST / SAW",
@@ -20,7 +22,7 @@ const destinations = [{
   route: "Cappadocia Tours",
   airports: "NAV / ASR",
   description: "Exclusive transfers and tour services throughout the magical Cappadocia region.",
-  image: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800&q=80"
+  image: cappadociaTransfer
 }];
 export const Destinations = () => {
   return <section className="py-20 px-4 bg-gradient-to-b from-background to-muted/30">
@@ -37,7 +39,11 @@ export const Destinations = () => {
           animationDelay: `${index * 100}ms`
         }}>
               <div className="relative h-48 overflow-hidden">
-                
+                <img 
+                  src={destination.image} 
+                  alt={destination.route}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <div className="flex items-center gap-2 text-white/90 text-xs mb-1">
