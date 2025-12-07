@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowRight } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import cappadociaTransfer from "@/assets/cappadocia-transfer.png";
 import bodrumTransfer from "@/assets/bodrum-transfer.png";
 import istanbulTransfer from "@/assets/istanbul-transfer.png";
@@ -27,8 +29,52 @@ const destinations = [{
   description: "Exclusive transfers and tour services throughout the magical Cappadocia region.",
   image: cappadociaTransfer
 }];
+
+interface LazyImageProps {
+  src: string;
+  alt: string;
+  className?: string;
+}
+
+const LazyImage = ({ src, alt, className }: LazyImageProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+
+  return (
+    <div className="relative w-full h-full">
+      {!isLoaded && (
+        <Skeleton className="absolute inset-0 w-full h-full" />
+      )}
+      <img 
+        src={isInView ? src : undefined}
+        data-src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+        onLoad={() => setIsLoaded(true)}
+        ref={(el) => {
+          if (el && !isInView) {
+            const observer = new IntersectionObserver(
+              ([entry]) => {
+                if (entry.isIntersecting) {
+                  setIsInView(true);
+                  observer.disconnect();
+                }
+              },
+              { rootMargin: '100px' }
+            );
+            observer.observe(el);
+          }
+        }}
+      />
+    </div>
+  );
+};
+
 export const Destinations = () => {
-  return <section className="py-20 px-4 bg-gradient-to-b from-background to-muted/30">
+  return (
+    <section className="py-20 px-4 bg-gradient-to-b from-background to-muted/30">
       <div className="container max-w-7xl mx-auto">
         <div className="text-center mb-12 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground">Top Destinations</h2>
@@ -38,11 +84,14 @@ export const Destinations = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {destinations.map((destination, index) => <Card key={index} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer animate-in fade-in slide-in-from-bottom-8" style={{
-          animationDelay: `${index * 100}ms`
-        }}>
+          {destinations.map((destination, index) => (
+            <Card 
+              key={index} 
+              className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer animate-in fade-in slide-in-from-bottom-8" 
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
               <div className="relative h-48 overflow-hidden">
-                <img 
+                <LazyImage 
                   src={destination.image} 
                   alt={destination.route}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -63,8 +112,10 @@ export const Destinations = () => {
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </div>
-            </Card>)}
+            </Card>
+          ))}
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
