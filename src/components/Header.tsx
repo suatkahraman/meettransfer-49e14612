@@ -24,13 +24,13 @@ export const Header = () => {
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#services" className="text-white/90 hover:text-white transition-colors font-sans">
+            <a href="/services" className="text-white/90 hover:text-white transition-colors font-sans">
               Services
             </a>
-            <a href="#destinations" className="text-white/90 hover:text-white transition-colors font-sans">
+            <a href="/destinations" className="text-white/90 hover:text-white transition-colors font-sans">
               Destinations
             </a>
-            <a href="#about" className="text-white/90 hover:text-white transition-colors font-sans">
+            <a href="/about" className="text-white/90 hover:text-white transition-colors font-sans">
               About
             </a>
             
