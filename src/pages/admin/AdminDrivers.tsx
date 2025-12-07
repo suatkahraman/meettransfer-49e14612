@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Percent, Loader2, Eye } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Percent, Loader2, Eye, Briefcase } from 'lucide-react';
 
 const regions = [
   { value: 'Istanbul', label: 'Istanbul' },
@@ -239,6 +239,14 @@ const AdminDrivers = () => {
                         title={driver.active ? 'Deactivate Driver' : 'Activate Driver'}
                       >
                         {driver.active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => navigate(`/admin/drivers/${driver.id}/jobs`)}
+                        title="View Assigned Jobs"
+                      >
+                        <Briefcase className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
