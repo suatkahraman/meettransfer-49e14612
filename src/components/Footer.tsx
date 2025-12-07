@@ -122,7 +122,7 @@ Privacy glass & extra comfort</p>
         </div>
 
         <div className="border-t border-white/20 pt-8 text-center text-white/60 font-sans text-sm">
-          <p>© 2024 Meet Transfer. All rights reserved.</p>
+          <p>© 2001 Meet Transfer. All rights reserved.</p>
         </div>
       </div>
     </footer>;
