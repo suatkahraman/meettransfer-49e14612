@@ -132,24 +132,26 @@ const WebsiteHeader = () => {
               align="end" 
               className="w-56 bg-card border border-border z-50 animate-in slide-in-from-top-2 fade-in-0 duration-200"
             >
-              {navLinks.map((link) => (
-                <DropdownMenuItem 
-                  key={link.path} 
-                  asChild
-                  className={isActive(link.path) ? "bg-primary/10 text-primary font-semibold" : ""}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <Link
-                    to={link.path}
-                    className="w-full cursor-pointer flex items-center gap-2"
+              {navLinks.map((link) => {
+                const active = isActive(link.path);
+                return (
+                  <DropdownMenuItem 
+                    key={link.path} 
+                    className={active ? "bg-primary/15 focus:bg-primary/20" : ""}
+                    onClick={() => setMenuOpen(false)}
                   >
-                    {isActive(link.path) && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                    )}
-                    <span>{link.label}</span>
-                  </Link>
-                </DropdownMenuItem>
-              ))}
+                    <Link
+                      to={link.path}
+                      className={`w-full flex items-center gap-2 ${active ? "text-primary font-semibold" : ""}`}
+                    >
+                      {active && (
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                      )}
+                      <span>{link.label}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                );
+              })}
               
               <DropdownMenuSeparator />
               
