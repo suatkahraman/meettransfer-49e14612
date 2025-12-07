@@ -4,6 +4,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 import cappadociaTransfer from "@/assets/cappadocia-transfer.png";
 import bodrumTransfer from "@/assets/bodrum-transfer.png";
 import istanbulTransfer from "@/assets/istanbul-transfer.png";
+import antalyaTransfer from "@/assets/antalya-transfer.png";
 
 const destinations = [{
   route: "Istanbul ⇄ Hotels",
@@ -14,7 +15,7 @@ const destinations = [{
   route: "Antalya ⇄ Resort Areas",
   airports: "AYT",
   description: "Luxury transfer to Lara, Belek, Kemer, Side and all major resort destinations.",
-  image: "https://images.unsplash.com/photo-1583037189850-1921ae7c6c22?w=800&q=80"
+  image: antalyaTransfer
 }, {
   route: "Bodrum ⇄ City Transfer",
   airports: "BJV",
