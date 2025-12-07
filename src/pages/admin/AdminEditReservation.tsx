@@ -6,14 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign } from 'lucide-react';
 
 const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
 const paymentTypes = ['cash', 'no-cash', 'invoice'];
-const statuses = ['new', 'assigned', 'active', 'completed', 'cancelled'];
+const statuses = ['awaiting-price', 'awaiting-customer', 'confirmed', 'assigned', 'active', 'completed', 'cancelled'];
+
+const statusColors: Record<string, string> = {
+  'awaiting-price': 'bg-orange-500/20 text-orange-700',
+  'awaiting-customer': 'bg-purple-500/20 text-purple-700',
+  'confirmed': 'bg-blue-500/20 text-blue-700',
+  'assigned': 'bg-yellow-500/20 text-yellow-700',
+  'active': 'bg-cyan-500/20 text-cyan-700',
+  'completed': 'bg-green-500/20 text-green-700',
+  'cancelled': 'bg-destructive/20 text-destructive',
+};
 
 interface Driver {
   id: string;
@@ -25,7 +36,9 @@ const AdminEditReservation = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sendingPrice, setSendingPrice] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [customerId, setCustomerId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_phone: '',
@@ -59,6 +72,7 @@ const AdminEditReservation = () => {
       }
 
       const r = reservationResult.data;
+      setCustomerId(r.customer_id);
       setFormData({
         customer_name: r.customer_name || '',
         customer_phone: r.customer_phone || '',
@@ -82,6 +96,52 @@ const AdminEditReservation = () => {
     fetchData();
   }, [id, navigate]);
 
+  const handleSendPrice = async () => {
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      toast.error('Please enter a valid price first');
+      return;
+    }
+    
+    setSendingPrice(true);
+
+    try {
+      // Update reservation with price and change status to awaiting-customer
+      const { error } = await supabase
+        .from('reservations')
+        .update({
+          price: parseFloat(formData.price),
+          status: 'awaiting-customer',
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Notify customer
+      if (customerId) {
+        try {
+          await supabase.functions.invoke('create-notification', {
+            body: {
+              user_id: customerId,
+              reservation_id: id,
+              title: 'Your Transfer Price is Ready',
+              message: `Your transfer price has been set: €${formData.price}. Please review and confirm your booking.`,
+              type: 'price_ready'
+            }
+          });
+        } catch (e) {
+          console.error('Failed to notify customer:', e);
+        }
+      }
+
+      toast.success('Price sent to customer for approval!');
+      setFormData({ ...formData, status: 'awaiting-customer' });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send price');
+    } finally {
+      setSendingPrice(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -99,7 +159,7 @@ const AdminEditReservation = () => {
         flight_number: formData.flight_number || null,
         vehicle_type: formData.vehicle_type,
         payment_type: formData.payment_type,
-        price: parseFloat(formData.price) || 0,
+        price: parseFloat(formData.price) || null,
         status: formData.status,
         driver_id: formData.driver_id || null,
       })
@@ -155,9 +215,50 @@ const AdminEditReservation = () => {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-2xl font-serif">Edit Reservation</h1>
+        <Badge className={`ml-auto ${statusColors[formData.status] || 'bg-muted'}`}>
+          {formData.status}
+        </Badge>
       </header>
 
       <main className="container mx-auto py-8 px-4 max-w-2xl">
+        {/* Price Entry Card for awaiting-price status */}
+        {formData.status === 'awaiting-price' && (
+          <Card className="mb-6 border-orange-300 bg-orange-50 dark:bg-orange-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
+                <DollarSign className="h-5 w-5" />
+                Set Price for Customer
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-orange-700 dark:text-orange-300">
+                This reservation is awaiting pricing. Enter the price and send it to the customer for approval.
+              </p>
+              <div className="flex gap-4 items-end">
+                <div className="flex-1 space-y-2">
+                  <Label>Price (€)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    placeholder="Enter price"
+                    className="text-lg"
+                  />
+                </div>
+                <Button 
+                  onClick={handleSendPrice} 
+                  disabled={sendingPrice || !formData.price}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  {sendingPrice ? 'Sending...' : 'Send to Customer'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -266,7 +367,6 @@ const AdminEditReservation = () => {
                     step="0.01"
                     value={formData.price}
                     onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    required
                   />
                 </div>
               </div>

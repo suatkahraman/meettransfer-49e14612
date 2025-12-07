@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Phone, User, Car } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Reservation {
@@ -15,21 +15,31 @@ interface Reservation {
   pickup_date: string;
   pickup_time: string;
   vehicle_type: string;
-  price: number;
+  price: number | null;
   status: string;
   driver_id: string | null;
-  drivers?: {
-    name: string;
-    phone: string;
-  } | null;
 }
 
 const statusColors: Record<string, string> = {
-  new: 'bg-muted text-muted-foreground',
-  assigned: 'bg-yellow-500/20 text-yellow-700',
-  active: 'bg-blue-500/20 text-blue-700',
-  completed: 'bg-green-500/20 text-green-700',
-  cancelled: 'bg-destructive/20 text-destructive',
+  'awaiting-price': 'bg-orange-500/20 text-orange-700',
+  'awaiting-customer': 'bg-purple-500/20 text-purple-700',
+  'confirmed': 'bg-blue-500/20 text-blue-700',
+  'assigned': 'bg-yellow-500/20 text-yellow-700',
+  'active': 'bg-cyan-500/20 text-cyan-700',
+  'completed': 'bg-green-500/20 text-green-700',
+  'cancelled': 'bg-destructive/20 text-destructive',
+  'new': 'bg-muted text-muted-foreground',
+};
+
+const statusLabels: Record<string, string> = {
+  'awaiting-price': 'Awaiting Price',
+  'awaiting-customer': 'Your Approval Needed',
+  'confirmed': 'Confirmed',
+  'assigned': 'Driver Assigned',
+  'active': 'In Progress',
+  'completed': 'Completed',
+  'cancelled': 'Cancelled',
+  'new': 'New',
 };
 
 const CustomerBookings = () => {
@@ -44,10 +54,7 @@ const CustomerBookings = () => {
 
       const { data, error } = await supabase
         .from('reservations')
-        .select(`
-          *,
-          drivers (name, phone)
-        `)
+        .select('*')
         .eq('customer_id', user.id)
         .order('pickup_date', { ascending: false });
 
@@ -69,7 +76,7 @@ const CustomerBookings = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/customer')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">My Bookings</h1>
+          <h1 className="text-2xl font-serif">My Reservations</h1>
         </div>
         <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
           <LogOut className="h-5 w-5" />
@@ -81,13 +88,17 @@ const CustomerBookings = () => {
           <div className="text-center py-12">Loading...</div>
         ) : reservations.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No bookings yet</p>
-            <Button onClick={() => navigate('/customer')}>Book a Transfer</Button>
+            <p className="text-muted-foreground mb-4">No reservations yet</p>
+            <Button onClick={() => navigate('/book')}>Book a Transfer</Button>
           </div>
         ) : (
           <div className="space-y-4 max-w-2xl mx-auto">
             {reservations.map((reservation) => (
-              <Card key={reservation.id}>
+              <Card 
+                key={reservation.id} 
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
+              >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
@@ -98,8 +109,8 @@ const CustomerBookings = () => {
                       <Clock className="h-4 w-4 text-muted-foreground ml-2" />
                       <span>{reservation.pickup_time}</span>
                     </div>
-                    <Badge className={statusColors[reservation.status]}>
-                      {reservation.status}
+                    <Badge className={statusColors[reservation.status] || 'bg-muted'}>
+                      {statusLabels[reservation.status] || reservation.status}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -124,24 +135,19 @@ const CustomerBookings = () => {
                       <Car className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">{reservation.vehicle_type}</span>
                     </div>
-                    <span className="font-bold text-primary">€{reservation.price}</span>
+                    <div className="flex items-center gap-2">
+                      {reservation.price !== null ? (
+                        <span className="font-bold text-primary">€{reservation.price}</span>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">Price pending</span>
+                      )}
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
 
-                  {reservation.status === 'assigned' && reservation.drivers && (
-                    <div className="bg-muted p-3 rounded-lg mt-3">
-                      <div className="text-sm font-medium mb-2">Driver Assigned</div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4" />
-                          <span>{reservation.drivers.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4" />
-                          <a href={`tel:${reservation.drivers.phone}`} className="text-primary">
-                            {reservation.drivers.phone}
-                          </a>
-                        </div>
-                      </div>
+                  {reservation.status === 'awaiting-customer' && (
+                    <div className="bg-purple-50 dark:bg-purple-950/30 p-2 rounded text-center text-sm text-purple-700 dark:text-purple-300">
+                      Tap to review and approve price
                     </div>
                   )}
                 </CardContent>

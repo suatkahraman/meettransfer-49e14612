@@ -8,11 +8,13 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ReservationForm from "./pages/ReservationForm";
 import NotFound from "./pages/NotFound";
 
 // Customer Pages
 import CustomerHome from "./pages/customer/CustomerHome";
 import CustomerBookings from "./pages/customer/CustomerBookings";
+import CustomerReservationDetail from "./pages/customer/CustomerReservationDetail";
 
 // Driver Pages
 import DriverHome from "./pages/driver/DriverHome";
@@ -58,6 +60,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/book" element={<ReservationForm />} />
               
               {/* Website Pages */}
               <Route path="/destinations" element={<DestinationsPage />} />
@@ -79,6 +82,7 @@ const App = () => (
               {/* Customer Routes - Protected */}
               <Route path="/customer" element={<CustomerRoute><CustomerHome /></CustomerRoute>} />
               <Route path="/customer/bookings" element={<CustomerRoute><CustomerBookings /></CustomerRoute>} />
+              <Route path="/customer/reservation/:id" element={<CustomerRoute><CustomerReservationDetail /></CustomerRoute>} />
               
               {/* Driver Routes - Protected */}
               <Route path="/driver" element={<DriverRoute><DriverHome /></DriverRoute>} />
