@@ -1,8 +1,14 @@
 import { Link } from "react-router-dom";
-import { Menu, LogIn, LogOut, User } from "lucide-react";
+import { Menu, LogIn, LogOut, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "./LanguageSelector";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -91,67 +97,66 @@ const WebsiteHeader = () => {
             </div>
           )}
 
-          {/* Mobile Menu */}
-          <Sheet>
-            <SheetTrigger asChild className="md:hidden">
+          {/* Mobile Menu - Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
               </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-card">
-              <nav className="flex flex-col gap-4 mt-8">
-                {navLinks.map((link) => (
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end" 
+              className="w-56 bg-card border border-border z-50"
+            >
+              {navLinks.map((link) => (
+                <DropdownMenuItem key={link.path} asChild>
                   <Link
-                    key={link.path}
                     to={link.path}
-                    className="text-lg font-medium hover:text-accent transition-colors"
+                    className="w-full cursor-pointer"
                   >
                     {link.label}
                   </Link>
-                ))}
-                
-                <div className="border-t border-border my-4 pt-4">
-                  {user ? (
-                    <>
-                      <Link to={getDashboardPath()}>
-                        <Button variant="outline" className="w-full mb-3 gap-2">
-                          <User className="h-4 w-4" />
-                          My Account
-                        </Button>
-                      </Link>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full gap-2"
-                        onClick={() => signOut()}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Logout
+                </DropdownMenuItem>
+              ))}
+              
+              <DropdownMenuSeparator />
+              
+              {user ? (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to={getDashboardPath()} className="w-full cursor-pointer gap-2">
+                      <User className="h-4 w-4" />
+                      My Account
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => signOut()}
+                    className="cursor-pointer gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to="/login" className="w-full cursor-pointer gap-2">
+                      <LogIn className="h-4 w-4" />
+                      Login
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <div className="p-2">
+                    <Link to="/book">
+                      <Button variant="accent" className="w-full">
+                        {t("bookNow")}
                       </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Link to="/login">
-                        <Button variant="outline" className="w-full mb-3 gap-2">
-                          <LogIn className="h-4 w-4" />
-                          Login
-                        </Button>
-                      </Link>
-                      <Link to="/signup">
-                        <Button variant="ghost" className="w-full mb-3">
-                          Create Account
-                        </Button>
-                      </Link>
-                      <Link to="/book">
-                        <Button variant="accent" className="w-full">
-                          {t("bookNow")}
-                        </Button>
-                      </Link>
-                    </>
-                  )}
-                </div>
-              </nav>
-            </SheetContent>
-          </Sheet>
+                    </Link>
+                  </div>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
