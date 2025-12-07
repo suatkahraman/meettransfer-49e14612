@@ -34,20 +34,29 @@ const AdminAccounting = () => {
         .from('drivers')
         .select('id, name, commission_rate');
 
-      // Get all completed reservations
+      // Get all completed reservations with driver financial data
       const { data: reservations } = await supabase
         .from('reservations')
-        .select('driver_id, price, driver_cash')
+        .select('driver_id, price, driver_earning, driver_cash_amount')
         .eq('status', 'completed');
 
       if (drivers && reservations) {
         const driverAccounting: DriverAccounting[] = drivers.map(driver => {
           const driverReservations = reservations.filter(r => r.driver_id === driver.id);
           const totalRevenue = driverReservations.reduce((sum, r) => sum + (r.price || 0), 0);
-          const earnings = totalRevenue * (driver.commission_rate / 100);
-          const cashCollected = driverReservations
-            .filter(r => r.driver_cash)
-            .reduce((sum, r) => sum + (r.price || 0), 0);
+          
+          // Use driver_earning if set, otherwise calculate from commission rate
+          const earnings = driverReservations.reduce((sum, r) => {
+            if (r.driver_earning !== null) {
+              return sum + r.driver_earning;
+            }
+            return sum + (r.price || 0) * (driver.commission_rate / 100);
+          }, 0);
+          
+          // Use actual driver_cash_amount entered by drivers
+          const cashCollected = driverReservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
+          
+          // Balance owed = cash collected - driver earnings (what driver keeps)
           const balanceOwed = Math.max(0, cashCollected - earnings);
 
           return {
