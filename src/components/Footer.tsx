@@ -39,7 +39,22 @@ export const Footer = () => {
               </li>
               <li className="flex items-start gap-2">
                 <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <span>info@elitetransfer.com</span>
+                <span className="whitespace-pre-line text-xs leading-relaxed">
+                  🌍 Meet Transfer – Global Office Locations{"\n"}
+                  🇹🇷 Türkiye – İstanbul Headquarters{"\n"}
+                  📍 Istanbul Airport (IST) – VIP Meet & Greet Terminal Office{"\n"}
+                  📞 +90 532 174 8390{"\n"}
+                  ✉ info@meettransfer.com{"\n\n"}
+                  🇺🇸 USA Office – Los Angeles{"\n"}
+                  📍 La Fashion District, Los Angeles, CA 854{"\n"}
+                  📞 +1 205 650 8400{"\n\n"}
+                  🇩🇪 Germany Office – Berlin{"\n"}
+                  📍 Street Business Center, Berlin 245{"\n"}
+                  📞 +1 205 650 8400{"\n\n"}
+                  🇦🇪 UAE Office – Dubai{"\n"}
+                  📍 Downtown Business Tower, Dubai 35{"\n"}
+                  📞 +1 205 650 8400
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
