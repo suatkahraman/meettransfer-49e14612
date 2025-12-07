@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +54,7 @@ const statusColors: Record<string, string> = {
 const AdminReservations = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const { logAction } = useAuditLog();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,6 +133,8 @@ const AdminReservations = () => {
     // Get the driver's user_id
     const selectedDriverData = drivers.find(d => d.id === selectedDriver);
 
+    const oldDriverId = reservation?.driver_id;
+
     const { error } = await supabase
       .from('reservations')
       .update({ 
@@ -142,6 +146,14 @@ const AdminReservations = () => {
     if (error) {
       toast.error('Failed to assign driver');
     } else {
+      // Audit log for driver assignment
+      await logAction({
+        action: 'ASSIGN_DRIVER',
+        table_name: 'reservations',
+        record_id: assignDialog.reservationId,
+        old_data: { driver_id: oldDriverId, status: reservation?.status },
+        new_data: { driver_id: selectedDriver, status: 'assigned', driver_name: selectedDriverData?.name },
+      });
       // Create notification for driver
       if (selectedDriverData && reservation) {
         try {
@@ -178,6 +190,9 @@ const AdminReservations = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this reservation?')) return;
 
+    // Get reservation data before deletion for audit log
+    const reservationToDelete = reservations.find(r => r.id === id);
+
     const { error } = await supabase
       .from('reservations')
       .delete()
@@ -186,6 +201,20 @@ const AdminReservations = () => {
     if (error) {
       toast.error('Failed to delete reservation');
     } else {
+      // Audit log for deletion
+      await logAction({
+        action: 'DELETE',
+        table_name: 'reservations',
+        record_id: id,
+        old_data: reservationToDelete ? {
+          customer_name: reservationToDelete.customer_name,
+          pickup: reservationToDelete.pickup,
+          dropoff: reservationToDelete.dropoff,
+          pickup_date: reservationToDelete.pickup_date,
+          status: reservationToDelete.status,
+        } : undefined,
+      });
+
       toast.success('Reservation deleted');
       fetchReservations();
     }
