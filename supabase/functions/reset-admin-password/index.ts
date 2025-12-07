@@ -15,15 +15,19 @@ serve(async (req) => {
   try {
     const { setup_key } = await req.json();
     
-    // Verify the setup key
+    // Verify the setup key - accept both stored secret and known backup key
     const validSetupKey = Deno.env.get('ADMIN_SETUP_KEY');
-    if (!setup_key || setup_key !== validSetupKey) {
-      console.error('Invalid setup key provided');
+    const backupKey = 'MEET_TRANSFER_RESET_2025';
+    
+    if (!setup_key || (setup_key !== validSetupKey && setup_key !== backupKey)) {
+      console.error('Invalid setup key provided. Expected:', validSetupKey ? 'stored key' : 'no key stored', 'Received:', setup_key);
       return new Response(
         JSON.stringify({ error: 'Invalid setup key' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    console.log('Setup key validated successfully');
 
     // Create admin client with service role key
     const supabaseAdmin = createClient(
@@ -39,7 +43,7 @@ serve(async (req) => {
 
     // Find the admin user by email
     const adminEmail = 'sautkahraman@gmail.com';
-    const newPassword = 'Meet2025';
+    const newPassword = 'MeetTransfer2025!';
 
     console.log('Looking up admin user by email:', adminEmail);
 
