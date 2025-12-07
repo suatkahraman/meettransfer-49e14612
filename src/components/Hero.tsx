@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
 import { Link } from "react-router-dom";
+import meetTransferLogo from "@/assets/meet-transfer-logo.jpg";
+
 export const Hero = () => {
   return <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/80">
       {/* Decorative elements */}
@@ -8,6 +10,15 @@ export const Hero = () => {
       
       <div className="container relative z-10 px-4 py-16 md:py-24">
         <div className="max-w-4xl mx-auto text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          {/* Large Logo */}
+          <div className="flex justify-center">
+            <img 
+              src={meetTransferLogo} 
+              alt="Meet Transfer Logo" 
+              className="h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 rounded-full object-cover shadow-2xl ring-4 ring-white/20"
+            />
+          </div>
+          
           <div className="space-y-4">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
               Premium Transfer Services
