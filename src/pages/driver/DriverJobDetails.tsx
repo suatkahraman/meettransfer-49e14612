@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,11 +44,13 @@ const statusColors: Record<string, string> = {
 const DriverJobDetails = () => {
   const { id } = useParams();
   const { user, signOut } = useAuth();
+  const { driverId } = useUserRole();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [showCashDialog, setShowCashDialog] = useState(false);
+  const [commissionRate, setCommissionRate] = useState<number>(70);
   
   // Driver editable fields
   const [driverEarning, setDriverEarning] = useState('');
@@ -56,29 +59,55 @@ const DriverJobDetails = () => {
   const [savingFinancials, setSavingFinancials] = useState(false);
 
   useEffect(() => {
-    const fetchReservation = async () => {
+    const fetchData = async () => {
       if (!id) return;
 
-      const { data, error } = await supabase
+      // Fetch reservation
+      const { data: resData, error: resError } = await supabase
         .from('reservations')
         .select('*')
         .eq('id', id)
         .maybeSingle();
 
-      if (error) {
-        console.error('Error:', error);
+      if (resError) {
+        console.error('Error:', resError);
         toast.error('Failed to load job details');
-      } else if (data) {
-        setReservation(data);
-        setDriverEarning(data.driver_earning?.toString() || '');
-        setDriverCashAmount(data.driver_cash_amount?.toString() || '');
-        setDriverNotes(data.driver_notes || '');
+        setLoading(false);
+        return;
+      }
+      
+      if (resData) {
+        setReservation(resData);
+        setDriverCashAmount(resData.driver_cash_amount?.toString() || '');
+        setDriverNotes(resData.driver_notes || '');
+
+        // Fetch driver's commission rate
+        if (driverId) {
+          const { data: driverData } = await supabase
+            .from('drivers')
+            .select('commission_rate')
+            .eq('id', driverId)
+            .maybeSingle();
+          
+          const rate = driverData?.commission_rate ? Number(driverData.commission_rate) : 70;
+          setCommissionRate(rate);
+          
+          // Auto-calculate earning if not already set
+          if (resData.driver_earning !== null) {
+            setDriverEarning(resData.driver_earning.toString());
+          } else if (resData.price) {
+            const autoEarning = (resData.price * rate / 100).toFixed(2);
+            setDriverEarning(autoEarning);
+          }
+        } else {
+          setDriverEarning(resData.driver_earning?.toString() || '');
+        }
       }
       setLoading(false);
     };
 
-    fetchReservation();
-  }, [id]);
+    fetchData();
+  }, [id, driverId]);
 
   const confirmJob = async () => {
     if (!id) return;
@@ -289,24 +318,26 @@ const DriverJobDetails = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="driver_earning">Your Earning (Budget / Hakediş)</Label>
+              <Label htmlFor="driver_earning">Your Earning (Budget)</Label>
               <Input
                 id="driver_earning"
                 type="number"
+                step="0.01"
                 placeholder="e.g., 70"
                 value={driverEarning}
                 onChange={(e) => setDriverEarning(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Your expected earning from this job
+                Auto-calculated: €{reservation?.price} × {commissionRate}% = €{((reservation?.price || 0) * commissionRate / 100).toFixed(2)} (editable)
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="driver_cash">Cash Collected from Passenger (Nakit)</Label>
+              <Label htmlFor="driver_cash">Cash Collected from Passenger</Label>
               <Input
                 id="driver_cash"
                 type="number"
+                step="0.01"
                 placeholder="e.g., 100"
                 value={driverCashAmount}
                 onChange={(e) => setDriverCashAmount(e.target.value)}
@@ -320,7 +351,7 @@ const DriverJobDetails = () => {
                 placeholder="Delays, extra stops, special situations..."
                 value={driverNotes}
                 onChange={(e) => setDriverNotes(e.target.value)}
-                rows={3}
+                rows={4}
               />
             </div>
 
