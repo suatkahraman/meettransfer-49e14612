@@ -137,15 +137,16 @@ const WebsiteHeader = () => {
                   key={link.path} 
                   asChild
                   className={isActive(link.path) ? "bg-primary/10 text-primary font-semibold" : ""}
+                  onClick={() => setMenuOpen(false)}
                 >
                   <Link
                     to={link.path}
                     className="w-full cursor-pointer flex items-center gap-2"
                   >
                     {isActive(link.path) && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
                     )}
-                    {link.label}
+                    <span>{link.label}</span>
                   </Link>
                 </DropdownMenuItem>
               ))}
