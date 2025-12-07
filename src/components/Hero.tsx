@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Hero = () => {
   return (
@@ -21,11 +22,12 @@ export const Hero = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Button 
+              asChild
               size="lg" 
               variant="accent"
               className="text-base px-8 h-12"
             >
-              Book Your Transfer
+              <Link to="/book">Book Your Transfer</Link>
             </Button>
             <Button 
               size="lg" 
