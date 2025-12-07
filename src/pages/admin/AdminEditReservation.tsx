@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,11 +35,13 @@ interface Driver {
 const AdminEditReservation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { logAction } = useAuditLog();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sendingPrice, setSendingPrice] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
+  const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null);
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_phone: '',
@@ -73,7 +76,8 @@ const AdminEditReservation = () => {
 
       const r = reservationResult.data;
       setCustomerId(r.customer_id);
-      setFormData({
+      
+      const initialData = {
         customer_name: r.customer_name || '',
         customer_phone: r.customer_phone || '',
         pickup: r.pickup || '',
@@ -87,7 +91,10 @@ const AdminEditReservation = () => {
         status: r.status || '',
         driver_id: r.driver_id || '',
         admin_notes: adminNotesResult.data?.notes || '',
-      });
+      };
+      
+      setOriginalData(initialData);
+      setFormData(initialData);
 
       setDrivers(driversResult.data || []);
       setLoading(false);
@@ -132,6 +139,15 @@ const AdminEditReservation = () => {
           console.error('Failed to notify customer:', e);
         }
       }
+
+      // Audit log for price sent
+      await logAction({
+        action: 'SEND_PRICE',
+        table_name: 'reservations',
+        record_id: id,
+        old_data: { price: originalData?.price, status: originalData?.status },
+        new_data: { price: formData.price, status: 'awaiting-customer' },
+      });
 
       toast.success('Price sent to customer for approval!');
       setFormData({ ...formData, status: 'awaiting-customer' });
@@ -194,6 +210,27 @@ const AdminEditReservation = () => {
         .delete()
         .eq('reservation_id', id);
     }
+
+    // Audit log for reservation update
+    await logAction({
+      action: 'UPDATE',
+      table_name: 'reservations',
+      record_id: id,
+      old_data: originalData || undefined,
+      new_data: {
+        customer_name: formData.customer_name,
+        customer_phone: formData.customer_phone,
+        pickup: formData.pickup,
+        dropoff: formData.dropoff,
+        pickup_date: formData.pickup_date,
+        pickup_time: formData.pickup_time,
+        vehicle_type: formData.vehicle_type,
+        payment_type: formData.payment_type,
+        price: formData.price,
+        status: formData.status,
+        driver_id: formData.driver_id,
+      },
+    });
 
     toast.success('Reservation updated');
     navigate('/admin/reservations');

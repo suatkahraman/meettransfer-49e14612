@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,7 @@ interface Driver {
 
 const AdminDrivers = () => {
   const navigate = useNavigate();
+  const { logAction } = useAuditLog();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -97,6 +99,14 @@ const AdminDrivers = () => {
     
     try {
       if (editingDriver) {
+        // Store old data for audit log
+        const oldData = {
+          name: editingDriver.name,
+          phone: editingDriver.phone,
+          region: editingDriver.region,
+          commission_rate: editingDriver.commission_rate,
+        };
+
         // Update existing driver
         const { error } = await supabase
           .from('drivers')
@@ -111,6 +121,20 @@ const AdminDrivers = () => {
         if (error) {
           toast.error('Failed to update driver');
         } else {
+          // Audit log for driver update
+          await logAction({
+            action: 'UPDATE',
+            table_name: 'drivers',
+            record_id: editingDriver.id,
+            old_data: oldData,
+            new_data: {
+              name: formData.name,
+              phone: formData.phone,
+              region: formData.region || null,
+              commission_rate: parseFloat(formData.commission_rate),
+            },
+          });
+
           toast.success('Driver updated');
           setDialogOpen(false);
           fetchDrivers();
@@ -154,6 +178,20 @@ const AdminDrivers = () => {
           return;
         }
 
+        // Audit log for driver creation
+        await logAction({
+          action: 'CREATE',
+          table_name: 'drivers',
+          record_id: data?.driver_id,
+          new_data: {
+            name: formData.name,
+            phone: formData.phone,
+            region: formData.region,
+            commission_rate: parseFloat(formData.commission_rate),
+            email: formData.email,
+          },
+        });
+
         toast.success('Driver has been created successfully!');
         setDialogOpen(false);
         fetchDrivers();
@@ -174,6 +212,15 @@ const AdminDrivers = () => {
     if (error) {
       toast.error('Failed to update driver status');
     } else {
+      // Audit log for status toggle
+      await logAction({
+        action: driver.active ? 'DEACTIVATE' : 'ACTIVATE',
+        table_name: 'drivers',
+        record_id: driver.id,
+        old_data: { active: driver.active, name: driver.name },
+        new_data: { active: !driver.active, name: driver.name },
+      });
+
       toast.success(driver.active ? 'Driver deactivated' : 'Driver activated');
       fetchDrivers();
     }
