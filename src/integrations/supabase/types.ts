@@ -221,7 +221,7 @@ export type Database = {
       reservations: {
         Row: {
           created_at: string | null
-          customer_id: string | null
+          customer_id: string
           customer_name: string
           customer_phone: string
           driver_cash: boolean | null
@@ -244,7 +244,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          customer_id?: string | null
+          customer_id: string
           customer_name: string
           customer_phone: string
           driver_cash?: boolean | null
@@ -267,7 +267,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          customer_id?: string | null
+          customer_id?: string
           customer_name?: string
           customer_phone?: string
           driver_cash?: boolean | null
