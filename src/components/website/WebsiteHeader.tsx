@@ -1,12 +1,16 @@
 import { Link } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, LogIn, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "./LanguageSelector";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const WebsiteHeader = () => {
   const { t } = useLanguage();
+  const { user, signOut } = useAuth();
+  const { role } = useUserRole();
 
   const navLinks = [
     { path: "/destinations", label: t("cities") },
@@ -15,6 +19,13 @@ const WebsiteHeader = () => {
     { path: "/contact", label: t("contact") },
     { path: "/reviews", label: t("reviews") },
   ];
+
+  // Get dashboard path based on role
+  const getDashboardPath = () => {
+    if (role === 'admin') return '/admin';
+    if (role === 'driver') return '/driver';
+    return '/customer';
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border">
@@ -38,11 +49,41 @@ const WebsiteHeader = () => {
 
         <div className="flex items-center gap-3">
           <LanguageSelector />
-          <Link to="/auth">
-            <Button variant="accent" size="sm" className="hidden md:flex">
-              {t("bookNow")}
-            </Button>
-          </Link>
+          
+          {/* Auth Buttons - Desktop */}
+          {user ? (
+            <div className="hidden md:flex items-center gap-2">
+              <Link to={getDashboardPath()}>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <User className="h-4 w-4" />
+                  My Account
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => signOut()}
+                className="gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center gap-2">
+              <Link to="/login">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Login
+                </Button>
+              </Link>
+              <Link to="/book">
+                <Button variant="accent" size="sm">
+                  {t("bookNow")}
+                </Button>
+              </Link>
+            </div>
+          )}
 
           {/* Mobile Menu */}
           <Sheet>
@@ -62,11 +103,46 @@ const WebsiteHeader = () => {
                     {link.label}
                   </Link>
                 ))}
-                <Link to="/auth">
-                  <Button variant="accent" className="w-full mt-4">
-                    {t("bookNow")}
-                  </Button>
-                </Link>
+                
+                <div className="border-t border-border my-4 pt-4">
+                  {user ? (
+                    <>
+                      <Link to={getDashboardPath()}>
+                        <Button variant="outline" className="w-full mb-3 gap-2">
+                          <User className="h-4 w-4" />
+                          My Account
+                        </Button>
+                      </Link>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full gap-2"
+                        onClick={() => signOut()}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/login">
+                        <Button variant="outline" className="w-full mb-3 gap-2">
+                          <LogIn className="h-4 w-4" />
+                          Login
+                        </Button>
+                      </Link>
+                      <Link to="/signup">
+                        <Button variant="ghost" className="w-full mb-3">
+                          Create Account
+                        </Button>
+                      </Link>
+                      <Link to="/book">
+                        <Button variant="accent" className="w-full">
+                          {t("bookNow")}
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+                </div>
               </nav>
             </SheetContent>
           </Sheet>
