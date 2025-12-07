@@ -9,14 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail } from 'lucide-react';
 import { z } from 'zod';
 
 const reservationSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
   email: z.string().trim().email("Invalid email address").max(255),
-  password: z.string().min(6, "Password must be at least 6 characters").max(100),
   pickup: z.string().min(1, "Please select a pickup airport"),
   dropoff: z.string().trim().min(2, "Drop-off location is required").max(200),
   date: z.string().min(1, "Please select a date"),
@@ -44,6 +43,15 @@ const vehicleTypes = [
   { value: 'minibus', label: 'Minibus' },
 ];
 
+const generateRandomPassword = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+  let password = '';
+  for (let i = 0; i < 16; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+};
+
 const ReservationForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +60,6 @@ const ReservationForm = () => {
     name: '',
     phone: '',
     email: '',
-    password: '',
     pickup: '',
     dropoff: '',
     date: '',
@@ -82,19 +89,13 @@ const ReservationForm = () => {
     setIsLoading(true);
 
     try {
-      // Step 1: Check if user already exists, if not create account
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', (await supabase.auth.getUser()).data.user?.id || '')
-        .maybeSingle();
-
       let userId: string;
 
-      // Try to sign up or sign in
+      // Step 1: Try to sign up the user (checks if email exists)
+      const randomPassword = generateRandomPassword();
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: result.data.email,
-        password: result.data.password,
+        password: randomPassword,
         options: {
           emailRedirectTo: `${window.location.origin}/customer/bookings`,
           data: {
@@ -104,32 +105,56 @@ const ReservationForm = () => {
       });
 
       if (signUpError) {
-        // User might already exist, try to sign in
-        if (signUpError.message.includes('already registered')) {
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email: result.data.email,
-            password: result.data.password,
-          });
+        // User already exists - we need to handle this case
+        if (signUpError.message.includes('already registered') || signUpError.message.includes('User already registered')) {
+          // User exists, try to sign in with a magic link or redirect to login
+          toast.error('This email is already registered. Please login to make a reservation.');
+          navigate('/auth');
+          setIsLoading(false);
+          return;
+        }
+        throw signUpError;
+      }
 
-          if (signInError) {
-            toast.error('Email already registered. Please use correct password or login.');
+      // Check if user was created or if it's a duplicate (signUp returns user even for existing unconfirmed)
+      if (!signUpData.user) {
+        toast.error('Failed to create account. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      userId = signUpData.user.id;
+
+      // If user was just created, sign them in immediately (auto-confirm is enabled)
+      if (signUpData.session) {
+        // User is already signed in from signup
+      } else {
+        // Try to sign in with the generated password
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: result.data.email,
+          password: randomPassword,
+        });
+
+        if (signInError) {
+          // If sign in fails, user might need email confirmation or already exists
+          if (signInError.message.includes('Email not confirmed')) {
+            toast.info('Please check your email to confirm your account, then try again.');
             setIsLoading(false);
             return;
           }
-
-          userId = signInData.user!.id;
-        } else {
-          throw signUpError;
+          // User might already exist with different password
+          toast.error('This email is already registered. Please login to make a reservation.');
+          navigate('/auth');
+          setIsLoading(false);
+          return;
         }
-      } else {
-        userId = signUpData.user!.id;
-        
-        // Update profile with phone
-        await supabase
-          .from('profiles')
-          .update({ phone: result.data.phone, full_name: result.data.name })
-          .eq('id', userId);
       }
+
+      // Update profile with phone number
+      await supabase
+        .from('profiles')
+        .update({ phone: result.data.phone, full_name: result.data.name })
+        .eq('id', userId);
 
       // Step 2: Create reservation with status 'awaiting-price'
       const { data: reservation, error: reservationError } = await supabase
@@ -144,7 +169,7 @@ const ReservationForm = () => {
           pickup_time: result.data.time,
           flight_number: result.data.flightNumber?.trim() || null,
           vehicle_type: result.data.vehicleType,
-          payment_type: 'cash', // Default, admin can change
+          payment_type: 'cash',
           status: 'awaiting-price',
           price: null,
         })
@@ -192,7 +217,7 @@ const ReservationForm = () => {
             <div className="space-y-4 pb-4 border-b">
               <h3 className="font-semibold text-lg">Your Information</h3>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <User className="h-4 w-4" />
@@ -223,37 +248,20 @@ const ReservationForm = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    Email
-                  </Label>
-                  <Input
-                    type="email"
-                    placeholder="your@email.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className={errors.email ? 'border-destructive' : ''}
-                    maxLength={255}
-                  />
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Lock className="h-4 w-4" />
-                    Password
-                  </Label>
-                  <Input
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className={errors.password ? 'border-destructive' : ''}
-                    maxLength={100}
-                  />
-                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email
+                </Label>
+                <Input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className={errors.email ? 'border-destructive' : ''}
+                  maxLength={255}
+                />
+                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
             </div>
 
