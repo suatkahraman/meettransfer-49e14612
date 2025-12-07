@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Bell } from 'lucide-react';
 import {
@@ -29,6 +30,7 @@ interface NotificationBellProps {
 
 export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) => {
   const { user } = useAuth();
+  const { role } = useUserRole();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -91,8 +93,14 @@ export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) =
     }
 
     if (notification.reservation_id) {
-      // Navigate to reservation details based on user role
-      navigate(`/admin/reservations/${notification.reservation_id}`);
+      // Navigate based on user role
+      if (role === 'admin') {
+        navigate(`/admin/reservations/${notification.reservation_id}`);
+      } else if (role === 'driver') {
+        navigate(`/driver/job/${notification.reservation_id}`);
+      } else {
+        navigate(`/customer/reservation/${notification.reservation_id}`);
+      }
     }
   };
 

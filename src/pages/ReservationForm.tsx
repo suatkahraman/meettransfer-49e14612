@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,13 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock } from 'lucide-react';
 import { z } from 'zod';
 
 const reservationSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
   email: z.string().trim().email("Invalid email address").max(255),
+  password: z.string().min(6, "Password must be at least 6 characters").max(100).optional(),
   pickup: z.string().min(1, "Please select a pickup airport"),
   dropoff: z.string().trim().min(2, "Drop-off location is required").max(200),
   date: z.string().min(1, "Please select a date"),
@@ -43,23 +45,17 @@ const vehicleTypes = [
   { value: 'minibus', label: 'Minibus' },
 ];
 
-const generateRandomPassword = (): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
-  let password = '';
-  for (let i = 0; i < 16; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
-};
-
 const ReservationForm = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
+    password: '',
     pickup: '',
     dropoff: '',
     date: '',
@@ -69,11 +65,46 @@ const ReservationForm = () => {
     notes: '',
   });
 
+  // Pre-fill form if user is logged in
+  useEffect(() => {
+    if (user) {
+      setIsLoggedIn(true);
+      setFormData(prev => ({
+        ...prev,
+        email: user.email || '',
+        name: user.user_metadata?.full_name || '',
+      }));
+      
+      // Fetch profile for phone
+      const fetchProfile = async () => {
+        const { data } = await supabase
+          .from('profiles')
+          .select('full_name, phone')
+          .eq('id', user.id)
+          .single();
+        
+        if (data) {
+          setFormData(prev => ({
+            ...prev,
+            name: data.full_name || prev.name,
+            phone: data.phone || '',
+          }));
+        }
+      };
+      fetchProfile();
+    }
+  }, [user]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
-    const result = reservationSchema.safeParse(formData);
+    // Validate - password only required if not logged in
+    const schemaToUse = isLoggedIn 
+      ? reservationSchema.omit({ password: true })
+      : reservationSchema.extend({ password: z.string().min(6, "Password must be at least 6 characters") });
+
+    const result = schemaToUse.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       result.error.errors.forEach((err) => {
@@ -91,84 +122,101 @@ const ReservationForm = () => {
     try {
       let userId: string;
 
-      // Step 1: Try to sign up the user (checks if email exists)
-      const randomPassword = generateRandomPassword();
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: result.data.email,
-        password: randomPassword,
-        options: {
-          emailRedirectTo: `${window.location.origin}/customer/bookings`,
-          data: {
-            full_name: result.data.name,
-          },
-        },
-      });
-
-      if (signUpError) {
-        // User already exists - we need to handle this case
-        if (signUpError.message.includes('already registered') || signUpError.message.includes('User already registered')) {
-          // User exists, try to sign in with a magic link or redirect to login
-          toast.error('This email is already registered. Please login to make a reservation.');
-          navigate('/auth');
-          setIsLoading(false);
-          return;
-        }
-        throw signUpError;
-      }
-
-      // Check if user was created or if it's a duplicate (signUp returns user even for existing unconfirmed)
-      if (!signUpData.user) {
-        toast.error('Failed to create account. Please try again.');
-        setIsLoading(false);
-        return;
-      }
-
-      userId = signUpData.user.id;
-
-      // If user was just created, sign them in immediately (auto-confirm is enabled)
-      if (signUpData.session) {
-        // User is already signed in from signup
+      if (isLoggedIn && user) {
+        // Already logged in, use current user
+        userId = user.id;
+        
+        // Update profile if needed
+        await supabase
+          .from('profiles')
+          .update({ phone: formData.phone.trim(), full_name: formData.name.trim() })
+          .eq('id', userId);
       } else {
-        // Try to sign in with the generated password
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: result.data.email,
-          password: randomPassword,
+        // Try to sign up the user
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: formData.email.trim(),
+          password: formData.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/customer/bookings`,
+            data: {
+              full_name: formData.name.trim(),
+            },
+          },
         });
 
-        if (signInError) {
-          // If sign in fails, user might need email confirmation or already exists
-          if (signInError.message.includes('Email not confirmed')) {
-            toast.info('Please check your email to confirm your account, then try again.');
+        if (signUpError) {
+          // Handle "user already exists" - try to sign in
+          if (signUpError.message.includes('already registered') || signUpError.message.includes('User already registered')) {
+            // Try to sign in with provided password
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+              email: formData.email.trim(),
+              password: formData.password,
+            });
+
+            if (signInError) {
+              toast.error('Email already registered. Please use correct password or login separately.');
+              setIsLoading(false);
+              return;
+            }
+
+            if (!signInData.user) {
+              toast.error('Failed to sign in. Please try logging in separately.');
+              navigate('/auth');
+              setIsLoading(false);
+              return;
+            }
+
+            userId = signInData.user.id;
+          } else {
+            throw signUpError;
+          }
+        } else {
+          if (!signUpData.user) {
+            toast.error('Failed to create account. Please try again.');
             setIsLoading(false);
             return;
           }
-          // User might already exist with different password
-          toast.error('This email is already registered. Please login to make a reservation.');
-          navigate('/auth');
-          setIsLoading(false);
-          return;
+
+          userId = signUpData.user.id;
+
+          // If no session, sign in with the password
+          if (!signUpData.session) {
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+              email: formData.email.trim(),
+              password: formData.password,
+            });
+
+            if (signInError) {
+              if (signInError.message.includes('Email not confirmed')) {
+                toast.info('Please check your email to confirm your account, then try again.');
+                setIsLoading(false);
+                return;
+              }
+              throw signInError;
+            }
+          }
         }
+
+        // Update profile with phone
+        await supabase
+          .from('profiles')
+          .update({ phone: formData.phone.trim(), full_name: formData.name.trim() })
+          .eq('id', userId);
       }
 
-      // Update profile with phone number
-      await supabase
-        .from('profiles')
-        .update({ phone: result.data.phone, full_name: result.data.name })
-        .eq('id', userId);
-
-      // Step 2: Create reservation with status 'awaiting-price'
+      // Create reservation with status 'awaiting-price'
       const { data: reservation, error: reservationError } = await supabase
         .from('reservations')
         .insert({
           customer_id: userId,
-          customer_name: result.data.name.trim(),
-          customer_phone: result.data.phone.trim(),
-          pickup: result.data.pickup,
-          dropoff: result.data.dropoff.trim(),
-          pickup_date: result.data.date,
-          pickup_time: result.data.time,
-          flight_number: result.data.flightNumber?.trim() || null,
-          vehicle_type: result.data.vehicleType,
+          customer_name: formData.name.trim(),
+          customer_phone: formData.phone.trim(),
+          pickup: formData.pickup,
+          dropoff: formData.dropoff.trim(),
+          pickup_date: formData.date,
+          pickup_time: formData.time,
+          flight_number: formData.flightNumber?.trim() || null,
+          vehicle_type: formData.vehicleType,
           payment_type: 'cash',
           status: 'awaiting-price',
           price: null,
@@ -178,15 +226,15 @@ const ReservationForm = () => {
 
       if (reservationError) throw reservationError;
 
-      // Step 3: Notify admin about new reservation
+      // Notify admin about new reservation
       try {
         await supabase.functions.invoke('notify-admin-new-reservation', {
           body: {
             reservation_id: reservation.id,
-            customer_name: result.data.name.trim(),
-            pickup: result.data.pickup,
-            dropoff: result.data.dropoff.trim(),
-            pickup_date: result.data.date,
+            customer_name: formData.name.trim(),
+            pickup: formData.pickup,
+            dropoff: formData.dropoff.trim(),
+            pickup_date: formData.date,
             needs_pricing: true,
           }
         });
@@ -260,9 +308,38 @@ const ReservationForm = () => {
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className={errors.email ? 'border-destructive' : ''}
                   maxLength={255}
+                  disabled={isLoggedIn}
                 />
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
+
+              {/* Password field - only show if not logged in */}
+              {!isLoggedIn && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    Password
+                  </Label>
+                  <Input
+                    type="password"
+                    placeholder="Create a password (min 6 characters)"
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    className={errors.password ? 'border-destructive' : ''}
+                    maxLength={100}
+                  />
+                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                  <p className="text-xs text-muted-foreground">
+                    This will create your account so you can track your reservations
+                  </p>
+                </div>
+              )}
+
+              {isLoggedIn && (
+                <div className="bg-green-50 dark:bg-green-950/30 p-3 rounded-lg text-sm text-green-700 dark:text-green-300">
+                  Logged in as {formData.email}
+                </div>
+              )}
             </div>
 
             {/* Transfer Details Section */}
@@ -379,10 +456,12 @@ const ReservationForm = () => {
               {isLoading ? 'Submitting...' : 'Submit Reservation Request'}
             </Button>
 
-            <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{' '}
-              <a href="/auth" className="text-primary hover:underline">Login here</a>
-            </p>
+            {!isLoggedIn && (
+              <p className="text-center text-sm text-muted-foreground">
+                Already have an account?{' '}
+                <a href="/auth" className="text-primary hover:underline">Login here</a>
+              </p>
+            )}
           </form>
         </CardContent>
       </Card>

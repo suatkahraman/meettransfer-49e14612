@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
+import NotificationBell from '@/components/NotificationBell';
 
 interface Reservation {
   id: string;
@@ -78,9 +79,12 @@ const CustomerBookings = () => {
           </Button>
           <h1 className="text-2xl font-serif">My Reservations</h1>
         </div>
-        <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
-          <LogOut className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
       </header>
 
       <main className="container mx-auto py-8 px-4">
