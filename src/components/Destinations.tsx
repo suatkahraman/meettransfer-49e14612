@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { MapPin, ArrowRight } from "lucide-react";
 import cappadociaTransfer from "@/assets/cappadocia-transfer.png";
 import bodrumTransfer from "@/assets/bodrum-transfer.png";
+import istanbulTransfer from "@/assets/istanbul-transfer.png";
 
 const destinations = [{
   route: "Istanbul ⇄ Hotels",
   airports: "IST / SAW",
   description: "Private VIP airport transfer with professional chauffeur service to all Istanbul hotels.",
-  image: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&q=80"
+  image: istanbulTransfer
 }, {
   route: "Antalya ⇄ Resort Areas",
   airports: "AYT",
