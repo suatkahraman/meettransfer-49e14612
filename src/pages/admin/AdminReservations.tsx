@@ -40,11 +40,14 @@ interface Driver {
 }
 
 const statusColors: Record<string, string> = {
-  new: 'bg-muted text-muted-foreground',
-  assigned: 'bg-yellow-500/20 text-yellow-700',
-  active: 'bg-blue-500/20 text-blue-700',
-  completed: 'bg-green-500/20 text-green-700',
-  cancelled: 'bg-destructive/20 text-destructive',
+  'awaiting-price': 'bg-orange-500/20 text-orange-700',
+  'awaiting-customer': 'bg-purple-500/20 text-purple-700',
+  'confirmed': 'bg-blue-500/20 text-blue-700',
+  'assigned': 'bg-yellow-500/20 text-yellow-700',
+  'active': 'bg-cyan-500/20 text-cyan-700',
+  'completed': 'bg-green-500/20 text-green-700',
+  'cancelled': 'bg-destructive/20 text-destructive',
+  'new': 'bg-muted text-muted-foreground',
 };
 
 const AdminReservations = () => {
@@ -216,12 +219,14 @@ const AdminReservations = () => {
             className="max-w-[180px]"
           />
           <Select value={filters.status} onValueChange={(v) => setFilters({...filters, status: v})}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[160px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="new">New</SelectItem>
+              <SelectItem value="awaiting-price">Awaiting Price</SelectItem>
+              <SelectItem value="awaiting-customer">Awaiting Customer</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
               <SelectItem value="assigned">Assigned</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>

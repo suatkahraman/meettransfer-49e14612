@@ -101,7 +101,7 @@ const CustomerHome = () => {
         vehicle_type: result.data.vehicleType,
         price: price,
         payment_type: result.data.paymentType,
-        status: 'new',
+        status: 'awaiting-price',
       }).select().single();
 
       if (error) throw error;
