@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard } from 'lucide-react';
 import { z } from 'zod';
+import NotificationBell from '@/components/NotificationBell';
 
 const reservationSchema = z.object({
   pickup: z.string().min(1, "Please select a pickup airport"),
@@ -134,10 +135,11 @@ const CustomerHome = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
         <h1 className="text-2xl font-serif">Meet Transfer</h1>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <Button variant="ghost" onClick={() => navigate('/customer/bookings')} className="text-primary-foreground hover:bg-primary-foreground/10">
             My Bookings
           </Button>
+          <NotificationBell />
           <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
             <LogOut className="h-5 w-5" />
           </Button>
