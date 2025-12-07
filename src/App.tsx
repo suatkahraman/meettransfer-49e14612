@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import LoginScreen from "./pages/auth/LoginScreen";
 import SignupScreen from "./pages/auth/SignupScreen";
 import ReservationForm from "./pages/ReservationForm";
+import InstallApp from "./pages/InstallApp";
 import NotFound from "./pages/NotFound";
 
 // Customer Pages
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="/login" element={<LoginScreen />} />
               <Route path="/signup" element={<SignupScreen />} />
               <Route path="/book" element={<ReservationForm />} />
+              <Route path="/install" element={<InstallApp />} />
               
               {/* Website Pages */}
               <Route path="/destinations" element={<DestinationsPage />} />
