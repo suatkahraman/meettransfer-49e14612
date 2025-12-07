@@ -1,8 +1,6 @@
 import { Phone, Mail, MapPin } from "lucide-react";
-
 export const Footer = () => {
-  return (
-    <footer className="bg-primary text-white py-12 px-4">
+  return <footer className="bg-primary text-white py-12 px-4">
       <div className="container max-w-7xl mx-auto">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
@@ -37,7 +35,7 @@ export const Footer = () => {
             <ul className="space-y-3 text-white/80 font-sans text-sm">
               <li className="flex items-start gap-2">
                 <Phone className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <span>+90 532 XXX XX XX</span>
+                <span>+90 532 1748390    </span>
               </li>
               <li className="flex items-start gap-2">
                 <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -55,6 +53,5 @@ export const Footer = () => {
           <p>© 2024 Meet Transfer. All rights reserved.</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };

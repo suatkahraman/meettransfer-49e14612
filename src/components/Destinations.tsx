@@ -1,37 +1,29 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowRight } from "lucide-react";
-
-const destinations = [
-  {
-    route: "Istanbul ⇄ Hotels",
-    airports: "IST / SAW",
-    description: "Private VIP airport transfer with professional chauffeur service to all Istanbul hotels.",
-    image: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&q=80",
-  },
-  {
-    route: "Antalya ⇄ Resort Areas",
-    airports: "AYT",
-    description: "Luxury transfer to Lara, Belek, Kemer, Side and all major resort destinations.",
-    image: "https://images.unsplash.com/photo-1583037189850-1921ae7c6c22?w=800&q=80",
-  },
-  {
-    route: "Bodrum ⇄ City Transfer",
-    airports: "BJV",
-    description: "Premium service to Bodrum Peninsula, Turgutreis, Gümbet and surrounding areas.",
-    image: "https://images.unsplash.com/photo-1605555274610-2a593f17d686?w=800&q=80",
-  },
-  {
-    route: "Cappadocia Tours",
-    airports: "NAV / ASR",
-    description: "Exclusive transfers and tour services throughout the magical Cappadocia region.",
-    image: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800&q=80",
-  },
-];
-
+const destinations = [{
+  route: "Istanbul ⇄ Hotels",
+  airports: "IST / SAW",
+  description: "Private VIP airport transfer with professional chauffeur service to all Istanbul hotels.",
+  image: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&q=80"
+}, {
+  route: "Antalya ⇄ Resort Areas",
+  airports: "AYT",
+  description: "Luxury transfer to Lara, Belek, Kemer, Side and all major resort destinations.",
+  image: "https://images.unsplash.com/photo-1583037189850-1921ae7c6c22?w=800&q=80"
+}, {
+  route: "Bodrum ⇄ City Transfer",
+  airports: "BJV",
+  description: "Premium service to Bodrum Peninsula, Turgutreis, Gümbet and surrounding areas.",
+  image: "https://images.unsplash.com/photo-1605555274610-2a593f17d686?w=800&q=80"
+}, {
+  route: "Cappadocia Tours",
+  airports: "NAV / ASR",
+  description: "Exclusive transfers and tour services throughout the magical Cappadocia region.",
+  image: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800&q=80"
+}];
 export const Destinations = () => {
-  return (
-    <section className="py-20 px-4 bg-gradient-to-b from-background to-muted/30">
+  return <section className="py-20 px-4 bg-gradient-to-b from-background to-muted/30">
       <div className="container max-w-7xl mx-auto">
         <div className="text-center mb-12 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground">Top Destinations</h2>
@@ -41,18 +33,11 @@ export const Destinations = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {destinations.map((destination, index) => (
-            <Card
-              key={index}
-              className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer animate-in fade-in slide-in-from-bottom-8"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
+          {destinations.map((destination, index) => <Card key={index} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer animate-in fade-in slide-in-from-bottom-8" style={{
+          animationDelay: `${index * 100}ms`
+        }}>
               <div className="relative h-48 overflow-hidden">
-                <img
-                  src={destination.image}
-                  alt={destination.route}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+                
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <div className="flex items-center gap-2 text-white/90 text-xs mb-1">
@@ -64,18 +49,13 @@ export const Destinations = () => {
               </div>
               <div className="p-5 space-y-4">
                 <p className="text-sm text-muted-foreground font-sans leading-relaxed">{destination.description}</p>
-                <Button
-                  variant="ghost"
-                  className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300"
-                >
+                <Button variant="ghost" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
                   Book Now
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </div>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
