@@ -130,7 +130,7 @@ const WebsiteHeader = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent 
               align="end" 
-              className="w-56 bg-card border border-border z-50"
+              className="w-56 bg-card border border-border z-50 animate-in slide-in-from-top-2 fade-in-0 duration-200"
             >
               {navLinks.map((link) => (
                 <DropdownMenuItem 
