@@ -21,17 +21,27 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    })
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
     // Verify caller is authenticated
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
+      console.error('No authorization header provided')
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Create client with user's token to get their identity
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    })
+
+    // Get the authenticated user
+    const { data: { user }, error: userError } = await supabaseUser.auth.getUser()
+    if (userError || !user) {
+      console.error('Failed to get user:', userError)
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -41,7 +51,55 @@ Deno.serve(async (req) => {
     const body: NotifyAdminRequest = await req.json()
     const { reservation_id, customer_name, pickup, dropoff, pickup_date } = body
 
-    console.log(`Notifying admins about new reservation: ${reservation_id}`)
+    if (!reservation_id) {
+      console.error('No reservation_id provided')
+      return new Response(
+        JSON.stringify({ error: 'reservation_id is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Create admin client for privileged operations
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+
+    // Verify the user owns this reservation
+    const { data: reservation, error: reservationError } = await supabaseAdmin
+      .from('reservations')
+      .select('customer_id')
+      .eq('id', reservation_id)
+      .maybeSingle()
+
+    if (reservationError) {
+      console.error('Error fetching reservation:', reservationError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to verify reservation' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!reservation) {
+      console.error('Reservation not found:', reservation_id)
+      return new Response(
+        JSON.stringify({ error: 'Reservation not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Check if the authenticated user is the owner of the reservation
+    if (reservation.customer_id !== user.id) {
+      console.error('User does not own this reservation:', { userId: user.id, customerId: reservation.customer_id })
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: You can only trigger notifications for your own reservations' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    console.log(`Ownership verified, notifying admins about reservation: ${reservation_id}`)
 
     // Find all admin users
     const { data: adminRoles, error: rolesError } = await supabaseAdmin
