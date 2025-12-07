@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, LogIn, LogOut, User, ChevronDown } from "lucide-react";
+import { LogIn, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "./LanguageSelector";
 import {
@@ -18,6 +19,7 @@ const WebsiteHeader = () => {
   const { t } = useLanguage();
   const { user, signOut } = useAuth();
   const { role } = useUserRole();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = [
     { path: "/services", label: "Services" },
@@ -98,10 +100,25 @@ const WebsiteHeader = () => {
           )}
 
           {/* Mobile Menu - Dropdown */}
-          <DropdownMenu>
+          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="relative w-10 h-10">
+                <span className="sr-only">Toggle menu</span>
+                <span 
+                  className={`absolute h-0.5 w-5 bg-foreground transition-all duration-300 ease-in-out ${
+                    menuOpen ? "rotate-45" : "-translate-y-1.5"
+                  }`}
+                />
+                <span 
+                  className={`absolute h-0.5 w-5 bg-foreground transition-all duration-300 ease-in-out ${
+                    menuOpen ? "opacity-0" : "opacity-100"
+                  }`}
+                />
+                <span 
+                  className={`absolute h-0.5 w-5 bg-foreground transition-all duration-300 ease-in-out ${
+                    menuOpen ? "-rotate-45" : "translate-y-1.5"
+                  }`}
+                />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent 
