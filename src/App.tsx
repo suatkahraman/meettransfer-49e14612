@@ -8,6 +8,8 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import LoginScreen from "./pages/auth/LoginScreen";
+import SignupScreen from "./pages/auth/SignupScreen";
 import ReservationForm from "./pages/ReservationForm";
 import NotFound from "./pages/NotFound";
 
@@ -61,6 +63,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<LoginScreen />} />
+              <Route path="/signup" element={<SignupScreen />} />
               <Route path="/book" element={<ReservationForm />} />
               
               {/* Website Pages */}
