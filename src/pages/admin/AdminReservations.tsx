@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 
@@ -90,6 +91,9 @@ const AdminReservations = () => {
     reservationId: null,
   });
   const [selectedDriver, setSelectedDriver] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAssignDialog, setBulkAssignDialog] = useState(false);
+  const [bulkAssigning, setBulkAssigning] = useState(false);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '-';
@@ -232,6 +236,96 @@ const AdminReservations = () => {
     }
   };
 
+  // Bulk assignment logic
+  const assignableReservations = reservations.filter(
+    r => (r.status === 'confirmed' || r.status === 'customer_approved') && !r.driver_id
+  );
+
+  const toggleSelect = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  const selectAll = () => {
+    if (selectedIds.size === assignableReservations.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(assignableReservations.map(r => r.id)));
+    }
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleBulkAssign = async () => {
+    if (!selectedDriver || selectedIds.size === 0) return;
+
+    setBulkAssigning(true);
+    const selectedDriverData = drivers.find(d => d.id === selectedDriver);
+
+    try {
+      // Update all selected reservations
+      const { error } = await supabase
+        .from('reservations')
+        .update({ 
+          driver_id: selectedDriver,
+          status: 'sent_to_driver'
+        })
+        .in('id', Array.from(selectedIds));
+
+      if (error) throw error;
+
+      // Audit log for bulk action
+      await logAction({
+        action: 'BULK_ASSIGN_DRIVER',
+        table_name: 'reservations',
+        new_data: { 
+          driver_id: selectedDriver, 
+          driver_name: selectedDriverData?.name,
+          reservation_count: selectedIds.size,
+          reservation_ids: Array.from(selectedIds)
+        },
+      });
+
+      // Send notifications for each reservation
+      if (selectedDriverData?.user_id) {
+        for (const id of selectedIds) {
+          const reservation = reservations.find(r => r.id === id);
+          if (reservation) {
+            try {
+              const priceDisplay = formatPrice(reservation.price, reservation.price_currency);
+              await supabase.functions.invoke('create-notification', {
+                body: {
+                  user_id: selectedDriverData.user_id,
+                  reservation_id: id,
+                  title: 'New Job Assigned',
+                  message: `New transfer: ${reservation.pickup} → ${reservation.dropoff} on ${format(new Date(reservation.pickup_date), 'PP')} at ${reservation.pickup_time}. Price: ${priceDisplay}`,
+                  type: 'driver_assigned'
+                }
+              });
+            } catch (err) {
+              console.error('Failed to notify for reservation:', id, err);
+            }
+          }
+        }
+      }
+
+      toast.success(`${selectedIds.size} reservations assigned to ${selectedDriverData?.name}`);
+      setBulkAssignDialog(false);
+      setSelectedDriver('');
+      setSelectedIds(new Set());
+      fetchReservations();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to assign driver');
+    } finally {
+      setBulkAssigning(false);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this reservation?')) return;
 
@@ -317,11 +411,42 @@ const AdminReservations = () => {
           </Select>
         </div>
 
+        {/* Bulk Selection Bar */}
+        {assignableReservations.length > 0 && (
+          <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-lg">
+            <Checkbox 
+              checked={selectedIds.size === assignableReservations.length && assignableReservations.length > 0}
+              onCheckedChange={selectAll}
+            />
+            <span className="text-sm text-muted-foreground">
+              {selectedIds.size === 0 
+                ? `${assignableReservations.length} reservations need driver assignment`
+                : `${selectedIds.size} of ${assignableReservations.length} selected`}
+            </span>
+            {selectedIds.size > 0 && (
+              <>
+                <Button 
+                  size="sm" 
+                  onClick={() => {
+                    setSelectedDriver('');
+                    setBulkAssignDialog(true);
+                  }}
+                >
+                  <UserCheck className="h-4 w-4 mr-2" />
+                  Assign Driver to {selectedIds.size}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={clearSelection}>
+                  <X className="h-4 w-4 mr-1" />
+                  Clear
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Needs Driver Assignment Section */}
         {!loading && (() => {
-          const needsAssignment = reservations.filter(
-            r => (r.status === 'confirmed' || r.status === 'customer_approved') && !r.driver_id
-          );
+          const needsAssignment = assignableReservations;
           if (needsAssignment.length === 0) return null;
           return (
             <div className="mb-8">
@@ -333,46 +458,56 @@ const AdminReservations = () => {
               </div>
               <div className="space-y-3">
                 {needsAssignment.map((reservation) => (
-                  <Card key={reservation.id} className="border-amber-300 bg-amber-50/50">
+                  <Card 
+                    key={reservation.id} 
+                    className={`border-amber-300 bg-amber-50/50 ${selectedIds.has(reservation.id) ? 'ring-2 ring-primary' : ''}`}
+                  >
                     <CardContent className="py-4">
                       <div className="flex flex-wrap justify-between items-start gap-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-3">
-                            <Badge className={statusColors[reservation.status] || 'bg-muted'}>
-                              {statusLabels[reservation.status] || reservation.status}
-                            </Badge>
-                            <span className="flex items-center gap-1 text-sm">
-                              <Calendar className="h-4 w-4" />
-                              {format(new Date(reservation.pickup_date), 'PPP')}
-                            </span>
-                            <span className="flex items-center gap-1 text-sm">
-                              <Clock className="h-4 w-4" />
-                              {reservation.pickup_time}
-                            </span>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">{reservation.customer_name}</span>
-                            <span className="text-muted-foreground">·</span>
-                            <span className="text-sm text-muted-foreground">{reservation.customer_phone}</span>
-                          </div>
+                        <div className="flex gap-3">
+                          <Checkbox 
+                            checked={selectedIds.has(reservation.id)}
+                            onCheckedChange={() => toggleSelect(reservation.id)}
+                            className="mt-1"
+                          />
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                              <Badge className={statusColors[reservation.status] || 'bg-muted'}>
+                                {statusLabels[reservation.status] || reservation.status}
+                              </Badge>
+                              <span className="flex items-center gap-1 text-sm">
+                                <Calendar className="h-4 w-4" />
+                                {format(new Date(reservation.pickup_date), 'PPP')}
+                              </span>
+                              <span className="flex items-center gap-1 text-sm">
+                                <Clock className="h-4 w-4" />
+                                {reservation.pickup_time}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <span className="font-medium">{reservation.customer_name}</span>
+                              <span className="text-muted-foreground">·</span>
+                              <span className="text-sm text-muted-foreground">{reservation.customer_phone}</span>
+                            </div>
 
-                          <div className="flex items-center gap-2 text-sm">
-                            <MapPin className="h-4 w-4 text-primary" />
-                            <span>{reservation.pickup}</span>
-                            <span>→</span>
-                            <span>{reservation.dropoff}</span>
-                          </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <MapPin className="h-4 w-4 text-primary" />
+                              <span>{reservation.pickup}</span>
+                              <span>→</span>
+                              <span>{reservation.dropoff}</span>
+                            </div>
 
-                          <div className="flex items-center gap-4 text-sm">
-                            <span className="flex items-center gap-1">
-                              <CreditCard className="h-4 w-4 text-muted-foreground" />
-                              {reservation.payment_type}
-                            </span>
-                            <span className="font-bold text-primary">
-                              {formatPrice(reservation.price, reservation.price_currency)}
-                            </span>
+                            <div className="flex items-center gap-4 text-sm">
+                              <span className="flex items-center gap-1">
+                                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                                {reservation.payment_type}
+                              </span>
+                              <span className="font-bold text-primary">
+                                {formatPrice(reservation.price, reservation.price_currency)}
+                              </span>
+                            </div>
                           </div>
                         </div>
 
@@ -538,6 +673,38 @@ const AdminReservations = () => {
             </Button>
             <Button onClick={handleAssignDriver} disabled={!selectedDriver}>
               Assign & Notify Driver
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Assign Dialog */}
+      <Dialog open={bulkAssignDialog} onOpenChange={setBulkAssignDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bulk Assign Driver</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground mb-4">
+            Assign a driver to <strong>{selectedIds.size}</strong> selected reservations. Each driver will receive individual notifications for their jobs.
+          </p>
+          <Select value={selectedDriver} onValueChange={setSelectedDriver}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a driver" />
+            </SelectTrigger>
+            <SelectContent>
+              {drivers.map(driver => (
+                <SelectItem key={driver.id} value={driver.id}>
+                  {driver.name} - {driver.phone}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkAssignDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkAssign} disabled={!selectedDriver || bulkAssigning}>
+              {bulkAssigning ? 'Assigning...' : `Assign to ${selectedIds.size} Reservations`}
             </Button>
           </DialogFooter>
         </DialogContent>
