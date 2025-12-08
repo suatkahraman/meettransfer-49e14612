@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car } from 'lucide-react';
 
 const regions = [
   { value: 'Istanbul', label: 'Istanbul' },
@@ -26,6 +26,7 @@ interface Driver {
   user_id: string;
   name: string;
   phone: string;
+  plate_number: string | null;
   region: string | null;
   active: boolean;
 }
@@ -43,6 +44,7 @@ const AdminDrivers = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    plate_number: '',
     region: '',
     email: '',
     password: '',
@@ -71,6 +73,7 @@ const AdminDrivers = () => {
     setFormData({
       name: '',
       phone: '',
+      plate_number: '',
       region: '',
       email: '',
       password: '',
@@ -83,6 +86,7 @@ const AdminDrivers = () => {
     setFormData({
       name: driver.name,
       phone: driver.phone,
+      plate_number: driver.plate_number || '',
       region: driver.region || '',
       email: '',
       password: '',
@@ -99,6 +103,7 @@ const AdminDrivers = () => {
         const oldData = {
           name: editingDriver.name,
           phone: editingDriver.phone,
+          plate_number: editingDriver.plate_number,
           region: editingDriver.region,
         };
 
@@ -108,6 +113,7 @@ const AdminDrivers = () => {
           .update({
             name: formData.name,
             phone: formData.phone,
+            plate_number: formData.plate_number || null,
             region: formData.region || null,
           })
           .eq('id', editingDriver.id);
@@ -124,6 +130,7 @@ const AdminDrivers = () => {
             new_data: {
               name: formData.name,
               phone: formData.phone,
+              plate_number: formData.plate_number || null,
               region: formData.region || null,
             },
           });
@@ -156,6 +163,7 @@ const AdminDrivers = () => {
             role: 'driver',
             name: formData.name,
             phone: formData.phone,
+            plate_number: formData.plate_number,
             region: formData.region,
           },
         });
@@ -178,6 +186,7 @@ const AdminDrivers = () => {
           new_data: {
             name: formData.name,
             phone: formData.phone,
+            plate_number: formData.plate_number,
             region: formData.region,
             email: formData.email,
           },
@@ -332,6 +341,14 @@ const AdminDrivers = () => {
               />
             </div>
             <div className="space-y-2">
+              <Label>Plate Number</Label>
+              <Input
+                value={formData.plate_number}
+                onChange={(e) => setFormData({...formData, plate_number: e.target.value})}
+                placeholder="e.g. 34 ABC 123"
+              />
+            </div>
+            <div className="space-y-2">
               <Label>Region</Label>
               <Select value={formData.region} onValueChange={(v) => setFormData({...formData, region: v})}>
                 <SelectTrigger className="bg-background">
@@ -417,6 +434,12 @@ const AdminDrivers = () => {
                     <Phone className="h-4 w-4" /> Phone
                   </span>
                   <span className="font-medium">{viewingDriver.phone}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Car className="h-4 w-4" /> Plate Number
+                  </span>
+                  <span className="font-medium">{viewingDriver.plate_number || 'Not set'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">

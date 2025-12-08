@@ -11,6 +11,7 @@ interface CreateUserRequest {
   role: 'admin' | 'driver' | 'customer'
   name: string
   phone: string
+  plate_number?: string
   region?: string
   commission_rate?: number
 }
@@ -74,7 +75,7 @@ Deno.serve(async (req) => {
     }
 
     const body: CreateUserRequest = await req.json()
-    const { email, password, role, name, phone, region, commission_rate } = body
+    const { email, password, role, name, phone, plate_number, region, commission_rate } = body
 
     console.log(`Creating ${role} account for: ${email}`)
 
@@ -156,6 +157,7 @@ Deno.serve(async (req) => {
           user_id: newUserId,
           name,
           phone,
+          plate_number: plate_number || null,
           region: region || null,
           commission_rate: commission_rate || 10.00,
           active: true
@@ -189,6 +191,7 @@ Deno.serve(async (req) => {
           name,
           phone,
           role,
+          plate_number: plate_number || null,
           region: region || null,
           commission_rate: commission_rate || null,
         },
