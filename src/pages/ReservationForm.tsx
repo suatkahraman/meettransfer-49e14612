@@ -228,18 +228,22 @@ const ReservationForm = () => {
 
       // Notify admin about new reservation
       try {
-        await supabase.functions.invoke('notify-admin-new-reservation', {
+        const notifyResponse = await supabase.functions.invoke('notify-admin-new-reservation', {
           body: {
             reservation_id: reservation.id,
             customer_name: formData.name.trim(),
             pickup: formData.pickup,
             dropoff: formData.dropoff.trim(),
             pickup_date: formData.date,
-            needs_pricing: true,
           }
         });
+        
+        if (notifyResponse.error) {
+          console.error('Admin notification error:', notifyResponse.error);
+        }
       } catch (notifyError) {
         console.error('Failed to notify admin:', notifyError);
+        // Don't block the user - reservation was created successfully
       }
 
       toast.success('Reservation submitted! We will contact you with pricing.');

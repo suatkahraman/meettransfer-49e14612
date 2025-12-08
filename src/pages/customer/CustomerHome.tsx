@@ -100,7 +100,7 @@ const CustomerHome = () => {
         pickup_time: result.data.time,
         flight_number: result.data.flightNumber?.trim() || null,
         vehicle_type: result.data.vehicleType,
-        price: price,
+        price: null, // Price will be set by admin
         payment_type: result.data.paymentType,
         status: 'awaiting-price',
       }).select().single();
@@ -109,7 +109,7 @@ const CustomerHome = () => {
 
       // Notify admin about new reservation
       try {
-        await supabase.functions.invoke('notify-admin-new-reservation', {
+        const notifyResponse = await supabase.functions.invoke('notify-admin-new-reservation', {
           body: {
             reservation_id: insertedReservation.id,
             customer_name: result.data.passengerName.trim(),
@@ -118,13 +118,19 @@ const CustomerHome = () => {
             pickup_date: result.data.date,
           }
         });
+        
+        if (notifyResponse.error) {
+          console.error('Admin notification error:', notifyResponse.error);
+        }
       } catch (notifyError) {
         console.error('Failed to notify admin:', notifyError);
+        // Don't block the user - reservation was created successfully
       }
 
-      toast.success('Booking created successfully!');
+      toast.success('Reservation submitted! We will contact you with pricing.');
       navigate('/customer/bookings');
     } catch (error: any) {
+      console.error('Reservation error:', error);
       toast.error(error.message || 'Failed to create booking');
     } finally {
       setIsLoading(false);
@@ -279,7 +285,7 @@ const CustomerHome = () => {
                         <RadioGroupItem value={vehicle.value} id={vehicle.value} />
                         <Label htmlFor={vehicle.value} className="cursor-pointer">{vehicle.label}</Label>
                       </div>
-                      <span className="font-semibold text-primary">€{vehicle.price}</span>
+                      <span className="font-semibold text-primary">₺{vehicle.price}</span>
                     </div>
                   ))}
                 </RadioGroup>
@@ -305,7 +311,7 @@ const CustomerHome = () => {
               <div className="bg-muted p-4 rounded-lg">
                 <div className="flex justify-between items-center text-lg">
                   <span className="font-medium">Total Price:</span>
-                  <span className="font-bold text-primary text-2xl">€{price}</span>
+                  <span className="font-bold text-primary text-2xl">₺{price}</span>
                 </div>
               </div>
 
