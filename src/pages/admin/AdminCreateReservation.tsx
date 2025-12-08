@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -45,22 +45,25 @@ interface Driver {
 
 const AdminCreateReservation = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { logAction } = useAuditLog();
   const [saving, setSaving] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  
+  // Pre-fill from URL params (for duplicate functionality)
   const [formData, setFormData] = useState({
-    customer_name: '',
-    customer_phone: '',
-    pickup: '',
-    dropoff: '',
+    customer_name: searchParams.get('customer_name') || '',
+    customer_phone: searchParams.get('customer_phone') || '',
+    pickup: searchParams.get('pickup') || '',
+    dropoff: searchParams.get('dropoff') || '',
     pickup_date: '',
     pickup_time: '',
-    flight_number: '',
-    vehicle_type: 'mercedes-vito',
-    payment_type: 'cash',
-    price: '',
-    price_currency: 'TRY',
+    flight_number: searchParams.get('flight_number') || '',
+    vehicle_type: searchParams.get('vehicle_type') || 'mercedes-vito',
+    payment_type: searchParams.get('payment_type') || 'cash',
+    price: searchParams.get('price') || '',
+    price_currency: searchParams.get('price_currency') || 'TRY',
     driver_cash_amount: '',
     status: 'confirmed',
     driver_id: '',
