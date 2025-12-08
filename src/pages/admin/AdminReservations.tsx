@@ -47,6 +47,7 @@ const statusColors: Record<string, string> = {
   'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700',
   'customer_approved': 'bg-blue-500/20 text-blue-700',
   'customer_rejected': 'bg-destructive/20 text-destructive',
+  'confirmed': 'bg-emerald-500/20 text-emerald-700',
   'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
   'active': 'bg-cyan-500/20 text-cyan-700',
   'completed': 'bg-green-500/20 text-green-700',
@@ -57,6 +58,7 @@ const statusLabels: Record<string, string> = {
   'waiting_for_customer_approval': 'Waiting Customer',
   'customer_approved': 'Approved',
   'customer_rejected': 'Rejected',
+  'confirmed': 'Confirmed',
   'sent_to_driver': 'Sent to Driver',
   'active': 'Active',
   'completed': 'Completed',
@@ -277,6 +279,7 @@ const AdminReservations = () => {
               <SelectItem value="pending_price">Pending Price</SelectItem>
               <SelectItem value="waiting_for_customer_approval">Waiting Customer</SelectItem>
               <SelectItem value="customer_approved">Customer Approved</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
               <SelectItem value="customer_rejected">Rejected</SelectItem>
               <SelectItem value="sent_to_driver">Sent to Driver</SelectItem>
               <SelectItem value="active">Active</SelectItem>
@@ -343,7 +346,7 @@ const AdminReservations = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      {reservation.status === 'customer_approved' && (
+                      {(reservation.status === 'customer_approved' || reservation.status === 'confirmed') && !reservation.driver_id && (
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -387,7 +390,7 @@ const AdminReservations = () => {
             <DialogTitle>Assign Driver</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground mb-4">
-            The driver will receive the same price that was approved by the customer.
+            Select a driver to assign to this reservation. The driver will receive a notification with the job details.
           </p>
           <Select value={selectedDriver} onValueChange={setSelectedDriver}>
             <SelectTrigger>

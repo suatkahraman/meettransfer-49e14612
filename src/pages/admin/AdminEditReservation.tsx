@@ -21,12 +21,13 @@ const paymentTypes = [
   { value: 'none', label: 'None' },
 ];
 
-// New status workflow
+// Status workflow
 const statuses = [
   'pending_price',
   'waiting_for_customer_approval',
   'customer_approved',
   'customer_rejected',
+  'confirmed',
   'sent_to_driver',
   'active',
   'completed',
@@ -37,6 +38,7 @@ const statusColors: Record<string, string> = {
   'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700',
   'customer_approved': 'bg-blue-500/20 text-blue-700',
   'customer_rejected': 'bg-destructive/20 text-destructive',
+  'confirmed': 'bg-emerald-500/20 text-emerald-700',
   'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
   'active': 'bg-cyan-500/20 text-cyan-700',
   'completed': 'bg-green-500/20 text-green-700',
@@ -47,6 +49,7 @@ const statusLabels: Record<string, string> = {
   'waiting_for_customer_approval': 'Waiting Customer Approval',
   'customer_approved': 'Customer Approved',
   'customer_rejected': 'Customer Rejected',
+  'confirmed': 'Confirmed',
   'sent_to_driver': 'Sent to Driver',
   'active': 'Active',
   'completed': 'Completed',
@@ -422,18 +425,21 @@ const AdminEditReservation = () => {
           </Card>
         )}
 
-        {/* Assign Driver Card - after customer approval */}
-        {formData.status === 'customer_approved' && (
-          <Card className="border-blue-300 bg-blue-50 dark:bg-blue-950/30">
+        {/* Assign Driver Card - after customer approval OR for confirmed manual reservations */}
+        {(formData.status === 'customer_approved' || formData.status === 'confirmed') && !formData.driver_id && (
+          <Card className="border-emerald-300 bg-emerald-50 dark:bg-emerald-950/30">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+              <CardTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
                 <UserCheck className="h-5 w-5" />
                 Assign Driver
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                Customer has approved the price ({currencySymbol}{formData.price}). Select a driver to assign this job.
+              <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                {formData.status === 'confirmed' 
+                  ? 'This reservation is confirmed. Select a driver to assign this job.'
+                  : `Customer has approved the price (${currencySymbol}${formData.price}). Select a driver to assign this job.`
+                }
               </p>
               <div className="space-y-2">
                 <Label>Select Driver</Label>
