@@ -17,3 +17,6 @@ verify_jwt = true
 
 [functions.log-admin-action]
 verify_jwt = true
+
+[functions.send-push-notification]
+verify_jwt = true
