@@ -288,7 +288,85 @@ const AdminReservations = () => {
           </Select>
         </div>
 
-        {/* Reservations List */}
+        {/* Needs Driver Assignment Section */}
+        {!loading && (() => {
+          const needsAssignment = reservations.filter(
+            r => (r.status === 'confirmed' || r.status === 'customer_approved') && !r.driver_id
+          );
+          if (needsAssignment.length === 0) return null;
+          return (
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-3 w-3 rounded-full bg-amber-500 animate-pulse" />
+                <h3 className="text-lg font-semibold text-amber-700">
+                  Needs Driver Assignment ({needsAssignment.length})
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {needsAssignment.map((reservation) => (
+                  <Card key={reservation.id} className="border-amber-300 bg-amber-50/50">
+                    <CardContent className="py-4">
+                      <div className="flex flex-wrap justify-between items-start gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <Badge className={statusColors[reservation.status] || 'bg-muted'}>
+                              {statusLabels[reservation.status] || reservation.status}
+                            </Badge>
+                            <span className="flex items-center gap-1 text-sm">
+                              <Calendar className="h-4 w-4" />
+                              {format(new Date(reservation.pickup_date), 'PPP')}
+                            </span>
+                            <span className="flex items-center gap-1 text-sm">
+                              <Clock className="h-4 w-4" />
+                              {reservation.pickup_time}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{reservation.customer_name}</span>
+                            <span className="text-muted-foreground">·</span>
+                            <span className="text-sm text-muted-foreground">{reservation.customer_phone}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-sm">
+                            <MapPin className="h-4 w-4 text-primary" />
+                            <span>{reservation.pickup}</span>
+                            <span>→</span>
+                            <span>{reservation.dropoff}</span>
+                          </div>
+
+                          <div className="flex items-center gap-4 text-sm">
+                            <span className="flex items-center gap-1">
+                              <CreditCard className="h-4 w-4 text-muted-foreground" />
+                              {reservation.payment_type}
+                            </span>
+                            <span className="font-bold text-primary">
+                              {formatPrice(reservation.price, reservation.price_currency)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <Button 
+                          onClick={() => {
+                            setAssignDialog({ open: true, reservationId: reservation.id });
+                            setSelectedDriver('');
+                          }}
+                          className="bg-amber-600 hover:bg-amber-700"
+                        >
+                          <UserCheck className="h-4 w-4 mr-2" />
+                          Assign Driver
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* All Reservations List */}
         {loading ? (
           <div className="text-center py-12">Loading...</div>
         ) : reservations.length === 0 ? (
