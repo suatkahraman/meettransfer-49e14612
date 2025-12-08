@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Percent, Loader2, Eye, Briefcase } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase } from 'lucide-react';
 
 const regions = [
   { value: 'Istanbul', label: 'Istanbul' },
@@ -27,7 +27,6 @@ interface Driver {
   name: string;
   phone: string;
   region: string | null;
-  commission_rate: number;
   active: boolean;
 }
 
@@ -45,7 +44,6 @@ const AdminDrivers = () => {
     name: '',
     phone: '',
     region: '',
-    commission_rate: '70',
     email: '',
     password: '',
   });
@@ -74,7 +72,6 @@ const AdminDrivers = () => {
       name: '',
       phone: '',
       region: '',
-      commission_rate: '70',
       email: '',
       password: '',
     });
@@ -87,7 +84,6 @@ const AdminDrivers = () => {
       name: driver.name,
       phone: driver.phone,
       region: driver.region || '',
-      commission_rate: driver.commission_rate.toString(),
       email: '',
       password: '',
     });
@@ -104,7 +100,6 @@ const AdminDrivers = () => {
           name: editingDriver.name,
           phone: editingDriver.phone,
           region: editingDriver.region,
-          commission_rate: editingDriver.commission_rate,
         };
 
         // Update existing driver
@@ -114,7 +109,6 @@ const AdminDrivers = () => {
             name: formData.name,
             phone: formData.phone,
             region: formData.region || null,
-            commission_rate: parseFloat(formData.commission_rate),
           })
           .eq('id', editingDriver.id);
 
@@ -131,7 +125,6 @@ const AdminDrivers = () => {
               name: formData.name,
               phone: formData.phone,
               region: formData.region || null,
-              commission_rate: parseFloat(formData.commission_rate),
             },
           });
 
@@ -164,7 +157,6 @@ const AdminDrivers = () => {
             name: formData.name,
             phone: formData.phone,
             region: formData.region,
-            commission_rate: parseFloat(formData.commission_rate) || 70,
           },
         });
 
@@ -187,7 +179,6 @@ const AdminDrivers = () => {
             name: formData.name,
             phone: formData.phone,
             region: formData.region,
-            commission_rate: parseFloat(formData.commission_rate),
             email: formData.email,
           },
         });
@@ -309,10 +300,6 @@ const AdminDrivers = () => {
                         <span>{driver.region}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2">
-                      <Percent className="h-4 w-4 text-muted-foreground" />
-                      <span>{driver.commission_rate}% payout</span>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -358,19 +345,6 @@ const AdminDrivers = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Driver Payout (%)</Label>
-              <Input
-                type="number"
-                min="0"
-                max="100"
-                placeholder="70"
-                value={formData.commission_rate}
-                onChange={(e) => setFormData({...formData, commission_rate: e.target.value})}
-                required
-              />
-              <p className="text-xs text-muted-foreground">Percentage the driver receives from each job</p>
             </div>
             {!editingDriver && (
               <>
@@ -449,12 +423,6 @@ const AdminDrivers = () => {
                     <MapPin className="h-4 w-4" /> Region
                   </span>
                   <span className="font-medium">{viewingDriver.region || 'Not assigned'}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Percent className="h-4 w-4" /> Payout Rate
-                  </span>
-                  <span className="font-medium">{viewingDriver.commission_rate}%</span>
                 </div>
               </div>
             </div>
