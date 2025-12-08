@@ -180,16 +180,18 @@ const DriverHome = () => {
     // Notify customer that driver accepted their reservation
     if (reservation) {
       try {
-        // Get driver name and plate number
+        // Get driver name, plate number and vehicle model
         const { data: driverData } = await supabase
           .from('drivers')
-          .select('name, plate_number')
+          .select('name, plate_number, vehicle_model')
           .eq('id', driverId)
           .maybeSingle();
 
         const driverName = driverData?.name || 'Your driver';
         const plateNumber = driverData?.plate_number || '';
-        const plateInfo = plateNumber ? `\n🚗 Plate: ${plateNumber}` : '';
+        const vehicleModel = driverData?.vehicle_model || '';
+        
+        const vehicleInfo = vehicleModel ? `\n🚗 ${vehicleModel}${plateNumber ? ` (${plateNumber})` : ''}` : (plateNumber ? `\n🚗 Plate: ${plateNumber}` : '');
 
         // Create notification for customer
         await supabase.from('notifications').insert({
@@ -197,16 +199,20 @@ const DriverHome = () => {
           reservation_id: id,
           type: 'driver_accepted',
           title: '✅ Driver Confirmed',
-          message: `Your driver: ${driverName}${plateInfo}`
+          message: `Your driver: ${driverName}${vehicleInfo}`
         });
 
         // Try to send push notification to customer
         try {
+          const pushBody = vehicleModel 
+            ? `Your driver: ${driverName} - ${vehicleModel}${plateNumber ? ` (${plateNumber})` : ''}`
+            : `Your driver: ${driverName}${plateNumber ? ` (${plateNumber})` : ''}`;
+          
           await supabase.functions.invoke('send-push-notification', {
             body: {
               user_id: reservation.customer_id,
               title: '✅ Driver Confirmed',
-              body: `Your driver: ${driverName}${plateNumber ? ` (${plateNumber})` : ''}`,
+              body: pushBody,
               data: { reservation_id: id }
             }
           });
