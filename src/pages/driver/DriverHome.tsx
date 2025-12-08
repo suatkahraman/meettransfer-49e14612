@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { LogOut, MapPin, Calendar, Clock, User, Plane, CreditCard, Calculator, Car, AlertCircle, CheckCircle2, Loader2, Bell } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
+import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { toast } from 'sonner';
 
 interface Reservation {
@@ -220,6 +221,7 @@ const DriverHome = () => {
       <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center sticky top-0 z-10">
         <h1 className="text-xl font-serif">Driver Panel</h1>
         <div className="flex items-center gap-2">
+          <PushNotificationToggle />
           <NotificationBell />
           <Button variant="ghost" size="sm" onClick={() => navigate('/driver/accounting')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <Calculator className="h-4 w-4 mr-1" />

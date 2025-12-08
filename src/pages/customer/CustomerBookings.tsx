@@ -9,6 +9,7 @@ import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, Al
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import NotificationBell from '@/components/NotificationBell';
+import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 interface Reservation {
@@ -143,6 +144,7 @@ const CustomerBookings = () => {
           <h1 className="text-2xl font-serif">My Reservations</h1>
         </div>
         <div className="flex items-center gap-2">
+          <PushNotificationToggle />
           <NotificationBell />
           <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
             <LogOut className="h-5 w-5" />
