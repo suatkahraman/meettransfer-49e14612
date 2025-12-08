@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw } from 'lucide-react';
+import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { toast } from 'sonner';
@@ -214,6 +214,14 @@ const DriverHome = () => {
         <div className="flex items-center gap-1">
           <PushNotificationToggle />
           <NotificationBell />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate('/driver/history')} 
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
+          >
+            <History className="h-5 w-5" />
+          </Button>
           <Button 
             variant="ghost" 
             size="icon" 

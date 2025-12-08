@@ -23,6 +23,7 @@ import CustomerReservationDetail from "./pages/customer/CustomerReservationDetai
 import DriverHome from "./pages/driver/DriverHome";
 import DriverJobDetails from "./pages/driver/DriverJobDetails";
 import DriverAccounting from "./pages/driver/DriverAccounting";
+import DriverHistory from "./pages/driver/DriverHistory";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -101,6 +102,7 @@ const App = () => (
               <Route path="/driver" element={<DriverRoute><DriverHome /></DriverRoute>} />
               <Route path="/driver/job/:id" element={<DriverRoute><DriverJobDetails /></DriverRoute>} />
               <Route path="/driver/accounting" element={<DriverRoute><DriverAccounting /></DriverRoute>} />
+              <Route path="/driver/history" element={<DriverRoute><DriverHistory /></DriverRoute>} />
               
               {/* Admin Routes - Protected (except setup which is for initial admin creation) */}
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
