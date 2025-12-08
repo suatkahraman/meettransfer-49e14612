@@ -27,6 +27,7 @@ interface Driver {
   name: string;
   phone: string;
   plate_number: string | null;
+  vehicle_model: string | null;
   region: string | null;
   active: boolean;
 }
@@ -45,6 +46,7 @@ const AdminDrivers = () => {
     name: '',
     phone: '',
     plate_number: '',
+    vehicle_model: '',
     region: '',
     email: '',
     password: '',
@@ -74,6 +76,7 @@ const AdminDrivers = () => {
       name: '',
       phone: '',
       plate_number: '',
+      vehicle_model: '',
       region: '',
       email: '',
       password: '',
@@ -87,6 +90,7 @@ const AdminDrivers = () => {
       name: driver.name,
       phone: driver.phone,
       plate_number: driver.plate_number || '',
+      vehicle_model: driver.vehicle_model || '',
       region: driver.region || '',
       email: '',
       password: '',
@@ -104,6 +108,7 @@ const AdminDrivers = () => {
           name: editingDriver.name,
           phone: editingDriver.phone,
           plate_number: editingDriver.plate_number,
+          vehicle_model: editingDriver.vehicle_model,
           region: editingDriver.region,
         };
 
@@ -114,6 +119,7 @@ const AdminDrivers = () => {
             name: formData.name,
             phone: formData.phone,
             plate_number: formData.plate_number || null,
+            vehicle_model: formData.vehicle_model || null,
             region: formData.region || null,
           })
           .eq('id', editingDriver.id);
@@ -131,6 +137,7 @@ const AdminDrivers = () => {
               name: formData.name,
               phone: formData.phone,
               plate_number: formData.plate_number || null,
+              vehicle_model: formData.vehicle_model || null,
               region: formData.region || null,
             },
           });
@@ -164,6 +171,7 @@ const AdminDrivers = () => {
             name: formData.name,
             phone: formData.phone,
             plate_number: formData.plate_number,
+            vehicle_model: formData.vehicle_model,
             region: formData.region,
           },
         });
@@ -187,6 +195,7 @@ const AdminDrivers = () => {
             name: formData.name,
             phone: formData.phone,
             plate_number: formData.plate_number,
+            vehicle_model: formData.vehicle_model,
             region: formData.region,
             email: formData.email,
           },
@@ -306,7 +315,13 @@ const AdminDrivers = () => {
                     {driver.plate_number && (
                       <div className="flex items-center gap-2">
                         <Car className="h-4 w-4 text-muted-foreground" />
-                        <span>{driver.plate_number}</span>
+                        <span>{driver.plate_number}{driver.vehicle_model ? ` - ${driver.vehicle_model}` : ''}</span>
+                      </div>
+                    )}
+                    {!driver.plate_number && driver.vehicle_model && (
+                      <div className="flex items-center gap-2">
+                        <Car className="h-4 w-4 text-muted-foreground" />
+                        <span>{driver.vehicle_model}</span>
                       </div>
                     )}
                     {driver.region && (
@@ -352,6 +367,14 @@ const AdminDrivers = () => {
                 value={formData.plate_number}
                 onChange={(e) => setFormData({...formData, plate_number: e.target.value})}
                 placeholder="e.g. 34 ABC 123"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Vehicle Model</Label>
+              <Input
+                value={formData.vehicle_model}
+                onChange={(e) => setFormData({...formData, vehicle_model: e.target.value})}
+                placeholder="e.g. Mercedes Vito"
               />
             </div>
             <div className="space-y-2">
@@ -446,6 +469,12 @@ const AdminDrivers = () => {
                     <Car className="h-4 w-4" /> Plate Number
                   </span>
                   <span className="font-medium">{viewingDriver.plate_number || 'Not set'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Car className="h-4 w-4" /> Vehicle Model
+                  </span>
+                  <span className="font-medium">{viewingDriver.vehicle_model || 'Not set'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">

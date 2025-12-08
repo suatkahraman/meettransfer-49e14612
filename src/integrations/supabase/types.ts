@@ -139,6 +139,7 @@ export type Database = {
           region: string | null
           updated_at: string | null
           user_id: string
+          vehicle_model: string | null
         }
         Insert: {
           active?: boolean | null
@@ -151,6 +152,7 @@ export type Database = {
           region?: string | null
           updated_at?: string | null
           user_id: string
+          vehicle_model?: string | null
         }
         Update: {
           active?: boolean | null
@@ -163,6 +165,7 @@ export type Database = {
           region?: string | null
           updated_at?: string | null
           user_id?: string
+          vehicle_model?: string | null
         }
         Relationships: []
       }
