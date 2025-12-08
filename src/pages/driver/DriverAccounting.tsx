@@ -5,17 +5,12 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, LogOut, Briefcase, DollarSign, Banknote, TrendingDown } from 'lucide-react';
-
-interface DriverData {
-  commission_rate: number;
-}
+import { ArrowLeft, LogOut, Briefcase, DollarSign, Banknote } from 'lucide-react';
 
 interface AccountingData {
   totalJobs: number;
-  totalEarnings: number;
+  totalRevenue: number;
   cashCollected: number;
-  balanceOwed: number;
 }
 
 const DriverAccounting = () => {
@@ -24,9 +19,8 @@ const DriverAccounting = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<AccountingData>({
     totalJobs: 0,
-    totalEarnings: 0,
+    totalRevenue: 0,
     cashCollected: 0,
-    balanceOwed: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -34,36 +28,22 @@ const DriverAccounting = () => {
     const fetchData = async () => {
       if (!driverId) return;
 
-      // Get driver's commission rate
-      const { data: driverData } = await supabase
-        .from('drivers')
-        .select('commission_rate')
-        .eq('id', driverId)
-        .single();
-
-      const commissionRate = (driverData as DriverData)?.commission_rate || 10;
-
       // Get completed reservations
       const { data: reservations } = await supabase
         .from('reservations')
-        .select('price, driver_cash')
+        .select('price, driver_cash_amount')
         .eq('driver_id', driverId)
         .eq('status', 'completed');
 
       if (reservations) {
         const totalJobs = reservations.length;
         const totalRevenue = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
-        const totalEarnings = totalRevenue * (commissionRate / 100);
-        const cashCollected = reservations
-          .filter(r => r.driver_cash)
-          .reduce((sum, r) => sum + (r.price || 0), 0);
-        const balanceOwed = cashCollected - totalEarnings;
+        const cashCollected = reservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
 
         setData({
           totalJobs,
-          totalEarnings,
+          totalRevenue,
           cashCollected,
-          balanceOwed: Math.max(0, balanceOwed),
         });
       }
       setLoading(false);
@@ -109,12 +89,12 @@ const DriverAccounting = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
-                  Total Earnings
+                  Total Revenue
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">₺{data.totalEarnings.toFixed(2)}</div>
-                <p className="text-sm text-muted-foreground mt-1">Based on your commission rate</p>
+                <div className="text-3xl font-bold text-green-600">₺{data.totalRevenue.toFixed(2)}</div>
+                <p className="text-sm text-muted-foreground mt-1">Total value of completed jobs</p>
               </CardContent>
             </Card>
 
@@ -127,19 +107,6 @@ const DriverAccounting = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">₺{data.cashCollected.toFixed(2)}</div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-destructive/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                  <TrendingDown className="h-4 w-4" />
-                  Balance Owed to Company
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-destructive">₺{data.balanceOwed.toFixed(2)}</div>
-                <p className="text-sm text-muted-foreground mt-1">Cash collected minus your earnings</p>
               </CardContent>
             </Card>
           </div>

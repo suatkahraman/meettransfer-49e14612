@@ -164,7 +164,7 @@ const AdminDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">€{loading ? '-' : kpis.monthlyRevenue.toFixed(0)}</div>
+              <div className="text-2xl font-bold text-primary">₺{loading ? '-' : kpis.monthlyRevenue.toFixed(0)}</div>
             </CardContent>
           </Card>
         </div>
