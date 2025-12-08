@@ -28,12 +28,15 @@ const SignupScreen = () => {
   // Role-based redirect if already logged in
   useEffect(() => {
     if (user && !roleLoading && role) {
-      if (role === 'admin') {
-        navigate('/admin');
-      } else if (role === 'driver') {
-        navigate('/driver');
-      } else {
-        navigate('/customer');
+      switch (role) {
+        case 'admin':
+          navigate('/admin', { replace: true });
+          break;
+        case 'driver':
+          navigate('/driver', { replace: true });
+          break;
+        default:
+          navigate('/customer', { replace: true });
       }
     }
   }, [user, role, roleLoading, navigate]);
@@ -105,7 +108,7 @@ const SignupScreen = () => {
         }
 
         toast.success('Account created successfully! Welcome to Meet Transfer.');
-        navigate('/customer');
+        navigate('/customer', { replace: true });
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

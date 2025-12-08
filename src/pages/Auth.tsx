@@ -58,12 +58,15 @@ const Auth = () => {
   // Role-based redirect after login
   useEffect(() => {
     if (user && !roleLoading && role) {
-      if (role === 'admin') {
-        navigate('/admin');
-      } else if (role === 'driver') {
-        navigate('/driver');
-      } else {
-        navigate('/customer');
+      switch (role) {
+        case 'admin':
+          navigate('/admin', { replace: true });
+          break;
+        case 'driver':
+          navigate('/driver', { replace: true });
+          break;
+        default:
+          navigate('/customer', { replace: true });
       }
     }
   }, [user, role, roleLoading, navigate]);
