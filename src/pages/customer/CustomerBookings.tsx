@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import NotificationBell from '@/components/NotificationBell';
 
 interface Reservation {
@@ -65,25 +66,54 @@ const CustomerBookings = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchReservations = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('customer_id', user.id)
+      .order('pickup_date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching reservations:', error);
+    } else {
+      setReservations(data || []);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchReservations = async () => {
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('reservations')
-        .select('*')
-        .eq('customer_id', user.id)
-        .order('pickup_date', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching reservations:', error);
-      } else {
-        setReservations(data || []);
-      }
-      setLoading(false);
-    };
-
     fetchReservations();
+  }, [user]);
+
+  // Real-time subscription for customer's reservations
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('customer-reservations-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reservations',
+          filter: `customer_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Reservation update:', payload);
+          fetchReservations();
+          if (payload.eventType === 'UPDATE') {
+            toast.info('Your reservation has been updated');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const formatPrice = (price: number | null, currency: string | null) => {
