@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList } from 'lucide-react';
 import { z } from 'zod';
 
 const reservationSchema = z.object({
@@ -49,6 +49,7 @@ const ReservationForm = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [formData, setFormData] = useState({
@@ -248,7 +249,7 @@ const ReservationForm = () => {
       }
 
       toast.success('Reservation submitted! We will contact you with pricing.');
-      navigate('/customer/reservations');
+      setIsSubmitted(true);
     } catch (error: any) {
       console.error('Reservation error:', error);
       toast.error(error.message || 'Failed to submit reservation');
@@ -256,6 +257,68 @@ const ReservationForm = () => {
       setIsLoading(false);
     }
   };
+
+  // Success state after submission
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary/80 to-primary/60 py-8 px-4">
+        <Card className="max-w-lg mx-auto">
+          <CardContent className="pt-8 pb-6 text-center space-y-6">
+            <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
+            </div>
+            
+            <div className="space-y-2">
+              <h2 className="text-2xl font-serif font-semibold">Reservation Submitted!</h2>
+              <p className="text-muted-foreground">
+                Thank you for your request. Our team will review it and send you the price for approval.
+              </p>
+            </div>
+
+            <div className="bg-muted p-4 rounded-lg text-left space-y-2">
+              <p className="text-sm"><strong>Route:</strong> {formData.pickup} → {formData.dropoff}</p>
+              <p className="text-sm"><strong>Date:</strong> {formData.date} at {formData.time}</p>
+              <p className="text-sm"><strong>Vehicle:</strong> {vehicleTypes.find(v => v.value === formData.vehicleType)?.label}</p>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <Button 
+                onClick={() => navigate('/customer/reservations')} 
+                className="w-full" 
+                size="lg"
+              >
+                <ClipboardList className="h-4 w-4 mr-2" />
+                My Reservations
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsSubmitted(false);
+                  setFormData({
+                    name: formData.name,
+                    phone: formData.phone,
+                    email: formData.email,
+                    password: '',
+                    pickup: '',
+                    dropoff: '',
+                    date: '',
+                    time: '',
+                    flightNumber: '',
+                    vehicleType: 'mercedes-vito',
+                    notes: '',
+                  });
+                }} 
+                className="w-full"
+              >
+                Book Another Transfer
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary/80 to-primary/60 py-8 px-4">
