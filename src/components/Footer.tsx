@@ -2,11 +2,10 @@ import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Linkedin, Youtube } 
 import { Link } from "react-router-dom";
 
 const socialLinks = [
-  { icon: Facebook, href: "https://facebook.com/meettransfer", label: "Facebook" },
-  { icon: Instagram, href: "https://instagram.com/meettransfer", label: "Instagram" },
-  { icon: Twitter, href: "https://twitter.com/meettransfer", label: "Twitter" },
-  { icon: Linkedin, href: "https://linkedin.com/company/meettransfer", label: "LinkedIn" },
-  { icon: Youtube, href: "https://youtube.com/@meettransfer", label: "YouTube" },
+  { icon: Facebook, href: "https://m.facebook.com/100095122861655/", label: "Facebook" },
+  { icon: Instagram, href: "https://www.instagram.com/meettransfer/", label: "Instagram" },
+  { icon: Twitter, href: "https://x.com/meettransfer", label: "X" },
+  { icon: Youtube, href: "https://www.youtube.com/@meettransfer", label: "YouTube" },
 ];
 
 export const Footer = () => {
