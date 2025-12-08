@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,7 +25,8 @@ interface Reservation {
   flight_number: string | null;
   vehicle_type: string;
   payment_type: string;
-  price: number;
+  price: number | null;
+  price_currency: string | null;
   status: string;
   driver_id: string | null;
   drivers?: {
@@ -38,17 +39,34 @@ interface Driver {
   id: string;
   name: string;
   phone: string;
+  user_id: string;
 }
 
 const statusColors: Record<string, string> = {
-  'awaiting-price': 'bg-orange-500/20 text-orange-700',
-  'awaiting-customer': 'bg-purple-500/20 text-purple-700',
-  'confirmed': 'bg-blue-500/20 text-blue-700',
-  'assigned': 'bg-yellow-500/20 text-yellow-700',
+  'pending_price': 'bg-orange-500/20 text-orange-700',
+  'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700',
+  'customer_approved': 'bg-blue-500/20 text-blue-700',
+  'customer_rejected': 'bg-destructive/20 text-destructive',
+  'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
   'active': 'bg-cyan-500/20 text-cyan-700',
   'completed': 'bg-green-500/20 text-green-700',
-  'cancelled': 'bg-destructive/20 text-destructive',
-  'new': 'bg-muted text-muted-foreground',
+};
+
+const statusLabels: Record<string, string> = {
+  'pending_price': 'Pending Price',
+  'waiting_for_customer_approval': 'Waiting Customer',
+  'customer_approved': 'Approved',
+  'customer_rejected': 'Rejected',
+  'sent_to_driver': 'Sent to Driver',
+  'active': 'Active',
+  'completed': 'Completed',
+};
+
+const currencySymbols: Record<string, string> = {
+  'TRY': '₺',
+  'EUR': '€',
+  'USD': '$',
+  'GBP': '£',
 };
 
 const AdminReservations = () => {
@@ -68,6 +86,12 @@ const AdminReservations = () => {
     reservationId: null,
   });
   const [selectedDriver, setSelectedDriver] = useState('');
+
+  const formatPrice = (price: number | null, currency: string | null) => {
+    if (price === null) return '-';
+    const symbol = currencySymbols[currency || 'TRY'] || currency || '';
+    return `${symbol}${price}`;
+  };
 
   const fetchReservations = async () => {
     let query = supabase
@@ -107,7 +131,7 @@ const AdminReservations = () => {
   const fetchDrivers = async () => {
     const { data } = await supabase
       .from('drivers')
-      .select('id, name, phone')
+      .select('id, name, phone, user_id')
       .eq('active', true);
     setDrivers(data || []);
   };
@@ -127,54 +151,44 @@ const AdminReservations = () => {
   const handleAssignDriver = async () => {
     if (!assignDialog.reservationId || !selectedDriver) return;
 
-    // Get the reservation details for notification message
+    // Get the reservation details
     const reservation = reservations.find(r => r.id === assignDialog.reservationId);
-    
-    // Get the driver's user_id
     const selectedDriverData = drivers.find(d => d.id === selectedDriver);
-
     const oldDriverId = reservation?.driver_id;
 
     const { error } = await supabase
       .from('reservations')
       .update({ 
         driver_id: selectedDriver,
-        status: 'assigned'
+        status: 'sent_to_driver'
       })
       .eq('id', assignDialog.reservationId);
 
     if (error) {
       toast.error('Failed to assign driver');
     } else {
-      // Audit log for driver assignment
+      // Audit log
       await logAction({
         action: 'ASSIGN_DRIVER',
         table_name: 'reservations',
         record_id: assignDialog.reservationId,
         old_data: { driver_id: oldDriverId, status: reservation?.status },
-        new_data: { driver_id: selectedDriver, status: 'assigned', driver_name: selectedDriverData?.name },
+        new_data: { driver_id: selectedDriver, status: 'sent_to_driver', driver_name: selectedDriverData?.name },
       });
-      // Create notification for driver
-      if (selectedDriverData && reservation) {
-        try {
-          // Get driver's user_id from drivers table
-          const { data: driverData } = await supabase
-            .from('drivers')
-            .select('user_id')
-            .eq('id', selectedDriver)
-            .single();
 
-          if (driverData?.user_id) {
-            await supabase.functions.invoke('create-notification', {
-              body: {
-                user_id: driverData.user_id,
-                reservation_id: assignDialog.reservationId,
-                title: 'New Job Assigned',
-                message: `You have a new transfer: ${reservation.pickup} → ${reservation.dropoff} on ${format(new Date(reservation.pickup_date), 'PP')} at ${reservation.pickup_time}.`,
-                type: 'driver_assigned'
-              }
-            });
-          }
+      // Notify driver with price
+      if (selectedDriverData?.user_id && reservation) {
+        try {
+          const priceDisplay = formatPrice(reservation.price, reservation.price_currency);
+          await supabase.functions.invoke('create-notification', {
+            body: {
+              user_id: selectedDriverData.user_id,
+              reservation_id: assignDialog.reservationId,
+              title: 'New Job Assigned',
+              message: `New transfer: ${reservation.pickup} → ${reservation.dropoff} on ${format(new Date(reservation.pickup_date), 'PP')} at ${reservation.pickup_time}. Price: ${priceDisplay}`,
+              type: 'driver_assigned'
+            }
+          });
         } catch (err) {
           console.error('Failed to create notification:', err);
         }
@@ -190,7 +204,6 @@ const AdminReservations = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this reservation?')) return;
 
-    // Get reservation data before deletion for audit log
     const reservationToDelete = reservations.find(r => r.id === id);
 
     const { error } = await supabase
@@ -201,7 +214,6 @@ const AdminReservations = () => {
     if (error) {
       toast.error('Failed to delete reservation');
     } else {
-      // Audit log for deletion
       await logAction({
         action: 'DELETE',
         table_name: 'reservations',
@@ -257,18 +269,18 @@ const AdminReservations = () => {
             className="max-w-[180px]"
           />
           <Select value={filters.status} onValueChange={(v) => setFilters({...filters, status: v})}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[180px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="awaiting-price">Awaiting Price</SelectItem>
-              <SelectItem value="awaiting-customer">Awaiting Customer</SelectItem>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="assigned">Assigned</SelectItem>
+              <SelectItem value="pending_price">Pending Price</SelectItem>
+              <SelectItem value="waiting_for_customer_approval">Waiting Customer</SelectItem>
+              <SelectItem value="customer_approved">Customer Approved</SelectItem>
+              <SelectItem value="customer_rejected">Rejected</SelectItem>
+              <SelectItem value="sent_to_driver">Sent to Driver</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -286,7 +298,9 @@ const AdminReservations = () => {
                   <div className="flex flex-wrap justify-between items-start gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
-                        <Badge className={statusColors[reservation.status]}>{reservation.status}</Badge>
+                        <Badge className={statusColors[reservation.status] || 'bg-muted'}>
+                          {statusLabels[reservation.status] || reservation.status}
+                        </Badge>
                         <span className="flex items-center gap-1 text-sm">
                           <Calendar className="h-4 w-4" />
                           {format(new Date(reservation.pickup_date), 'PPP')}
@@ -316,7 +330,9 @@ const AdminReservations = () => {
                           <CreditCard className="h-4 w-4 text-muted-foreground" />
                           {reservation.payment_type}
                         </span>
-                        <span className="font-bold text-primary">₺{reservation.price}</span>
+                        <span className="font-bold text-primary">
+                          {formatPrice(reservation.price, reservation.price_currency)}
+                        </span>
                         {reservation.drivers && (
                           <span className="flex items-center gap-1">
                             <UserCheck className="h-4 w-4 text-green-600" />
@@ -327,17 +343,19 @@ const AdminReservations = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          setAssignDialog({ open: true, reservationId: reservation.id });
-                          setSelectedDriver(reservation.driver_id || '');
-                        }}
-                      >
-                        <UserCheck className="h-4 w-4 mr-1" />
-                        Assign
-                      </Button>
+                      {reservation.status === 'customer_approved' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setAssignDialog({ open: true, reservationId: reservation.id });
+                            setSelectedDriver(reservation.driver_id || '');
+                          }}
+                        >
+                          <UserCheck className="h-4 w-4 mr-1" />
+                          Assign Driver
+                        </Button>
+                      )}
                       <Button 
                         variant="outline" 
                         size="sm"
@@ -368,6 +386,9 @@ const AdminReservations = () => {
           <DialogHeader>
             <DialogTitle>Assign Driver</DialogTitle>
           </DialogHeader>
+          <p className="text-sm text-muted-foreground mb-4">
+            The driver will receive the same price that was approved by the customer.
+          </p>
           <Select value={selectedDriver} onValueChange={setSelectedDriver}>
             <SelectTrigger>
               <SelectValue placeholder="Select a driver" />
@@ -385,7 +406,7 @@ const AdminReservations = () => {
               Cancel
             </Button>
             <Button onClick={handleAssignDriver} disabled={!selectedDriver}>
-              Assign
+              Assign & Notify Driver
             </Button>
           </DialogFooter>
         </DialogContent>

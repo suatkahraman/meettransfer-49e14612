@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck } from 'lucide-react';
 
 const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
@@ -20,21 +20,50 @@ const paymentTypes = [
   { value: 'online', label: 'Online' },
   { value: 'none', label: 'None' },
 ];
-const statuses = ['awaiting-price', 'awaiting-customer', 'confirmed', 'assigned', 'active', 'completed', 'cancelled'];
+
+// New status workflow
+const statuses = [
+  'pending_price',
+  'waiting_for_customer_approval',
+  'customer_approved',
+  'customer_rejected',
+  'sent_to_driver',
+  'active',
+  'completed',
+];
 
 const statusColors: Record<string, string> = {
-  'awaiting-price': 'bg-orange-500/20 text-orange-700',
-  'awaiting-customer': 'bg-purple-500/20 text-purple-700',
-  'confirmed': 'bg-blue-500/20 text-blue-700',
-  'assigned': 'bg-yellow-500/20 text-yellow-700',
+  'pending_price': 'bg-orange-500/20 text-orange-700',
+  'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700',
+  'customer_approved': 'bg-blue-500/20 text-blue-700',
+  'customer_rejected': 'bg-destructive/20 text-destructive',
+  'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
   'active': 'bg-cyan-500/20 text-cyan-700',
   'completed': 'bg-green-500/20 text-green-700',
-  'cancelled': 'bg-destructive/20 text-destructive',
 };
+
+const statusLabels: Record<string, string> = {
+  'pending_price': 'Pending Price',
+  'waiting_for_customer_approval': 'Waiting Customer Approval',
+  'customer_approved': 'Customer Approved',
+  'customer_rejected': 'Customer Rejected',
+  'sent_to_driver': 'Sent to Driver',
+  'active': 'Active',
+  'completed': 'Completed',
+};
+
+// Currency options
+const currencies = [
+  { value: 'TRY', label: '₺ TRY', symbol: '₺' },
+  { value: 'EUR', label: '€ EUR', symbol: '€' },
+  { value: 'USD', label: '$ USD', symbol: '$' },
+  { value: 'GBP', label: '£ GBP', symbol: '£' },
+];
 
 interface Driver {
   id: string;
   name: string;
+  user_id: string;
 }
 
 const AdminEditReservation = () => {
@@ -44,6 +73,7 @@ const AdminEditReservation = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sendingPrice, setSendingPrice] = useState(false);
+  const [assigningDriver, setAssigningDriver] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null);
@@ -58,11 +88,16 @@ const AdminEditReservation = () => {
     vehicle_type: '',
     payment_type: '',
     price: '',
+    price_currency: 'TRY',
     driver_cash_amount: '',
     status: '',
     driver_id: '',
     admin_notes: '',
   });
+
+  const getCurrencySymbol = (currency: string) => {
+    return currencies.find(c => c.value === currency)?.symbol || currency;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,7 +105,7 @@ const AdminEditReservation = () => {
 
       const [reservationResult, driversResult, adminNotesResult] = await Promise.all([
         supabase.from('reservations').select('*').eq('id', id).single(),
-        supabase.from('drivers').select('id, name').eq('active', true),
+        supabase.from('drivers').select('id, name, user_id').eq('active', true),
         supabase.from('reservation_admin_notes').select('notes').eq('reservation_id', id).maybeSingle(),
       ]);
 
@@ -94,6 +129,7 @@ const AdminEditReservation = () => {
         vehicle_type: r.vehicle_type || '',
         payment_type: r.payment_type || '',
         price: r.price?.toString() || '',
+        price_currency: r.price_currency || 'TRY',
         driver_cash_amount: r.driver_cash_amount?.toString() || '',
         status: r.status || '',
         driver_id: r.driver_id || '',
@@ -110,7 +146,7 @@ const AdminEditReservation = () => {
     fetchData();
   }, [id, navigate]);
 
-  const handleSendPrice = async () => {
+  const handleSendPriceToCustomer = async () => {
     if (!formData.price || parseFloat(formData.price) <= 0) {
       toast.error('Please enter a valid price first');
       return;
@@ -119,12 +155,13 @@ const AdminEditReservation = () => {
     setSendingPrice(true);
 
     try {
-      // Update reservation with price and change status to awaiting-customer
+      // Update reservation with price, currency and change status
       const { error } = await supabase
         .from('reservations')
         .update({
           price: parseFloat(formData.price),
-          status: 'awaiting-customer',
+          price_currency: formData.price_currency,
+          status: 'waiting_for_customer_approval',
         })
         .eq('id', id);
 
@@ -132,13 +169,14 @@ const AdminEditReservation = () => {
 
       // Notify customer
       if (customerId) {
+        const symbol = getCurrencySymbol(formData.price_currency);
         try {
           await supabase.functions.invoke('create-notification', {
             body: {
               user_id: customerId,
               reservation_id: id,
               title: 'Your Transfer Price is Ready',
-              message: `Your transfer price has been set: ₺${formData.price}. Please review and confirm your booking.`,
+              message: `Your transfer price has been set: ${symbol}${formData.price}. Please review and confirm your booking.`,
               type: 'price_ready'
             }
           });
@@ -149,19 +187,78 @@ const AdminEditReservation = () => {
 
       // Audit log for price sent
       await logAction({
-        action: 'SEND_PRICE',
+        action: 'SEND_PRICE_TO_CUSTOMER',
         table_name: 'reservations',
         record_id: id,
-        old_data: { price: originalData?.price, status: originalData?.status },
-        new_data: { price: formData.price, status: 'awaiting-customer' },
+        old_data: { price: originalData?.price, price_currency: originalData?.price_currency, status: originalData?.status },
+        new_data: { price: formData.price, price_currency: formData.price_currency, status: 'waiting_for_customer_approval' },
       });
 
       toast.success('Price sent to customer for approval!');
-      setFormData({ ...formData, status: 'awaiting-customer' });
+      setFormData({ ...formData, status: 'waiting_for_customer_approval' });
     } catch (error: any) {
       toast.error(error.message || 'Failed to send price');
     } finally {
       setSendingPrice(false);
+    }
+  };
+
+  const handleAssignDriver = async () => {
+    if (!formData.driver_id) {
+      toast.error('Please select a driver first');
+      return;
+    }
+
+    setAssigningDriver(true);
+
+    try {
+      // Update reservation with driver and status
+      const { error } = await supabase
+        .from('reservations')
+        .update({
+          driver_id: formData.driver_id,
+          status: 'sent_to_driver',
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Get driver info for notification
+      const selectedDriver = drivers.find(d => d.id === formData.driver_id);
+      
+      // Notify driver with the same price
+      if (selectedDriver?.user_id) {
+        const symbol = getCurrencySymbol(formData.price_currency);
+        try {
+          await supabase.functions.invoke('create-notification', {
+            body: {
+              user_id: selectedDriver.user_id,
+              reservation_id: id,
+              title: 'New Job Assigned',
+              message: `New transfer: ${formData.pickup} → ${formData.dropoff} on ${formData.pickup_date} at ${formData.pickup_time}. Price: ${symbol}${formData.price}`,
+              type: 'driver_assigned'
+            }
+          });
+        } catch (e) {
+          console.error('Failed to notify driver:', e);
+        }
+      }
+
+      // Audit log
+      await logAction({
+        action: 'ASSIGN_DRIVER',
+        table_name: 'reservations',
+        record_id: id,
+        old_data: { driver_id: originalData?.driver_id, status: originalData?.status },
+        new_data: { driver_id: formData.driver_id, driver_name: selectedDriver?.name, status: 'sent_to_driver' },
+      });
+
+      toast.success('Driver assigned and notified with price!');
+      setFormData({ ...formData, status: 'sent_to_driver' });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to assign driver');
+    } finally {
+      setAssigningDriver(false);
     }
   };
 
@@ -183,6 +280,7 @@ const AdminEditReservation = () => {
         vehicle_type: formData.vehicle_type,
         payment_type: formData.payment_type,
         price: parseFloat(formData.price) || null,
+        price_currency: formData.price_currency,
         driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
         status: formData.status,
         driver_id: formData.driver_id || null,
@@ -235,6 +333,7 @@ const AdminEditReservation = () => {
         vehicle_type: formData.vehicle_type,
         payment_type: formData.payment_type,
         price: formData.price,
+        price_currency: formData.price_currency,
         status: formData.status,
         driver_id: formData.driver_id,
       },
@@ -253,6 +352,8 @@ const AdminEditReservation = () => {
     );
   }
 
+  const currencySymbol = getCurrencySymbol(formData.price_currency);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4">
@@ -261,14 +362,14 @@ const AdminEditReservation = () => {
         </Button>
         <h1 className="text-2xl font-serif">Edit Reservation</h1>
         <Badge className={`ml-auto ${statusColors[formData.status] || 'bg-muted'}`}>
-          {formData.status}
+          {statusLabels[formData.status] || formData.status}
         </Badge>
       </header>
 
-      <main className="container mx-auto py-8 px-4 max-w-2xl">
-        {/* Price Entry Card for awaiting-price status */}
-        {formData.status === 'awaiting-price' && (
-          <Card className="mb-6 border-orange-300 bg-orange-50 dark:bg-orange-950/30">
+      <main className="container mx-auto py-8 px-4 max-w-2xl space-y-6">
+        {/* Price Entry Card for pending_price status */}
+        {formData.status === 'pending_price' && (
+          <Card className="border-orange-300 bg-orange-50 dark:bg-orange-950/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
                 <DollarSign className="h-5 w-5" />
@@ -277,13 +378,26 @@ const AdminEditReservation = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-orange-700 dark:text-orange-300">
-                This reservation is awaiting pricing. Enter the price and send it to the customer for approval.
+                This reservation is awaiting pricing. Enter the price, select currency, and send to the customer for approval.
               </p>
-              <div className="flex gap-4 items-end">
-                <div className="flex-1 space-y-2">
-                  <Label>Price (₺)</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Currency</Label>
+                  <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map(c => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Price</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                     <Input
                       type="number"
                       step="0.01"
@@ -295,15 +409,53 @@ const AdminEditReservation = () => {
                     />
                   </div>
                 </div>
-                <Button 
-                  onClick={handleSendPrice} 
-                  disabled={sendingPrice || !formData.price}
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  {sendingPrice ? 'Sending...' : 'Send to Customer'}
-                </Button>
               </div>
+              <Button 
+                onClick={handleSendPriceToCustomer} 
+                disabled={sendingPrice || !formData.price}
+                className="w-full bg-orange-600 hover:bg-orange-700"
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {sendingPrice ? 'Sending...' : 'Send Price to Customer'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Assign Driver Card - after customer approval */}
+        {formData.status === 'customer_approved' && (
+          <Card className="border-blue-300 bg-blue-50 dark:bg-blue-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                <UserCheck className="h-5 w-5" />
+                Assign Driver
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Customer has approved the price ({currencySymbol}{formData.price}). Select a driver to assign this job.
+              </p>
+              <div className="space-y-2">
+                <Label>Select Driver</Label>
+                <Select value={formData.driver_id} onValueChange={(v) => setFormData({...formData, driver_id: v})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a driver" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {drivers.map(d => (
+                      <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button 
+                onClick={handleAssignDriver} 
+                disabled={assigningDriver || !formData.driver_id}
+                className="w-full"
+              >
+                <UserCheck className="h-4 w-4 mr-2" />
+                {assigningDriver ? 'Assigning...' : 'Assign to Driver'}
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -382,7 +534,7 @@ const AdminEditReservation = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Vehicle</Label>
                   <Select value={formData.vehicle_type} onValueChange={(v) => setFormData({...formData, vehicle_type: v})}>
@@ -409,10 +561,26 @@ const AdminEditReservation = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Price (₺)</Label>
+                  <Label>Currency</Label>
+                  <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map(c => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Price</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                     <Input
                       type="number"
                       step="0.01"
@@ -424,9 +592,9 @@ const AdminEditReservation = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Driver Cash (₺)</Label>
+                  <Label>Driver Cash</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                     <Input
                       type="number"
                       step="0.01"
@@ -448,7 +616,7 @@ const AdminEditReservation = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {statuses.map(s => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                        <SelectItem key={s} value={s}>{statusLabels[s] || s}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -473,6 +641,7 @@ const AdminEditReservation = () => {
                 <Textarea
                   value={formData.admin_notes}
                   onChange={(e) => setFormData({...formData, admin_notes: e.target.value})}
+                  placeholder="Internal notes (not visible to customer or driver)"
                   rows={3}
                 />
               </div>

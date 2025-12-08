@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, FileText } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 
@@ -27,6 +27,7 @@ interface Reservation {
   vehicle_type: string;
   payment_type: string;
   price: number;
+  price_currency: string | null;
   status: string;
   driver_confirmed: boolean;
   driver_earning: number | null;
@@ -35,10 +36,22 @@ interface Reservation {
 }
 
 const statusColors: Record<string, string> = {
-  new: 'bg-gray-500/20 text-gray-700',
-  assigned: 'bg-yellow-500/20 text-yellow-700',
-  active: 'bg-blue-500/20 text-blue-700',
-  completed: 'bg-green-500/20 text-green-700',
+  'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
+  'active': 'bg-blue-500/20 text-blue-700',
+  'completed': 'bg-green-500/20 text-green-700',
+};
+
+const statusLabels: Record<string, string> = {
+  'sent_to_driver': 'Assigned',
+  'active': 'In Progress',
+  'completed': 'Completed',
+};
+
+const currencySymbols: Record<string, string> = {
+  'TRY': '₺',
+  'EUR': '€',
+  'USD': '$',
+  'GBP': '£',
 };
 
 const DriverJobDetails = () => {
@@ -50,10 +63,8 @@ const DriverJobDetails = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [showCashDialog, setShowCashDialog] = useState(false);
-  const [commissionRate, setCommissionRate] = useState<number>(70);
   
-  // Driver editable fields
-  const [driverEarning, setDriverEarning] = useState('');
+  // Driver editable fields (only cash amount and notes, NOT price)
   const [driverCashAmount, setDriverCashAmount] = useState('');
   const [driverNotes, setDriverNotes] = useState('');
   const [savingFinancials, setSavingFinancials] = useState(false);
@@ -80,34 +91,22 @@ const DriverJobDetails = () => {
         setReservation(resData);
         setDriverCashAmount(resData.driver_cash_amount?.toString() || '');
         setDriverNotes(resData.driver_notes || '');
-
-        // Fetch driver's commission rate
-        if (driverId) {
-          const { data: driverData } = await supabase
-            .from('drivers')
-            .select('commission_rate')
-            .eq('id', driverId)
-            .maybeSingle();
-          
-          const rate = driverData?.commission_rate ? Number(driverData.commission_rate) : 70;
-          setCommissionRate(rate);
-          
-          // Auto-calculate earning if not already set
-          if (resData.driver_earning !== null) {
-            setDriverEarning(resData.driver_earning.toString());
-          } else if (resData.price) {
-            const autoEarning = (resData.price * rate / 100).toFixed(2);
-            setDriverEarning(autoEarning);
-          }
-        } else {
-          setDriverEarning(resData.driver_earning?.toString() || '');
-        }
       }
       setLoading(false);
     };
 
     fetchData();
   }, [id, driverId]);
+
+  const getCurrencySymbol = (currency: string | null) => {
+    return currencySymbols[currency || 'TRY'] || currency || '₺';
+  };
+
+  const formatPrice = (price: number | null, currency: string | null) => {
+    if (price === null) return '-';
+    const symbol = getCurrencySymbol(currency);
+    return `${symbol}${price}`;
+  };
 
   const confirmJob = async () => {
     if (!id) return;
@@ -134,22 +133,21 @@ const DriverJobDetails = () => {
     if (!id) return;
     setSavingFinancials(true);
 
+    // Driver can only update cash amount and notes, NOT price
     const { error } = await supabase
       .from('reservations')
       .update({
-        driver_earning: driverEarning ? parseFloat(driverEarning) : null,
         driver_cash_amount: driverCashAmount ? parseFloat(driverCashAmount) : null,
         driver_notes: driverNotes || null
       })
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to save financial data');
+      toast.error('Failed to save data');
     } else {
-      toast.success('Driver financial data saved!');
+      toast.success('Data saved!');
       setReservation(prev => prev ? {
         ...prev,
-        driver_earning: driverEarning ? parseFloat(driverEarning) : null,
         driver_cash_amount: driverCashAmount ? parseFloat(driverCashAmount) : null,
         driver_notes: driverNotes || null
       } : null);
@@ -174,7 +172,7 @@ const DriverJobDetails = () => {
     if (error) {
       toast.error('Failed to update status');
     } else {
-      toast.success(`Status updated to ${newStatus}`);
+      toast.success(`Status updated to ${statusLabels[newStatus] || newStatus}`);
       setReservation(prev => prev ? { ...prev, status: newStatus } : null);
       setShowCashDialog(false);
     }
@@ -205,6 +203,8 @@ const DriverJobDetails = () => {
     );
   }
 
+  const currencySymbol = getCurrencySymbol(reservation.price_currency);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
@@ -216,8 +216,8 @@ const DriverJobDetails = () => {
         </div>
         <div className="flex items-center gap-2">
           <NotificationBell />
-          <Badge className={statusColors[reservation.status]}>
-            {reservation.status}
+          <Badge className={statusColors[reservation.status] || 'bg-muted'}>
+            {statusLabels[reservation.status] || reservation.status}
           </Badge>
         </div>
       </header>
@@ -299,54 +299,40 @@ const DriverJobDetails = () => {
               </div>
             </div>
 
+            {/* Price Display - READ ONLY for driver */}
             <div className="bg-muted p-4 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Total Price</span>
-                <span className="text-2xl font-bold text-primary">₺{reservation.price}</span>
+                <span className="text-muted-foreground">Trip Price</span>
+                <span className="text-2xl font-bold text-primary">
+                  {formatPrice(reservation.price, reservation.price_currency)}
+                </span>
               </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Price set by admin - not editable
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Driver Financial Data Card */}
+        {/* Driver Data Card - Cash amount and notes only */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              Driver Financial Data
+              Driver Notes & Cash
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="driver_earning">Your Earning (₺)</Label>
+              <Label htmlFor="driver_cash">Cash Collected ({currencySymbol})</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
-                <Input
-                  id="driver_earning"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="e.g., 70"
-                  value={driverEarning}
-                  onChange={(e) => setDriverEarning(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Auto-calculated: ₺{reservation?.price} × {commissionRate}% = ₺{((reservation?.price || 0) * commissionRate / 100).toFixed(2)} (editable)
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="driver_cash">Cash Collected (₺)</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                 <Input
                   id="driver_cash"
                   type="number"
                   step="0.01"
                   min="0"
-                  placeholder="e.g., 100"
+                  placeholder="Enter cash amount collected"
                   value={driverCashAmount}
                   onChange={(e) => setDriverCashAmount(e.target.value)}
                   className="pl-8"
@@ -378,7 +364,7 @@ const DriverJobDetails = () => {
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Save Cash & Budget
+                  Save Notes & Cash
                 </>
               )}
             </Button>
@@ -388,7 +374,7 @@ const DriverJobDetails = () => {
         {/* Action Buttons Card */}
         <Card>
           <CardContent className="pt-6 space-y-3">
-            {reservation.status === 'assigned' && !reservation.driver_confirmed && (
+            {reservation.status === 'sent_to_driver' && !reservation.driver_confirmed && (
               <Button 
                 className="w-full" 
                 size="lg"
@@ -404,7 +390,7 @@ const DriverJobDetails = () => {
               </Button>
             )}
 
-            {(reservation.status === 'assigned' && reservation.driver_confirmed) && (
+            {(reservation.status === 'sent_to_driver' && reservation.driver_confirmed) && (
               <Button 
                 className="w-full" 
                 size="lg"
@@ -444,7 +430,9 @@ const DriverJobDetails = () => {
           <DialogHeader>
             <DialogTitle>Cash Collection</DialogTitle>
           </DialogHeader>
-          <p className="py-4">Did you collect cash payment of ₺{reservation.price} from the customer?</p>
+          <p className="py-4">
+            Did you collect cash payment of {formatPrice(reservation.price, reservation.price_currency)} from the customer?
+          </p>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => updateStatus('completed', false)} disabled={updating}>
               No, Not Collected

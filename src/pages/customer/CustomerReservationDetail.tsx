@@ -18,6 +18,7 @@ interface Reservation {
   flight_number: string | null;
   vehicle_type: string;
   price: number | null;
+  price_currency: string | null;
   status: string;
   driver_id: string | null;
   drivers?: {
@@ -27,23 +28,30 @@ interface Reservation {
 }
 
 const statusColors: Record<string, string> = {
-  'awaiting-price': 'bg-orange-500/20 text-orange-700',
-  'awaiting-customer': 'bg-purple-500/20 text-purple-700',
-  'confirmed': 'bg-blue-500/20 text-blue-700',
-  'assigned': 'bg-yellow-500/20 text-yellow-700',
+  'pending_price': 'bg-orange-500/20 text-orange-700',
+  'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700',
+  'customer_approved': 'bg-blue-500/20 text-blue-700',
+  'customer_rejected': 'bg-destructive/20 text-destructive',
+  'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
   'active': 'bg-cyan-500/20 text-cyan-700',
   'completed': 'bg-green-500/20 text-green-700',
-  'cancelled': 'bg-destructive/20 text-destructive',
 };
 
 const statusLabels: Record<string, string> = {
-  'awaiting-price': 'Awaiting Price',
-  'awaiting-customer': 'Price Ready - Your Approval Needed',
-  'confirmed': 'Confirmed',
-  'assigned': 'Driver Assigned',
+  'pending_price': 'Awaiting Price',
+  'waiting_for_customer_approval': 'Price Ready - Your Approval Needed',
+  'customer_approved': 'Confirmed',
+  'customer_rejected': 'Cancelled',
+  'sent_to_driver': 'Driver Assigned',
   'active': 'In Progress',
   'completed': 'Completed',
-  'cancelled': 'Cancelled',
+};
+
+const currencySymbols: Record<string, string> = {
+  'TRY': '₺',
+  'EUR': '€',
+  'USD': '$',
+  'GBP': '£',
 };
 
 const CustomerReservationDetail = () => {
@@ -81,6 +89,12 @@ const CustomerReservationDetail = () => {
     fetchReservation();
   }, [id, user, navigate]);
 
+  const formatPrice = (price: number | null, currency: string | null) => {
+    if (price === null) return null;
+    const symbol = currencySymbols[currency || 'TRY'] || currency || '';
+    return `${symbol}${price}`;
+  };
+
   const handleAcceptPrice = async () => {
     if (!reservation) return;
     setActionLoading(true);
@@ -88,7 +102,7 @@ const CustomerReservationDetail = () => {
     try {
       const { error } = await supabase
         .from('reservations')
-        .update({ status: 'confirmed' })
+        .update({ status: 'customer_approved' })
         .eq('id', reservation.id);
 
       if (error) throw error;
@@ -99,7 +113,7 @@ const CustomerReservationDetail = () => {
           body: {
             type: 'price_accepted',
             title: 'Customer Accepted Price',
-            message: `Reservation #${reservation.id.slice(0, 8)} is confirmed. Price: ₺${reservation.price}`,
+            message: `Reservation #${reservation.id.slice(0, 8)} is confirmed. Price: ${formatPrice(reservation.price, reservation.price_currency)}`,
             notify_admins: true,
             reservation_id: reservation.id,
           }
@@ -109,7 +123,7 @@ const CustomerReservationDetail = () => {
       }
 
       toast.success('Price accepted! Your transfer is confirmed.');
-      setReservation({ ...reservation, status: 'confirmed' });
+      setReservation({ ...reservation, status: 'customer_approved' });
     } catch (error: any) {
       toast.error(error.message || 'Failed to accept price');
     } finally {
@@ -124,7 +138,7 @@ const CustomerReservationDetail = () => {
     try {
       const { error } = await supabase
         .from('reservations')
-        .update({ status: 'cancelled' })
+        .update({ status: 'customer_rejected' })
         .eq('id', reservation.id);
 
       if (error) throw error;
@@ -145,7 +159,7 @@ const CustomerReservationDetail = () => {
       }
 
       toast.success('Reservation cancelled.');
-      setReservation({ ...reservation, status: 'cancelled' });
+      setReservation({ ...reservation, status: 'customer_rejected' });
     } catch (error: any) {
       toast.error(error.message || 'Failed to cancel reservation');
     } finally {
@@ -162,6 +176,8 @@ const CustomerReservationDetail = () => {
   }
 
   if (!reservation) return null;
+
+  const priceDisplay = formatPrice(reservation.price, reservation.price_currency);
 
   return (
     <div className="min-h-screen bg-background">
@@ -223,18 +239,18 @@ const CustomerReservationDetail = () => {
               </div>
             </div>
 
-            {/* Price Section */}
-            {reservation.price !== null && (
+            {/* Price Section - only show if price is set */}
+            {priceDisplay && (
               <div className="bg-muted p-4 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Price</span>
-                  <span className="font-bold text-primary text-2xl">₺{reservation.price}</span>
+                  <span className="font-bold text-primary text-2xl">{priceDisplay}</span>
                 </div>
               </div>
             )}
 
-            {/* Awaiting Price Message */}
-            {reservation.status === 'awaiting-price' && (
+            {/* Pending Price Message */}
+            {reservation.status === 'pending_price' && (
               <div className="bg-orange-50 dark:bg-orange-950/30 p-4 rounded-lg text-center">
                 <p className="text-orange-700 dark:text-orange-300">
                   Our team is reviewing your request. You will receive a notification when the price is ready.
@@ -243,10 +259,13 @@ const CustomerReservationDetail = () => {
             )}
 
             {/* Customer Approval Section */}
-            {reservation.status === 'awaiting-customer' && (
+            {reservation.status === 'waiting_for_customer_approval' && (
               <div className="space-y-4">
                 <div className="bg-purple-50 dark:bg-purple-950/30 p-4 rounded-lg text-center">
-                  <p className="text-purple-700 dark:text-purple-300 mb-2">
+                  <p className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-2">
+                    Your Transfer Price is Ready
+                  </p>
+                  <p className="text-purple-600 dark:text-purple-400">
                     Please review the price and confirm your booking
                   </p>
                 </div>
@@ -258,21 +277,21 @@ const CustomerReservationDetail = () => {
                     disabled={actionLoading}
                   >
                     <X className="h-4 w-4 mr-2" />
-                    Decline
+                    Reject
                   </Button>
                   <Button 
                     onClick={handleAcceptPrice}
                     disabled={actionLoading}
                   >
                     <Check className="h-4 w-4 mr-2" />
-                    Accept Price
+                    Accept
                   </Button>
                 </div>
               </div>
             )}
 
             {/* Driver Info */}
-            {reservation.drivers && (reservation.status === 'assigned' || reservation.status === 'active') && (
+            {reservation.drivers && (reservation.status === 'sent_to_driver' || reservation.status === 'active') && (
               <div className="bg-muted p-4 rounded-lg">
                 <div className="text-sm font-medium mb-3">Your Driver</div>
                 <div className="flex items-center gap-4">
@@ -290,6 +309,15 @@ const CustomerReservationDetail = () => {
               </div>
             )}
 
+            {/* Confirmed Message */}
+            {reservation.status === 'customer_approved' && (
+              <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg text-center">
+                <p className="text-blue-700 dark:text-blue-300">
+                  Your booking is confirmed! A driver will be assigned shortly.
+                </p>
+              </div>
+            )}
+
             {/* Completed Message */}
             {reservation.status === 'completed' && (
               <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg text-center">
@@ -300,7 +328,7 @@ const CustomerReservationDetail = () => {
             )}
 
             {/* Cancelled Message */}
-            {reservation.status === 'cancelled' && (
+            {reservation.status === 'customer_rejected' && (
               <div className="bg-destructive/10 p-4 rounded-lg text-center">
                 <p className="text-destructive">
                   This reservation has been cancelled.

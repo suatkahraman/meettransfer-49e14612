@@ -280,6 +280,7 @@ export type Database = {
           pickup_date: string
           pickup_time: string
           price: number | null
+          price_currency: string | null
           status: string
           updated_at: string | null
           vehicle_type: string
@@ -303,6 +304,7 @@ export type Database = {
           pickup_date: string
           pickup_time: string
           price?: number | null
+          price_currency?: string | null
           status?: string
           updated_at?: string | null
           vehicle_type: string
@@ -326,6 +328,7 @@ export type Database = {
           pickup_date?: string
           pickup_time?: string
           price?: number | null
+          price_currency?: string | null
           status?: string
           updated_at?: string | null
           vehicle_type?: string

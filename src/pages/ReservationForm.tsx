@@ -204,7 +204,7 @@ const ReservationForm = () => {
           .eq('id', userId);
       }
 
-      // Create reservation with status 'awaiting-price'
+      // Create reservation with status 'pending_price'
       const { data: reservation, error: reservationError } = await supabase
         .from('reservations')
         .insert({
@@ -218,8 +218,9 @@ const ReservationForm = () => {
           flight_number: formData.flightNumber?.trim() || null,
           vehicle_type: formData.vehicleType,
           payment_type: 'cash',
-          status: 'awaiting-price',
+          status: 'pending_price',
           price: null,
+          price_currency: null,
         })
         .select()
         .single();
