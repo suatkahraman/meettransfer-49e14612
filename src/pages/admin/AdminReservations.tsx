@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -75,6 +76,7 @@ const AdminReservations = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
+  const { playSound } = useNotificationSound();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,6 +167,7 @@ const AdminReservations = () => {
           console.log('Reservation change:', payload);
           fetchReservations();
           if (payload.eventType === 'INSERT') {
+            playSound();
             toast.info('New reservation received');
           }
         }
