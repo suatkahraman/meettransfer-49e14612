@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 
@@ -466,6 +466,27 @@ const AdminReservations = () => {
                           Assign Driver
                         </Button>
                       )}
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          const params = new URLSearchParams({
+                            customer_name: reservation.customer_name,
+                            customer_phone: reservation.customer_phone,
+                            pickup: reservation.pickup,
+                            dropoff: reservation.dropoff,
+                            vehicle_type: reservation.vehicle_type,
+                            payment_type: reservation.payment_type,
+                            price: reservation.price?.toString() || '',
+                            price_currency: reservation.price_currency || 'TRY',
+                            flight_number: reservation.flight_number || '',
+                          });
+                          navigate(`/admin/reservations/create?${params.toString()}`);
+                        }}
+                        title="Duplicate reservation"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                       <Button 
                         variant="outline" 
                         size="sm"
