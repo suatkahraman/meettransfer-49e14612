@@ -11,9 +11,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
+import DriverRouteMap from '@/components/driver/DriverRouteMap';
 
 interface Reservation {
   id: string;
@@ -311,6 +312,23 @@ const DriverJobDetails = () => {
                 Price set by admin - not editable
               </p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Route Map Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Map className="h-5 w-5" />
+              Route Map
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DriverRouteMap
+              pickup={reservation.pickup}
+              dropoff={reservation.dropoff}
+              customerPhone={reservation.customer_phone}
+            />
           </CardContent>
         </Card>
 
