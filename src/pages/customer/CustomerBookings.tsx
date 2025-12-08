@@ -9,6 +9,7 @@ import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, Al
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import NotificationBell from '@/components/NotificationBell';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 interface Reservation {
   id: string;
@@ -65,6 +66,7 @@ const CustomerBookings = () => {
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
+  const { playSound } = useNotificationSound();
 
   const fetchReservations = async () => {
     if (!user) return;
@@ -105,6 +107,7 @@ const CustomerBookings = () => {
           console.log('Reservation update:', payload);
           fetchReservations();
           if (payload.eventType === 'UPDATE') {
+            playSound();
             toast.info('Your reservation has been updated');
           }
         }
@@ -114,7 +117,7 @@ const CustomerBookings = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, playSound]);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return null;
