@@ -172,7 +172,32 @@ Deno.serve(async (req) => {
       console.log('Driver record created successfully')
     }
 
+    // Server-side audit log for user creation
+    const ip_address = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown'
+    const user_agent = req.headers.get('user-agent') || 'unknown'
+    
+    await supabaseAdmin
+      .from('audit_logs')
+      .insert({
+        user_id: user.id,
+        user_email: user.email,
+        action: 'CREATE_USER',
+        table_name: role === 'driver' ? 'drivers' : 'user_roles',
+        record_id: newUserId,
+        new_data: {
+          email,
+          name,
+          phone,
+          role,
+          region: region || null,
+          commission_rate: commission_rate || null,
+        },
+        ip_address,
+        user_agent,
+      })
+
     console.log(`${role} account created successfully for: ${email}`)
+    console.log(`Audit log created for user creation by ${user.email}`)
 
     return new Response(
       JSON.stringify({ 
