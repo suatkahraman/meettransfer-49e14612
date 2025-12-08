@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +60,7 @@ const DriverHome = () => {
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
+  const { playSound } = useNotificationSound();
 
   const getCurrencySymbol = (currency: string | null) => {
     return currencySymbols[currency || 'TRY'] || '₺';
@@ -114,6 +116,7 @@ const DriverHome = () => {
             const newReservation = payload.new as Reservation;
             if (['sent_to_driver', 'active', 'completed'].includes(newReservation.status)) {
               setReservations(prev => [...prev, newReservation]);
+              playSound();
               toast.success('New job assigned!', {
                 description: `${newReservation.pickup} → ${newReservation.dropoff}`,
                 icon: <Bell className="h-4 w-4" />
