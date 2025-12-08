@@ -10,7 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Plus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { ArrowLeft, Save, Plus, BookmarkPlus, FileText } from 'lucide-react';
 
 const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
@@ -43,13 +44,28 @@ interface Driver {
   user_id: string;
 }
 
+interface Template {
+  id: string;
+  name: string;
+  pickup: string;
+  dropoff: string;
+  vehicle_type: string;
+  payment_type: string;
+  price: number | null;
+  price_currency: string | null;
+}
+
 const AdminCreateReservation = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { logAction } = useAuditLog();
   const [saving, setSaving] = useState(false);
+  const [savingTemplate, setSavingTemplate] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [templateDialog, setTemplateDialog] = useState(false);
+  const [templateName, setTemplateName] = useState('');
   
   // Pre-fill from URL params (for duplicate functionality)
   const [formData, setFormData] = useState({
@@ -75,15 +91,70 @@ const AdminCreateReservation = () => {
   };
 
   useEffect(() => {
-    const fetchDrivers = async () => {
-      const { data } = await supabase
-        .from('drivers')
-        .select('id, name, user_id')
-        .eq('active', true);
-      setDrivers(data || []);
+    const fetchData = async () => {
+      const [driversRes, templatesRes] = await Promise.all([
+        supabase.from('drivers').select('id, name, user_id').eq('active', true),
+        supabase.from('reservation_templates').select('*').order('name'),
+      ]);
+      setDrivers(driversRes.data || []);
+      setTemplates(templatesRes.data || []);
     };
-    fetchDrivers();
+    fetchData();
   }, []);
+
+  const applyTemplate = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setFormData(prev => ({
+        ...prev,
+        pickup: template.pickup,
+        dropoff: template.dropoff,
+        vehicle_type: template.vehicle_type,
+        payment_type: template.payment_type,
+        price: template.price?.toString() || '',
+        price_currency: template.price_currency || 'TRY',
+      }));
+      toast.success(`Template "${template.name}" applied`);
+    }
+  };
+
+  const saveAsTemplate = async () => {
+    if (!templateName.trim()) {
+      toast.error('Please enter a template name');
+      return;
+    }
+    if (!formData.pickup || !formData.dropoff) {
+      toast.error('Pickup and dropoff locations are required');
+      return;
+    }
+
+    setSavingTemplate(true);
+    try {
+      const { error } = await supabase.from('reservation_templates').insert({
+        name: templateName.trim(),
+        pickup: formData.pickup,
+        dropoff: formData.dropoff,
+        vehicle_type: formData.vehicle_type,
+        payment_type: formData.payment_type,
+        price: formData.price ? parseFloat(formData.price) : null,
+        price_currency: formData.price_currency,
+      });
+
+      if (error) throw error;
+
+      // Refresh templates
+      const { data } = await supabase.from('reservation_templates').select('*').order('name');
+      setTemplates(data || []);
+      
+      setTemplateDialog(false);
+      setTemplateName('');
+      toast.success('Template saved successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save template');
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,10 +263,39 @@ const AdminCreateReservation = () => {
       <main className="container mx-auto py-8 px-4 max-w-2xl">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5" />
-              New Reservation
-            </CardTitle>
+            <div className="flex flex-wrap justify-between items-start gap-4">
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                New Reservation
+              </CardTitle>
+              <div className="flex gap-2">
+                {templates.length > 0 && (
+                  <Select onValueChange={applyTemplate}>
+                    <SelectTrigger className="w-[180px]">
+                      <FileText className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Use Template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templates.map(t => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setTemplateDialog(true)}
+                  disabled={!formData.pickup || !formData.dropoff}
+                >
+                  <BookmarkPlus className="h-4 w-4 mr-1" />
+                  Save Template
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -412,6 +512,37 @@ const AdminCreateReservation = () => {
             </form>
           </CardContent>
         </Card>
+
+        {/* Save Template Dialog */}
+        <Dialog open={templateDialog} onOpenChange={setTemplateDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Save as Template</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-muted-foreground">
+                Save the current route ({formData.pickup} → {formData.dropoff}) as a reusable template.
+              </p>
+              <div className="space-y-2">
+                <Label>Template Name *</Label>
+                <Input
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  placeholder="e.g., IST to Taksim Standard"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setTemplateDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={saveAsTemplate} disabled={savingTemplate}>
+                <BookmarkPlus className="h-4 w-4 mr-2" />
+                {savingTemplate ? 'Saving...' : 'Save Template'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

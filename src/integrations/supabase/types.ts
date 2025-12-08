@@ -290,6 +290,45 @@ export type Database = {
           },
         ]
       }
+      reservation_templates: {
+        Row: {
+          created_at: string
+          dropoff: string
+          id: string
+          name: string
+          payment_type: string
+          pickup: string
+          price: number | null
+          price_currency: string | null
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          created_at?: string
+          dropoff: string
+          id?: string
+          name: string
+          payment_type?: string
+          pickup: string
+          price?: number | null
+          price_currency?: string | null
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Update: {
+          created_at?: string
+          dropoff?: string
+          id?: string
+          name?: string
+          payment_type?: string
+          pickup?: string
+          price?: number | null
+          price_currency?: string | null
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       reservations: {
         Row: {
           created_at: string | null
