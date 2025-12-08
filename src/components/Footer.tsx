@@ -1,129 +1,98 @@
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Linkedin, Youtube } from "lucide-react";
+import { Link } from "react-router-dom";
+
+const socialLinks = [
+  { icon: Facebook, href: "https://facebook.com/meettransfer", label: "Facebook" },
+  { icon: Instagram, href: "https://instagram.com/meettransfer", label: "Instagram" },
+  { icon: Twitter, href: "https://twitter.com/meettransfer", label: "Twitter" },
+  { icon: Linkedin, href: "https://linkedin.com/company/meettransfer", label: "LinkedIn" },
+  { icon: Youtube, href: "https://youtube.com/@meettransfer", label: "YouTube" },
+];
+
 export const Footer = () => {
-  return <footer className="bg-primary text-white py-12 px-4">
+  return (
+    <footer className="bg-primary text-primary-foreground py-12 px-4">
       <div className="container max-w-7xl mx-auto">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
+          {/* Brand & Description */}
           <div className="space-y-4">
             <h3 className="text-2xl font-bold">Meet Transfer</h3>
-            <p className="text-white/80 font-sans text-sm leading-relaxed">🌍 Destinations
-Meet Transfer provides premium VIP transfer services from all major international airports and top holiday destinations across Turkey.
-
-✈ Istanbul Airport (IST & SAW) – VIP Airport Transfer
-Exclusive private transfers to Taksim, Sultanahmet, Galataport Cruise Port, Beşiktaş, Levent, and all hotels on the European & Asian side
-Mercedes Vito, V-Class, Sprinter VIP
-
-🏖 Antalya Airport (AYT) – Resort Transfers
-Luxury transfers to Lara, Kundu, Belek, Side, Alanya, Kemer, Manavgat
-Perfect for hotel groups, golfers & family travel
-
-⚓ Bodrum Airport (BJV) – Luxury Transfers
-VIP service to Yalıkavak, Türkbükü, Torba, Gündoğan, Turgutreis, Bodrum Center
-
-🌊 Dalaman Airport (DLM) – Private Chauffeur Service
-Private transfers to Fethiye, Ölüdeniz, Göcek Marina, Marmaris, Datça, Kaş, Kalkan
-Premium fleet & yacht/marina transfer options available
-
-🏙 Izmir Airport (ADB) – Business & Hotel Transfers
-Exclusive transfers to Kuşadası, Alaçatı, Çeşme, Selçuk, Şirince & Izmir hotels
-
-🏜 Cappadocia (NAV & ASR) – VIP Airport Shuttle
-Luxury transfers to Göreme, Uçhisar, Avanos, Ürgüp & cave & balloon hotels
-Special hot air balloon tour packages available
-
-🚘 Our Premium Fleet
-
-Mercedes V-Class VIP
-
-Mercedes Vito Luxury
-
-Mercedes Sprinter VIP
-
-Minibus 12–16 seats
-
-Luxury Executive Limousine
-
-⭐ All Vehicles Include
-
-Leather seats
-
-Large luggage capacity
-
-A/C & high-speed Wi-Fi
-
-USB & mobile charging ports
-
-Privacy glass & extra comfort</p>
+            <p className="text-primary-foreground/80 text-sm leading-relaxed">
+              Premium VIP transfer services from all major international airports across Turkey. 
+              Experience luxury travel with our professional chauffeurs and premium fleet.
+            </p>
+            {/* Social Media Links */}
+            <div className="flex items-center gap-3 pt-2">
+              {socialLinks.map((social) => {
+                const IconComponent = social.icon;
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    className="p-2 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
+                  >
+                    <IconComponent className="h-4 w-4" />
+                  </a>
+                );
+              })}
+            </div>
           </div>
 
+          {/* Quick Links */}
           <div className="space-y-4">
             <h4 className="font-semibold text-lg">Quick Links</h4>
-            <ul className="space-y-2 text-white/80 font-sans text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">Home</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Services</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Destinations</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
+            <ul className="space-y-2 text-primary-foreground/80 text-sm">
+              <li><Link to="/" className="hover:text-primary-foreground transition-colors">Home</Link></li>
+              <li><Link to="/services" className="hover:text-primary-foreground transition-colors">Services</Link></li>
+              <li><Link to="/destinations" className="hover:text-primary-foreground transition-colors">Destinations</Link></li>
+              <li><Link to="/about" className="hover:text-primary-foreground transition-colors">About Us</Link></li>
+              <li><Link to="/contact" className="hover:text-primary-foreground transition-colors">Contact</Link></li>
             </ul>
           </div>
 
+          {/* Services */}
           <div className="space-y-4">
             <h4 className="font-semibold text-lg">Services</h4>
-            <ul className="space-y-2 text-white/80 font-sans text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">Airport Transfer</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Hourly Rental</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">City Tours</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Corporate Service</a></li>
+            <ul className="space-y-2 text-primary-foreground/80 text-sm">
+              <li><Link to="/istanbul-transfer" className="hover:text-primary-foreground transition-colors">Istanbul Transfer</Link></li>
+              <li><Link to="/antalya-transfer" className="hover:text-primary-foreground transition-colors">Antalya Transfer</Link></li>
+              <li><Link to="/bodrum-transfer" className="hover:text-primary-foreground transition-colors">Bodrum Transfer</Link></li>
+              <li><Link to="/dalaman-transfer" className="hover:text-primary-foreground transition-colors">Dalaman Transfer</Link></li>
+              <li><Link to="/fleet" className="hover:text-primary-foreground transition-colors">Our Fleet</Link></li>
             </ul>
           </div>
 
+          {/* Contact */}
           <div className="space-y-4">
             <h4 className="font-semibold text-lg">Contact</h4>
-            <ul className="space-y-3 text-white/80 font-sans text-sm">
-              
-              <li className="flex items-start gap-2">
-                <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <span className="whitespace-pre-line text-xs leading-relaxed">
-                  🌍 Meet Transfer – Global Office Locations{"\n"}
-                  🇹🇷 Türkiye – İstanbul Headquarters{"\n"}
-                  📍 Istanbul Airport (IST) – VIP Meet & Greet Terminal Office{"\n"}
-                  📞 +90 532 174 8390{"\n"}
-                  ✉ info@meettransfer.com{"\n\n"}
-                  🇺🇸 USA Office – Los Angeles{"\n"}
-                  📍 La Fashion District, Los Angeles, CA 854{"\n"}
-                  📞 +1 205 650 8400{"\n\n"}
-                  🇩🇪 Germany Office – Berlin{"\n"}
-                  📍 Street Business Center, Berlin 245{"\n"}
-                  📞 +1 205 650 8400{"\n\n"}
-                  🇦🇪 UAE Office – Dubai{"\n"}
-                  📍 Downtown Business Tower, Dubai 35{"\n"}
-                  📞 +1 205 650 8400
-                </span>
+            <ul className="space-y-3 text-primary-foreground/80 text-sm">
+              <li className="flex items-center gap-2">
+                <Phone className="h-4 w-4 flex-shrink-0" />
+                <a href="tel:+905321748390" className="hover:text-primary-foreground transition-colors">
+                  +90 532 174 8390
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="h-4 w-4 flex-shrink-0" />
+                <a href="mailto:info@meettransfer.com" className="hover:text-primary-foreground transition-colors">
+                  info@meettransfer.com
+                </a>
               </li>
               <li className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <span className="whitespace-pre-line text-xs leading-relaxed">
-                  🌍 Meet Transfer – Global Office Locations{"\n"}
-                  🇹🇷 Türkiye – İstanbul Headquarters{"\n"}
-                  📍 Istanbul Airport (IST) – VIP Meet & Greet Terminal Office{"\n"}
-                  📞 +90 532 174 8390{"\n"}
-                  ✉ info@meettransfer.com{"\n\n"}
-                  🇺🇸 USA Office – Los Angeles{"\n"}
-                  📍 La Fashion District, Los Angeles, CA 854{"\n"}
-                  📞 +1 205 650 8400{"\n\n"}
-                  🇩🇪 Germany Office – Berlin{"\n"}
-                  📍 Street Business Center, Berlin 245{"\n"}
-                  📞 +1 205 650 8400{"\n\n"}
-                  🇦🇪 UAE Office – Dubai{"\n"}
-                  📍 Downtown Business Tower, Dubai 35{"\n"}
-                  📞 +1 205 650 8400
-                </span>
+                <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <span>Istanbul Airport (IST)<br />VIP Terminal Office</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-white/20 pt-8 text-center text-white/60 font-sans text-sm">
-          <p>© 2001 Meet Transfer. All rights reserved.</p>
+        <div className="border-t border-primary-foreground/20 pt-8 text-center text-primary-foreground/60 text-sm">
+          <p>© {new Date().getFullYear()} Meet Transfer. All rights reserved.</p>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
