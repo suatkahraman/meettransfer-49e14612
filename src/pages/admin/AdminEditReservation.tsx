@@ -14,7 +14,12 @@ import { ArrowLeft, Save, Send, DollarSign } from 'lucide-react';
 
 const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
-const paymentTypes = ['cash', 'no-cash', 'invoice'];
+const paymentTypes = [
+  { value: 'cash', label: 'Cash' },
+  { value: 'card', label: 'Card' },
+  { value: 'online', label: 'Online' },
+  { value: 'none', label: 'None' },
+];
 const statuses = ['awaiting-price', 'awaiting-customer', 'confirmed', 'assigned', 'active', 'completed', 'cancelled'];
 
 const statusColors: Record<string, string> = {
@@ -53,6 +58,7 @@ const AdminEditReservation = () => {
     vehicle_type: '',
     payment_type: '',
     price: '',
+    driver_cash_amount: '',
     status: '',
     driver_id: '',
     admin_notes: '',
@@ -88,6 +94,7 @@ const AdminEditReservation = () => {
         vehicle_type: r.vehicle_type || '',
         payment_type: r.payment_type || '',
         price: r.price?.toString() || '',
+        driver_cash_amount: r.driver_cash_amount?.toString() || '',
         status: r.status || '',
         driver_id: r.driver_id || '',
         admin_notes: adminNotesResult.data?.notes || '',
@@ -131,7 +138,7 @@ const AdminEditReservation = () => {
               user_id: customerId,
               reservation_id: id,
               title: 'Your Transfer Price is Ready',
-              message: `Your transfer price has been set: €${formData.price}. Please review and confirm your booking.`,
+              message: `Your transfer price has been set: ₺${formData.price}. Please review and confirm your booking.`,
               type: 'price_ready'
             }
           });
@@ -176,6 +183,7 @@ const AdminEditReservation = () => {
         vehicle_type: formData.vehicle_type,
         payment_type: formData.payment_type,
         price: parseFloat(formData.price) || null,
+        driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
         status: formData.status,
         driver_id: formData.driver_id || null,
       })
@@ -273,15 +281,19 @@ const AdminEditReservation = () => {
               </p>
               <div className="flex gap-4 items-end">
                 <div className="flex-1 space-y-2">
-                  <Label>Price (€)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    placeholder="Enter price"
-                    className="text-lg"
-                  />
+                  <Label>Price (₺)</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.price}
+                      onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      placeholder="Enter price"
+                      className="text-lg pl-8"
+                    />
+                  </div>
                 </div>
                 <Button 
                   onClick={handleSendPrice} 
@@ -392,19 +404,38 @@ const AdminEditReservation = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {paymentTypes.map(p => (
-                        <SelectItem key={p} value={p}>{p}</SelectItem>
+                        <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Price (€)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
-                  />
+                  <Label>Price (₺)</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.price}
+                      onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      className="pl-8"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Driver Cash (₺)</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.driver_cash_amount}
+                      onChange={(e) => setFormData({...formData, driver_cash_amount: e.target.value})}
+                      className="pl-8"
+                    />
+                  </div>
                 </div>
               </div>
 

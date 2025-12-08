@@ -28,6 +28,7 @@ import DriverAccounting from "./pages/driver/DriverAccounting";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminReservations from "./pages/admin/AdminReservations";
 import AdminEditReservation from "./pages/admin/AdminEditReservation";
+import AdminCreateReservation from "./pages/admin/AdminCreateReservation";
 import AdminDrivers from "./pages/admin/AdminDrivers";
 import AdminDriverJobs from "./pages/admin/AdminDriverJobs";
 import AdminAccounting from "./pages/admin/AdminAccounting";
@@ -102,6 +103,7 @@ const App = () => (
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/setup" element={<AdminSetup />} />
               <Route path="/admin/reservations" element={<AdminRoute><AdminReservations /></AdminRoute>} />
+              <Route path="/admin/reservations/create" element={<AdminRoute><AdminCreateReservation /></AdminRoute>} />
               <Route path="/admin/reservations/:id" element={<AdminRoute><AdminEditReservation /></AdminRoute>} />
               <Route path="/admin/drivers" element={<AdminRoute><AdminDrivers /></AdminRoute>} />
               <Route path="/admin/drivers/:driverId/jobs" element={<AdminRoute><AdminDriverJobs /></AdminRoute>} />

@@ -135,7 +135,7 @@ const DriverHome = () => {
                       <CreditCard className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm capitalize">{reservation.payment_type}</span>
                     </div>
-                    <span className="font-bold text-primary">€{reservation.price}</span>
+                    <span className="font-bold text-primary">₺{reservation.price}</span>
                   </div>
                 </CardContent>
               </Card>

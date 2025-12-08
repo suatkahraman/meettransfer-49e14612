@@ -141,7 +141,7 @@ const CustomerBookings = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       {reservation.price !== null ? (
-                        <span className="font-bold text-primary">€{reservation.price}</span>
+                        <span className="font-bold text-primary">₺{reservation.price}</span>
                       ) : (
                         <span className="text-sm text-muted-foreground">Price pending</span>
                       )}

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 
@@ -233,6 +233,15 @@ const AdminReservations = () => {
       </header>
 
       <main className="container mx-auto py-8 px-4">
+        {/* Header with Create Button */}
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+          <h2 className="text-xl font-semibold">All Reservations</h2>
+          <Button onClick={() => navigate('/admin/reservations/create')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Reservation
+          </Button>
+        </div>
+
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
           <Input
@@ -307,7 +316,7 @@ const AdminReservations = () => {
                           <CreditCard className="h-4 w-4 text-muted-foreground" />
                           {reservation.payment_type}
                         </span>
-                        <span className="font-bold text-primary">€{reservation.price}</span>
+                        <span className="font-bold text-primary">₺{reservation.price}</span>
                         {reservation.drivers && (
                           <span className="flex items-center gap-1">
                             <UserCheck className="h-4 w-4 text-green-600" />
