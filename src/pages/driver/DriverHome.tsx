@@ -59,14 +59,21 @@ const DriverHome = () => {
       .from('reservations')
       .select('*')
       .eq('driver_id', driverId)
-      .in('status', ['sent_to_driver', 'active', 'completed'])
-      .order('pickup_date', { ascending: true });
+      .in('status', ['sent_to_driver', 'assigned', 'active', 'completed'])
+      .order('pickup_date', { ascending: true })
+      .order('pickup_time', { ascending: true });
 
     if (error) {
       console.error('Error:', error);
       if (showToast) toast.error('Failed to refresh');
     } else {
-      setReservations(data || []);
+      // Sort by combined date and time for accurate ordering
+      const sortedData = (data || []).sort((a, b) => {
+        const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
+        const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
+        return dateTimeA.getTime() - dateTimeB.getTime();
+      });
+      setReservations(sortedData);
       if (showToast) toast.success('Jobs refreshed');
     }
     setLoading(false);
@@ -105,8 +112,16 @@ const DriverHome = () => {
           
           if (payload.eventType === 'INSERT') {
             const newReservation = payload.new as Reservation;
-            if (['sent_to_driver', 'active', 'completed'].includes(newReservation.status)) {
-              setReservations(prev => [...prev, newReservation]);
+            if (['sent_to_driver', 'assigned', 'active', 'completed'].includes(newReservation.status)) {
+              setReservations(prev => {
+                const updated = [...prev, newReservation];
+                // Re-sort by date/time
+                return updated.sort((a, b) => {
+                  const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
+                  const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
+                  return dateTimeA.getTime() - dateTimeB.getTime();
+                });
+              });
               playSound();
               toast.success('New job assigned!', {
                 description: `${newReservation.pickup} → ${newReservation.dropoff}`,
@@ -115,9 +130,21 @@ const DriverHome = () => {
             }
           } else if (payload.eventType === 'UPDATE') {
             const updatedReservation = payload.new as Reservation;
-            setReservations(prev => 
-              prev.map(r => r.id === updatedReservation.id ? updatedReservation : r)
-            );
+            // Keep the reservation visible if it's in valid statuses
+            if (['sent_to_driver', 'assigned', 'active', 'completed'].includes(updatedReservation.status)) {
+              setReservations(prev => {
+                const updated = prev.map(r => r.id === updatedReservation.id ? updatedReservation : r);
+                // Re-sort after update
+                return updated.sort((a, b) => {
+                  const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
+                  const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
+                  return dateTimeA.getTime() - dateTimeB.getTime();
+                });
+              });
+            } else {
+              // Remove if status changed to something we don't track
+              setReservations(prev => prev.filter(r => r.id !== updatedReservation.id));
+            }
           } else if (payload.eventType === 'DELETE') {
             const deletedId = (payload.old as any).id;
             setReservations(prev => prev.filter(r => r.id !== deletedId));
@@ -169,9 +196,14 @@ const DriverHome = () => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Separate reservations by status
-  const pendingJobs = reservations.filter(r => r.status === 'sent_to_driver');
+  // Get current date/time for separating upcoming vs past
+  const now = new Date();
+
+  // Separate reservations by status and time
+  const pendingJobs = reservations.filter(r => r.status === 'sent_to_driver' || r.status === 'assigned');
   const activeJobs = reservations.filter(r => r.status === 'active');
+  
+  // Separate completed into recent (today) and past
   const completedJobs = reservations.filter(r => r.status === 'completed');
 
   return (
