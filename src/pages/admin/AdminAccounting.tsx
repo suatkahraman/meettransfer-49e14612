@@ -115,7 +115,7 @@ const AdminAccounting = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-primary">€{totals.revenue.toFixed(2)}</div>
+                  <div className="text-2xl font-bold text-primary">₺{totals.revenue.toFixed(2)}</div>
                 </CardContent>
               </Card>
 
@@ -127,7 +127,7 @@ const AdminAccounting = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">€{totals.commissions.toFixed(2)}</div>
+                  <div className="text-2xl font-bold">₺{totals.commissions.toFixed(2)}</div>
                 </CardContent>
               </Card>
 
@@ -139,7 +139,7 @@ const AdminAccounting = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">€{totals.cashCollected.toFixed(2)}</div>
+                  <div className="text-2xl font-bold">₺{totals.cashCollected.toFixed(2)}</div>
                 </CardContent>
               </Card>
 
@@ -151,7 +151,7 @@ const AdminAccounting = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-destructive">€{totals.unpaidBalances.toFixed(2)}</div>
+                  <div className="text-2xl font-bold text-destructive">₺{totals.unpaidBalances.toFixed(2)}</div>
                 </CardContent>
               </Card>
             </div>
@@ -178,11 +178,11 @@ const AdminAccounting = () => {
                       <TableRow key={driver.id}>
                         <TableCell className="font-medium">{driver.name}</TableCell>
                         <TableCell className="text-right">{driver.commission_rate}%</TableCell>
-                        <TableCell className="text-right">€{driver.totalRevenue.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-green-600">€{driver.earnings.toFixed(2)}</TableCell>
-                        <TableCell className="text-right">€{driver.cashCollected.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">₺{driver.totalRevenue.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-green-600">₺{driver.earnings.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">₺{driver.cashCollected.toFixed(2)}</TableCell>
                         <TableCell className="text-right text-destructive font-medium">
-                          €{driver.balanceOwed.toFixed(2)}
+                          ₺{driver.balanceOwed.toFixed(2)}
                         </TableCell>
                       </TableRow>
                     ))}

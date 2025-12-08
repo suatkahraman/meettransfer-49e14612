@@ -302,7 +302,7 @@ const DriverJobDetails = () => {
             <div className="bg-muted p-4 rounded-lg">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Total Price</span>
-                <span className="text-2xl font-bold text-primary">€{reservation.price}</span>
+                <span className="text-2xl font-bold text-primary">₺{reservation.price}</span>
               </div>
             </div>
           </CardContent>
@@ -318,30 +318,40 @@ const DriverJobDetails = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="driver_earning">Your Earning (Budget)</Label>
-              <Input
-                id="driver_earning"
-                type="number"
-                step="0.01"
-                placeholder="e.g., 70"
-                value={driverEarning}
-                onChange={(e) => setDriverEarning(e.target.value)}
-              />
+              <Label htmlFor="driver_earning">Your Earning (₺)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                <Input
+                  id="driver_earning"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="e.g., 70"
+                  value={driverEarning}
+                  onChange={(e) => setDriverEarning(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
               <p className="text-xs text-muted-foreground">
-                Auto-calculated: €{reservation?.price} × {commissionRate}% = €{((reservation?.price || 0) * commissionRate / 100).toFixed(2)} (editable)
+                Auto-calculated: ₺{reservation?.price} × {commissionRate}% = ₺{((reservation?.price || 0) * commissionRate / 100).toFixed(2)} (editable)
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="driver_cash">Cash Collected from Passenger</Label>
-              <Input
-                id="driver_cash"
-                type="number"
-                step="0.01"
-                placeholder="e.g., 100"
-                value={driverCashAmount}
-                onChange={(e) => setDriverCashAmount(e.target.value)}
-              />
+              <Label htmlFor="driver_cash">Cash Collected (₺)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                <Input
+                  id="driver_cash"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="e.g., 100"
+                  value={driverCashAmount}
+                  onChange={(e) => setDriverCashAmount(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -434,7 +444,7 @@ const DriverJobDetails = () => {
           <DialogHeader>
             <DialogTitle>Cash Collection</DialogTitle>
           </DialogHeader>
-          <p className="py-4">Did you collect cash payment of €{reservation.price} from the customer?</p>
+          <p className="py-4">Did you collect cash payment of ₺{reservation.price} from the customer?</p>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => updateStatus('completed', false)} disabled={updating}>
               No, Not Collected

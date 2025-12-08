@@ -99,7 +99,7 @@ const CustomerReservationDetail = () => {
           body: {
             type: 'price_accepted',
             title: 'Customer Accepted Price',
-            message: `Reservation #${reservation.id.slice(0, 8)} is confirmed. Price: €${reservation.price}`,
+            message: `Reservation #${reservation.id.slice(0, 8)} is confirmed. Price: ₺${reservation.price}`,
             notify_admins: true,
             reservation_id: reservation.id,
           }
@@ -228,7 +228,7 @@ const CustomerReservationDetail = () => {
               <div className="bg-muted p-4 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Price</span>
-                  <span className="font-bold text-primary text-2xl">€{reservation.price}</span>
+                  <span className="font-bold text-primary text-2xl">₺{reservation.price}</span>
                 </div>
               </div>
             )}

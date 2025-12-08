@@ -113,7 +113,7 @@ const DriverAccounting = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">€{data.totalEarnings.toFixed(2)}</div>
+                <div className="text-3xl font-bold text-green-600">₺{data.totalEarnings.toFixed(2)}</div>
                 <p className="text-sm text-muted-foreground mt-1">Based on your commission rate</p>
               </CardContent>
             </Card>
@@ -126,7 +126,7 @@ const DriverAccounting = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">€{data.cashCollected.toFixed(2)}</div>
+                <div className="text-3xl font-bold">₺{data.cashCollected.toFixed(2)}</div>
               </CardContent>
             </Card>
 
@@ -138,7 +138,7 @@ const DriverAccounting = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-destructive">€{data.balanceOwed.toFixed(2)}</div>
+                <div className="text-3xl font-bold text-destructive">₺{data.balanceOwed.toFixed(2)}</div>
                 <p className="text-sm text-muted-foreground mt-1">Cash collected minus your earnings</p>
               </CardContent>
             </Card>
