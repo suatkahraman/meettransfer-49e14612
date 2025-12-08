@@ -303,6 +303,12 @@ const AdminDrivers = () => {
                       <Phone className="h-4 w-4 text-muted-foreground" />
                       <span>{driver.phone}</span>
                     </div>
+                    {driver.plate_number && (
+                      <div className="flex items-center gap-2">
+                        <Car className="h-4 w-4 text-muted-foreground" />
+                        <span>{driver.plate_number}</span>
+                      </div>
+                    )}
                     {driver.region && (
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-muted-foreground" />
