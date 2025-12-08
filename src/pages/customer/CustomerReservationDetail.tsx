@@ -24,6 +24,8 @@ interface Reservation {
   drivers?: {
     name: string;
     phone: string;
+    plate_number: string | null;
+    vehicle_model: string | null;
   } | null;
 }
 
@@ -70,7 +72,7 @@ const CustomerReservationDetail = () => {
         .from('reservations')
         .select(`
           *,
-          drivers (name, phone)
+          drivers (name, phone, plate_number, vehicle_model)
         `)
         .eq('id', id)
         .eq('customer_id', user.id)
@@ -294,13 +296,23 @@ const CustomerReservationDetail = () => {
             {reservation.drivers && (reservation.status === 'sent_to_driver' || reservation.status === 'active') && (
               <div className="bg-muted p-4 rounded-lg">
                 <div className="text-sm font-medium mb-3">Your Driver</div>
-                <div className="flex items-center gap-4">
+                <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span>{reservation.drivers.name}</span>
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{reservation.drivers.name}</span>
                   </div>
+                  {(reservation.drivers.vehicle_model || reservation.drivers.plate_number) && (
+                    <div className="flex items-center gap-2">
+                      <Car className="h-4 w-4 text-muted-foreground" />
+                      <span>
+                        {reservation.drivers.vehicle_model || ''}
+                        {reservation.drivers.vehicle_model && reservation.drivers.plate_number ? ' - ' : ''}
+                        {reservation.drivers.plate_number || ''}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
+                    <Phone className="h-4 w-4 text-muted-foreground" />
                     <a href={`tel:${reservation.drivers.phone}`} className="text-primary">
                       {reservation.drivers.phone}
                     </a>
