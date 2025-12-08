@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 
 interface Reservation {
   id: string;
+  customer_id: string;
   customer_name: string;
   customer_phone: string;
   pickup: string;
@@ -159,6 +160,8 @@ const DriverHome = () => {
   }, [driverId]);
 
   const handleAcceptJob = async (id: string) => {
+    const reservation = reservations.find(r => r.id === id);
+    
     const { error } = await supabase
       .from('reservations')
       .update({ driver_confirmed: true, status: 'active' })
@@ -166,11 +169,52 @@ const DriverHome = () => {
 
     if (error) {
       toast.error('Failed to accept job');
-    } else {
-      toast.success('Job accepted! Passenger pickup confirmed.');
-      setReservations(prev => 
-        prev.map(r => r.id === id ? { ...r, driver_confirmed: true, status: 'active' } : r)
-      );
+      return;
+    }
+
+    toast.success('Job accepted! Passenger pickup confirmed.');
+    setReservations(prev => 
+      prev.map(r => r.id === id ? { ...r, driver_confirmed: true, status: 'active' } : r)
+    );
+
+    // Notify customer that driver accepted their reservation
+    if (reservation) {
+      try {
+        // Get driver name
+        const { data: driverData } = await supabase
+          .from('drivers')
+          .select('name')
+          .eq('id', driverId)
+          .maybeSingle();
+
+        const driverName = driverData?.name || 'Your driver';
+
+        // Create notification for customer
+        await supabase.from('notifications').insert({
+          user_id: reservation.customer_id,
+          reservation_id: id,
+          type: 'driver_accepted',
+          title: '✅ Driver Confirmed',
+          message: `${driverName} has confirmed your transfer!\n📍 ${reservation.pickup} → ${reservation.dropoff}\n🕐 ${reservation.pickup_date} at ${reservation.pickup_time}`
+        });
+
+        // Try to send push notification to customer
+        try {
+          await supabase.functions.invoke('send-push-notification', {
+            body: {
+              user_id: reservation.customer_id,
+              title: '✅ Driver Confirmed',
+              body: `${driverName} has confirmed your transfer for ${reservation.pickup_date}`,
+              data: { reservation_id: id }
+            }
+          });
+        } catch (pushError) {
+          console.log('Push notification failed (customer may not have enabled push):', pushError);
+        }
+      } catch (notifyError) {
+        console.error('Failed to notify customer:', notifyError);
+        // Don't show error to driver - the main action succeeded
+      }
     }
   };
 
