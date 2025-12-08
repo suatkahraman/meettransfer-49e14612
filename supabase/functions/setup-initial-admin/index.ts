@@ -140,6 +140,30 @@ Deno.serve(async (req) => {
 
     console.log('Admin account created successfully!')
 
+    // Server-side audit log for initial admin setup
+    const ip_address = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown'
+    const user_agent = req.headers.get('user-agent') || 'unknown'
+    
+    await supabaseAdmin
+      .from('audit_logs')
+      .insert({
+        user_id: newUserId,
+        user_email: email,
+        action: 'INITIAL_ADMIN_SETUP',
+        table_name: 'user_roles',
+        record_id: newUserId,
+        new_data: {
+          email,
+          name,
+          phone,
+          role: 'admin',
+        },
+        ip_address,
+        user_agent,
+      })
+
+    console.log('Audit log created for initial admin setup')
+
     return new Response(
       JSON.stringify({ 
         success: true, 
