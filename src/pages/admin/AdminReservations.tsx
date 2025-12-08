@@ -150,6 +150,32 @@ const AdminReservations = () => {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
+  // Real-time subscription for reservations
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-reservations-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reservations'
+        },
+        (payload) => {
+          console.log('Reservation change:', payload);
+          fetchReservations();
+          if (payload.eventType === 'INSERT') {
+            toast.info('New reservation received');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [filters.status, filters.date]);
+
   const handleAssignDriver = async () => {
     if (!assignDialog.reservationId || !selectedDriver) return;
 
