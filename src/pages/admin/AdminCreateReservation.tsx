@@ -20,11 +20,29 @@ const paymentTypes = [
   { value: 'online', label: 'Online' },
   { value: 'none', label: 'None' },
 ];
-const statuses = ['awaiting-price', 'awaiting-customer', 'confirmed', 'assigned', 'active', 'completed', 'cancelled'];
+
+// New status workflow
+const statuses = [
+  { value: 'pending_price', label: 'Pending Price' },
+  { value: 'waiting_for_customer_approval', label: 'Waiting Customer Approval' },
+  { value: 'customer_approved', label: 'Customer Approved' },
+  { value: 'sent_to_driver', label: 'Sent to Driver' },
+  { value: 'active', label: 'Active' },
+  { value: 'completed', label: 'Completed' },
+];
+
+// Currency options
+const currencies = [
+  { value: 'TRY', label: '₺ TRY', symbol: '₺' },
+  { value: 'EUR', label: '€ EUR', symbol: '€' },
+  { value: 'USD', label: '$ USD', symbol: '$' },
+  { value: 'GBP', label: '£ GBP', symbol: '£' },
+];
 
 interface Driver {
   id: string;
   name: string;
+  user_id: string;
 }
 
 const AdminCreateReservation = () => {
@@ -44,17 +62,22 @@ const AdminCreateReservation = () => {
     vehicle_type: 'mercedes-vito',
     payment_type: 'cash',
     price: '',
+    price_currency: 'TRY',
     driver_cash_amount: '',
-    status: 'confirmed',
+    status: 'pending_price',
     driver_id: '',
     admin_notes: '',
   });
+
+  const getCurrencySymbol = (currency: string) => {
+    return currencies.find(c => c.value === currency)?.symbol || currency;
+  };
 
   useEffect(() => {
     const fetchDrivers = async () => {
       const { data } = await supabase
         .from('drivers')
-        .select('id, name')
+        .select('id, name, user_id')
         .eq('active', true);
       setDrivers(data || []);
     };
@@ -72,7 +95,7 @@ const AdminCreateReservation = () => {
     setSaving(true);
 
     try {
-      // Create reservation with admin as customer_id (since it's manual entry)
+      // Create reservation
       const { data: reservation, error: reservationError } = await supabase
         .from('reservations')
         .insert({
@@ -87,6 +110,7 @@ const AdminCreateReservation = () => {
           vehicle_type: formData.vehicle_type,
           payment_type: formData.payment_type,
           price: formData.price ? parseFloat(formData.price) : null,
+          price_currency: formData.price_currency,
           driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
           status: formData.status,
           driver_id: formData.driver_id || null,
@@ -117,6 +141,7 @@ const AdminCreateReservation = () => {
           dropoff: formData.dropoff,
           pickup_date: formData.pickup_date,
           price: formData.price,
+          price_currency: formData.price_currency,
           status: formData.status,
         },
       });
@@ -124,19 +149,15 @@ const AdminCreateReservation = () => {
       // Notify driver if assigned
       if (formData.driver_id && reservation) {
         try {
-          const { data: driverData } = await supabase
-            .from('drivers')
-            .select('user_id')
-            .eq('id', formData.driver_id)
-            .single();
-
-          if (driverData?.user_id) {
+          const selectedDriver = drivers.find(d => d.id === formData.driver_id);
+          if (selectedDriver?.user_id) {
+            const symbol = getCurrencySymbol(formData.price_currency);
             await supabase.functions.invoke('create-notification', {
               body: {
-                user_id: driverData.user_id,
+                user_id: selectedDriver.user_id,
                 reservation_id: reservation.id,
                 title: 'New Job Assigned',
-                message: `New transfer: ${formData.pickup} → ${formData.dropoff} on ${formData.pickup_date} at ${formData.pickup_time}.`,
+                message: `New transfer: ${formData.pickup} → ${formData.dropoff} on ${formData.pickup_date} at ${formData.pickup_time}. Price: ${symbol}${formData.price}`,
                 type: 'driver_assigned'
               }
             });
@@ -155,6 +176,8 @@ const AdminCreateReservation = () => {
       setSaving(false);
     }
   };
+
+  const currencySymbol = getCurrencySymbol(formData.price_currency);
 
   return (
     <div className="min-h-screen bg-background">
@@ -275,7 +298,7 @@ const AdminCreateReservation = () => {
               {/* Payment & Pricing */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg border-b pb-2">Payment & Pricing</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Payment Type</Label>
                     <Select value={formData.payment_type} onValueChange={(v) => setFormData({...formData, payment_type: v})}>
@@ -290,9 +313,24 @@ const AdminCreateReservation = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Price (₺)</Label>
+                    <Label>Currency</Label>
+                    <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currencies.map(c => (
+                          <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Price</Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                       <Input
                         type="number"
                         step="0.01"
@@ -305,9 +343,9 @@ const AdminCreateReservation = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Driver Cash Amount (₺)</Label>
+                    <Label>Driver Cash Amount</Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                       <Input
                         type="number"
                         step="0.01"
@@ -334,7 +372,7 @@ const AdminCreateReservation = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {statuses.map(s => (
-                          <SelectItem key={s} value={s}>{s.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>
+                          <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

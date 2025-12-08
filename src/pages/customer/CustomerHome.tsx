@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
@@ -36,11 +36,12 @@ const airports = [
   { code: 'ADB', name: 'Izmir Adnan Menderes Airport' },
 ];
 
+// Vehicle types without prices - prices set by admin
 const vehicleTypes = [
-  { value: 'mercedes-vito', label: 'Mercedes Vito', price: 80 },
-  { value: 'mercedes-vclass', label: 'Mercedes V-Class', price: 120 },
-  { value: 'maybach', label: 'Maybach', price: 250 },
-  { value: 'minibus', label: 'Minibus', price: 150 },
+  { value: 'mercedes-vito', label: 'Mercedes Vito' },
+  { value: 'mercedes-vclass', label: 'Mercedes V-Class' },
+  { value: 'maybach', label: 'Maybach' },
+  { value: 'minibus', label: 'Minibus' },
 ];
 
 const paymentTypes = [
@@ -65,9 +66,6 @@ const CustomerHome = () => {
     vehicleType: 'mercedes-vito',
     paymentType: 'cash',
   });
-
-  const selectedVehicle = vehicleTypes.find(v => v.value === formData.vehicleType);
-  const price = selectedVehicle?.price || 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,8 +99,9 @@ const CustomerHome = () => {
         flight_number: result.data.flightNumber?.trim() || null,
         vehicle_type: result.data.vehicleType,
         price: null, // Price will be set by admin
+        price_currency: null, // Currency will be set by admin
         payment_type: result.data.paymentType,
-        status: 'awaiting-price',
+        status: 'pending_price', // New status
       }).select().single();
 
       if (error) throw error;
@@ -159,6 +158,9 @@ const CustomerHome = () => {
               <Car className="h-6 w-6" />
               Book Your Transfer
             </CardTitle>
+            <CardDescription>
+              Submit your transfer details and we'll send you a price for approval
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -272,7 +274,7 @@ const CustomerHome = () => {
                 </div>
               </div>
 
-              {/* Vehicle Type */}
+              {/* Vehicle Type - No prices shown */}
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
@@ -280,12 +282,9 @@ const CustomerHome = () => {
                 </Label>
                 <RadioGroup value={formData.vehicleType} onValueChange={(v) => setFormData({...formData, vehicleType: v})}>
                   {vehicleTypes.map(vehicle => (
-                    <div key={vehicle.value} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem value={vehicle.value} id={vehicle.value} />
-                        <Label htmlFor={vehicle.value} className="cursor-pointer">{vehicle.label}</Label>
-                      </div>
-                      <span className="font-semibold text-primary">₺{vehicle.price}</span>
+                    <div key={vehicle.value} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                      <RadioGroupItem value={vehicle.value} id={vehicle.value} />
+                      <Label htmlFor={vehicle.value} className="cursor-pointer flex-1">{vehicle.label}</Label>
                     </div>
                   ))}
                 </RadioGroup>
@@ -307,16 +306,15 @@ const CustomerHome = () => {
                 </RadioGroup>
               </div>
 
-              {/* Price Summary */}
-              <div className="bg-muted p-4 rounded-lg">
-                <div className="flex justify-between items-center text-lg">
-                  <span className="font-medium">Total Price:</span>
-                  <span className="font-bold text-primary text-2xl">₺{price}</span>
-                </div>
+              {/* Info message instead of price */}
+              <div className="bg-muted p-4 rounded-lg text-center">
+                <p className="text-muted-foreground">
+                  After submitting, our team will review your request and send you a price for approval.
+                </p>
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                {isLoading ? 'Booking...' : 'Book Transfer'}
+                {isLoading ? 'Submitting...' : 'Submit Booking Request'}
               </Button>
             </form>
           </CardContent>
