@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Button } from '@/components/ui/button';
-import { Navigation, MapPin, Phone, ExternalLink, Loader2 } from 'lucide-react';
+import { Navigation, MapPin, Phone, ExternalLink, Loader2, Clock, Route } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface DriverRouteMapProps {
@@ -17,6 +17,11 @@ interface Coordinates {
   lng: number;
 }
 
+interface TripInfo {
+  duration: number; // in seconds
+  distance: number; // in meters
+}
+
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || '';
 
 const DriverRouteMap = ({ pickup, dropoff, customerPhone, className }: DriverRouteMapProps) => {
@@ -26,6 +31,25 @@ const DriverRouteMap = ({ pickup, dropoff, customerPhone, className }: DriverRou
   const [dropoffCoords, setDropoffCoords] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tripInfo, setTripInfo] = useState<TripInfo | null>(null);
+
+  // Format duration to human readable string
+  const formatDuration = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.round((seconds % 3600) / 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes}min`;
+    }
+    return `${minutes} min`;
+  };
+
+  // Format distance to human readable string
+  const formatDistance = (meters: number): string => {
+    if (meters >= 1000) {
+      return `${(meters / 1000).toFixed(1)} km`;
+    }
+    return `${Math.round(meters)} m`;
+  };
 
   // Geocode an address to coordinates
   const geocodeAddress = async (address: string): Promise<Coordinates | null> => {
@@ -145,7 +169,14 @@ const DriverRouteMap = ({ pickup, dropoff, customerPhone, className }: DriverRou
             const routeData = await routeResponse.json();
 
             if (routeData.routes && routeData.routes.length > 0) {
-              const route = routeData.routes[0].geometry;
+              const routeInfo = routeData.routes[0];
+              const route = routeInfo.geometry;
+
+              // Extract trip duration and distance
+              setTripInfo({
+                duration: routeInfo.duration,
+                distance: routeInfo.distance
+              });
 
               map.current.addSource('route', {
                 type: 'geojson',
@@ -253,6 +284,34 @@ const DriverRouteMap = ({ pickup, dropoff, customerPhone, className }: DriverRou
           </div>
         )}
         <div ref={mapContainer} className="h-[300px] w-full" />
+        
+        {/* Trip Info Overlay */}
+        {tripInfo && !loading && (
+          <div className="absolute bottom-3 left-3 right-3 bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Clock className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Duration</p>
+                    <p className="font-semibold text-sm">{formatDuration(tripInfo.duration)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                    <Route className="h-4 w-4 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Distance</p>
+                    <p className="font-semibold text-sm">{formatDistance(tripInfo.distance)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Navigation Buttons */}
