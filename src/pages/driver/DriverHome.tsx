@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -6,12 +6,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown } from 'lucide-react';
+import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { toast } from 'sonner';
 import SwipeableJobCard from '@/components/driver/SwipeableJobCard';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface Reservation {
@@ -31,12 +31,15 @@ interface Reservation {
   driver_confirmed: boolean | null;
 }
 
+const PULL_THRESHOLD = 80;
+
 const DriverHome = () => {
   const { signOut } = useAuth();
   const { driverId } = useUserRole();
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { playSound } = useNotificationSound();
   const [expandedSections, setExpandedSections] = useState({
     pending: true,
@@ -44,7 +47,12 @@ const DriverHome = () => {
     completed: false
   });
 
-  const fetchReservations = async () => {
+  const pullY = useMotionValue(0);
+  const pullProgress = useTransform(pullY, [0, PULL_THRESHOLD], [0, 1]);
+  const pullRotation = useTransform(pullY, [0, PULL_THRESHOLD], [0, 180]);
+  const pullOpacity = useTransform(pullY, [0, 40, PULL_THRESHOLD], [0, 0.5, 1]);
+
+  const fetchReservations = useCallback(async (showToast = false) => {
     if (!driverId) return;
 
     const { data, error } = await supabase
@@ -56,10 +64,20 @@ const DriverHome = () => {
 
     if (error) {
       console.error('Error:', error);
+      if (showToast) toast.error('Failed to refresh');
     } else {
       setReservations(data || []);
+      if (showToast) toast.success('Jobs refreshed');
     }
     setLoading(false);
+    setRefreshing(false);
+  }, [driverId]);
+
+  const handlePullEnd = async (_: any, info: PanInfo) => {
+    if (info.offset.y > PULL_THRESHOLD && !refreshing) {
+      setRefreshing(true);
+      await fetchReservations(true);
+    }
   };
 
   useEffect(() => {
@@ -183,7 +201,26 @@ const DriverHome = () => {
         </div>
       </header>
 
-      <main className="pb-8 px-4 max-w-lg mx-auto">
+      <motion.main 
+        className="pb-8 px-4 max-w-lg mx-auto relative"
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0.5, bottom: 0 }}
+        onDragEnd={handlePullEnd}
+        style={{ y: pullY }}
+      >
+        {/* Pull to refresh indicator */}
+        <motion.div 
+          className="absolute left-1/2 -translate-x-1/2 -top-12 flex flex-col items-center gap-1"
+          style={{ opacity: pullOpacity }}
+        >
+          <motion.div style={{ rotate: pullRotation }}>
+            <RefreshCw className={cn("h-6 w-6 text-primary", refreshing && "animate-spin")} />
+          </motion.div>
+          <span className="text-xs text-muted-foreground">
+            {refreshing ? 'Refreshing...' : 'Pull to refresh'}
+          </span>
+        </motion.div>
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -347,7 +384,7 @@ const DriverHome = () => {
             )}
           </div>
         )}
-      </main>
+      </motion.main>
     </div>
   );
 };
