@@ -21,11 +21,9 @@ const paymentTypes = [
   { value: 'none', label: 'None' },
 ];
 
-// New status workflow
+// Statuses for manual admin reservations
 const statuses = [
-  { value: 'pending_price', label: 'Pending Price' },
-  { value: 'waiting_for_customer_approval', label: 'Waiting Customer Approval' },
-  { value: 'customer_approved', label: 'Customer Approved' },
+  { value: 'confirmed', label: 'Confirmed' },
   { value: 'sent_to_driver', label: 'Sent to Driver' },
   { value: 'active', label: 'Active' },
   { value: 'completed', label: 'Completed' },
@@ -64,7 +62,7 @@ const AdminCreateReservation = () => {
     price: '',
     price_currency: 'TRY',
     driver_cash_amount: '',
-    status: 'pending_price',
+    status: 'confirmed',
     driver_id: '',
     admin_notes: '',
   });
