@@ -33,7 +33,7 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  'pending_price': 'Awaiting Price',
+  'pending_price': 'Waiting for Price',
   'waiting_for_customer_approval': 'Action Required',
   'customer_approved': 'Confirmed',
   'customer_rejected': 'Cancelled',
@@ -251,7 +251,7 @@ const CustomerBookings = () => {
 
                       {reservation.status === 'pending_price' && (
                         <div className="bg-orange-50 dark:bg-orange-950/30 p-2 rounded text-center text-sm text-orange-700 dark:text-orange-300">
-                          We're reviewing your request
+                          Waiting for Price
                         </div>
                       )}
 

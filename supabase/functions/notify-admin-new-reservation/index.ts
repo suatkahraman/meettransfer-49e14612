@@ -127,8 +127,8 @@ Deno.serve(async (req) => {
     const notifications = adminRoles.map(admin => ({
       user_id: admin.user_id,
       reservation_id,
-      title: 'New Reservation Received',
-      message: `New booking from ${customer_name} – ${pickup} to ${dropoff} on ${pickup_date}.`,
+      title: 'New Reservation Request',
+      message: 'A customer has requested a transfer price.',
       type: 'reservation_created',
       read: false
     }))
