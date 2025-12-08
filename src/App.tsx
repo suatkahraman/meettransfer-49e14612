@@ -35,6 +35,7 @@ import AdminAccounting from "./pages/admin/AdminAccounting";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminSetup from "./pages/admin/AdminSetup";
 import AdminTemplates from "./pages/admin/AdminTemplates";
+import AdminCalendar from "./pages/admin/AdminCalendar";
 
 // Website Pages
 import IstanbulTransfer from "./pages/website/IstanbulTransfer";
@@ -112,6 +113,7 @@ const App = () => (
               <Route path="/admin/accounting" element={<AdminRoute><AdminAccounting /></AdminRoute>} />
               <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
               <Route path="/admin/templates" element={<AdminRoute><AdminTemplates /></AdminRoute>} />
+              <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
