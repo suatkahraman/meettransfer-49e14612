@@ -6,9 +6,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, MapPin, Calendar, Clock, User, Plane, CreditCard, Calculator, Car, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { LogOut, MapPin, Calendar, Clock, User, Plane, CreditCard, Calculator, Car, AlertCircle, CheckCircle2, Loader2, Bell } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
+import { toast } from 'sonner';
 
 interface Reservation {
   id: string;
@@ -68,28 +69,72 @@ const DriverHome = () => {
     return `${getCurrencySymbol(currency)}${price.toLocaleString()}`;
   };
 
+  const fetchReservations = async () => {
+    if (!driverId) return;
+
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('driver_id', driverId)
+      .in('status', ['sent_to_driver', 'active', 'completed'])
+      .order('pickup_date', { ascending: true });
+
+    if (error) {
+      console.error('Error:', error);
+    } else {
+      setReservations(data || []);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchReservations = async () => {
-      if (!driverId) return;
-
-      const { data, error } = await supabase
-        .from('reservations')
-        .select('*')
-        .eq('driver_id', driverId)
-        .in('status', ['sent_to_driver', 'active', 'completed'])
-        .order('pickup_date', { ascending: true });
-
-      if (error) {
-        console.error('Error:', error);
-      } else {
-        setReservations(data || []);
-      }
-      setLoading(false);
-    };
-
     if (driverId) {
       fetchReservations();
     }
+  }, [driverId]);
+
+  // Real-time subscription for new job assignments
+  useEffect(() => {
+    if (!driverId) return;
+
+    const channel = supabase
+      .channel('driver-jobs-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reservations',
+          filter: `driver_id=eq.${driverId}`
+        },
+        (payload) => {
+          console.log('Realtime update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            const newReservation = payload.new as Reservation;
+            if (['sent_to_driver', 'active', 'completed'].includes(newReservation.status)) {
+              setReservations(prev => [...prev, newReservation]);
+              toast.success('New job assigned!', {
+                description: `${newReservation.pickup} → ${newReservation.dropoff}`,
+                icon: <Bell className="h-4 w-4" />
+              });
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedReservation = payload.new as Reservation;
+            setReservations(prev => 
+              prev.map(r => r.id === updatedReservation.id ? updatedReservation : r)
+            );
+          } else if (payload.eventType === 'DELETE') {
+            const deletedId = (payload.old as any).id;
+            setReservations(prev => prev.filter(r => r.id !== deletedId));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [driverId]);
 
   // Separate reservations by status
