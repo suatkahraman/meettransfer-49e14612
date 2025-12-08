@@ -248,7 +248,7 @@ const ReservationForm = () => {
       }
 
       toast.success('Reservation submitted! We will contact you with pricing.');
-      navigate('/customer/bookings');
+      navigate('/customer/reservations');
     } catch (error: any) {
       console.error('Reservation error:', error);
       toast.error(error.message || 'Failed to submit reservation');

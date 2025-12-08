@@ -92,6 +92,7 @@ const App = () => (
               {/* Customer Routes - Protected */}
               <Route path="/customer" element={<CustomerRoute><CustomerHome /></CustomerRoute>} />
               <Route path="/customer/bookings" element={<CustomerRoute><CustomerBookings /></CustomerRoute>} />
+              <Route path="/customer/reservations" element={<CustomerRoute><CustomerBookings /></CustomerRoute>} />
               <Route path="/customer/reservation/:id" element={<CustomerRoute><CustomerReservationDetail /></CustomerRoute>} />
               
               {/* Driver Routes - Protected */}
