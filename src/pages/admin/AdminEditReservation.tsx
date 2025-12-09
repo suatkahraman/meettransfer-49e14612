@@ -31,6 +31,8 @@ const statuses = [
   'sent_to_driver',
   'active',
   'completed',
+  'pending_admin_review',
+  'cancelled_by_customer',
 ];
 
 const statusColors: Record<string, string> = {
@@ -42,6 +44,8 @@ const statusColors: Record<string, string> = {
   'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
   'active': 'bg-cyan-500/20 text-cyan-700',
   'completed': 'bg-green-500/20 text-green-700',
+  'pending_admin_review': 'bg-amber-500/20 text-amber-700',
+  'cancelled_by_customer': 'bg-destructive/20 text-destructive',
 };
 
 const statusLabels: Record<string, string> = {
@@ -53,6 +57,8 @@ const statusLabels: Record<string, string> = {
   'sent_to_driver': 'Sent to Driver',
   'active': 'Active',
   'completed': 'Completed',
+  'pending_admin_review': 'Needs Review',
+  'cancelled_by_customer': 'Cancelled by Customer',
 };
 
 // Currency options
@@ -460,6 +466,120 @@ const AdminEditReservation = () => {
                 <Send className="h-4 w-4 mr-2" />
                 {sendingPrice ? 'Sending...' : 'Send Price to Customer'}
               </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Customer Edit Review Card */}
+        {formData.status === 'pending_admin_review' && (
+          <Card className="border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                <UserCheck className="h-5 w-5" />
+                Customer Updated This Reservation
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                The customer has modified this reservation. Please review the changes below and either approve or reject them.
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  onClick={async () => {
+                    setSaving(true);
+                    try {
+                      // Restore to previous status (sent_to_driver if driver was assigned, customer_approved otherwise)
+                      const newStatus = formData.driver_id ? 'sent_to_driver' : 'customer_approved';
+                      const { error } = await supabase
+                        .from('reservations')
+                        .update({ status: newStatus })
+                        .eq('id', id);
+                      if (error) throw error;
+
+                      // Notify customer
+                      if (customerId) {
+                        try {
+                          await supabase.functions.invoke('create-notification', {
+                            body: {
+                              user_id: customerId,
+                              reservation_id: id,
+                              title: 'Changes Approved',
+                              message: 'Your reservation changes have been approved.',
+                              type: 'changes_approved'
+                            }
+                          });
+                        } catch (e) {
+                          console.error('Failed to notify customer:', e);
+                        }
+                      }
+
+                      toast.success('Changes approved!');
+                      setFormData({ ...formData, status: newStatus });
+                    } catch (error: any) {
+                      toast.error(error.message || 'Failed to approve changes');
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  disabled={saving}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Approve Changes
+                </Button>
+                <Button
+                  onClick={async () => {
+                    setSaving(true);
+                    try {
+                      // Revert to original data
+                      if (originalData) {
+                        const { error } = await supabase
+                          .from('reservations')
+                          .update({
+                            pickup: originalData.pickup as string,
+                            dropoff: originalData.dropoff as string,
+                            pickup_date: originalData.pickup_date as string,
+                            pickup_time: originalData.pickup_time as string,
+                            flight_number: originalData.flight_number as string | null,
+                            vehicle_type: originalData.vehicle_type as string,
+                            passenger_names: originalData.passenger_names as string[],
+                            status: formData.driver_id ? 'sent_to_driver' : 'customer_approved',
+                          })
+                          .eq('id', id);
+                        if (error) throw error;
+
+                        // Notify customer
+                        if (customerId) {
+                          try {
+                            await supabase.functions.invoke('create-notification', {
+                              body: {
+                                user_id: customerId,
+                                reservation_id: id,
+                                title: 'Changes Rejected',
+                                message: 'Your reservation changes have been rejected. The original details have been restored.',
+                                type: 'changes_rejected'
+                              }
+                            });
+                          } catch (e) {
+                            console.error('Failed to notify customer:', e);
+                          }
+                        }
+
+                        toast.success('Changes rejected, original details restored');
+                        navigate('/admin/reservations');
+                      }
+                    } catch (error: any) {
+                      toast.error(error.message || 'Failed to reject changes');
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  disabled={saving}
+                  variant="outline"
+                  className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                >
+                  Reject Changes
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
