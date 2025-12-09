@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Check, X, Plane } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Reservation {
@@ -21,6 +21,7 @@ interface Reservation {
   price_currency: string | null;
   status: string;
   driver_id: string | null;
+  passenger_names: string[] | null;
   drivers?: {
     name: string;
     phone: string;
@@ -228,6 +229,23 @@ const CustomerReservationDetail = () => {
                 </div>
               </div>
             </div>
+
+            {/* Passengers */}
+            {reservation.passenger_names && reservation.passenger_names.length > 0 && (
+              <div className="space-y-2 py-4 border-t">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Passengers ({reservation.passenger_names.length})</span>
+                </div>
+                <div className="pl-6 space-y-1">
+                  {reservation.passenger_names.map((name, index) => (
+                    <div key={index} className="text-sm">
+                      {index + 1}. {name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Flight & Vehicle */}
             <div className="flex items-center justify-between py-4 border-t border-b">

@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import DriverRouteMap from '@/components/driver/DriverRouteMap';
@@ -34,6 +34,7 @@ interface Reservation {
   driver_earning: number | null;
   driver_cash_amount: number | null;
   driver_notes: string | null;
+  passenger_names: string[] | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -242,10 +243,26 @@ const DriverJobDetails = () => {
               <div className="flex items-start gap-3">
                 <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Customer</div>
+                  <div className="text-sm text-muted-foreground">Primary Customer</div>
                   <div className="font-medium">{reservation.customer_name}</div>
                 </div>
               </div>
+
+              {reservation.passenger_names && reservation.passenger_names.length > 1 && (
+                <div className="flex items-start gap-3">
+                  <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <div className="text-sm text-muted-foreground">All Passengers ({reservation.passenger_names.length})</div>
+                    <div className="space-y-1 mt-1">
+                      {reservation.passenger_names.map((name, index) => (
+                        <div key={index} className="font-medium text-sm">
+                          {index + 1}. {name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
