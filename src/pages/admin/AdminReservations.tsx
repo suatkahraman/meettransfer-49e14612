@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
@@ -29,6 +29,7 @@ interface Reservation {
   payment_type: string;
   price: number | null;
   price_currency: string | null;
+  admin_set_price: number | null;
   status: string;
   driver_id: string | null;
   drivers?: {
@@ -99,6 +100,11 @@ const AdminReservations = () => {
     if (price === null) return '-';
     const symbol = currencySymbols[currency || 'TRY'] || currency || '';
     return `${symbol}${price}`;
+  };
+
+  const isPriceModifiedByDriver = (reservation: Reservation) => {
+    if (reservation.admin_set_price === null || reservation.price === null) return false;
+    return reservation.price !== reservation.admin_set_price;
   };
 
   const fetchReservations = async () => {
@@ -499,13 +505,19 @@ const AdminReservations = () => {
                               <span>{reservation.dropoff}</span>
                             </div>
 
-                            <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-4 text-sm flex-wrap">
                               <span className="flex items-center gap-1">
                                 <CreditCard className="h-4 w-4 text-muted-foreground" />
                                 {reservation.payment_type}
                               </span>
-                              <span className="font-bold text-primary">
+                              <span className={`font-bold ${isPriceModifiedByDriver(reservation) ? 'text-amber-600' : 'text-primary'}`}>
                                 {formatPrice(reservation.price, reservation.price_currency)}
+                                {isPriceModifiedByDriver(reservation) && (
+                                  <span className="ml-2 inline-flex items-center gap-1 text-xs font-normal bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                                    <AlertTriangle className="h-3 w-3" />
+                                    Modified
+                                  </span>
+                                )}
                               </span>
                             </div>
                           </div>
@@ -570,13 +582,19 @@ const AdminReservations = () => {
                         <span>{reservation.dropoff}</span>
                       </div>
 
-                      <div className="flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-4 text-sm flex-wrap">
                         <span className="flex items-center gap-1">
                           <CreditCard className="h-4 w-4 text-muted-foreground" />
                           {reservation.payment_type}
                         </span>
-                        <span className="font-bold text-primary">
+                        <span className={`font-bold ${isPriceModifiedByDriver(reservation) ? 'text-amber-600' : 'text-primary'}`}>
                           {formatPrice(reservation.price, reservation.price_currency)}
+                          {isPriceModifiedByDriver(reservation) && (
+                            <span className="ml-2 inline-flex items-center gap-1 text-xs font-normal bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                              <AlertTriangle className="h-3 w-3" />
+                              Modified (was {formatPrice(reservation.admin_set_price, reservation.price_currency)})
+                            </span>
+                          )}
                         </span>
                         {reservation.drivers && (
                           <span className="flex items-center gap-1">

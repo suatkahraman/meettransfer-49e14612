@@ -184,12 +184,15 @@ const AdminEditReservation = () => {
     setSendingPrice(true);
 
     try {
-      // Update reservation with price, currency and change status
+      const priceValue = parseFloat(formData.price);
+      
+      // Update reservation with price, currency, admin_set_price and change status
       const { error } = await supabase
         .from('reservations')
         .update({
-          price: parseFloat(formData.price),
+          price: priceValue,
           price_currency: formData.price_currency,
+          admin_set_price: priceValue, // Store original admin price
           status: 'waiting_for_customer_approval',
         })
         .eq('id', id);

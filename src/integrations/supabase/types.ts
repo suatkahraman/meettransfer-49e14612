@@ -337,6 +337,7 @@ export type Database = {
       }
       reservations: {
         Row: {
+          admin_set_price: number | null
           created_at: string | null
           customer_id: string
           customer_name: string
@@ -362,6 +363,7 @@ export type Database = {
           vehicle_type: string
         }
         Insert: {
+          admin_set_price?: number | null
           created_at?: string | null
           customer_id: string
           customer_name: string
@@ -387,6 +389,7 @@ export type Database = {
           vehicle_type: string
         }
         Update: {
+          admin_set_price?: number | null
           created_at?: string | null
           customer_id?: string
           customer_name?: string
