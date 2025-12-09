@@ -33,10 +33,13 @@ import AdminCreateReservation from "./pages/admin/AdminCreateReservation";
 import AdminDrivers from "./pages/admin/AdminDrivers";
 import AdminDriverJobs from "./pages/admin/AdminDriverJobs";
 import AdminAccounting from "./pages/admin/AdminAccounting";
+import AdminMonthlyAccounting from "./pages/admin/AdminMonthlyAccounting";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminSetup from "./pages/admin/AdminSetup";
 import AdminTemplates from "./pages/admin/AdminTemplates";
 import AdminCalendar from "./pages/admin/AdminCalendar";
+
+import DriverMonthlyAccounting from "./pages/driver/DriverMonthlyAccounting";
 
 // Website Pages
 import IstanbulTransfer from "./pages/website/IstanbulTransfer";
@@ -102,6 +105,7 @@ const App = () => (
               <Route path="/driver" element={<DriverRoute><DriverHome /></DriverRoute>} />
               <Route path="/driver/job/:id" element={<DriverRoute><DriverJobDetails /></DriverRoute>} />
               <Route path="/driver/accounting" element={<DriverRoute><DriverAccounting /></DriverRoute>} />
+              <Route path="/driver/monthly-accounting" element={<DriverRoute><DriverMonthlyAccounting /></DriverRoute>} />
               <Route path="/driver/history" element={<DriverRoute><DriverHistory /></DriverRoute>} />
               
               {/* Admin Routes - Protected (except setup which is for initial admin creation) */}
@@ -113,6 +117,7 @@ const App = () => (
               <Route path="/admin/drivers" element={<AdminRoute><AdminDrivers /></AdminRoute>} />
               <Route path="/admin/drivers/:driverId/jobs" element={<AdminRoute><AdminDriverJobs /></AdminRoute>} />
               <Route path="/admin/accounting" element={<AdminRoute><AdminAccounting /></AdminRoute>} />
+              <Route path="/admin/monthly-accounting" element={<AdminRoute><AdminMonthlyAccounting /></AdminRoute>} />
               <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
               <Route path="/admin/templates" element={<AdminRoute><AdminTemplates /></AdminRoute>} />
               <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
