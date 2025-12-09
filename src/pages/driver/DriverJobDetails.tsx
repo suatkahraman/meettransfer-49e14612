@@ -66,7 +66,8 @@ const DriverJobDetails = () => {
   const [updating, setUpdating] = useState(false);
   const [showCashDialog, setShowCashDialog] = useState(false);
   
-  // Driver editable fields (only cash amount and notes, NOT price)
+  // Driver editable fields
+  const [driverPrice, setDriverPrice] = useState('');
   const [driverCashAmount, setDriverCashAmount] = useState('');
   const [driverNotes, setDriverNotes] = useState('');
   const [savingFinancials, setSavingFinancials] = useState(false);
@@ -91,6 +92,7 @@ const DriverJobDetails = () => {
       
       if (resData) {
         setReservation(resData);
+        setDriverPrice(resData.price?.toString() || '');
         setDriverCashAmount(resData.driver_cash_amount?.toString() || '');
         setDriverNotes(resData.driver_notes || '');
       }
@@ -135,21 +137,23 @@ const DriverJobDetails = () => {
     if (!id) return;
     setSavingFinancials(true);
 
-    // Driver can only update cash amount and notes, NOT price
+    // Driver can update price, cash amount, and notes
     const { error } = await supabase
       .from('reservations')
       .update({
+        price: driverPrice ? parseFloat(driverPrice) : null,
         driver_cash_amount: driverCashAmount ? parseFloat(driverCashAmount) : null,
         driver_notes: driverNotes || null
       })
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to save data');
+      toast.error('Failed to save changes');
     } else {
-      toast.success('Data saved!');
+      toast.success('Changes saved successfully!');
       setReservation(prev => prev ? {
         ...prev,
+        price: driverPrice ? parseFloat(driverPrice) : null,
         driver_cash_amount: driverCashAmount ? parseFloat(driverCashAmount) : null,
         driver_notes: driverNotes || null
       } : null);
@@ -317,47 +321,46 @@ const DriverJobDetails = () => {
               </div>
             </div>
 
-            {/* Price Display - READ ONLY for driver */}
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Trip Price</span>
-                <span className="text-2xl font-bold text-primary">
-                  {formatPrice(reservation.price, reservation.price_currency)}
-                </span>
+            {/* Currency Display - READ ONLY */}
+            <div className="bg-muted/50 p-3 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Currency</span>
+                <span className="font-medium">{reservation.price_currency || 'TRY'} ({currencySymbol})</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Price set by admin - not editable
+              <p className="text-xs text-muted-foreground mt-1">
+                Currency set by admin - not editable
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Route Map Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Map className="h-5 w-5" />
-              Route Map
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DriverRouteMap
-              pickup={reservation.pickup}
-              dropoff={reservation.dropoff}
-              customerPhone={reservation.customer_phone}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Driver Data Card - Cash amount and notes only */}
+        {/* Driver Editable Fields Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              Driver Notes & Cash
+              Trip Budget & Cash
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="driver_price">Trip Price / Budget ({currencySymbol})</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
+                <Input
+                  id="driver_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Enter final trip price"
+                  value={driverPrice}
+                  onChange={(e) => setDriverPrice(e.target.value)}
+                  className="pl-8 text-lg font-semibold"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">You can update the final price for this trip</p>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="driver_cash">Cash Collected ({currencySymbol})</Label>
               <div className="relative">
@@ -382,7 +385,7 @@ const DriverJobDetails = () => {
                 placeholder="Delays, extra stops, special situations..."
                 value={driverNotes}
                 onChange={(e) => setDriverNotes(e.target.value)}
-                rows={4}
+                rows={3}
               />
             </div>
 
@@ -390,6 +393,7 @@ const DriverJobDetails = () => {
               onClick={saveFinancials} 
               disabled={savingFinancials}
               className="w-full"
+              size="lg"
             >
               {savingFinancials ? (
                 <>
@@ -399,12 +403,30 @@ const DriverJobDetails = () => {
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Save Notes & Cash
+                  Save Changes
                 </>
               )}
             </Button>
           </CardContent>
         </Card>
+
+        {/* Route Map Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Map className="h-5 w-5" />
+              Route Map
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DriverRouteMap
+              pickup={reservation.pickup}
+              dropoff={reservation.dropoff}
+              customerPhone={reservation.customer_phone}
+            />
+          </CardContent>
+        </Card>
+
 
         {/* Action Buttons Card */}
         <Card>
