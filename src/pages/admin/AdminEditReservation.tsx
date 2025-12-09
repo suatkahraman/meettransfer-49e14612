@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus } from 'lucide-react';
 
 const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
@@ -69,6 +69,8 @@ interface Driver {
   user_id: string;
 }
 
+const MAX_PASSENGERS = 15;
+
 const AdminEditReservation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -80,8 +82,8 @@ const AdminEditReservation = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null);
+  const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [formData, setFormData] = useState({
-    customer_name: '',
     customer_phone: '',
     pickup: '',
     dropoff: '',
@@ -100,6 +102,24 @@ const AdminEditReservation = () => {
 
   const getCurrencySymbol = (currency: string) => {
     return currencies.find(c => c.value === currency)?.symbol || currency;
+  };
+
+  const addPassenger = () => {
+    if (passengerNames.length < MAX_PASSENGERS) {
+      setPassengerNames([...passengerNames, '']);
+    }
+  };
+
+  const removePassenger = (index: number) => {
+    if (passengerNames.length > 1) {
+      setPassengerNames(passengerNames.filter((_, i) => i !== index));
+    }
+  };
+
+  const updatePassenger = (index: number, value: string) => {
+    const updated = [...passengerNames];
+    updated[index] = value;
+    setPassengerNames(updated);
   };
 
   useEffect(() => {
@@ -121,8 +141,13 @@ const AdminEditReservation = () => {
       const r = reservationResult.data;
       setCustomerId(r.customer_id);
       
+      // Load passenger names - use array or fallback to customer_name
+      const loadedPassengerNames = r.passenger_names && r.passenger_names.length > 0 
+        ? r.passenger_names 
+        : [r.customer_name || ''];
+      setPassengerNames(loadedPassengerNames);
+      
       const initialData = {
-        customer_name: r.customer_name || '',
         customer_phone: r.customer_phone || '',
         pickup: r.pickup || '',
         dropoff: r.dropoff || '',
@@ -137,6 +162,7 @@ const AdminEditReservation = () => {
         status: r.status || '',
         driver_id: r.driver_id || '',
         admin_notes: adminNotesResult.data?.notes || '',
+        passenger_names: loadedPassengerNames,
       };
       
       setOriginalData(initialData);
@@ -267,13 +293,21 @@ const AdminEditReservation = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate at least one passenger name
+    const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
+    if (validPassengerNames.length === 0) {
+      toast.error('At least one passenger name is required');
+      return;
+    }
+    
     setSaving(true);
 
     // Update reservation (without admin_notes)
     const { error: reservationError } = await supabase
       .from('reservations')
       .update({
-        customer_name: formData.customer_name,
+        customer_name: validPassengerNames[0], // Primary passenger for backward compatibility
         customer_phone: formData.customer_phone,
         pickup: formData.pickup,
         dropoff: formData.dropoff,
@@ -287,6 +321,7 @@ const AdminEditReservation = () => {
         driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
         status: formData.status,
         driver_id: formData.driver_id || null,
+        passenger_names: validPassengerNames,
       })
       .eq('id', id);
 
@@ -327,7 +362,7 @@ const AdminEditReservation = () => {
       record_id: id,
       old_data: originalData || undefined,
       new_data: {
-        customer_name: formData.customer_name,
+        customer_name: validPassengerNames[0],
         customer_phone: formData.customer_phone,
         pickup: formData.pickup,
         dropoff: formData.dropoff,
@@ -339,6 +374,7 @@ const AdminEditReservation = () => {
         price_currency: formData.price_currency,
         status: formData.status,
         driver_id: formData.driver_id,
+        passenger_names: validPassengerNames,
       },
     });
 
@@ -469,23 +505,59 @@ const AdminEditReservation = () => {
         <Card>
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Customer Name</Label>
-                  <Input
-                    value={formData.customer_name}
-                    onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
-                    required
-                  />
+              {/* Passenger Names Section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Passengers ({passengerNames.length}/{MAX_PASSENGERS})</Label>
+                  {passengerNames.length < MAX_PASSENGERS && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addPassenger}
+                      className="gap-1"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Add Passenger
+                    </Button>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Customer Phone</Label>
-                  <Input
-                    value={formData.customer_phone}
-                    onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                    required
-                  />
-                </div>
+                
+                {passengerNames.map((name, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <div className="flex-1 space-y-1">
+                      <Label className="text-xs text-muted-foreground">
+                        {index === 0 ? 'Primary Passenger' : `Passenger ${index + 1}`}
+                      </Label>
+                      <Input
+                        value={name}
+                        onChange={(e) => updatePassenger(index, e.target.value)}
+                        placeholder={index === 0 ? 'Primary passenger name' : `Passenger ${index + 1} name`}
+                        required={index === 0}
+                      />
+                    </div>
+                    {index > 0 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removePassenger(index)}
+                        className="mt-5 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Customer Phone</Label>
+                <Input
+                  value={formData.customer_phone}
+                  onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
+                  required
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
