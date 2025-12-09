@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2 } from 'lucide-react';
 
 const regions = [
   { value: 'Istanbul', label: 'Istanbul' },
@@ -39,9 +40,12 @@ const AdminDrivers = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [viewingDriver, setViewingDriver] = useState<Driver | null>(null);
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
+  const [deletingDriver, setDeletingDriver] = useState<Driver | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -235,6 +239,49 @@ const AdminDrivers = () => {
     }
   };
 
+  const openDeleteDialog = (driver: Driver) => {
+    setDeletingDriver(driver);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingDriver) return;
+    
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('drivers')
+        .delete()
+        .eq('id', deletingDriver.id);
+
+      if (error) {
+        toast.error('Failed to delete driver');
+      } else {
+        await logAction({
+          action: 'DELETE',
+          table_name: 'drivers',
+          record_id: deletingDriver.id,
+          old_data: {
+            name: deletingDriver.name,
+            phone: deletingDriver.phone,
+            plate_number: deletingDriver.plate_number,
+            vehicle_model: deletingDriver.vehicle_model,
+            region: deletingDriver.region,
+          },
+        });
+
+        toast.success('Driver deleted successfully');
+        setDeleteDialogOpen(false);
+        setDeletingDriver(null);
+        fetchDrivers();
+      }
+    } catch (err) {
+      toast.error('Failed to delete driver');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
@@ -303,6 +350,15 @@ const AdminDrivers = () => {
                         title="View Assigned Jobs"
                       >
                         <Briefcase className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => openDeleteDialog(driver)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        title="Delete Driver"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -500,6 +556,35 @@ const AdminDrivers = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Driver</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{deletingDriver?.name}</strong>? This action cannot be undone and will remove all driver information.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete} 
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
