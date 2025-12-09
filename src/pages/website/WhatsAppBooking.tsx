@@ -15,16 +15,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageCircle, ArrowRight } from "lucide-react";
 
-const airports = [
-  { code: "IST", name: "Istanbul Airport" },
-  { code: "SAW", name: "Sabiha Gökçen Airport" },
-  { code: "AYT", name: "Antalya Airport" },
-  { code: "BJV", name: "Bodrum Airport" },
-  { code: "DLM", name: "Dalaman Airport" },
-  { code: "ADB", name: "Izmir Airport" },
-  { code: "NAV", name: "Nevşehir Airport" },
-  { code: "ASR", name: "Kayseri Airport" },
-];
+// Airports list removed - pickup is now free text
 
 const vehicleTypes = [
   "Mercedes Vito",
@@ -35,8 +26,8 @@ const vehicleTypes = [
 
 const WhatsAppBooking = () => {
   const { t } = useLanguage();
-  const [formData, setFormData] = useState({
-    airport: "",
+const [formData, setFormData] = useState({
+    pickup: "",
     destination: "",
     date: "",
     time: "",
@@ -49,7 +40,7 @@ const WhatsAppBooking = () => {
 
     const message = `Hello! I would like to book a transfer:
 
-📍 Pickup: ${formData.airport}
+📍 Pick-up Point: ${formData.pickup}
 📍 Destination: ${formData.destination}
 📅 Date: ${formData.date}
 🕐 Time: ${formData.time}
@@ -74,24 +65,15 @@ Please confirm availability and price.`;
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>{t("selectAirport")}</Label>
-                <Select
-                  value={formData.airport}
-                  onValueChange={(val) =>
-                    setFormData({ ...formData, airport: val })
+                <Label>Pick-up Point</Label>
+                <Input
+                  value={formData.pickup}
+                  onChange={(e) =>
+                    setFormData({ ...formData, pickup: e.target.value })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select airport" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card">
-                    {airports.map((airport) => (
-                      <SelectItem key={airport.code} value={airport.name}>
-                        {airport.code} - {airport.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Enter Pick-up Point"
+                  required
+                />
               </div>
 
               <div className="space-y-2">

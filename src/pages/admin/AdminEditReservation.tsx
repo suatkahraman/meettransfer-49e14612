@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus } from 'lucide-react';
 
-const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
+// Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
 const paymentTypes = [
   { value: 'cash', label: 'Cash' },
@@ -565,17 +565,12 @@ const AdminEditReservation = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Pickup</Label>
-                  <Select value={formData.pickup} onValueChange={(v) => setFormData({...formData, pickup: v})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {airports.map(a => (
-                        <SelectItem key={a} value={a}>{a}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label>Pick-up Point</Label>
+                  <Input
+                    value={formData.pickup}
+                    onChange={(e) => setFormData({...formData, pickup: e.target.value})}
+                    placeholder="Enter Pick-up Point"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Drop-off</Label>

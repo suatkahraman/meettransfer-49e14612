@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus } from 'lucide-react';
 
-const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
+// Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
 const paymentTypes = [
   { value: 'cash', label: 'Cash' },
@@ -400,17 +400,13 @@ const AdminCreateReservation = () => {
                 <h3 className="font-semibold text-lg border-b pb-2">Transfer Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Pickup Location *</Label>
-                    <Select value={formData.pickup} onValueChange={(v) => setFormData({...formData, pickup: v})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select airport" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {airports.map(a => (
-                          <SelectItem key={a} value={a}>{a}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label>Pick-up Point *</Label>
+                    <Input
+                      value={formData.pickup}
+                      onChange={(e) => setFormData({...formData, pickup: e.target.value})}
+                      placeholder="Enter Pick-up Point"
+                      required
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Drop-off Location *</Label>
