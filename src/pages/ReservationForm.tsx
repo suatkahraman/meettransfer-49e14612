@@ -10,11 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus } from 'lucide-react';
 import { z } from 'zod';
 
 const reservationSchema = z.object({
-  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
   email: z.string().trim().email("Invalid email address").max(255),
   password: z.string().min(6, "Password must be at least 6 characters").max(100).optional(),
@@ -26,6 +25,8 @@ const reservationSchema = z.object({
   vehicleType: z.string().min(1, "Please select a vehicle type"),
   notes: z.string().trim().max(500).optional().or(z.literal('')),
 });
+
+const MAX_PASSENGERS = 15;
 
 // Airports list removed - pickup is now free text
 
@@ -43,8 +44,8 @@ const ReservationForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [formData, setFormData] = useState({
-    name: '',
     phone: '',
     email: '',
     password: '',
@@ -64,8 +65,12 @@ const ReservationForm = () => {
       setFormData(prev => ({
         ...prev,
         email: user.email || '',
-        name: user.user_metadata?.full_name || '',
       }));
+      
+      // Set primary passenger name from user metadata
+      if (user.user_metadata?.full_name) {
+        setPassengerNames([user.user_metadata.full_name]);
+      }
       
       // Fetch profile for phone
       const fetchProfile = async () => {
@@ -76,9 +81,11 @@ const ReservationForm = () => {
           .single();
         
         if (data) {
+          if (data.full_name) {
+            setPassengerNames([data.full_name]);
+          }
           setFormData(prev => ({
             ...prev,
-            name: data.full_name || prev.name,
             phone: data.phone || '',
           }));
         }
@@ -87,9 +94,35 @@ const ReservationForm = () => {
     }
   }, [user]);
 
+  const addPassenger = () => {
+    if (passengerNames.length < MAX_PASSENGERS) {
+      setPassengerNames([...passengerNames, '']);
+    }
+  };
+
+  const removePassenger = (index: number) => {
+    if (passengerNames.length > 1) {
+      setPassengerNames(passengerNames.filter((_, i) => i !== index));
+    }
+  };
+
+  const updatePassenger = (index: number, value: string) => {
+    const updated = [...passengerNames];
+    updated[index] = value;
+    setPassengerNames(updated);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    // Validate passenger names
+    const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
+    if (validPassengerNames.length === 0) {
+      setErrors({ passengerNames: 'At least one passenger name is required' });
+      toast.error('Please enter at least one passenger name');
+      return;
+    }
 
     // Validate - password only required if not logged in
     const schemaToUse = isLoggedIn 
@@ -113,6 +146,7 @@ const ReservationForm = () => {
 
     try {
       let userId: string;
+      const primaryPassengerName = validPassengerNames[0].trim();
 
       if (isLoggedIn && user) {
         // Already logged in, use current user
@@ -121,7 +155,7 @@ const ReservationForm = () => {
         // Update profile if needed
         await supabase
           .from('profiles')
-          .update({ phone: formData.phone.trim(), full_name: formData.name.trim() })
+          .update({ phone: formData.phone.trim(), full_name: primaryPassengerName })
           .eq('id', userId);
       } else {
         // Try to sign up the user
@@ -131,7 +165,7 @@ const ReservationForm = () => {
           options: {
             emailRedirectTo: `${window.location.origin}/customer/bookings`,
             data: {
-              full_name: formData.name.trim(),
+              full_name: primaryPassengerName,
             },
           },
         });
@@ -192,7 +226,7 @@ const ReservationForm = () => {
         // Update profile with phone
         await supabase
           .from('profiles')
-          .update({ phone: formData.phone.trim(), full_name: formData.name.trim() })
+          .update({ phone: formData.phone.trim(), full_name: primaryPassengerName })
           .eq('id', userId);
       }
 
@@ -201,8 +235,9 @@ const ReservationForm = () => {
         .from('reservations')
         .insert({
           customer_id: userId,
-          customer_name: formData.name.trim(),
+          customer_name: primaryPassengerName,
           customer_phone: formData.phone.trim(),
+          passenger_names: validPassengerNames.map(n => n.trim()),
           pickup: formData.pickup,
           dropoff: formData.dropoff.trim(),
           pickup_date: formData.date,
@@ -224,7 +259,7 @@ const ReservationForm = () => {
         const notifyResponse = await supabase.functions.invoke('notify-admin-new-reservation', {
           body: {
             reservation_id: reservation.id,
-            customer_name: formData.name.trim(),
+            customer_name: primaryPassengerName,
             pickup: formData.pickup,
             dropoff: formData.dropoff.trim(),
             pickup_date: formData.date,
@@ -286,8 +321,8 @@ const ReservationForm = () => {
                 variant="outline" 
                 onClick={() => {
                   setIsSubmitted(false);
+                  setPassengerNames(['']);
                   setFormData({
-                    name: formData.name,
                     phone: formData.phone,
                     email: formData.email,
                     password: '',
@@ -322,37 +357,71 @@ const ReservationForm = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Account Section */}
             <div className="space-y-4 pb-4 border-b">
-              <h3 className="font-semibold text-lg">Your Information</h3>
+              <h3 className="font-semibold text-lg">Passengers</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Full Name
-                  </Label>
-                  <Input
-                    placeholder="John Doe"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className={errors.name ? 'border-destructive' : ''}
-                    maxLength={100}
-                  />
-                  {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    Phone
-                  </Label>
-                  <Input
-                    placeholder="+90 5XX XXX XXXX"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className={errors.phone ? 'border-destructive' : ''}
-                    maxLength={20}
-                  />
-                  {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-                </div>
+              {/* Passenger Names - Multiple */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Passenger Names ({passengerNames.length})
+                </Label>
+                {passengerNames.map((name, index) => (
+                  <div key={index} className="flex gap-2">
+                    <div className="flex-1">
+                      <Input
+                        placeholder={index === 0 ? 'Primary Passenger (Name & Surname)' : `Passenger ${index + 1}`}
+                        value={name}
+                        onChange={(e) => updatePassenger(index, e.target.value)}
+                        className={index === 0 && errors.passengerNames ? 'border-destructive' : ''}
+                        maxLength={100}
+                      />
+                    </div>
+                    {passengerNames.length > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => removePassenger(index)}
+                        className="text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                {errors.passengerNames && <p className="text-sm text-destructive">{errors.passengerNames}</p>}
+                {passengerNames.length < MAX_PASSENGERS && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={addPassenger}
+                    className="w-full"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add Passenger
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Contact Info Section */}
+            <div className="space-y-4 pb-4 border-b">
+              <h3 className="font-semibold text-lg">Contact Information</h3>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Phone
+                </Label>
+                <Input
+                  placeholder="+90 5XX XXX XXXX"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className={errors.phone ? 'border-destructive' : ''}
+                  maxLength={20}
+                />
+                {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
               </div>
 
               <div className="space-y-2">

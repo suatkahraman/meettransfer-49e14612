@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard } from 'lucide-react';
+import { LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, Trash2, UserPlus } from 'lucide-react';
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
 
@@ -19,13 +19,10 @@ const reservationSchema = z.object({
   date: z.string().min(1, "Please select a pickup date"),
   time: z.string().min(1, "Please select a pickup time"),
   flightNumber: z.string().trim().max(20, "Flight number is too long").optional().or(z.literal('')),
-  passengerName: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
   passengerPhone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20, "Phone number is too long").regex(/^[+\d\s\-()]+$/, "Invalid phone number format"),
   vehicleType: z.string().min(1, "Please select a vehicle type"),
   paymentType: z.string().min(1, "Please select a payment type"),
 });
-
-// Airports list removed - pickup is now free text
 
 // Vehicle types without prices - prices set by admin
 const vehicleTypes = [
@@ -41,26 +38,54 @@ const paymentTypes = [
   { value: 'invoice', label: 'Invoice' },
 ];
 
+const MAX_PASSENGERS = 15;
+
 const CustomerHome = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [formData, setFormData] = useState({
     pickup: '',
     dropoff: '',
     date: '',
     time: '',
     flightNumber: '',
-    passengerName: '',
     passengerPhone: '',
     vehicleType: 'mercedes-vito',
     paymentType: 'cash',
   });
 
+  const addPassenger = () => {
+    if (passengerNames.length < MAX_PASSENGERS) {
+      setPassengerNames([...passengerNames, '']);
+    }
+  };
+
+  const removePassenger = (index: number) => {
+    if (passengerNames.length > 1) {
+      setPassengerNames(passengerNames.filter((_, i) => i !== index));
+    }
+  };
+
+  const updatePassenger = (index: number, value: string) => {
+    const updated = [...passengerNames];
+    updated[index] = value;
+    setPassengerNames(updated);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    // Validate passenger names
+    const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
+    if (validPassengerNames.length === 0) {
+      setErrors({ passengerNames: 'At least one passenger name is required' });
+      toast.error('Please enter at least one passenger name');
+      return;
+    }
 
     // Validate form data
     const result = reservationSchema.safeParse(formData);
@@ -81,18 +106,19 @@ const CustomerHome = () => {
     try {
       const { data: insertedReservation, error } = await supabase.from('reservations').insert({
         customer_id: user?.id,
-        customer_name: result.data.passengerName.trim(),
+        customer_name: validPassengerNames[0].trim(),
         customer_phone: result.data.passengerPhone.trim(),
+        passenger_names: validPassengerNames.map(n => n.trim()),
         pickup: result.data.pickup,
         dropoff: result.data.dropoff.trim(),
         pickup_date: result.data.date,
         pickup_time: result.data.time,
         flight_number: result.data.flightNumber?.trim() || null,
         vehicle_type: result.data.vehicleType,
-        price: null, // Price will be set by admin
-        price_currency: null, // Currency will be set by admin
+        price: null,
+        price_currency: null,
         payment_type: result.data.paymentType,
-        status: 'pending_price', // New status
+        status: 'pending_price',
       }).select().single();
 
       if (error) throw error;
@@ -102,7 +128,7 @@ const CustomerHome = () => {
         const notifyResponse = await supabase.functions.invoke('notify-admin-new-reservation', {
           body: {
             reservation_id: insertedReservation.id,
-            customer_name: result.data.passengerName.trim(),
+            customer_name: validPassengerNames[0].trim(),
             pickup: result.data.pickup,
             dropoff: result.data.dropoff.trim(),
             pickup_date: result.data.date,
@@ -218,7 +244,7 @@ const CustomerHome = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Plane className="h-4 w-4" />
-                  Flight Number
+                  Flight Number (optional)
                 </Label>
                 <Input
                   placeholder="e.g., TK1234"
@@ -228,36 +254,65 @@ const CustomerHome = () => {
                 />
               </div>
 
-              {/* Passenger Details */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Passenger Name
-                  </Label>
-                  <Input
-                    placeholder="Full name"
-                    value={formData.passengerName}
-                    onChange={(e) => setFormData({...formData, passengerName: e.target.value})}
-                    className={errors.passengerName ? 'border-destructive' : ''}
-                    maxLength={100}
-                  />
-                  {errors.passengerName && <p className="text-sm text-destructive">{errors.passengerName}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    Phone
-                  </Label>
-                  <Input
-                    placeholder="+90 5XX XXX XXXX"
-                    value={formData.passengerPhone}
-                    onChange={(e) => setFormData({...formData, passengerPhone: e.target.value})}
-                    className={errors.passengerPhone ? 'border-destructive' : ''}
-                    maxLength={20}
-                  />
-                  {errors.passengerPhone && <p className="text-sm text-destructive">{errors.passengerPhone}</p>}
-                </div>
+              {/* Passenger Names - Multiple */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Passengers ({passengerNames.length})
+                </Label>
+                {passengerNames.map((name, index) => (
+                  <div key={index} className="flex gap-2">
+                    <div className="flex-1">
+                      <Input
+                        placeholder={index === 0 ? 'Primary Passenger (Name & Surname)' : `Passenger ${index + 1}`}
+                        value={name}
+                        onChange={(e) => updatePassenger(index, e.target.value)}
+                        className={index === 0 && errors.passengerNames ? 'border-destructive' : ''}
+                        maxLength={100}
+                      />
+                    </div>
+                    {passengerNames.length > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => removePassenger(index)}
+                        className="text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                {errors.passengerNames && <p className="text-sm text-destructive">{errors.passengerNames}</p>}
+                {passengerNames.length < MAX_PASSENGERS && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={addPassenger}
+                    className="w-full"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add Passenger
+                  </Button>
+                )}
+              </div>
+
+              {/* Phone */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Contact Phone
+                </Label>
+                <Input
+                  placeholder="+90 5XX XXX XXXX"
+                  value={formData.passengerPhone}
+                  onChange={(e) => setFormData({...formData, passengerPhone: e.target.value})}
+                  className={errors.passengerPhone ? 'border-destructive' : ''}
+                  maxLength={20}
+                />
+                {errors.passengerPhone && <p className="text-sm text-destructive">{errors.passengerPhone}</p>}
               </div>
 
               {/* Vehicle Type - No prices shown */}
