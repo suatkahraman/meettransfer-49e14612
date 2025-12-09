@@ -14,7 +14,7 @@ import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
 
 const reservationSchema = z.object({
-  pickup: z.string().min(1, "Please select a pickup airport"),
+  pickup: z.string().trim().min(2, "Pick-up point must be at least 2 characters").max(200, "Pick-up point is too long"),
   dropoff: z.string().trim().min(2, "Drop-off location must be at least 2 characters").max(200, "Drop-off location is too long"),
   date: z.string().min(1, "Please select a pickup date"),
   time: z.string().min(1, "Please select a pickup time"),
@@ -25,16 +25,7 @@ const reservationSchema = z.object({
   paymentType: z.string().min(1, "Please select a payment type"),
 });
 
-const airports = [
-  { code: 'IST', name: 'Istanbul Airport' },
-  { code: 'SAW', name: 'Sabiha Gökçen Airport' },
-  { code: 'AYT', name: 'Antalya Airport' },
-  { code: 'BJV', name: 'Bodrum Milas Airport' },
-  { code: 'DLM', name: 'Dalaman Airport' },
-  { code: 'ASR', name: 'Kayseri Airport' },
-  { code: 'NAV', name: 'Nevşehir Airport' },
-  { code: 'ADB', name: 'Izmir Adnan Menderes Airport' },
-];
+// Airports list removed - pickup is now free text
 
 // Vehicle types without prices - prices set by admin
 const vehicleTypes = [
@@ -164,24 +155,19 @@ const CustomerHome = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Pickup Airport */}
+              {/* Pick-up Point */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
-                  <Plane className="h-4 w-4" />
-                  Pickup Airport
+                  <MapPin className="h-4 w-4" />
+                  Pick-up Point
                 </Label>
-                <Select value={formData.pickup} onValueChange={(v) => setFormData({...formData, pickup: v})}>
-                  <SelectTrigger className={errors.pickup ? 'border-destructive' : ''}>
-                    <SelectValue placeholder="Select airport" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {airports.map(airport => (
-                      <SelectItem key={airport.code} value={airport.code}>
-                        {airport.code} - {airport.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  placeholder="Enter Pick-up Point"
+                  value={formData.pickup}
+                  onChange={(e) => setFormData({...formData, pickup: e.target.value})}
+                  className={errors.pickup ? 'border-destructive' : ''}
+                  maxLength={200}
+                />
                 {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
               </div>
 

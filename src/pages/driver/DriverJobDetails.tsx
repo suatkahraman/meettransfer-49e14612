@@ -281,7 +281,7 @@ const DriverJobDetails = () => {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Pickup</div>
+                  <div className="text-sm text-muted-foreground">Pick-up Point</div>
                   <div className="font-medium">{reservation.pickup}</div>
                 </div>
               </div>
