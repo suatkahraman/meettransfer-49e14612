@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ArrowLeft, Save, Plus, BookmarkPlus, FileText } from 'lucide-react';
+import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus } from 'lucide-react';
 
 const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
@@ -85,6 +85,28 @@ const AdminCreateReservation = () => {
     driver_id: '',
     admin_notes: '',
   });
+  
+  // Multiple passenger names support (max 15)
+  const [passengerNames, setPassengerNames] = useState<string[]>(['']);
+  const MAX_PASSENGERS = 15;
+
+  const addPassenger = () => {
+    if (passengerNames.length < MAX_PASSENGERS) {
+      setPassengerNames([...passengerNames, '']);
+    }
+  };
+
+  const removePassenger = (index: number) => {
+    if (index > 0) { // Never remove the primary passenger
+      setPassengerNames(passengerNames.filter((_, i) => i !== index));
+    }
+  };
+
+  const updatePassenger = (index: number, value: string) => {
+    const updated = [...passengerNames];
+    updated[index] = value;
+    setPassengerNames(updated);
+  };
 
   const getCurrencySymbol = (currency: string) => {
     return currencies.find(c => c.value === currency)?.symbol || currency;
@@ -159,7 +181,14 @@ const AdminCreateReservation = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.customer_name || !formData.customer_phone || !formData.pickup || !formData.dropoff || !formData.pickup_date || !formData.pickup_time) {
+    // Validate passenger names - at least primary passenger required
+    const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
+    if (validPassengerNames.length === 0) {
+      toast.error('At least one passenger name is required');
+      return;
+    }
+    
+    if (!formData.customer_phone || !formData.pickup || !formData.dropoff || !formData.pickup_date || !formData.pickup_time) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -167,12 +196,15 @@ const AdminCreateReservation = () => {
     setSaving(true);
 
     try {
+      // Use first passenger as customer_name for backwards compatibility
+      const primaryPassenger = validPassengerNames[0];
+      
       // Create reservation
       const { data: reservation, error: reservationError } = await supabase
         .from('reservations')
         .insert({
           customer_id: user?.id, // Admin creates on behalf
-          customer_name: formData.customer_name,
+          customer_name: primaryPassenger,
           customer_phone: formData.customer_phone,
           pickup: formData.pickup,
           dropoff: formData.dropoff,
@@ -186,6 +218,7 @@ const AdminCreateReservation = () => {
           driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
           status: formData.status,
           driver_id: formData.driver_id || null,
+          passenger_names: validPassengerNames,
         })
         .select()
         .single();
@@ -208,7 +241,8 @@ const AdminCreateReservation = () => {
         table_name: 'reservations',
         record_id: reservation?.id,
         new_data: {
-          customer_name: formData.customer_name,
+          customer_name: primaryPassenger,
+          passenger_names: validPassengerNames,
           pickup: formData.pickup,
           dropoff: formData.dropoff,
           pickup_date: formData.pickup_date,
@@ -302,25 +336,62 @@ const AdminCreateReservation = () => {
               {/* Customer Information */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg border-b pb-2">Customer Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Customer Name *</Label>
-                    <Input
-                      value={formData.customer_name}
-                      onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
-                      placeholder="Full name"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Customer Phone *</Label>
-                    <Input
-                      value={formData.customer_phone}
-                      onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                      placeholder="+90 5XX XXX XXXX"
-                      required
-                    />
-                  </div>
+                
+                {/* Passenger Names */}
+                <div className="space-y-3">
+                  <Label>Passenger Names * <span className="text-muted-foreground text-sm">({passengerNames.length}/{MAX_PASSENGERS})</span></Label>
+                  {passengerNames.map((name, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <div className="flex-1">
+                        <div className="relative">
+                          <Input
+                            value={name}
+                            onChange={(e) => updatePassenger(index, e.target.value)}
+                            placeholder={index === 0 ? "Primary Passenger Name *" : `Passenger ${index + 1}`}
+                            className="pr-20"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                            {index === 0 ? 'Primary' : `#${index + 1}`}
+                          </span>
+                        </div>
+                      </div>
+                      {index > 0 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removePassenger(index)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {passengerNames.length < MAX_PASSENGERS && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addPassenger}
+                      className="w-full sm:w-auto"
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Add Customer Name
+                    </Button>
+                  )}
+                </div>
+
+                {/* Phone */}
+                <div className="space-y-2">
+                  <Label>Customer Phone *</Label>
+                  <Input
+                    value={formData.customer_phone}
+                    onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
+                    placeholder="+90 5XX XXX XXXX"
+                    required
+                  />
                 </div>
               </div>
 
