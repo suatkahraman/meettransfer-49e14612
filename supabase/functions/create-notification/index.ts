@@ -12,6 +12,58 @@ interface CreateNotificationRequest {
   message: string
   type: string
   notify_admins?: boolean
+  send_push?: boolean
+}
+
+async function sendPushToUser(supabase: any, userId: string, title: string, body: string, url?: string) {
+  try {
+    console.log(`Attempting to send push notification to user ${userId}`);
+    
+    // Get user's push subscriptions
+    const { data: subscriptions, error: subError } = await supabase
+      .from('push_subscriptions')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (subError) {
+      console.error('Error fetching push subscriptions:', subError);
+      return;
+    }
+
+    if (!subscriptions || subscriptions.length === 0) {
+      console.log(`No push subscriptions found for user ${userId}`);
+      return;
+    }
+
+    console.log(`Found ${subscriptions.length} push subscription(s) for user ${userId}`);
+
+    // Trigger push notification function
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    const pushResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${serviceKey}`,
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        title,
+        body,
+        url: url || '/',
+      }),
+    });
+
+    if (!pushResponse.ok) {
+      const errorText = await pushResponse.text();
+      console.error('Push notification request failed:', errorText);
+    } else {
+      console.log('Push notification sent successfully');
+    }
+  } catch (error) {
+    console.error('Error sending push notification:', error);
+  }
 }
 
 Deno.serve(async (req) => {
@@ -52,7 +104,7 @@ Deno.serve(async (req) => {
     }
 
     const body: CreateNotificationRequest = await req.json()
-    const { user_id, reservation_id, title, message, type, notify_admins } = body
+    const { user_id, reservation_id, title, message, type, notify_admins, send_push } = body
 
     // If notify_admins is true, send notification to all admin users
     if (notify_admins) {
@@ -104,6 +156,11 @@ Deno.serve(async (req) => {
       }
 
       console.log(`Created ${data.length} notifications for admins`)
+
+      // Send push notifications to all admins
+      for (const admin of adminRoles) {
+        await sendPushToUser(supabaseAdmin, admin.user_id, title, message, reservation_id ? `/admin/reservations/${reservation_id}` : '/admin/reservations');
+      }
 
       return new Response(
         JSON.stringify({ success: true, notifications: data }),
@@ -160,6 +217,14 @@ Deno.serve(async (req) => {
     }
 
     console.log('Notification created successfully:', data.id)
+
+    // Send push notification if requested or by default for direct notifications
+    if (send_push !== false) {
+      const urlPath = reservation_id 
+        ? (roleData ? `/admin/reservations/${reservation_id}` : `/customer/reservation/${reservation_id}`)
+        : '/';
+      await sendPushToUser(supabaseAdmin, user_id, title, message, urlPath);
+    }
 
     return new Response(
       JSON.stringify({ success: true, notification: data }),

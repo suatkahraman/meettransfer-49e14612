@@ -162,7 +162,7 @@ const DriverJobDetails = () => {
   };
 
   const updateStatus = async (newStatus: string, driverCash?: boolean) => {
-    if (!id) return;
+    if (!id || !reservation) return;
     setUpdating(true);
 
     const updateData: any = { status: newStatus };
@@ -181,6 +181,62 @@ const DriverJobDetails = () => {
       toast.success(`Status updated to ${statusLabels[newStatus] || newStatus}`);
       setReservation(prev => prev ? { ...prev, status: newStatus } : null);
       setShowCashDialog(false);
+
+      // Notify customer when trip is completed
+      if (newStatus === 'completed') {
+        try {
+          // Get driver name
+          const { data: driverData } = await supabase
+            .from('drivers')
+            .select('name')
+            .eq('id', driverId)
+            .maybeSingle();
+
+          // Create notification for customer
+          const { data: resData } = await supabase
+            .from('reservations')
+            .select('customer_id')
+            .eq('id', id)
+            .single();
+
+          if (resData?.customer_id) {
+            await supabase.from('notifications').insert({
+              user_id: resData.customer_id,
+              reservation_id: id,
+              type: 'trip_completed',
+              title: '🎉 Trip Completed',
+              message: 'Your trip has been completed. Thank you for choosing Meet Transfer!'
+            });
+
+            // Try to send push notification
+            try {
+              await supabase.functions.invoke('send-push-notification', {
+                body: {
+                  user_id: resData.customer_id,
+                  title: '🎉 Trip Completed',
+                  body: 'Your trip has been completed. Thank you for choosing Meet Transfer!',
+                  data: { reservation_id: id }
+                }
+              });
+            } catch (pushError) {
+              console.log('Push notification failed:', pushError);
+            }
+          }
+
+          // Notify admins
+          await supabase.functions.invoke('create-notification', {
+            body: {
+              type: 'trip_completed',
+              title: '✅ Trip Completed',
+              message: `${driverData?.name || 'Driver'} completed trip #${id.slice(0, 8)}.`,
+              notify_admins: true,
+              reservation_id: id,
+            }
+          });
+        } catch (notifyError) {
+          console.error('Failed to send notifications:', notifyError);
+        }
+      }
     }
     setUpdating(false);
   };
