@@ -277,7 +277,7 @@ const DriverHome = () => {
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => navigate('/driver/accounting')} 
+            onClick={() => navigate('/driver/monthly-accounting')} 
             className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
           >
             <Calculator className="h-5 w-5" />

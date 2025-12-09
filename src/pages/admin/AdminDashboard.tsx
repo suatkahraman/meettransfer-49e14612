@@ -91,7 +91,7 @@ const AdminDashboard = () => {
     { icon: CalendarDays, label: 'Calendar', path: '/admin/calendar' },
     { icon: Users, label: 'Drivers', path: '/admin/drivers' },
     { icon: FileText, label: 'Templates', path: '/admin/templates' },
-    { icon: DollarSign, label: 'Accounting', path: '/admin/accounting' },
+    { icon: DollarSign, label: 'Monthly Accounting', path: '/admin/monthly-accounting' },
     { icon: Settings, label: 'Settings', path: '/admin/settings' },
   ];
 
