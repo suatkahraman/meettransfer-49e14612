@@ -6,8 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface Reservation {
   id: string;
@@ -38,6 +49,8 @@ const statusColors: Record<string, string> = {
   'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
   'active': 'bg-cyan-500/20 text-cyan-700',
   'completed': 'bg-green-500/20 text-green-700',
+  'pending_admin_review': 'bg-amber-500/20 text-amber-700',
+  'cancelled_by_customer': 'bg-destructive/20 text-destructive',
 };
 
 const statusLabels: Record<string, string> = {
@@ -48,6 +61,8 @@ const statusLabels: Record<string, string> = {
   'sent_to_driver': 'Driver Assigned',
   'active': 'In Progress',
   'completed': 'Completed',
+  'pending_admin_review': 'Pending Admin Review',
+  'cancelled_by_customer': 'Cancelled by You',
 };
 
 const currencySymbols: Record<string, string> = {
@@ -64,6 +79,7 @@ const CustomerReservationDetail = () => {
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   useEffect(() => {
     const fetchReservation = async () => {
@@ -97,6 +113,9 @@ const CustomerReservationDetail = () => {
     const symbol = currencySymbols[currency || 'TRY'] || currency || '';
     return `${symbol}${price}`;
   };
+
+  const canEdit = reservation && ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status);
+  const canCancel = reservation && ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status);
 
   const handleAcceptPrice = async () => {
     if (!reservation) return;
@@ -167,6 +186,73 @@ const CustomerReservationDetail = () => {
       toast.error(error.message || 'Failed to cancel reservation');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleCancelReservation = async () => {
+    if (!reservation) return;
+    setCancelLoading(true);
+
+    try {
+      const driverId = reservation.driver_id;
+
+      // Update reservation status and remove driver
+      const { error } = await supabase
+        .from('reservations')
+        .update({ 
+          status: 'cancelled_by_customer',
+          driver_id: null,
+        })
+        .eq('id', reservation.id);
+
+      if (error) throw error;
+
+      // Notify admin
+      try {
+        await supabase.functions.invoke('create-notification', {
+          body: {
+            type: 'reservation_cancelled',
+            title: 'Customer Cancelled Reservation',
+            message: `A customer cancelled reservation #${reservation.id.slice(0, 8)}.`,
+            notify_admins: true,
+            reservation_id: reservation.id,
+          }
+        });
+      } catch (e) {
+        console.error('Failed to notify admin:', e);
+      }
+
+      // Notify driver if one was assigned
+      if (driverId) {
+        try {
+          const { data: driver } = await supabase
+            .from('drivers')
+            .select('user_id')
+            .eq('id', driverId)
+            .single();
+
+          if (driver?.user_id) {
+            await supabase.functions.invoke('create-notification', {
+              body: {
+                user_id: driver.user_id,
+                reservation_id: reservation.id,
+                title: 'Reservation Cancelled',
+                message: `Reservation #${reservation.id.slice(0, 8)} has been cancelled by the customer.`,
+                type: 'reservation_cancelled'
+              }
+            });
+          }
+        } catch (e) {
+          console.error('Failed to notify driver:', e);
+        }
+      }
+
+      toast.success('Reservation cancelled successfully.');
+      setReservation({ ...reservation, status: 'cancelled_by_customer', driver_id: null });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to cancel reservation');
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -358,11 +444,69 @@ const CustomerReservationDetail = () => {
             )}
 
             {/* Cancelled Message */}
-            {reservation.status === 'customer_rejected' && (
+            {(reservation.status === 'customer_rejected' || reservation.status === 'cancelled_by_customer') && (
               <div className="bg-destructive/10 p-4 rounded-lg text-center">
                 <p className="text-destructive">
                   This reservation has been cancelled.
                 </p>
+              </div>
+            )}
+
+            {/* Pending Admin Review Message */}
+            {reservation.status === 'pending_admin_review' && (
+              <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-lg text-center">
+                <AlertTriangle className="h-5 w-5 mx-auto text-amber-600 mb-2" />
+                <p className="text-amber-700 dark:text-amber-300">
+                  Your changes are being reviewed by our team. We'll notify you once they're confirmed.
+                </p>
+              </div>
+            )}
+
+            {/* Action Buttons for confirmed reservations */}
+            {(canEdit || canCancel) && (
+              <div className="space-y-3 pt-4 border-t">
+                {canEdit && (
+                  <Button 
+                    onClick={() => navigate(`/customer/reservation/${reservation.id}/edit`)}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Reservation
+                  </Button>
+                )}
+                
+                {canCancel && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="outline"
+                        className="w-full border-destructive text-destructive hover:bg-destructive/10"
+                        disabled={cancelLoading}
+                      >
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Cancel Reservation
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Cancel Reservation?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to cancel this reservation? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Keep Reservation</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleCancelReservation}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Yes, Cancel It
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             )}
           </CardContent>

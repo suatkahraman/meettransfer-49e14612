@@ -33,6 +33,8 @@ const statusColors: Record<string, string> = {
   'sent_to_driver': 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-300',
   'active': 'bg-cyan-500/20 text-cyan-700 dark:text-cyan-300',
   'completed': 'bg-green-500/20 text-green-700 dark:text-green-300',
+  'pending_admin_review': 'bg-amber-500/20 text-amber-700 dark:text-amber-300',
+  'cancelled_by_customer': 'bg-destructive/20 text-destructive',
 };
 
 const statusLabels: Record<string, string> = {
@@ -43,6 +45,8 @@ const statusLabels: Record<string, string> = {
   'sent_to_driver': 'Driver Assigned',
   'active': 'In Progress',
   'completed': 'Completed',
+  'pending_admin_review': 'Under Review',
+  'cancelled_by_customer': 'Cancelled',
 };
 
 const statusIcons: Record<string, React.ReactNode> = {
@@ -53,6 +57,8 @@ const statusIcons: Record<string, React.ReactNode> = {
   'sent_to_driver': <Truck className="h-3 w-3" />,
   'active': <Car className="h-3 w-3" />,
   'completed': <CheckCircle className="h-3 w-3" />,
+  'pending_admin_review': <AlertCircle className="h-3 w-3" />,
+  'cancelled_by_customer': <XCircle className="h-3 w-3" />,
 };
 
 const currencySymbols: Record<string, string> = {

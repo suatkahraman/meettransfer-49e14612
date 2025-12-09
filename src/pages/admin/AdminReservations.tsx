@@ -54,6 +54,8 @@ const statusColors: Record<string, string> = {
   'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
   'active': 'bg-cyan-500/20 text-cyan-700',
   'completed': 'bg-green-500/20 text-green-700',
+  'pending_admin_review': 'bg-amber-500/20 text-amber-700',
+  'cancelled_by_customer': 'bg-destructive/20 text-destructive',
 };
 
 const statusLabels: Record<string, string> = {
@@ -65,6 +67,8 @@ const statusLabels: Record<string, string> = {
   'sent_to_driver': 'Sent to Driver',
   'active': 'Active',
   'completed': 'Completed',
+  'pending_admin_review': 'Needs Review',
+  'cancelled_by_customer': 'Cancelled',
 };
 
 const currencySymbols: Record<string, string> = {
@@ -413,6 +417,8 @@ const AdminReservations = () => {
               <SelectItem value="sent_to_driver">Sent to Driver</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="pending_admin_review">Needs Review</SelectItem>
+              <SelectItem value="cancelled_by_customer">Cancelled by Customer</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -449,6 +455,67 @@ const AdminReservations = () => {
             )}
           </div>
         )}
+
+        {/* Needs Admin Review Section */}
+        {!loading && (() => {
+          const needsReview = reservations.filter(r => r.status === 'pending_admin_review');
+          if (needsReview.length === 0) return null;
+          return (
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-3 w-3 rounded-full bg-amber-500 animate-pulse" />
+                <h3 className="text-lg font-semibold text-amber-700">
+                  Needs Review - Customer Edited ({needsReview.length})
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {needsReview.map((reservation) => (
+                  <Card 
+                    key={reservation.id} 
+                    className="border-amber-300 bg-amber-50/50 cursor-pointer hover:shadow-md"
+                    onClick={() => navigate(`/admin/reservations/${reservation.id}`)}
+                  >
+                    <CardContent className="py-4">
+                      <div className="flex flex-wrap justify-between items-start gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <Badge className="bg-amber-500/20 text-amber-700">
+                              Needs Review
+                            </Badge>
+                            <span className="flex items-center gap-1 text-sm">
+                              <Calendar className="h-4 w-4" />
+                              {format(new Date(reservation.pickup_date), 'PPP')}
+                            </span>
+                            <span className="flex items-center gap-1 text-sm">
+                              <Clock className="h-4 w-4" />
+                              {reservation.pickup_time}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{reservation.customer_name}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-sm">
+                            <MapPin className="h-4 w-4 text-primary" />
+                            <span>{reservation.pickup}</span>
+                            <span>→</span>
+                            <span>{reservation.dropoff}</span>
+                          </div>
+                        </div>
+                        
+                        <Button size="sm">
+                          Review Changes
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Needs Driver Assignment Section */}
         {!loading && (() => {
