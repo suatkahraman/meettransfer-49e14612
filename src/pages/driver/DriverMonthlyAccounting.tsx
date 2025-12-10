@@ -99,7 +99,7 @@ const DriverMonthlyAccounting = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">Monthly Earnings</h1>
+          <h1 className="text-2xl font-serif">Aylık Kazanç</h1>
         </div>
         <Button 
           variant="ghost" 
@@ -120,7 +120,7 @@ const DriverMonthlyAccounting = () => {
         />
 
         {loading ? (
-          <div className="text-center py-12">Loading...</div>
+          <div className="text-center py-12">Yükleniyor...</div>
         ) : (
           <>
             {/* Monthly Summary */}
@@ -133,7 +133,7 @@ const DriverMonthlyAccounting = () => {
             {/* Reservations Table */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Transfers</CardTitle>
+                <CardTitle className="text-lg">Transferler</CardTitle>
               </CardHeader>
               <CardContent>
                 <MonthlyAccountingTable

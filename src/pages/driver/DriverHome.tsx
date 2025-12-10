@@ -321,7 +321,7 @@ const DriverHome = () => {
     <div className="min-h-screen bg-background">
       {/* Mobile-optimized sticky header */}
       <header className="bg-primary text-primary-foreground py-3 px-4 flex justify-between items-center sticky top-0 z-20 shadow-lg">
-        <h1 className="text-lg font-serif font-bold">Driver Panel</h1>
+        <h1 className="text-lg font-serif font-bold">Şoför Paneli</h1>
         <div className="flex items-center gap-1">
           <PushNotificationToggle />
           <NotificationBell />
@@ -369,7 +369,7 @@ const DriverHome = () => {
             <RefreshCw className={cn("h-6 w-6 text-primary", refreshing && "animate-spin")} />
           </motion.div>
           <span className="text-xs text-muted-foreground">
-            {refreshing ? 'Refreshing...' : 'Pull to refresh'}
+            {refreshing ? 'Yenileniyor...' : 'Yenilemek için çekin'}
           </span>
         </motion.div>
         {loading ? (
@@ -383,8 +383,8 @@ const DriverHome = () => {
             className="text-center py-16"
           >
             <Car className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <p className="text-lg text-muted-foreground">No jobs assigned yet</p>
-            <p className="text-sm text-muted-foreground mt-2">New jobs will appear here</p>
+            <p className="text-lg text-muted-foreground">Henüz atanmış iş yok</p>
+            <p className="text-sm text-muted-foreground mt-2">Yeni işler burada görünecek</p>
           </motion.div>
         ) : (
           <div className="space-y-4 pt-4">
@@ -399,7 +399,7 @@ const DriverHome = () => {
                     <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
                       <AlertCircle className="h-4 w-4 text-orange-600" />
                     </div>
-                    <span className="font-semibold">New Jobs</span>
+                    <span className="font-semibold">Yeni İşler</span>
                     <Badge variant="secondary" className="bg-orange-500/20 text-orange-700">
                       {pendingJobs.length}
                     </Badge>
@@ -448,7 +448,7 @@ const DriverHome = () => {
                     <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
                       <Loader2 className="h-4 w-4 text-blue-600" />
                     </div>
-                    <span className="font-semibold">In Progress</span>
+                    <span className="font-semibold">Devam Ediyor</span>
                     <Badge variant="secondary" className="bg-blue-500/20 text-blue-700">
                       {activeJobs.length}
                     </Badge>
@@ -497,7 +497,7 @@ const DriverHome = () => {
                     <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                     </div>
-                    <span className="font-semibold">Completed</span>
+                    <span className="font-semibold">Tamamlanan</span>
                     <Badge variant="secondary" className="bg-green-500/20 text-green-700">
                       {completedJobs.length}
                     </Badge>
