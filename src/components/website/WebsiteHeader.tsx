@@ -13,7 +13,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import meetTransferLogo from "@/assets/meet-transfer-logo.jpg";
+import meetTransferLogo from "@/assets/meet-transfer-logo.png";
 
 const WebsiteHeader = () => {
   const { t } = useLanguage();

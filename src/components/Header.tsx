@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import meetTransferLogo from "@/assets/meet-transfer-logo.jpg";
+import meetTransferLogo from "@/assets/meet-transfer-logo.png";
 
 export const Header = () => {
   const { user, signOut } = useAuth();
