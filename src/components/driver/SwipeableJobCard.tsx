@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface Reservation {
@@ -32,19 +33,25 @@ interface SwipeableJobCardProps {
 
 const statusConfig: Record<string, { label: string; color: string; bgColor: string; icon: React.ReactNode }> = {
   sent_to_driver: { 
-    label: 'New Job', 
+    label: 'Yeni İş', 
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-500',
+    icon: <AlertCircle className="h-4 w-4" />
+  },
+  assigned: { 
+    label: 'Atandı', 
     color: 'text-orange-600',
     bgColor: 'bg-orange-500',
     icon: <AlertCircle className="h-4 w-4" />
   },
   active: { 
-    label: 'In Progress', 
+    label: 'Devam Ediyor', 
     color: 'text-blue-600',
     bgColor: 'bg-blue-500',
     icon: <Loader2 className="h-4 w-4" />
   },
   completed: { 
-    label: 'Completed', 
+    label: 'Tamamlandı', 
     color: 'text-green-600',
     bgColor: 'bg-green-500',
     icon: <CheckCircle className="h-4 w-4" />
@@ -56,6 +63,13 @@ const currencySymbols: Record<string, string> = {
   EUR: '€',
   USD: '$',
   GBP: '£',
+};
+
+const paymentTypeLabels: Record<string, string> = {
+  cash: 'Nakit',
+  card: 'Kart',
+  online: 'Online',
+  none: 'Yok',
 };
 
 const SWIPE_THRESHOLD = 100;
@@ -77,8 +91,8 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
   };
 
   const formatPrice = (price: number | null, currency: string | null) => {
-    if (price === null || price === undefined) return 'N/A';
-    return `${getCurrencySymbol(currency)}${price.toLocaleString()}`;
+    if (price === null || price === undefined) return 'Belirtilmedi';
+    return `${getCurrencySymbol(currency)}${price.toLocaleString('tr-TR')}`;
   };
 
   const handleDragEnd = async (_: any, info: PanInfo) => {
@@ -88,14 +102,14 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
       setIsProcessing(true);
       await onComplete();
       setIsProcessing(false);
-    } else if (offset > SWIPE_THRESHOLD && reservation.status === 'sent_to_driver' && onAccept) {
+    } else if (offset > SWIPE_THRESHOLD && (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && onAccept) {
       setIsProcessing(true);
       await onAccept();
       setIsProcessing(false);
     }
   };
 
-  const canSwipeRight = reservation.status === 'sent_to_driver' && onAccept;
+  const canSwipeRight = (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && onAccept;
   const canSwipeLeft = reservation.status === 'active' && onComplete;
 
   return (
@@ -111,7 +125,7 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
             style={{ scale: leftIconScale }}
           >
             <Play className="h-6 w-6" />
-            <span>Accept</span>
+            <span>Kabul Et</span>
           </motion.div>
         </motion.div>
       )}
@@ -126,7 +140,7 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
             className="flex items-center gap-2 text-primary-foreground font-semibold"
             style={{ scale: rightIconScale }}
           >
-            <span>Complete</span>
+            <span>Tamamla</span>
             <CheckCircle className="h-6 w-6" />
           </motion.div>
         </motion.div>
@@ -156,7 +170,7 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{format(new Date(reservation.pickup_date), 'EEE, MMM d')}</span>
+                  <span>{format(new Date(reservation.pickup_date), 'EEE, d MMM', { locale: tr })}</span>
                 </div>
                 <div className="flex items-center gap-2 text-lg font-bold">
                   <Clock className="h-4 w-4 text-primary" />
@@ -165,7 +179,7 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
               </div>
               <Badge className={cn(
                 "flex items-center gap-1 px-3 py-1",
-                reservation.status === 'sent_to_driver' && "bg-orange-500/20 text-orange-700 border-orange-500",
+                (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && "bg-orange-500/20 text-orange-700 border-orange-500",
                 reservation.status === 'active' && "bg-blue-500/20 text-blue-700 border-blue-500",
                 reservation.status === 'completed' && "bg-green-500/20 text-green-700 border-green-500"
               )}>
@@ -211,7 +225,7 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
               </div>
               <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs">
                 <CreditCard className="h-3 w-3" />
-                <span className="capitalize">{reservation.payment_type}</span>
+                <span>{paymentTypeLabels[reservation.payment_type] || reservation.payment_type}</span>
               </div>
             </div>
 
@@ -220,12 +234,12 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
               {canSwipeRight && (
                 <span className="text-xs text-green-600 flex items-center gap-1">
                   <Play className="h-3 w-3" />
-                  Swipe right to accept
+                  Kabul etmek için sağa kaydır
                 </span>
               )}
               {canSwipeLeft && (
                 <span className="text-xs text-primary flex items-center gap-1">
-                  Swipe left to complete
+                  Tamamlamak için sola kaydır
                   <CheckCircle className="h-3 w-3" />
                 </span>
               )}

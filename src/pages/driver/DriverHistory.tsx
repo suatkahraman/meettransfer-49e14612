@@ -9,6 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ArrowLeft, Calendar as CalendarIcon, MapPin, Clock, User, Car, CreditCard, CheckCircle2, Loader2, Filter, X } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -35,6 +36,13 @@ const currencySymbols: Record<string, string> = {
   GBP: '£',
 };
 
+const paymentTypeLabels: Record<string, string> = {
+  cash: 'Nakit',
+  card: 'Kart',
+  online: 'Online',
+  none: 'Yok',
+};
+
 const DriverHistory = () => {
   const navigate = useNavigate();
   const { driverId } = useUserRole();
@@ -50,7 +58,7 @@ const DriverHistory = () => {
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null || price === undefined) return '-';
-    return `${getCurrencySymbol(currency)}${price.toLocaleString()}`;
+    return `${getCurrencySymbol(currency)}${price.toLocaleString('tr-TR')}`;
   };
 
   const fetchHistory = async () => {
@@ -110,7 +118,7 @@ const DriverHistory = () => {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-lg font-serif font-bold flex-1">Trip History</h1>
+        <h1 className="text-lg font-serif font-bold flex-1">Transfer Geçmişi</h1>
         <Button
           variant="ghost"
           size="icon"
@@ -135,11 +143,11 @@ const DriverHistory = () => {
           >
             <div className="p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Filter by Date Range</span>
+                <span className="text-sm font-medium">Tarih Aralığına Göre Filtrele</span>
                 {(dateFrom || dateTo) && (
                   <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-xs">
                     <X className="h-3 w-3 mr-1" />
-                    Clear
+                    Temizle
                   </Button>
                 )}
               </div>
@@ -155,7 +163,7 @@ const DriverHistory = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateFrom ? format(dateFrom, 'PP') : 'From'}
+                      {dateFrom ? format(dateFrom, 'PP', { locale: tr }) : 'Başlangıç'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -180,7 +188,7 @@ const DriverHistory = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateTo ? format(dateTo, 'PP') : 'To'}
+                      {dateTo ? format(dateTo, 'PP', { locale: tr }) : 'Bitiş'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="end">
@@ -204,19 +212,19 @@ const DriverHistory = () => {
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="p-3 text-center">
             <p className="text-2xl font-bold text-primary">{totalTrips}</p>
-            <p className="text-xs text-muted-foreground">Total Trips</p>
+            <p className="text-xs text-muted-foreground">Toplam Transfer</p>
           </CardContent>
         </Card>
         <Card className="bg-green-500/5 border-green-500/20">
           <CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold text-green-600">₺{totalEarnings.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">Earnings</p>
+            <p className="text-2xl font-bold text-green-600">₺{totalEarnings.toLocaleString('tr-TR')}</p>
+            <p className="text-xs text-muted-foreground">Kazanç</p>
           </CardContent>
         </Card>
         <Card className="bg-blue-500/5 border-blue-500/20">
           <CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold text-blue-600">₺{totalCashCollected.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">Cash</p>
+            <p className="text-2xl font-bold text-blue-600">₺{totalCashCollected.toLocaleString('tr-TR')}</p>
+            <p className="text-xs text-muted-foreground">Nakit</p>
           </CardContent>
         </Card>
       </div>
@@ -230,9 +238,9 @@ const DriverHistory = () => {
         ) : reservations.length === 0 ? (
           <div className="text-center py-12">
             <CheckCircle2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No completed trips found</p>
+            <p className="text-muted-foreground">Tamamlanmış transfer bulunamadı</p>
             <p className="text-sm text-muted-foreground mt-1">
-              {dateFrom || dateTo ? 'Try adjusting your date filters' : 'Complete trips will appear here'}
+              {dateFrom || dateTo ? 'Tarih filtrelerini değiştirmeyi deneyin' : 'Tamamlanan transferler burada görünecek'}
             </p>
           </div>
         ) : (
@@ -254,7 +262,7 @@ const DriverHistory = () => {
                       <div className="flex items-center gap-2 text-sm">
                         <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">
-                          {format(new Date(reservation.pickup_date), 'EEE, MMM d, yyyy')}
+                          {format(new Date(reservation.pickup_date), 'EEE, d MMM yyyy', { locale: tr })}
                         </span>
                       </div>
                       <div className="flex items-center gap-1 text-sm">
@@ -294,7 +302,7 @@ const DriverHistory = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <CreditCard className="h-3 w-3" />
-                          <span className="capitalize">{reservation.payment_type}</span>
+                          <span>{paymentTypeLabels[reservation.payment_type] || reservation.payment_type}</span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -303,7 +311,7 @@ const DriverHistory = () => {
                         </p>
                         {reservation.driver_cash_amount && (
                           <p className="text-xs text-muted-foreground">
-                            Cash: {formatPrice(reservation.driver_cash_amount, reservation.price_currency)}
+                            Nakit: {formatPrice(reservation.driver_cash_amount, reservation.price_currency)}
                           </p>
                         )}
                       </div>

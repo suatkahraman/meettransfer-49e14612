@@ -44,9 +44,10 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  'sent_to_driver': 'Assigned',
-  'active': 'In Progress',
-  'completed': 'Completed',
+  'sent_to_driver': 'Atandı',
+  'assigned': 'Atandı',
+  'active': 'Devam Ediyor',
+  'completed': 'Tamamlandı',
 };
 
 const currencySymbols: Record<string, string> = {
@@ -274,7 +275,7 @@ const DriverJobDetails = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/driver')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">Job Details</h1>
+          <h1 className="text-2xl font-serif">İş Detayı</h1>
         </div>
         <div className="flex items-center gap-2">
           <NotificationBell />
@@ -303,7 +304,7 @@ const DriverJobDetails = () => {
               <div className="flex items-start gap-3">
                 <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Primary Customer</div>
+                  <div className="text-sm text-muted-foreground">Ana Müşteri</div>
                   <div className="font-medium">{reservation.customer_name}</div>
                 </div>
               </div>
@@ -312,7 +313,7 @@ const DriverJobDetails = () => {
                 <div className="flex items-start gap-3">
                   <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <div className="text-sm text-muted-foreground">All Passengers ({reservation.passenger_names.length})</div>
+                    <div className="text-sm text-muted-foreground">Tüm Yolcular ({reservation.passenger_names.length})</div>
                     <div className="space-y-1 mt-1">
                       {reservation.passenger_names.map((name, index) => (
                         <div key={index} className="font-medium text-sm">
@@ -327,7 +328,7 @@ const DriverJobDetails = () => {
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Phone</div>
+                  <div className="text-sm text-muted-foreground">Telefon</div>
                   <a href={`tel:${reservation.customer_phone}`} className="font-medium text-primary">
                     {reservation.customer_phone}
                   </a>
@@ -337,7 +338,7 @@ const DriverJobDetails = () => {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Pick-up Point</div>
+                  <div className="text-sm text-muted-foreground">Alış Noktası</div>
                   <div className="font-medium">{reservation.pickup}</div>
                 </div>
               </div>
@@ -345,7 +346,7 @@ const DriverJobDetails = () => {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-destructive mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Drop-off</div>
+                  <div className="text-sm text-muted-foreground">Bırakış Noktası</div>
                   <div className="font-medium">{reservation.dropoff}</div>
                 </div>
               </div>
@@ -354,7 +355,7 @@ const DriverJobDetails = () => {
                 <div className="flex items-start gap-3">
                   <Plane className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <div className="text-sm text-muted-foreground">Flight</div>
+                    <div className="text-sm text-muted-foreground">Uçuş</div>
                     <div className="font-medium">{reservation.flight_number}</div>
                   </div>
                 </div>
@@ -363,7 +364,7 @@ const DriverJobDetails = () => {
               <div className="flex items-start gap-3">
                 <Car className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Vehicle</div>
+                  <div className="text-sm text-muted-foreground">Araç</div>
                   <div className="font-medium capitalize">{reservation.vehicle_type.replace('-', ' ')}</div>
                 </div>
               </div>
@@ -371,8 +372,8 @@ const DriverJobDetails = () => {
               <div className="flex items-start gap-3">
                 <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Payment</div>
-                  <div className="font-medium capitalize">{reservation.payment_type}</div>
+                  <div className="text-sm text-muted-foreground">Ödeme</div>
+                  <div className="font-medium capitalize">{reservation.payment_type === 'cash' ? 'Nakit' : reservation.payment_type === 'card' ? 'Kart' : reservation.payment_type === 'online' ? 'Online' : reservation.payment_type}</div>
                 </div>
               </div>
             </div>
@@ -380,11 +381,11 @@ const DriverJobDetails = () => {
             {/* Currency Display - READ ONLY */}
             <div className="bg-muted/50 p-3 rounded-lg">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Currency</span>
+                <span className="text-sm text-muted-foreground">Para Birimi</span>
                 <span className="font-medium">{reservation.price_currency || 'TRY'} ({currencySymbol})</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Currency set by admin - not editable
+                Para birimi admin tarafından belirlenir - düzenlenemez
               </p>
             </div>
           </CardContent>
@@ -395,12 +396,12 @@ const DriverJobDetails = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              Trip Budget & Cash
+              Transfer Ücreti & Nakit
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="driver_price">Trip Price / Budget ({currencySymbol})</Label>
+              <Label htmlFor="driver_price">Transfer Ücreti ({currencySymbol})</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                 <Input
@@ -408,17 +409,17 @@ const DriverJobDetails = () => {
                   type="number"
                   step="0.01"
                   min="0"
-                  placeholder="Enter final trip price"
+                  placeholder="Son transfer ücretini girin"
                   value={driverPrice}
                   onChange={(e) => setDriverPrice(e.target.value)}
                   className="pl-8 text-lg font-semibold"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">You can update the final price for this trip</p>
+              <p className="text-xs text-muted-foreground">Bu transfer için son ücreti güncelleyebilirsiniz</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="driver_cash">Cash Collected ({currencySymbol})</Label>
+              <Label htmlFor="driver_cash">Toplanan Nakit ({currencySymbol})</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                 <Input
@@ -426,7 +427,7 @@ const DriverJobDetails = () => {
                   type="number"
                   step="0.01"
                   min="0"
-                  placeholder="Enter cash amount collected"
+                  placeholder="Toplanan nakit tutarını girin"
                   value={driverCashAmount}
                   onChange={(e) => setDriverCashAmount(e.target.value)}
                   className="pl-8"
@@ -435,10 +436,10 @@ const DriverJobDetails = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="driver_notes">Notes / Additional Info</Label>
+              <Label htmlFor="driver_notes">Notlar / Ek Bilgi</Label>
               <Textarea
                 id="driver_notes"
-                placeholder="Delays, extra stops, special situations..."
+                placeholder="Gecikmeler, ekstra duraklar, özel durumlar..."
                 value={driverNotes}
                 onChange={(e) => setDriverNotes(e.target.value)}
                 rows={3}
@@ -451,15 +452,15 @@ const DriverJobDetails = () => {
               className="w-full"
               size="lg"
             >
-              {savingFinancials ? (
+            {savingFinancials ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  Kaydediliyor...
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Save Changes
+                  Değişiklikleri Kaydet
                 </>
               )}
             </Button>
@@ -471,7 +472,7 @@ const DriverJobDetails = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Map className="h-5 w-5" />
-              Route Map
+              Güzergah Haritası
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -499,7 +500,7 @@ const DriverJobDetails = () => {
                 ) : (
                   <CheckCircle className="h-5 w-5 mr-2" />
                 )}
-                Confirm Job
+                İşi Onayla
               </Button>
             )}
 
@@ -511,7 +512,7 @@ const DriverJobDetails = () => {
                 disabled={updating}
               >
                 <CheckCircle className="h-5 w-5 mr-2" />
-                Passenger Picked Up
+                Yolcu Alındı
               </Button>
             )}
             
@@ -523,14 +524,14 @@ const DriverJobDetails = () => {
                 disabled={updating}
               >
                 <CheckCircle className="h-5 w-5 mr-2" />
-                Trip Completed
+                Transfer Tamamlandı
               </Button>
             )}
 
             {reservation.status === 'completed' && (
               <div className="text-center py-4">
                 <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
-                <p className="text-lg font-medium text-green-600">Trip Completed</p>
+                <p className="text-lg font-medium text-green-600">Transfer Tamamlandı</p>
               </div>
             )}
           </CardContent>
@@ -541,17 +542,17 @@ const DriverJobDetails = () => {
       <Dialog open={showCashDialog} onOpenChange={setShowCashDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cash Collection</DialogTitle>
+            <DialogTitle>Nakit Tahsilat</DialogTitle>
           </DialogHeader>
           <p className="py-4">
-            Did you collect cash payment of {formatPrice(reservation.price, reservation.price_currency)} from the customer?
+            Müşteriden {formatPrice(reservation.price, reservation.price_currency)} nakit ödeme aldınız mı?
           </p>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => updateStatus('completed', false)} disabled={updating}>
-              No, Not Collected
+              Hayır, Almadım
             </Button>
             <Button onClick={() => updateStatus('completed', true)} disabled={updating}>
-              Yes, Collected
+              Evet, Aldım
             </Button>
           </DialogFooter>
         </DialogContent>
