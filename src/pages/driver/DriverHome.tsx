@@ -318,9 +318,9 @@ const DriverHome = () => {
   const completedJobs = reservations.filter(r => r.status === 'completed');
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Mobile-optimized sticky header */}
-      <header className="bg-primary text-primary-foreground py-3 px-4 flex justify-between items-center sticky top-0 z-20 shadow-lg">
+      <header className="bg-primary text-primary-foreground py-3 px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg">
         <h1 className="text-lg font-serif font-bold">Şoför Paneli</h1>
         <div className="flex items-center gap-1">
           <PushNotificationToggle />
@@ -352,14 +352,8 @@ const DriverHome = () => {
         </div>
       </header>
 
-      <motion.main 
-        className="pb-8 px-4 max-w-lg mx-auto relative"
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0.5, bottom: 0 }}
-        onDragEnd={handlePullEnd}
-        style={{ y: pullY }}
-      >
+      <main className="flex-1 overflow-y-auto relative">
+        <div className="pb-8 px-4 max-w-lg mx-auto">
         {/* Pull to refresh indicator */}
         <motion.div 
           className="absolute left-1/2 -translate-x-1/2 -top-12 flex flex-col items-center gap-1"
@@ -535,7 +529,8 @@ const DriverHome = () => {
             )}
           </div>
         )}
-      </motion.main>
+        </div>
+      </main>
     </div>
   );
 };

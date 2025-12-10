@@ -369,8 +369,8 @@ const AdminReservations = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
+      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center flex-shrink-0">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
@@ -380,7 +380,8 @@ const AdminReservations = () => {
         <NotificationBell />
       </header>
 
-      <main className="container mx-auto py-8 px-4">
+      <main className="flex-1 overflow-y-auto">
+        <div className="container mx-auto py-8 px-4">
         {/* Header with Create Button */}
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
           <h2 className="text-xl font-semibold">All Reservations</h2>
@@ -733,6 +734,7 @@ const AdminReservations = () => {
             ))}
           </div>
         )}
+        </div>
       </main>
 
       {/* Assign Driver Dialog */}
