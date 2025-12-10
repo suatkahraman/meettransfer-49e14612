@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2 } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2 } from 'lucide-react';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
@@ -90,6 +90,7 @@ const AdminEditReservation = () => {
   const [saving, setSaving] = useState(false);
   const [sendingPrice, setSendingPrice] = useState(false);
   const [assigningDriver, setAssigningDriver] = useState(false);
+  const [collectingPayment, setCollectingPayment] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
@@ -349,6 +350,93 @@ const AdminEditReservation = () => {
       toast.error(error.message || 'Failed to assign driver');
     } finally {
       setAssigningDriver(false);
+    }
+  };
+
+  const handleCollectPayment = async () => {
+    if (!formData.agency_id || formData.agency_id === 'none' || !agencyDetails.customer_price) {
+      toast.error('Please enter agency price first');
+      return;
+    }
+
+    setCollectingPayment(true);
+
+    try {
+      const agencyPrice = parseFloat(agencyDetails.customer_price);
+      
+      // Get current agency balance
+      const { data: agency, error: agencyError } = await supabase
+        .from('agencies')
+        .select('balance, agency_name')
+        .eq('id', formData.agency_id)
+        .single();
+
+      if (agencyError) throw agencyError;
+
+      const currentBalance = agency.balance || 0;
+      const newBalance = currentBalance + agencyPrice;
+
+      // Update agency balance
+      const { error: updateError } = await supabase
+        .from('agencies')
+        .update({ balance: newBalance })
+        .eq('id', formData.agency_id);
+
+      if (updateError) throw updateError;
+
+      // Create transaction record
+      const { error: transactionError } = await supabase
+        .from('agency_transactions')
+        .insert({
+          agency_id: formData.agency_id,
+          reservation_id: id,
+          amount: agencyPrice,
+          balance_after: newBalance,
+          type: 'payment',
+          description: `Payment collected for reservation ${reservationCode || id}`,
+        });
+
+      if (transactionError) throw transactionError;
+
+      // Update agency_reservation_details payment status
+      const driverFee = parseFloat(formData.price) || 0;
+      const profit = agencyPrice - driverFee;
+
+      const { error: detailsError } = await supabase
+        .from('agency_reservation_details')
+        .upsert({
+          reservation_id: id,
+          customer_price: agencyPrice,
+          company_amount: agencyPrice,
+          agency_profit: profit,
+          agency_notes: agencyDetails.agency_notes || null,
+          payment_status: 'paid',
+        }, {
+          onConflict: 'reservation_id'
+        });
+
+      if (detailsError) throw detailsError;
+
+      // Update local state
+      setAgencyDetails({ ...agencyDetails, payment_status: 'paid' });
+
+      // Audit log
+      await logAction({
+        action: 'COLLECT_AGENCY_PAYMENT',
+        table_name: 'agency_transactions',
+        record_id: id,
+        new_data: { 
+          agency_name: agency.agency_name, 
+          amount: agencyPrice, 
+          reservation_code: reservationCode 
+        },
+      });
+
+      toast.success(`Payment of ${getCurrencySymbol(formData.price_currency)}${agencyPrice.toFixed(2)} collected from ${agency.agency_name}`);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to collect payment');
+    } finally {
+      setCollectingPayment(false);
     }
   };
 
@@ -1006,6 +1094,35 @@ const AdminEditReservation = () => {
                         rows={2}
                       />
                     </div>
+
+                    {/* Collect Payment Button */}
+                    {agencyDetails.customer_price && agencyDetails.payment_status !== 'paid' && (
+                      <Button
+                        type="button"
+                        onClick={handleCollectPayment}
+                        disabled={collectingPayment}
+                        className="w-full bg-green-600 hover:bg-green-700"
+                      >
+                        {collectingPayment ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Collecting...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Collect Payment ({currencySymbol}{parseFloat(agencyDetails.customer_price).toFixed(2)})
+                          </>
+                        )}
+                      </Button>
+                    )}
+
+                    {agencyDetails.payment_status === 'paid' && (
+                      <div className="flex items-center gap-2 p-3 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-700 dark:text-green-300">
+                        <CheckCircle className="h-5 w-5" />
+                        <span className="font-medium">Payment Collected</span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
