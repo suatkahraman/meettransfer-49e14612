@@ -358,6 +358,7 @@ export type Database = {
           pickup_time: string
           price: number | null
           price_currency: string | null
+          reservation_code: string | null
           status: string
           updated_at: string | null
           vehicle_type: string
@@ -384,6 +385,7 @@ export type Database = {
           pickup_time: string
           price?: number | null
           price_currency?: string | null
+          reservation_code?: string | null
           status?: string
           updated_at?: string | null
           vehicle_type: string
@@ -410,6 +412,7 @@ export type Database = {
           pickup_time?: string
           price?: number | null
           price_currency?: string | null
+          reservation_code?: string | null
           status?: string
           updated_at?: string | null
           vehicle_type?: string
@@ -450,6 +453,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_reservation_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
