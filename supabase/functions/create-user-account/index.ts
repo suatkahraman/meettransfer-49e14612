@@ -8,13 +8,14 @@ const corsHeaders = {
 interface CreateUserRequest {
   email: string
   password: string
-  role: 'admin' | 'driver' | 'customer'
+  role: 'admin' | 'driver' | 'customer' | 'agency'
   name: string
   phone: string
   plate_number?: string
   vehicle_model?: string
   region?: string
   commission_rate?: number
+  agency_id?: string // For linking agency user to agency record
 }
 
 Deno.serve(async (req) => {
@@ -76,7 +77,7 @@ Deno.serve(async (req) => {
     }
 
     const body: CreateUserRequest = await req.json()
-    const { email, password, role, name, phone, plate_number, vehicle_model, region, commission_rate } = body
+    const { email, password, role, name, phone, plate_number, vehicle_model, region, commission_rate, agency_id } = body
 
     console.log(`Creating ${role} account for: ${email}`)
 
@@ -89,9 +90,17 @@ Deno.serve(async (req) => {
     }
 
     // Validate role
-    if (!['admin', 'driver', 'customer'].includes(role)) {
+    if (!['admin', 'driver', 'customer', 'agency'].includes(role)) {
       return new Response(
-        JSON.stringify({ error: 'Invalid role. Must be admin, driver, or customer' }),
+        JSON.stringify({ error: 'Invalid role. Must be admin, driver, customer, or agency' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Validate agency_id for agency role
+    if (role === 'agency' && !agency_id) {
+      return new Response(
+        JSON.stringify({ error: 'agency_id is required for agency role' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -174,6 +183,24 @@ Deno.serve(async (req) => {
       }
 
       console.log('Driver record created successfully')
+    }
+
+    // If agency, link user to agency record
+    if (role === 'agency' && agency_id) {
+      const { error: agencyError } = await supabaseAdmin
+        .from('agencies')
+        .update({ user_id: newUserId })
+        .eq('id', agency_id)
+
+      if (agencyError) {
+        console.error('Error linking agency user:', agencyError)
+        return new Response(
+          JSON.stringify({ error: 'User created but failed to link to agency: ' + agencyError.message }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      console.log('Agency user linked successfully')
     }
 
     // Server-side audit log for user creation
