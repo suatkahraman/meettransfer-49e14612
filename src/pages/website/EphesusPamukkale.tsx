@@ -8,6 +8,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
 
 const destinations = [
   "Ephesus", "Pamukkale", "Hierapolis", "Şirince", "House of Virgin Mary",
@@ -48,7 +49,7 @@ const vehicles = [
     passengers: 6,
     luggage: 6,
     features: ["Leather seats", "WiFi", "Water", "USB charger"],
-    image: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=800",
+    image: mercedesVipImage,
   },
   {
     name: "Mercedes V-Class",
