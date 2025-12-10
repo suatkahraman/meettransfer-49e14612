@@ -5,15 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Building2, Calendar, MapPin, Car, User, DollarSign, Clock, Plane, Users } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ArrowLeft, Building2, Calendar, MapPin, Car, User, DollarSign, Clock, Plane, Users, Plus, CreditCard, TrendingUp, Banknote, Receipt, History } from 'lucide-react';
 import { MonthNavigator } from '@/components/accounting/MonthNavigator';
-import { MonthlySummaryCard } from '@/components/accounting/MonthlySummaryCard';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
+import { toast } from 'sonner';
 
 interface Agency {
   id: string;
   agency_name: string;
   comments: string | null;
+  balance: number | null;
 }
 
 interface Driver {
@@ -40,6 +46,21 @@ interface Reservation {
   driver_notes: string | null;
 }
 
+interface AgencyPayment {
+  id: string;
+  agency_id: string;
+  amount: number;
+  payment_date: string;
+  notes: string | null;
+  created_at: string;
+}
+
+interface AgencyReservationDetail {
+  reservation_id: string;
+  customer_price: number | null;
+  company_amount: number | null;
+}
+
 const statusColors: Record<string, string> = {
   'pending_price': 'bg-orange-500/20 text-orange-700',
   'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700',
@@ -49,6 +70,8 @@ const statusColors: Record<string, string> = {
   'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
   'active': 'bg-cyan-500/20 text-cyan-700',
   'completed': 'bg-green-500/20 text-green-700',
+  'cancelled': 'bg-destructive/20 text-destructive',
+  'cancelled_by_customer': 'bg-destructive/20 text-destructive',
 };
 
 const statusLabels: Record<string, string> = {
@@ -60,6 +83,8 @@ const statusLabels: Record<string, string> = {
   'sent_to_driver': 'Sent to Driver',
   'active': 'Active',
   'completed': 'Completed',
+  'cancelled': 'Cancelled',
+  'cancelled_by_customer': 'Cancelled by Customer',
 };
 
 const currencies: Record<string, string> = {
@@ -78,7 +103,19 @@ const AdminAgencyAccounting = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [agencyDetails, setAgencyDetails] = useState<AgencyReservationDetail[]>([]);
+  const [payments, setPayments] = useState<AgencyPayment[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Payment dialog state
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentDate, setPaymentDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [paymentNotes, setPaymentNotes] = useState('');
+  const [savingPayment, setSavingPayment] = useState(false);
+  
+  // Payment history dialog
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
 
   // Fetch all agencies and drivers
   useEffect(() => {
@@ -101,48 +138,96 @@ const AdminAgencyAccounting = () => {
     }
   }, [agencyId, allAgencies]);
 
-  // Fetch reservations for selected agency and month
-  useEffect(() => {
-    const fetchReservations = async () => {
-      if (!agencyId) {
-        setLoading(false);
-        return;
-      }
+  // Fetch reservations, agency details, and payments
+  const fetchData = async () => {
+    if (!agencyId) {
+      setLoading(false);
+      return;
+    }
 
-      setLoading(true);
-      const monthStart = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
-      const monthEnd = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
+    setLoading(true);
+    const monthStart = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
+    const monthEnd = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
 
-      let query = supabase
-        .from('reservations')
+    let query = supabase
+      .from('reservations')
+      .select('*')
+      .eq('agency_id', agencyId)
+      .gte('pickup_date', monthStart)
+      .lte('pickup_date', monthEnd)
+      .order('pickup_date', { ascending: true })
+      .order('pickup_time', { ascending: true });
+
+    if (selectedStatus !== 'all') {
+      query = query.eq('status', selectedStatus);
+    }
+
+    const [reservationsRes, paymentsRes] = await Promise.all([
+      query,
+      supabase
+        .from('agency_payments')
         .select('*')
         .eq('agency_id', agencyId)
-        .gte('pickup_date', monthStart)
-        .lte('pickup_date', monthEnd)
-        .order('pickup_date', { ascending: true })
-        .order('pickup_time', { ascending: true });
+        .order('payment_date', { ascending: false }),
+    ]);
 
-      if (selectedStatus !== 'all') {
-        query = query.eq('status', selectedStatus);
-      }
+    const reservationsData = reservationsRes.data || [];
+    setReservations(reservationsData);
+    setPayments(paymentsRes.data || []);
 
-      const { data } = await query;
-      setReservations(data || []);
-      setLoading(false);
-    };
+    // Fetch agency reservation details for price info
+    if (reservationsData.length > 0) {
+      const reservationIds = reservationsData.map(r => r.id);
+      const { data: detailsData } = await supabase
+        .from('agency_reservation_details')
+        .select('reservation_id, customer_price, company_amount')
+        .in('reservation_id', reservationIds);
+      setAgencyDetails(detailsData || []);
+    } else {
+      setAgencyDetails([]);
+    }
 
-    fetchReservations();
+    setLoading(false);
+  };
 
-    // Real-time subscription
-    const channel = supabase
-      .channel('agency-reservations')
+  useEffect(() => {
+    fetchData();
+
+    // Real-time subscriptions
+    const reservationsChannel = supabase
+      .channel('agency-reservations-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, () => {
-        fetchReservations();
+        fetchData();
+      })
+      .subscribe();
+
+    const paymentsChannel = supabase
+      .channel('agency-payments-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agency_payments' }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    const detailsChannel = supabase
+      .channel('agency-details-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agency_reservation_details' }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    const agenciesChannel = supabase
+      .channel('agencies-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agencies' }, async () => {
+        const { data } = await supabase.from('agencies').select('*').order('agency_name');
+        setAllAgencies(data || []);
       })
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(reservationsChannel);
+      supabase.removeChannel(paymentsChannel);
+      supabase.removeChannel(detailsChannel);
+      supabase.removeChannel(agenciesChannel);
     };
   }, [agencyId, currentMonth, selectedStatus]);
 
@@ -154,11 +239,74 @@ const AdminAgencyAccounting = () => {
 
   const getCurrencySymbol = (currency: string | null) => currencies[currency || 'TRY'] || currency;
 
-  const totalPrice = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
-  const totalCash = reservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
+  const getAgencyPrice = (reservationId: string) => {
+    const detail = agencyDetails.find(d => d.reservation_id === reservationId);
+    return detail?.company_amount || 0;
+  };
+
+  // Calculate totals
+  const totalReservations = reservations.length;
+  const totalAgencyPrice = reservations.reduce((sum, r) => sum + getAgencyPrice(r.id), 0);
+  const totalPaymentsReceived = payments.reduce((sum, p) => sum + p.amount, 0);
+  const remainingBalance = totalAgencyPrice - totalPaymentsReceived;
 
   const handleAgencyChange = (newAgencyId: string) => {
     navigate(`/admin/agency-accounting/${newAgencyId}`);
+  };
+
+  const handleRecordPayment = async () => {
+    if (!agencyId || !paymentAmount) {
+      toast.error('Please enter a payment amount');
+      return;
+    }
+
+    const amount = parseFloat(paymentAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid payment amount');
+      return;
+    }
+
+    setSavingPayment(true);
+
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Insert payment record
+      const { error: paymentError } = await supabase
+        .from('agency_payments')
+        .insert({
+          agency_id: agencyId,
+          amount,
+          payment_date: paymentDate,
+          notes: paymentNotes || null,
+          created_by: user?.id,
+        });
+
+      if (paymentError) throw paymentError;
+
+      // Update agency balance
+      const currentBalance = agency?.balance || 0;
+      const newBalance = currentBalance - amount;
+      
+      const { error: balanceError } = await supabase
+        .from('agencies')
+        .update({ balance: newBalance })
+        .eq('id', agencyId);
+
+      if (balanceError) throw balanceError;
+
+      toast.success('Payment recorded successfully');
+      setPaymentDialogOpen(false);
+      setPaymentAmount('');
+      setPaymentNotes('');
+      setPaymentDate(format(new Date(), 'yyyy-MM-dd'));
+      fetchData();
+    } catch (error: any) {
+      toast.error('Failed to record payment: ' + error.message);
+    } finally {
+      setSavingPayment(false);
+    }
   };
 
   return (
@@ -213,6 +361,18 @@ const AdminAgencyAccounting = () => {
                 onNextMonth={() => setCurrentMonth(addMonths(currentMonth, 1))}
               />
 
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={() => setPaymentDialogOpen(true)} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Record Payment
+                </Button>
+                <Button variant="outline" onClick={() => setHistoryDialogOpen(true)} className="gap-2">
+                  <History className="h-4 w-4" />
+                  Payment History ({payments.length})
+                </Button>
+              </div>
+
               {/* Status Filter */}
               <div className="flex gap-4">
                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -233,12 +393,61 @@ const AdminAgencyAccounting = () => {
                 <div className="text-center py-12">Loading...</div>
               ) : (
                 <>
-                  {/* Monthly Summary */}
-                  <MonthlySummaryCard
-                    totalTransfers={reservations.length}
-                    totalPrice={totalPrice}
-                    totalCashCollected={totalCash}
-                  />
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                          <Receipt className="h-4 w-4" />
+                          Total Reservations
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{totalReservations}</div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4" />
+                          Total Agency Price
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-primary">₺{totalAgencyPrice.toFixed(2)}</div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                          <CreditCard className="h-4 w-4" />
+                          Payments Received
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-green-600">₺{totalPaymentsReceived.toFixed(2)}</div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className={remainingBalance > 0 ? 'border-amber-500' : remainingBalance < 0 ? 'border-green-500' : ''}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                          <Banknote className="h-4 w-4" />
+                          Balance
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className={`text-2xl font-bold ${remainingBalance > 0 ? 'text-amber-600' : remainingBalance < 0 ? 'text-green-600' : ''}`}>
+                          ₺{remainingBalance.toFixed(2)}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {remainingBalance > 0 ? 'Agency owes' : remainingBalance < 0 ? 'Overpaid' : 'Settled'}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
 
                   {/* Reservations List */}
                   <Card>
@@ -257,6 +466,7 @@ const AdminAgencyAccounting = () => {
                           {reservations.map((res) => {
                             const symbol = getCurrencySymbol(res.price_currency);
                             const passengerCount = res.passenger_names?.length || 1;
+                            const agencyPrice = getAgencyPrice(res.id);
 
                             return (
                               <Card 
@@ -316,14 +526,12 @@ const AdminAgencyAccounting = () => {
                                       </div>
                                     </div>
 
-                                    {/* Right - Pricing */}
+                                    {/* Right - Agency Price */}
                                     <div className="text-right space-y-1">
-                                      <div className="flex items-center justify-end gap-1 text-lg font-semibold">
+                                      <div className="text-xs text-muted-foreground">Agency Price</div>
+                                      <div className="flex items-center justify-end gap-1 text-lg font-semibold text-primary">
                                         <DollarSign className="h-4 w-4" />
-                                        {symbol}{res.price?.toFixed(2) || '0.00'}
-                                      </div>
-                                      <div className="text-sm text-muted-foreground">
-                                        Cash: {symbol}{res.driver_cash_amount?.toFixed(2) || '0.00'}
+                                        ₺{agencyPrice.toFixed(2)}
                                       </div>
                                     </div>
                                   </div>
@@ -347,6 +555,100 @@ const AdminAgencyAccounting = () => {
           )}
         </div>
       </main>
+
+      {/* Record Payment Dialog */}
+      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Record Payment from {agency?.agency_name}</DialogTitle>
+            <DialogDescription>
+              Enter the payment details received from the agency.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount">Payment Amount (₺)</Label>
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                placeholder="Enter amount"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="date">Payment Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Textarea
+                id="notes"
+                placeholder="Add any notes about this payment..."
+                value={paymentNotes}
+                onChange={(e) => setPaymentNotes(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPaymentDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleRecordPayment} disabled={savingPayment}>
+              {savingPayment ? 'Recording...' : 'Record Payment'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment History Dialog */}
+      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Payment History - {agency?.agency_name}</DialogTitle>
+            <DialogDescription>
+              All recorded payments from this agency.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {payments.length === 0 ? (
+              <p className="text-center py-8 text-muted-foreground">
+                No payments recorded yet
+              </p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>Notes</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {payments.map((payment) => (
+                    <TableRow key={payment.id}>
+                      <TableCell>{format(new Date(payment.payment_date), 'dd MMM yyyy')}</TableCell>
+                      <TableCell className="text-right font-medium">₺{payment.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-muted-foreground">{payment.notes || '-'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setHistoryDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

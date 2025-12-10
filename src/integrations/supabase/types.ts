@@ -44,6 +44,44 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_payments: {
+        Row: {
+          agency_id: string
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payment_date: string
+        }
+        Insert: {
+          agency_id: string
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+        }
+        Update: {
+          agency_id?: string
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_payments_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_reservation_details: {
         Row: {
           agency_notes: string | null
