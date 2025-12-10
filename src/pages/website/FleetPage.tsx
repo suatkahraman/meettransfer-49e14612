@@ -5,6 +5,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
+import mercedesMaybachImage from "@/assets/mercedes-maybach-interior.jpg";
 
 const vehicles = [
   {
@@ -24,12 +25,12 @@ const vehicles = [
     image: mercedesVitoFamilyImage,
   },
   {
-    name: "Mercedes-Maybach S-Class",
-    description: "The pinnacle of automotive luxury. Our Maybach S-Class offers executive rear seating, champagne cooler, and the smoothest ride for VIP guests and business executives.",
-    passengers: 3,
-    luggage: 3,
-    features: ["Executive rear seats", "Champagne cooler", "Burmester sound", "Rear entertainment", "Partition screen", "Ambient lighting"],
-    image: "https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=800",
+    name: "Mercedes Maybach",
+    description: "The pinnacle of automotive luxury. Our Maybach offers executive rear seating and the smoothest ride for VIP guests and business executives.",
+    passengers: 4,
+    luggage: 4,
+    features: ["Leather seats", "Rear entertainment", "Ambient lighting", "Mini bar", "Star ceiling", "TV"],
+    image: mercedesMaybachImage,
   },
   {
     name: "Mercedes Sprinter VIP Minibus",
