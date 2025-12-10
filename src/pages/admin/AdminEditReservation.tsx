@@ -367,7 +367,7 @@ const AdminEditReservation = () => {
         driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
         status: formData.status,
         driver_id: formData.driver_id || null,
-        agency_id: formData.agency_id || null,
+        agency_id: formData.agency_id && formData.agency_id !== 'none' ? formData.agency_id : null,
         passenger_names: validPassengerNames,
       })
       .eq('id', id);
@@ -873,6 +873,21 @@ const AdminEditReservation = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Agency</Label>
+                <Select value={formData.agency_id} onValueChange={(v) => setFormData({...formData, agency_id: v})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="No Agency (Direct Customer)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Agency (Direct Customer)</SelectItem>
+                    {agencies.map(a => (
+                      <SelectItem key={a.id} value={a.id}>{a.agency_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
