@@ -9,8 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, Building2, Calendar, MapPin, Car, User, DollarSign, Clock, Plane, Users, Plus, CreditCard, TrendingUp, Banknote, Receipt, History } from 'lucide-react';
+import { ArrowLeft, Building2, Calendar, MapPin, Car, User, DollarSign, Clock, Plane, Users, Plus, CreditCard, TrendingUp, Banknote, Receipt, History, Pencil, Trash2 } from 'lucide-react';
 import { MonthNavigator } from '@/components/accounting/MonthNavigator';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 import { toast } from 'sonner';
@@ -116,6 +117,13 @@ const AdminAgencyAccounting = () => {
   
   // Payment history dialog
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  
+  // Edit payment state
+  const [editingPayment, setEditingPayment] = useState<AgencyPayment | null>(null);
+  
+  // Delete confirmation state
+  const [deletingPayment, setDeletingPayment] = useState<AgencyPayment | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Fetch all agencies and drivers
   useEffect(() => {
@@ -309,6 +317,113 @@ const AdminAgencyAccounting = () => {
     }
   };
 
+  const handleEditPayment = async () => {
+    if (!editingPayment || !paymentAmount) {
+      toast.error('Please enter a payment amount');
+      return;
+    }
+
+    const newAmount = parseFloat(paymentAmount);
+    if (isNaN(newAmount) || newAmount <= 0) {
+      toast.error('Please enter a valid payment amount');
+      return;
+    }
+
+    setSavingPayment(true);
+
+    try {
+      const amountDifference = newAmount - editingPayment.amount;
+
+      // Update payment record
+      const { error: paymentError } = await supabase
+        .from('agency_payments')
+        .update({
+          amount: newAmount,
+          payment_date: paymentDate,
+          notes: paymentNotes || null,
+        })
+        .eq('id', editingPayment.id);
+
+      if (paymentError) throw paymentError;
+
+      // Update agency balance (subtract difference)
+      if (amountDifference !== 0) {
+        const currentBalance = agency?.balance || 0;
+        const newBalance = currentBalance - amountDifference;
+        
+        const { error: balanceError } = await supabase
+          .from('agencies')
+          .update({ balance: newBalance })
+          .eq('id', agencyId);
+
+        if (balanceError) throw balanceError;
+      }
+
+      toast.success('Payment updated successfully');
+      setEditingPayment(null);
+      setPaymentDialogOpen(false);
+      setPaymentAmount('');
+      setPaymentNotes('');
+      setPaymentDate(format(new Date(), 'yyyy-MM-dd'));
+      fetchData();
+    } catch (error: any) {
+      toast.error('Failed to update payment: ' + error.message);
+    } finally {
+      setSavingPayment(false);
+    }
+  };
+
+  const handleDeletePayment = async () => {
+    if (!deletingPayment) return;
+
+    setDeleting(true);
+
+    try {
+      // Delete payment record
+      const { error: paymentError } = await supabase
+        .from('agency_payments')
+        .delete()
+        .eq('id', deletingPayment.id);
+
+      if (paymentError) throw paymentError;
+
+      // Restore agency balance (add back the deleted amount)
+      const currentBalance = agency?.balance || 0;
+      const newBalance = currentBalance + deletingPayment.amount;
+      
+      const { error: balanceError } = await supabase
+        .from('agencies')
+        .update({ balance: newBalance })
+        .eq('id', agencyId);
+
+      if (balanceError) throw balanceError;
+
+      toast.success('Payment deleted successfully');
+      setDeletingPayment(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('Failed to delete payment: ' + error.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const openEditPaymentDialog = (payment: AgencyPayment) => {
+    setEditingPayment(payment);
+    setPaymentAmount(payment.amount.toString());
+    setPaymentDate(payment.payment_date);
+    setPaymentNotes(payment.notes || '');
+    setPaymentDialogOpen(true);
+  };
+
+  const openNewPaymentDialog = () => {
+    setEditingPayment(null);
+    setPaymentAmount('');
+    setPaymentDate(format(new Date(), 'yyyy-MM-dd'));
+    setPaymentNotes('');
+    setPaymentDialogOpen(true);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4 flex-shrink-0">
@@ -363,7 +478,7 @@ const AdminAgencyAccounting = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
-                <Button onClick={() => setPaymentDialogOpen(true)} className="gap-2">
+                <Button onClick={openNewPaymentDialog} className="gap-2">
                   <Plus className="h-4 w-4" />
                   Record Payment
                 </Button>
@@ -556,13 +671,20 @@ const AdminAgencyAccounting = () => {
         </div>
       </main>
 
-      {/* Record Payment Dialog */}
-      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+      {/* Record/Edit Payment Dialog */}
+      <Dialog open={paymentDialogOpen} onOpenChange={(open) => {
+        setPaymentDialogOpen(open);
+        if (!open) setEditingPayment(null);
+      }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Record Payment from {agency?.agency_name}</DialogTitle>
+            <DialogTitle>
+              {editingPayment ? 'Edit Payment' : 'Record Payment'} - {agency?.agency_name}
+            </DialogTitle>
             <DialogDescription>
-              Enter the payment details received from the agency.
+              {editingPayment 
+                ? 'Update the payment details.' 
+                : 'Enter the payment details received from the agency.'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -597,11 +719,19 @@ const AdminAgencyAccounting = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPaymentDialogOpen(false)}>
+            <Button variant="outline" onClick={() => {
+              setPaymentDialogOpen(false);
+              setEditingPayment(null);
+            }}>
               Cancel
             </Button>
-            <Button onClick={handleRecordPayment} disabled={savingPayment}>
-              {savingPayment ? 'Recording...' : 'Record Payment'}
+            <Button 
+              onClick={editingPayment ? handleEditPayment : handleRecordPayment} 
+              disabled={savingPayment}
+            >
+              {savingPayment 
+                ? (editingPayment ? 'Updating...' : 'Recording...') 
+                : (editingPayment ? 'Update Payment' : 'Record Payment')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -628,6 +758,7 @@ const AdminAgencyAccounting = () => {
                     <TableHead>Date</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead>Notes</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -635,7 +766,29 @@ const AdminAgencyAccounting = () => {
                     <TableRow key={payment.id}>
                       <TableCell>{format(new Date(payment.payment_date), 'dd MMM yyyy')}</TableCell>
                       <TableCell className="text-right font-medium">₺{payment.amount.toFixed(2)}</TableCell>
-                      <TableCell className="text-muted-foreground">{payment.notes || '-'}</TableCell>
+                      <TableCell className="text-muted-foreground max-w-[200px] truncate">{payment.notes || '-'}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => {
+                              setHistoryDialogOpen(false);
+                              openEditPaymentDialog(payment);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeletingPayment(payment)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -649,6 +802,29 @@ const AdminAgencyAccounting = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingPayment} onOpenChange={(open) => !open && setDeletingPayment(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Payment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this payment of ₺{deletingPayment?.amount.toFixed(2)}? 
+              This will restore the amount to the agency balance.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeletePayment}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
