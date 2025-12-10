@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 import mercedesMaybachImage from "@/assets/mercedes-maybach-interior.jpg";
+import mercedesSprinterImage from "@/assets/mercedes-sprinter-minibus.jpg";
 
 const vehicles = [
   {
@@ -37,8 +38,8 @@ const vehicles = [
     description: "Perfect for larger groups, our VIP Sprinter offers airline-style seating for up to 16 passengers with individual screens and premium amenities.",
     passengers: 16,
     luggage: 16,
-    features: ["Individual screens", "Airline seats", "Large luggage space", "PA system", "WiFi", "USB at every seat"],
-    image: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800",
+    features: ["Leather Seats", "Large luggage space", "WiFi", "USB"],
+    image: mercedesSprinterImage,
   },
 ];
 
