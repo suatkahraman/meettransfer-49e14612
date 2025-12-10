@@ -18,6 +18,7 @@ import DriverRouteMap from '@/components/driver/DriverRouteMap';
 
 interface Reservation {
   id: string;
+  reservation_code: string | null;
   customer_name: string;
   customer_phone: string;
   pickup: string;
@@ -261,7 +262,7 @@ const DriverJobDetails = () => {
     const currencySymbol = getCurrencySymbol(reservation.price_currency);
     
     const text = `---------------------------------
-Rezervasyon ID: ${reservation.id.slice(0, 8)}
+Rezervasyon Kodu: ${reservation.reservation_code || reservation.id.slice(0, 8)}
 Tarih & Saat: ${formattedDate} – ${reservation.pickup_time}
 
 Yolcular:
@@ -322,13 +323,17 @@ Notlar: ${reservation.driver_notes || '—'}
       </header>
 
       <main className="container mx-auto py-8 px-4 max-w-2xl space-y-6">
-        {/* Job Info Card */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              {format(new Date(reservation.pickup_date), 'PPPP')}
-            </CardTitle>
+            <div className="space-y-2">
+              {reservation.reservation_code && (
+                <span className="text-sm font-mono bg-muted px-2 py-1 rounded inline-block">{reservation.reservation_code}</span>
+              )}
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                {format(new Date(reservation.pickup_date), 'PPPP')}
+              </CardTitle>
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center gap-2 text-lg">

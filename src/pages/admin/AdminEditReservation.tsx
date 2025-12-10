@@ -87,6 +87,7 @@ const AdminEditReservation = () => {
   const [assigningDriver, setAssigningDriver] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
+  const [reservationCode, setReservationCode] = useState<string | null>(null);
   const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null);
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [formData, setFormData] = useState({
@@ -146,6 +147,7 @@ const AdminEditReservation = () => {
 
       const r = reservationResult.data;
       setCustomerId(r.customer_id);
+      setReservationCode(r.reservation_code);
       
       // Load passenger names - use array or fallback to customer_name
       const loadedPassengerNames = r.passenger_names && r.passenger_names.length > 0 
@@ -282,6 +284,32 @@ const AdminEditReservation = () => {
         }
       }
 
+      // Notify customer that driver has been assigned
+      if (customerId) {
+        try {
+          await supabase.functions.invoke('create-notification', {
+            body: {
+              user_id: customerId,
+              reservation_id: id,
+              title: 'Driver Assigned',
+              message: `Your driver has been assigned: ${selectedDriver?.name}. They will contact you before pickup.`,
+              type: 'driver_assigned'
+            }
+          });
+        } catch (e) {
+          console.error('Failed to notify customer:', e);
+        }
+
+        // Send confirmation email
+        try {
+          await supabase.functions.invoke('send-confirmation-email', {
+            body: { reservation_id: id }
+          });
+        } catch (e) {
+          console.error('Failed to send confirmation email:', e);
+        }
+      }
+
       // Audit log
       await logAction({
         action: 'ASSIGN_DRIVER',
@@ -408,7 +436,12 @@ const AdminEditReservation = () => {
         <Button variant="ghost" size="icon" onClick={() => navigate('/admin/reservations')} className="text-primary-foreground hover:bg-primary-foreground/10">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-serif">Edit Reservation</h1>
+        <div className="flex flex-col">
+          {reservationCode && (
+            <span className="text-xs font-mono opacity-80">{reservationCode}</span>
+          )}
+          <h1 className="text-2xl font-serif">Edit Reservation</h1>
+        </div>
         <Badge className={`ml-auto ${statusColors[formData.status] || 'bg-muted'}`}>
           {statusLabels[formData.status] || formData.status}
         </Badge>

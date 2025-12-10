@@ -18,6 +18,7 @@ import NotificationBell from '@/components/NotificationBell';
 
 interface Reservation {
   id: string;
+  reservation_code: string | null;
   customer_name: string;
   customer_phone: string;
   pickup: string;
@@ -621,7 +622,10 @@ const AdminReservations = () => {
                 <CardContent className="py-4">
                   <div className="flex flex-wrap justify-between items-start gap-4">
                     <div className="space-y-2">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {reservation.reservation_code && (
+                          <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded">{reservation.reservation_code}</span>
+                        )}
                         <Badge className={statusColors[reservation.status] || 'bg-muted'}>
                           {statusLabels[reservation.status] || reservation.status}
                         </Badge>
