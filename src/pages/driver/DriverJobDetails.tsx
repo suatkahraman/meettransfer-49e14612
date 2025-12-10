@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import DriverRouteMap from '@/components/driver/DriverRouteMap';
@@ -250,6 +250,42 @@ const DriverJobDetails = () => {
     }
   };
 
+  const copyReservationDetails = async () => {
+    if (!reservation) return;
+
+    const passengerList = reservation.passenger_names && reservation.passenger_names.length > 0
+      ? reservation.passenger_names.map((name, index) => `  ${index + 1}. ${name}`).join('\n')
+      : `  1. ${reservation.customer_name}`;
+
+    const formattedDate = format(new Date(reservation.pickup_date), 'dd MMM yyyy');
+    const currencySymbol = getCurrencySymbol(reservation.price_currency);
+    
+    const text = `---------------------------------
+Rezervasyon ID: ${reservation.id.slice(0, 8)}
+Tarih & Saat: ${formattedDate} – ${reservation.pickup_time}
+
+Yolcular:
+${passengerList}
+
+Alış Noktası: ${reservation.pickup}
+Bırakış Noktası: ${reservation.dropoff}
+${reservation.flight_number ? `Uçuş No: ${reservation.flight_number}\n` : ''}
+Araç: ${reservation.vehicle_type.replace('-', ' ')}
+Ücret: ${reservation.price ? `${currencySymbol}${reservation.price}` : '—'}
+Toplanan Nakit: ${reservation.driver_cash_amount ? `${currencySymbol}${reservation.driver_cash_amount}` : '—'}
+
+Müşteri Telefon: ${reservation.customer_phone}
+Notlar: ${reservation.driver_notes || '—'}
+---------------------------------`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Rezervasyon detayları kopyalandı.');
+    } catch (err) {
+      toast.error('Kopyalama başarısız oldu.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -484,6 +520,16 @@ const DriverJobDetails = () => {
           </CardContent>
         </Card>
 
+        {/* Copy Reservation Details Button */}
+        <Button
+          variant="outline"
+          size="lg"
+          className="w-full"
+          onClick={copyReservationDetails}
+        >
+          <ClipboardCopy className="h-5 w-5 mr-2" />
+          Rezervasyon Detaylarını Kopyala
+        </Button>
 
         {/* Action Buttons Card */}
         <Card>
