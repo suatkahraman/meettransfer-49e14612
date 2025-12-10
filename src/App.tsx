@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRoute";
+import { AdminRoute, DriverRoute, CustomerRoute, AgencyRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import LoginScreen from "./pages/auth/LoginScreen";
@@ -26,6 +26,11 @@ import DriverJobDetails from "./pages/driver/DriverJobDetails";
 import DriverAccounting from "./pages/driver/DriverAccounting";
 import DriverHistory from "./pages/driver/DriverHistory";
 
+// Agency Pages
+import AgencyHome from "./pages/agency/AgencyHome";
+import AgencyReservationDetail from "./pages/agency/AgencyReservationDetail";
+import AgencyReports from "./pages/agency/AgencyReports";
+
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminReservations from "./pages/admin/AdminReservations";
@@ -41,6 +46,7 @@ import AdminTemplates from "./pages/admin/AdminTemplates";
 import AdminCalendar from "./pages/admin/AdminCalendar";
 import AdminAgencies from "./pages/admin/AdminAgencies";
 import AdminAgencyAccounting from "./pages/admin/AdminAgencyAccounting";
+import AdminAgencyBalance from "./pages/admin/AdminAgencyBalance";
 
 import DriverMonthlyAccounting from "./pages/driver/DriverMonthlyAccounting";
 
@@ -112,6 +118,11 @@ const App = () => (
               <Route path="/driver/monthly-accounting" element={<DriverRoute><DriverMonthlyAccounting /></DriverRoute>} />
               <Route path="/driver/history" element={<DriverRoute><DriverHistory /></DriverRoute>} />
               
+              {/* Agency Routes - Protected */}
+              <Route path="/agency" element={<AgencyRoute><AgencyHome /></AgencyRoute>} />
+              <Route path="/agency/reservation/:id" element={<AgencyRoute><AgencyReservationDetail /></AgencyRoute>} />
+              <Route path="/agency/reports" element={<AgencyRoute><AgencyReports /></AgencyRoute>} />
+              
               {/* Admin Routes - Protected (except setup which is for initial admin creation) */}
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/setup" element={<AdminSetup />} />
@@ -127,6 +138,7 @@ const App = () => (
               <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
               <Route path="/admin/agencies" element={<AdminRoute><AdminAgencies /></AdminRoute>} />
               <Route path="/admin/agency-accounting/:agencyId" element={<AdminRoute><AdminAgencyAccounting /></AdminRoute>} />
+              <Route path="/admin/agency-balance/:agencyId" element={<AdminRoute><AdminAgencyBalance /></AdminRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

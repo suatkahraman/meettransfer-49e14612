@@ -38,7 +38,8 @@ const ProtectedRoute = ({
     const roleRedirects: Record<AppRole, string> = {
       admin: '/admin',
       driver: '/driver',
-      customer: '/customer'
+      customer: '/customer',
+      agency: '/agency'
     };
     
     const redirect = role ? roleRedirects[role] : redirectTo;
@@ -63,6 +64,12 @@ export const DriverRoute = ({ children }: { children: ReactNode }) => (
 
 export const CustomerRoute = ({ children }: { children: ReactNode }) => (
   <ProtectedRoute allowedRoles={['customer']}>
+    {children}
+  </ProtectedRoute>
+);
+
+export const AgencyRoute = ({ children }: { children: ReactNode }) => (
+  <ProtectedRoute allowedRoles={['agency']}>
     {children}
   </ProtectedRoute>
 );
