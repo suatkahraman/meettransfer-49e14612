@@ -39,6 +39,8 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminSetup from "./pages/admin/AdminSetup";
 import AdminTemplates from "./pages/admin/AdminTemplates";
 import AdminCalendar from "./pages/admin/AdminCalendar";
+import AdminAgencies from "./pages/admin/AdminAgencies";
+import AdminAgencyAccounting from "./pages/admin/AdminAgencyAccounting";
 
 import DriverMonthlyAccounting from "./pages/driver/DriverMonthlyAccounting";
 
@@ -123,6 +125,8 @@ const App = () => (
               <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
               <Route path="/admin/templates" element={<AdminRoute><AdminTemplates /></AdminRoute>} />
               <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
+              <Route path="/admin/agencies" element={<AdminRoute><AdminAgencies /></AdminRoute>} />
+              <Route path="/admin/agency-accounting/:agencyId" element={<AdminRoute><AdminAgencyAccounting /></AdminRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

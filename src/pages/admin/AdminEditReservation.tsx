@@ -75,6 +75,11 @@ interface Driver {
   user_id: string;
 }
 
+interface Agency {
+  id: string;
+  agency_name: string;
+}
+
 const MAX_PASSENGERS = 15;
 
 const AdminEditReservation = () => {
@@ -86,6 +91,7 @@ const AdminEditReservation = () => {
   const [sendingPrice, setSendingPrice] = useState(false);
   const [assigningDriver, setAssigningDriver] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [agencies, setAgencies] = useState<Agency[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [reservationCode, setReservationCode] = useState<string | null>(null);
   const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null);
@@ -104,6 +110,7 @@ const AdminEditReservation = () => {
     driver_cash_amount: '',
     status: '',
     driver_id: '',
+    agency_id: '',
     admin_notes: '',
   });
 
@@ -133,10 +140,11 @@ const AdminEditReservation = () => {
     const fetchData = async () => {
       if (!id) return;
 
-      const [reservationResult, driversResult, adminNotesResult] = await Promise.all([
+      const [reservationResult, driversResult, adminNotesResult, agenciesResult] = await Promise.all([
         supabase.from('reservations').select('*').eq('id', id).single(),
         supabase.from('drivers').select('id, name, user_id').eq('active', true),
         supabase.from('reservation_admin_notes').select('notes').eq('reservation_id', id).maybeSingle(),
+        supabase.from('agencies').select('id, agency_name').order('agency_name'),
       ]);
 
       if (reservationResult.error) {
@@ -169,14 +177,15 @@ const AdminEditReservation = () => {
         driver_cash_amount: r.driver_cash_amount?.toString() || '',
         status: r.status || '',
         driver_id: r.driver_id || '',
+        agency_id: r.agency_id || '',
         admin_notes: adminNotesResult.data?.notes || '',
-        passenger_names: loadedPassengerNames,
       };
       
       setOriginalData(initialData);
       setFormData(initialData);
 
       setDrivers(driversResult.data || []);
+      setAgencies(agenciesResult.data || []);
       setLoading(false);
     };
 
@@ -358,6 +367,7 @@ const AdminEditReservation = () => {
         driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
         status: formData.status,
         driver_id: formData.driver_id || null,
+        agency_id: formData.agency_id || null,
         passenger_names: validPassengerNames,
       })
       .eq('id', id);
