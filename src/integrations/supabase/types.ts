@@ -17,26 +17,124 @@ export type Database = {
       agencies: {
         Row: {
           agency_name: string
+          balance: number | null
           comments: string | null
           created_at: string
           id: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           agency_name: string
+          balance?: number | null
           comments?: string | null
           created_at?: string
           id?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           agency_name?: string
+          balance?: number | null
           comments?: string | null
           created_at?: string
           id?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
+      }
+      agency_reservation_details: {
+        Row: {
+          agency_notes: string | null
+          agency_profit: number | null
+          company_amount: number | null
+          created_at: string | null
+          customer_price: number | null
+          id: string
+          payment_status: string | null
+          reservation_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          agency_notes?: string | null
+          agency_profit?: number | null
+          company_amount?: number | null
+          created_at?: string | null
+          customer_price?: number | null
+          id?: string
+          payment_status?: string | null
+          reservation_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          agency_notes?: string | null
+          agency_profit?: number | null
+          company_amount?: number | null
+          created_at?: string | null
+          customer_price?: number | null
+          id?: string
+          payment_status?: string | null
+          reservation_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_reservation_details_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: true
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_transactions: {
+        Row: {
+          agency_id: string
+          amount: number
+          balance_after: number
+          created_at: string | null
+          description: string | null
+          id: string
+          reservation_id: string | null
+          type: string
+        }
+        Insert: {
+          agency_id: string
+          amount: number
+          balance_after: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          reservation_id?: string | null
+          type: string
+        }
+        Update: {
+          agency_id?: string
+          amount?: number
+          balance_after?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          reservation_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_transactions_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_transactions_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       audit_logs: {
         Row: {
@@ -497,7 +595,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "driver" | "customer"
+      app_role: "admin" | "driver" | "customer" | "agency"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -625,7 +723,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "driver", "customer"],
+      app_role: ["admin", "driver", "customer", "agency"],
     },
   },
 } as const
