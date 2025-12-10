@@ -3,6 +3,7 @@ import PageHeader from "@/components/website/PageHeader";
 import VehicleCard from "@/components/website/VehicleCard";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
 
 const vehicles = [
   {
@@ -11,7 +12,7 @@ const vehicles = [
     passengers: 6,
     luggage: 6,
     features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
-    image: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=800",
+    image: mercedesVipImage,
   },
   {
     name: "Mercedes V-Class",
