@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      agencies: {
+        Row: {
+          agency_name: string
+          comments: string | null
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          agency_name: string
+          comments?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_name?: string
+          comments?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -338,6 +362,7 @@ export type Database = {
       reservations: {
         Row: {
           admin_set_price: number | null
+          agency_id: string | null
           created_at: string | null
           customer_id: string
           customer_name: string
@@ -365,6 +390,7 @@ export type Database = {
         }
         Insert: {
           admin_set_price?: number | null
+          agency_id?: string | null
           created_at?: string | null
           customer_id: string
           customer_name: string
@@ -392,6 +418,7 @@ export type Database = {
         }
         Update: {
           admin_set_price?: number | null
+          agency_id?: string | null
           created_at?: string | null
           customer_id?: string
           customer_name?: string
@@ -418,6 +445,13 @@ export type Database = {
           vehicle_type?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reservations_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reservations_driver_id_fkey"
             columns: ["driver_id"]

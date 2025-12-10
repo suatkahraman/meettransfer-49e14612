@@ -55,6 +55,11 @@ interface Template {
   price_currency: string | null;
 }
 
+interface Agency {
+  id: string;
+  agency_name: string;
+}
+
 const AdminCreateReservation = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -64,6 +69,7 @@ const AdminCreateReservation = () => {
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [agencies, setAgencies] = useState<Agency[]>([]);
   const [templateDialog, setTemplateDialog] = useState(false);
   const [templateName, setTemplateName] = useState('');
   
@@ -83,6 +89,7 @@ const AdminCreateReservation = () => {
     driver_cash_amount: '',
     status: 'confirmed',
     driver_id: '',
+    agency_id: '',
     admin_notes: '',
   });
   
@@ -114,12 +121,14 @@ const AdminCreateReservation = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [driversRes, templatesRes] = await Promise.all([
+      const [driversRes, templatesRes, agenciesRes] = await Promise.all([
         supabase.from('drivers').select('id, name, user_id').eq('active', true),
         supabase.from('reservation_templates').select('*').order('name'),
+        supabase.from('agencies').select('id, agency_name').order('agency_name'),
       ]);
       setDrivers(driversRes.data || []);
       setTemplates(templatesRes.data || []);
+      setAgencies(agenciesRes.data || []);
     };
     fetchData();
   }, []);
@@ -218,6 +227,7 @@ const AdminCreateReservation = () => {
           driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
           status: formData.status,
           driver_id: formData.driver_id || null,
+          agency_id: formData.agency_id || null,
           passenger_names: validPassengerNames,
         })
         .select()
@@ -558,6 +568,22 @@ const AdminCreateReservation = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                {/* Agency Selection */}
+                <div className="space-y-2">
+                  <Label>Agency (Acenta)</Label>
+                  <Select value={formData.agency_id} onValueChange={(v) => setFormData({...formData, agency_id: v === 'none' ? '' : v})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="No Agency (Direct Customer)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Agency (Direct Customer)</SelectItem>
+                      {agencies.map(a => (
+                        <SelectItem key={a.id} value={a.id}>{a.agency_name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

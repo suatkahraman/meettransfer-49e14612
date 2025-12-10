@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays } from 'lucide-react';
+import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2 } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfDay, endOfDay, format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 
@@ -90,6 +90,7 @@ const AdminDashboard = () => {
     { icon: ClipboardList, label: 'Reservations', path: '/admin/reservations' },
     { icon: CalendarDays, label: 'Calendar', path: '/admin/calendar' },
     { icon: Users, label: 'Drivers', path: '/admin/drivers' },
+    { icon: Building2, label: 'Agencies', path: '/admin/agencies' },
     { icon: FileText, label: 'Templates', path: '/admin/templates' },
     { icon: DollarSign, label: 'Monthly Accounting', path: '/admin/monthly-accounting' },
     { icon: Settings, label: 'Settings', path: '/admin/settings' },
