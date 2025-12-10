@@ -4,6 +4,7 @@ import VehicleCard from "@/components/website/VehicleCard";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
+import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 
 const vehicles = [
   {
@@ -15,12 +16,12 @@ const vehicles = [
     image: mercedesVipImage,
   },
   {
-    name: "Mercedes V-Class",
-    description: "The ultimate in luxury minivan travel. The V-Class features captain seats with extra legroom, star ceiling lighting, and a mini bar for the most discerning travelers.",
+    name: "Mercedes Vito",
+    description: "The Mercedes Vito Comfortable family holiday transfer vehicles with best budget.",
     passengers: 7,
     luggage: 7,
-    features: ["Captain seats", "Star ceiling", "Mini bar", "Premium WiFi", "Massage seats", "Extra legroom"],
-    image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800",
+    features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
+    image: mercedesVitoFamilyImage,
   },
   {
     name: "Mercedes-Maybach S-Class",

@@ -45,6 +45,7 @@ const faqItems = [
 ];
 
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
+import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 
 const vehicles = [
   {
@@ -56,12 +57,12 @@ const vehicles = [
     image: mercedesVipImage,
   },
   {
-    name: "Mercedes V-Class",
-    description: "Premium 7-seater with extra legroom and luxury features",
+    name: "Mercedes Vito",
+    description: "The Mercedes Vito Comfortable family holiday transfer vehicles with best budget.",
     passengers: 7,
     luggage: 7,
-    features: ["Captain seats", "Star ceiling", "WiFi", "Mini bar"],
-    image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800",
+    features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
+    image: mercedesVitoFamilyImage,
   },
 ];
 
