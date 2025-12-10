@@ -65,9 +65,6 @@ const Auth = () => {
         case 'driver':
           navigate('/driver', { replace: true });
           break;
-        case 'agency':
-          navigate('/agency', { replace: true });
-          break;
         default:
           navigate('/customer', { replace: true });
       }
