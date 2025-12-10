@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2 } from 'lucide-react';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
@@ -94,6 +94,11 @@ const AdminEditReservation = () => {
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [reservationCode, setReservationCode] = useState<string | null>(null);
+  const [agencyDetails, setAgencyDetails] = useState<{
+    customer_price: string;
+    agency_notes: string;
+    payment_status: string;
+  }>({ customer_price: '', agency_notes: '', payment_status: 'not_paid' });
   const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null);
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [formData, setFormData] = useState({
@@ -140,11 +145,12 @@ const AdminEditReservation = () => {
     const fetchData = async () => {
       if (!id) return;
 
-      const [reservationResult, driversResult, adminNotesResult, agenciesResult] = await Promise.all([
+      const [reservationResult, driversResult, adminNotesResult, agenciesResult, agencyDetailsResult] = await Promise.all([
         supabase.from('reservations').select('*').eq('id', id).single(),
         supabase.from('drivers').select('id, name, user_id').eq('active', true),
         supabase.from('reservation_admin_notes').select('notes').eq('reservation_id', id).maybeSingle(),
         supabase.from('agencies').select('id, agency_name').order('agency_name'),
+        supabase.from('agency_reservation_details').select('*').eq('reservation_id', id).maybeSingle(),
       ]);
 
       if (reservationResult.error) {
@@ -183,6 +189,15 @@ const AdminEditReservation = () => {
       
       setOriginalData(initialData);
       setFormData(initialData);
+
+      // Load agency details if exists
+      if (agencyDetailsResult.data) {
+        setAgencyDetails({
+          customer_price: agencyDetailsResult.data.customer_price?.toString() || '',
+          agency_notes: agencyDetailsResult.data.agency_notes || '',
+          payment_status: agencyDetailsResult.data.payment_status || 'not_paid',
+        });
+      }
 
       setDrivers(driversResult.data || []);
       setAgencies(agenciesResult.data || []);
@@ -400,6 +415,30 @@ const AdminEditReservation = () => {
         .from('reservation_admin_notes')
         .delete()
         .eq('reservation_id', id);
+    }
+
+    // Save agency details if agency is selected
+    if (formData.agency_id && formData.agency_id !== 'none' && agencyDetails.customer_price) {
+      const driverFee = parseFloat(formData.price) || 0;
+      const agencyPrice = parseFloat(agencyDetails.customer_price) || 0;
+      const profit = agencyPrice - driverFee;
+
+      const { error: agencyError } = await supabase
+        .from('agency_reservation_details')
+        .upsert({
+          reservation_id: id,
+          customer_price: agencyPrice,
+          company_amount: agencyPrice, // Amount to receive from agency
+          agency_profit: profit,
+          agency_notes: agencyDetails.agency_notes || null,
+          payment_status: agencyDetails.payment_status,
+        }, {
+          onConflict: 'reservation_id'
+        });
+
+      if (agencyError) {
+        console.error('Failed to save agency details:', agencyError);
+      }
     }
 
     // Audit log for reservation update
@@ -889,6 +928,87 @@ const AdminEditReservation = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Agency Pricing Section - Only show when agency is selected */}
+              {formData.agency_id && formData.agency_id !== 'none' && (
+                <Card className="border-blue-300 bg-blue-50 dark:bg-blue-950/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-base">
+                      <Building2 className="h-4 w-4" />
+                      Agency Pricing
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-xs text-blue-600 dark:text-blue-400">
+                      Enter the amount to receive from the agency. Profit = Agency Price - Driver Transfer Fee
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm">Agency Price ({currencySymbol})</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={agencyDetails.customer_price}
+                          onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
+                          placeholder="Amount from agency"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm">Payment Status</Label>
+                        <Select 
+                          value={agencyDetails.payment_status} 
+                          onValueChange={(v) => setAgencyDetails({...agencyDetails, payment_status: v})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="not_paid">Not Paid</SelectItem>
+                            <SelectItem value="partially_paid">Partially Paid</SelectItem>
+                            <SelectItem value="paid">Paid</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Show calculated profit */}
+                    {agencyDetails.customer_price && formData.price && (
+                      <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-muted-foreground">Driver Transfer Fee:</span>
+                          <span>{currencySymbol}{parseFloat(formData.price).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-muted-foreground">Agency Price:</span>
+                          <span>{currencySymbol}{parseFloat(agencyDetails.customer_price).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center font-bold mt-2 pt-2 border-t">
+                          <span>Profit:</span>
+                          <span className={
+                            parseFloat(agencyDetails.customer_price) - parseFloat(formData.price) >= 0 
+                              ? 'text-green-600' 
+                              : 'text-destructive'
+                          }>
+                            {currencySymbol}{(parseFloat(agencyDetails.customer_price) - parseFloat(formData.price)).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label className="text-sm">Agency Notes</Label>
+                      <Textarea
+                        value={agencyDetails.agency_notes}
+                        onChange={(e) => setAgencyDetails({...agencyDetails, agency_notes: e.target.value})}
+                        placeholder="Notes about this agency reservation..."
+                        rows={2}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               <div className="space-y-2">
                 <Label>Admin Notes</Label>

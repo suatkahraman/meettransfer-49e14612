@@ -9,16 +9,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, UserPlus, Wallet, Check, X } from 'lucide-react';
+import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Wallet } from 'lucide-react';
 
 interface Agency {
   id: string;
   agency_name: string;
   comments: string | null;
   balance: number | null;
-  user_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -30,19 +28,12 @@ const AdminAgencies = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [userDialogOpen, setUserDialogOpen] = useState(false);
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [creatingUser, setCreatingUser] = useState(false);
   const [formData, setFormData] = useState({
     agency_name: '',
     comments: '',
-  });
-  const [userFormData, setUserFormData] = useState({
-    email: '',
-    password: '',
-    phone: '',
   });
 
   const fetchAgencies = async () => {
@@ -93,12 +84,6 @@ const AdminAgencies = () => {
   const openDeleteDialog = (agency: Agency) => {
     setSelectedAgency(agency);
     setDeleteDialogOpen(true);
-  };
-
-  const openUserDialog = (agency: Agency) => {
-    setSelectedAgency(agency);
-    setUserFormData({ email: '', password: '', phone: '' });
-    setUserDialogOpen(true);
   };
 
   const handleSave = async () => {
@@ -161,53 +146,6 @@ const AdminAgencies = () => {
       toast.error(error.message || 'Failed to save agency');
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleCreateUser = async () => {
-    if (!selectedAgency) return;
-
-    if (!userFormData.email.trim() || !userFormData.password.trim() || !userFormData.phone.trim()) {
-      toast.error('All fields are required');
-      return;
-    }
-
-    if (userFormData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-
-    setCreatingUser(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('create-user-account', {
-        body: {
-          email: userFormData.email.trim(),
-          password: userFormData.password,
-          role: 'agency',
-          name: selectedAgency.agency_name,
-          phone: userFormData.phone.trim(),
-          agency_id: selectedAgency.id,
-        }
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      await logAction({
-        action: 'CREATE_AGENCY_USER',
-        table_name: 'agencies',
-        record_id: selectedAgency.id,
-        new_data: { email: userFormData.email, agency_name: selectedAgency.agency_name },
-      });
-
-      toast.success('Agency user account created successfully');
-      setUserDialogOpen(false);
-      fetchAgencies();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create agency user');
-    } finally {
-      setCreatingUser(false);
     }
   };
 
@@ -338,33 +276,6 @@ const AdminAgencies = () => {
                     </span>
                   </div>
 
-                  {/* User Account Status */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {agency.user_id ? (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          <Check className="h-3 w-3" />
-                          Has Login
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="flex items-center gap-1 text-muted-foreground">
-                          <X className="h-3 w-3" />
-                          No Login
-                        </Badge>
-                      )}
-                    </div>
-                    {!agency.user_id && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => openUserDialog(agency)}
-                      >
-                        <UserPlus className="h-4 w-4 mr-1" />
-                        Create Login
-                      </Button>
-                    )}
-                  </div>
-
                   {agency.comments && (
                     <p className="text-sm text-muted-foreground">{agency.comments}</p>
                   )}
@@ -406,55 +317,6 @@ const AdminAgencies = () => {
             </Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? 'Saving...' : selectedAgency ? 'Update' : 'Create'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Create User Account Dialog */}
-      <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create Agency Login</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-sm text-muted-foreground">
-              Create login credentials for <strong>{selectedAgency?.agency_name}</strong>
-            </p>
-            <div className="space-y-2">
-              <Label>Email *</Label>
-              <Input
-                type="email"
-                value={userFormData.email}
-                onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
-                placeholder="agency@email.com"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Phone *</Label>
-              <Input
-                type="tel"
-                value={userFormData.phone}
-                onChange={(e) => setUserFormData({ ...userFormData, phone: e.target.value })}
-                placeholder="+90 5XX XXX XXXX"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Password *</Label>
-              <Input
-                type="password"
-                value={userFormData.password}
-                onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
-                placeholder="Minimum 6 characters"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setUserDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateUser} disabled={creatingUser}>
-              {creatingUser ? 'Creating...' : 'Create Account'}
             </Button>
           </DialogFooter>
         </DialogContent>
