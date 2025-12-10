@@ -15,10 +15,8 @@ import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, C
 // Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
 const paymentTypes = [
-  { value: 'cash', label: 'Cash' },
-  { value: 'card', label: 'Card' },
-  { value: 'online', label: 'Online' },
-  { value: 'none', label: 'None' },
+  { value: 'cash', label: 'Cash to Driver' },
+  { value: 'online', label: 'Online Payment Link' },
 ];
 
 // Status workflow

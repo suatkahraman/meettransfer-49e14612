@@ -33,9 +33,8 @@ const vehicleTypes = [
 ];
 
 const paymentTypes = [
-  { value: 'cash', label: 'Cash to driver' },
-  { value: 'no-cash', label: 'No cash (pre-paid)' },
-  { value: 'invoice', label: 'Invoice' },
+  { value: 'cash', label: 'Cash to Driver' },
+  { value: 'online', label: 'Online Payment Link' },
 ];
 
 const MAX_PASSENGERS = 15;
