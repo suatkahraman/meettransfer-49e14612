@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Driver {
@@ -183,6 +183,36 @@ const AgencyReservationDetail = () => {
     }
   };
 
+  const handleCopyDetails = () => {
+    if (!reservation) return;
+
+    const passengerList = reservation.passenger_names && reservation.passenger_names.length > 0
+      ? reservation.passenger_names.map((name, i) => `${i + 1}. ${name}`).join('\n')
+      : reservation.customer_name;
+
+    const details = [
+      `Reservation: ${reservation.reservation_code || 'N/A'}`,
+      `Date: ${format(new Date(reservation.pickup_date), 'dd/MM/yyyy')}`,
+      `Time: ${reservation.pickup_time}`,
+      '',
+      'Passengers:',
+      passengerList,
+      '',
+      `Pickup: ${reservation.pickup}`,
+      `Drop-off: ${reservation.dropoff}`,
+      reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
+      `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
+      '',
+      `Price: ₺${agencyDetails?.customer_price || 0}`,
+      '',
+      reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
+      reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
+    ].filter(Boolean).join('\n');
+
+    navigator.clipboard.writeText(details);
+    toast.success('Reservation details copied');
+  };
+
   const calculatedProfit = (parseFloat(customerPrice) || 0) - (parseFloat(companyAmount) || 0);
 
   if (loading) {
@@ -317,6 +347,18 @@ const AgencyReservationDetail = () => {
                 </div>
               </div>
             )}
+
+            {/* Copy Details Button */}
+            <div className="pt-4 border-t">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={handleCopyDetails}
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Reservation Details
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
