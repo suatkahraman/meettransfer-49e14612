@@ -160,10 +160,11 @@ const AgencyReports = () => {
         </Card>
 
         {/* Month Navigator */}
-        <MonthNavigator 
-          currentMonth={currentMonth} 
-          onMonthChange={setCurrentMonth} 
-        />
+          <MonthNavigator 
+            currentMonth={currentMonth}
+            onPreviousMonth={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))}
+            onNextMonth={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))}
+          />
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
