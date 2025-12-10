@@ -22,6 +22,7 @@ import {
 
 interface Reservation {
   id: string;
+  reservation_code: string | null;
   pickup: string;
   dropoff: string;
   pickup_date: string;
@@ -281,7 +282,14 @@ const CustomerReservationDetail = () => {
         <Card>
           <CardHeader>
             <div className="flex justify-between items-start">
-              <CardTitle className="text-xl">Transfer Details</CardTitle>
+              <div className="space-y-1">
+                {reservation.reservation_code && (
+                  <div className="text-sm font-mono text-muted-foreground bg-muted px-2 py-1 rounded inline-block">
+                    {reservation.reservation_code}
+                  </div>
+                )}
+                <CardTitle className="text-xl">Transfer Details</CardTitle>
+              </div>
               <Badge className={statusColors[reservation.status] || 'bg-muted'}>
                 {statusLabels[reservation.status] || reservation.status}
               </Badge>
@@ -397,9 +405,9 @@ const CustomerReservationDetail = () => {
             )}
 
             {/* Driver Info */}
-            {reservation.drivers && (reservation.status === 'sent_to_driver' || reservation.status === 'active') && (
-              <div className="bg-muted p-4 rounded-lg">
-                <div className="text-sm font-medium mb-3">Your Driver</div>
+            <div className="bg-muted p-4 rounded-lg">
+              <div className="text-sm font-medium mb-3">Driver Information</div>
+              {reservation.drivers ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-muted-foreground" />
@@ -422,11 +430,13 @@ const CustomerReservationDetail = () => {
                     </a>
                   </div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <p className="text-muted-foreground text-sm">Driver will be assigned soon.</p>
+              )}
+            </div>
 
             {/* Confirmed Message */}
-            {reservation.status === 'customer_approved' && (
+            {reservation.status === 'customer_approved' && !reservation.drivers && (
               <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg text-center">
                 <p className="text-blue-700 dark:text-blue-300">
                   Your booking is confirmed! A driver will be assigned shortly.

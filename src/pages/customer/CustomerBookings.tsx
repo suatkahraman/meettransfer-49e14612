@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import NotificationBell from '@/components/NotificationBell';
@@ -14,6 +14,7 @@ import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 interface Reservation {
   id: string;
+  reservation_code: string | null;
   pickup: string;
   dropoff: string;
   pickup_date: string;
@@ -23,6 +24,10 @@ interface Reservation {
   price_currency: string | null;
   status: string;
   driver_id: string | null;
+  drivers?: {
+    name: string;
+    plate_number: string | null;
+  } | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -80,7 +85,10 @@ const CustomerBookings = () => {
 
     const { data, error } = await supabase
       .from('reservations')
-      .select('*')
+      .select(`
+        *,
+        drivers (name, plate_number)
+      `)
       .eq('customer_id', user.id)
       .order('pickup_date', { ascending: false });
 
@@ -189,13 +197,18 @@ const CustomerBookings = () => {
                   >
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">
-                            {format(new Date(reservation.pickup_date), 'PPP')}
-                          </span>
-                          <Clock className="h-4 w-4 text-muted-foreground ml-2" />
-                          <span>{reservation.pickup_time}</span>
+                        <div className="flex flex-col gap-1">
+                          {reservation.reservation_code && (
+                            <span className="text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
+                          )}
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">
+                              {format(new Date(reservation.pickup_date), 'PPP')}
+                            </span>
+                            <Clock className="h-4 w-4 text-muted-foreground ml-2" />
+                            <span>{reservation.pickup_time}</span>
+                          </div>
                         </div>
                         <Badge className={`flex items-center gap-1 ${statusColors[reservation.status]}`}>
                           {statusIcons[reservation.status]}
@@ -251,13 +264,18 @@ const CustomerBookings = () => {
                   >
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">
-                            {format(new Date(reservation.pickup_date), 'PPP')}
-                          </span>
-                          <Clock className="h-4 w-4 text-muted-foreground ml-2" />
-                          <span>{reservation.pickup_time}</span>
+                        <div className="flex flex-col gap-1">
+                          {reservation.reservation_code && (
+                            <span className="text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
+                          )}
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">
+                              {format(new Date(reservation.pickup_date), 'PPP')}
+                            </span>
+                            <Clock className="h-4 w-4 text-muted-foreground ml-2" />
+                            <span>{reservation.pickup_time}</span>
+                          </div>
                         </div>
                         <Badge className={`flex items-center gap-1 ${statusColors[reservation.status] || 'bg-muted'}`}>
                           {statusIcons[reservation.status]}
@@ -297,8 +315,18 @@ const CustomerBookings = () => {
                       )}
 
                       {reservation.status === 'sent_to_driver' && (
-                        <div className="bg-yellow-50 dark:bg-yellow-950/30 p-2 rounded text-center text-sm text-yellow-700 dark:text-yellow-300">
-                          Your driver is ready
+                        <div className="bg-yellow-50 dark:bg-yellow-950/30 p-2 rounded text-sm text-yellow-700 dark:text-yellow-300">
+                          {reservation.drivers ? (
+                            <div className="flex items-center gap-2 justify-center">
+                              <User className="h-4 w-4" />
+                              <span>{reservation.drivers.name}</span>
+                              {reservation.drivers.plate_number && (
+                                <span className="font-mono">({reservation.drivers.plate_number})</span>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-center">Driver will be assigned soon</p>
+                          )}
                         </div>
                       )}
 
