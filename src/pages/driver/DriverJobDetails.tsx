@@ -197,7 +197,7 @@ const DriverJobDetails = () => {
           // Create notification for customer
           const { data: resData } = await supabase
             .from('reservations')
-            .select('customer_id')
+            .select('customer_id, agency_id')
             .eq('id', id)
             .single();
 
@@ -222,6 +222,18 @@ const DriverJobDetails = () => {
               });
             } catch (pushError) {
               console.log('Push notification failed:', pushError);
+            }
+          }
+
+          // If agency reservation, deduct balance
+          if (resData?.agency_id) {
+            try {
+              await supabase.functions.invoke('deduct-agency-balance', {
+                body: { reservation_id: id }
+              });
+              console.log('Agency balance deduction triggered');
+            } catch (balanceError) {
+              console.error('Balance deduction failed:', balanceError);
             }
           }
 
