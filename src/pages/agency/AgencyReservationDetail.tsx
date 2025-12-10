@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Driver {
@@ -348,8 +348,8 @@ const AgencyReservationDetail = () => {
               </div>
             )}
 
-            {/* Copy Details Button */}
-            <div className="pt-4 border-t">
+            {/* Copy & Share Buttons */}
+            <div className="pt-4 border-t space-y-2">
               <Button 
                 variant="outline" 
                 className="w-full"
@@ -357,6 +357,37 @@ const AgencyReservationDetail = () => {
               >
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Reservation Details
+              </Button>
+              <Button 
+                className="w-full bg-[#25D366] hover:bg-[#22c55e] text-white"
+                onClick={() => {
+                  if (!reservation) return;
+                  const passengerList = reservation.passenger_names && reservation.passenger_names.length > 0
+                    ? reservation.passenger_names.map((name, i) => `${i + 1}. ${name}`).join('\n')
+                    : reservation.customer_name;
+                  const details = [
+                    `Reservation: ${reservation.reservation_code || 'N/A'}`,
+                    `Date: ${format(new Date(reservation.pickup_date), 'dd/MM/yyyy')}`,
+                    `Time: ${reservation.pickup_time}`,
+                    '',
+                    'Passengers:',
+                    passengerList,
+                    '',
+                    `Pickup: ${reservation.pickup}`,
+                    `Drop-off: ${reservation.dropoff}`,
+                    reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
+                    `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
+                    '',
+                    `Price: ₺${agencyDetails?.customer_price || 0}`,
+                    '',
+                    reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
+                    reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
+                  ].filter(Boolean).join('\n');
+                  window.open(`https://wa.me/?text=${encodeURIComponent(details)}`, '_blank');
+                }}
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Share via WhatsApp
               </Button>
             </div>
           </CardContent>
