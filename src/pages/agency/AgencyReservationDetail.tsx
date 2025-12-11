@@ -198,6 +198,8 @@ const AgencyReservationDetail = () => {
       'Passengers:',
       passengerList,
       '',
+      `Phone: ${reservation.customer_phone}`,
+      '',
       `Pickup: ${reservation.pickup}`,
       `Drop-off: ${reservation.dropoff}`,
       reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
@@ -207,6 +209,7 @@ const AgencyReservationDetail = () => {
       '',
       reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
       reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
+      reservation.drivers?.vehicle_model ? `Vehicle: ${reservation.drivers.vehicle_model}` : null,
     ].filter(Boolean).join('\n');
 
     navigator.clipboard.writeText(details);
@@ -373,6 +376,8 @@ const AgencyReservationDetail = () => {
                     'Passengers:',
                     passengerList,
                     '',
+                    `Phone: ${reservation.customer_phone}`,
+                    '',
                     `Pickup: ${reservation.pickup}`,
                     `Drop-off: ${reservation.dropoff}`,
                     reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
@@ -382,6 +387,7 @@ const AgencyReservationDetail = () => {
                     '',
                     reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
                     reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
+                    reservation.drivers?.vehicle_model ? `Vehicle: ${reservation.drivers.vehicle_model}` : null,
                   ].filter(Boolean).join('\n');
                   window.open(`https://wa.me/?text=${encodeURIComponent(details)}`, '_blank');
                 }}
