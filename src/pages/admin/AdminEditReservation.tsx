@@ -1045,44 +1045,48 @@ const AdminEditReservation = () => {
                     </p>
                     
                     {/* Agency Price Fields - Locked when saved and not editing */}
-                    {(() => {
-                      const isLocked = agencyPriceSaved && !isEditingAgencyPrice;
-                      return (
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2 col-span-2">
-                            <Label className="text-sm">Agency Price</Label>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={agencyDetails.customer_price}
-                              onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
-                              placeholder="Amount from agency"
-                              disabled={isLocked}
-                              className={isLocked ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}
-                            />
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2 col-span-2">
+                        <Label className="text-sm">Agency Price</Label>
+                        {agencyPriceSaved && !isEditingAgencyPrice ? (
+                          <div className="flex items-center h-10 px-3 rounded-md border bg-muted text-foreground">
+                            {agencyDetails.customer_price || '0'}
                           </div>
-                          <div className="space-y-2">
-                            <Label className="text-sm">Currency</Label>
-                            <Select 
-                              value={agencyDetails.agency_price_currency} 
-                              onValueChange={(v) => setAgencyDetails({...agencyDetails, agency_price_currency: v})}
-                              disabled={isLocked}
-                            >
-                              <SelectTrigger className={isLocked ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="USD">$ USD</SelectItem>
-                                <SelectItem value="EUR">€ EUR</SelectItem>
-                                <SelectItem value="TRY">₺ TRY</SelectItem>
-                                <SelectItem value="GBP">£ GBP</SelectItem>
-                              </SelectContent>
-                            </Select>
+                        ) : (
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={agencyDetails.customer_price}
+                            onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
+                            placeholder="Amount from agency"
+                          />
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm">Currency</Label>
+                        {agencyPriceSaved && !isEditingAgencyPrice ? (
+                          <div className="flex items-center h-10 px-3 rounded-md border bg-muted text-foreground">
+                            {agencyDetails.agency_price_currency}
                           </div>
-                        </div>
-                      );
-                    })()}
+                        ) : (
+                          <Select 
+                            value={agencyDetails.agency_price_currency} 
+                            onValueChange={(v) => setAgencyDetails({...agencyDetails, agency_price_currency: v})}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="USD">$ USD</SelectItem>
+                              <SelectItem value="EUR">€ EUR</SelectItem>
+                              <SelectItem value="TRY">₺ TRY</SelectItem>
+                              <SelectItem value="GBP">£ GBP</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                    </div>
 
                     {/* Edit/Save Price Button Logic */}
                     {agencyPriceSaved && !isEditingAgencyPrice ? (
@@ -1100,7 +1104,7 @@ const AdminEditReservation = () => {
                       <Button
                         type="button"
                         onClick={async () => {
-                          const agencyPriceValue = agencyDetails.customer_price.trim();
+                          const agencyPriceValue = (agencyDetails.customer_price || '').toString().trim();
                           const agencyPrice = parseFloat(agencyPriceValue) || 0;
                           if (agencyPrice <= 0) {
                             toast.error('Please enter a valid agency price');
@@ -1126,11 +1130,11 @@ const AdminEditReservation = () => {
                           if (error) {
                             toast.error('Failed to save agency price');
                           } else {
-                            // Explicitly update state with the saved value as string
-                            setAgencyDetails(prev => ({
-                              ...prev,
+                            // Update state with the saved value
+                            setAgencyDetails({
+                              ...agencyDetails,
                               customer_price: agencyPrice.toString()
-                            }));
+                            });
                             setAgencyPriceSaved(true);
                             setIsEditingAgencyPrice(false);
                             toast.success('Agency price saved');
