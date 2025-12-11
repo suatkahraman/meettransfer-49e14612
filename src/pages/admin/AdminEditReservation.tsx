@@ -405,7 +405,7 @@ const AdminEditReservation = () => {
         .upsert({
           reservation_id: id,
           customer_price: agencyPrice,
-          company_amount: agencyPrice,
+          company_amount: driverFee, // Amount company charges for the transfer
           agency_profit: profit,
           agency_notes: agencyDetails.agency_notes || null,
           payment_status: 'paid',
@@ -514,7 +514,7 @@ const AdminEditReservation = () => {
         .upsert({
           reservation_id: id,
           customer_price: agencyPrice,
-          company_amount: agencyPrice, // Amount to receive from agency
+          company_amount: driverFee, // Amount company charges for the transfer
           agency_profit: profit,
           agency_notes: agencyDetails.agency_notes || null,
           payment_status: agencyDetails.payment_status,
