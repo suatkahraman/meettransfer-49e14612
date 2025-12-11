@@ -1044,43 +1044,49 @@ const AdminEditReservation = () => {
                       Enter the amount to receive from the agency. Profit = Agency Price - Driver Transfer Fee
                     </p>
                     
-                    {/* Agency Price Fields - Locked when saved, editable when not */}
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2 col-span-2">
-                        <Label className="text-sm">Agency Price</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={agencyDetails.customer_price}
-                          onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
-                          placeholder="Amount from agency"
-                          disabled={agencyPriceSaved && !isEditingAgencyPrice}
-                          className={agencyPriceSaved && !isEditingAgencyPrice ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-sm">Currency</Label>
-                        <Select 
-                          value={agencyDetails.agency_price_currency} 
-                          onValueChange={(v) => setAgencyDetails({...agencyDetails, agency_price_currency: v})}
-                          disabled={agencyPriceSaved && !isEditingAgencyPrice}
-                        >
-                          <SelectTrigger className={agencyPriceSaved && !isEditingAgencyPrice ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="USD">$ USD</SelectItem>
-                            <SelectItem value="EUR">€ EUR</SelectItem>
-                            <SelectItem value="TRY">₺ TRY</SelectItem>
-                            <SelectItem value="GBP">£ GBP</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                    {/* Agency Price Fields - Locked when saved and not editing */}
+                    {(() => {
+                      const isLocked = agencyPriceSaved && !isEditingAgencyPrice;
+                      return (
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-2 col-span-2">
+                            <Label className="text-sm">Agency Price</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={agencyDetails.customer_price}
+                              onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
+                              placeholder="Amount from agency"
+                              disabled={isLocked}
+                              className={isLocked ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm">Currency</Label>
+                            <Select 
+                              value={agencyDetails.agency_price_currency} 
+                              onValueChange={(v) => setAgencyDetails({...agencyDetails, agency_price_currency: v})}
+                              disabled={isLocked}
+                            >
+                              <SelectTrigger className={isLocked ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="USD">$ USD</SelectItem>
+                                <SelectItem value="EUR">€ EUR</SelectItem>
+                                <SelectItem value="TRY">₺ TRY</SelectItem>
+                                <SelectItem value="GBP">£ GBP</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
-                    {/* Edit/Save Price Button */}
+                    {/* Edit/Save Price Button Logic */}
                     {agencyPriceSaved && !isEditingAgencyPrice ? (
+                      // Price is saved and locked - show Edit button
                       <Button
                         type="button"
                         variant="outline"
@@ -1089,7 +1095,8 @@ const AdminEditReservation = () => {
                       >
                         Edit Agency Price
                       </Button>
-                    ) : isEditingAgencyPrice ? (
+                    ) : (
+                      // Price not saved yet OR currently editing - show Save button
                       <Button
                         type="button"
                         onClick={async () => {
@@ -1128,7 +1135,7 @@ const AdminEditReservation = () => {
                         <Save className="h-4 w-4 mr-2" />
                         Save Price
                       </Button>
-                    ) : null}
+                    )}
                     
                     {/* Show receivable amount after saving */}
                     {agencyDetails.customer_price && agencyPriceSaved && (
