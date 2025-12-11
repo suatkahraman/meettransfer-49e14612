@@ -89,6 +89,8 @@ const AdminEditReservation = () => {
   const [sendingPrice, setSendingPrice] = useState(false);
   const [assigningDriver, setAssigningDriver] = useState(false);
   const [collectingPayment, setCollectingPayment] = useState(false);
+  const [isEditingAgencyPrice, setIsEditingAgencyPrice] = useState(false);
+  const [agencyPriceSaved, setAgencyPriceSaved] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
@@ -192,12 +194,17 @@ const AdminEditReservation = () => {
 
       // Load agency details if exists
       if (agencyDetailsResult.data) {
+        const savedCustomerPrice = agencyDetailsResult.data.customer_price?.toString() || '';
         setAgencyDetails({
-          customer_price: agencyDetailsResult.data.customer_price?.toString() || '',
+          customer_price: savedCustomerPrice,
           agency_price_currency: (agencyDetailsResult.data as any).agency_price_currency || 'USD',
           agency_notes: agencyDetailsResult.data.agency_notes || '',
           payment_status: agencyDetailsResult.data.payment_status || 'not_paid',
         });
+        // Mark as saved if there's an existing price
+        if (savedCustomerPrice && parseFloat(savedCustomerPrice) > 0) {
+          setAgencyPriceSaved(true);
+        }
       }
 
       setDrivers(driversResult.data || []);
@@ -528,6 +535,10 @@ const AdminEditReservation = () => {
 
       if (agencyError) {
         console.error('Failed to save agency details:', agencyError);
+      } else if (agencyPrice > 0) {
+        // Mark agency price as saved and lock it
+        setAgencyPriceSaved(true);
+        setIsEditingAgencyPrice(false);
       }
     }
 
@@ -1033,6 +1044,7 @@ const AdminEditReservation = () => {
                       Enter the amount to receive from the agency. Profit = Agency Price - Driver Transfer Fee
                     </p>
                     
+                    {/* Agency Price Fields - Locked when saved, editable when not */}
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2 col-span-2">
                         <Label className="text-sm">Agency Price</Label>
@@ -1043,6 +1055,8 @@ const AdminEditReservation = () => {
                           value={agencyDetails.customer_price}
                           onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
                           placeholder="Amount from agency"
+                          disabled={agencyPriceSaved && !isEditingAgencyPrice}
+                          className={agencyPriceSaved && !isEditingAgencyPrice ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}
                         />
                       </div>
                       <div className="space-y-2">
@@ -1050,8 +1064,9 @@ const AdminEditReservation = () => {
                         <Select 
                           value={agencyDetails.agency_price_currency} 
                           onValueChange={(v) => setAgencyDetails({...agencyDetails, agency_price_currency: v})}
+                          disabled={agencyPriceSaved && !isEditingAgencyPrice}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className={agencyPriceSaved && !isEditingAgencyPrice ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -1063,6 +1078,69 @@ const AdminEditReservation = () => {
                         </Select>
                       </div>
                     </div>
+
+                    {/* Edit/Save Price Button */}
+                    {agencyPriceSaved && !isEditingAgencyPrice ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsEditingAgencyPrice(true)}
+                        className="w-full border-blue-300 text-blue-700 hover:bg-blue-100"
+                      >
+                        Edit Agency Price
+                      </Button>
+                    ) : isEditingAgencyPrice ? (
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          const agencyPrice = parseFloat(agencyDetails.customer_price) || 0;
+                          if (agencyPrice <= 0) {
+                            toast.error('Please enter a valid agency price');
+                            return;
+                          }
+                          const driverFee = parseFloat(formData.price) || 0;
+                          const profit = agencyPrice - driverFee;
+
+                          const { error } = await supabase
+                            .from('agency_reservation_details')
+                            .upsert({
+                              reservation_id: id,
+                              customer_price: agencyPrice,
+                              agency_price_currency: agencyDetails.agency_price_currency,
+                              company_amount: driverFee,
+                              agency_profit: profit,
+                              agency_notes: agencyDetails.agency_notes || null,
+                              payment_status: agencyDetails.payment_status,
+                            } as any, {
+                              onConflict: 'reservation_id'
+                            });
+
+                          if (error) {
+                            toast.error('Failed to save agency price');
+                          } else {
+                            setAgencyPriceSaved(true);
+                            setIsEditingAgencyPrice(false);
+                            toast.success('Agency price saved');
+                          }
+                        }}
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Price
+                      </Button>
+                    ) : null}
+                    
+                    {/* Show receivable amount after saving */}
+                    {agencyDetails.customer_price && agencyPriceSaved && (
+                      <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                        <div className="flex justify-between items-center font-bold">
+                          <span>Receivable Amount:</span>
+                          <span className="text-blue-600">
+                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="space-y-2">
                       <Label className="text-sm">Payment Status</Label>
@@ -1080,18 +1158,6 @@ const AdminEditReservation = () => {
                         </SelectContent>
                       </Select>
                     </div>
-
-                    {/* Show receivable amount after saving */}
-                    {agencyDetails.customer_price && (
-                      <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border">
-                        <div className="flex justify-between items-center font-bold">
-                          <span>Receivable Amount:</span>
-                          <span className="text-blue-600">
-                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    )}
 
                     <div className="space-y-2">
                       <Label className="text-sm">Agency Notes</Label>
