@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
@@ -33,9 +33,20 @@ interface Reservation {
   admin_set_price: number | null;
   status: string;
   driver_id: string | null;
+  agency_id: string | null;
   drivers?: {
     id: string;
     name: string;
+  } | null;
+  agencies?: {
+    id: string;
+    agency_name: string;
+  } | null;
+  agency_reservation_details?: {
+    customer_price: number | null;
+    company_amount: number | null;
+    agency_profit: number | null;
+    payment_status: string | null;
   } | null;
 }
 
@@ -117,7 +128,9 @@ const AdminReservations = () => {
       .from('reservations')
       .select(`
         *,
-        drivers (id, name)
+        drivers (id, name),
+        agencies (id, agency_name),
+        agency_reservation_details (customer_price, company_amount, agency_profit, payment_status)
       `)
       .order('pickup_date', { ascending: false });
 
@@ -588,6 +601,17 @@ const AdminReservations = () => {
                                   </span>
                                 )}
                               </span>
+                              {reservation.agencies && (
+                                <span className="flex items-center gap-1 text-blue-600">
+                                  <Building2 className="h-4 w-4" />
+                                  {reservation.agencies.agency_name}
+                                  {reservation.agency_reservation_details?.customer_price && (
+                                    <span className="font-bold ml-1">
+                                      ({formatPrice(reservation.agency_reservation_details.customer_price, reservation.price_currency)})
+                                    </span>
+                                  )}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -672,6 +696,17 @@ const AdminReservations = () => {
                           <span className="flex items-center gap-1">
                             <UserCheck className="h-4 w-4 text-green-600" />
                             {reservation.drivers.name}
+                          </span>
+                        )}
+                        {reservation.agencies && (
+                          <span className="flex items-center gap-1 text-blue-600">
+                            <Building2 className="h-4 w-4" />
+                            {reservation.agencies.agency_name}
+                            {reservation.agency_reservation_details?.customer_price && (
+                              <span className="font-bold ml-1">
+                                ({formatPrice(reservation.agency_reservation_details.customer_price, reservation.price_currency)})
+                              </span>
+                            )}
                           </span>
                         )}
                       </div>
