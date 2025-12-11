@@ -15,8 +15,8 @@ import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, C
 // Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
 const paymentTypes = [
-  { value: 'cash', label: 'Cash to Driver' },
-  { value: 'online', label: 'Online Payment Link' },
+  { value: 'cash', label: 'Şoföre Nakit' },
+  { value: 'online', label: 'Online Ödeme Linki' },
 ];
 
 // Status workflow
@@ -47,16 +47,16 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  'pending_price': 'Pending Price',
-  'waiting_for_customer_approval': 'Waiting Customer Approval',
-  'customer_approved': 'Customer Approved',
-  'customer_rejected': 'Customer Rejected',
-  'confirmed': 'Confirmed',
-  'sent_to_driver': 'Sent to Driver',
-  'active': 'Active',
-  'completed': 'Completed',
-  'pending_admin_review': 'Needs Review',
-  'cancelled_by_customer': 'Cancelled by Customer',
+  'pending_price': 'Fiyat Bekleniyor',
+  'waiting_for_customer_approval': 'Müşteri Onayı Bekleniyor',
+  'customer_approved': 'Müşteri Onayladı',
+  'customer_rejected': 'Müşteri Reddetti',
+  'confirmed': 'Onaylandı',
+  'sent_to_driver': 'Şoföre Gönderildi',
+  'active': 'Aktif',
+  'completed': 'Tamamlandı',
+  'pending_admin_review': 'İnceleme Gerekli',
+  'cancelled_by_customer': 'Müşteri İptal Etti',
 };
 
 // Currency options
@@ -573,7 +573,7 @@ const AdminEditReservation = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+        <p>Yükleniyor...</p>
       </div>
     );
   }
@@ -590,7 +590,7 @@ const AdminEditReservation = () => {
           {reservationCode && (
             <span className="text-xs font-mono opacity-80">{reservationCode}</span>
           )}
-          <h1 className="text-2xl font-serif">Edit Reservation</h1>
+          <h1 className="text-2xl font-serif">Rezervasyon Düzenle</h1>
         </div>
         <Badge className={`ml-auto ${statusColors[formData.status] || 'bg-muted'}`}>
           {statusLabels[formData.status] || formData.status}
@@ -604,16 +604,16 @@ const AdminEditReservation = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
                 <DollarSign className="h-5 w-5" />
-                Set Price for Customer
+                Müşteri İçin Fiyat Belirle
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-orange-700 dark:text-orange-300">
-                This reservation is awaiting pricing. Enter the price, select currency, and send to the customer for approval.
+                Bu rezervasyon fiyat bekliyor. Fiyatı girin, para birimini seçin ve onay için müşteriye gönderin.
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Currency</Label>
+                  <Label>Para Birimi</Label>
                   <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
                     <SelectTrigger>
                       <SelectValue />
@@ -626,7 +626,7 @@ const AdminEditReservation = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Price</Label>
+                  <Label>Fiyat</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                     <Input
@@ -635,7 +635,7 @@ const AdminEditReservation = () => {
                       min="0"
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
-                      placeholder="Enter price"
+                      placeholder="Fiyat girin"
                       className="text-lg pl-8"
                     />
                   </div>
@@ -647,7 +647,7 @@ const AdminEditReservation = () => {
                 className="w-full bg-orange-600 hover:bg-orange-700"
               >
                 <Send className="h-4 w-4 mr-2" />
-                {sendingPrice ? 'Sending...' : 'Send Price to Customer'}
+                {sendingPrice ? 'Gönderiliyor...' : 'Fiyatı Müşteriye Gönder'}
               </Button>
             </CardContent>
           </Card>
@@ -659,12 +659,12 @@ const AdminEditReservation = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
                 <UserCheck className="h-5 w-5" />
-                Customer Updated This Reservation
+                Müşteri Bu Rezervasyonu Güncelledi
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-amber-700 dark:text-amber-300">
-                The customer has modified this reservation. Please review the changes below and either approve or reject them.
+                Müşteri bu rezervasyonu değiştirdi. Lütfen aşağıdaki değişiklikleri inceleyin ve onaylayın veya reddedin.
               </p>
               <div className="flex gap-3">
                 <Button
@@ -696,10 +696,10 @@ const AdminEditReservation = () => {
                         }
                       }
 
-                      toast.success('Changes approved!');
+                      toast.success('Değişiklikler onaylandı!');
                       setFormData({ ...formData, status: newStatus });
                     } catch (error: any) {
-                      toast.error(error.message || 'Failed to approve changes');
+                      toast.error(error.message || 'Değişiklikler onaylanamadı');
                     } finally {
                       setSaving(false);
                     }
@@ -707,7 +707,7 @@ const AdminEditReservation = () => {
                   disabled={saving}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700"
                 >
-                  Approve Changes
+                  Değişiklikleri Onayla
                 </Button>
                 <Button
                   onClick={async () => {
@@ -747,11 +747,11 @@ const AdminEditReservation = () => {
                           }
                         }
 
-                        toast.success('Changes rejected, original details restored');
+                        toast.success('Değişiklikler reddedildi, orijinal detaylar geri yüklendi');
                         navigate('/admin/reservations');
                       }
                     } catch (error: any) {
-                      toast.error(error.message || 'Failed to reject changes');
+                      toast.error(error.message || 'Değişiklikler reddedilemedi');
                     } finally {
                       setSaving(false);
                     }
@@ -760,7 +760,7 @@ const AdminEditReservation = () => {
                   variant="outline"
                   className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
                 >
-                  Reject Changes
+                  Değişiklikleri Reddet
                 </Button>
               </div>
             </CardContent>
@@ -773,21 +773,21 @@ const AdminEditReservation = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
                 <UserCheck className="h-5 w-5" />
-                Assign Driver
+                Şoför Ata
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-emerald-700 dark:text-emerald-300">
                 {formData.status === 'confirmed' 
-                  ? 'This reservation is confirmed. Select a driver to assign this job.'
-                  : `Customer has approved the price (${currencySymbol}${formData.price}). Select a driver to assign this job.`
+                  ? 'Bu rezervasyon onaylandı. Bu işi atamak için bir şoför seçin.'
+                  : `Müşteri fiyatı onayladı (${currencySymbol}${formData.price}). Bu işi atamak için bir şoför seçin.`
                 }
               </p>
               <div className="space-y-2">
-                <Label>Select Driver</Label>
+                <Label>Şoför Seçin</Label>
                 <Select value={formData.driver_id} onValueChange={(v) => setFormData({...formData, driver_id: v})}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose a driver" />
+                    <SelectValue placeholder="Şoför seçin" />
                   </SelectTrigger>
                   <SelectContent>
                     {drivers.map(d => (
@@ -802,7 +802,7 @@ const AdminEditReservation = () => {
                 className="w-full"
               >
                 <UserCheck className="h-4 w-4 mr-2" />
-                {assigningDriver ? 'Assigning...' : 'Assign to Driver'}
+                {assigningDriver ? 'Atanıyor...' : 'Şoföre Ata'}
               </Button>
             </CardContent>
           </Card>
@@ -814,7 +814,7 @@ const AdminEditReservation = () => {
               {/* Passenger Names Section */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Passengers ({passengerNames.length}/{MAX_PASSENGERS})</Label>
+                  <Label>Yolcular ({passengerNames.length}/{MAX_PASSENGERS})</Label>
                   {passengerNames.length < MAX_PASSENGERS && (
                     <Button
                       type="button"
@@ -824,7 +824,7 @@ const AdminEditReservation = () => {
                       className="gap-1"
                     >
                       <UserPlus className="h-4 w-4" />
-                      Add Passenger
+                      Yolcu Ekle
                     </Button>
                   )}
                 </div>
@@ -833,12 +833,12 @@ const AdminEditReservation = () => {
                   <div key={index} className="flex gap-2 items-center">
                     <div className="flex-1 space-y-1">
                       <Label className="text-xs text-muted-foreground">
-                        {index === 0 ? 'Primary Passenger' : `Passenger ${index + 1}`}
+                        {index === 0 ? 'Ana Yolcu' : `Yolcu ${index + 1}`}
                       </Label>
                       <Input
                         value={name}
                         onChange={(e) => updatePassenger(index, e.target.value)}
-                        placeholder={index === 0 ? 'Primary passenger name' : `Passenger ${index + 1} name`}
+                        placeholder={index === 0 ? 'Ana yolcu adı' : `Yolcu ${index + 1} adı`}
                         required={index === 0}
                       />
                     </div>
@@ -858,7 +858,7 @@ const AdminEditReservation = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Customer Phone</Label>
+                <Label>Müşteri Telefonu</Label>
                 <Input
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
@@ -868,15 +868,15 @@ const AdminEditReservation = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Pick-up Point</Label>
+                  <Label>Alış Noktası</Label>
                   <Input
                     value={formData.pickup}
                     onChange={(e) => setFormData({...formData, pickup: e.target.value})}
-                    placeholder="Enter Pick-up Point"
+                    placeholder="Alış noktasını girin"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Drop-off</Label>
+                  <Label>Bırakış Noktası</Label>
                   <Input
                     value={formData.dropoff}
                     onChange={(e) => setFormData({...formData, dropoff: e.target.value})}
@@ -887,7 +887,7 @@ const AdminEditReservation = () => {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Date</Label>
+                  <Label>Tarih</Label>
                   <Input
                     type="date"
                     value={formData.pickup_date}
@@ -896,7 +896,7 @@ const AdminEditReservation = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Time</Label>
+                  <Label>Saat</Label>
                   <Input
                     type="time"
                     value={formData.pickup_time}
@@ -905,7 +905,7 @@ const AdminEditReservation = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Flight</Label>
+                  <Label>Uçuş</Label>
                   <Input
                     value={formData.flight_number}
                     onChange={(e) => setFormData({...formData, flight_number: e.target.value})}
@@ -915,7 +915,7 @@ const AdminEditReservation = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Vehicle</Label>
+                  <Label>Araç</Label>
                   <Select value={formData.vehicle_type} onValueChange={(v) => setFormData({...formData, vehicle_type: v})}>
                     <SelectTrigger>
                       <SelectValue />
@@ -928,7 +928,7 @@ const AdminEditReservation = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Payment</Label>
+                  <Label>Ödeme</Label>
                   <Select value={formData.payment_type} onValueChange={(v) => setFormData({...formData, payment_type: v})}>
                     <SelectTrigger>
                       <SelectValue />
@@ -944,7 +944,7 @@ const AdminEditReservation = () => {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Currency</Label>
+                  <Label>Para Birimi</Label>
                   <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
                     <SelectTrigger>
                       <SelectValue />
@@ -957,7 +957,7 @@ const AdminEditReservation = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Price</Label>
+                  <Label>Fiyat</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                     <Input
@@ -971,7 +971,7 @@ const AdminEditReservation = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Driver Cash</Label>
+                  <Label>Şoför Nakiti</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                     <Input
@@ -988,7 +988,7 @@ const AdminEditReservation = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Status</Label>
+                  <Label>Durum</Label>
                   <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
                     <SelectTrigger>
                       <SelectValue />
@@ -1001,10 +1001,10 @@ const AdminEditReservation = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Driver</Label>
+                  <Label>Şoför</Label>
                   <Select value={formData.driver_id} onValueChange={(v) => setFormData({...formData, driver_id: v})}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select driver" />
+                      <SelectValue placeholder="Şoför seçin" />
                     </SelectTrigger>
                     <SelectContent>
                       {drivers.map(d => (
@@ -1016,13 +1016,13 @@ const AdminEditReservation = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Agency</Label>
+                <Label>Acenta</Label>
                 <Select value={formData.agency_id} onValueChange={(v) => setFormData({...formData, agency_id: v})}>
                   <SelectTrigger>
-                    <SelectValue placeholder="No Agency (Direct Customer)" />
+                    <SelectValue placeholder="Acenta Yok (Direkt Müşteri)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No Agency (Direct Customer)</SelectItem>
+                    <SelectItem value="none">Acenta Yok (Direkt Müşteri)</SelectItem>
                     {agencies.map(a => (
                       <SelectItem key={a.id} value={a.id}>{a.agency_name}</SelectItem>
                     ))}
@@ -1036,18 +1036,18 @@ const AdminEditReservation = () => {
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-base">
                       <Building2 className="h-4 w-4" />
-                      Agency Pricing
+                      Acenta Fiyatlandırması
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-xs text-blue-600 dark:text-blue-400">
-                      Enter the amount to receive from the agency. Profit = Agency Price - Driver Transfer Fee
+                      Acentadan alınacak tutarı girin. Kar = Acenta Fiyatı - Şoför Transfer Ücreti
                     </p>
                     
                     {/* Agency Price Fields - Locked when saved and not editing */}
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2 col-span-2">
-                        <Label className="text-sm">Agency Price</Label>
+                        <Label className="text-sm">Acenta Fiyatı</Label>
                         {agencyPriceSaved && !isEditingAgencyPrice ? (
                           <div className="flex items-center h-10 px-3 rounded-md border bg-muted text-foreground">
                             {agencyDetails.customer_price || '0'}
@@ -1064,7 +1064,7 @@ const AdminEditReservation = () => {
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm">Currency</Label>
+                        <Label className="text-sm">Para Birimi</Label>
                         {agencyPriceSaved && !isEditingAgencyPrice ? (
                           <div className="flex items-center h-10 px-3 rounded-md border bg-muted text-foreground">
                             {agencyDetails.agency_price_currency}
@@ -1097,7 +1097,7 @@ const AdminEditReservation = () => {
                         onClick={() => setIsEditingAgencyPrice(true)}
                         className="w-full border-blue-300 text-blue-700 hover:bg-blue-100"
                       >
-                        Edit Agency Price
+                        Acenta Fiyatını Düzenle
                       </Button>
                     ) : (
                       // Price not saved yet OR currently editing - show Save button
@@ -1107,7 +1107,7 @@ const AdminEditReservation = () => {
                           const agencyPriceValue = (agencyDetails.customer_price || '').toString().trim();
                           const agencyPrice = parseFloat(agencyPriceValue) || 0;
                           if (agencyPrice <= 0) {
-                            toast.error('Please enter a valid agency price');
+                            toast.error('Lütfen geçerli bir acenta fiyatı girin');
                             return;
                           }
                           const driverFee = parseFloat(formData.price) || 0;
@@ -1154,7 +1154,7 @@ const AdminEditReservation = () => {
 
                             if (error) {
                               console.error('Agency price save error:', error);
-                              toast.error(error.message || 'Failed to save agency price');
+                              toast.error(error.message || 'Acenta fiyatı kaydedilemedi');
                             } else {
                               // Update state with the saved value
                               setAgencyDetails({
@@ -1163,17 +1163,17 @@ const AdminEditReservation = () => {
                               });
                               setAgencyPriceSaved(true);
                               setIsEditingAgencyPrice(false);
-                              toast.success('Agency price saved');
+                              toast.success('Acenta fiyatı kaydedildi');
                             }
                           } catch (err: any) {
                             console.error('Agency price save exception:', err);
-                            toast.error(err.message || 'Failed to save agency price');
+                            toast.error(err.message || 'Acenta fiyatı kaydedilemedi');
                           }
                         }}
                         className="w-full bg-blue-600 hover:bg-blue-700"
                       >
                         <Save className="h-4 w-4 mr-2" />
-                        Save Price
+                        Fiyatı Kaydet
                       </Button>
                     )}
                     
@@ -1181,7 +1181,7 @@ const AdminEditReservation = () => {
                     {agencyDetails.customer_price && agencyPriceSaved && (
                       <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border">
                         <div className="flex justify-between items-center font-bold">
-                          <span>Receivable Amount:</span>
+                          <span>Alınacak Tutar:</span>
                           <span className="text-blue-600">
                             {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
                           </span>
@@ -1190,7 +1190,7 @@ const AdminEditReservation = () => {
                     )}
                     
                     <div className="space-y-2">
-                      <Label className="text-sm">Payment Status</Label>
+                      <Label className="text-sm">Ödeme Durumu</Label>
                       <Select 
                         value={agencyDetails.payment_status} 
                         onValueChange={(v) => setAgencyDetails({...agencyDetails, payment_status: v})}
@@ -1199,19 +1199,19 @@ const AdminEditReservation = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="not_paid">Not Paid</SelectItem>
-                          <SelectItem value="partially_paid">Partially Paid</SelectItem>
-                          <SelectItem value="paid">Paid</SelectItem>
+                          <SelectItem value="not_paid">Ödenmedi</SelectItem>
+                          <SelectItem value="partially_paid">Kısmen Ödendi</SelectItem>
+                          <SelectItem value="paid">Ödendi</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm">Agency Notes</Label>
+                      <Label className="text-sm">Acenta Notları</Label>
                       <Textarea
                         value={agencyDetails.agency_notes}
                         onChange={(e) => setAgencyDetails({...agencyDetails, agency_notes: e.target.value})}
-                        placeholder="Notes about this agency reservation..."
+                        placeholder="Bu acenta rezervasyonu hakkında notlar..."
                         rows={2}
                       />
                     </div>
@@ -1227,12 +1227,12 @@ const AdminEditReservation = () => {
                         {collectingPayment ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Collecting...
+                            Tahsil Ediliyor...
                           </>
                         ) : (
                           <>
                             <CheckCircle className="h-4 w-4 mr-2" />
-                            Collect Payment ({getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)})
+                            Ödeme Tahsil Et ({getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)})
                           </>
                         )}
                       </Button>
@@ -1241,7 +1241,7 @@ const AdminEditReservation = () => {
                     {agencyDetails.payment_status === 'paid' && (
                       <div className="flex items-center gap-2 p-3 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-700 dark:text-green-300">
                         <CheckCircle className="h-5 w-5" />
-                        <span className="font-medium">Payment Collected</span>
+                        <span className="font-medium">Ödeme Tahsil Edildi</span>
                       </div>
                     )}
                   </CardContent>
@@ -1249,18 +1249,18 @@ const AdminEditReservation = () => {
               )}
 
               <div className="space-y-2">
-                <Label>Admin Notes</Label>
+                <Label>Admin Notları</Label>
                 <Textarea
                   value={formData.admin_notes}
                   onChange={(e) => setFormData({...formData, admin_notes: e.target.value})}
-                  placeholder="Internal notes (not visible to customer or driver)"
+                  placeholder="Dahili notlar (müşteri veya şoför tarafından görülemez)"
                   rows={3}
                 />
               </div>
 
               <Button type="submit" className="w-full" disabled={saving}>
                 <Save className="h-4 w-4 mr-2" />
-                {saving ? 'Saving...' : 'Save Changes'}
+                {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
               </Button>
             </form>
           </CardContent>
