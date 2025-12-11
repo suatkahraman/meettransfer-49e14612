@@ -77,16 +77,16 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  'pending_price': 'Pending Price',
-  'waiting_for_customer_approval': 'Awaiting Approval',
-  'customer_approved': 'Approved',
-  'customer_rejected': 'Rejected',
-  'confirmed': 'Confirmed',
-  'sent_to_driver': 'Sent to Driver',
-  'active': 'Active',
-  'completed': 'Completed',
-  'cancelled': 'Cancelled',
-  'cancelled_by_customer': 'Cancelled by Customer',
+  'pending_price': 'Fiyat Bekliyor',
+  'waiting_for_customer_approval': 'Onay Bekliyor',
+  'customer_approved': 'Onaylandı',
+  'customer_rejected': 'Reddedildi',
+  'confirmed': 'Onaylandı',
+  'sent_to_driver': 'Şoföre Gönderildi',
+  'active': 'Aktif',
+  'completed': 'Tamamlandı',
+  'cancelled': 'İptal',
+  'cancelled_by_customer': 'Müşteri İptal Etti',
 };
 
 const currencies: Record<string, string> = {
@@ -241,9 +241,9 @@ const AdminAgencyAccounting = () => {
   }, [agencyId, currentMonth, selectedStatus]);
 
   const getDriverName = (driverId: string | null) => {
-    if (!driverId) return 'Not Assigned';
+    if (!driverId) return 'Atanmadı';
     const driver = drivers.find(d => d.id === driverId);
-    return driver?.name || 'Unknown';
+    return driver?.name || 'Bilinmiyor';
   };
 
   const getCurrencySymbol = (currency: string | null) => currencies[currency || 'TRY'] || currency;
@@ -442,7 +442,7 @@ const AdminAgencyAccounting = () => {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <Building2 className="h-6 w-6" />
-        <h1 className="text-2xl font-serif">Agency Accounting</h1>
+        <h1 className="text-2xl font-serif">Acenta Muhasebe</h1>
       </header>
 
       <main className="flex-1 overflow-y-auto">
@@ -452,7 +452,7 @@ const AdminAgencyAccounting = () => {
             <div className="flex-1 min-w-[200px] max-w-xs">
               <Select value={agencyId || ''} onValueChange={handleAgencyChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Agency" />
+                  <SelectValue placeholder="Acenta Seçin" />
                 </SelectTrigger>
                 <SelectContent>
                   {allAgencies.map(a => (
@@ -470,7 +470,7 @@ const AdminAgencyAccounting = () => {
             <Card>
               <CardContent className="py-12 text-center">
                 <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Select an agency to view accounting</p>
+                <p className="text-muted-foreground">Muhasebe görüntülemek için acenta seçin</p>
               </CardContent>
             </Card>
           ) : (
@@ -486,11 +486,11 @@ const AdminAgencyAccounting = () => {
               <div className="flex flex-wrap gap-3">
                 <Button onClick={openNewPaymentDialog} className="gap-2">
                   <Plus className="h-4 w-4" />
-                  Record Payment
+                  Ödeme Kaydet
                 </Button>
                 <Button variant="outline" onClick={() => setHistoryDialogOpen(true)} className="gap-2">
                   <History className="h-4 w-4" />
-                  Payment History ({payments.length})
+                  Ödeme Geçmişi ({payments.length})
                 </Button>
               </div>
 
@@ -498,20 +498,20 @@ const AdminAgencyAccounting = () => {
               <div className="flex gap-4">
                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                   <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Filter by status" />
+                    <SelectValue placeholder="Duruma göre filtrele" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="confirmed">Confirmed</SelectItem>
-                    <SelectItem value="sent_to_driver">Sent to Driver</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="all">Tüm Durumlar</SelectItem>
+                    <SelectItem value="completed">Tamamlandı</SelectItem>
+                    <SelectItem value="confirmed">Onaylandı</SelectItem>
+                    <SelectItem value="sent_to_driver">Şoföre Gönderildi</SelectItem>
+                    <SelectItem value="active">Aktif</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {loading ? (
-                <div className="text-center py-12">Loading...</div>
+                <div className="text-center py-12">Yükleniyor...</div>
               ) : (
                 <>
                   {/* Summary Cards */}
@@ -520,7 +520,7 @@ const AdminAgencyAccounting = () => {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                           <Receipt className="h-4 w-4" />
-                          Total Reservations
+                          Toplam Rezervasyon
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -532,7 +532,7 @@ const AdminAgencyAccounting = () => {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                           <TrendingUp className="h-4 w-4" />
-                          Total Agency Price
+                          Toplam Acenta Fiyatı
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -544,7 +544,7 @@ const AdminAgencyAccounting = () => {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                           <CreditCard className="h-4 w-4" />
-                          Payments Received
+                          Alınan Ödemeler
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -556,7 +556,7 @@ const AdminAgencyAccounting = () => {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                           <Banknote className="h-4 w-4" />
-                          Balance
+                          Bakiye
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -564,7 +564,7 @@ const AdminAgencyAccounting = () => {
                           ₺{remainingBalance.toFixed(2)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {remainingBalance > 0 ? 'Agency owes' : remainingBalance < 0 ? 'Overpaid' : 'Settled'}
+                          {remainingBalance > 0 ? 'Acenta borçlu' : remainingBalance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
                         </p>
                       </CardContent>
                     </Card>
@@ -574,13 +574,13 @@ const AdminAgencyAccounting = () => {
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-lg">
-                        Reservations ({reservations.length})
+                        Rezervasyonlar ({reservations.length})
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       {reservations.length === 0 ? (
                         <p className="text-center py-8 text-muted-foreground">
-                          No reservations found for this period
+                          Bu dönem için rezervasyon bulunamadı
                         </p>
                       ) : (
                         <div className="space-y-4">
@@ -643,13 +643,13 @@ const AdminAgencyAccounting = () => {
 
                                       <div className="flex items-center gap-2 text-sm">
                                         <User className="h-4 w-4 text-muted-foreground" />
-                                        <span>Driver: {getDriverName(res.driver_id)}</span>
+                                        <span>Şoför: {getDriverName(res.driver_id)}</span>
                                       </div>
                                     </div>
 
                                     {/* Right - Agency Price */}
                                     <div className="text-right space-y-1">
-                                      <div className="text-xs text-muted-foreground">Agency Price</div>
+                                      <div className="text-xs text-muted-foreground">Acenta Fiyatı</div>
                                       <div className="text-lg font-semibold text-primary">
                                         {getCurrencySymbol(getAgencyPriceCurrency(res.id))}{agencyPrice.toFixed(2)}
                                       </div>
@@ -658,7 +658,7 @@ const AdminAgencyAccounting = () => {
 
                                   {res.driver_notes && (
                                     <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
-                                      Notes: {res.driver_notes}
+                                      Notlar: {res.driver_notes}
                                     </div>
                                   )}
                                 </CardContent>
@@ -684,28 +684,28 @@ const AdminAgencyAccounting = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingPayment ? 'Edit Payment' : 'Record Payment'} - {agency?.agency_name}
+              {editingPayment ? 'Ödeme Düzenle' : 'Ödeme Kaydet'} - {agency?.agency_name}
             </DialogTitle>
             <DialogDescription>
               {editingPayment 
-                ? 'Update the payment details.' 
-                : 'Enter the payment details received from the agency.'}
+                ? 'Ödeme bilgilerini güncelleyin.' 
+                : 'Acentadan alınan ödeme bilgilerini girin.'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Payment Amount (₺)</Label>
+              <Label htmlFor="amount">Ödeme Tutarı (₺)</Label>
               <Input
                 id="amount"
                 type="number"
                 step="0.01"
-                placeholder="Enter amount"
+                placeholder="Tutar girin"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="date">Payment Date</Label>
+              <Label htmlFor="date">Ödeme Tarihi</Label>
               <Input
                 id="date"
                 type="date"
@@ -714,10 +714,10 @@ const AdminAgencyAccounting = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Label htmlFor="notes">Notlar (Opsiyonel)</Label>
               <Textarea
                 id="notes"
-                placeholder="Add any notes about this payment..."
+                placeholder="Bu ödeme hakkında not ekleyin..."
                 value={paymentNotes}
                 onChange={(e) => setPaymentNotes(e.target.value)}
               />
@@ -728,15 +728,15 @@ const AdminAgencyAccounting = () => {
               setPaymentDialogOpen(false);
               setEditingPayment(null);
             }}>
-              Cancel
+              İptal
             </Button>
             <Button 
               onClick={editingPayment ? handleEditPayment : handleRecordPayment} 
               disabled={savingPayment}
             >
               {savingPayment 
-                ? (editingPayment ? 'Updating...' : 'Recording...') 
-                : (editingPayment ? 'Update Payment' : 'Record Payment')}
+                ? (editingPayment ? 'Güncelleniyor...' : 'Kaydediliyor...') 
+                : (editingPayment ? 'Ödeme Güncelle' : 'Ödeme Kaydet')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -746,24 +746,24 @@ const AdminAgencyAccounting = () => {
       <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Payment History - {agency?.agency_name}</DialogTitle>
+            <DialogTitle>Ödeme Geçmişi - {agency?.agency_name}</DialogTitle>
             <DialogDescription>
-              All recorded payments from this agency.
+              Bu acentadan alınan tüm ödemeler.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             {payments.length === 0 ? (
               <p className="text-center py-8 text-muted-foreground">
-                No payments recorded yet
+                Henüz ödeme kaydedilmedi
               </p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead>Notes</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Tarih</TableHead>
+                    <TableHead className="text-right">Tutar</TableHead>
+                    <TableHead>Notlar</TableHead>
+                    <TableHead className="text-right">İşlemler</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -802,7 +802,7 @@ const AdminAgencyAccounting = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setHistoryDialogOpen(false)}>
-              Close
+              Kapat
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -812,20 +812,20 @@ const AdminAgencyAccounting = () => {
       <AlertDialog open={!!deletingPayment} onOpenChange={(open) => !open && setDeletingPayment(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Payment</AlertDialogTitle>
+            <AlertDialogTitle>Ödeme Sil</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this payment of ₺{deletingPayment?.amount.toFixed(2)}? 
-              This will restore the amount to the agency balance.
+              ₺{deletingPayment?.amount.toFixed(2)} tutarındaki bu ödemeyi silmek istediğinizden emin misiniz? 
+              Bu tutar acenta bakiyesine geri eklenecektir.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>İptal</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeletePayment}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleting ? 'Deleting...' : 'Delete'}
+              {deleting ? 'Siliniyor...' : 'Sil'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

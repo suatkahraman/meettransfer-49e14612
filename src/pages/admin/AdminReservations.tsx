@@ -149,6 +149,23 @@ const AdminReservations = () => {
       console.error('Error:', error);
     } else {
       let filtered = data || [];
+      
+      // Filter out completed reservations that have agency AND agency_price set
+      // These should only appear in Agency Accounting
+      filtered = filtered.filter(r => {
+        const isCompleted = r.status === 'completed';
+        const hasAgency = r.agency_id !== null;
+        const hasAgencyPrice = r.agency_reservation_details?.customer_price !== null && 
+                               r.agency_reservation_details?.customer_price !== undefined &&
+                               r.agency_reservation_details?.customer_price > 0;
+        
+        // Hide from main list if ALL conditions are true
+        if (isCompleted && hasAgency && hasAgencyPrice) {
+          return false;
+        }
+        return true;
+      });
+      
       if (filters.search) {
         const search = filters.search.toLowerCase();
         filtered = filtered.filter(r => 
