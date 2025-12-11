@@ -95,9 +95,10 @@ const AdminEditReservation = () => {
   const [reservationCode, setReservationCode] = useState<string | null>(null);
   const [agencyDetails, setAgencyDetails] = useState<{
     customer_price: string;
+    agency_price_currency: string;
     agency_notes: string;
     payment_status: string;
-  }>({ customer_price: '', agency_notes: '', payment_status: 'not_paid' });
+  }>({ customer_price: '', agency_price_currency: 'USD', agency_notes: '', payment_status: 'not_paid' });
   const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null);
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [formData, setFormData] = useState({
@@ -193,6 +194,7 @@ const AdminEditReservation = () => {
       if (agencyDetailsResult.data) {
         setAgencyDetails({
           customer_price: agencyDetailsResult.data.customer_price?.toString() || '',
+          agency_price_currency: (agencyDetailsResult.data as any).agency_price_currency || 'USD',
           agency_notes: agencyDetailsResult.data.agency_notes || '',
           payment_status: agencyDetailsResult.data.payment_status || 'not_paid',
         });
@@ -405,11 +407,12 @@ const AdminEditReservation = () => {
         .upsert({
           reservation_id: id,
           customer_price: agencyPrice,
+          agency_price_currency: agencyDetails.agency_price_currency,
           company_amount: driverFee, // Amount company charges for the transfer
           agency_profit: profit,
           agency_notes: agencyDetails.agency_notes || null,
           payment_status: 'paid',
-        }, {
+        } as any, {
           onConflict: 'reservation_id'
         });
 
@@ -514,11 +517,12 @@ const AdminEditReservation = () => {
         .upsert({
           reservation_id: id,
           customer_price: agencyPrice,
+          agency_price_currency: agencyDetails.agency_price_currency,
           company_amount: driverFee, // Amount company charges for the transfer
           agency_profit: profit,
           agency_notes: agencyDetails.agency_notes || null,
           payment_status: agencyDetails.payment_status,
-        }, {
+        } as any, {
           onConflict: 'reservation_id'
         });
 
@@ -1029,9 +1033,9 @@ const AdminEditReservation = () => {
                       Enter the amount to receive from the agency. Profit = Agency Price - Driver Transfer Fee
                     </p>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-sm">Agency Price ({currencySymbol})</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2 col-span-2">
+                        <Label className="text-sm">Agency Price</Label>
                         <Input
                           type="number"
                           step="0.01"
@@ -1042,21 +1046,39 @@ const AdminEditReservation = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm">Payment Status</Label>
+                        <Label className="text-sm">Currency</Label>
                         <Select 
-                          value={agencyDetails.payment_status} 
-                          onValueChange={(v) => setAgencyDetails({...agencyDetails, payment_status: v})}
+                          value={agencyDetails.agency_price_currency} 
+                          onValueChange={(v) => setAgencyDetails({...agencyDetails, agency_price_currency: v})}
                         >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="not_paid">Not Paid</SelectItem>
-                            <SelectItem value="partially_paid">Partially Paid</SelectItem>
-                            <SelectItem value="paid">Paid</SelectItem>
+                            <SelectItem value="USD">$ USD</SelectItem>
+                            <SelectItem value="EUR">€ EUR</SelectItem>
+                            <SelectItem value="TRY">₺ TRY</SelectItem>
+                            <SelectItem value="GBP">£ GBP</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-sm">Payment Status</Label>
+                      <Select 
+                        value={agencyDetails.payment_status} 
+                        onValueChange={(v) => setAgencyDetails({...agencyDetails, payment_status: v})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="not_paid">Not Paid</SelectItem>
+                          <SelectItem value="partially_paid">Partially Paid</SelectItem>
+                          <SelectItem value="paid">Paid</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* Show calculated profit */}
@@ -1068,7 +1090,7 @@ const AdminEditReservation = () => {
                         </div>
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-muted-foreground">Agency Price:</span>
-                          <span>{currencySymbol}{parseFloat(agencyDetails.customer_price).toFixed(2)}</span>
+                          <span>{getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center font-bold mt-2 pt-2 border-t">
                           <span>Profit:</span>
@@ -1077,7 +1099,7 @@ const AdminEditReservation = () => {
                               ? 'text-green-600' 
                               : 'text-destructive'
                           }>
-                            {currencySymbol}{(parseFloat(agencyDetails.customer_price) - parseFloat(formData.price)).toFixed(2)}
+                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{(parseFloat(agencyDetails.customer_price) - parseFloat(formData.price)).toFixed(2)}
                           </span>
                         </div>
                       </div>
@@ -1109,7 +1131,7 @@ const AdminEditReservation = () => {
                         ) : (
                           <>
                             <CheckCircle className="h-4 w-4 mr-2" />
-                            Collect Payment ({currencySymbol}{parseFloat(agencyDetails.customer_price).toFixed(2)})
+                            Collect Payment ({getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)})
                           </>
                         )}
                       </Button>

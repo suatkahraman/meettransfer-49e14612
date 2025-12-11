@@ -85,6 +85,7 @@ export type Database = {
       agency_reservation_details: {
         Row: {
           agency_notes: string | null
+          agency_price_currency: string | null
           agency_profit: number | null
           company_amount: number | null
           created_at: string | null
@@ -96,6 +97,7 @@ export type Database = {
         }
         Insert: {
           agency_notes?: string | null
+          agency_price_currency?: string | null
           agency_profit?: number | null
           company_amount?: number | null
           created_at?: string | null
@@ -107,6 +109,7 @@ export type Database = {
         }
         Update: {
           agency_notes?: string | null
+          agency_price_currency?: string | null
           agency_profit?: number | null
           company_amount?: number | null
           created_at?: string | null
