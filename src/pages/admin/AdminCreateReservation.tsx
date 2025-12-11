@@ -16,16 +16,16 @@ import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus } from 'luci
 // Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
 const paymentTypes = [
-  { value: 'cash', label: 'Cash to Driver' },
-  { value: 'online', label: 'Online Payment Link' },
+  { value: 'cash', label: 'Şoföre Nakit' },
+  { value: 'online', label: 'Online Ödeme Linki' },
 ];
 
 // Statuses for manual admin reservations
 const statuses = [
-  { value: 'confirmed', label: 'Confirmed' },
-  { value: 'sent_to_driver', label: 'Sent to Driver' },
-  { value: 'active', label: 'Active' },
-  { value: 'completed', label: 'Completed' },
+  { value: 'confirmed', label: 'Onaylandı' },
+  { value: 'sent_to_driver', label: 'Şoföre Gönderildi' },
+  { value: 'active', label: 'Aktif' },
+  { value: 'completed', label: 'Tamamlandı' },
 ];
 
 // Currency options
@@ -299,7 +299,7 @@ const AdminCreateReservation = () => {
         <Button variant="ghost" size="icon" onClick={() => navigate('/admin/reservations')} className="text-primary-foreground hover:bg-primary-foreground/10">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-serif">Create Reservation</h1>
+        <h1 className="text-2xl font-serif">Rezervasyon Oluştur</h1>
       </header>
 
       <main className="container mx-auto py-8 px-4 max-w-2xl">
@@ -308,14 +308,14 @@ const AdminCreateReservation = () => {
             <div className="flex flex-wrap justify-between items-start gap-4">
               <CardTitle className="flex items-center gap-2">
                 <Plus className="h-5 w-5" />
-                New Reservation
+                Yeni Rezervasyon
               </CardTitle>
               <div className="flex gap-2">
                 {templates.length > 0 && (
                   <Select onValueChange={applyTemplate}>
                     <SelectTrigger className="w-[180px]">
                       <FileText className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Use Template" />
+                      <SelectValue placeholder="Şablon Kullan" />
                     </SelectTrigger>
                     <SelectContent>
                       {templates.map(t => (
@@ -334,7 +334,7 @@ const AdminCreateReservation = () => {
                   disabled={!formData.pickup || !formData.dropoff}
                 >
                   <BookmarkPlus className="h-4 w-4 mr-1" />
-                  Save Template
+                  Şablon Kaydet
                 </Button>
               </div>
             </div>
@@ -343,11 +343,11 @@ const AdminCreateReservation = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Customer Information */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Customer Information</h3>
+                <h3 className="font-semibold text-lg border-b pb-2">Müşteri Bilgileri</h3>
                 
                 {/* Passenger Names */}
                 <div className="space-y-3">
-                  <Label>Passenger Names * <span className="text-muted-foreground text-sm">({passengerNames.length}/{MAX_PASSENGERS})</span></Label>
+                  <Label>Yolcu İsimleri * <span className="text-muted-foreground text-sm">({passengerNames.length}/{MAX_PASSENGERS})</span></Label>
                   {passengerNames.map((name, index) => (
                     <div key={index} className="flex gap-2 items-center">
                       <div className="flex-1">
@@ -355,11 +355,11 @@ const AdminCreateReservation = () => {
                           <Input
                             value={name}
                             onChange={(e) => updatePassenger(index, e.target.value)}
-                            placeholder={index === 0 ? "Primary Passenger Name *" : `Passenger ${index + 1}`}
+                            placeholder={index === 0 ? "Ana Yolcu Adı *" : `Yolcu ${index + 1}`}
                             className="pr-20"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                            {index === 0 ? 'Primary' : `#${index + 1}`}
+                            {index === 0 ? 'Ana' : `#${index + 1}`}
                           </span>
                         </div>
                       </div>
@@ -386,14 +386,14 @@ const AdminCreateReservation = () => {
                       className="w-full sm:w-auto"
                     >
                       <UserPlus className="h-4 w-4 mr-2" />
-                      Add Customer Name
+                      Müşteri Ekle
                     </Button>
                   )}
                 </div>
 
                 {/* Phone */}
                 <div className="space-y-2">
-                  <Label>Customer Phone *</Label>
+                  <Label>Müşteri Telefonu *</Label>
                   <Input
                     value={formData.customer_phone}
                     onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
@@ -405,23 +405,23 @@ const AdminCreateReservation = () => {
 
               {/* Transfer Details */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Transfer Details</h3>
+                <h3 className="font-semibold text-lg border-b pb-2">Transfer Detayları</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Pick-up Point *</Label>
+                    <Label>Alış Noktası *</Label>
                     <Input
                       value={formData.pickup}
                       onChange={(e) => setFormData({...formData, pickup: e.target.value})}
-                      placeholder="Enter Pick-up Point"
+                      placeholder="Alış noktasını girin"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Drop-off Location *</Label>
+                    <Label>Bırakış Noktası *</Label>
                     <Input
                       value={formData.dropoff}
                       onChange={(e) => setFormData({...formData, dropoff: e.target.value})}
-                      placeholder="Hotel or address"
+                      placeholder="Otel veya adres"
                       required
                     />
                   </div>
@@ -429,7 +429,7 @@ const AdminCreateReservation = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Date *</Label>
+                    <Label>Tarih *</Label>
                     <Input
                       type="date"
                       value={formData.pickup_date}
@@ -438,7 +438,7 @@ const AdminCreateReservation = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Time *</Label>
+                    <Label>Saat *</Label>
                     <Input
                       type="time"
                       value={formData.pickup_time}
@@ -447,7 +447,7 @@ const AdminCreateReservation = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Flight Number</Label>
+                    <Label>Uçuş Numarası</Label>
                     <Input
                       value={formData.flight_number}
                       onChange={(e) => setFormData({...formData, flight_number: e.target.value})}
@@ -457,7 +457,7 @@ const AdminCreateReservation = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Vehicle Type</Label>
+                  <Label>Araç Tipi</Label>
                   <Select value={formData.vehicle_type} onValueChange={(v) => setFormData({...formData, vehicle_type: v})}>
                     <SelectTrigger>
                       <SelectValue />
@@ -473,10 +473,10 @@ const AdminCreateReservation = () => {
 
               {/* Payment & Pricing */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Payment & Pricing</h3>
+                <h3 className="font-semibold text-lg border-b pb-2">Ödeme ve Fiyat</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Payment Type</Label>
+                    <Label>Ödeme Tipi</Label>
                     <Select value={formData.payment_type} onValueChange={(v) => setFormData({...formData, payment_type: v})}>
                       <SelectTrigger>
                         <SelectValue />
@@ -489,7 +489,7 @@ const AdminCreateReservation = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Currency</Label>
+                    <Label>Para Birimi</Label>
                     <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
                       <SelectTrigger>
                         <SelectValue />
@@ -504,7 +504,7 @@ const AdminCreateReservation = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Price</Label>
+                    <Label>Fiyat</Label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                       <Input
@@ -519,7 +519,7 @@ const AdminCreateReservation = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Driver Cash Amount</Label>
+                    <Label>Şoför Nakit Tutarı</Label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                       <Input
@@ -538,10 +538,10 @@ const AdminCreateReservation = () => {
 
               {/* Status & Assignment */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Status & Assignment</h3>
+                <h3 className="font-semibold text-lg border-b pb-2">Durum ve Atama</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Status</Label>
+                    <Label>Durum</Label>
                     <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
                       <SelectTrigger>
                         <SelectValue />
@@ -554,10 +554,10 @@ const AdminCreateReservation = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Assign Driver</Label>
+                    <Label>Şoför Ata</Label>
                     <Select value={formData.driver_id} onValueChange={(v) => setFormData({...formData, driver_id: v})}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select driver (optional)" />
+                        <SelectValue placeholder="Şoför seçin (opsiyonel)" />
                       </SelectTrigger>
                       <SelectContent>
                         {drivers.map(d => (
@@ -570,13 +570,13 @@ const AdminCreateReservation = () => {
 
                 {/* Agency Selection */}
                 <div className="space-y-2">
-                  <Label>Agency (Acenta)</Label>
+                  <Label>Acenta</Label>
                   <Select value={formData.agency_id} onValueChange={(v) => setFormData({...formData, agency_id: v === 'none' ? '' : v})}>
                     <SelectTrigger>
-                      <SelectValue placeholder="No Agency (Direct Customer)" />
+                      <SelectValue placeholder="Acenta Yok (Direkt Müşteri)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">No Agency (Direct Customer)</SelectItem>
+                      <SelectItem value="none">Acenta Yok (Direkt Müşteri)</SelectItem>
                       {agencies.map(a => (
                         <SelectItem key={a.id} value={a.id}>{a.agency_name}</SelectItem>
                       ))}
@@ -587,18 +587,18 @@ const AdminCreateReservation = () => {
 
               {/* Admin Notes */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Admin Notes (Internal)</h3>
+                <h3 className="font-semibold text-lg border-b pb-2">Admin Notları (Dahili)</h3>
                 <Textarea
                   value={formData.admin_notes}
                   onChange={(e) => setFormData({...formData, admin_notes: e.target.value})}
-                  placeholder="Internal notes - not visible to customer or driver"
+                  placeholder="Dahili notlar - müşteri veya şoför tarafından görülemez"
                   rows={3}
                 />
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={saving}>
                 <Save className="h-4 w-4 mr-2" />
-                {saving ? 'Creating...' : 'Create Reservation'}
+                {saving ? 'Oluşturuluyor...' : 'Rezervasyon Oluştur'}
               </Button>
             </form>
           </CardContent>
@@ -608,28 +608,28 @@ const AdminCreateReservation = () => {
         <Dialog open={templateDialog} onOpenChange={setTemplateDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Save as Template</DialogTitle>
+              <DialogTitle>Şablon Olarak Kaydet</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <p className="text-sm text-muted-foreground">
-                Save the current route ({formData.pickup} → {formData.dropoff}) as a reusable template.
+                Mevcut rotayı ({formData.pickup} → {formData.dropoff}) yeniden kullanılabilir şablon olarak kaydedin.
               </p>
               <div className="space-y-2">
-                <Label>Template Name *</Label>
+                <Label>Şablon Adı *</Label>
                 <Input
                   value={templateName}
                   onChange={(e) => setTemplateName(e.target.value)}
-                  placeholder="e.g., IST to Taksim Standard"
+                  placeholder="örn: IST - Taksim Standart"
                 />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setTemplateDialog(false)}>
-                Cancel
+                İptal
               </Button>
               <Button onClick={saveAsTemplate} disabled={savingTemplate}>
                 <BookmarkPlus className="h-4 w-4 mr-2" />
-                {savingTemplate ? 'Saving...' : 'Save Template'}
+                {savingTemplate ? 'Kaydediliyor...' : 'Şablonu Kaydet'}
               </Button>
             </DialogFooter>
           </DialogContent>

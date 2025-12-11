@@ -99,9 +99,9 @@ const AdminDriverJobs = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-serif">Driver Jobs</h1>
+            <h1 className="text-2xl font-serif">Şoför İşleri</h1>
             {driver && (
-              <p className="text-primary-foreground/80 text-sm">{driver.name} • {driver.region || 'No region'}</p>
+              <p className="text-primary-foreground/80 text-sm">{driver.name} • {driver.region || 'Bölge yok'}</p>
             )}
           </div>
         </div>
@@ -109,15 +109,15 @@ const AdminDriverJobs = () => {
 
       <main className="container mx-auto py-8 px-4">
         {loading ? (
-          <div className="text-center py-12">Loading...</div>
+          <div className="text-center py-12">Yükleniyor...</div>
         ) : reservations.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            No jobs assigned to this driver yet
+            Bu şoföre henüz iş atanmadı
           </div>
         ) : (
           <div className="space-y-4">
             <p className="text-muted-foreground mb-4">
-              {reservations.length} job{reservations.length !== 1 ? 's' : ''} found
+              {reservations.length} iş bulundu
             </p>
             
             {reservations.map((reservation) => (
@@ -170,7 +170,7 @@ const AdminDriverJobs = () => {
 
                     {reservation.driver_earning && (
                       <div className="pt-2 border-t mt-2">
-                        <span className="text-muted-foreground">Driver Earning:</span>{' '}
+                        <span className="text-muted-foreground">Şoför Kazancı:</span>{' '}
                         <span className="font-medium text-green-600">${reservation.driver_earning}</span>
                       </div>
                     )}

@@ -12,7 +12,7 @@ const AdminSettings = () => {
         <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-serif">Settings</h1>
+        <h1 className="text-2xl font-serif">Ayarlar</h1>
       </header>
 
       <main className="container mx-auto py-8 px-4 max-w-2xl">
@@ -21,15 +21,15 @@ const AdminSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                User Management
+                Kullanıcı Yönetimi
               </CardTitle>
               <CardDescription>
-                Manage user accounts and roles
+                Kullanıcı hesaplarını ve rollerini yönetin
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground text-sm">
-                User management features coming soon. You can currently manage drivers from the Drivers page.
+                Kullanıcı yönetimi özellikleri yakında eklenecek. Şu anda şoförleri Şoförler sayfasından yönetebilirsiniz.
               </p>
             </CardContent>
           </Card>
@@ -38,15 +38,15 @@ const AdminSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Security
+                Güvenlik
               </CardTitle>
               <CardDescription>
-                Security and access settings
+                Güvenlik ve erişim ayarları
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground text-sm">
-                Security settings coming soon.
+                Güvenlik ayarları yakında eklenecek.
               </p>
             </CardContent>
           </Card>
@@ -55,15 +55,15 @@ const AdminSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                General
+                Genel
               </CardTitle>
               <CardDescription>
-                General application settings
+                Genel uygulama ayarları
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground text-sm">
-                General settings coming soon.
+                Genel ayarlar yakında eklenecek.
               </p>
             </CardContent>
           </Card>

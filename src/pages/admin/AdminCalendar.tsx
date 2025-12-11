@@ -165,7 +165,7 @@ const AdminCalendar = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">Calendar View</h1>
+          <h1 className="text-2xl font-serif">Takvim Görünümü</h1>
         </div>
         <NotificationBell />
       </header>
@@ -174,9 +174,9 @@ const AdminCalendar = () => {
         <div className="flex gap-6">
           {/* Driver Sidebar */}
           <div className="w-48 flex-shrink-0">
-            <h3 className="font-semibold mb-3">Drivers</h3>
+            <h3 className="font-semibold mb-3">Şoförler</h3>
             <p className="text-xs text-muted-foreground mb-3">
-              Drag a driver onto a reservation to assign
+              Atamak için şoförü rezervasyonun üzerine sürükleyin
             </p>
             <div className="space-y-2">
               {drivers.map(driver => (
@@ -219,7 +219,7 @@ const AdminCalendar = () => {
 
             {/* Calendar Grid */}
             {loading ? (
-              <div className="text-center py-12">Loading...</div>
+              <div className="text-center py-12">Yükleniyor...</div>
             ) : (
               <div className="grid grid-cols-7 gap-1">
                 {paddedDays.map((day, idx) => {
@@ -282,27 +282,27 @@ const AdminCalendar = () => {
             <div className="flex flex-wrap gap-3 mt-4 text-xs">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded bg-orange-500/80" />
-                <span>Pending Price</span>
+                <span>Fiyat Bekleniyor</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded bg-purple-500/80" />
-                <span>Waiting Customer</span>
+                <span>Müşteri Bekleniyor</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded bg-emerald-500/80" />
-                <span>Confirmed</span>
+                <span>Onaylandı</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded bg-yellow-500/80" />
-                <span>Sent to Driver</span>
+                <span>Şoföre Gönderildi</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded bg-cyan-500/80" />
-                <span>Active</span>
+                <span>Aktif</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded bg-green-600/80" />
-                <span>Completed</span>
+                <span>Tamamlandı</span>
               </div>
             </div>
           </div>
