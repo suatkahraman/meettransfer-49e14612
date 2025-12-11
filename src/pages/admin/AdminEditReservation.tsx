@@ -1113,31 +1113,61 @@ const AdminEditReservation = () => {
                           const driverFee = parseFloat(formData.price) || 0;
                           const profit = agencyPrice - driverFee;
 
-                          const { error } = await supabase
-                            .from('agency_reservation_details')
-                            .upsert({
-                              reservation_id: id,
-                              customer_price: agencyPrice,
-                              agency_price_currency: agencyDetails.agency_price_currency,
-                              company_amount: driverFee,
-                              agency_profit: profit,
-                              agency_notes: agencyDetails.agency_notes || null,
-                              payment_status: agencyDetails.payment_status,
-                            } as any, {
-                              onConflict: 'reservation_id'
-                            });
+                          try {
+                            // First check if record exists
+                            const { data: existingRecord } = await supabase
+                              .from('agency_reservation_details')
+                              .select('id')
+                              .eq('reservation_id', id)
+                              .maybeSingle();
 
-                          if (error) {
-                            toast.error('Failed to save agency price');
-                          } else {
-                            // Update state with the saved value
-                            setAgencyDetails({
-                              ...agencyDetails,
-                              customer_price: agencyPrice.toString()
-                            });
-                            setAgencyPriceSaved(true);
-                            setIsEditingAgencyPrice(false);
-                            toast.success('Agency price saved');
+                            let error;
+                            if (existingRecord) {
+                              // Update existing record
+                              const result = await supabase
+                                .from('agency_reservation_details')
+                                .update({
+                                  customer_price: agencyPrice,
+                                  agency_price_currency: agencyDetails.agency_price_currency,
+                                  company_amount: driverFee,
+                                  agency_profit: profit,
+                                  agency_notes: agencyDetails.agency_notes || null,
+                                  payment_status: agencyDetails.payment_status,
+                                })
+                                .eq('reservation_id', id);
+                              error = result.error;
+                            } else {
+                              // Insert new record
+                              const result = await supabase
+                                .from('agency_reservation_details')
+                                .insert({
+                                  reservation_id: id,
+                                  customer_price: agencyPrice,
+                                  agency_price_currency: agencyDetails.agency_price_currency,
+                                  company_amount: driverFee,
+                                  agency_profit: profit,
+                                  agency_notes: agencyDetails.agency_notes || null,
+                                  payment_status: agencyDetails.payment_status,
+                                });
+                              error = result.error;
+                            }
+
+                            if (error) {
+                              console.error('Agency price save error:', error);
+                              toast.error(error.message || 'Failed to save agency price');
+                            } else {
+                              // Update state with the saved value
+                              setAgencyDetails({
+                                ...agencyDetails,
+                                customer_price: agencyPrice.toString()
+                              });
+                              setAgencyPriceSaved(true);
+                              setIsEditingAgencyPrice(false);
+                              toast.success('Agency price saved');
+                            }
+                          } catch (err: any) {
+                            console.error('Agency price save exception:', err);
+                            toast.error(err.message || 'Failed to save agency price');
                           }
                         }}
                         className="w-full bg-blue-600 hover:bg-blue-700"
