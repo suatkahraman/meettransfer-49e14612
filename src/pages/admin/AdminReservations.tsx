@@ -46,6 +46,7 @@ interface Reservation {
     customer_price: number | null;
     company_amount: number | null;
     agency_profit: number | null;
+    agency_price_currency: string | null;
     payment_status: string | null;
   } | null;
 }
@@ -130,7 +131,7 @@ const AdminReservations = () => {
         *,
         drivers (id, name),
         agencies (id, agency_name),
-        agency_reservation_details (customer_price, company_amount, agency_profit, payment_status)
+        agency_reservation_details (customer_price, company_amount, agency_profit, agency_price_currency, payment_status)
       `)
       .order('pickup_date', { ascending: false });
 
@@ -607,7 +608,7 @@ const AdminReservations = () => {
                                   {reservation.agencies.agency_name}
                                   {reservation.agency_reservation_details?.customer_price && (
                                     <span className="font-bold ml-1">
-                                      ({formatPrice(reservation.agency_reservation_details.customer_price, reservation.price_currency)})
+                                      ({formatPrice(reservation.agency_reservation_details.customer_price, reservation.agency_reservation_details.agency_price_currency || 'USD')})
                                     </span>
                                   )}
                                 </span>
@@ -704,7 +705,7 @@ const AdminReservations = () => {
                             {reservation.agencies.agency_name}
                             {reservation.agency_reservation_details?.customer_price && (
                               <span className="font-bold ml-1">
-                                ({formatPrice(reservation.agency_reservation_details.customer_price, reservation.price_currency)})
+                                ({formatPrice(reservation.agency_reservation_details.customer_price, reservation.agency_reservation_details.agency_price_currency || 'USD')})
                               </span>
                             )}
                           </span>
