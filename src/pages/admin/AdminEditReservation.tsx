@@ -504,7 +504,7 @@ const AdminEditReservation = () => {
     }
 
     // Save agency details if agency is selected
-    if (formData.agency_id && formData.agency_id !== 'none' && agencyDetails.customer_price) {
+    if (formData.agency_id && formData.agency_id !== 'none') {
       const driverFee = parseFloat(formData.price) || 0;
       const agencyPrice = parseFloat(agencyDetails.customer_price) || 0;
       const profit = agencyPrice - driverFee;
