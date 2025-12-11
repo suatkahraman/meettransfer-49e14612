@@ -1081,25 +1081,13 @@ const AdminEditReservation = () => {
                       </Select>
                     </div>
 
-                    {/* Show calculated profit */}
-                    {agencyDetails.customer_price && formData.price && (
+                    {/* Show receivable amount after saving */}
+                    {agencyDetails.customer_price && (
                       <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border">
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-muted-foreground">Driver Transfer Fee:</span>
-                          <span>{currencySymbol}{parseFloat(formData.price).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-muted-foreground">Agency Price:</span>
-                          <span>{getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-center font-bold mt-2 pt-2 border-t">
-                          <span>Profit:</span>
-                          <span className={
-                            parseFloat(agencyDetails.customer_price) - parseFloat(formData.price) >= 0 
-                              ? 'text-green-600' 
-                              : 'text-destructive'
-                          }>
-                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{(parseFloat(agencyDetails.customer_price) - parseFloat(formData.price)).toFixed(2)}
+                        <div className="flex justify-between items-center font-bold">
+                          <span>Receivable Amount:</span>
+                          <span className="text-blue-600">
+                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
                           </span>
                         </div>
                       </div>
