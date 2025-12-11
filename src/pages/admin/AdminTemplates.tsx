@@ -14,10 +14,10 @@ import NotificationBell from '@/components/NotificationBell';
 const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
 const paymentTypes = [
-  { value: 'cash', label: 'Cash' },
-  { value: 'card', label: 'Card' },
+  { value: 'cash', label: 'Nakit' },
+  { value: 'card', label: 'Kart' },
   { value: 'online', label: 'Online' },
-  { value: 'none', label: 'None' },
+  { value: 'none', label: 'Yok' },
 ];
 const currencies = [
   { value: 'TRY', label: '₺ TRY', symbol: '₺' },
@@ -101,7 +101,7 @@ const AdminTemplates = () => {
 
   const handleSave = async () => {
     if (!formData.name || !formData.pickup || !formData.dropoff) {
-      toast.error('Name, pickup, and dropoff are required');
+      toast.error('Ad, alış ve bırakış noktası gereklidir');
       return;
     }
 
@@ -123,26 +123,26 @@ const AdminTemplates = () => {
           .update(payload)
           .eq('id', editingId);
         if (error) throw error;
-        toast.success('Template updated');
+        toast.success('Şablon güncellendi');
       } else {
         const { error } = await supabase
           .from('reservation_templates')
           .insert(payload);
         if (error) throw error;
-        toast.success('Template created');
+        toast.success('Şablon oluşturuldu');
       }
 
       setDialogOpen(false);
       fetchTemplates();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save template');
+      toast.error(error.message || 'Şablon kaydedilemedi');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Delete template "${name}"?`)) return;
+    if (!confirm(`"${name}" şablonunu silmek istiyor musunuz?`)) return;
 
     const { error } = await supabase
       .from('reservation_templates')
@@ -150,9 +150,9 @@ const AdminTemplates = () => {
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to delete template');
+      toast.error('Şablon silinemedi');
     } else {
-      toast.success('Template deleted');
+      toast.success('Şablon silindi');
       fetchTemplates();
     }
   };
@@ -166,7 +166,7 @@ const AdminTemplates = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">Route Templates</h1>
+          <h1 className="text-2xl font-serif">Rota Şablonları</h1>
         </div>
         <NotificationBell />
       </header>
@@ -174,24 +174,24 @@ const AdminTemplates = () => {
       <main className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-6">
           <p className="text-muted-foreground">
-            Save common routes with preset pricing for quick reservation creation.
+            Hızlı rezervasyon oluşturma için hazır fiyatlı rotaları kaydedin.
           </p>
           <Button onClick={openCreateDialog}>
             <Plus className="h-4 w-4 mr-2" />
-            New Template
+            Yeni Şablon
           </Button>
         </div>
 
         {loading ? (
-          <div className="text-center py-12">Loading...</div>
+          <div className="text-center py-12">Yükleniyor...</div>
         ) : templates.length === 0 ? (
           <Card className="py-12">
             <CardContent className="text-center">
               <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-4">No templates yet</p>
+              <p className="text-muted-foreground mb-4">Henüz şablon yok</p>
               <Button onClick={openCreateDialog}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create First Template
+                İlk Şablonu Oluştur
               </Button>
             </CardContent>
           </Card>
@@ -225,7 +225,7 @@ const AdminTemplates = () => {
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     <span>{template.vehicle_type.replace('-', ' ')}</span>
                     <span>•</span>
-                    <span>{template.payment_type}</span>
+                    <span>{template.payment_type === 'cash' ? 'Nakit' : template.payment_type === 'online' ? 'Online' : template.payment_type}</span>
                   </div>
                   {template.price && (
                     <div className="text-lg font-bold text-primary">
@@ -243,24 +243,24 @@ const AdminTemplates = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Edit Template' : 'New Template'}</DialogTitle>
+            <DialogTitle>{editingId ? 'Şablonu Düzenle' : 'Yeni Şablon'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Template Name *</Label>
+              <Label>Şablon Adı *</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                placeholder="e.g., IST to Taksim Standard"
+                placeholder="örn. IST - Taksim Standart"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Pickup *</Label>
+                <Label>Alış Noktası *</Label>
                 <Select value={formData.pickup} onValueChange={(v) => setFormData({...formData, pickup: v})}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Airport" />
+                    <SelectValue placeholder="Havalimanı" />
                   </SelectTrigger>
                   <SelectContent>
                     {airports.map(a => (
@@ -270,18 +270,18 @@ const AdminTemplates = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Dropoff *</Label>
+                <Label>Bırakış Noktası *</Label>
                 <Input
                   value={formData.dropoff}
                   onChange={(e) => setFormData({...formData, dropoff: e.target.value})}
-                  placeholder="Destination"
+                  placeholder="Varış noktası"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Vehicle</Label>
+                <Label>Araç</Label>
                 <Select value={formData.vehicle_type} onValueChange={(v) => setFormData({...formData, vehicle_type: v})}>
                   <SelectTrigger>
                     <SelectValue />
@@ -294,7 +294,7 @@ const AdminTemplates = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Payment</Label>
+                <Label>Ödeme</Label>
                 <Select value={formData.payment_type} onValueChange={(v) => setFormData({...formData, payment_type: v})}>
                   <SelectTrigger>
                     <SelectValue />
@@ -310,7 +310,7 @@ const AdminTemplates = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Currency</Label>
+                <Label>Para Birimi</Label>
                 <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
                   <SelectTrigger>
                     <SelectValue />
@@ -323,7 +323,7 @@ const AdminTemplates = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Price</Label>
+                <Label>Fiyat</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                   <Input
@@ -341,10 +341,10 @@ const AdminTemplates = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              İptal
             </Button>
             <Button onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving...' : editingId ? 'Update' : 'Create'}
+              {saving ? 'Kaydediliyor...' : editingId ? 'Güncelle' : 'Oluştur'}
             </Button>
           </DialogFooter>
         </DialogContent>

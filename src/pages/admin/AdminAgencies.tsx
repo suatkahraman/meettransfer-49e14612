@@ -43,7 +43,7 @@ const AdminAgencies = () => {
       .order('agency_name');
     
     if (error) {
-      toast.error('Failed to load agencies');
+      toast.error('Acenteler yüklenemedi');
       return;
     }
     setAgencies(data || []);
@@ -88,7 +88,7 @@ const AdminAgencies = () => {
 
   const handleSave = async () => {
     if (!formData.agency_name.trim()) {
-      toast.error('Agency name is required');
+      toast.error('Acenta adı gereklidir');
       return;
     }
 
@@ -115,7 +115,7 @@ const AdminAgencies = () => {
           new_data: { agency_name: formData.agency_name, comments: formData.comments },
         });
 
-        toast.success('Agency updated successfully');
+        toast.success('Acenta başarıyla güncellendi');
       } else {
         // Create new
         const { data, error } = await supabase
@@ -137,13 +137,13 @@ const AdminAgencies = () => {
           new_data: { agency_name: formData.agency_name, comments: formData.comments },
         });
 
-        toast.success('Agency created successfully');
+        toast.success('Acenta başarıyla oluşturuldu');
       }
 
       setDialogOpen(false);
       fetchAgencies();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save agency');
+      toast.error(error.message || 'Acenta kaydedilemedi');
     } finally {
       setSaving(false);
     }
@@ -162,7 +162,7 @@ const AdminAgencies = () => {
         .eq('agency_id', selectedAgency.id);
 
       if (count && count > 0) {
-        toast.error(`Cannot delete agency with ${count} linked reservations`);
+        toast.error(`${count} bağlı rezervasyonu olan acenta silinemez`);
         setDeleting(false);
         setDeleteDialogOpen(false);
         return;
@@ -182,11 +182,11 @@ const AdminAgencies = () => {
         old_data: { agency_name: selectedAgency.agency_name },
       });
 
-      toast.success('Agency deleted successfully');
+      toast.success('Acenta başarıyla silindi');
       setDeleteDialogOpen(false);
       fetchAgencies();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete agency');
+      toast.error(error.message || 'Acenta silinemedi');
     } finally {
       setDeleting(false);
     }
@@ -204,25 +204,25 @@ const AdminAgencies = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">Agencies</h1>
+          <h1 className="text-2xl font-serif">Acenteler</h1>
         </div>
         <Button onClick={openCreateDialog} className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
           <Plus className="h-4 w-4 mr-2" />
-          Add Agency
+          Acenta Ekle
         </Button>
       </header>
 
       <main className="container mx-auto py-8 px-4">
         {loading ? (
-          <div className="text-center py-12">Loading...</div>
+          <div className="text-center py-12">Yükleniyor...</div>
         ) : agencies.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No agencies created yet</p>
+              <p className="text-muted-foreground">Henüz acenta oluşturulmadı</p>
               <Button onClick={openCreateDialog} className="mt-4">
                 <Plus className="h-4 w-4 mr-2" />
-                Create First Agency
+                İlk Acentayı Oluştur
               </Button>
             </CardContent>
           </Card>
@@ -241,7 +241,7 @@ const AdminAgencies = () => {
                         variant="ghost" 
                         size="icon"
                         onClick={() => navigate(`/admin/agency-balance/${agency.id}`)}
-                        title="Manage Balance"
+                        title="Bakiye Yönet"
                       >
                         <Wallet className="h-4 w-4" />
                       </Button>
@@ -249,7 +249,7 @@ const AdminAgencies = () => {
                         variant="ghost" 
                         size="icon"
                         onClick={() => navigate(`/admin/agency-accounting/${agency.id}`)}
-                        title="View Accounting"
+                        title="Muhasebe Görüntüle"
                       >
                         <DollarSign className="h-4 w-4" />
                       </Button>
@@ -270,7 +270,7 @@ const AdminAgencies = () => {
                 <CardContent className="space-y-3">
                   {/* Balance Display */}
                   <div className="flex items-center justify-between p-2 bg-muted rounded-lg">
-                    <span className="text-sm text-muted-foreground">Balance</span>
+                    <span className="text-sm text-muted-foreground">Bakiye</span>
                     <span className={`font-bold ${(agency.balance || 0) < 0 ? 'text-destructive' : 'text-green-600'}`}>
                       ₺{(agency.balance || 0).toFixed(2)}
                     </span>
@@ -290,33 +290,33 @@ const AdminAgencies = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedAgency ? 'Edit Agency' : 'Create Agency'}</DialogTitle>
+            <DialogTitle>{selectedAgency ? 'Acentayı Düzenle' : 'Acenta Oluştur'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Agency Name *</Label>
+              <Label>Acenta Adı *</Label>
               <Input
                 value={formData.agency_name}
                 onChange={(e) => setFormData({ ...formData, agency_name: e.target.value })}
-                placeholder="Enter agency name"
+                placeholder="Acenta adını girin"
               />
             </div>
             <div className="space-y-2">
-              <Label>Notes / Comments</Label>
+              <Label>Notlar / Yorumlar</Label>
               <Textarea
                 value={formData.comments}
                 onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
-                placeholder="Commission rules, contact info, etc."
+                placeholder="Komisyon kuralları, iletişim bilgileri vb."
                 rows={3}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              İptal
             </Button>
             <Button onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving...' : selectedAgency ? 'Update' : 'Create'}
+              {saving ? 'Kaydediliyor...' : selectedAgency ? 'Güncelle' : 'Oluştur'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -326,20 +326,20 @@ const AdminAgencies = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Agency</AlertDialogTitle>
+            <AlertDialogTitle>Acentayı Sil</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{selectedAgency?.agency_name}"? This action cannot be undone.
-              Agencies with linked reservations cannot be deleted.
+              "{selectedAgency?.agency_name}" acentasını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+              Bağlı rezervasyonları olan acentalar silinemez.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>İptal</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleting ? 'Deleting...' : 'Delete'}
+              {deleting ? 'Siliniyor...' : 'Sil'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
