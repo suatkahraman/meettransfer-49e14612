@@ -139,7 +139,7 @@ const AdminMonthlyAccounting = () => {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-serif">Monthly Accounting</h1>
+        <h1 className="text-2xl font-serif">Aylık Muhasebe</h1>
       </header>
 
       <main className="container mx-auto py-6 px-4 space-y-6">
@@ -154,10 +154,10 @@ const AdminMonthlyAccounting = () => {
         <div className="flex flex-wrap gap-4">
           <Select value={selectedDriver} onValueChange={setSelectedDriver}>
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select driver" />
+              <SelectValue placeholder="Şoför seçin" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Drivers</SelectItem>
+              <SelectItem value="all">Tüm Şoförler</SelectItem>
               {drivers.map(driver => (
                 <SelectItem key={driver.id} value={driver.id}>{driver.name}</SelectItem>
               ))}
@@ -166,21 +166,21 @@ const AdminMonthlyAccounting = () => {
 
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select status" />
+              <SelectValue placeholder="Durum seçin" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="assigned">Assigned</SelectItem>
-              <SelectItem value="sent_to_driver">Sent to Driver</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="all">Tüm Durumlar</SelectItem>
+              <SelectItem value="completed">Tamamlandı</SelectItem>
+              <SelectItem value="assigned">Atandı</SelectItem>
+              <SelectItem value="sent_to_driver">Şoföre Gönderildi</SelectItem>
+              <SelectItem value="active">Aktif</SelectItem>
+              <SelectItem value="cancelled">İptal Edildi</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {loading ? (
-          <div className="text-center py-12">Loading...</div>
+          <div className="text-center py-12">Yükleniyor...</div>
         ) : (
           <>
             {/* Monthly Summary */}
@@ -196,7 +196,7 @@ const AdminMonthlyAccounting = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Users className="h-5 w-5" />
-                    Driver Breakdown
+                    Şoför Dağılımı
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -211,16 +211,16 @@ const AdminMonthlyAccounting = () => {
                           <div>
                             <div className="font-medium">{summary.driver.name}</div>
                             <div className="text-sm text-muted-foreground">
-                              {summary.transferCount} transfers
+                              {summary.transferCount} transfer
                             </div>
                           </div>
                           <div className="text-right">
                             <div className="text-sm">
-                              Price: ₺{summary.totalPrice.toFixed(2)} | Cash: ₺{summary.totalCash.toFixed(2)}
+                              Fiyat: ₺{summary.totalPrice.toFixed(2)} | Nakit: ₺{summary.totalCash.toFixed(2)}
                             </div>
                             <div className={`font-semibold ${balanceColor}`}>
-                              Balance: ₺{Math.abs(summary.balance).toFixed(2)}
-                              {summary.balance > 0 ? ' (owes)' : summary.balance < 0 ? ' (owed)' : ' (settled)'}
+                              Bakiye: ₺{Math.abs(summary.balance).toFixed(2)}
+                              {summary.balance > 0 ? ' (borçlu)' : summary.balance < 0 ? ' (alacaklı)' : ' (kapalı)'}
                             </div>
                           </div>
                         </div>
@@ -234,7 +234,7 @@ const AdminMonthlyAccounting = () => {
             {/* Reservations Table */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Reservations</CardTitle>
+                <CardTitle className="text-lg">Rezervasyonlar</CardTitle>
               </CardHeader>
               <CardContent>
                 <MonthlyAccountingTable

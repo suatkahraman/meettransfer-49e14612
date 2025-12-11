@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2 } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfDay, endOfDay, format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
 
 interface KPIs {
@@ -87,19 +88,19 @@ const AdminDashboard = () => {
   }, []);
 
   const menuItems = [
-    { icon: ClipboardList, label: 'Reservations', path: '/admin/reservations' },
-    { icon: CalendarDays, label: 'Calendar', path: '/admin/calendar' },
-    { icon: Users, label: 'Drivers', path: '/admin/drivers' },
-    { icon: Building2, label: 'Agencies', path: '/admin/agencies' },
-    { icon: FileText, label: 'Templates', path: '/admin/templates' },
-    { icon: DollarSign, label: 'Monthly Accounting', path: '/admin/monthly-accounting' },
-    { icon: Settings, label: 'Settings', path: '/admin/settings' },
+    { icon: ClipboardList, label: 'Rezervasyonlar', path: '/admin/reservations' },
+    { icon: CalendarDays, label: 'Takvim', path: '/admin/calendar' },
+    { icon: Users, label: 'Şoförler', path: '/admin/drivers' },
+    { icon: Building2, label: 'Acenteler', path: '/admin/agencies' },
+    { icon: FileText, label: 'Şablonlar', path: '/admin/templates' },
+    { icon: DollarSign, label: 'Aylık Muhasebe', path: '/admin/monthly-accounting' },
+    { icon: Settings, label: 'Ayarlar', path: '/admin/settings' },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
-        <h1 className="text-2xl font-serif">Admin Dashboard</h1>
+        <h1 className="text-2xl font-serif">Yönetim Paneli</h1>
         <div className="flex items-center gap-2">
           <NotificationBell />
           <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
@@ -115,7 +116,7 @@ const AdminDashboard = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                New Today
+                Bugün Yeni
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -127,7 +128,7 @@ const AdminDashboard = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                Pending Assignment
+                Atama Bekleyen
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -139,7 +140,7 @@ const AdminDashboard = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                 <Car className="h-4 w-4" />
-                Active Trips
+                Aktif Transferler
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -151,7 +152,7 @@ const AdminDashboard = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                Completed
+                Tamamlanan
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -163,7 +164,7 @@ const AdminDashboard = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
-                Revenue ({format(new Date(), 'MMM')})
+                Gelir ({format(new Date(), 'MMM', { locale: tr })})
               </CardTitle>
             </CardHeader>
             <CardContent>

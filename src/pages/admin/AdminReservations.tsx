@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
 
 interface Reservation {
@@ -72,16 +73,16 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  'pending_price': 'Pending Price',
-  'waiting_for_customer_approval': 'Waiting Customer',
-  'customer_approved': 'Approved',
-  'customer_rejected': 'Rejected',
-  'confirmed': 'Confirmed',
-  'sent_to_driver': 'Sent to Driver',
-  'active': 'Active',
-  'completed': 'Completed',
-  'pending_admin_review': 'Needs Review',
-  'cancelled_by_customer': 'Cancelled',
+  'pending_price': 'Fiyat Bekliyor',
+  'waiting_for_customer_approval': 'Müşteri Onayı Bekliyor',
+  'customer_approved': 'Onaylandı',
+  'customer_rejected': 'Reddedildi',
+  'confirmed': 'Onaylandı',
+  'sent_to_driver': 'Şoföre Gönderildi',
+  'active': 'Aktif',
+  'completed': 'Tamamlandı',
+  'pending_admin_review': 'İnceleme Bekliyor',
+  'cancelled_by_customer': 'Müşteri İptal Etti',
 };
 
 const currencySymbols: Record<string, string> = {
@@ -197,7 +198,7 @@ const AdminReservations = () => {
           fetchReservations();
           if (payload.eventType === 'INSERT') {
             playSound();
-            toast.info('New reservation received');
+            toast.info('Yeni rezervasyon alındı');
           }
         }
       )
@@ -225,7 +226,7 @@ const AdminReservations = () => {
       .eq('id', assignDialog.reservationId);
 
     if (error) {
-      toast.error('Failed to assign driver');
+      toast.error('Şoför atanamadı');
     } else {
       // Audit log
       await logAction({
@@ -244,8 +245,8 @@ const AdminReservations = () => {
             body: {
               user_id: selectedDriverData.user_id,
               reservation_id: assignDialog.reservationId,
-              title: 'New Job Assigned',
-              message: `New transfer: ${reservation.pickup} → ${reservation.dropoff} on ${format(new Date(reservation.pickup_date), 'PP')} at ${reservation.pickup_time}. Price: ${priceDisplay}`,
+              title: 'Yeni İş Atandı',
+              message: `Yeni transfer: ${reservation.pickup} → ${reservation.dropoff} tarih ${format(new Date(reservation.pickup_date), 'PP', { locale: tr })} saat ${reservation.pickup_time}. Fiyat: ${priceDisplay}`,
               type: 'driver_assigned'
             }
           });
@@ -254,7 +255,7 @@ const AdminReservations = () => {
         }
       }
 
-      toast.success('Driver assigned successfully');
+      toast.success('Şoför başarıyla atandı');
       setAssignDialog({ open: false, reservationId: null });
       setSelectedDriver('');
       fetchReservations();
@@ -327,8 +328,8 @@ const AdminReservations = () => {
                 body: {
                   user_id: selectedDriverData.user_id,
                   reservation_id: id,
-                  title: 'New Job Assigned',
-                  message: `New transfer: ${reservation.pickup} → ${reservation.dropoff} on ${format(new Date(reservation.pickup_date), 'PP')} at ${reservation.pickup_time}. Price: ${priceDisplay}`,
+                  title: 'Yeni İş Atandı',
+                  message: `Yeni transfer: ${reservation.pickup} → ${reservation.dropoff} tarih ${format(new Date(reservation.pickup_date), 'PP', { locale: tr })} saat ${reservation.pickup_time}. Fiyat: ${priceDisplay}`,
                   type: 'driver_assigned'
                 }
               });
@@ -339,20 +340,20 @@ const AdminReservations = () => {
         }
       }
 
-      toast.success(`${selectedIds.size} reservations assigned to ${selectedDriverData?.name}`);
+      toast.success(`${selectedIds.size} rezervasyon ${selectedDriverData?.name} şoföre atandı`);
       setBulkAssignDialog(false);
       setSelectedDriver('');
       setSelectedIds(new Set());
       fetchReservations();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to assign driver');
+      toast.error(error.message || 'Şoför atanamadı');
     } finally {
       setBulkAssigning(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this reservation?')) return;
+    if (!confirm('Bu rezervasyonu silmek istediğinizden emin misiniz?')) return;
 
     const reservationToDelete = reservations.find(r => r.id === id);
 
@@ -362,7 +363,7 @@ const AdminReservations = () => {
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to delete reservation');
+      toast.error('Rezervasyon silinemedi');
     } else {
       await logAction({
         action: 'DELETE',
@@ -377,7 +378,7 @@ const AdminReservations = () => {
         } : undefined,
       });
 
-      toast.success('Reservation deleted');
+      toast.success('Rezervasyon silindi');
       fetchReservations();
     }
   };
@@ -389,7 +390,7 @@ const AdminReservations = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">Reservations</h1>
+          <h1 className="text-2xl font-serif">Rezervasyonlar</h1>
         </div>
         <NotificationBell />
       </header>
@@ -398,17 +399,17 @@ const AdminReservations = () => {
         <div className="container mx-auto py-8 px-4">
         {/* Header with Create Button */}
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-          <h2 className="text-xl font-semibold">All Reservations</h2>
+          <h2 className="text-xl font-semibold">Tüm Rezervasyonlar</h2>
           <Button onClick={() => navigate('/admin/reservations/create')}>
             <Plus className="h-4 w-4 mr-2" />
-            Create Reservation
+            Rezervasyon Oluştur
           </Button>
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
           <Input
-            placeholder="Search customer, pickup, dropoff..."
+            placeholder="Müşteri, alış, bırakış ara..."
             value={filters.search}
             onChange={(e) => setFilters({...filters, search: e.target.value})}
             className="max-w-xs"
@@ -424,17 +425,17 @@ const AdminReservations = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending_price">Pending Price</SelectItem>
-              <SelectItem value="waiting_for_customer_approval">Waiting Customer</SelectItem>
-              <SelectItem value="customer_approved">Customer Approved</SelectItem>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="customer_rejected">Rejected</SelectItem>
-              <SelectItem value="sent_to_driver">Sent to Driver</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="pending_admin_review">Needs Review</SelectItem>
-              <SelectItem value="cancelled_by_customer">Cancelled by Customer</SelectItem>
+              <SelectItem value="all">Tüm Durumlar</SelectItem>
+              <SelectItem value="pending_price">Fiyat Bekliyor</SelectItem>
+              <SelectItem value="waiting_for_customer_approval">Müşteri Onayı Bekliyor</SelectItem>
+              <SelectItem value="customer_approved">Müşteri Onayladı</SelectItem>
+              <SelectItem value="confirmed">Onaylandı</SelectItem>
+              <SelectItem value="customer_rejected">Reddedildi</SelectItem>
+              <SelectItem value="sent_to_driver">Şoföre Gönderildi</SelectItem>
+              <SelectItem value="active">Aktif</SelectItem>
+              <SelectItem value="completed">Tamamlandı</SelectItem>
+              <SelectItem value="pending_admin_review">İnceleme Bekliyor</SelectItem>
+              <SelectItem value="cancelled_by_customer">Müşteri İptal Etti</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -448,8 +449,8 @@ const AdminReservations = () => {
             />
             <span className="text-sm text-muted-foreground">
               {selectedIds.size === 0 
-                ? `${assignableReservations.length} reservations need driver assignment`
-                : `${selectedIds.size} of ${assignableReservations.length} selected`}
+                ? `${assignableReservations.length} rezervasyon şoför ataması bekliyor`
+                : `${selectedIds.size} / ${assignableReservations.length} seçildi`}
             </span>
             {selectedIds.size > 0 && (
               <>
@@ -461,11 +462,11 @@ const AdminReservations = () => {
                   }}
                 >
                   <UserCheck className="h-4 w-4 mr-2" />
-                  Assign Driver to {selectedIds.size}
+                  {selectedIds.size} Rezervasyona Şoför Ata
                 </Button>
                 <Button variant="ghost" size="sm" onClick={clearSelection}>
                   <X className="h-4 w-4 mr-1" />
-                  Clear
+                  Temizle
                 </Button>
               </>
             )}
@@ -481,7 +482,7 @@ const AdminReservations = () => {
               <div className="flex items-center gap-2 mb-4">
                 <div className="h-3 w-3 rounded-full bg-amber-500 animate-pulse" />
                 <h3 className="text-lg font-semibold text-amber-700">
-                  Needs Review - Customer Edited ({needsReview.length})
+                  İnceleme Bekliyor - Müşteri Düzenledi ({needsReview.length})
                 </h3>
               </div>
               <div className="space-y-3">
@@ -496,11 +497,11 @@ const AdminReservations = () => {
                         <div className="space-y-2">
                           <div className="flex items-center gap-3">
                             <Badge className="bg-amber-500/20 text-amber-700">
-                              Needs Review
+                              İnceleme Bekliyor
                             </Badge>
                             <span className="flex items-center gap-1 text-sm">
                               <Calendar className="h-4 w-4" />
-                              {format(new Date(reservation.pickup_date), 'PPP')}
+                              {format(new Date(reservation.pickup_date), 'PPP', { locale: tr })}
                             </span>
                             <span className="flex items-center gap-1 text-sm">
                               <Clock className="h-4 w-4" />
@@ -522,7 +523,7 @@ const AdminReservations = () => {
                         </div>
                         
                         <Button size="sm">
-                          Review Changes
+                          Değişiklikleri İncele
                         </Button>
                       </div>
                     </CardContent>
@@ -542,7 +543,7 @@ const AdminReservations = () => {
               <div className="flex items-center gap-2 mb-4">
                 <div className="h-3 w-3 rounded-full bg-amber-500 animate-pulse" />
                 <h3 className="text-lg font-semibold text-amber-700">
-                  Needs Driver Assignment ({needsAssignment.length})
+                  Şoför Ataması Bekliyor ({needsAssignment.length})
                 </h3>
               </div>
               <div className="space-y-3">
@@ -566,7 +567,7 @@ const AdminReservations = () => {
                               </Badge>
                               <span className="flex items-center gap-1 text-sm">
                                 <Calendar className="h-4 w-4" />
-                                {format(new Date(reservation.pickup_date), 'PPP')}
+                                {format(new Date(reservation.pickup_date), 'PPP', { locale: tr })}
                               </span>
                               <span className="flex items-center gap-1 text-sm">
                                 <Clock className="h-4 w-4" />
@@ -591,14 +592,14 @@ const AdminReservations = () => {
                             <div className="flex items-center gap-4 text-sm flex-wrap">
                               <span className="flex items-center gap-1">
                                 <CreditCard className="h-4 w-4 text-muted-foreground" />
-                                {reservation.payment_type}
+                                {reservation.payment_type === 'cash' ? 'Nakit' : reservation.payment_type === 'online' ? 'Online' : reservation.payment_type}
                               </span>
                               <span className={`font-bold ${isPriceModifiedByDriver(reservation) ? 'text-amber-600' : 'text-primary'}`}>
                                 {formatPrice(reservation.price, reservation.price_currency)}
                                 {isPriceModifiedByDriver(reservation) && (
                                   <span className="ml-2 inline-flex items-center gap-1 text-xs font-normal bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
                                     <AlertTriangle className="h-3 w-3" />
-                                    Modified
+                                    Değiştirildi
                                   </span>
                                 )}
                               </span>
@@ -625,7 +626,7 @@ const AdminReservations = () => {
                           className="bg-amber-600 hover:bg-amber-700"
                         >
                           <UserCheck className="h-4 w-4 mr-2" />
-                          Assign Driver
+                          Şoför Ata
                         </Button>
                       </div>
                     </CardContent>
@@ -638,9 +639,9 @@ const AdminReservations = () => {
 
         {/* All Reservations List */}
         {loading ? (
-          <div className="text-center py-12">Loading...</div>
+          <div className="text-center py-12">Yükleniyor...</div>
         ) : reservations.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">No reservations found</div>
+          <div className="text-center py-12 text-muted-foreground">Rezervasyon bulunamadı</div>
         ) : (
           <div className="space-y-4">
             {reservations.map((reservation) => (
@@ -657,7 +658,7 @@ const AdminReservations = () => {
                         </Badge>
                         <span className="flex items-center gap-1 text-sm">
                           <Calendar className="h-4 w-4" />
-                          {format(new Date(reservation.pickup_date), 'PPP')}
+                          {format(new Date(reservation.pickup_date), 'PPP', { locale: tr })}
                         </span>
                         <span className="flex items-center gap-1 text-sm">
                           <Clock className="h-4 w-4" />
@@ -682,14 +683,14 @@ const AdminReservations = () => {
                       <div className="flex items-center gap-4 text-sm flex-wrap">
                         <span className="flex items-center gap-1">
                           <CreditCard className="h-4 w-4 text-muted-foreground" />
-                          {reservation.payment_type}
+                          {reservation.payment_type === 'cash' ? 'Nakit' : reservation.payment_type === 'online' ? 'Online' : reservation.payment_type}
                         </span>
                         <span className={`font-bold ${isPriceModifiedByDriver(reservation) ? 'text-amber-600' : 'text-primary'}`}>
                           {formatPrice(reservation.price, reservation.price_currency)}
                           {isPriceModifiedByDriver(reservation) && (
                             <span className="ml-2 inline-flex items-center gap-1 text-xs font-normal bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
                               <AlertTriangle className="h-3 w-3" />
-                              Modified (was {formatPrice(reservation.admin_set_price, reservation.price_currency)})
+                              Değiştirildi (önceki: {formatPrice(reservation.admin_set_price, reservation.price_currency)})
                             </span>
                           )}
                         </span>
@@ -724,7 +725,7 @@ const AdminReservations = () => {
                           }}
                         >
                           <UserCheck className="h-4 w-4 mr-1" />
-                          Assign Driver
+                          Şoför Ata
                         </Button>
                       )}
                       <Button 
@@ -744,7 +745,7 @@ const AdminReservations = () => {
                           });
                           navigate(`/admin/reservations/create?${params.toString()}`);
                         }}
-                        title="Duplicate reservation"
+                        title="Rezervasyonu kopyala"
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
@@ -777,14 +778,14 @@ const AdminReservations = () => {
       <Dialog open={assignDialog.open} onOpenChange={(open) => setAssignDialog({ ...assignDialog, open })}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign Driver</DialogTitle>
+            <DialogTitle>Şoför Ata</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground mb-4">
-            Select a driver to assign to this reservation. The driver will receive a notification with the job details.
+            Bu rezervasyona atanacak şoförü seçin. Şoför iş detayları hakkında bildirim alacak.
           </p>
           <Select value={selectedDriver} onValueChange={setSelectedDriver}>
             <SelectTrigger>
-              <SelectValue placeholder="Select a driver" />
+              <SelectValue placeholder="Şoför seçin" />
             </SelectTrigger>
             <SelectContent>
               {drivers.map(driver => (
@@ -796,10 +797,10 @@ const AdminReservations = () => {
           </Select>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAssignDialog({ open: false, reservationId: null })}>
-              Cancel
+              İptal
             </Button>
             <Button onClick={handleAssignDriver} disabled={!selectedDriver}>
-              Assign & Notify Driver
+              Ata ve Bildir
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -809,14 +810,14 @@ const AdminReservations = () => {
       <Dialog open={bulkAssignDialog} onOpenChange={setBulkAssignDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Bulk Assign Driver</DialogTitle>
+            <DialogTitle>Toplu Şoför Ata</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground mb-4">
-            Assign a driver to <strong>{selectedIds.size}</strong> selected reservations. Each driver will receive individual notifications for their jobs.
+            <strong>{selectedIds.size}</strong> seçili rezervasyona şoför ata. Her şoför ayrı ayrı bildirim alacak.
           </p>
           <Select value={selectedDriver} onValueChange={setSelectedDriver}>
             <SelectTrigger>
-              <SelectValue placeholder="Select a driver" />
+              <SelectValue placeholder="Şoför seçin" />
             </SelectTrigger>
             <SelectContent>
               {drivers.map(driver => (
@@ -828,10 +829,10 @@ const AdminReservations = () => {
           </Select>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBulkAssignDialog(false)}>
-              Cancel
+              İptal
             </Button>
             <Button onClick={handleBulkAssign} disabled={!selectedDriver || bulkAssigning}>
-              {bulkAssigning ? 'Assigning...' : `Assign to ${selectedIds.size} Reservations`}
+              {bulkAssigning ? 'Atanıyor...' : `${selectedIds.size} Rezervasyona Ata`}
             </Button>
           </DialogFooter>
         </DialogContent>

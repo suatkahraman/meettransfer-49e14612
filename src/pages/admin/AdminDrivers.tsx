@@ -14,12 +14,12 @@ import { toast } from 'sonner';
 import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2 } from 'lucide-react';
 
 const regions = [
-  { value: 'Istanbul', label: 'Istanbul' },
+  { value: 'Istanbul', label: 'İstanbul' },
   { value: 'Antalya', label: 'Antalya' },
   { value: 'Bodrum', label: 'Bodrum' },
   { value: 'Dalaman', label: 'Dalaman' },
-  { value: 'Izmir', label: 'Izmir' },
-  { value: 'Cappadocia', label: 'Cappadocia' },
+  { value: 'Izmir', label: 'İzmir' },
+  { value: 'Cappadocia', label: 'Kapadokya' },
 ];
 
 interface Driver {
@@ -129,7 +129,7 @@ const AdminDrivers = () => {
           .eq('id', editingDriver.id);
 
         if (error) {
-          toast.error('Failed to update driver');
+          toast.error('Şoför güncellenemedi');
         } else {
           // Audit log for driver update
           await logAction({
@@ -146,24 +146,24 @@ const AdminDrivers = () => {
             },
           });
 
-          toast.success('Driver updated');
+          toast.success('Şoför güncellendi');
           setDialogOpen(false);
           fetchDrivers();
         }
       } else {
         // Create new driver via edge function
         if (!formData.email || !formData.password) {
-          toast.error('Email and password are required for new drivers');
+          toast.error('Yeni şoförler için e-posta ve şifre gereklidir');
           return;
         }
 
         if (!formData.name || !formData.phone) {
-          toast.error('Name and phone are required');
+          toast.error('Ad ve telefon gereklidir');
           return;
         }
 
         if (!formData.region) {
-          toast.error('Please select a region');
+          toast.error('Lütfen bir bölge seçin');
           return;
         }
 
@@ -181,7 +181,7 @@ const AdminDrivers = () => {
         });
 
         if (error) {
-          toast.error(error.message || 'Failed to create driver');
+          toast.error(error.message || 'Şoför oluşturulamadı');
           return;
         }
 
@@ -205,12 +205,12 @@ const AdminDrivers = () => {
           },
         });
 
-        toast.success('Driver has been created successfully!');
+        toast.success('Şoför başarıyla oluşturuldu!');
         setDialogOpen(false);
         fetchDrivers();
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to create driver');
+      toast.error(err.message || 'Şoför oluşturulamadı');
     } finally {
       setIsSubmitting(false);
     }
@@ -223,7 +223,7 @@ const AdminDrivers = () => {
       .eq('id', driver.id);
 
     if (error) {
-      toast.error('Failed to update driver status');
+      toast.error('Şoför durumu güncellenemedi');
     } else {
       // Audit log for status toggle
       await logAction({
@@ -234,7 +234,7 @@ const AdminDrivers = () => {
         new_data: { active: !driver.active, name: driver.name },
       });
 
-      toast.success(driver.active ? 'Driver deactivated' : 'Driver activated');
+      toast.success(driver.active ? 'Şoför pasif yapıldı' : 'Şoför aktif yapıldı');
       fetchDrivers();
     }
   };
@@ -255,7 +255,7 @@ const AdminDrivers = () => {
         .eq('id', deletingDriver.id);
 
       if (error) {
-        toast.error('Failed to delete driver');
+        toast.error('Şoför silinemedi');
       } else {
         await logAction({
           action: 'DELETE',
@@ -270,13 +270,13 @@ const AdminDrivers = () => {
           },
         });
 
-        toast.success('Driver deleted successfully');
+        toast.success('Şoför başarıyla silindi');
         setDeleteDialogOpen(false);
         setDeletingDriver(null);
         fetchDrivers();
       }
     } catch (err) {
-      toast.error('Failed to delete driver');
+      toast.error('Şoför silinemedi');
     } finally {
       setIsDeleting(false);
     }
@@ -289,19 +289,19 @@ const AdminDrivers = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">Drivers</h1>
+          <h1 className="text-2xl font-serif">Şoförler</h1>
         </div>
         <Button onClick={openAddDialog} className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
           <Plus className="h-4 w-4 mr-2" />
-          Add Driver
+          Şoför Ekle
         </Button>
       </header>
 
       <main className="container mx-auto py-8 px-4">
         {loading ? (
-          <div className="text-center py-12">Loading...</div>
+          <div className="text-center py-12">Yükleniyor...</div>
         ) : drivers.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">No drivers yet</div>
+          <div className="text-center py-12 text-muted-foreground">Henüz şoför yok</div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {drivers.map((driver) => (
@@ -311,7 +311,7 @@ const AdminDrivers = () => {
                     <div>
                       <h3 className="font-semibold text-lg">{driver.name}</h3>
                       <Badge variant={driver.active ? 'default' : 'secondary'}>
-                        {driver.active ? 'Active' : 'Inactive'}
+                        {driver.active ? 'Aktif' : 'Pasif'}
                       </Badge>
                     </div>
                     <div className="flex gap-1">
@@ -322,7 +322,7 @@ const AdminDrivers = () => {
                           setViewingDriver(driver);
                           setViewDialogOpen(true);
                         }}
-                        title="View Details"
+                        title="Detayları Gör"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -330,7 +330,7 @@ const AdminDrivers = () => {
                         variant="outline" 
                         size="icon" 
                         onClick={() => openEditDialog(driver)}
-                        title="Edit Driver"
+                        title="Şoförü Düzenle"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -339,7 +339,7 @@ const AdminDrivers = () => {
                         size="icon"
                         onClick={() => toggleActive(driver)}
                         className={driver.active ? 'text-destructive hover:text-destructive' : 'text-green-600 hover:text-green-600'}
-                        title={driver.active ? 'Deactivate Driver' : 'Activate Driver'}
+                        title={driver.active ? 'Şoförü Pasif Yap' : 'Şoförü Aktif Yap'}
                       >
                         {driver.active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                       </Button>
@@ -347,7 +347,7 @@ const AdminDrivers = () => {
                         variant="outline" 
                         size="icon"
                         onClick={() => navigate(`/admin/drivers/${driver.id}/jobs`)}
-                        title="View Assigned Jobs"
+                        title="Atanan İşleri Gör"
                       >
                         <Briefcase className="h-4 w-4" />
                       </Button>
@@ -356,7 +356,7 @@ const AdminDrivers = () => {
                         size="icon"
                         onClick={() => openDeleteDialog(driver)}
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        title="Delete Driver"
+                        title="Şoförü Sil"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -398,11 +398,11 @@ const AdminDrivers = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingDriver ? 'Edit Driver' : 'Add New Driver'}</DialogTitle>
+            <DialogTitle>{editingDriver ? 'Şoförü Düzenle' : 'Yeni Şoför Ekle'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Name</Label>
+              <Label>Ad Soyad</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -410,7 +410,7 @@ const AdminDrivers = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Phone</Label>
+              <Label>Telefon</Label>
               <Input
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -418,26 +418,26 @@ const AdminDrivers = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Plate Number</Label>
+              <Label>Plaka</Label>
               <Input
                 value={formData.plate_number}
                 onChange={(e) => setFormData({...formData, plate_number: e.target.value})}
-                placeholder="e.g. 34 ABC 123"
+                placeholder="örn. 34 ABC 123"
               />
             </div>
             <div className="space-y-2">
-              <Label>Vehicle Model</Label>
+              <Label>Araç Modeli</Label>
               <Input
                 value={formData.vehicle_model}
                 onChange={(e) => setFormData({...formData, vehicle_model: e.target.value})}
-                placeholder="e.g. Mercedes Vito"
+                placeholder="örn. Mercedes Vito"
               />
             </div>
             <div className="space-y-2">
-              <Label>Region</Label>
+              <Label>Bölge</Label>
               <Select value={formData.region} onValueChange={(v) => setFormData({...formData, region: v})}>
                 <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Select region" />
+                  <SelectValue placeholder="Bölge seçin" />
                 </SelectTrigger>
                 <SelectContent className="bg-background z-50">
                   {regions.map(region => (
@@ -451,22 +451,22 @@ const AdminDrivers = () => {
             {!editingDriver && (
               <>
                 <div className="space-y-2">
-                  <Label>Email (for login)</Label>
+                  <Label>E-posta (giriş için)</Label>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="driver@example.com"
+                    placeholder="sofor@example.com"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Password</Label>
+                  <Label>Şifre</Label>
                   <Input
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    placeholder="Minimum 6 characters"
+                    placeholder="Minimum 6 karakter"
                     required
                   />
                 </div>
@@ -475,16 +475,16 @@ const AdminDrivers = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting}>
-              Cancel
+              İptal
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {editingDriver ? 'Updating...' : 'Creating...'}
+                  {editingDriver ? 'Güncelleniyor...' : 'Oluşturuluyor...'}
                 </>
               ) : (
-                editingDriver ? 'Update' : 'Create Driver'
+                editingDriver ? 'Güncelle' : 'Şoför Oluştur'
               )}
             </Button>
           </DialogFooter>
@@ -495,7 +495,7 @@ const AdminDrivers = () => {
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Driver Details</DialogTitle>
+            <DialogTitle>Şoför Detayları</DialogTitle>
           </DialogHeader>
           {viewingDriver && (
             <div className="space-y-4">
@@ -508,7 +508,7 @@ const AdminDrivers = () => {
                 <div>
                   <h3 className="text-xl font-semibold">{viewingDriver.name}</h3>
                   <Badge variant={viewingDriver.active ? 'default' : 'secondary'}>
-                    {viewingDriver.active ? 'Active' : 'Inactive'}
+                    {viewingDriver.active ? 'Aktif' : 'Pasif'}
                   </Badge>
                 </div>
               </div>
@@ -516,27 +516,27 @@ const AdminDrivers = () => {
               <div className="grid gap-3 pt-4 border-t">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <Phone className="h-4 w-4" /> Phone
+                    <Phone className="h-4 w-4" /> Telefon
                   </span>
                   <span className="font-medium">{viewingDriver.phone}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <Car className="h-4 w-4" /> Plate Number
+                    <Car className="h-4 w-4" /> Plaka
                   </span>
-                  <span className="font-medium">{viewingDriver.plate_number || 'Not set'}</span>
+                  <span className="font-medium">{viewingDriver.plate_number || 'Belirtilmedi'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <Car className="h-4 w-4" /> Vehicle Model
+                    <Car className="h-4 w-4" /> Araç Modeli
                   </span>
-                  <span className="font-medium">{viewingDriver.vehicle_model || 'Not set'}</span>
+                  <span className="font-medium">{viewingDriver.vehicle_model || 'Belirtilmedi'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <MapPin className="h-4 w-4" /> Region
+                    <MapPin className="h-4 w-4" /> Bölge
                   </span>
-                  <span className="font-medium">{viewingDriver.region || 'Not assigned'}</span>
+                  <span className="font-medium">{viewingDriver.region || 'Atanmadı'}</span>
                 </div>
               </div>
             </div>
@@ -550,9 +550,9 @@ const AdminDrivers = () => {
               }}
             >
               <Pencil className="h-4 w-4 mr-2" />
-              Edit Driver
+              Şoförü Düzenle
             </Button>
-            <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
+            <Button onClick={() => setViewDialogOpen(false)}>Kapat</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -561,13 +561,13 @@ const AdminDrivers = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Driver</AlertDialogTitle>
+            <AlertDialogTitle>Şoförü Sil</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <strong>{deletingDriver?.name}</strong>? This action cannot be undone and will remove all driver information.
+              <strong>{deletingDriver?.name}</strong> şoförünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve tüm şoför bilgileri silinecektir.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>İptal</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete} 
               disabled={isDeleting}
@@ -576,10 +576,10 @@ const AdminDrivers = () => {
               {isDeleting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  Siliniyor...
                 </>
               ) : (
-                'Delete'
+                'Sil'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
