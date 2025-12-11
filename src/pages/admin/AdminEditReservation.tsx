@@ -1100,7 +1100,8 @@ const AdminEditReservation = () => {
                       <Button
                         type="button"
                         onClick={async () => {
-                          const agencyPrice = parseFloat(agencyDetails.customer_price) || 0;
+                          const agencyPriceValue = agencyDetails.customer_price.trim();
+                          const agencyPrice = parseFloat(agencyPriceValue) || 0;
                           if (agencyPrice <= 0) {
                             toast.error('Please enter a valid agency price');
                             return;
@@ -1125,6 +1126,11 @@ const AdminEditReservation = () => {
                           if (error) {
                             toast.error('Failed to save agency price');
                           } else {
+                            // Explicitly update state with the saved value as string
+                            setAgencyDetails(prev => ({
+                              ...prev,
+                              customer_price: agencyPrice.toString()
+                            }));
                             setAgencyPriceSaved(true);
                             setIsEditingAgencyPrice(false);
                             toast.success('Agency price saved');
