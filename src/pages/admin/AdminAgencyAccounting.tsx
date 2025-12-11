@@ -60,6 +60,7 @@ interface AgencyReservationDetail {
   reservation_id: string;
   customer_price: number | null;
   company_amount: number | null;
+  agency_price_currency: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -188,7 +189,7 @@ const AdminAgencyAccounting = () => {
       const reservationIds = reservationsData.map(r => r.id);
       const { data: detailsData } = await supabase
         .from('agency_reservation_details')
-        .select('reservation_id, customer_price, company_amount')
+        .select('reservation_id, customer_price, company_amount, agency_price_currency')
         .in('reservation_id', reservationIds);
       setAgencyDetails(detailsData || []);
     } else {
@@ -249,7 +250,12 @@ const AdminAgencyAccounting = () => {
 
   const getAgencyPrice = (reservationId: string) => {
     const detail = agencyDetails.find(d => d.reservation_id === reservationId);
-    return detail?.company_amount || 0;
+    return detail?.customer_price || 0;
+  };
+
+  const getAgencyPriceCurrency = (reservationId: string) => {
+    const detail = agencyDetails.find(d => d.reservation_id === reservationId);
+    return detail?.agency_price_currency || 'TRY';
   };
 
   // Calculate totals
@@ -644,9 +650,8 @@ const AdminAgencyAccounting = () => {
                                     {/* Right - Agency Price */}
                                     <div className="text-right space-y-1">
                                       <div className="text-xs text-muted-foreground">Agency Price</div>
-                                      <div className="flex items-center justify-end gap-1 text-lg font-semibold text-primary">
-                                        <DollarSign className="h-4 w-4" />
-                                        ₺{agencyPrice.toFixed(2)}
+                                      <div className="text-lg font-semibold text-primary">
+                                        {getCurrencySymbol(getAgencyPriceCurrency(res.id))}{agencyPrice.toFixed(2)}
                                       </div>
                                     </div>
                                   </div>
