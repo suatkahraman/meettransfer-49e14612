@@ -258,10 +258,14 @@ const AdminAgencyAccounting = () => {
     return detail?.agency_price_currency || 'TRY';
   };
 
-  // Calculate totals
+  // HESAPLAMA: Tüm hesaplamalar SADECE agency_price (customer_price) üzerinden yapılmalı
+  // Hiçbir eski hesaplama mantığı veya eski alan kullanılmamalı
   const totalReservations = reservations.length;
+  // Toplam Acenta Fiyatı = Tüm rezervasyonların customer_price toplamı (TEK KAYNAK)
   const totalAgencyPrice = reservations.reduce((sum, r) => sum + getAgencyPrice(r.id), 0);
+  // Alınan Ödemeler = agency_payments tablosundaki ödemelerin toplamı
   const totalPaymentsReceived = payments.reduce((sum, p) => sum + p.amount, 0);
+  // Acenta Bakiyesi = Toplam Acenta Fiyatı - Toplam Ödenen Tutar
   const remainingBalance = totalAgencyPrice - totalPaymentsReceived;
 
   const handleAgencyChange = (newAgencyId: string) => {

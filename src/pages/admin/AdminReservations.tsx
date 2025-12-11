@@ -150,16 +150,16 @@ const AdminReservations = () => {
     } else {
       let filtered = data || [];
       
-      // Filter out completed reservations that have agency AND agency_price set
-      // These should only appear in Agency Accounting
+      // KURAL: Tamamlanmış + Acentaya bağlı + Acenta fiyatı kaydedilmiş rezervasyonlar
+      // Ana listeden KESİNLİKLE kaldırılmalı - SADECE Acenta Muhasebesinde görünmeli
       filtered = filtered.filter(r => {
         const isCompleted = r.status === 'completed';
-        const hasAgency = r.agency_id !== null;
+        const hasAgency = r.agency_id !== null && r.agency_id !== undefined;
         const hasAgencyPrice = r.agency_reservation_details?.customer_price !== null && 
                                r.agency_reservation_details?.customer_price !== undefined &&
-                               r.agency_reservation_details?.customer_price > 0;
+                               Number(r.agency_reservation_details?.customer_price) > 0;
         
-        // Hide from main list if ALL conditions are true
+        // 3 koşul da sağlanıyorsa → Admin rezervasyon listesinden ÇIKAR
         if (isCompleted && hasAgency && hasAgencyPrice) {
           return false;
         }
