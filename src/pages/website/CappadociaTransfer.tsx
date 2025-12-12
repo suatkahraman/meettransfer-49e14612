@@ -8,6 +8,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 
@@ -33,7 +34,7 @@ const faqItems = [
     answer: "Nevşehir Airport (NAV) is closer to Göreme (30 min), while Kayseri Airport (ASR) has more flight options but is further (1 hour 15 min).",
   },
   {
-    question: "Can you arrange early morning balloon flight transfers?",
+    question: "Can you arrange early morning balloon flight transfers in Cappadocia?",
     answer: "Yes, we provide early morning transfers (4-5 AM) to hot air balloon departure points. Book your return transfer too!",
   },
   {
@@ -41,7 +42,7 @@ const faqItems = [
     answer: "We can arrange full-day tours to explore the fairy chimneys, underground cities, and valleys with private driver and guide.",
   },
   {
-    question: "Is the transfer available 24/7?",
+    question: "Is the Cappadocia transfer available 24/7?",
     answer: "Yes, we operate 24/7 and can accommodate any flight arrival time, including late-night arrivals.",
   },
 ];
@@ -68,6 +69,33 @@ const vehicles = [
 const CappadociaTransfer = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Cappadocia Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
+        description="Premium Cappadocia airport transfer service from Nevşehir and Kayseri airports to Göreme, Ürgüp, Uçhisar. VIP meet & greet, Mercedes fleet. Book your private Cappadocia transfer!"
+        keywords="Cappadocia airport transfer, Nevşehir airport transfer, Kayseri airport transfer, Göreme transfer, Ürgüp transfer, Cappadocia VIP transfer, Cappadocia private driver, balloon flight transfer, cave hotel transfer"
+        canonicalPath="/cappadocia-transfer"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Cappadocia', 'Göreme', 'Ürgüp', 'Uçhisar', 'Nevşehir', 'Kayseri'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Destinations', url: '/destinations' },
+              { name: 'Cappadocia Airport Transfer', url: '/cappadocia-transfer' },
+            ],
+          },
+          { type: 'FAQPage', questions: faqItems },
+          {
+            type: 'Product',
+            name: 'Cappadocia Airport Transfer Service',
+            description: 'Premium VIP airport transfer from Nevşehir (NAV) and Kayseri (ASR) airports to Cappadocia cave hotels',
+            offers: { price: '40', priceCurrency: 'USD' },
+          },
+        ]}
+      />
+
       <PageHeader
         title="Cappadocia Airport Transfer – VIP Chauffeur Service"
         subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
@@ -76,23 +104,23 @@ const CappadociaTransfer = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             Private Airport Transfer in Cappadocia
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Experience the magic of Cappadocia with Meet Transfer. We provide
-            premium transfers from both Nevşehir Airport (NAV) and Kayseri
-            Airport (ASR) to all cave hotels and destinations in the region
-            including Göreme, Ürgüp, and Uçhisar. Our drivers are familiar with
-            every fairy chimney and can assist with balloon flight schedules.
-            Start your Cappadocia adventure in comfort and style.
+          </h1>
+          <p className="text-muted-foreground leading-relaxed text-lg">
+            Experience the magic of <strong>Cappadocia</strong> with Meet Transfer. We provide
+            premium <strong>Cappadocia airport transfers</strong> from both <strong>Nevşehir Airport (NAV)</strong> and <strong>Kayseri
+            Airport (ASR)</strong> to all cave hotels and destinations in the region
+            including <strong>Göreme, Ürgüp, and Uçhisar</strong>. Our drivers are familiar with
+            every fairy chimney and can assist with <strong>balloon flight schedules</strong>.
+            Start your Cappadocia adventure in comfort and style with our <strong>VIP transfer service</strong>.
           </p>
         </section>
 
         <FeatureList />
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">Popular Cappadocia Transfer Destinations</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -107,7 +135,7 @@ const CappadociaTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet</h2>
+          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Cappadocia Transfers</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -120,12 +148,15 @@ const CappadociaTransfer = () => {
           </Link>
         </section>
 
-        <PriceTable items={prices} title="Transfer Prices" />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Cappadocia Airport Transfer Prices</h2>
+          <PriceTable items={prices} title="Fixed Price Transfers" />
+        </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Cappadocia Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">Book Your Cappadocia Airport Transfer</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp
+            Get instant confirmation via WhatsApp for your Cappadocia transfer
           </p>
           <WhatsAppButton
             variant="large"
@@ -133,7 +164,10 @@ const CappadociaTransfer = () => {
           />
         </div>
 
-        <FAQSection items={faqItems} />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Cappadocia Transfer FAQ</h2>
+          <FAQSection items={faqItems} />
+        </section>
       </div>
     </WebsiteLayout>
   );

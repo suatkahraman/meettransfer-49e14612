@@ -8,7 +8,10 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 import bodrumMeetTransfer from "@/assets/bodrum-meet-transfer.png";
+import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
+import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 
 const destinations = [
   "Yalıkavak", "Türkbükü", "Gümüşlük", "Bodrum Center", "Gündoğan",
@@ -27,7 +30,7 @@ const prices = [
 
 const faqItems = [
   {
-    question: "What is included in the transfer price?",
+    question: "What is included in the Bodrum airport transfer price?",
     answer: "Our price includes meet & greet service at the airport, flight tracking, professional driver, luxury vehicle, complimentary water, WiFi, and all taxes.",
   },
   {
@@ -35,17 +38,14 @@ const faqItems = [
     answer: "Yalıkavak is approximately 45 km from Bodrum Airport. The transfer takes about 50-60 minutes.",
   },
   {
-    question: "Do you provide transfers to marinas?",
+    question: "Do you provide transfers to Bodrum marinas?",
     answer: "Yes, we provide transfers to all Bodrum marinas including Yalıkavak Marina, D-Marin Turgutreis, and Palmarina.",
   },
   {
-    question: "Can I book a transfer to Greek islands?",
+    question: "Can I book a transfer to Greek islands from Bodrum?",
     answer: "We can transfer you to the ferry ports in Bodrum and Turgutreis for connections to Greek islands like Kos.",
   },
 ];
-
-import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
-import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 
 const vehicles = [
   {
@@ -69,6 +69,33 @@ const vehicles = [
 const BodrumTransfer = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Bodrum Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
+        description="Premium Bodrum airport transfer service to Yalıkavak, Türkbükü, Gümüşlük, marinas. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Bodrum transfer today!"
+        keywords="Bodrum airport transfer, BJV airport transfer, Yalıkavak transfer, Türkbükü transfer, Gümüşlük transfer, Bodrum VIP transfer, Bodrum private driver, Bodrum marina transfer, Bodrum Peninsula transfer"
+        canonicalPath="/bodrum-transfer"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Bodrum', 'Yalıkavak', 'Türkbükü', 'Gümüşlük', 'Gündoğan'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Destinations', url: '/destinations' },
+              { name: 'Bodrum Airport Transfer', url: '/bodrum-transfer' },
+            ],
+          },
+          { type: 'FAQPage', questions: faqItems },
+          {
+            type: 'Product',
+            name: 'Bodrum Airport Transfer Service',
+            description: 'Premium VIP airport transfer from Milas-Bodrum Airport (BJV) to all Bodrum Peninsula destinations',
+            offers: { price: '40', priceCurrency: 'USD' },
+          },
+        ]}
+      />
+
       <PageHeader
         title="Bodrum Airport Transfer – VIP Chauffeur Service"
         subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
@@ -77,16 +104,16 @@ const BodrumTransfer = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             Private Airport Transfer in Bodrum
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
+          </h1>
+          <p className="text-muted-foreground leading-relaxed text-lg">
             Arrive in style at the stunning Bodrum Peninsula. Meet Transfer
-            offers premium airport transfers from Milas-Bodrum Airport (BJV) to
-            all exclusive destinations including Yalıkavak, Türkbükü, and Gümüşlük.
-            Our luxury vehicles and professional drivers ensure a comfortable
-            journey to your yacht, villa, or beach resort. We serve all marinas
-            and hotels on the peninsula with 24/7 availability.
+            offers premium <strong>Bodrum airport transfers</strong> from <strong>Milas-Bodrum Airport (BJV)</strong> to
+            all exclusive destinations including <strong>Yalıkavak, Türkbükü, and Gümüşlük</strong>.
+            Our luxury <strong>Mercedes vehicles</strong> and professional drivers ensure a comfortable
+            journey to your yacht, villa, or beach resort. We serve all <strong>Bodrum marinas</strong>
+            and hotels on the peninsula with 24/7 availability for your <strong>private Bodrum transfer</strong>.
           </p>
         </section>
 
@@ -94,7 +121,7 @@ const BodrumTransfer = () => {
 
         <section className="grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h2 className="text-2xl font-bold mb-4">City Transfer Service</h2>
+            <h2 className="text-2xl font-bold mb-4">Bodrum City Transfer Service</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
               Whether you're arriving at Milas-Bodrum Airport or need a transfer within the peninsula, 
               our professional drivers will meet you with a personalized name sign and ensure a smooth journey.
@@ -121,14 +148,15 @@ const BodrumTransfer = () => {
           <div className="rounded-2xl overflow-hidden shadow-lg">
             <img 
               src={bodrumMeetTransfer} 
-              alt="Meet Transfer service at Bodrum Airport - driver greeting passenger with name sign"
+              alt="Meet Transfer VIP service at Bodrum Airport - professional driver greeting passenger with name sign"
               className="w-full h-auto object-cover"
+              loading="lazy"
             />
           </div>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">Popular Bodrum Transfer Destinations</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -143,7 +171,7 @@ const BodrumTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet</h2>
+          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Bodrum Transfers</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -156,12 +184,15 @@ const BodrumTransfer = () => {
           </Link>
         </section>
 
-        <PriceTable items={prices} title="Transfer Prices" />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Bodrum Airport Transfer Prices</h2>
+          <PriceTable items={prices} title="Fixed Price Transfers" />
+        </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Bodrum Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">Book Your Bodrum Airport Transfer</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp
+            Get instant confirmation via WhatsApp for your Bodrum transfer
           </p>
           <WhatsAppButton
             variant="large"
@@ -169,7 +200,10 @@ const BodrumTransfer = () => {
           />
         </div>
 
-        <FAQSection items={faqItems} />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Bodrum Transfer FAQ</h2>
+          <FAQSection items={faqItems} />
+        </section>
       </div>
     </WebsiteLayout>
   );

@@ -8,6 +8,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 
@@ -27,7 +28,7 @@ const prices = [
 
 const faqItems = [
   {
-    question: "What is included in the transfer price?",
+    question: "What is included in the Izmir airport transfer price?",
     answer: "Our price includes meet & greet service at the airport, flight tracking, professional driver, luxury vehicle, complimentary water, WiFi, and all taxes.",
   },
   {
@@ -35,11 +36,11 @@ const faqItems = [
     answer: "Çeşme is approximately 85 km from Izmir Airport. The transfer takes about 1 hour 15 minutes.",
   },
   {
-    question: "Do you provide transfers to Ephesus?",
+    question: "Do you provide transfers to Ephesus from Izmir?",
     answer: "Yes, we offer direct transfers to Ephesus and Selçuk from Izmir Airport. We can also arrange guided tours.",
   },
   {
-    question: "Can I book a transfer to cruise port?",
+    question: "Can I book a transfer to Izmir cruise port?",
     answer: "Yes, we provide transfers to and from Izmir cruise port and Kuşadası cruise port.",
   },
 ];
@@ -66,6 +67,33 @@ const vehicles = [
 const IzmirTransfer = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Izmir Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
+        description="Premium Izmir airport transfer service to Çeşme, Alaçatı, Kuşadası, Ephesus. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Izmir transfer today!"
+        keywords="Izmir airport transfer, ADB airport transfer, Çeşme airport transfer, Alaçatı transfer, Kuşadası transfer, Ephesus transfer, Izmir VIP transfer, Izmir private driver, Aegean Coast transfer"
+        canonicalPath="/izmir-transfer"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Izmir', 'Çeşme', 'Alaçatı', 'Kuşadası', 'Ephesus', 'Selçuk'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Destinations', url: '/destinations' },
+              { name: 'Izmir Airport Transfer', url: '/izmir-transfer' },
+            ],
+          },
+          { type: 'FAQPage', questions: faqItems },
+          {
+            type: 'Product',
+            name: 'Izmir Airport Transfer Service',
+            description: 'Premium VIP airport transfer from Adnan Menderes Airport (ADB) to Aegean Coast destinations',
+            offers: { price: '35', priceCurrency: 'USD' },
+          },
+        ]}
+      />
+
       <PageHeader
         title="Izmir Airport Transfer – VIP Chauffeur Service"
         subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
@@ -74,23 +102,23 @@ const IzmirTransfer = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             Private Airport Transfer in Izmir
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Explore the Aegean coast with Meet Transfer. We offer premium airport
-            transfers from Adnan Menderes Airport (ADB) to popular destinations
-            including Çeşme, Alaçatı, Kuşadası, and historical Ephesus. Our
+          </h1>
+          <p className="text-muted-foreground leading-relaxed text-lg">
+            Explore the Aegean coast with Meet Transfer. We offer premium <strong>Izmir airport
+            transfers</strong> from <strong>Adnan Menderes Airport (ADB)</strong> to popular destinations
+            including <strong>Çeşme, Alaçatı, Kuşadası, and historical Ephesus</strong>. Our
             experienced drivers know the region well and provide comfortable
-            journeys in luxury Mercedes vehicles. Available 24/7 with flight
-            monitoring and meet & greet service.
+            journeys in luxury <strong>Mercedes vehicles</strong>. Available 24/7 with flight
+            monitoring and <strong>VIP meet & greet service</strong> for your <strong>private Izmir transfer</strong>.
           </p>
         </section>
 
         <FeatureList />
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">Popular Izmir Transfer Destinations</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -105,7 +133,7 @@ const IzmirTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet</h2>
+          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Izmir Transfers</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -118,12 +146,15 @@ const IzmirTransfer = () => {
           </Link>
         </section>
 
-        <PriceTable items={prices} title="Transfer Prices" />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Izmir Airport Transfer Prices</h2>
+          <PriceTable items={prices} title="Fixed Price Transfers" />
+        </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Izmir Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">Book Your Izmir Airport Transfer</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp
+            Get instant confirmation via WhatsApp for your Izmir transfer
           </p>
           <WhatsAppButton
             variant="large"
@@ -131,7 +162,10 @@ const IzmirTransfer = () => {
           />
         </div>
 
-        <FAQSection items={faqItems} />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Izmir Transfer FAQ</h2>
+          <FAQSection items={faqItems} />
+        </section>
       </div>
     </WebsiteLayout>
   );

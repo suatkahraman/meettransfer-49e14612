@@ -8,6 +8,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 
@@ -28,19 +29,19 @@ const prices = [
 
 const faqItems = [
   {
-    question: "What is included in the transfer price?",
+    question: "What is included in the Dalaman airport transfer price?",
     answer: "Our price includes meet & greet service at the airport, flight tracking, professional driver, luxury vehicle, complimentary water, WiFi, and all taxes.",
   },
   {
-    question: "How long is the transfer from Dalaman to Fethiye?",
+    question: "How long is the transfer from Dalaman Airport to Fethiye?",
     answer: "The transfer from Dalaman Airport to Fethiye takes approximately 45-50 minutes.",
   },
   {
-    question: "Do you provide transfers to Ölüdeniz?",
+    question: "Do you provide transfers to Ölüdeniz from Dalaman?",
     answer: "Yes, we provide direct transfers from Dalaman Airport to Ölüdeniz, including all beach resorts and hotels in the area.",
   },
   {
-    question: "Can you pick up from hotels as well?",
+    question: "Can you pick up from hotels for Dalaman transfers?",
     answer: "Absolutely! We provide both airport pickup and hotel pickup services throughout the region.",
   },
 ];
@@ -67,6 +68,33 @@ const vehicles = [
 const DalamanTransfer = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Dalaman Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
+        description="Premium Dalaman airport transfer service to Fethiye, Ölüdeniz, Marmaris, Göcek. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Dalaman transfer today!"
+        keywords="Dalaman airport transfer, DLM airport transfer, Fethiye airport transfer, Ölüdeniz transfer, Marmaris transfer, Göcek transfer, Dalaman VIP transfer, Dalaman private driver, Turquoise Coast transfer"
+        canonicalPath="/dalaman-transfer"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Dalaman', 'Fethiye', 'Ölüdeniz', 'Marmaris', 'Göcek', 'Kaş'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Destinations', url: '/destinations' },
+              { name: 'Dalaman Airport Transfer', url: '/dalaman-transfer' },
+            ],
+          },
+          { type: 'FAQPage', questions: faqItems },
+          {
+            type: 'Product',
+            name: 'Dalaman Airport Transfer Service',
+            description: 'Premium VIP airport transfer from Dalaman Airport (DLM) to Turquoise Coast destinations',
+            offers: { price: '35', priceCurrency: 'USD' },
+          },
+        ]}
+      />
+
       <PageHeader
         title="Dalaman Airport Transfer – VIP Chauffeur Service"
         subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
@@ -75,23 +103,23 @@ const DalamanTransfer = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             Private Airport Transfer in Dalaman
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
+          </h1>
+          <p className="text-muted-foreground leading-relaxed text-lg">
             Discover the beautiful Turquoise Coast with Meet Transfer. We provide
-            premium airport transfers from Dalaman Airport (DLM) to stunning
-            destinations including Fethiye, Ölüdeniz, Marmaris, and Göcek. Our
-            professional drivers and luxury vehicles ensure a comfortable journey
+            premium <strong>Dalaman airport transfers</strong> from <strong>Dalaman Airport (DLM)</strong> to stunning
+            destinations including <strong>Fethiye, Ölüdeniz, Marmaris, and Göcek</strong>. Our
+            professional drivers and luxury <strong>Mercedes vehicles</strong> ensure a comfortable journey
             through scenic coastal roads. With 24/7 availability and flight
-            tracking, we guarantee a stress-free start to your holiday.
+            tracking, we guarantee a stress-free start to your <strong>private Dalaman transfer</strong>.
           </p>
         </section>
 
         <FeatureList />
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">Popular Dalaman Transfer Destinations</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -106,7 +134,7 @@ const DalamanTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet</h2>
+          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Dalaman Transfers</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -119,12 +147,15 @@ const DalamanTransfer = () => {
           </Link>
         </section>
 
-        <PriceTable items={prices} title="Transfer Prices" />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Dalaman Airport Transfer Prices</h2>
+          <PriceTable items={prices} title="Fixed Price Transfers" />
+        </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Dalaman Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">Book Your Dalaman Airport Transfer</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp
+            Get instant confirmation via WhatsApp for your Dalaman transfer
           </p>
           <WhatsAppButton
             variant="large"
@@ -132,7 +163,10 @@ const DalamanTransfer = () => {
           />
         </div>
 
-        <FAQSection items={faqItems} />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Dalaman Transfer FAQ</h2>
+          <FAQSection items={faqItems} />
+        </section>
       </div>
     </WebsiteLayout>
   );
