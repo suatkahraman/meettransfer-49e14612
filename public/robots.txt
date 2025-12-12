@@ -14,4 +14,4 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://meettransfer.com/sitemap.xml
+Sitemap: https://meettransfer.app/sitemap.xml
