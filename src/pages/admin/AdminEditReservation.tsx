@@ -407,7 +407,6 @@ const AdminEditReservation = () => {
 
       // Update agency_reservation_details payment status
       const driverFee = parseFloat(formData.price) || 0;
-      const profit = agencyPrice - driverFee;
 
       const { error: detailsError } = await supabase
         .from('agency_reservation_details')
@@ -416,7 +415,6 @@ const AdminEditReservation = () => {
           customer_price: agencyPrice,
           agency_price_currency: agencyDetails.agency_price_currency,
           company_amount: driverFee, // Amount company charges for the transfer
-          agency_profit: profit,
           agency_notes: agencyDetails.agency_notes || null,
           payment_status: 'paid',
         } as any, {
@@ -517,7 +515,6 @@ const AdminEditReservation = () => {
     if (formData.agency_id && formData.agency_id !== 'none') {
       const driverFee = parseFloat(formData.price) || 0;
       const agencyPrice = parseFloat(agencyDetails.customer_price) || 0;
-      const profit = agencyPrice - driverFee;
 
       const { error: agencyError } = await supabase
         .from('agency_reservation_details')
@@ -526,7 +523,6 @@ const AdminEditReservation = () => {
           customer_price: agencyPrice,
           agency_price_currency: agencyDetails.agency_price_currency,
           company_amount: driverFee, // Amount company charges for the transfer
-          agency_profit: profit,
           agency_notes: agencyDetails.agency_notes || null,
           payment_status: agencyDetails.payment_status,
         } as any, {
