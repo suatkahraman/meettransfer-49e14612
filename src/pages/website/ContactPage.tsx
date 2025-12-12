@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const globalOffices = [
   {
@@ -18,7 +19,7 @@ const globalOffices = [
     city: "İstanbul Headquarters",
     address: "Istanbul Airport (IST) – VIP Meet & Greet Terminal Office",
     phone: "+90 532 174 8390",
-    email: "info@meettransfer.com",
+    email: "info@meettransfer.app",
   },
   {
     flag: "🇺🇸",
@@ -69,22 +70,39 @@ const ContactPage = () => {
 
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Contact Meet Transfer - 24/7 VIP Airport Transfer Support"
+        description="Contact Meet Transfer for premium airport transfers in Turkey. 24/7 WhatsApp support, global offices in Istanbul, USA, Germany, Dubai. Book your VIP transfer today!"
+        keywords="contact Meet Transfer, airport transfer booking, WhatsApp transfer booking, Turkey transfer contact, Istanbul transfer phone, VIP transfer support"
+        canonicalPath="/contact"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'LocalBusiness' },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Contact Us', url: '/contact' },
+            ],
+          },
+        ]}
+      />
+
       <PageHeader
         title="Contact Us"
         subtitle="We're Here to Help 24/7"
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
-        {/* Global Offices Section */}
+        {/* Main H1 */}
         <section>
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">
-              🌍 Meet Transfer – Global Office Locations
-            </h2>
-            <p className="text-muted-foreground">
-              Serving you from multiple locations worldwide
-            </p>
-          </div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center text-foreground">
+            Contact Meet Transfer - Global Office Locations
+          </h1>
+          <p className="text-center text-muted-foreground mb-8">
+            Serving you from multiple locations worldwide with 24/7 support
+          </p>
 
           <div className="grid md:grid-cols-2 gap-6">
             {globalOffices.map((office) => (
@@ -94,9 +112,9 @@ const ContactPage = () => {
                     <span className="text-4xl">{office.flag}</span>
                     <div className="flex-1 space-y-3">
                       <div>
-                        <h3 className="font-bold text-lg">
+                        <h2 className="font-bold text-lg">
                           {office.country} Office – {office.city}
-                        </h3>
+                        </h2>
                       </div>
                       
                       <div className="space-y-2 text-sm">
@@ -137,9 +155,9 @@ const ContactPage = () => {
 
         {/* WhatsApp CTA */}
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Fastest Way to Reach Us</h3>
+          <h2 className="text-xl font-bold mb-2">Fastest Way to Reach Us</h2>
           <p className="text-muted-foreground mb-4">
-            Get instant responses via WhatsApp
+            Get instant responses via WhatsApp for your airport transfer booking
           </p>
           <WhatsAppButton variant="large" />
         </div>
@@ -147,7 +165,7 @@ const ContactPage = () => {
         {/* Contact Form */}
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-xl font-bold mb-4">Send Us a Message</h3>
+            <h2 className="text-xl font-bold mb-4">Send Us a Message</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">

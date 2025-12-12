@@ -3,6 +3,7 @@ import PageHeader from "@/components/website/PageHeader";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { Check, Award, Users, MapPin, Clock, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const stats = [
   { value: "10+", label: "Years Experience" },
@@ -42,6 +43,25 @@ const cities = [
 const AboutPage = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="About Meet Transfer - Premium VIP Airport Transfer Service in Turkey"
+        description="Meet Transfer is Turkey's leading premium airport transfer service with 10+ years experience, 50,000+ completed transfers. Professional drivers, Mercedes fleet, 24/7 service."
+        keywords="about Meet Transfer, Turkey airport transfer company, VIP transfer service Turkey, professional chauffeur Turkey, luxury transfer company, airport transfer experience"
+        canonicalPath="/about"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'LocalBusiness' },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'About Us', url: '/about' },
+            ],
+          },
+        ]}
+      />
+
       <PageHeader
         title="About Meet Transfer"
         subtitle="Your Trusted Partner for Premium Airport Transfers"
@@ -50,10 +70,12 @@ const AboutPage = () => {
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         {/* Intro */}
         <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">Who We Are</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Meet Transfer is Turkey's leading premium airport transfer service,
-            providing luxury transportation across the country's most popular
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+            Who We Are - Turkey's Leading Airport Transfer Service
+          </h1>
+          <p className="text-muted-foreground leading-relaxed text-lg">
+            <strong>Meet Transfer</strong> is Turkey's leading <strong>premium airport transfer service</strong>,
+            providing <strong>luxury transportation</strong> across the country's most popular
             tourist destinations. Founded with a vision to offer travelers a
             seamless and comfortable journey, we have grown to become the trusted
             choice for discerning travelers, families, and business executives
@@ -61,8 +83,8 @@ const AboutPage = () => {
           </p>
           <p className="text-muted-foreground leading-relaxed">
             Our commitment to excellence is reflected in every aspect of our
-            service – from our immaculately maintained Mercedes fleet to our
-            professional, English-speaking drivers who undergo rigorous training.
+            service – from our immaculately maintained <strong>Mercedes fleet</strong> to our
+            <strong> professional, English-speaking drivers</strong> who undergo rigorous training.
             We believe that your journey should be as enjoyable as your destination.
           </p>
         </section>
@@ -85,7 +107,7 @@ const AboutPage = () => {
 
         {/* Values */}
         <section>
-          <h2 className="text-2xl font-bold mb-6">Why Choose Us</h2>
+          <h2 className="text-2xl font-bold mb-6">Why Choose Meet Transfer</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {values.map((value) => (
               <Card key={value.title} className="hover:shadow-lg transition-shadow">
@@ -107,7 +129,7 @@ const AboutPage = () => {
 
         {/* Cities */}
         <section className="bg-card rounded-xl p-8 shadow-sm">
-          <h2 className="text-2xl font-bold mb-4">Cities We Serve</h2>
+          <h2 className="text-2xl font-bold mb-4">Cities We Serve Across Turkey</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {cities.map((city) => (
               <div
@@ -123,9 +145,9 @@ const AboutPage = () => {
 
         {/* Meet & Greet */}
         <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">Our Meet & Greet Service</h2>
+          <h2 className="text-2xl font-bold mb-4">Our VIP Meet & Greet Service</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Every airport transfer includes our signature Meet & Greet service.
+            Every <strong>airport transfer</strong> includes our signature <strong>Meet & Greet service</strong>.
             Your driver will be waiting in the arrivals hall with a personalized
             name board. We monitor your flight in real-time, so even if there are
             delays, your driver will be there when you land. No waiting, no

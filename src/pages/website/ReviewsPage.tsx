@@ -3,6 +3,7 @@ import PageHeader from "@/components/website/PageHeader";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const reviews = [
   {
@@ -52,14 +53,36 @@ const reviews = [
 const ReviewsPage = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Customer Reviews - Meet Transfer Airport Transfer Service"
+        description="Read reviews from 2,500+ satisfied customers. 4.9/5 rating for Meet Transfer's VIP airport transfer service in Turkey. Trusted by travelers worldwide."
+        keywords="Meet Transfer reviews, airport transfer reviews Turkey, VIP transfer testimonials, customer reviews Turkey transfer, trusted transfer service"
+        canonicalPath="/reviews"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'LocalBusiness' },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Customer Reviews', url: '/reviews' },
+            ],
+          },
+        ]}
+      />
+
       <PageHeader
         title="Customer Reviews"
         subtitle="What Our Guests Say About Us"
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
-        {/* Overall Rating */}
+        {/* Main H1 and Overall Rating */}
         <section className="text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
+            Trusted by Thousands of Travelers
+          </h1>
           <div className="flex items-center justify-center gap-1 mb-2">
             {[...Array(5)].map((_, i) => (
               <Star
@@ -70,7 +93,7 @@ const ReviewsPage = () => {
           </div>
           <div className="text-4xl font-bold mb-1">4.9</div>
           <div className="text-muted-foreground">
-            Based on 2,500+ reviews
+            Based on 2,500+ verified reviews
           </div>
         </section>
 
@@ -108,9 +131,9 @@ const ReviewsPage = () => {
 
         {/* External Reviews */}
         <section className="bg-card rounded-xl p-8 shadow-sm">
-          <h3 className="text-xl font-bold mb-4 text-center">
+          <h2 className="text-xl font-bold mb-4 text-center">
             Find Us On
-          </h3>
+          </h2>
           <div className="flex flex-wrap items-center justify-center gap-6">
             <a
               href="https://www.google.com/maps"
@@ -141,7 +164,7 @@ const ReviewsPage = () => {
 
         {/* CTA */}
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Experience It Yourself</h3>
+          <h2 className="text-xl font-bold mb-2">Experience It Yourself</h2>
           <p className="text-muted-foreground mb-4">
             Join thousands of satisfied customers
           </p>

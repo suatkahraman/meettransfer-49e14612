@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const destinations = [
   {
@@ -77,19 +78,41 @@ const destinations = [
 const DestinationsPage = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Airport Transfer Destinations in Turkey - Meet Transfer"
+        description="VIP airport transfers to all major Turkey destinations: Istanbul, Antalya, Bodrum, Dalaman, Izmir, Cappadocia. Mercedes fleet, professional drivers, 24/7 service."
+        keywords="Turkey airport transfer destinations, Istanbul transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, VIP transfer Turkey"
+        canonicalPath="/destinations"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Destinations', url: '/destinations' },
+            ],
+          },
+        ]}
+      />
+
       <PageHeader
-        title="🌍 Meet Transfer – VIP Destinations Across Turkey"
+        title="VIP Destinations Across Turkey"
         subtitle="Premium Airport Transfers & Private Chauffeur Services"
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
-        {/* Intro Section */}
-        <div className="text-center mb-10 md:mb-14">
+        {/* Main H1 */}
+        <section className="text-center mb-10 md:mb-14">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+            Airport Transfer Destinations in Turkey
+          </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Discover the top destinations we serve across Turkey. From luxury marinas to historic city centers, 
-            Meet Transfer provides premium airport transfers, private chauffeurs, and VIP minivan service in every major region.
+            Discover the top destinations we serve across Turkey. From <strong>luxury marinas</strong> to <strong>historic city centers</strong>, 
+            Meet Transfer provides <strong>premium airport transfers</strong>, <strong>private chauffeurs</strong>, and <strong>VIP minivan service</strong> in every major region.
           </p>
-        </div>
+        </section>
 
         {/* Destinations Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -156,7 +179,7 @@ const DestinationsPage = () => {
                     variant="outline"
                   >
                     <Link to={destination.link}>
-                      Book Now
+                      Book {destination.name} Transfer
                     </Link>
                   </Button>
                 </CardContent>
@@ -167,16 +190,16 @@ const DestinationsPage = () => {
 
         {/* CTA Section */}
         <div className="mt-12 md:mt-16 text-center bg-muted/50 rounded-2xl p-6 md:p-10">
-          <h3 className="text-xl md:text-2xl font-bold text-foreground mb-3">
-            ⭐ Premium VIP Fleet Available
-          </h3>
+          <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3">
+            Premium VIP Fleet Available
+          </h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            All destinations feature our luxury Mercedes Vito, V-Class, VIP Minibus, and Maybach vehicles 
+            All destinations feature our luxury <strong>Mercedes Vito, V-Class, VIP Minibus, and Maybach</strong> vehicles 
             with professional chauffeurs, flight tracking, and 24/7 support.
           </p>
           <Button asChild size="lg">
             <Link to="/whatsapp-booking">
-              📱 Book via WhatsApp
+              Book via WhatsApp
             </Link>
           </Button>
         </div>
