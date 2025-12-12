@@ -408,18 +408,41 @@ const AdminEditReservation = () => {
       // Update agency_reservation_details payment status
       const driverFee = parseFloat(formData.price) || 0;
 
-      const { error: detailsError } = await supabase
+      // Check if record exists first
+      const { data: existingDetail } = await supabase
         .from('agency_reservation_details')
-        .upsert({
-          reservation_id: id,
-          customer_price: agencyPrice,
-          agency_price_currency: agencyDetails.agency_price_currency,
-          company_amount: driverFee, // Amount company charges for the transfer
-          agency_notes: agencyDetails.agency_notes || null,
-          payment_status: 'paid',
-        } as any, {
-          onConflict: 'reservation_id'
-        });
+        .select('id')
+        .eq('reservation_id', id!)
+        .maybeSingle();
+
+      let detailsError;
+      if (existingDetail) {
+        // Update existing record
+        const { error } = await supabase
+          .from('agency_reservation_details')
+          .update({
+            customer_price: agencyPrice,
+            agency_price_currency: agencyDetails.agency_price_currency,
+            company_amount: driverFee,
+            agency_notes: agencyDetails.agency_notes || null,
+            payment_status: 'paid',
+          })
+          .eq('reservation_id', id!);
+        detailsError = error;
+      } else {
+        // Insert new record
+        const { error } = await supabase
+          .from('agency_reservation_details')
+          .insert({
+            reservation_id: id,
+            customer_price: agencyPrice,
+            agency_price_currency: agencyDetails.agency_price_currency,
+            company_amount: driverFee,
+            agency_notes: agencyDetails.agency_notes || null,
+            payment_status: 'paid',
+          });
+        detailsError = error;
+      }
 
       if (detailsError) throw detailsError;
 
@@ -516,18 +539,41 @@ const AdminEditReservation = () => {
       const driverFee = parseFloat(formData.price) || 0;
       const agencyPrice = parseFloat(agencyDetails.customer_price) || 0;
 
-      const { error: agencyError } = await supabase
+      // Check if record exists first
+      const { data: existingAgencyDetail } = await supabase
         .from('agency_reservation_details')
-        .upsert({
-          reservation_id: id,
-          customer_price: agencyPrice,
-          agency_price_currency: agencyDetails.agency_price_currency,
-          company_amount: driverFee, // Amount company charges for the transfer
-          agency_notes: agencyDetails.agency_notes || null,
-          payment_status: agencyDetails.payment_status,
-        } as any, {
-          onConflict: 'reservation_id'
-        });
+        .select('id')
+        .eq('reservation_id', id!)
+        .maybeSingle();
+
+      let agencyError;
+      if (existingAgencyDetail) {
+        // Update existing record
+        const { error } = await supabase
+          .from('agency_reservation_details')
+          .update({
+            customer_price: agencyPrice,
+            agency_price_currency: agencyDetails.agency_price_currency,
+            company_amount: driverFee,
+            agency_notes: agencyDetails.agency_notes || null,
+            payment_status: agencyDetails.payment_status,
+          })
+          .eq('reservation_id', id!);
+        agencyError = error;
+      } else {
+        // Insert new record
+        const { error } = await supabase
+          .from('agency_reservation_details')
+          .insert({
+            reservation_id: id,
+            customer_price: agencyPrice,
+            agency_price_currency: agencyDetails.agency_price_currency,
+            company_amount: driverFee,
+            agency_notes: agencyDetails.agency_notes || null,
+            payment_status: agencyDetails.payment_status,
+          });
+        agencyError = error;
+      }
 
       if (agencyError) {
         console.error('Failed to save agency details:', agencyError);
