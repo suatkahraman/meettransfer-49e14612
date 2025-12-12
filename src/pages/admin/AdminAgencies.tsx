@@ -21,10 +21,14 @@ interface Agency {
   updated_at: string;
 }
 
+interface AgencyWithCalculatedBalance extends Agency {
+  calculatedBalance: number;
+}
+
 const AdminAgencies = () => {
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
-  const [agencies, setAgencies] = useState<Agency[]>([]);
+  const [agencies, setAgencies] = useState<AgencyWithCalculatedBalance[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -37,16 +41,61 @@ const AdminAgencies = () => {
   });
 
   const fetchAgencies = async () => {
-    const { data, error } = await supabase
+    // Fetch agencies
+    const { data: agenciesData, error: agenciesError } = await supabase
       .from('agencies')
       .select('*')
       .order('agency_name');
     
-    if (error) {
+    if (agenciesError) {
       toast.error('Acenteler yüklenemedi');
       return;
     }
-    setAgencies(data || []);
+
+    // Calculate balance for each agency based on completed reservations and payments
+    const agenciesWithBalances = await Promise.all(
+      (agenciesData || []).map(async (agency) => {
+        // Get all completed reservations for this agency with their agency_reservation_details
+        const { data: reservations } = await supabase
+          .from('reservations')
+          .select('id, status')
+          .eq('agency_id', agency.id)
+          .eq('status', 'completed');
+
+        let totalAgencyPrice = 0;
+
+        if (reservations && reservations.length > 0) {
+          // Get agency_reservation_details for these reservations
+          const reservationIds = reservations.map(r => r.id);
+          const { data: details } = await supabase
+            .from('agency_reservation_details')
+            .select('customer_price')
+            .in('reservation_id', reservationIds);
+
+          if (details) {
+            totalAgencyPrice = details.reduce((sum, d) => sum + (parseFloat(String(d.customer_price)) || 0), 0);
+          }
+        }
+
+        // Get total payments received for this agency
+        const { data: payments } = await supabase
+          .from('agency_payments')
+          .select('amount')
+          .eq('agency_id', agency.id);
+
+        const totalPayments = payments?.reduce((sum, p) => sum + (parseFloat(String(p.amount)) || 0), 0) || 0;
+
+        // Calculate remaining balance: total agency prices - payments received
+        const calculatedBalance = totalAgencyPrice - totalPayments;
+
+        return {
+          ...agency,
+          calculatedBalance,
+        };
+      })
+    );
+
+    setAgencies(agenciesWithBalances);
     setLoading(false);
   };
 
@@ -271,8 +320,8 @@ const AdminAgencies = () => {
                   {/* Balance Display */}
                   <div className="flex items-center justify-between p-2 bg-muted rounded-lg">
                     <span className="text-sm text-muted-foreground">Bakiye</span>
-                    <span className={`font-bold ${(agency.balance || 0) < 0 ? 'text-destructive' : 'text-green-600'}`}>
-                      ₺{(agency.balance || 0).toFixed(2)}
+                    <span className={`font-bold ${agency.calculatedBalance > 0 ? 'text-green-600' : agency.calculatedBalance < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                      ₺{agency.calculatedBalance.toFixed(2)}
                     </span>
                   </div>
 
