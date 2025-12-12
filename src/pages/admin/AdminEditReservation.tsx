@@ -1258,34 +1258,6 @@ const AdminEditReservation = () => {
                       />
                     </div>
 
-                    {/* Collect Payment Button */}
-                    {agencyDetails.customer_price && agencyDetails.payment_status !== 'paid' && (
-                      <Button
-                        type="button"
-                        onClick={handleCollectPayment}
-                        disabled={collectingPayment}
-                        className="w-full bg-green-600 hover:bg-green-700"
-                      >
-                        {collectingPayment ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Tahsil Ediliyor...
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Ödeme Tahsil Et ({getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)})
-                          </>
-                        )}
-                      </Button>
-                    )}
-
-                    {agencyDetails.payment_status === 'paid' && (
-                      <div className="flex items-center gap-2 p-3 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-700 dark:text-green-300">
-                        <CheckCircle className="h-5 w-5" />
-                        <span className="font-medium">Ödeme Tahsil Edildi</span>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               )}
