@@ -3,6 +3,7 @@ import PageHeader from "@/components/website/PageHeader";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plane, Car, Anchor, Waves, Building, Gift } from "lucide-react";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const services = [
   {
@@ -78,14 +79,36 @@ const services = [
 const ServicesPage = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="VIP Airport Transfer Services in Turkey - Meet Transfer"
+        description="Premium VIP airport transfer and private chauffeur services across Turkey. Istanbul, Antalya, Bodrum, Dalaman, Izmir, Cappadocia. Mercedes fleet, 24/7 service."
+        keywords="VIP airport transfer Turkey, private chauffeur service, luxury transfer service, Istanbul airport transfer, Antalya airport transfer, Bodrum airport transfer, Turkey transfer services, Mercedes VIP transfer"
+        canonicalPath="/services"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Services', url: '/services' },
+            ],
+          },
+        ]}
+      />
+
       <PageHeader
-        title="🌍 Premium VIP Airport & Chauffeur Services"
+        title="Premium VIP Airport & Chauffeur Services"
         subtitle="Luxury transfers across Turkey's top destinations"
       />
 
       <div className="max-w-7xl mx-auto px-4 py-12">
-        {/* Intro Section */}
-        <div className="mb-12 text-center">
+        {/* Main H1 */}
+        <section className="mb-12 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
+            VIP Airport Transfer Services Across Turkey
+          </h1>
           <div className="max-w-4xl mx-auto bg-card rounded-2xl shadow-lg p-8 border border-border">
             <div className="flex justify-center gap-4 text-4xl mb-6">
               <span>🚘</span>
@@ -94,13 +117,13 @@ const ServicesPage = () => {
               <span>⭐</span>
             </div>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Meet Transfer provides luxury airport transfers, private chauffeur service, and VIP minivan 
-              transportation across Turkey's most important airports and holiday destinations. Our fleet includes 
+              <strong>Meet Transfer</strong> provides <strong>luxury airport transfers</strong>, <strong>private chauffeur service</strong>, and <strong>VIP minivan 
+              transportation</strong> across Turkey's most important airports and holiday destinations. Our fleet includes 
               <span className="text-foreground font-medium"> Mercedes Vito, Mercedes V-Class, VIP Minibuses, and Maybach </span> 
               options. All transfers include professional chauffeurs, flight tracking, meet & greet, bottled water, and 24/7 support.
             </p>
           </div>
-        </div>
+        </section>
 
         {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

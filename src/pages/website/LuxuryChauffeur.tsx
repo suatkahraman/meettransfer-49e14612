@@ -4,6 +4,7 @@ import FeatureList from "@/components/website/FeatureList";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { Check, Star, Clock, Shield, Award, Car } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const services = [
   {
@@ -47,6 +48,26 @@ const features = [
 const LuxuryChauffeur = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Luxury Chauffeur Service Turkey - VIP Private Driver | Meet Transfer"
+        description="Premium luxury chauffeur service in Turkey. Business travel, event transportation, VIP airport service, full-day hire. Mercedes fleet, professional drivers, 24/7 service."
+        keywords="luxury chauffeur Turkey, VIP private driver, business travel Turkey, event transportation, hourly chauffeur service, Mercedes chauffeur, private driver Istanbul, executive car service"
+        canonicalPath="/luxury-chauffeur"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Izmir'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Services', url: '/services' },
+              { name: 'Luxury Chauffeur', url: '/luxury-chauffeur' },
+            ],
+          },
+        ]}
+      />
+
       <PageHeader
         title="Luxury Chauffeur Service"
         subtitle="Premium Transportation for Discerning Travelers"
@@ -55,14 +76,14 @@ const LuxuryChauffeur = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">
-            Experience True Luxury Travel
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Meet Transfer's luxury chauffeur service offers an unparalleled
-            travel experience across Turkey. Whether you need airport transfers,
-            business travel, or a full-day dedicated service, our professional
-            chauffeurs and premium Mercedes fleet ensure you travel in comfort
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+            Experience True Luxury Chauffeur Travel in Turkey
+          </h1>
+          <p className="text-muted-foreground leading-relaxed text-lg">
+            <strong>Meet Transfer's luxury chauffeur service</strong> offers an unparalleled
+            travel experience across Turkey. Whether you need <strong>airport transfers</strong>,
+            <strong> business travel</strong>, or a <strong>full-day dedicated service</strong>, our professional
+            chauffeurs and premium <strong>Mercedes fleet</strong> ensure you travel in comfort
             and style. Every journey is tailored to your needs with meticulous
             attention to detail.
           </p>
@@ -71,7 +92,7 @@ const LuxuryChauffeur = () => {
         <FeatureList />
 
         <section>
-          <h2 className="text-2xl font-bold mb-6">Our Services</h2>
+          <h2 className="text-2xl font-bold mb-6">Our Luxury Chauffeur Services</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service) => (
               <Card key={service.title} className="hover:shadow-lg transition-shadow">
@@ -90,7 +111,7 @@ const LuxuryChauffeur = () => {
         </section>
 
         <section className="bg-card rounded-xl p-8 shadow-sm">
-          <h2 className="text-2xl font-bold mb-6">What's Included</h2>
+          <h2 className="text-2xl font-bold mb-6">What's Included in Our Chauffeur Service</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {features.map((feature) => (
               <div key={feature} className="flex items-center gap-3">
@@ -104,7 +125,7 @@ const LuxuryChauffeur = () => {
         </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Luxury Chauffeur</h3>
+          <h2 className="text-xl font-bold mb-2">Book Your Luxury Chauffeur</h2>
           <p className="text-muted-foreground mb-4">
             Contact us for personalized service and pricing
           </p>

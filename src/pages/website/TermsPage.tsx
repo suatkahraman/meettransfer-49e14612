@@ -1,15 +1,37 @@
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const TermsPage = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Terms & Conditions - Meet Transfer Airport Transfer Service"
+        description="Terms and conditions for Meet Transfer airport transfer services. Booking, payment, cancellation policy, waiting time, and privacy information."
+        keywords="Meet Transfer terms, transfer service terms, cancellation policy, booking terms, airport transfer conditions"
+        canonicalPath="/terms"
+        noIndex={false}
+      />
+      <SchemaOrg
+        schemas={[
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Terms & Conditions', url: '/terms' },
+            ],
+          },
+        ]}
+      />
+
       <PageHeader
         title="Terms & Conditions"
         subtitle="Please read carefully before booking"
       />
 
       <div className="max-w-4xl mx-auto px-4 py-8 prose prose-sm max-w-none">
+        <h1 className="text-3xl font-bold mb-6 text-foreground">Meet Transfer - Terms & Conditions</h1>
+
         <h2>1. Booking & Confirmation</h2>
         <p>
           All bookings are subject to availability. Upon successful booking,
@@ -88,9 +110,9 @@ const TermsPage = () => {
 
         <h2>Contact Information</h2>
         <p>
-          Meet Transfer<br />
-          Email: info@meettransfer.com<br />
-          Phone/WhatsApp: +90 530 123 4567<br />
+          <strong>Meet Transfer</strong><br />
+          Email: info@meettransfer.app<br />
+          Phone/WhatsApp: +90 532 174 8390<br />
           Address: Istanbul, Turkey
         </p>
 

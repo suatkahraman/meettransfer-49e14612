@@ -3,6 +3,7 @@ import PageHeader from "@/components/website/PageHeader";
 import VehicleCard from "@/components/website/VehicleCard";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 import mercedesMaybachImage from "@/assets/mercedes-maybach-interior.jpg";
@@ -48,6 +49,30 @@ const FleetPage = () => {
 
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Mercedes VIP Fleet - Luxury Transfer Vehicles | Meet Transfer"
+        description="Explore our premium Mercedes fleet: Vito VIP, V-Class, Maybach, Sprinter Minibus. Luxury airport transfer vehicles with leather seats, WiFi, professional drivers."
+        keywords="Mercedes VIP transfer, luxury transfer fleet, Mercedes Vito transfer, Mercedes Maybach chauffeur, VIP minibus Turkey, airport transfer vehicles, Mercedes V-Class transfer"
+        canonicalPath="/fleet"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Our Fleet', url: '/fleet' },
+            ],
+          },
+          {
+            type: 'Product',
+            name: 'Mercedes VIP Transfer Fleet',
+            description: 'Premium Mercedes vehicles for luxury airport transfers including Vito VIP, V-Class, Maybach, and Sprinter Minibus',
+          },
+        ]}
+      />
+
       <PageHeader
         title="Our Fleet"
         subtitle="Premium Mercedes Vehicles for Every Journey"
@@ -55,13 +80,13 @@ const FleetPage = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none text-center">
-          <h2 className="text-2xl font-bold mb-4">
-            Travel in Style & Comfort
-          </h2>
-          <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Our carefully curated fleet of Mercedes vehicles ensures you travel
-            in the utmost comfort and style. From efficient airport transfers to
-            luxury chauffeur service, we have the perfect vehicle for every
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+            Mercedes VIP Fleet - Travel in Style & Comfort
+          </h1>
+          <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto text-lg">
+            Our carefully curated fleet of <strong>Mercedes vehicles</strong> ensures you travel
+            in the utmost comfort and style. From efficient <strong>airport transfers</strong> to
+            <strong> luxury chauffeur service</strong>, we have the perfect vehicle for every
             occasion. All vehicles are regularly maintained and cleaned to the
             highest standards.
           </p>
@@ -74,9 +99,9 @@ const FleetPage = () => {
         </div>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Need Help Choosing?</h3>
+          <h2 className="text-xl font-bold mb-2">Need Help Choosing?</h2>
           <p className="text-muted-foreground mb-4">
-            Contact us and we'll recommend the best vehicle for your needs
+            Contact us and we'll recommend the best vehicle for your transfer needs
           </p>
           <WhatsAppButton
             variant="large"

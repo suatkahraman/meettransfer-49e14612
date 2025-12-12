@@ -8,6 +8,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 
@@ -65,6 +66,33 @@ const vehicles = [
 const EphesusPamukkale = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Ephesus & Pamukkale Transfer - Private Tours & VIP Transfers | Meet Transfer"
+        description="Private transfers and tours to Ephesus and Pamukkale. Cruise shore excursions from Kuşadası, guided tours with licensed guides. Mercedes fleet, professional drivers."
+        keywords="Ephesus transfer, Pamukkale transfer, Ephesus tour, Pamukkale tour, Kuşadası cruise excursion, Ephesus private tour, Hierapolis transfer, Turkey ancient sites tour, Selçuk transfer"
+        canonicalPath="/ephesus-pamukkale"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Ephesus', 'Pamukkale', 'Kuşadası', 'Selçuk', 'Izmir'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Destinations', url: '/destinations' },
+              { name: 'Ephesus & Pamukkale', url: '/ephesus-pamukkale' },
+            ],
+          },
+          { type: 'FAQPage', questions: faqItems },
+          {
+            type: 'Product',
+            name: 'Ephesus & Pamukkale Transfer Service',
+            description: 'Private transfers and guided tours to ancient Ephesus and Pamukkale cotton castle',
+            offers: { price: '30', priceCurrency: 'EUR' },
+          },
+        ]}
+      />
+
       <PageHeader
         title="Ephesus & Pamukkale Transfer – VIP Chauffeur Service"
         subtitle="Mercedes Vito, V-Class, Maybach | Private Tours & Transfers"
@@ -73,15 +101,15 @@ const EphesusPamukkale = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             Private Transfers to Ephesus & Pamukkale
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Explore Turkey's most famous ancient sites with Meet Transfer. We
-            provide private transfers and tours to the spectacular ruins of
-            Ephesus, the cotton castle terraces of Pamukkale, and other
-            historical gems like the House of Virgin Mary and Hierapolis.
-            Perfect for cruise passengers from Kuşadası or travelers from
+          </h1>
+          <p className="text-muted-foreground leading-relaxed text-lg">
+            Explore Turkey's most famous ancient sites with <strong>Meet Transfer</strong>. We
+            provide <strong>private transfers and tours</strong> to the spectacular ruins of
+            <strong> Ephesus</strong>, the cotton castle terraces of <strong>Pamukkale</strong>, and other
+            historical gems like the <strong>House of Virgin Mary</strong> and <strong>Hierapolis</strong>.
+            Perfect for <strong>cruise passengers from Kuşadası</strong> or travelers from
             Izmir and surrounding regions. Our experienced drivers and optional
             licensed guides ensure an unforgettable cultural experience.
           </p>
@@ -90,7 +118,7 @@ const EphesusPamukkale = () => {
         <FeatureList />
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Historical Sites</h2>
+          <h2 className="text-2xl font-bold mb-4">Historical Sites We Cover</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -105,7 +133,7 @@ const EphesusPamukkale = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet</h2>
+          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Historical Tours</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -118,12 +146,15 @@ const EphesusPamukkale = () => {
           </Link>
         </section>
 
-        <PriceTable items={prices} title="Transfer Prices" />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Ephesus & Pamukkale Transfer Prices</h2>
+          <PriceTable items={prices} title="Fixed Price Transfers" />
+        </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Historical Tour</h3>
+          <h2 className="text-xl font-bold mb-2">Book Your Historical Tour</h2>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp
+            Get instant confirmation via WhatsApp for your Ephesus or Pamukkale transfer
           </p>
           <WhatsAppButton
             variant="large"
@@ -131,7 +162,10 @@ const EphesusPamukkale = () => {
           />
         </div>
 
-        <FAQSection items={faqItems} />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Ephesus & Pamukkale FAQ</h2>
+          <FAQSection items={faqItems} />
+        </section>
       </div>
     </WebsiteLayout>
   );
