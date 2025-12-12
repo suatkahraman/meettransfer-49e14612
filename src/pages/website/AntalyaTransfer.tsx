@@ -8,6 +8,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
 
@@ -28,7 +29,7 @@ const prices = [
 
 const faqItems = [
   {
-    question: "What is included in the transfer price?",
+    question: "What is included in the Antalya airport transfer price?",
     answer: "Our price includes meet & greet service at the airport, flight tracking, professional driver, luxury vehicle, complimentary water, WiFi, and all taxes.",
   },
   {
@@ -36,11 +37,11 @@ const faqItems = [
     answer: "The transfer from Antalya Airport to Belek takes approximately 30-40 minutes depending on traffic conditions.",
   },
   {
-    question: "Can you accommodate child seats?",
+    question: "Can you accommodate child seats for Antalya transfers?",
     answer: "Yes, we provide child seats and booster seats free of charge upon request. Please mention this when booking.",
   },
   {
-    question: "Do you offer return transfers?",
+    question: "Do you offer return transfers from Antalya Airport?",
     answer: "Yes, we offer both one-way and round-trip transfers. You can book your return transfer at the same time for added convenience.",
   },
 ];
@@ -67,6 +68,33 @@ const vehicles = [
 const AntalyaTransfer = () => {
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="Antalya Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
+        description="Premium Antalya airport transfer service to Belek, Side, Alanya, Kemer. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Antalya transfer today!"
+        keywords="Antalya airport transfer, AYT airport transfer, Belek airport transfer, Side airport transfer, Alanya airport transfer, Kemer transfer, Antalya VIP transfer, Antalya private driver, Turkey Riviera transfer"
+        canonicalPath="/antalya-transfer"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Antalya', 'Belek', 'Side', 'Alanya', 'Kemer', 'Lara'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Destinations', url: '/destinations' },
+              { name: 'Antalya Airport Transfer', url: '/antalya-transfer' },
+            ],
+          },
+          { type: 'FAQPage', questions: faqItems },
+          {
+            type: 'Product',
+            name: 'Antalya Airport Transfer Service',
+            description: 'Premium VIP airport transfer from Antalya Airport (AYT) to all beach resorts',
+            offers: { price: '35', priceCurrency: 'USD' },
+          },
+        ]}
+      />
+
       <PageHeader
         title="Antalya Airport Transfer – VIP Chauffeur Service"
         subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
@@ -75,23 +103,23 @@ const AntalyaTransfer = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             Private Airport Transfer in Antalya
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Welcome to the Turkish Riviera! Meet Transfer provides premium airport
-            transfers from Antalya Airport (AYT) to all popular beach resorts
-            including Lara, Belek, Side, Alanya, and Kemer. Our professional drivers
-            ensure a comfortable and stress-free journey to your hotel. With meet &
-            greet service, flight monitoring, and luxury vehicles, your vacation
-            starts the moment you land.
+          </h1>
+          <p className="text-muted-foreground leading-relaxed text-lg">
+            Welcome to the Turkish Riviera! Meet Transfer provides premium <strong>Antalya airport
+            transfers</strong> from <strong>Antalya Airport (AYT)</strong> to all popular beach resorts
+            including <strong>Lara, Belek, Side, Alanya, and Kemer</strong>. Our professional drivers
+            ensure a comfortable and stress-free journey to your hotel. With <strong>VIP meet &
+            greet service</strong>, flight monitoring, and luxury <strong>Mercedes vehicles</strong>, your vacation
+            starts the moment you land. Book your <strong>private Antalya transfer</strong> today!
           </p>
         </section>
 
         <FeatureList />
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">Popular Antalya Transfer Destinations</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -106,7 +134,7 @@ const AntalyaTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet</h2>
+          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Antalya Transfers</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -119,12 +147,15 @@ const AntalyaTransfer = () => {
           </Link>
         </section>
 
-        <PriceTable items={prices} title="Transfer Prices" />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Antalya Airport Transfer Prices</h2>
+          <PriceTable items={prices} title="Fixed Price Transfers" />
+        </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Antalya Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">Book Your Antalya Airport Transfer</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp
+            Get instant confirmation via WhatsApp for your Antalya transfer
           </p>
           <WhatsAppButton
             variant="large"
@@ -132,7 +163,10 @@ const AntalyaTransfer = () => {
           />
         </div>
 
-        <FAQSection items={faqItems} />
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Antalya Transfer FAQ</h2>
+          <FAQSection items={faqItems} />
+        </section>
       </div>
     </WebsiteLayout>
   );
