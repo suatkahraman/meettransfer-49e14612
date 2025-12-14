@@ -368,7 +368,78 @@ const ReservationForm = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Account Section */}
+            {/* Transfer Details Section - Pick-up and Drop-off */}
+            <div className="space-y-4 pb-4 border-b">
+              <h3 className="font-semibold text-lg">Transfer Details</h3>
+              
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Pick-up Point
+                </Label>
+                <GooglePlacesAutocomplete
+                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
+                  placeholder="Enter Pick-up Point"
+                  className={errors.pickup ? 'border-destructive' : ''}
+                  maxLength={200}
+                />
+                {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Drop-off Location
+                </Label>
+                <GooglePlacesAutocomplete
+                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
+                  placeholder="Hotel name or full address"
+                  className={errors.dropoff ? 'border-destructive' : ''}
+                  maxLength={200}
+                />
+                {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Date
+                  </Label>
+                  <Input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({...formData, date: e.target.value})}
+                    className={errors.date ? 'border-destructive' : ''}
+                  />
+                  {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label>Time</Label>
+                  <Input
+                    type="time"
+                    value={formData.time}
+                    onChange={(e) => setFormData({...formData, time: e.target.value})}
+                    className={errors.time ? 'border-destructive' : ''}
+                  />
+                  {errors.time && <p className="text-sm text-destructive">{errors.time}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Plane className="h-4 w-4" />
+                    Flight
+                  </Label>
+                  <Input
+                    placeholder="TK1234"
+                    value={formData.flightNumber}
+                    onChange={(e) => setFormData({...formData, flightNumber: e.target.value})}
+                    maxLength={20}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Passengers Section */}
             <div className="space-y-4 pb-4 border-b">
               <h3 className="font-semibold text-lg">Passengers</h3>
               
@@ -531,76 +602,8 @@ const ReservationForm = () => {
               )}
             </div>
 
-            {/* Transfer Details Section */}
+            {/* Vehicle & Payment Section */}
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg">Transfer Details</h3>
-              
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Pick-up Point
-                </Label>
-                <GooglePlacesAutocomplete
-                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
-                  placeholder="Enter Pick-up Point"
-                  className={errors.pickup ? 'border-destructive' : ''}
-                  maxLength={200}
-                />
-                {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Drop-off Location
-                </Label>
-                <GooglePlacesAutocomplete
-                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
-                  placeholder="Hotel name or full address"
-                  className={errors.dropoff ? 'border-destructive' : ''}
-                  maxLength={200}
-                />
-                {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Date
-                  </Label>
-                  <Input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    className={errors.date ? 'border-destructive' : ''}
-                  />
-                  {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Time</Label>
-                  <Input
-                    type="time"
-                    value={formData.time}
-                    onChange={(e) => setFormData({...formData, time: e.target.value})}
-                    className={errors.time ? 'border-destructive' : ''}
-                  />
-                  {errors.time && <p className="text-sm text-destructive">{errors.time}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Plane className="h-4 w-4" />
-                    Flight
-                  </Label>
-                  <Input
-                    placeholder="TK1234"
-                    value={formData.flightNumber}
-                    onChange={(e) => setFormData({...formData, flightNumber: e.target.value})}
-                    maxLength={20}
-                  />
-                </div>
-              </div>
-
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
