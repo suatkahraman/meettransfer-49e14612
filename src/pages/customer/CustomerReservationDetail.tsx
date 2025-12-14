@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -77,6 +78,7 @@ const CustomerReservationDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { emailAdminPriceAccepted } = useEmailNotifications();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -130,7 +132,7 @@ const CustomerReservationDetail = () => {
 
       if (error) throw error;
 
-      // Notify admin
+      // Notify admin (in-app)
       try {
         await supabase.functions.invoke('create-notification', {
           body: {
@@ -143,6 +145,13 @@ const CustomerReservationDetail = () => {
         });
       } catch (e) {
         console.error('Failed to notify admin:', e);
+      }
+
+      // Send email to admin about price acceptance
+      try {
+        await emailAdminPriceAccepted(reservation.id);
+      } catch (e) {
+        console.error('Failed to send admin email:', e);
       }
 
       toast.success('Price accepted! Your transfer is confirmed.');

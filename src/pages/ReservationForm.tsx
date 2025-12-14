@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -40,6 +41,7 @@ const vehicleTypes = [
 const ReservationForm = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { emailAdminNewReservation } = useEmailNotifications();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -254,7 +256,7 @@ const ReservationForm = () => {
 
       if (reservationError) throw reservationError;
 
-      // Notify admin about new reservation
+      // Notify admin about new reservation (in-app notification)
       try {
         const notifyResponse = await supabase.functions.invoke('notify-admin-new-reservation', {
           body: {
@@ -271,6 +273,13 @@ const ReservationForm = () => {
         }
       } catch (notifyError) {
         console.error('Failed to notify admin:', notifyError);
+      }
+
+      // Send email notification to admin
+      try {
+        await emailAdminNewReservation(reservation.id);
+      } catch (emailError) {
+        console.error('Failed to send admin email:', emailError);
         // Don't block the user - reservation was created successfully
       }
 

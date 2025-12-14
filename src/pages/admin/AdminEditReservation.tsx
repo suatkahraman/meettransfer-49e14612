@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -84,6 +85,7 @@ const AdminEditReservation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
+  const { emailCustomerPriceSet, emailDriverAssigned } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sendingPrice, setSendingPrice] = useState(false);
@@ -255,6 +257,13 @@ const AdminEditReservation = () => {
         } catch (e) {
           console.error('Failed to notify customer:', e);
         }
+
+        // Send email to customer with accept/reject link
+        try {
+          await emailCustomerPriceSet(id!, priceValue, formData.price_currency);
+        } catch (e) {
+          console.error('Failed to send customer email:', e);
+        }
       }
 
       // Audit log for price sent
@@ -332,7 +341,7 @@ const AdminEditReservation = () => {
           console.error('Failed to notify customer:', e);
         }
 
-        // Send confirmation email
+        // Send confirmation email to customer
         try {
           await supabase.functions.invoke('send-confirmation-email', {
             body: { reservation_id: id }
@@ -340,6 +349,13 @@ const AdminEditReservation = () => {
         } catch (e) {
           console.error('Failed to send confirmation email:', e);
         }
+      }
+
+      // Send email notification to driver
+      try {
+        await emailDriverAssigned(id!);
+      } catch (e) {
+        console.error('Failed to send driver email:', e);
       }
 
       // Audit log
