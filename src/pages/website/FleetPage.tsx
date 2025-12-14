@@ -6,7 +6,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
-import mercedesSprinterImage from "@/assets/mercedes-sprinter-minibus.jpg";
 import vitoVip1 from "@/assets/vito-vip-1.jpg";
 import vitoVip2 from "@/assets/vito-vip-2.jpg";
 import vitoVip3 from "@/assets/vito-vip-3.jpg";
@@ -18,6 +17,12 @@ import maybach3 from "@/assets/maybach-3.jpg";
 import maybach4 from "@/assets/maybach-4.jpg";
 import maybach5 from "@/assets/maybach-5.jpg";
 import maybach6 from "@/assets/maybach-6.jpg";
+import sprinter1 from "@/assets/sprinter-1.jpg";
+import sprinter2 from "@/assets/sprinter-2.jpg";
+import sprinter3 from "@/assets/sprinter-3.jpg";
+import sprinter4 from "@/assets/sprinter-4.jpg";
+import sprinter5 from "@/assets/sprinter-5.jpg";
+import sprinter6 from "@/assets/sprinter-6.jpg";
 
 const vehicles = [
   {
@@ -34,7 +39,7 @@ const vehicles = [
     passengers: 7,
     luggage: 7,
     features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-    images: [mercedesVitoFamilyImage, mercedesVipImage, mercedesSprinterImage],
+    images: [mercedesVitoFamilyImage, mercedesVipImage],
   },
   {
     name: "Mercedes Maybach",
@@ -50,7 +55,7 @@ const vehicles = [
     passengers: 16,
     luggage: 16,
     features: ["Leather Seats", "Large luggage space", "WiFi", "USB"],
-    images: [mercedesSprinterImage, mercedesVitoFamilyImage, mercedesVipImage],
+    images: [sprinter1, sprinter2, sprinter3, sprinter4, sprinter5, sprinter6],
   },
 ];
 
