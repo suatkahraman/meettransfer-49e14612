@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map } from 'lucide-react';
+import GoogleRouteMap from '@/components/ui/google-route-map';
 import { format } from 'date-fns';
 import {
   AlertDialog,
@@ -334,6 +335,19 @@ const CustomerReservationDetail = () => {
                   <div className="font-medium">{reservation.dropoff}</div>
                 </div>
               </div>
+            </div>
+
+            {/* Route Map */}
+            <div className="py-4 border-t">
+              <div className="flex items-center gap-2 mb-3">
+                <Map className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Route Map</span>
+              </div>
+              <GoogleRouteMap
+                pickup={reservation.pickup}
+                dropoff={reservation.dropoff}
+                showNavigationButtons={false}
+              />
             </div>
 
             {/* Passengers */}

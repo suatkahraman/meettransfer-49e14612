@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import GoogleRouteMap from '@/components/ui/google-route-map';
 
 const vehicleTypes = [
   { value: 'mercedes-vito', label: 'Mercedes Vito' },
@@ -270,6 +271,15 @@ const CustomerEditReservation = () => {
                   required
                 />
               </div>
+
+              {/* Route Map Preview */}
+              {formData.pickup && formData.dropoff && (
+                <GoogleRouteMap
+                  pickup={formData.pickup}
+                  dropoff={formData.dropoff}
+                  showNavigationButtons={false}
+                />
+              )}
 
               {/* Date & Time */}
               <div className="grid grid-cols-2 gap-4">

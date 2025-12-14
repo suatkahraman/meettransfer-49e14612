@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus } from 'lucide-react';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import GoogleRouteMap from '@/components/ui/google-route-map';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
@@ -423,6 +424,17 @@ const AdminCreateReservation = () => {
                     />
                   </div>
                 </div>
+
+                {/* Route Map Preview */}
+                {formData.pickup && formData.dropoff && (
+                  <div className="pt-2">
+                    <GoogleRouteMap
+                      pickup={formData.pickup}
+                      dropoff={formData.dropoff}
+                      showNavigationButtons={false}
+                    />
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
