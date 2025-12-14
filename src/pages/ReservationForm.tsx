@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote } from 'lucide-react';
 import { z } from 'zod';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { GooglePlacesDebugOverlay } from '@/components/ui/google-places-debug';
 
 const reservationSchema = z.object({
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
@@ -361,6 +362,7 @@ const ReservationForm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary/80 to-primary/60 py-8 px-4">
+      <GooglePlacesDebugOverlay />
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-serif">Meet Transfer</CardTitle>
