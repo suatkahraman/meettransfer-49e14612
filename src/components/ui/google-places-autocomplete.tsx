@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -97,62 +97,77 @@ export const GooglePlacesAutocomplete = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
   const onChangeRef = useRef(onChange);
-  const [isReady, setIsReady] = useState(false);
 
-  // Keep onChange ref updated
+  // Keep onChange ref updated so parent handler is always current
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
 
-  // Initialize Google Places script
+  // Debug: log renders to verify no re-render on each keystroke
+  console.log('[GooglePlacesAutocomplete] render');
+
+  // Initialize Google Places script & autocomplete once (per mount)
   useEffect(() => {
-    loadGoogleMapsScript()
-      .then(() => {
-        setIsReady(true);
-      })
-      .catch((err) => {
-        console.error('Failed to load Google Maps:', err);
-      });
-  }, []);
+    if (!inputRef.current) return;
 
-  // Setup autocomplete when ready
-  useEffect(() => {
-    if (!isReady || !inputRef.current) return;
-    if (autocompleteRef.current) return;
-    if (!window.google?.maps?.places) return;
+    let isCancelled = false;
 
-    try {
-      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-        types: ['establishment', 'geocode'],
-        fields: ['formatted_address', 'name', 'address_components'],
-        componentRestrictions: { country: 'tr' },
-      });
+    const setupAutocomplete = async () => {
+      try {
+        await loadGoogleMapsScript();
 
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (place && inputRef.current) {
-          const address = place.formatted_address || place.name || '';
-
-          // Let Google / DOM control the input value directly
-          inputRef.current.value = address;
-
-          // Notify parent only when a place is selected
-          onChangeRef.current(address);
+        if (
+          isCancelled ||
+          !inputRef.current ||
+          autocompleteRef.current ||
+          !window.google?.maps?.places
+        ) {
+          return;
         }
-      });
 
-      autocompleteRef.current = autocomplete;
-    } catch (error) {
-      console.error('Failed to initialize Google Places Autocomplete:', error);
-    }
+        console.log('[GooglePlacesAutocomplete] initializing autocomplete');
+
+        const autocomplete = new window.google.maps.places.Autocomplete(
+          inputRef.current,
+          {
+            types: ['establishment', 'geocode'],
+            fields: ['formatted_address', 'name', 'address_components'],
+            componentRestrictions: { country: 'tr' },
+          }
+        );
+
+        autocomplete.addListener('place_changed', () => {
+          const place = autocomplete.getPlace();
+          if (place && inputRef.current) {
+            const address = place.formatted_address || place.name || '';
+
+            // Let Google / DOM control the input value directly
+            inputRef.current.value = address;
+
+            console.log('[GooglePlacesAutocomplete] place_changed', address);
+
+            // Notify parent ONLY when a place is selected
+            onChangeRef.current(address);
+          }
+        });
+
+        autocompleteRef.current = autocomplete;
+      } catch (error) {
+        console.error('Failed to initialize Google Places Autocomplete:', error);
+      }
+    };
+
+    setupAutocomplete();
 
     return () => {
+      isCancelled = true;
       if (autocompleteRef.current && window.google?.maps?.event) {
+        console.log('[GooglePlacesAutocomplete] cleanup autocomplete instance');
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
         autocompleteRef.current = null;
       }
     };
-  }, [isReady]);
+  }, []);
 
   return (
     <Input
