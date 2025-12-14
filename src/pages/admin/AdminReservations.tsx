@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2, Banknote } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2, Banknote, CheckCircle2, Clock3 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -29,6 +29,7 @@ interface Reservation {
   flight_number: string | null;
   vehicle_type: string;
   payment_type: string;
+  payment_status: string | null;
   price: number | null;
   price_currency: string | null;
   admin_set_price: number | null;
@@ -608,10 +609,23 @@ const AdminReservations = () => {
 
                             <div className="flex items-center gap-4 text-sm flex-wrap">
                               {reservation.payment_type === 'payment_link' ? (
-                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                  <CreditCard className="h-3 w-3 mr-1" />
-                                  Payment Link
-                                </Badge>
+                                <>
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                    <CreditCard className="h-3 w-3 mr-1" />
+                                    Payment Link
+                                  </Badge>
+                                  {reservation.payment_status === 'paid' ? (
+                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                                      Ödendi
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                                      <Clock3 className="h-3 w-3 mr-1" />
+                                      Ödeme Bekliyor
+                                    </Badge>
+                                  )}
+                                </>
                               ) : (
                                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                                   <Banknote className="h-3 w-3 mr-1" />
@@ -706,10 +720,23 @@ const AdminReservations = () => {
 
                       <div className="flex items-center gap-4 text-sm flex-wrap">
                         {reservation.payment_type === 'payment_link' ? (
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                            <CreditCard className="h-3 w-3 mr-1" />
-                            Payment Link
-                          </Badge>
+                          <>
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                              <CreditCard className="h-3 w-3 mr-1" />
+                              Payment Link
+                            </Badge>
+                            {reservation.payment_status === 'paid' ? (
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Ödendi
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                                <Clock3 className="h-3 w-3 mr-1" />
+                                Ödeme Bekliyor
+                              </Badge>
+                            )}
+                          </>
                         ) : (
                           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                             <Banknote className="h-3 w-3 mr-1" />
