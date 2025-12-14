@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle, Banknote } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
-import DriverRouteMap from '@/components/driver/DriverRouteMap';
+import GoogleRouteMap from '@/components/ui/google-route-map';
 
 interface Reservation {
   id: string;
@@ -600,7 +600,7 @@ Notlar: ${reservation.driver_notes || '—'}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <DriverRouteMap
+            <GoogleRouteMap
               pickup={reservation.pickup}
               dropoff={reservation.dropoff}
               customerPhone={reservation.customer_phone}

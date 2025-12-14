@@ -1,0 +1,395 @@
+import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Navigation, MapPin, Phone, ExternalLink, Loader2, Clock, Route } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface GoogleRouteMapProps {
+  pickup: string;
+  dropoff: string;
+  customerPhone?: string;
+  className?: string;
+  showNavigationButtons?: boolean;
+}
+
+interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+interface TripInfo {
+  duration: string;
+  distance: string;
+}
+
+// Same API key as Google Places Autocomplete
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCk_A1D5LOqb2TuIFuOiVVjGDSAprap38M';
+
+// Track script loading globally
+let isScriptLoading = false;
+let isScriptLoaded = false;
+const loadCallbacks: (() => void)[] = [];
+
+// Access google maps via any to avoid type conflicts
+const getGoogleMaps = (): any => {
+  return (window as any).google?.maps;
+};
+
+const loadGoogleMapsScript = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const maps = getGoogleMaps();
+    if (isScriptLoaded && maps) {
+      resolve();
+      return;
+    }
+
+    if (isScriptLoading) {
+      loadCallbacks.push(resolve);
+      return;
+    }
+
+    // Check if script already exists (may have been loaded by autocomplete)
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
+    if (existingScript && getGoogleMaps()) {
+      isScriptLoaded = true;
+      resolve();
+      return;
+    }
+
+    if (existingScript) {
+      // Script exists but not yet loaded, wait for it
+      existingScript.addEventListener('load', () => {
+        isScriptLoaded = true;
+        resolve();
+      });
+      return;
+    }
+
+    isScriptLoading = true;
+
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry`;
+    script.async = true;
+    script.defer = true;
+
+    script.onload = () => {
+      isScriptLoaded = true;
+      isScriptLoading = false;
+      resolve();
+      loadCallbacks.forEach((cb) => cb());
+      loadCallbacks.length = 0;
+    };
+
+    script.onerror = () => {
+      isScriptLoading = false;
+      console.error('Failed to load Google Maps script');
+    };
+
+    document.head.appendChild(script);
+  });
+};
+
+export const GoogleRouteMap = ({
+  pickup,
+  dropoff,
+  customerPhone,
+  className,
+  showNavigationButtons = true,
+}: GoogleRouteMapProps) => {
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+  const directionsRendererRef = useRef<any>(null);
+  const [pickupCoords, setPickupCoords] = useState<Coordinates | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<Coordinates | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [tripInfo, setTripInfo] = useState<TripInfo | null>(null);
+
+  // Geocode an address to coordinates
+  const geocodeAddress = async (address: string): Promise<Coordinates | null> => {
+    const maps = getGoogleMaps();
+    if (!maps) return null;
+    
+    return new Promise((resolve) => {
+      const geocoder = new maps.Geocoder();
+      geocoder.geocode(
+        { address, region: 'TR' },
+        (results: any[], status: string) => {
+          if (status === 'OK' && results && results[0]) {
+            const location = results[0].geometry.location;
+            resolve({ lat: location.lat(), lng: location.lng() });
+          } else {
+            resolve(null);
+          }
+        }
+      );
+    });
+  };
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const initMap = async () => {
+      if (!mapContainer.current) return;
+      
+      setLoading(true);
+      setError(null);
+
+      try {
+        await loadGoogleMapsScript();
+      } catch (err) {
+        setError('Failed to load Google Maps');
+        setLoading(false);
+        return;
+      }
+
+      const maps = getGoogleMaps();
+      if (isCancelled || !maps) {
+        setLoading(false);
+        return;
+      }
+
+      // Geocode both addresses
+      const [pickupResult, dropoffResult] = await Promise.all([
+        geocodeAddress(pickup),
+        geocodeAddress(dropoff)
+      ]);
+
+      if (isCancelled) return;
+
+      setPickupCoords(pickupResult);
+      setDropoffCoords(dropoffResult);
+
+      if (!pickupResult && !dropoffResult) {
+        setError('Could not locate addresses');
+        setLoading(false);
+        return;
+      }
+
+      // Calculate center
+      const coords = [pickupResult, dropoffResult].filter(Boolean) as Coordinates[];
+      const center = coords.length === 2
+        ? { lat: (coords[0].lat + coords[1].lat) / 2, lng: (coords[0].lng + coords[1].lng) / 2 }
+        : coords[0];
+
+      // Initialize map
+      mapRef.current = new maps.Map(mapContainer.current!, {
+        center,
+        zoom: 10,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: true,
+        zoomControl: true,
+      });
+
+      // If we have both coordinates, draw the route
+      if (pickupResult && dropoffResult) {
+        const directionsService = new maps.DirectionsService();
+        directionsRendererRef.current = new maps.DirectionsRenderer({
+          map: mapRef.current,
+          suppressMarkers: false,
+          polylineOptions: {
+            strokeColor: '#3b82f6',
+            strokeWeight: 5,
+            strokeOpacity: 0.8,
+          },
+        });
+
+        directionsService.route(
+          {
+            origin: pickupResult,
+            destination: dropoffResult,
+            travelMode: maps.TravelMode.DRIVING,
+          },
+          (result: any, status: string) => {
+            if (isCancelled) return;
+            
+            if (status === 'OK' && result) {
+              directionsRendererRef.current?.setDirections(result);
+              
+              // Extract trip info
+              const leg = result.routes[0]?.legs[0];
+              if (leg) {
+                setTripInfo({
+                  duration: leg.duration?.text || '',
+                  distance: leg.distance?.text || '',
+                });
+              }
+            }
+            setLoading(false);
+          }
+        );
+      } else {
+        // Just show single marker
+        if (pickupResult) {
+          new maps.Marker({
+            position: pickupResult,
+            map: mapRef.current,
+            title: 'Pickup',
+            icon: {
+              url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+            },
+          });
+        }
+        if (dropoffResult) {
+          new maps.Marker({
+            position: dropoffResult,
+            map: mapRef.current,
+            title: 'Drop-off',
+            icon: {
+              url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+            },
+          });
+        }
+        setLoading(false);
+      }
+    };
+
+    if (pickup && dropoff) {
+      initMap();
+    } else {
+      setLoading(false);
+    }
+
+    return () => {
+      isCancelled = true;
+      if (directionsRendererRef.current) {
+        directionsRendererRef.current.setMap(null);
+      }
+    };
+  }, [pickup, dropoff]);
+
+  // Open navigation in external app
+  const openNavigation = (destination: Coordinates | null) => {
+    if (!destination) return;
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    
+    if (isIOS) {
+      window.open(`maps://maps.apple.com/?daddr=${destination.lat},${destination.lng}&dirflg=d`, '_blank');
+    } else if (isAndroid) {
+      window.open(`google.navigation:q=${destination.lat},${destination.lng}`, '_blank');
+    } else {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination.lat},${destination.lng}`, '_blank');
+    }
+  };
+
+  const openGoogleMaps = () => {
+    if (pickupCoords && dropoffCoords) {
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&origin=${pickupCoords.lat},${pickupCoords.lng}&destination=${dropoffCoords.lat},${dropoffCoords.lng}`,
+        '_blank'
+      );
+    } else if (pickupCoords) {
+      window.open(`https://www.google.com/maps?q=${pickupCoords.lat},${pickupCoords.lng}`, '_blank');
+    } else if (dropoffCoords) {
+      window.open(`https://www.google.com/maps?q=${dropoffCoords.lat},${dropoffCoords.lng}`, '_blank');
+    }
+  };
+
+  if (!pickup && !dropoff) {
+    return null;
+  }
+
+  if (error) {
+    return (
+      <div className={cn("bg-muted/50 rounded-lg p-6 text-center", className)}>
+        <MapPin className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+        <p className="text-sm text-muted-foreground">{error}</p>
+        <div className="mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={openGoogleMaps}
+          >
+            <ExternalLink className="h-4 w-4 mr-2" />
+            Open in Google Maps
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("space-y-3", className)}>
+      {/* Map Container */}
+      <div className="relative rounded-xl overflow-hidden shadow-lg border">
+        {loading && (
+          <div className="absolute inset-0 bg-background/80 z-10 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
+        <div ref={mapContainer} className="h-[300px] w-full" />
+        
+        {/* Trip Info Overlay */}
+        {tripInfo && !loading && (
+          <div className="absolute bottom-3 left-3 right-3 bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Clock className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Duration</p>
+                    <p className="font-semibold text-sm">{tripInfo.duration}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                    <Route className="h-4 w-4 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Distance</p>
+                    <p className="font-semibold text-sm">{tripInfo.distance}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Navigation Buttons */}
+      {showNavigationButtons && (
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            variant="default"
+            className="flex items-center gap-2"
+            onClick={() => openNavigation(pickupCoords)}
+            disabled={!pickupCoords}
+          >
+            <Navigation className="h-4 w-4" />
+            <span className="text-sm">Navigate to Pickup</span>
+          </Button>
+          <Button
+            variant="secondary"
+            className="flex items-center gap-2"
+            onClick={() => openNavigation(dropoffCoords)}
+            disabled={!dropoffCoords}
+          >
+            <Navigation className="h-4 w-4" />
+            <span className="text-sm">Navigate to Drop-off</span>
+          </Button>
+        </div>
+      )}
+
+      {/* Call Customer */}
+      {customerPhone && showNavigationButtons && (
+        <Button
+          variant="outline"
+          className="w-full flex items-center gap-2"
+          asChild
+        >
+          <a href={`tel:${customerPhone}`}>
+            <Phone className="h-4 w-4" />
+            <span>Call Customer: {customerPhone}</span>
+          </a>
+        </Button>
+      )}
+    </div>
+  );
+};
+
+export default GoogleRouteMap;

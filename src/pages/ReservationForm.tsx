@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote } from 'lucide-react';
 import { z } from 'zod';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import GoogleRouteMap from '@/components/ui/google-route-map';
 
 const reservationSchema = z.object({
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
@@ -400,6 +401,16 @@ const ReservationForm = () => {
                 {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
               </div>
 
+              {/* Route Map Preview */}
+              {formData.pickup && formData.dropoff && (
+                <div className="pt-4">
+                  <GoogleRouteMap
+                    pickup={formData.pickup}
+                    dropoff={formData.dropoff}
+                    showNavigationButtons={false}
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
