@@ -126,7 +126,7 @@ export const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/20 pt-8 text-center text-primary-foreground/60 text-sm">
-          <p>© {new Date().getFullYear()} Meet Transfer. All rights reserved.</p>
+          <p>© 2001 Meet Transfer. All rights reserved.</p>
         </div>
       </div>
     </footer>
