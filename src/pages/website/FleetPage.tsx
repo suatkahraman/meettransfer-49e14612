@@ -16,7 +16,7 @@ const vehicles = [
     passengers: 6,
     luggage: 6,
     features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
-    image: mercedesVipImage,
+    images: [mercedesVipImage, mercedesVitoFamilyImage, mercedesMaybachImage],
   },
   {
     name: "Mercedes Vito",
@@ -24,7 +24,7 @@ const vehicles = [
     passengers: 7,
     luggage: 7,
     features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-    image: mercedesVitoFamilyImage,
+    images: [mercedesVitoFamilyImage, mercedesVipImage, mercedesSprinterImage],
   },
   {
     name: "Mercedes Maybach",
@@ -32,7 +32,7 @@ const vehicles = [
     passengers: 4,
     luggage: 4,
     features: ["Leather seats", "Rear entertainment", "Ambient lighting", "Mini bar", "Star ceiling", "TV"],
-    image: mercedesMaybachImage,
+    images: [mercedesMaybachImage, mercedesVipImage, mercedesVitoFamilyImage],
   },
   {
     name: "Mercedes Sprinter VIP Minibus",
@@ -40,7 +40,7 @@ const vehicles = [
     passengers: 16,
     luggage: 16,
     features: ["Leather Seats", "Large luggage space", "WiFi", "USB"],
-    image: mercedesSprinterImage,
+    images: [mercedesSprinterImage, mercedesVitoFamilyImage, mercedesVipImage],
   },
 ];
 
