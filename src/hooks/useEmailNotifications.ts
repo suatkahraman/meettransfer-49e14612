@@ -5,7 +5,9 @@ type EmailType =
   | 'new_reservation_admin'
   | 'price_accepted_admin'
   | 'price_set_customer'
-  | 'driver_assigned_driver';
+  | 'driver_assigned_driver'
+  | 'payment_request_customer'
+  | 'payment_confirmed_customer';
 
 interface EmailOptions {
   type: EmailType;
@@ -15,6 +17,7 @@ interface EmailOptions {
     currency?: string;
     driver_email?: string;
     driver_name?: string;
+    payment_link?: string;
   };
 }
 
@@ -86,11 +89,33 @@ export const useEmailNotifications = () => {
     });
   }, [sendEmail]);
 
+  // 5. When admin sends payment link → Email to customer
+  const emailPaymentRequest = useCallback(async (
+    reservationId: string,
+    paymentLink: string
+  ) => {
+    return sendEmail({
+      type: 'payment_request_customer',
+      reservation_id: reservationId,
+      additional_data: { payment_link: paymentLink },
+    });
+  }, [sendEmail]);
+
+  // 6. When admin confirms payment → Email to customer
+  const emailPaymentConfirmed = useCallback(async (reservationId: string) => {
+    return sendEmail({
+      type: 'payment_confirmed_customer',
+      reservation_id: reservationId,
+    });
+  }, [sendEmail]);
+
   return {
     sendEmail,
     emailAdminNewReservation,
     emailAdminPriceAccepted,
     emailCustomerPriceSet,
     emailDriverAssigned,
+    emailPaymentRequest,
+    emailPaymentConfirmed,
   };
 };

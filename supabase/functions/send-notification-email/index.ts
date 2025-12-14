@@ -14,7 +14,9 @@ type EmailType =
   | 'new_reservation_admin'      // Customer creates reservation → Admin
   | 'price_accepted_admin'       // Customer accepts price → Admin
   | 'price_set_customer'         // Admin sets price → Customer
-  | 'driver_assigned_driver';    // Admin assigns driver → Driver
+  | 'driver_assigned_driver'     // Admin assigns driver → Driver
+  | 'payment_request_customer'   // Admin sends payment link → Customer
+  | 'payment_confirmed_customer'; // Admin confirms payment → Customer
 
 interface EmailRequest {
   type: EmailType;
@@ -24,6 +26,7 @@ interface EmailRequest {
     currency?: string;
     driver_email?: string;
     driver_name?: string;
+    payment_link?: string;
   };
 }
 
@@ -294,6 +297,141 @@ const getEmailTemplate = (type: EmailType, data: any) => {
         `,
       };
 
+    case 'payment_request_customer':
+      return {
+        subject: `💳 Payment Required - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">💳 Complete Your Payment</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">Your transfer price is ready</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #2196f3; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #2196f3;">
+                <p style="margin: 0; color: #666; font-size: 14px;">Amount Due</p>
+                <p style="margin: 10px 0 0; font-size: 36px; font-weight: bold; color: #1565c0;">${data.price_display}</p>
+              </div>
+
+              <p style="text-align: center; color: #666; margin-bottom: 25px;">
+                Please complete your payment using the secure link below to confirm your transfer booking.
+              </p>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Date & Time</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.vehicle_type?.replace(/-/g, ' ')}</td>
+                </tr>
+              </table>
+
+              <div style="text-align: center; margin-top: 25px;">
+                <a href="${data.payment_link}" style="display: inline-block; background: #4caf50; color: #fff; padding: 18px 50px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px;">👉 Pay Now</a>
+              </div>
+
+              <p style="text-align: center; margin-top: 20px; color: #888; font-size: 13px;">
+                Click the button above to complete your secure payment.
+              </p>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>If you have questions, contact us via WhatsApp.</p>
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+    case 'payment_confirmed_customer':
+      return {
+        subject: `✅ Payment Confirmed - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">✅ Payment Confirmed!</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">Thank you for your payment</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #4caf50; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #4caf50;">
+                <p style="margin: 0; color: #2e7d32; font-size: 16px; font-weight: bold;">✓ Payment Received</p>
+                <p style="margin: 10px 0 0; font-size: 28px; font-weight: bold; color: #1b5e20;">${data.price_display}</p>
+                <p style="margin: 10px 0 0; color: #388e3c; font-size: 14px;">Status: <strong>PAID</strong></p>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Date & Time</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.vehicle_type?.replace(/-/g, ' ')}</td>
+                </tr>
+              </table>
+
+              <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center;">
+                <p style="margin: 0; color: #666; font-size: 14px;">
+                  Your booking is confirmed! We will assign a driver and notify you before pickup.
+                </p>
+              </div>
+
+              <div style="text-align: center; margin-top: 25px;">
+                <a href="${baseUrl}/customer/reservations" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">View My Reservations</a>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>Thank you for choosing Meet Transfer!</p>
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
     default:
       throw new Error(`Unknown email type: ${type}`);
   }
@@ -366,6 +504,7 @@ const handler = async (req: Request): Promise<Response> => {
       passengers: passengers,
       price_display: priceDisplay,
       driver_notes: reservation.driver_notes,
+      payment_link: additional_data?.payment_link || reservation.payment_link || '',
     };
 
     const template = getEmailTemplate(type, templateData);
@@ -378,6 +517,8 @@ const handler = async (req: Request): Promise<Response> => {
         recipient = ADMIN_EMAIL;
         break;
       case 'price_set_customer':
+      case 'payment_request_customer':
+      case 'payment_confirmed_customer':
         recipient = customerEmail;
         break;
       case 'driver_assigned_driver':

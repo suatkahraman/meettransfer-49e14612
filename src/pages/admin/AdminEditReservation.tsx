@@ -11,13 +11,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote } from 'lucide-react';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
 const paymentTypes = [
   { value: 'cash', label: 'Şoföre Nakit' },
-  { value: 'online', label: 'Online Ödeme Linki' },
+  { value: 'payment_link', label: 'Online Ödeme Linki' },
 ];
 
 // Status workflow
@@ -85,12 +85,14 @@ const AdminEditReservation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
-  const { emailCustomerPriceSet, emailDriverAssigned } = useEmailNotifications();
+  const { emailCustomerPriceSet, emailDriverAssigned, emailPaymentRequest, emailPaymentConfirmed } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sendingPrice, setSendingPrice] = useState(false);
   const [assigningDriver, setAssigningDriver] = useState(false);
   const [collectingPayment, setCollectingPayment] = useState(false);
+  const [sendingPaymentLink, setSendingPaymentLink] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
   const [isEditingAgencyPrice, setIsEditingAgencyPrice] = useState(false);
   const [agencyPriceSaved, setAgencyPriceSaved] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -121,6 +123,8 @@ const AdminEditReservation = () => {
     driver_id: '',
     agency_id: '',
     admin_notes: '',
+    payment_link: '',
+    payment_status: 'pending',
   });
 
   const getCurrencySymbol = (currency: string) => {
@@ -189,6 +193,8 @@ const AdminEditReservation = () => {
         driver_id: r.driver_id || '',
         agency_id: r.agency_id || '',
         admin_notes: adminNotesResult.data?.notes || '',
+        payment_link: r.payment_link || '',
+        payment_status: r.payment_status || 'pending',
       };
       
       setOriginalData(initialData);
@@ -517,6 +523,8 @@ const AdminEditReservation = () => {
         driver_id: formData.driver_id || null,
         agency_id: formData.agency_id && formData.agency_id !== 'none' ? formData.agency_id : null,
         passenger_names: validPassengerNames,
+        payment_link: formData.payment_link || null,
+        payment_status: formData.payment_status,
       })
       .eq('id', id);
 
@@ -862,6 +870,200 @@ const AdminEditReservation = () => {
                 <UserCheck className="h-4 w-4 mr-2" />
                 {assigningDriver ? 'Atanıyor...' : 'Şoföre Ata'}
               </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Payment Management Card - Show for online payment type */}
+        {formData.payment_type === 'payment_link' && formData.price && parseFloat(formData.price) > 0 && (
+          <Card className="border-blue-300 bg-blue-50 dark:bg-blue-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                <CreditCard className="h-5 w-5" />
+                Online Ödeme Yönetimi
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Payment Status Badge */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Ödeme Durumu:</span>
+                {formData.payment_status === 'paid' ? (
+                  <Badge className="bg-green-500/20 text-green-700">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Ödendi
+                  </Badge>
+                ) : (
+                  <Badge className="bg-orange-500/20 text-orange-700">
+                    Bekliyor
+                  </Badge>
+                )}
+              </div>
+
+              {/* Payment Link Input */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Link className="h-4 w-4" />
+                  Ödeme Linki (URL)
+                </Label>
+                <Input
+                  type="url"
+                  value={formData.payment_link}
+                  onChange={(e) => setFormData({...formData, payment_link: e.target.value})}
+                  placeholder="https://pay.stripe.com/... veya başka bir ödeme linki"
+                  disabled={formData.payment_status === 'paid'}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Stripe, Wise, banka linki veya başka bir ödeme sağlayıcısından URL girin
+                </p>
+              </div>
+
+              {/* Send Payment Request Button */}
+              {formData.payment_status !== 'paid' && (
+                <Button
+                  type="button"
+                  onClick={async () => {
+                    if (!formData.payment_link) {
+                      toast.error('Lütfen önce bir ödeme linki girin');
+                      return;
+                    }
+                    if (!formData.price || parseFloat(formData.price) <= 0) {
+                      toast.error('Lütfen önce fiyatı belirleyin');
+                      return;
+                    }
+
+                    setSendingPaymentLink(true);
+                    try {
+                      // First save the payment link to reservation
+                      const { error: saveError } = await supabase
+                        .from('reservations')
+                        .update({
+                          payment_link: formData.payment_link,
+                          status: 'waiting_for_customer_approval',
+                        })
+                        .eq('id', id);
+
+                      if (saveError) throw saveError;
+
+                      // Send payment request email to customer
+                      await emailPaymentRequest(id!, formData.payment_link);
+
+                      // Notify customer in-app
+                      if (customerId) {
+                        await supabase.functions.invoke('create-notification', {
+                          body: {
+                            user_id: customerId,
+                            reservation_id: id,
+                            title: 'Payment Required',
+                            message: `Please complete your payment of ${currencySymbol}${formData.price} using the provided link.`,
+                            type: 'payment_request'
+                          }
+                        });
+                      }
+
+                      toast.success('Ödeme linki müşteriye e-posta ile gönderildi!');
+                      setFormData({ ...formData, status: 'waiting_for_customer_approval' });
+                    } catch (error: any) {
+                      toast.error(error.message || 'Ödeme linki gönderilemedi');
+                    } finally {
+                      setSendingPaymentLink(false);
+                    }
+                  }}
+                  disabled={sendingPaymentLink || !formData.payment_link}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  {sendingPaymentLink ? 'Gönderiliyor...' : 'Fiyat ve Ödeme Linkini Müşteriye Gönder'}
+                </Button>
+              )}
+
+              {/* Mark as Paid Button */}
+              {formData.payment_status !== 'paid' && (
+                <Button
+                  type="button"
+                  onClick={async () => {
+                    if (!confirm('Ödemenin alındığını onaylıyor musunuz?')) return;
+
+                    setConfirmingPayment(true);
+                    try {
+                      // Update payment status
+                      const { error: updateError } = await supabase
+                        .from('reservations')
+                        .update({
+                          payment_status: 'paid',
+                          status: 'customer_approved',
+                        })
+                        .eq('id', id);
+
+                      if (updateError) throw updateError;
+
+                      // Send payment confirmation email to customer
+                      await emailPaymentConfirmed(id!);
+
+                      // Notify customer in-app
+                      if (customerId) {
+                        await supabase.functions.invoke('create-notification', {
+                          body: {
+                            user_id: customerId,
+                            reservation_id: id,
+                            title: '✅ Payment Confirmed',
+                            message: `Your payment of ${currencySymbol}${formData.price} has been received. Your booking is confirmed!`,
+                            type: 'payment_confirmed'
+                          }
+                        });
+                      }
+
+                      toast.success('Ödeme onaylandı ve müşteriye bilgi e-postası gönderildi!');
+                      setFormData({ ...formData, payment_status: 'paid', status: 'customer_approved' });
+                    } catch (error: any) {
+                      toast.error(error.message || 'Ödeme onaylanamadı');
+                    } finally {
+                      setConfirmingPayment(false);
+                    }
+                  }}
+                  disabled={confirmingPayment}
+                  variant="outline"
+                  className="w-full border-green-500 text-green-700 hover:bg-green-50"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {confirmingPayment ? 'Onaylanıyor...' : 'Ödeme Alındı Olarak İşaretle'}
+                </Button>
+              )}
+
+              {/* Payment Confirmed Message */}
+              {formData.payment_status === 'paid' && (
+                <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-lg text-center">
+                  <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <p className="font-semibold text-green-700 dark:text-green-300">Ödeme Alındı!</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    {currencySymbol}{formData.price} tutarındaki ödeme onaylandı
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Cash Payment Info Card */}
+        {formData.payment_type === 'cash' && formData.price && parseFloat(formData.price) > 0 && (
+          <Card className="border-green-300 bg-green-50 dark:bg-green-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                <Banknote className="h-5 w-5" />
+                Nakit Ödeme
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3 p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <Banknote className="h-6 w-6 text-green-600" />
+                <div>
+                  <p className="font-medium text-green-700 dark:text-green-300">
+                    Müşteri şoföre nakit ödeyecek
+                  </p>
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    Tutar: {currencySymbol}{formData.price}
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
