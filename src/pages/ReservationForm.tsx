@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
+import { FlightStatus } from '@/components/ui/flight-status';
 
 const reservationSchema = z.object({
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
@@ -517,9 +518,17 @@ const ReservationForm = () => {
                 </div>
               </div>
 
-              {/* Airline Display */}
+              {/* Airline Display & Flight Status */}
               {formData.flightNumber && formData.flightNumber.length >= 2 && (
-                <AirlineDisplay flightNumber={formData.flightNumber} size="md" />
+                <div className="space-y-3">
+                  <AirlineDisplay flightNumber={formData.flightNumber} size="md" />
+                  {formData.date && (
+                    <FlightStatus 
+                      flightNumber={formData.flightNumber} 
+                      date={formData.date}
+                    />
+                  )}
+                </div>
               )}
 
               {/* Return Reservation Section */}

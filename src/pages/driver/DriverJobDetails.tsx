@@ -18,6 +18,7 @@ import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
+import { FlightStatus } from '@/components/ui/flight-status';
 
 interface Reservation {
   id: string;
@@ -457,12 +458,18 @@ Notlar: ${reservation.driver_notes || '—'}
               </div>
 
               {reservation.flight_number && (
-                <div className="flex items-start gap-3">
-                  <Plane className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <div className="text-sm text-muted-foreground">Uçuş</div>
-                    <AirlineDisplay flightNumber={reservation.flight_number} size="md" />
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Plane className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <div className="text-sm text-muted-foreground">Uçuş</div>
+                      <AirlineDisplay flightNumber={reservation.flight_number} size="md" />
+                    </div>
                   </div>
+                  <FlightStatus 
+                    flightNumber={reservation.flight_number} 
+                    date={reservation.pickup_date}
+                  />
                 </div>
               )}
 
