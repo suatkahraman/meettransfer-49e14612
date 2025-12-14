@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote } from 'lucide-react';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
+import { AirlineDisplay } from '@/components/ui/airline-display';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
@@ -1181,6 +1182,9 @@ const AdminEditReservation = () => {
                     value={formData.flight_number}
                     onChange={(e) => setFormData({...formData, flight_number: e.target.value})}
                   />
+                  {formData.flight_number && formData.flight_number.length >= 2 && (
+                    <AirlineDisplay flightNumber={formData.flight_number} size="sm" className="mt-2" />
+                  )}
                 </div>
               </div>
 

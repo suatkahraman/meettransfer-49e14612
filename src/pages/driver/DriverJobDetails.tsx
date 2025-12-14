@@ -17,6 +17,7 @@ import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Cre
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import GoogleRouteMap from '@/components/ui/google-route-map';
+import { AirlineDisplay } from '@/components/ui/airline-display';
 
 interface Reservation {
   id: string;
@@ -460,7 +461,7 @@ Notlar: ${reservation.driver_notes || '—'}
                   <Plane className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <div className="text-sm text-muted-foreground">Uçuş</div>
-                    <div className="font-medium">{reservation.flight_number}</div>
+                    <AirlineDisplay flightNumber={reservation.flight_number} size="md" />
                   </div>
                 </div>
               )}

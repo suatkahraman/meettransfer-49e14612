@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map } from 'lucide-react';
 import GoogleRouteMap from '@/components/ui/google-route-map';
+import { AirlineDisplay } from '@/components/ui/airline-display';
 import { format } from 'date-fns';
 import {
   AlertDialog,
@@ -370,8 +371,14 @@ const CustomerReservationDetail = () => {
             {/* Flight & Vehicle */}
             <div className="flex items-center justify-between py-4 border-t border-b">
               <div className="flex items-center gap-2">
-                <Plane className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{reservation.flight_number || 'No flight info'}</span>
+                {reservation.flight_number ? (
+                  <AirlineDisplay flightNumber={reservation.flight_number} size="sm" />
+                ) : (
+                  <>
+                    <Plane className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">No flight info</span>
+                  </>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Car className="h-4 w-4 text-muted-foreground" />
