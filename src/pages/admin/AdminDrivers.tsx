@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2, Star } from 'lucide-react';
 
 const regions = [
   { value: 'Istanbul', label: 'İstanbul' },
@@ -31,6 +31,8 @@ interface Driver {
   vehicle_model: string | null;
   region: string | null;
   active: boolean;
+  average_rating: number | null;
+  total_reviews: number | null;
 }
 
 const AdminDrivers = () => {
@@ -386,6 +388,20 @@ const AdminDrivers = () => {
                         <span>{driver.region}</span>
                       </div>
                     )}
+                    {/* Driver Rating */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <Star className={`h-4 w-4 ${(driver.total_reviews || 0) > 0 ? 'fill-accent text-accent' : 'text-muted-foreground/50'}`} />
+                      {(driver.total_reviews || 0) > 0 ? (
+                        <span className="font-medium">
+                          {(driver.average_rating || 0).toFixed(1)} 
+                          <span className="text-muted-foreground font-normal ml-1">
+                            ({driver.total_reviews} değerlendirme)
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">Henüz değerlendirme yok</span>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
