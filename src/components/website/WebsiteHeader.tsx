@@ -16,16 +16,20 @@ import { useUserRole } from "@/hooks/useUserRole";
 import meetTransferLogo from "@/assets/meet-transfer-logo.png";
 
 const WebsiteHeader = () => {
-  const { t } = useLanguage();
+  const { t, getLocalizedPath } = useLanguage();
   const { user, signOut } = useAuth();
   const { role } = useUserRole();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const isActive = (path: string) => location.pathname === path;
+  // Check if path matches considering language prefix
+  const isActive = (path: string) => {
+    const localizedPath = getLocalizedPath(path);
+    return location.pathname === localizedPath;
+  };
 
   const navLinks = [
-    { path: "/services", label: "Services" },
+    { path: "/services", label: t("services") || "Services" },
     { path: "/destinations", label: t("cities") },
     { path: "/fleet", label: t("fleet") },
     { path: "/about", label: t("about") },
@@ -42,7 +46,7 @@ const WebsiteHeader = () => {
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3">
+        <Link to={getLocalizedPath("/")} className="flex items-center gap-3">
           <img 
             src={meetTransferLogo} 
             alt="Meet Transfer Logo" 
@@ -56,7 +60,7 @@ const WebsiteHeader = () => {
           {navLinks.map((link) => (
             <Link
               key={link.path}
-              to={link.path}
+              to={getLocalizedPath(link.path)}
               className={`text-sm font-medium transition-colors ${
                 isActive(link.path) 
                   ? "text-primary font-semibold" 
@@ -77,7 +81,7 @@ const WebsiteHeader = () => {
               <Link to={getDashboardPath()}>
                 <Button variant="ghost" size="sm" className="gap-2">
                   <User className="h-4 w-4" />
-                  My Account
+                  {t("myAccount")}
                 </Button>
               </Link>
               <Button 
@@ -87,7 +91,7 @@ const WebsiteHeader = () => {
                 className="gap-2"
               >
                 <LogOut className="h-4 w-4" />
-                Logout
+                {t("logout")}
               </Button>
             </div>
           ) : (
@@ -95,10 +99,10 @@ const WebsiteHeader = () => {
               <Link to="/login">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <LogIn className="h-4 w-4" />
-                  Login
+                  {t("login")}
                 </Button>
               </Link>
-              <Link to="/book">
+              <Link to={getLocalizedPath("/book")}>
                 <Button variant="accent" size="sm">
                   {t("bookNow")}
                 </Button>
@@ -141,7 +145,7 @@ const WebsiteHeader = () => {
                     onClick={() => setMenuOpen(false)}
                   >
                     <Link
-                      to={link.path}
+                      to={getLocalizedPath(link.path)}
                       className={`w-full flex items-center gap-2 ${active ? "text-primary font-semibold" : ""}`}
                     >
                       {active && (
@@ -160,7 +164,7 @@ const WebsiteHeader = () => {
                   <DropdownMenuItem asChild>
                     <Link to={getDashboardPath()} className="w-full cursor-pointer gap-2">
                       <User className="h-4 w-4" />
-                      My Account
+                      {t("myAccount")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem 
@@ -168,7 +172,7 @@ const WebsiteHeader = () => {
                     className="cursor-pointer gap-2"
                   >
                     <LogOut className="h-4 w-4" />
-                    Logout
+                    {t("logout")}
                   </DropdownMenuItem>
                 </>
               ) : (
@@ -176,12 +180,12 @@ const WebsiteHeader = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/login" className="w-full cursor-pointer gap-2">
                       <LogIn className="h-4 w-4" />
-                      Login
+                      {t("login")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <div className="p-2">
-                    <Link to="/book">
+                    <Link to={getLocalizedPath("/book")}>
                       <Button variant="accent" className="w-full">
                         {t("bookNow")}
                       </Button>

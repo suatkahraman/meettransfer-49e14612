@@ -1,4 +1,5 @@
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useLanguage, Language } from "@/contexts/LanguageContext";
 import {
   Select,
   SelectContent,
@@ -8,19 +9,46 @@ import {
 } from "@/components/ui/select";
 
 const languages = [
-  { code: "EN", label: "English", flag: "🇬🇧" },
-  { code: "DE", label: "Deutsch", flag: "🇩🇪" },
-  { code: "FR", label: "Français", flag: "🇫🇷" },
-  { code: "RU", label: "Русский", flag: "🇷🇺" },
-  { code: "IT", label: "Italiano", flag: "🇮🇹" },
-  { code: "ES", label: "Español", flag: "🇪🇸" },
+  { code: "EN" as Language, label: "English", flag: "🇬🇧", prefix: "" },
+  { code: "DE" as Language, label: "Deutsch", flag: "🇩🇪", prefix: "/de" },
+  { code: "FR" as Language, label: "Français", flag: "🇫🇷", prefix: "/fr" },
+  { code: "RU" as Language, label: "Русский", flag: "🇷🇺", prefix: "/ru" },
+  { code: "IT" as Language, label: "Italiano", flag: "🇮🇹", prefix: "/it" },
+  { code: "ES" as Language, label: "Español", flag: "🇪🇸", prefix: "/es" },
 ] as const;
 
+const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es"];
+
 const LanguageSelector = () => {
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLanguageChange = (newLang: Language) => {
+    if (newLang === language) return;
+
+    // Get current path without language prefix
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    const firstPart = pathParts[0]?.toLowerCase();
+    
+    let basePath: string;
+    if (LANGUAGE_PREFIXES.includes(firstPart)) {
+      basePath = "/" + pathParts.slice(1).join("/") || "/";
+    } else {
+      basePath = location.pathname;
+    }
+
+    // Build new path with target language prefix
+    const targetLang = languages.find(l => l.code === newLang);
+    const newPath = newLang === "EN" 
+      ? basePath 
+      : `${targetLang?.prefix}${basePath === "/" ? "" : basePath}`;
+
+    navigate(newPath);
+  };
 
   return (
-    <Select value={language} onValueChange={(val) => setLanguage(val as typeof language)}>
+    <Select value={language} onValueChange={(val) => handleLanguageChange(val as Language)}>
       <SelectTrigger className="w-[100px] h-9 bg-card border-border">
         <SelectValue>
           {languages.find((l) => l.code === language)?.flag} {language}
