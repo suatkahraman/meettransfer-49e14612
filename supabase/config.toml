@@ -1,5 +1,8 @@
 project_id = "zqykoyugubaeealrspxm"
 
+[functions.notify-flight-delay]
+verify_jwt = true
+
 [functions.create-user-account]
 verify_jwt = true
 
