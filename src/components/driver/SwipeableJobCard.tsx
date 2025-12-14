@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2 } from 'lucide-react';
+import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
+import { toast } from 'sonner';
 
 interface Reservation {
   id: string;
@@ -80,6 +82,14 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
   
   const config = statusConfig[reservation.status] || statusConfig.sent_to_driver;
   
+  // Validate completion eligibility for active jobs
+  const completionValidation = useMemo(() => {
+    if (reservation.status === 'active') {
+      return checkCompletionEligibility(reservation);
+    }
+    return { canComplete: false, reason: null, isCompleted: false };
+  }, [reservation.pickup_date, reservation.pickup_time, reservation.status]);
+  
   // Transform for background reveal
   const rightBgOpacity = useTransform(x, [-150, -50], [1, 0]);
   const leftBgOpacity = useTransform(x, [50, 150], [0, 1]);
@@ -99,6 +109,15 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
     const offset = info.offset.x;
     
     if (offset < -SWIPE_THRESHOLD && reservation.status === 'active' && onComplete) {
+      // Validate before completing
+      if (!completionValidation.canComplete) {
+        if (completionValidation.isCompleted) {
+          toast.error('Bu transfer zaten tamamlanmış');
+        } else {
+          toast.error(completionValidation.reason || 'Bu transfer şu anda tamamlanamaz');
+        }
+        return;
+      }
       setIsProcessing(true);
       await onComplete();
       setIsProcessing(false);
@@ -110,7 +129,8 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
   };
 
   const canSwipeRight = (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && onAccept;
-  const canSwipeLeft = reservation.status === 'active' && onComplete;
+  // Only allow swipe left if validation passes
+  const canSwipeLeft = reservation.status === 'active' && onComplete && completionValidation.canComplete;
 
   return (
     <div className="relative overflow-hidden rounded-xl">
@@ -237,13 +257,19 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
                   Kabul etmek için sağa kaydır
                 </span>
               )}
+              {reservation.status === 'active' && onComplete && !completionValidation.canComplete && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Ban className="h-3 w-3" />
+                  Transfer saati bekleniyor
+                </span>
+              )}
               {canSwipeLeft && (
                 <span className="text-xs text-primary flex items-center gap-1">
                   Tamamlamak için sola kaydır
                   <CheckCircle className="h-3 w-3" />
                 </span>
               )}
-              {!canSwipeRight && !canSwipeLeft && <span />}
+              {!canSwipeRight && !canSwipeLeft && reservation.status !== 'active' && <span />}
               <span className="font-bold text-lg text-primary">
                 {formatPrice(reservation.price, reservation.price_currency)}
               </span>

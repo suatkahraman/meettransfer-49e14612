@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
+import { useCompletionValidation } from '@/hooks/useCompletionValidation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,8 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import DriverRouteMap from '@/components/driver/DriverRouteMap';
@@ -163,11 +165,30 @@ const DriverJobDetails = () => {
     setSavingFinancials(false);
   };
 
+  // Completion validation hook
+  const completionValidation = useCompletionValidation(reservation);
+
   const updateStatus = async (newStatus: string, driverCash?: boolean) => {
     if (!id || !reservation) return;
+    
+    // Validate completion if trying to complete
+    if (newStatus === 'completed') {
+      if (!completionValidation.canComplete) {
+        if (completionValidation.isCompleted) {
+          toast.error('Bu transfer zaten tamamlanmış');
+        } else {
+          toast.error(completionValidation.reason || 'Bu transfer şu anda tamamlanamaz');
+        }
+        return;
+      }
+    }
+    
     setUpdating(true);
 
-    const updateData: any = { status: newStatus };
+    const updateData: any = { 
+      status: newStatus,
+      updated_at: new Date().toISOString() // Store completion timestamp
+    };
     if (driverCash !== undefined) {
       updateData.driver_cash = driverCash;
     }
@@ -580,15 +601,26 @@ Notlar: ${reservation.driver_notes || '—'}
             )}
             
             {reservation.status === 'active' && (
-              <Button 
-                className="w-full" 
-                size="lg"
-                onClick={handleComplete}
-                disabled={updating}
-              >
-                <CheckCircle className="h-5 w-5 mr-2" />
-                Transfer Tamamlandı
-              </Button>
+              <>
+                {/* Show warning if completion not allowed */}
+                {!completionValidation.canComplete && completionValidation.reason && (
+                  <Alert variant="destructive" className="mb-3">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {completionValidation.reason}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={handleComplete}
+                  disabled={updating || !completionValidation.canComplete}
+                >
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  Transfer Tamamlandı
+                </Button>
+              </>
             )}
 
             {reservation.status === 'completed' && (
