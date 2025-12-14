@@ -448,6 +448,29 @@ const ReservationForm = () => {
                   />
                 </div>
               </div>
+
+              {/* Return Reservation Button */}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  // Swap pickup and dropoff for return trip
+                  setFormData(prev => ({
+                    ...prev,
+                    pickup: prev.dropoff,
+                    dropoff: prev.pickup,
+                    date: '',
+                    time: '',
+                    flightNumber: '',
+                  }));
+                  toast.info('Locations swapped for return trip. Please select new date and time.');
+                }}
+                disabled={!formData.pickup || !formData.dropoff}
+              >
+                <Car className="h-4 w-4 mr-2" />
+                Add Return Reservation
+              </Button>
             </div>
 
             {/* Passengers Section */}
