@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus } from 'lucide-react';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
+import { AirlineDisplay } from '@/components/ui/airline-display';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
@@ -462,6 +463,9 @@ const AdminCreateReservation = () => {
                       onChange={(e) => setFormData({...formData, flight_number: e.target.value})}
                       placeholder="TK1234"
                     />
+                    {formData.flight_number && formData.flight_number.length >= 2 && (
+                      <AirlineDisplay flightNumber={formData.flight_number} size="sm" className="mt-2" />
+                    )}
                   </div>
                 </div>
 

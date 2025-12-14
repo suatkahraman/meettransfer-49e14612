@@ -15,6 +15,7 @@ import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, Cli
 import { z } from 'zod';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
+import { AirlineDisplay } from '@/components/ui/airline-display';
 
 const reservationSchema = z.object({
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
@@ -515,6 +516,11 @@ const ReservationForm = () => {
                   />
                 </div>
               </div>
+
+              {/* Airline Display */}
+              {formData.flightNumber && formData.flightNumber.length >= 2 && (
+                <AirlineDisplay flightNumber={formData.flightNumber} size="md" />
+              )}
 
               {/* Return Reservation Section */}
               {!hasReturnTrip ? (

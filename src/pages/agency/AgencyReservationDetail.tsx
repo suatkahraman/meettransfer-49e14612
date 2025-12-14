@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { AirlineDisplay } from '@/components/ui/airline-display';
 
 interface Driver {
   id: string;
@@ -323,7 +324,7 @@ const AgencyReservationDetail = () => {
                   <Plane className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <div className="text-sm text-muted-foreground">Flight</div>
-                    <div className="font-medium">{reservation.flight_number}</div>
+                    <AirlineDisplay flightNumber={reservation.flight_number} size="md" />
                   </div>
                 </div>
               )}
