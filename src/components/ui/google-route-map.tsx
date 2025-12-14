@@ -181,6 +181,10 @@ export const GoogleRouteMap = ({
         zoomControl: true,
       });
 
+      // Add traffic layer
+      const trafficLayer = new maps.TrafficLayer();
+      trafficLayer.setMap(mapRef.current);
+
       // If we have both coordinates, draw the route
       if (pickupResult && dropoffResult) {
         const directionsService = new maps.DirectionsService();
