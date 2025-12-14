@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote } from 'lucide-react';
+import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
@@ -1129,18 +1130,18 @@ const AdminEditReservation = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Alış Noktası</Label>
-                  <Input
+                  <GooglePlacesAutocomplete
                     value={formData.pickup}
-                    onChange={(e) => setFormData({...formData, pickup: e.target.value})}
+                    onChange={(value) => setFormData({...formData, pickup: value})}
                     placeholder="Alış noktasını girin"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Bırakış Noktası</Label>
-                  <Input
+                  <GooglePlacesAutocomplete
                     value={formData.dropoff}
-                    onChange={(e) => setFormData({...formData, dropoff: e.target.value})}
-                    required
+                    onChange={(value) => setFormData({...formData, dropoff: value})}
+                    placeholder="Bırakış noktasını girin"
                   />
                 </div>
               </div>

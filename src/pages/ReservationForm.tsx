@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote } from 'lucide-react';
 import { z } from 'zod';
+import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 
 const reservationSchema = z.object({
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
@@ -539,10 +540,10 @@ const ReservationForm = () => {
                   <MapPin className="h-4 w-4" />
                   Pick-up Point
                 </Label>
-                <Input
-                  placeholder="Enter Pick-up Point"
+                <GooglePlacesAutocomplete
                   value={formData.pickup}
-                  onChange={(e) => setFormData({...formData, pickup: e.target.value})}
+                  onChange={(value) => setFormData({...formData, pickup: value})}
+                  placeholder="Enter Pick-up Point"
                   className={errors.pickup ? 'border-destructive' : ''}
                   maxLength={200}
                 />
@@ -554,10 +555,10 @@ const ReservationForm = () => {
                   <MapPin className="h-4 w-4" />
                   Drop-off Location
                 </Label>
-                <Input
-                  placeholder="Hotel name or full address"
+                <GooglePlacesAutocomplete
                   value={formData.dropoff}
-                  onChange={(e) => setFormData({...formData, dropoff: e.target.value})}
+                  onChange={(value) => setFormData({...formData, dropoff: value})}
+                  placeholder="Hotel name or full address"
                   className={errors.dropoff ? 'border-destructive' : ''}
                   maxLength={200}
                 />

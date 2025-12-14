@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, Trash2, UserPlus } from 'lucide-react';
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
+import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 
 const reservationSchema = z.object({
   pickup: z.string().trim().min(2, "Pick-up point must be at least 2 characters").max(200, "Pick-up point is too long"),
@@ -186,10 +187,10 @@ const CustomerHome = () => {
                   <MapPin className="h-4 w-4" />
                   Pick-up Point
                 </Label>
-                <Input
-                  placeholder="Enter Pick-up Point"
+                <GooglePlacesAutocomplete
                   value={formData.pickup}
-                  onChange={(e) => setFormData({...formData, pickup: e.target.value})}
+                  onChange={(value) => setFormData({...formData, pickup: value})}
+                  placeholder="Enter Pick-up Point"
                   className={errors.pickup ? 'border-destructive' : ''}
                   maxLength={200}
                 />
@@ -202,10 +203,10 @@ const CustomerHome = () => {
                   <MapPin className="h-4 w-4" />
                   Drop-off Location
                 </Label>
-                <Input
-                  placeholder="Hotel name or address"
+                <GooglePlacesAutocomplete
                   value={formData.dropoff}
-                  onChange={(e) => setFormData({...formData, dropoff: e.target.value})}
+                  onChange={(value) => setFormData({...formData, dropoff: value})}
+                  placeholder="Hotel name or address"
                   className={errors.dropoff ? 'border-destructive' : ''}
                   maxLength={200}
                 />
