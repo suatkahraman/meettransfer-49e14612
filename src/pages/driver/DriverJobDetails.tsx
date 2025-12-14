@@ -218,7 +218,7 @@ const DriverJobDetails = () => {
           // Create notification for customer
           const { data: resData } = await supabase
             .from('reservations')
-            .select('customer_id, agency_id')
+            .select('customer_id, agency_id, reservation_code, pickup_date, pickup, dropoff')
             .eq('id', id)
             .single();
 
@@ -243,6 +243,36 @@ const DriverJobDetails = () => {
               });
             } catch (pushError) {
               console.log('Push notification failed:', pushError);
+            }
+
+            // Send review request email to customer
+            try {
+              // Get customer email from profiles
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', resData.customer_id)
+                .maybeSingle();
+              
+              // Get customer email from auth (need to get from reservation or booking info)
+              const { data: authData } = await supabase.auth.admin?.getUserById?.(resData.customer_id) || {};
+              
+              // Send review request
+              await supabase.functions.invoke('send-review-request', {
+                body: {
+                  reservationId: id,
+                  customerEmail: authData?.user?.email || '',
+                  customerName: reservation?.customer_name || profileData?.full_name || 'Customer',
+                  driverName: driverData?.name || 'Your Driver',
+                  reservationCode: resData.reservation_code || id.slice(0, 8),
+                  pickupDate: resData.pickup_date,
+                  pickup: resData.pickup,
+                  dropoff: resData.dropoff
+                }
+              });
+              console.log('Review request email sent');
+            } catch (emailError) {
+              console.log('Review request email failed:', emailError);
             }
           }
 

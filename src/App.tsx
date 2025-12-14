@@ -19,6 +19,7 @@ import CustomerHome from "./pages/customer/CustomerHome";
 import CustomerBookings from "./pages/customer/CustomerBookings";
 import CustomerReservationDetail from "./pages/customer/CustomerReservationDetail";
 import CustomerEditReservation from "./pages/customer/CustomerEditReservation";
+import CustomerReviewPage from "./pages/customer/CustomerReviewPage";
 
 // Driver Pages
 import DriverHome from "./pages/driver/DriverHome";
@@ -127,6 +128,7 @@ const App = () => (
               <Route path="/customer/reservations" element={<CustomerRoute><CustomerBookings /></CustomerRoute>} />
               <Route path="/customer/reservation/:id" element={<CustomerRoute><CustomerReservationDetail /></CustomerRoute>} />
               <Route path="/customer/reservation/:id/edit" element={<CustomerRoute><CustomerEditReservation /></CustomerRoute>} />
+              <Route path="/customer/review/:reservationId" element={<CustomerRoute><CustomerReviewPage /></CustomerRoute>} />
               
               {/* Driver Routes - Protected */}
               <Route path="/driver" element={<DriverRoute><DriverHome /></DriverRoute>} />

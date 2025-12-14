@@ -290,9 +290,55 @@ export type Database = {
           },
         ]
       }
+      driver_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          customer_id: string
+          driver_id: string
+          id: string
+          rating: number
+          reservation_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          customer_id: string
+          driver_id: string
+          id?: string
+          rating: number
+          reservation_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          customer_id?: string
+          driver_id?: string
+          id?: string
+          rating?: number
+          reservation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_reviews_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_reviews_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: true
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           active: boolean | null
+          average_rating: number | null
           commission_rate: number | null
           created_at: string | null
           id: string
@@ -300,12 +346,14 @@ export type Database = {
           phone: string
           plate_number: string | null
           region: string | null
+          total_reviews: number | null
           updated_at: string | null
           user_id: string
           vehicle_model: string | null
         }
         Insert: {
           active?: boolean | null
+          average_rating?: number | null
           commission_rate?: number | null
           created_at?: string | null
           id?: string
@@ -313,12 +361,14 @@ export type Database = {
           phone: string
           plate_number?: string | null
           region?: string | null
+          total_reviews?: number | null
           updated_at?: string | null
           user_id: string
           vehicle_model?: string | null
         }
         Update: {
           active?: boolean | null
+          average_rating?: number | null
           commission_rate?: number | null
           created_at?: string | null
           id?: string
@@ -326,6 +376,7 @@ export type Database = {
           phone?: string
           plate_number?: string | null
           region?: string | null
+          total_reviews?: number | null
           updated_at?: string | null
           user_id?: string
           vehicle_model?: string | null
