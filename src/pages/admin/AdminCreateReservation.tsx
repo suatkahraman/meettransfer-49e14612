@@ -17,7 +17,7 @@ import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus } from 'luci
 const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
 const paymentTypes = [
   { value: 'cash', label: 'Şoföre Nakit' },
-  { value: 'online', label: 'Online Ödeme Linki' },
+  { value: 'payment_link', label: 'Online Ödeme Linki' },
 ];
 
 // Statuses for manual admin reservations

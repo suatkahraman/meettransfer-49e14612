@@ -516,6 +516,8 @@ export type Database = {
           flight_number: string | null
           id: string
           passenger_names: string[] | null
+          payment_link: string | null
+          payment_status: string | null
           payment_type: string
           pickup: string
           pickup_date: string
@@ -544,6 +546,8 @@ export type Database = {
           flight_number?: string | null
           id?: string
           passenger_names?: string[] | null
+          payment_link?: string | null
+          payment_status?: string | null
           payment_type: string
           pickup: string
           pickup_date: string
@@ -572,6 +576,8 @@ export type Database = {
           flight_number?: string | null
           id?: string
           passenger_names?: string[] | null
+          payment_link?: string | null
+          payment_status?: string | null
           payment_type?: string
           pickup?: string
           pickup_date?: string
