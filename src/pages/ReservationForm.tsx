@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X } from 'lucide-react';
 import { z } from 'zod';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -50,6 +50,12 @@ const ReservationForm = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
+  const [hasReturnTrip, setHasReturnTrip] = useState(false);
+  const [returnTripData, setReturnTripData] = useState({
+    date: '',
+    time: '',
+    flightNumber: '',
+  });
   const [formData, setFormData] = useState({
     phone: '',
     email: '',
@@ -128,6 +134,20 @@ const ReservationForm = () => {
       setErrors({ passengerNames: 'At least one passenger name is required' });
       toast.error('Please enter at least one passenger name');
       return;
+    }
+
+    // Validate return trip if enabled
+    if (hasReturnTrip) {
+      if (!returnTripData.date) {
+        setErrors(prev => ({ ...prev, returnDate: 'Please select a return date' }));
+        toast.error('Please select a return date');
+        return;
+      }
+      if (!returnTripData.time) {
+        setErrors(prev => ({ ...prev, returnTime: 'Please select a return time' }));
+        toast.error('Please select a return time');
+        return;
+      }
     }
 
     // Validate - password only required if not logged in
@@ -284,10 +304,57 @@ const ReservationForm = () => {
         await emailAdminNewReservation(reservation.id);
       } catch (emailError) {
         console.error('Failed to send admin email:', emailError);
-        // Don't block the user - reservation was created successfully
       }
 
-      toast.success('Reservation submitted! We will contact you with pricing.');
+      // Create return trip reservation if enabled
+      if (hasReturnTrip && returnTripData.date && returnTripData.time) {
+        const { data: returnReservation, error: returnError } = await supabase
+          .from('reservations')
+          .insert({
+            customer_id: userId,
+            customer_name: primaryPassengerName,
+            customer_phone: formData.phone.trim(),
+            passenger_names: validPassengerNames.map(n => n.trim()),
+            pickup: formData.dropoff.trim(), // Swapped for return
+            dropoff: formData.pickup, // Swapped for return
+            pickup_date: returnTripData.date,
+            pickup_time: returnTripData.time,
+            flight_number: returnTripData.flightNumber?.trim() || null,
+            vehicle_type: formData.vehicleType,
+            payment_type: formData.paymentMethod,
+            status: 'pending_price',
+            price: null,
+            price_currency: null,
+          })
+          .select()
+          .single();
+
+        if (returnError) {
+          console.error('Return reservation error:', returnError);
+          toast.error('Outbound trip created, but return trip failed. Please book return separately.');
+        } else {
+          // Notify admin about return reservation
+          try {
+            await supabase.functions.invoke('notify-admin-new-reservation', {
+              body: {
+                reservation_id: returnReservation.id,
+                customer_name: primaryPassengerName,
+                pickup: formData.dropoff.trim(),
+                dropoff: formData.pickup,
+                pickup_date: returnTripData.date,
+              }
+            });
+            await emailAdminNewReservation(returnReservation.id);
+          } catch (notifyError) {
+            console.error('Failed to notify admin about return trip:', notifyError);
+          }
+        }
+      }
+
+      const successMessage = hasReturnTrip 
+        ? 'Both reservations submitted! We will contact you with pricing.'
+        : 'Reservation submitted! We will contact you with pricing.';
+      toast.success(successMessage);
       setIsSubmitted(true);
     } catch (error: any) {
       console.error('Reservation error:', error);
@@ -449,28 +516,84 @@ const ReservationForm = () => {
                 </div>
               </div>
 
-              {/* Return Reservation Button */}
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  // Swap pickup and dropoff for return trip
-                  setFormData(prev => ({
-                    ...prev,
-                    pickup: prev.dropoff,
-                    dropoff: prev.pickup,
-                    date: '',
-                    time: '',
-                    flightNumber: '',
-                  }));
-                  toast.info('Locations swapped for return trip. Please select new date and time.');
-                }}
-                disabled={!formData.pickup || !formData.dropoff}
-              >
-                <Car className="h-4 w-4 mr-2" />
-                Add Return Reservation
-              </Button>
+              {/* Return Reservation Section */}
+              {!hasReturnTrip ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setHasReturnTrip(true)}
+                  disabled={!formData.pickup || !formData.dropoff}
+                >
+                  <ArrowLeftRight className="h-4 w-4 mr-2" />
+                  Add Return Reservation
+                </Button>
+              ) : (
+                <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-dashed space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold text-base flex items-center gap-2">
+                      <ArrowLeftRight className="h-4 w-4" />
+                      Return Trip
+                    </h4>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setHasReturnTrip(false);
+                        setReturnTripData({ date: '', time: '', flightNumber: '' });
+                      }}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="text-sm text-muted-foreground bg-background/50 p-2 rounded">
+                    <span className="font-medium">{formData.dropoff || 'Drop-off'}</span>
+                    <span className="mx-2">→</span>
+                    <span className="font-medium">{formData.pickup || 'Pick-up'}</span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Return Date
+                      </Label>
+                      <Input
+                        type="date"
+                        value={returnTripData.date}
+                        onChange={(e) => setReturnTripData(prev => ({ ...prev, date: e.target.value }))}
+                        className={errors.returnDate ? 'border-destructive' : ''}
+                      />
+                      {errors.returnDate && <p className="text-sm text-destructive">{errors.returnDate}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Return Time</Label>
+                      <Input
+                        type="time"
+                        value={returnTripData.time}
+                        onChange={(e) => setReturnTripData(prev => ({ ...prev, time: e.target.value }))}
+                        className={errors.returnTime ? 'border-destructive' : ''}
+                      />
+                      {errors.returnTime && <p className="text-sm text-destructive">{errors.returnTime}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Plane className="h-4 w-4" />
+                        Flight
+                      </Label>
+                      <Input
+                        placeholder="TK1234"
+                        value={returnTripData.flightNumber}
+                        onChange={(e) => setReturnTripData(prev => ({ ...prev, flightNumber: e.target.value }))}
+                        maxLength={20}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Passengers Section */}
