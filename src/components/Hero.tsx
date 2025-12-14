@@ -1,8 +1,41 @@
 import { Button } from "@/components/ui/button";
-import { Phone } from "lucide-react";
+import { Phone, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import meetTransferLogo from "@/assets/meet-transfer-logo.webp";
+
+const TripAdvisorBadge = () => (
+  <a
+    href="https://www.tripadvisor.com/Attraction_Review-g293974-d9884368-Reviews-Meet_Transfer-Istanbul.html"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all group"
+  >
+    <svg viewBox="0 0 24 24" className="h-6 w-6 text-[#00AF87]">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2" />
+      <path
+        fill="currentColor"
+        d="M12 6a3 3 0 100 6 3 3 0 000-6zm-4.5 4.5a2 2 0 100 4 2 2 0 000-4zm9 0a2 2 0 100 4 2 2 0 000-4zM12 14c-1.5 0-2.75 1.25-2.75 2.75h5.5c0-1.5-1.25-2.75-2.75-2.75z"
+      />
+    </svg>
+    <div className="flex items-center gap-1.5">
+      <span className="text-lg font-bold text-white">4.7</span>
+      <div className="flex">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`h-3.5 w-3.5 ${
+              i < 4 ? "fill-[#00AF87] text-[#00AF87]" : "fill-[#00AF87]/50 text-[#00AF87]"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+    <span className="text-xs text-white/80 group-hover:text-white transition-colors">
+      492 reviews
+    </span>
+  </a>
+);
 
 export const Hero = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -19,6 +52,11 @@ export const Hero = () => {
               alt="Meet Transfer Logo" 
               className="h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 rounded-full object-cover shadow-2xl ring-4 ring-white/20"
             />
+          </div>
+          
+          {/* TripAdvisor Badge */}
+          <div className="flex justify-center">
+            <TripAdvisorBadge />
           </div>
           
           <div className="space-y-4">
