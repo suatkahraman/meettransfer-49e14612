@@ -98,25 +98,21 @@ export const GooglePlacesAutocomplete = ({
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
   const onChangeRef = useRef(onChange);
   const [isReady, setIsReady] = useState(false);
-  const [internalValue, setInternalValue] = useState(value);
 
   // Keep onChange ref updated
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
 
-  // Sync external value changes
+  // Initialize Google Places script
   useEffect(() => {
-    setInternalValue(value);
-  }, [value]);
-
-  // Initialize Google Places
-  useEffect(() => {
-    loadGoogleMapsScript().then(() => {
-      setIsReady(true);
-    }).catch((err) => {
-      console.error('Failed to load Google Maps:', err);
-    });
+    loadGoogleMapsScript()
+      .then(() => {
+        setIsReady(true);
+      })
+      .catch((err) => {
+        console.error('Failed to load Google Maps:', err);
+      });
   }, []);
 
   // Setup autocomplete when ready
@@ -134,9 +130,13 @@ export const GooglePlacesAutocomplete = ({
 
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
-        if (place) {
+        if (place && inputRef.current) {
           const address = place.formatted_address || place.name || '';
-          setInternalValue(address);
+
+          // Let Google / DOM control the input value directly
+          inputRef.current.value = address;
+
+          // Notify parent only when a place is selected
           onChangeRef.current(address);
         }
       });
@@ -154,18 +154,10 @@ export const GooglePlacesAutocomplete = ({
     };
   }, [isReady]);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInternalValue(newValue);
-    onChange(newValue);
-  }, [onChange]);
-
   return (
     <Input
       ref={inputRef}
       type="text"
-      value={internalValue}
-      onChange={handleInputChange}
       placeholder={placeholder}
       className={cn(className)}
       disabled={disabled}
