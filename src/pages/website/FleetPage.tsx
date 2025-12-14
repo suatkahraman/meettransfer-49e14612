@@ -6,13 +6,18 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
-import mercedesMaybachImage from "@/assets/mercedes-maybach-interior.webp";
 import mercedesSprinterImage from "@/assets/mercedes-sprinter-minibus.jpg";
 import vitoVip1 from "@/assets/vito-vip-1.jpg";
 import vitoVip2 from "@/assets/vito-vip-2.jpg";
 import vitoVip3 from "@/assets/vito-vip-3.jpg";
 import vitoVip4 from "@/assets/vito-vip-4.jpg";
 import vitoVip5 from "@/assets/vito-vip-5.jpg";
+import maybach1 from "@/assets/maybach-1.jpg";
+import maybach2 from "@/assets/maybach-2.jpg";
+import maybach3 from "@/assets/maybach-3.jpg";
+import maybach4 from "@/assets/maybach-4.jpg";
+import maybach5 from "@/assets/maybach-5.jpg";
+import maybach6 from "@/assets/maybach-6.jpg";
 
 const vehicles = [
   {
@@ -37,7 +42,7 @@ const vehicles = [
     passengers: 4,
     luggage: 4,
     features: ["Leather seats", "Rear entertainment", "Ambient lighting", "Mini bar", "Star ceiling", "TV"],
-    images: [mercedesMaybachImage, mercedesVipImage, mercedesVitoFamilyImage],
+    images: [maybach1, maybach2, maybach3, maybach4, maybach5, maybach6],
   },
   {
     name: "Mercedes Sprinter VIP Minibus",
