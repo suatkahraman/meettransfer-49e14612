@@ -4,9 +4,13 @@ import VehicleCard from "@/components/website/VehicleCard";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
-import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
-import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 import vitoVip1 from "@/assets/vito-vip-1.jpg";
+import vito1 from "@/assets/vito-1.jpg";
+import vito2 from "@/assets/vito-2.jpg";
+import vito3 from "@/assets/vito-3.jpg";
+import vito4 from "@/assets/vito-4.jpg";
+import vito5 from "@/assets/vito-5.jpg";
+import vito6 from "@/assets/vito-6.jpg";
 import vitoVip2 from "@/assets/vito-vip-2.jpg";
 import vitoVip3 from "@/assets/vito-vip-3.jpg";
 import vitoVip4 from "@/assets/vito-vip-4.jpg";
@@ -39,7 +43,7 @@ const vehicles = [
     passengers: 7,
     luggage: 7,
     features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-    images: [mercedesVitoFamilyImage, mercedesVipImage],
+    images: [vito1, vito2, vito3, vito4, vito5, vito6],
   },
   {
     name: "Mercedes Maybach",
