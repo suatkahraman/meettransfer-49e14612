@@ -5,8 +5,12 @@ import { Destinations } from "@/components/Destinations";
 import { Features } from "@/components/Features";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 
 const Index = () => {
+  // Auto-redirect first-time visitors based on browser language
+  useBrowserLanguageRedirect();
+
   return (
     <WebsiteLayout>
       <SEOHead
