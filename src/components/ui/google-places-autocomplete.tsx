@@ -13,6 +13,7 @@ declare global {
             options?: {
               types?: string[];
               fields?: string[];
+              componentRestrictions?: { country: string | string[] };
             }
           ) => GoogleMapsAutocomplete;
         };
@@ -113,6 +114,7 @@ export const GooglePlacesAutocomplete = ({
       const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
         types: ['establishment', 'geocode'],
         fields: ['formatted_address', 'name', 'address_components'],
+        componentRestrictions: { country: 'tr' },
       });
 
       autocomplete.addListener('place_changed', () => {
