@@ -8,6 +8,11 @@ import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 import mercedesMaybachImage from "@/assets/mercedes-maybach-interior.webp";
 import mercedesSprinterImage from "@/assets/mercedes-sprinter-minibus.jpg";
+import vitoVip1 from "@/assets/vito-vip-1.jpg";
+import vitoVip2 from "@/assets/vito-vip-2.jpg";
+import vitoVip3 from "@/assets/vito-vip-3.jpg";
+import vitoVip4 from "@/assets/vito-vip-4.jpg";
+import vitoVip5 from "@/assets/vito-vip-5.jpg";
 
 const vehicles = [
   {
@@ -16,7 +21,7 @@ const vehicles = [
     passengers: 6,
     luggage: 6,
     features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
-    images: [mercedesVipImage, mercedesVitoFamilyImage, mercedesMaybachImage],
+    images: [vitoVip1, vitoVip2, vitoVip3, vitoVip4, vitoVip5],
   },
   {
     name: "Mercedes Vito",
