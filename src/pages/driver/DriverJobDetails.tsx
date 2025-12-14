@@ -469,6 +469,7 @@ Notlar: ${reservation.driver_notes || '—'}
                   <FlightStatus 
                     flightNumber={reservation.flight_number} 
                     date={reservation.pickup_date}
+                    reservationId={reservation.id}
                   />
                 </div>
               )}

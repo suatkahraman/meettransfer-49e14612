@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Clock, Plane, AlertTriangle, CheckCircle2, PlaneLanding, PlaneTakeoff } from 'lucide-react';
@@ -35,6 +35,8 @@ interface FlightStatusProps {
   date?: string;
   className?: string;
   compact?: boolean;
+  reservationId?: string;
+  onStatusChange?: (status: FlightStatusData) => void;
 }
 
 const statusColors: Record<string, string> = {
@@ -68,11 +70,48 @@ export const FlightStatus = ({
   flightNumber, 
   date,
   className,
-  compact = false
+  compact = false,
+  reservationId,
+  onStatusChange
 }: FlightStatusProps) => {
   const [status, setStatus] = useState<FlightStatusData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lastNotifiedRef = useRef<{ delay: number | null; status: string | null }>({ delay: null, status: null });
+
+  // Notify driver about flight changes
+  const notifyDriver = async (flightData: FlightStatusData) => {
+    if (!reservationId || !flightData.found) return;
+
+    const currentDelay = flightData.arrival?.delay || 0;
+    const currentStatus = flightData.status?.toLowerCase() || '';
+    
+    // Check if status or delay changed significantly
+    const delayChanged = lastNotifiedRef.current.delay !== null && 
+                         Math.abs(currentDelay - lastNotifiedRef.current.delay) >= 15;
+    const statusChanged = lastNotifiedRef.current.status !== null && 
+                          lastNotifiedRef.current.status !== currentStatus &&
+                          ['cancelled', 'landed', 'diverted'].includes(currentStatus);
+    
+    if (delayChanged || statusChanged) {
+      try {
+        await supabase.functions.invoke('notify-flight-delay', {
+          body: {
+            reservation_id: reservationId,
+            flight_number: flightData.flightNumber,
+            delay_minutes: currentDelay,
+            status: currentStatus,
+            arrival_time: flightData.arrival?.estimated || flightData.arrival?.scheduled
+          }
+        });
+        console.log('Driver notified about flight change');
+      } catch (err) {
+        console.error('Failed to notify driver:', err);
+      }
+    }
+    
+    lastNotifiedRef.current = { delay: currentDelay, status: currentStatus };
+  };
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -97,6 +136,12 @@ export const FlightStatus = ({
         }
 
         setStatus(data);
+        
+        // Notify about changes and call callback
+        if (data?.found) {
+          notifyDriver(data);
+          onStatusChange?.(data);
+        }
       } catch (err) {
         console.error('Flight status fetch error:', err);
         setError('Unable to fetch flight status');
@@ -109,7 +154,7 @@ export const FlightStatus = ({
     // Debounce the API call
     const timeoutId = setTimeout(fetchStatus, 1000);
     return () => clearTimeout(timeoutId);
-  }, [flightNumber, date]);
+  }, [flightNumber, date, reservationId]);
 
   if (!flightNumber || flightNumber.trim().length < 3) {
     return null;
