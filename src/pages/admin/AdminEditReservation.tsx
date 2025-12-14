@@ -21,6 +21,7 @@ const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
 const paymentTypes = [
   { value: 'cash', label: 'Şoföre Nakit' },
   { value: 'payment_link', label: 'Online Ödeme Linki' },
+  { value: 'agency_pay', label: 'Acente Ödemesi' },
 ];
 
 // Status workflow

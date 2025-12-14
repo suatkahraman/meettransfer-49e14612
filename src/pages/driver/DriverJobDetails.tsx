@@ -491,6 +491,11 @@ Notlar: ${reservation.driver_notes || '—'}
                       <CreditCard className="h-3 w-3 mr-1" />
                       Payment Link
                     </Badge>
+                  ) : reservation.payment_type === 'agency_pay' ? (
+                    <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 mt-1">
+                      <CreditCard className="h-3 w-3 mr-1" />
+                      Acente Ödemesi
+                    </Badge>
                   ) : (
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 mt-1">
                       <Banknote className="h-3 w-3 mr-1" />
@@ -505,6 +510,11 @@ Notlar: ${reservation.driver_notes || '—'}
                   {reservation.payment_type === 'payment_link' && (
                     <p className="text-xs text-muted-foreground mt-1">
                       Müşteri online ödeme yaptı - nakit almayın
+                    </p>
+                  )}
+                  {reservation.payment_type === 'agency_pay' && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Ödeme acente tarafından yapılacak - nakit almayın
                     </p>
                   )}
                 </div>
