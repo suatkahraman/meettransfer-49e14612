@@ -1,4 +1,4 @@
-import { Users, Briefcase } from "lucide-react";
+import { Users, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useCallback, useEffect } from "react";
@@ -48,9 +48,12 @@ const VehicleCard = ({
     [emblaApi]
   );
 
+  const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="aspect-video bg-muted relative overflow-hidden">
+      <div className="aspect-video bg-muted relative overflow-hidden group">
         <div className="overflow-hidden h-full" ref={emblaRef}>
           <div className="flex h-full touch-pan-y">
             {images.map((image, index) => (
@@ -67,20 +70,36 @@ const VehicleCard = ({
           </div>
         </div>
         {images.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {images.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => scrollTo(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  index === selectedIndex
-                    ? "bg-primary w-4"
-                    : "bg-white/60 hover:bg-white/80"
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
+          <>
+            <button
+              onClick={scrollPrev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/80 hover:bg-background flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              onClick={scrollNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/80 hover:bg-background flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100"
+              aria-label="Next image"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+              {images.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollTo(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === selectedIndex
+                      ? "bg-primary w-4"
+                      : "bg-white/60 hover:bg-white/80"
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
       <CardContent className="p-4">
