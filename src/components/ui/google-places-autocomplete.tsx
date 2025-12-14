@@ -35,7 +35,8 @@ interface GoogleMapsAutocomplete {
   };
 }
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyDMyk24Ow1FzZpuvy4fGBNLApQwaKfIRuU';
+// NEW API KEY (publishable)
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCk_A1D5LOqb2TuIFuOiVVjGDSAprap38M';
 
 // Track script loading globally
 let isScriptLoading = false;
@@ -60,15 +61,15 @@ const loadGoogleMapsScript = (): Promise<void> => {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
     script.async = true;
     script.defer = true;
-    
+
     script.onload = () => {
       isScriptLoaded = true;
       isScriptLoading = false;
       resolve();
-      loadCallbacks.forEach(cb => cb());
+      loadCallbacks.forEach((cb) => cb());
       loadCallbacks.length = 0;
     };
-    
+
     script.onerror = () => {
       isScriptLoading = false;
       console.error('Failed to load Google Maps script');
@@ -79,8 +80,8 @@ const loadGoogleMapsScript = (): Promise<void> => {
 };
 
 interface GooglePlacesAutocompleteProps {
-  value: string;
-  onChange: (value: string) => void;
+  /** Called ONLY when a place is selected from suggestions */
+  onPlaceSelected?: (value: string) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -88,77 +89,70 @@ interface GooglePlacesAutocompleteProps {
 }
 
 export const GooglePlacesAutocomplete = ({
-  value,
-  onChange,
+  onPlaceSelected,
   placeholder = 'Enter location',
   className,
   disabled = false,
   maxLength = 200,
 }: GooglePlacesAutocompleteProps) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
-  const onChangeRef = useRef(onChange);
+  const onPlaceSelectedRef = useRef(onPlaceSelected);
+  const hasInitializedRef = useRef(false); // StrictMode + "only once" guard
 
-  // Keep onChange ref updated so parent handler is always current
+  // Keep callback ref up to date
   useEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
+    onPlaceSelectedRef.current = onPlaceSelected;
+  }, [onPlaceSelected]);
 
-  // Debug: log renders to verify no re-render on each keystroke
-  console.log('[GooglePlacesAutocomplete] render');
-
-  // Initialize Google Places script & autocomplete once (per mount)
   useEffect(() => {
-    if (!inputRef.current) return;
-
     let isCancelled = false;
 
     const setupAutocomplete = async () => {
-      try {
-        await loadGoogleMapsScript();
-
-        if (
-          isCancelled ||
-          !inputRef.current ||
-          autocompleteRef.current ||
-          !window.google?.maps?.places
-        ) {
-          return;
-        }
-
-        logGooglePlacesEvent('init', 'Autocomplete initialized');
-        console.log('[GooglePlacesAutocomplete] initializing autocomplete');
-
-        const autocomplete = new window.google.maps.places.Autocomplete(
-          inputRef.current,
-          {
-            types: ['establishment', 'geocode'],
-            fields: ['formatted_address', 'name', 'address_components'],
-            componentRestrictions: { country: 'tr' },
-          }
-        );
-
-        autocomplete.addListener('place_changed', () => {
-          const place = autocomplete.getPlace();
-          if (place && inputRef.current) {
-            const address = place.formatted_address || place.name || '';
-
-            // Let Google / DOM control the input value directly
-            inputRef.current.value = address;
-
-            logGooglePlacesEvent('place_changed', address);
-            console.log('[GooglePlacesAutocomplete] place_changed', address);
-
-            // Notify parent ONLY when a place is selected
-            onChangeRef.current(address);
-          }
-        });
-
-        autocompleteRef.current = autocomplete;
-      } catch (error) {
-        logGooglePlacesEvent('error', String(error));
-        console.error('Failed to initialize Google Places Autocomplete:', error);
+      if (hasInitializedRef.current) {
+        // Prevent double-init under StrictMode
+        return;
       }
+
+      await loadGoogleMapsScript();
+
+      if (
+        isCancelled ||
+        !inputRef.current ||
+        autocompleteRef.current || // already attached
+        !window.google?.maps?.places
+      ) {
+        return;
+      }
+
+      hasInitializedRef.current = true;
+      logGooglePlacesEvent('init', 'Autocomplete initialized');
+
+      const autocomplete = new window.google.maps.places.Autocomplete(
+        inputRef.current,
+        {
+          types: ['establishment', 'geocode'],
+          fields: ['formatted_address', 'name', 'address_components'],
+          componentRestrictions: { country: 'tr' },
+        }
+      );
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place && inputRef.current) {
+          const address = place.formatted_address || place.name || '';
+
+          // Let Google / DOM control the input value directly
+          inputRef.current.value = address;
+
+          logGooglePlacesEvent('place_changed', address);
+
+          // React state update ONLY here (if parent uses it)
+          onPlaceSelectedRef.current?.(address);
+        }
+      });
+
+      autocompleteRef.current = autocomplete;
     };
 
     setupAutocomplete();
@@ -167,9 +161,9 @@ export const GooglePlacesAutocomplete = ({
       isCancelled = true;
       if (autocompleteRef.current && window.google?.maps?.event) {
         logGooglePlacesEvent('cleanup', 'Autocomplete instance cleaned up');
-        console.log('[GooglePlacesAutocomplete] cleanup autocomplete instance');
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
         autocompleteRef.current = null;
+        hasInitializedRef.current = false;
       }
     };
   }, []);
@@ -183,6 +177,7 @@ export const GooglePlacesAutocomplete = ({
       disabled={disabled}
       maxLength={maxLength}
       autoComplete="off"
+      // CRITICAL: NO value, defaultValue, or onChange here
     />
   );
 };

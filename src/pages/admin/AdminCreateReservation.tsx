@@ -411,16 +411,14 @@ const AdminCreateReservation = () => {
                   <div className="space-y-2">
                     <Label>Alış Noktası *</Label>
                     <GooglePlacesAutocomplete
-                      value={formData.pickup}
-                      onChange={(value) => setFormData({...formData, pickup: value})}
+                      onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
                       placeholder="Alış noktasını girin"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Bırakış Noktası *</Label>
                     <GooglePlacesAutocomplete
-                      value={formData.dropoff}
-                      onChange={(value) => setFormData({...formData, dropoff: value})}
+                      onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
                       placeholder="Otel veya adres"
                     />
                   </div>

@@ -543,8 +543,7 @@ const ReservationForm = () => {
                   Pick-up Point
                 </Label>
                 <GooglePlacesAutocomplete
-                  value={formData.pickup}
-                  onChange={(value) => setFormData({...formData, pickup: value})}
+                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
                   placeholder="Enter Pick-up Point"
                   className={errors.pickup ? 'border-destructive' : ''}
                   maxLength={200}
@@ -558,8 +557,7 @@ const ReservationForm = () => {
                   Drop-off Location
                 </Label>
                 <GooglePlacesAutocomplete
-                  value={formData.dropoff}
-                  onChange={(value) => setFormData({...formData, dropoff: value})}
+                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
                   placeholder="Hotel name or full address"
                   className={errors.dropoff ? 'border-destructive' : ''}
                   maxLength={200}
