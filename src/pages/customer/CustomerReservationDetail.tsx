@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map } from 'lucide-react';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
+import { FlightStatus } from '@/components/ui/flight-status';
 import { format } from 'date-fns';
 import {
   AlertDialog,
@@ -385,6 +386,14 @@ const CustomerReservationDetail = () => {
                 <span className="text-sm">{reservation.vehicle_type}</span>
               </div>
             </div>
+
+            {/* Flight Status */}
+            {reservation.flight_number && (
+              <FlightStatus 
+                flightNumber={reservation.flight_number} 
+                date={reservation.pickup_date}
+              />
+            )}
 
             {/* Price Section - only show if price is set */}
             {priceDisplay && (
