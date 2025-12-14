@@ -98,11 +98,17 @@ export const GooglePlacesAutocomplete = ({
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
   const onChangeRef = useRef(onChange);
   const [isReady, setIsReady] = useState(false);
+  const [internalValue, setInternalValue] = useState(value);
 
   // Keep onChange ref updated
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
+
+  // Sync external value changes
+  useEffect(() => {
+    setInternalValue(value);
+  }, [value]);
 
   // Initialize Google Places
   useEffect(() => {
@@ -116,7 +122,7 @@ export const GooglePlacesAutocomplete = ({
   // Setup autocomplete when ready
   useEffect(() => {
     if (!isReady || !inputRef.current) return;
-    if (autocompleteRef.current) return; // Already initialized
+    if (autocompleteRef.current) return;
     if (!window.google?.maps?.places) return;
 
     try {
@@ -130,6 +136,7 @@ export const GooglePlacesAutocomplete = ({
         const place = autocomplete.getPlace();
         if (place) {
           const address = place.formatted_address || place.name || '';
+          setInternalValue(address);
           onChangeRef.current(address);
         }
       });
@@ -148,14 +155,16 @@ export const GooglePlacesAutocomplete = ({
   }, [isReady]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+    const newValue = e.target.value;
+    setInternalValue(newValue);
+    onChange(newValue);
   }, [onChange]);
 
   return (
     <Input
       ref={inputRef}
       type="text"
-      value={value}
+      value={internalValue}
       onChange={handleInputChange}
       placeholder={placeholder}
       className={cn(className)}
