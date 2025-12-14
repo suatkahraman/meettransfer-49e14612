@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const destinations = [
@@ -76,6 +77,8 @@ const destinations = [
 ];
 
 const DestinationsPage = () => {
+  const { getLocalizedPath } = useLanguage();
+  
   return (
     <WebsiteLayout>
       <SEOHead
@@ -178,7 +181,7 @@ const DestinationsPage = () => {
                     className="w-full mt-2 group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                     variant="outline"
                   >
-                    <Link to={destination.link}>
+                    <Link to={`${getLocalizedPath("/book")}?destination=${encodeURIComponent(destination.name)}`}>
                       Book {destination.name} Transfer
                     </Link>
                   </Button>
