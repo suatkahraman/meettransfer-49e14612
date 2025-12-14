@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2, Banknote } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -607,10 +607,17 @@ const AdminReservations = () => {
                             </div>
 
                             <div className="flex items-center gap-4 text-sm flex-wrap">
-                              <span className="flex items-center gap-1">
-                                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                                {reservation.payment_type === 'cash' ? 'Nakit' : reservation.payment_type === 'online' ? 'Online' : reservation.payment_type}
-                              </span>
+                              {reservation.payment_type === 'payment_link' ? (
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                  <CreditCard className="h-3 w-3 mr-1" />
+                                  Payment Link
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                  <Banknote className="h-3 w-3 mr-1" />
+                                  Nakit
+                                </Badge>
+                              )}
                               <span className={`font-bold ${isPriceModifiedByDriver(reservation) ? 'text-amber-600' : 'text-primary'}`}>
                                 {formatPrice(reservation.price, reservation.price_currency)}
                                 {isPriceModifiedByDriver(reservation) && (
@@ -698,10 +705,17 @@ const AdminReservations = () => {
                       </div>
 
                       <div className="flex items-center gap-4 text-sm flex-wrap">
-                        <span className="flex items-center gap-1">
-                          <CreditCard className="h-4 w-4 text-muted-foreground" />
-                          {reservation.payment_type === 'cash' ? 'Nakit' : reservation.payment_type === 'online' ? 'Online' : reservation.payment_type}
-                        </span>
+                        {reservation.payment_type === 'payment_link' ? (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            <CreditCard className="h-3 w-3 mr-1" />
+                            Payment Link
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            <Banknote className="h-3 w-3 mr-1" />
+                            Nakit
+                          </Badge>
+                        )}
                         <span className={`font-bold ${isPriceModifiedByDriver(reservation) ? 'text-amber-600' : 'text-primary'}`}>
                           {formatPrice(reservation.price, reservation.price_currency)}
                           {isPriceModifiedByDriver(reservation) && (
