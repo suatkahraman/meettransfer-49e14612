@@ -96,18 +96,27 @@ export const GooglePlacesAutocomplete = ({
 }: GooglePlacesAutocompleteProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
+  const onChangeRef = useRef(onChange);
   const [isReady, setIsReady] = useState(false);
+
+  // Keep onChange ref updated
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   // Initialize Google Places
   useEffect(() => {
     loadGoogleMapsScript().then(() => {
       setIsReady(true);
+    }).catch((err) => {
+      console.error('Failed to load Google Maps:', err);
     });
   }, []);
 
   // Setup autocomplete when ready
   useEffect(() => {
-    if (!isReady || !inputRef.current || autocompleteRef.current) return;
+    if (!isReady || !inputRef.current) return;
+    if (autocompleteRef.current) return; // Already initialized
     if (!window.google?.maps?.places) return;
 
     try {
@@ -120,9 +129,8 @@ export const GooglePlacesAutocomplete = ({
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
         if (place) {
-          // Prefer formatted_address, fallback to name
           const address = place.formatted_address || place.name || '';
-          onChange(address);
+          onChangeRef.current(address);
         }
       });
 
@@ -137,7 +145,7 @@ export const GooglePlacesAutocomplete = ({
         autocompleteRef.current = null;
       }
     };
-  }, [isReady, onChange]);
+  }, [isReady]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
