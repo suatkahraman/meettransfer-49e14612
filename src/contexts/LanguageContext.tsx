@@ -1,12 +1,31 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, ReactNode, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
-type Language = "EN" | "DE" | "FR" | "RU" | "IT" | "ES";
+export type Language = "EN" | "DE" | "FR" | "RU" | "IT" | "ES";
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  getLocalizedPath: (path: string) => string;
 }
+
+const LANGUAGE_PREFIXES: Record<string, Language> = {
+  de: "DE",
+  fr: "FR",
+  ru: "RU",
+  it: "IT",
+  es: "ES",
+};
+
+const LANGUAGE_TO_PREFIX: Record<Language, string> = {
+  EN: "",
+  DE: "/de",
+  FR: "/fr",
+  RU: "/ru",
+  IT: "/it",
+  ES: "/es",
+};
 
 const translations: Record<Language, Record<string, string>> = {
   EN: {
@@ -50,6 +69,10 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Flight Tracking",
     doorToDoor: "Door-to-Door Service",
     professionalDrivers: "Professional Drivers",
+    services: "Services",
+    login: "Login",
+    logout: "Logout",
+    myAccount: "My Account",
   },
   DE: {
     home: "Startseite",
@@ -92,6 +115,10 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Flugverfolgung",
     doorToDoor: "Tür-zu-Tür-Service",
     professionalDrivers: "Professionelle Fahrer",
+    services: "Dienstleistungen",
+    login: "Anmelden",
+    logout: "Abmelden",
+    myAccount: "Mein Konto",
   },
   FR: {
     home: "Accueil",
@@ -134,6 +161,10 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Suivi de vol",
     doorToDoor: "Service Porte-à-Porte",
     professionalDrivers: "Chauffeurs Professionnels",
+    services: "Services",
+    login: "Connexion",
+    logout: "Déconnexion",
+    myAccount: "Mon compte",
   },
   RU: {
     home: "Главная",
@@ -176,6 +207,10 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Отслеживание рейса",
     doorToDoor: "От двери до двери",
     professionalDrivers: "Профессиональные водители",
+    services: "Услуги",
+    login: "Вход",
+    logout: "Выход",
+    myAccount: "Мой аккаунт",
   },
   IT: {
     home: "Home",
@@ -218,6 +253,10 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Tracciamento volo",
     doorToDoor: "Servizio Porta a Porta",
     professionalDrivers: "Autisti Professionisti",
+    services: "Servizi",
+    login: "Accedi",
+    logout: "Esci",
+    myAccount: "Il mio account",
   },
   ES: {
     home: "Inicio",
@@ -260,20 +299,58 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Seguimiento de vuelo",
     doorToDoor: "Servicio Puerta a Puerta",
     professionalDrivers: "Conductores Profesionales",
+    services: "Servicios",
+    login: "Iniciar sesión",
+    logout: "Cerrar sesión",
+    myAccount: "Mi cuenta",
   },
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// Helper to extract language from pathname
+const getLanguageFromPath = (pathname: string): Language => {
+  const pathParts = pathname.split("/").filter(Boolean);
+  const firstPart = pathParts[0]?.toLowerCase();
+  
+  if (firstPart && LANGUAGE_PREFIXES[firstPart]) {
+    return LANGUAGE_PREFIXES[firstPart];
+  }
+  
+  return "EN";
+};
+
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>("EN");
+  const location = useLocation();
+  const language = getLanguageFromPath(location.pathname);
 
   const t = (key: string): string => {
-    return translations[language][key] || key;
+    return translations[language][key] || translations["EN"][key] || key;
   };
 
+  const getLocalizedPath = (path: string): string => {
+    const prefix = LANGUAGE_TO_PREFIX[language];
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    
+    if (language === "EN") {
+      return normalizedPath;
+    }
+    
+    return `${prefix}${normalizedPath === "/" ? "" : normalizedPath}`;
+  };
+
+  // Dummy setLanguage - actual switching happens via navigation
+  const setLanguage = () => {
+    // Language is determined by URL, use navigation instead
+  };
+
+  // Update document lang attribute
+  useEffect(() => {
+    document.documentElement.lang = language.toLowerCase();
+  }, [language]);
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, getLocalizedPath }}>
       {children}
     </LanguageContext.Provider>
   );

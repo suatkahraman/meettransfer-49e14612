@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
 
 interface SEOHeadProps {
   title: string;
@@ -11,6 +12,16 @@ interface SEOHeadProps {
   noIndex?: boolean;
 }
 
+const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es"];
+const LANGUAGE_CODES: Record<Language, string> = {
+  EN: "en",
+  DE: "de",
+  FR: "fr",
+  RU: "ru",
+  IT: "it",
+  ES: "es",
+};
+
 const SEOHead = ({
   title,
   description,
@@ -21,8 +32,23 @@ const SEOHead = ({
   noIndex = false,
 }: SEOHeadProps) => {
   const location = useLocation();
+  const { language } = useLanguage();
   const baseUrl = 'https://meettransfer.app';
-  const fullUrl = canonicalPath ? `${baseUrl}${canonicalPath}` : `${baseUrl}${location.pathname}`;
+
+  // Get base path without language prefix
+  const getBasePath = () => {
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    const firstPart = pathParts[0]?.toLowerCase();
+    
+    if (LANGUAGE_PREFIXES.includes(firstPart)) {
+      return "/" + pathParts.slice(1).join("/") || "/";
+    }
+    return location.pathname;
+  };
+
+  const basePath = canonicalPath || getBasePath();
+  const fullUrl = `${baseUrl}${location.pathname}`;
+  const canonicalUrl = `${baseUrl}${language === "EN" ? basePath : `/${language.toLowerCase()}${basePath === "/" ? "" : basePath}`}`;
 
   useEffect(() => {
     // Update title
@@ -58,7 +84,7 @@ const SEOHead = ({
     updateMeta('og:type', ogType, true);
     updateMeta('og:image', ogImage, true);
     updateMeta('og:site_name', 'Meet Transfer', true);
-    updateMeta('og:locale', 'en_US', true);
+    updateMeta('og:locale', `${LANGUAGE_CODES[language]}_${LANGUAGE_CODES[language].toUpperCase()}`, true);
 
     // Twitter
     updateMeta('twitter:title', title);
@@ -68,18 +94,42 @@ const SEOHead = ({
     // Update canonical
     let canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) {
-      canonical.setAttribute('href', fullUrl);
+      canonical.setAttribute('href', canonicalUrl);
     } else {
       canonical = document.createElement('link');
       canonical.setAttribute('rel', 'canonical');
-      canonical.setAttribute('href', fullUrl);
+      canonical.setAttribute('href', canonicalUrl);
       document.head.appendChild(canonical);
     }
 
+    // Remove existing hreflang tags
+    document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
+
+    // Add hreflang tags for all languages
+    const languages: Language[] = ["EN", "DE", "FR", "RU", "IT", "ES"];
+    languages.forEach(lang => {
+      const hreflang = document.createElement('link');
+      hreflang.setAttribute('rel', 'alternate');
+      hreflang.setAttribute('hreflang', LANGUAGE_CODES[lang]);
+      const langPath = lang === "EN" 
+        ? basePath 
+        : `/${lang.toLowerCase()}${basePath === "/" ? "" : basePath}`;
+      hreflang.setAttribute('href', `${baseUrl}${langPath}`);
+      document.head.appendChild(hreflang);
+    });
+
+    // Add x-default hreflang (pointing to English)
+    const xDefault = document.createElement('link');
+    xDefault.setAttribute('rel', 'alternate');
+    xDefault.setAttribute('hreflang', 'x-default');
+    xDefault.setAttribute('href', `${baseUrl}${basePath}`);
+    document.head.appendChild(xDefault);
+
     return () => {
-      // Cleanup is optional since we're updating the same tags
+      // Cleanup hreflang tags on unmount
+      document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
     };
-  }, [title, description, keywords, fullUrl, ogImage, ogType, noIndex]);
+  }, [title, description, keywords, fullUrl, canonicalUrl, ogImage, ogType, noIndex, language, basePath]);
 
   return null;
 };

@@ -65,39 +65,61 @@ import ServicesPage from "./pages/website/ServicesPage";
 
 const queryClient = new QueryClient();
 
+// Language prefixes for non-English routes
+const LANG_PREFIXES = ["de", "fr", "ru", "it", "es"];
+
+// Helper to create localized routes
+const localizedRoutes = (basePath: string, element: React.ReactNode) => {
+  const routes = [
+    <Route key={`en-${basePath}`} path={basePath} element={element} />,
+  ];
+  
+  LANG_PREFIXES.forEach((prefix) => {
+    const localizedPath = basePath === "/" 
+      ? `/${prefix}` 
+      : `/${prefix}${basePath}`;
+    routes.push(
+      <Route key={`${prefix}-${basePath}`} path={localizedPath} element={element} />
+    );
+  });
+  
+  return routes;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <LanguageProvider>
           <AuthProvider>
             <Routes>
-              <Route path="/" element={<Index />} />
+              {/* Localized Website Pages - Support all languages */}
+              {localizedRoutes("/", <Index />)}
+              {localizedRoutes("/services", <ServicesPage />)}
+              {localizedRoutes("/destinations", <DestinationsPage />)}
+              {localizedRoutes("/fleet", <FleetPage />)}
+              {localizedRoutes("/about", <AboutPage />)}
+              {localizedRoutes("/contact", <ContactPage />)}
+              {localizedRoutes("/reviews", <ReviewsPage />)}
+              {localizedRoutes("/terms", <TermsPage />)}
+              {localizedRoutes("/whatsapp-booking", <WhatsAppBooking />)}
+              {localizedRoutes("/istanbul-transfer", <IstanbulTransfer />)}
+              {localizedRoutes("/antalya-transfer", <AntalyaTransfer />)}
+              {localizedRoutes("/bodrum-transfer", <BodrumTransfer />)}
+              {localizedRoutes("/dalaman-transfer", <DalamanTransfer />)}
+              {localizedRoutes("/izmir-transfer", <IzmirTransfer />)}
+              {localizedRoutes("/cappadocia-transfer", <CappadociaTransfer />)}
+              {localizedRoutes("/ephesus-pamukkale", <EphesusPamukkale />)}
+              {localizedRoutes("/luxury-chauffeur", <LuxuryChauffeur />)}
+              {localizedRoutes("/book", <ReservationForm />)}
+              
+              {/* Auth routes - Not localized (use common language) */}
               <Route path="/auth" element={<Auth />} />
               <Route path="/login" element={<LoginScreen />} />
               <Route path="/signup" element={<SignupScreen />} />
-              <Route path="/book" element={<ReservationForm />} />
               <Route path="/install" element={<InstallApp />} />
-              
-              {/* Website Pages */}
-              <Route path="/services" element={<ServicesPage />} />
-              <Route path="/destinations" element={<DestinationsPage />} />
-              <Route path="/fleet" element={<FleetPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/reviews" element={<ReviewsPage />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/whatsapp-booking" element={<WhatsAppBooking />} />
-              <Route path="/istanbul-transfer" element={<IstanbulTransfer />} />
-              <Route path="/antalya-transfer" element={<AntalyaTransfer />} />
-              <Route path="/bodrum-transfer" element={<BodrumTransfer />} />
-              <Route path="/dalaman-transfer" element={<DalamanTransfer />} />
-              <Route path="/izmir-transfer" element={<IzmirTransfer />} />
-              <Route path="/cappadocia-transfer" element={<CappadociaTransfer />} />
-              <Route path="/ephesus-pamukkale" element={<EphesusPamukkale />} />
-              <Route path="/luxury-chauffeur" element={<LuxuryChauffeur />} />
               
               {/* Customer Routes - Protected */}
               <Route path="/customer" element={<CustomerRoute><CustomerHome /></CustomerRoute>} />
@@ -113,7 +135,7 @@ const App = () => (
               <Route path="/driver/monthly-accounting" element={<DriverRoute><DriverMonthlyAccounting /></DriverRoute>} />
               <Route path="/driver/history" element={<DriverRoute><DriverHistory /></DriverRoute>} />
               
-              {/* Admin Routes - Protected (except setup which is for initial admin creation) */}
+              {/* Admin Routes - Protected */}
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/setup" element={<AdminSetup />} />
               <Route path="/admin/reservations" element={<AdminRoute><AdminReservations /></AdminRoute>} />
@@ -133,9 +155,9 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </LanguageProvider>
+        </LanguageProvider>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 
