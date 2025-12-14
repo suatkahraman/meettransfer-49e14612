@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3 } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   AlertDialog,
@@ -30,6 +30,9 @@ interface Reservation {
   pickup_time: string;
   flight_number: string | null;
   vehicle_type: string;
+  payment_type: string;
+  payment_status: string | null;
+  payment_link: string | null;
   price: number | null;
   price_currency: string | null;
   status: string;
@@ -364,11 +367,67 @@ const CustomerReservationDetail = () => {
 
             {/* Price Section - only show if price is set */}
             {priceDisplay && (
-              <div className="bg-muted p-4 rounded-lg">
+              <div className="bg-muted p-4 rounded-lg space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Price</span>
                   <span className="font-bold text-primary text-2xl">{priceDisplay}</span>
                 </div>
+                
+                {/* Payment Status Indicator */}
+                {reservation.payment_type === 'payment_link' && (
+                  <div className="pt-3 border-t">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">Payment Status</span>
+                      </div>
+                      {reservation.payment_status === 'paid' ? (
+                        <Badge className="bg-green-100 text-green-700 border-green-200">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Payment Received
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-amber-100 text-amber-700 border-amber-200">
+                          <Clock3 className="h-3 w-3 mr-1" />
+                          Payment Pending
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    {/* Show Pay Now button if payment is pending and link exists */}
+                    {reservation.payment_status !== 'paid' && reservation.payment_link && (
+                      <div className="mt-3">
+                        <a 
+                          href={reservation.payment_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <Button className="w-full bg-green-600 hover:bg-green-700">
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Pay Now
+                          </Button>
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Cash payment indicator */}
+                {reservation.payment_type === 'cash' && (
+                  <div className="pt-3 border-t">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">Payment Method</span>
+                      </div>
+                      <Badge className="bg-green-100 text-green-700 border-green-200">
+                        <Banknote className="h-3 w-3 mr-1" />
+                        Cash to Driver
+                      </Badge>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
