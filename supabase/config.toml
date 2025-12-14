@@ -26,3 +26,9 @@ verify_jwt = false
 
 [functions.send-confirmation-email]
 verify_jwt = true
+
+[functions.send-notification-email]
+verify_jwt = true
+
+[functions.deduct-agency-balance]
+verify_jwt = true
