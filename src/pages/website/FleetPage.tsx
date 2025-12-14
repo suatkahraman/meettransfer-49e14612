@@ -7,7 +7,7 @@ import { SEOHead, SchemaOrg } from "@/components/seo";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 import mercedesMaybachImage from "@/assets/mercedes-maybach-interior.webp";
-import mercedesSprinterImage from "@/assets/mercedes-sprinter-minibus.webp";
+import mercedesSprinterImage from "@/assets/mercedes-sprinter-minibus.jpg";
 
 const vehicles = [
   {
