@@ -10,8 +10,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import bodrumMeetTransfer from "@/assets/bodrum-meet-transfer.png";
-import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
-import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
+import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
+import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 
 const destinations = [
   "Yalıkavak", "Türkbükü", "Gümüşlük", "Bodrum Center", "Gündoğan",

@@ -9,8 +9,8 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
-import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
-import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
+import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
+import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 
 const destinations = [
   "Lara", "Kundu", "Belek", "Side", "Alanya",

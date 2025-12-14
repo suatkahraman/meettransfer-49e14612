@@ -4,10 +4,10 @@ import VehicleCard from "@/components/website/VehicleCard";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
-import mercedesVipImage from "@/assets/mercedes-vip-transfer.jpg";
-import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.jpg";
-import mercedesMaybachImage from "@/assets/mercedes-maybach-interior.jpg";
-import mercedesSprinterImage from "@/assets/mercedes-sprinter-minibus.jpg";
+import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
+import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
+import mercedesMaybachImage from "@/assets/mercedes-maybach-interior.webp";
+import mercedesSprinterImage from "@/assets/mercedes-sprinter-minibus.webp";
 
 const vehicles = [
   {
