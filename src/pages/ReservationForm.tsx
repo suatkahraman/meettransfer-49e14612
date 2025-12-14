@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote } from 'lucide-react';
 import { z } from 'zod';
 
 const reservationSchema = z.object({
@@ -25,6 +25,7 @@ const reservationSchema = z.object({
   flightNumber: z.string().trim().max(20).optional().or(z.literal('')),
   vehicleType: z.string().min(1, "Please select a vehicle type"),
   notes: z.string().trim().max(500).optional().or(z.literal('')),
+  paymentMethod: z.enum(['payment_link', 'cash'], { required_error: "Please select a payment option" }),
 });
 
 const MAX_PASSENGERS = 15;
@@ -58,6 +59,7 @@ const ReservationForm = () => {
     flightNumber: '',
     vehicleType: 'mercedes-vito',
     notes: '',
+    paymentMethod: '' as 'payment_link' | 'cash' | '',
   });
 
   // Pre-fill form if user is logged in
@@ -246,7 +248,7 @@ const ReservationForm = () => {
           pickup_time: formData.time,
           flight_number: formData.flightNumber?.trim() || null,
           vehicle_type: formData.vehicleType,
-          payment_type: 'cash',
+          payment_type: formData.paymentMethod,
           status: 'pending_price',
           price: null,
           price_currency: null,
@@ -338,6 +340,7 @@ const ReservationForm = () => {
                     pickup: '',
                     dropoff: '',
                     date: '',
+                    paymentMethod: '',
                     time: '',
                     flightNumber: '',
                     vehicleType: 'mercedes-vito',
@@ -612,6 +615,47 @@ const ReservationForm = () => {
                     </div>
                   ))}
                 </RadioGroup>
+              </div>
+
+              {/* Payment Option Section */}
+              <div className="space-y-3 pt-4 border-t">
+                <Label className="flex items-center gap-2 text-base font-semibold">
+                  <CreditCard className="h-4 w-4" />
+                  Payment Option
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Select how you would like to pay for your transfer
+                </p>
+                <RadioGroup 
+                  value={formData.paymentMethod} 
+                  onValueChange={(v) => setFormData({...formData, paymentMethod: v as 'payment_link' | 'cash'})}
+                >
+                  <div className={`flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer ${errors.paymentMethod ? 'border-destructive' : ''}`}>
+                    <RadioGroupItem value="payment_link" id="payment_link" />
+                    <div className="flex-1">
+                      <Label htmlFor="payment_link" className="cursor-pointer font-medium flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-primary" />
+                        Payment Link
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        We'll send you a secure payment link via email after confirming the price
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer ${errors.paymentMethod ? 'border-destructive' : ''}`}>
+                    <RadioGroupItem value="cash" id="cash" />
+                    <div className="flex-1">
+                      <Label htmlFor="cash" className="cursor-pointer font-medium flex items-center gap-2">
+                        <Banknote className="h-4 w-4 text-green-600" />
+                        Cash to Driver
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Pay in cash directly to your driver at the end of your transfer
+                      </p>
+                    </div>
+                  </div>
+                </RadioGroup>
+                {errors.paymentMethod && <p className="text-sm text-destructive">{errors.paymentMethod}</p>}
               </div>
 
               <div className="space-y-2">
