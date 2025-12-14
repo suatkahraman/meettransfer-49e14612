@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle, Banknote } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import DriverRouteMap from '@/components/driver/DriverRouteMap';
@@ -446,8 +446,28 @@ Notlar: ${reservation.driver_notes || '—'}
               <div className="flex items-start gap-3">
                 <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Ödeme</div>
-                  <div className="font-medium capitalize">{reservation.payment_type === 'cash' ? 'Nakit' : reservation.payment_type === 'card' ? 'Kart' : reservation.payment_type === 'online' ? 'Online' : reservation.payment_type}</div>
+                  <div className="text-sm text-muted-foreground">Ödeme Yöntemi</div>
+                  {reservation.payment_type === 'payment_link' ? (
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 mt-1">
+                      <CreditCard className="h-3 w-3 mr-1" />
+                      Payment Link
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 mt-1">
+                      <Banknote className="h-3 w-3 mr-1" />
+                      Nakit Ödeme
+                    </Badge>
+                  )}
+                  {reservation.payment_type === 'cash' && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Müşteri transferin sonunda size nakit ödeme yapacak
+                    </p>
+                  )}
+                  {reservation.payment_type === 'payment_link' && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Müşteri online ödeme yaptı - nakit almayın
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
