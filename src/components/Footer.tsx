@@ -1,5 +1,38 @@
-import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Linkedin, Youtube } from "lucide-react";
+import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Linkedin, Youtube, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+
+const TripAdvisorBadge = () => (
+  <a
+    href="https://www.tripadvisor.com/Attraction_Review-g293974-d9884368-Reviews-Meet_Transfer-Istanbul.html"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-3 px-4 py-2 bg-primary-foreground/10 rounded-full border border-primary-foreground/20 hover:bg-primary-foreground/20 transition-all group"
+  >
+    <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#00AF87]">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2" />
+      <path
+        fill="currentColor"
+        d="M12 6a3 3 0 100 6 3 3 0 000-6zm-4.5 4.5a2 2 0 100 4 2 2 0 000-4zm9 0a2 2 0 100 4 2 2 0 000-4zM12 14c-1.5 0-2.75 1.25-2.75 2.75h5.5c0-1.5-1.25-2.75-2.75-2.75z"
+      />
+    </svg>
+    <div className="flex items-center gap-1.5">
+      <span className="text-sm font-bold text-primary-foreground">4.7</span>
+      <div className="flex">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`h-3 w-3 ${
+              i < 4 ? "fill-[#00AF87] text-[#00AF87]" : "fill-[#00AF87]/50 text-[#00AF87]"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+    <span className="text-xs text-primary-foreground/80 group-hover:text-primary-foreground transition-colors">
+      492 reviews
+    </span>
+  </a>
+);
 
 const socialLinks = [
   { icon: Facebook, href: "https://m.facebook.com/100095122861655/", label: "Facebook" },
@@ -37,6 +70,10 @@ export const Footer = () => {
                   </a>
                 );
               })}
+            </div>
+            {/* TripAdvisor Badge */}
+            <div className="pt-3">
+              <TripAdvisorBadge />
             </div>
           </div>
 
