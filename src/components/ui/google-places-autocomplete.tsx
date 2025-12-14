@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { logGooglePlacesEvent } from '@/components/ui/google-places-debug';
 
 // Extend Window interface for Google Maps
 declare global {
@@ -125,6 +126,7 @@ export const GooglePlacesAutocomplete = ({
           return;
         }
 
+        logGooglePlacesEvent('init', 'Autocomplete initialized');
         console.log('[GooglePlacesAutocomplete] initializing autocomplete');
 
         const autocomplete = new window.google.maps.places.Autocomplete(
@@ -144,6 +146,7 @@ export const GooglePlacesAutocomplete = ({
             // Let Google / DOM control the input value directly
             inputRef.current.value = address;
 
+            logGooglePlacesEvent('place_changed', address);
             console.log('[GooglePlacesAutocomplete] place_changed', address);
 
             // Notify parent ONLY when a place is selected
@@ -153,6 +156,7 @@ export const GooglePlacesAutocomplete = ({
 
         autocompleteRef.current = autocomplete;
       } catch (error) {
+        logGooglePlacesEvent('error', String(error));
         console.error('Failed to initialize Google Places Autocomplete:', error);
       }
     };
@@ -162,6 +166,7 @@ export const GooglePlacesAutocomplete = ({
     return () => {
       isCancelled = true;
       if (autocompleteRef.current && window.google?.maps?.event) {
+        logGooglePlacesEvent('cleanup', 'Autocomplete instance cleaned up');
         console.log('[GooglePlacesAutocomplete] cleanup autocomplete instance');
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
         autocompleteRef.current = null;
