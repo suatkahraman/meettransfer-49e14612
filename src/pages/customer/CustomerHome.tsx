@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,6 @@ import { LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, T
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
-
 const reservationSchema = z.object({
   pickup: z.string().trim().min(2, "Pick-up point must be at least 2 characters").max(200, "Pick-up point is too long"),
   dropoff: z.string().trim().min(2, "Drop-off location must be at least 2 characters").max(200, "Drop-off location is too long"),
@@ -42,6 +42,7 @@ const MAX_PASSENGERS = 15;
 
 const CustomerHome = () => {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -82,8 +83,8 @@ const CustomerHome = () => {
     // Validate passenger names
     const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
     if (validPassengerNames.length === 0) {
-      setErrors({ passengerNames: 'At least one passenger name is required' });
-      toast.error('Please enter at least one passenger name');
+      setErrors({ passengerNames: t('passengerRequired') });
+      toast.error(t('passengerRequired'));
       return;
     }
 
@@ -97,7 +98,7 @@ const CustomerHome = () => {
         }
       });
       setErrors(fieldErrors);
-      toast.error('Please fix the validation errors');
+      toast.error(t('fixValidationErrors'));
       return;
     }
 
@@ -143,11 +144,11 @@ const CustomerHome = () => {
         // Don't block the user - reservation was created successfully
       }
 
-      toast.success('Reservation submitted! We will contact you with pricing.');
+      toast.success(t('reservationSubmitted'));
       navigate('/customer/bookings');
     } catch (error: any) {
       console.error('Reservation error:', error);
-      toast.error(error.message || 'Failed to create booking');
+      toast.error(error.message || t('bookingFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +160,7 @@ const CustomerHome = () => {
         <h1 className="text-2xl font-serif">Meet Transfer</h1>
         <div className="flex items-center gap-2">
           <Button variant="ghost" onClick={() => navigate('/customer/bookings')} className="text-primary-foreground hover:bg-primary-foreground/10">
-            My Bookings
+            {t('myBookings')}
           </Button>
           <NotificationBell />
           <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
@@ -173,10 +174,10 @@ const CustomerHome = () => {
           <CardHeader>
             <CardTitle className="text-2xl font-serif flex items-center gap-2">
               <Car className="h-6 w-6" />
-              Book Your Transfer
+              {t('bookYourTransfer')}
             </CardTitle>
             <CardDescription>
-              Submit your transfer details and we'll send you a price for approval
+              {t('submitTransferDetails')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -185,11 +186,11 @@ const CustomerHome = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  Pick-up Point
+                  {t('pickupPoint')}
                 </Label>
                 <GooglePlacesAutocomplete
                   onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
-                  placeholder="Enter Pick-up Point"
+                  placeholder={t('enterPickupPoint')}
                   className={errors.pickup ? 'border-destructive' : ''}
                   maxLength={200}
                 />
@@ -200,11 +201,11 @@ const CustomerHome = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  Drop-off Location
+                  {t('dropoffLocation')}
                 </Label>
                 <GooglePlacesAutocomplete
                   onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
-                  placeholder="Hotel name or address"
+                  placeholder={t('hotelNameOrAddress')}
                   className={errors.dropoff ? 'border-destructive' : ''}
                   maxLength={200}
                 />
@@ -216,7 +217,7 @@ const CustomerHome = () => {
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    Date
+                    {t('date')}
                   </Label>
                   <Input
                     type="date"
@@ -227,7 +228,7 @@ const CustomerHome = () => {
                   {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label>Time</Label>
+                  <Label>{t('time')}</Label>
                   <Input
                     type="time"
                     value={formData.time}
@@ -242,10 +243,10 @@ const CustomerHome = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Plane className="h-4 w-4" />
-                  Flight Number (optional)
+                  {t('flightNumberOptional')}
                 </Label>
                 <Input
-                  placeholder="e.g., TK1234"
+                  placeholder={t('flightExample')}
                   value={formData.flightNumber}
                   onChange={(e) => setFormData({...formData, flightNumber: e.target.value})}
                   maxLength={20}
@@ -256,13 +257,13 @@ const CustomerHome = () => {
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Passengers ({passengerNames.length})
+                  {t('passengers')} ({passengerNames.length})
                 </Label>
                 {passengerNames.map((name, index) => (
                   <div key={index} className="flex gap-2">
                     <div className="flex-1">
                       <Input
-                        placeholder={index === 0 ? 'Primary Passenger (Name & Surname)' : `Passenger ${index + 1}`}
+                        placeholder={index === 0 ? t('primaryPassenger') : `${t('passenger')} ${index + 1}`}
                         value={name}
                         onChange={(e) => updatePassenger(index, e.target.value)}
                         className={index === 0 && errors.passengerNames ? 'border-destructive' : ''}
@@ -292,7 +293,7 @@ const CustomerHome = () => {
                     className="w-full"
                   >
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Add Passenger
+                    {t('addPassenger')}
                   </Button>
                 )}
               </div>
@@ -301,7 +302,7 @@ const CustomerHome = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  Contact Phone
+                  {t('contactPhone')}
                 </Label>
                 <Input
                   placeholder="+90 5XX XXX XXXX"
@@ -317,7 +318,7 @@ const CustomerHome = () => {
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
-                  Vehicle Type
+                  {t('vehicleType')}
                 </Label>
                 <RadioGroup value={formData.vehicleType} onValueChange={(v) => setFormData({...formData, vehicleType: v})}>
                   {vehicleTypes.map(vehicle => (
@@ -333,7 +334,7 @@ const CustomerHome = () => {
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <CreditCard className="h-4 w-4" />
-                  Payment Type
+                  {t('paymentType')}
                 </Label>
                 <RadioGroup value={formData.paymentType} onValueChange={(v) => setFormData({...formData, paymentType: v})}>
                   {paymentTypes.map(payment => (
@@ -348,12 +349,12 @@ const CustomerHome = () => {
               {/* Info message instead of price */}
               <div className="bg-muted p-4 rounded-lg text-center">
                 <p className="text-muted-foreground">
-                  After submitting, our team will review your request and send you a price for approval.
+                  {t('priceApprovalMessage')}
                 </p>
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                {isLoading ? 'Submitting...' : 'Submit Booking Request'}
+                {isLoading ? t('submitting') : t('submitBookingRequest')}
               </Button>
             </form>
           </CardContent>
