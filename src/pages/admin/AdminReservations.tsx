@@ -648,6 +648,12 @@ const AdminReservations = () => {
                                   </span>
                                 )}
                               </span>
+                              {/* Yolcudan Alınacak Nakit */}
+                              {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
+                                <span className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                  💵 {currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '₺'}{reservation.passenger_cash_amount}
+                                </span>
+                              )}
                               {reservation.agencies && (
                                 <span className="flex items-center gap-1 text-blue-600">
                                   <Building2 className="h-4 w-4" />
