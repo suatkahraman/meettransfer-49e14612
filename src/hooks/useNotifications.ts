@@ -153,18 +153,18 @@ export const useNotifications = () => {
     customerId: string,
     reservationId: string,
     driverName: string,
-    vehicleModel?: string,
     plateNumber?: string
   ) => {
-    const details = [driverName];
-    if (vehicleModel) details.push(vehicleModel);
-    if (plateNumber) details.push(`(${plateNumber})`);
+    // Only show driver name and plate - no phone, no vehicle model
+    const message = plateNumber 
+      ? `Your driver: ${driverName} (${plateNumber})`
+      : `Your driver: ${driverName}`;
     
     return sendNotification({
       user_id: customerId,
       reservation_id: reservationId,
       title: '🚗 Driver Assigned',
-      message: `Your driver: ${details.join(' - ')}`,
+      message: message,
       type: 'driver_assigned',
       send_push: true,
       url: `/customer/reservation/${reservationId}`,
