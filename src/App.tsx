@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRoute";
 import { lazy, Suspense } from "react";
+import RefreshDebugOverlay from "@/components/ui/refresh-debug-overlay";
 
 // Critical pages - lazy loaded with prefetch for better UX
 const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
@@ -108,6 +109,7 @@ const LazyRoute = ({ children }: { children: React.ReactNode }) => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <RefreshDebugOverlay />
       <Toaster />
       <Sonner />
       <BrowserRouter>
