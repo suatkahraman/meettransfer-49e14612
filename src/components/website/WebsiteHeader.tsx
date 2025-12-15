@@ -13,7 +13,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import meetTransferLogo from "@/assets/meet-transfer-logo.webp";
+import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 
 const WebsiteHeader = () => {
   const { t, getLocalizedPath } = useLanguage();
