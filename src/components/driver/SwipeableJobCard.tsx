@@ -236,16 +236,16 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
             {/* Tags Row */}
             <div className="flex flex-wrap gap-2">
               {reservation.flight_number && (
-                <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs">
+                <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs text-red-600">
                   <Plane className="h-3 w-3" />
                   <span>{reservation.flight_number}</span>
                 </div>
               )}
-              <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs">
+              <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs text-red-600">
                 <Car className="h-3 w-3" />
                 <span>{reservation.vehicle_type}</span>
               </div>
-              <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs">
+              <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs text-red-600">
                 <CreditCard className="h-3 w-3" />
                 <span>{paymentTypeLabels[reservation.payment_type] || reservation.payment_type}</span>
               </div>
