@@ -39,6 +39,8 @@ interface Reservation {
   payment_link: string | null;
   price: number | null;
   price_currency: string | null;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   status: string;
   driver_id: string | null;
   passenger_names: string[] | null;
@@ -462,18 +464,26 @@ const CustomerReservationDetail = () => {
                         Cash to Driver
                       </Badge>
                     </div>
-                    {/* Cash amount to pay info - display only */}
-                    <div className="flex justify-between items-center bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <Banknote className="h-4 w-4 text-amber-600" />
-                        <span className="text-sm font-medium text-amber-700 dark:text-amber-300">Amount to Pay Driver</span>
-                      </div>
-                      <span className="font-bold text-amber-700 dark:text-amber-300 text-lg">
-                        {priceDisplay}
-                      </span>
-                    </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Yolcudan Alınacak Nakit - bağımsız section */}
+            {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && !['pending_price', 'waiting_for_customer_approval'].includes(reservation.status) && (
+              <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-lg border-2 border-amber-300 dark:border-amber-700">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">💵</span>
+                    <span className="font-medium text-amber-700 dark:text-amber-300">Cash Payment to Driver</span>
+                  </div>
+                  <span className="font-bold text-amber-700 dark:text-amber-300 text-2xl">
+                    {currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '₺'}{reservation.passenger_cash_amount}
+                  </span>
+                </div>
+                <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+                  Please pay this amount in cash to your driver at the end of the transfer.
+                </p>
               </div>
             )}
 
