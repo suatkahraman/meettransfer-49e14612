@@ -1308,192 +1308,109 @@ const AdminEditReservation = () => {
                 </div>
               )}
 
-              {/* Agency Pricing Section - Only show when agency is selected */}
-              {formData.agency_id && formData.agency_id !== 'none' && (
+              {/* Agency Pricing Section - Only show when payment type is agency_pay */}
+              {formData.payment_type === 'agency_pay' && formData.agency_id && formData.agency_id !== 'none' && (
                 <Card className="border-blue-300 bg-blue-50 dark:bg-blue-950/30">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-base">
                       <Building2 className="h-4 w-4" />
-                      Acenta Fiyatlandırması
+                      Acenta Fiyatı
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-xs text-blue-600 dark:text-blue-400">
-                      Acentadan alınacak tutarı girin. Kar = Acenta Fiyatı - Şoför Transfer Ücreti
-                    </p>
-                    
-                    {/* Agency Price Fields - Locked when saved and not editing */}
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2 col-span-2">
-                        <Label className="text-sm">Acenta Fiyatı</Label>
-                        {agencyPriceSaved && !isEditingAgencyPrice ? (
-                          <div className="flex items-center h-10 px-3 rounded-md border bg-muted text-foreground">
-                            {agencyDetails.customer_price || '0'}
-                          </div>
-                        ) : (
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={agencyDetails.customer_price}
-                            onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
-                            placeholder="Amount from agency"
-                          />
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-sm">Para Birimi</Label>
-                        {agencyPriceSaved && !isEditingAgencyPrice ? (
-                          <div className="flex items-center h-10 px-3 rounded-md border bg-muted text-foreground">
-                            {agencyDetails.agency_price_currency}
-                          </div>
-                        ) : (
-                          <Select 
-                            value={agencyDetails.agency_price_currency} 
-                            onValueChange={(v) => setAgencyDetails({...agencyDetails, agency_price_currency: v})}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="USD">$ USD</SelectItem>
-                              <SelectItem value="EUR">€ EUR</SelectItem>
-                              <SelectItem value="TRY">₺ TRY</SelectItem>
-                              <SelectItem value="GBP">£ GBP</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
+                    <div className="space-y-2">
+                      <Label className="text-sm">Acentadan Alınacak Tutar ({getCurrencySymbol(formData.price_currency)})</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{getCurrencySymbol(formData.price_currency)}</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={agencyDetails.customer_price}
+                          onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
+                          placeholder="0.00"
+                          className="pl-8"
+                        />
                       </div>
                     </div>
 
-                    {/* Edit/Save Price Button Logic */}
-                    {agencyPriceSaved && !isEditingAgencyPrice ? (
-                      // Price is saved and locked - show Edit button
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsEditingAgencyPrice(true)}
-                        className="w-full border-blue-300 text-blue-700 hover:bg-blue-100"
-                      >
-                        Acenta Fiyatını Düzenle
-                      </Button>
-                    ) : (
-                      // Price not saved yet OR currently editing - show Save button
-                      <Button
-                        type="button"
-                        onClick={async () => {
-                          const agencyPriceValue = (agencyDetails.customer_price || '').toString().trim();
-                          const agencyPrice = parseFloat(agencyPriceValue) || 0;
-                          if (agencyPrice <= 0) {
-                            toast.error('Lütfen geçerli bir acenta fiyatı girin');
-                            return;
-                          }
-                          const driverFee = parseFloat(formData.price) || 0;
-                          const profit = agencyPrice - driverFee;
+                    <Button
+                      type="button"
+                      onClick={async () => {
+                        const agencyPriceValue = (agencyDetails.customer_price || '').toString().trim();
+                        const agencyPrice = parseFloat(agencyPriceValue) || 0;
+                        if (agencyPrice <= 0) {
+                          toast.error('Lütfen geçerli bir acenta fiyatı girin');
+                          return;
+                        }
+                        const driverFee = parseFloat(formData.price) || 0;
+                        const profit = agencyPrice - driverFee;
 
-                          try {
-                            // First check if record exists
-                            const { data: existingRecord } = await supabase
+                        try {
+                          const { data: existingRecord } = await supabase
+                            .from('agency_reservation_details')
+                            .select('id')
+                            .eq('reservation_id', id)
+                            .maybeSingle();
+
+                          let error;
+                          if (existingRecord) {
+                            const result = await supabase
                               .from('agency_reservation_details')
-                              .select('id')
-                              .eq('reservation_id', id)
-                              .maybeSingle();
-
-                            let error;
-                            if (existingRecord) {
-                              // Update existing record
-                              const result = await supabase
-                                .from('agency_reservation_details')
-                                .update({
-                                  customer_price: agencyPrice,
-                                  agency_price_currency: agencyDetails.agency_price_currency,
-                                  company_amount: driverFee,
-                                  agency_profit: profit,
-                                  agency_notes: agencyDetails.agency_notes || null,
-                                  payment_status: agencyDetails.payment_status,
-                                })
-                                .eq('reservation_id', id);
-                              error = result.error;
-                            } else {
-                              // Insert new record
-                              const result = await supabase
-                                .from('agency_reservation_details')
-                                .insert({
-                                  reservation_id: id,
-                                  customer_price: agencyPrice,
-                                  agency_price_currency: agencyDetails.agency_price_currency,
-                                  company_amount: driverFee,
-                                  agency_profit: profit,
-                                  agency_notes: agencyDetails.agency_notes || null,
-                                  payment_status: agencyDetails.payment_status,
-                                });
-                              error = result.error;
-                            }
-
-                            if (error) {
-                              console.error('Agency price save error:', error);
-                              toast.error(error.message || 'Acenta fiyatı kaydedilemedi');
-                            } else {
-                              // Update state with the saved value
-                              setAgencyDetails({
-                                ...agencyDetails,
-                                customer_price: agencyPrice.toString()
+                              .update({
+                                customer_price: agencyPrice,
+                                agency_price_currency: formData.price_currency,
+                                company_amount: driverFee,
+                                agency_profit: profit,
+                              })
+                              .eq('reservation_id', id);
+                            error = result.error;
+                          } else {
+                            const result = await supabase
+                              .from('agency_reservation_details')
+                              .insert({
+                                reservation_id: id,
+                                customer_price: agencyPrice,
+                                agency_price_currency: formData.price_currency,
+                                company_amount: driverFee,
+                                agency_profit: profit,
                               });
-                              setAgencyPriceSaved(true);
-                              setIsEditingAgencyPrice(false);
-                              toast.success('Acenta fiyatı kaydedildi');
-                            }
-                          } catch (err: any) {
-                            console.error('Agency price save exception:', err);
-                            toast.error(err.message || 'Acenta fiyatı kaydedilemedi');
+                            error = result.error;
                           }
-                        }}
-                        className="w-full bg-blue-600 hover:bg-blue-700"
-                      >
-                        <Save className="h-4 w-4 mr-2" />
-                        Fiyatı Kaydet
-                      </Button>
-                    )}
+
+                          if (error) {
+                            console.error('Agency price save error:', error);
+                            toast.error(error.message || 'Acenta fiyatı kaydedilemedi');
+                          } else {
+                            setAgencyDetails({
+                              ...agencyDetails,
+                              customer_price: agencyPrice.toString(),
+                              agency_price_currency: formData.price_currency
+                            });
+                            setAgencyPriceSaved(true);
+                            toast.success('Acenta fiyatı kaydedildi');
+                          }
+                        } catch (err: any) {
+                          console.error('Agency price save exception:', err);
+                          toast.error(err.message || 'Acenta fiyatı kaydedilemedi');
+                        }
+                      }}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      Acenta Fiyatını Kaydet
+                    </Button>
                     
-                    {/* Show receivable amount after saving */}
                     {agencyDetails.customer_price && agencyPriceSaved && (
                       <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border">
                         <div className="flex justify-between items-center font-bold">
-                          <span>Alınacak Tutar:</span>
+                          <span>Kaydedilen Tutar:</span>
                           <span className="text-blue-600">
-                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
+                            {getCurrencySymbol(formData.price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
                           </span>
                         </div>
                       </div>
                     )}
-                    
-                    <div className="space-y-2">
-                      <Label className="text-sm">Ödeme Durumu</Label>
-                      <Select 
-                        value={agencyDetails.payment_status} 
-                        onValueChange={(v) => setAgencyDetails({...agencyDetails, payment_status: v})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="not_paid">Ödenmedi</SelectItem>
-                          <SelectItem value="partially_paid">Kısmen Ödendi</SelectItem>
-                          <SelectItem value="paid">Ödendi</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm">Acenta Notları</Label>
-                      <Textarea
-                        value={agencyDetails.agency_notes}
-                        onChange={(e) => setAgencyDetails({...agencyDetails, agency_notes: e.target.value})}
-                        placeholder="Bu acenta rezervasyonu hakkında notlar..."
-                        rows={2}
-                      />
-                    </div>
-
                   </CardContent>
                 </Card>
               )}
