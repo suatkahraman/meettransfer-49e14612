@@ -47,16 +47,17 @@ const WebsiteHeader = () => {
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to={getLocalizedPath("/")} className="flex items-center gap-3">
+        {/* Left - Logo */}
+        <Link to={getLocalizedPath("/")} className="flex items-center gap-2 flex-shrink-0">
           <img 
             src={meetTransferLogo} 
             alt="Meet Transfer Logo" 
-            className="h-10 w-10 rounded-full object-cover"
+            className="h-9 w-9 rounded-full object-cover"
           />
-          <span className="font-serif text-xl font-bold">Meet Transfer</span>
+          <span className="font-serif text-lg font-bold hidden sm:block">Meet Transfer</span>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Center - Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             <Link
@@ -73,9 +74,17 @@ const WebsiteHeader = () => {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
-          {/* Book Your Transfer - Always visible */}
-          <Link to={getLocalizedPath("/book")}>
+        {/* Center - Book Button (Mobile) */}
+        <Link to={getLocalizedPath("/book")} className="md:hidden">
+          <Button variant="accent" size="sm" className="font-semibold text-xs px-3">
+            {t("bookNow")}
+          </Button>
+        </Link>
+
+        {/* Right - Actions */}
+        <div className="flex items-center gap-2">
+          {/* Book Button (Desktop) */}
+          <Link to={getLocalizedPath("/book")} className="hidden md:block">
             <Button variant="accent" size="sm" className="font-semibold">
               {t("bookNow")}
             </Button>
