@@ -6,11 +6,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import NotificationBell from '@/components/NotificationBell';
-import { PushNotificationToggle } from '@/components/PushNotificationToggle';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 const vehicleTypeLabels: Record<string, string> = {
@@ -79,6 +79,7 @@ const CustomerBookings = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const { playSound } = useNotificationSound();
+  const { isSubscribed, subscribe, unsubscribe, isLoading: pushLoading } = usePushNotifications();
 
   const getStatusLabel = (status: string) => {
     const statusLabels: Record<string, string> = {
@@ -173,8 +174,20 @@ const CustomerBookings = () => {
           <h1 className="text-2xl font-serif">{t('myReservationsTitle')}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <PushNotificationToggle />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => isSubscribed ? unsubscribe() : subscribe()}
+            disabled={pushLoading}
+            className="text-primary-foreground hover:bg-primary-foreground/10"
+            title={isSubscribed ? 'Notifications On' : 'Notifications Off'}
+          >
+            {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5 opacity-60" />}
+          </Button>
           <NotificationBell />
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10" title="Home">
+            <Home className="h-5 w-5" />
+          </Button>
           <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
             <LogOut className="h-5 w-5" />
           </Button>
