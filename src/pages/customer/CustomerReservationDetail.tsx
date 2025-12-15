@@ -83,7 +83,7 @@ const CustomerReservationDetail = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { emailAdminPriceAccepted } = useEmailNotifications();
+  const { emailAdminPriceAccepted, emailAdminPriceRejected, emailAdminReservationCancelled } = useEmailNotifications();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -195,7 +195,7 @@ const CustomerReservationDetail = () => {
 
       if (error) throw error;
 
-      // Notify admin
+      // Notify admin (in-app)
       try {
         await supabase.functions.invoke('create-notification', {
           body: {
@@ -208,6 +208,13 @@ const CustomerReservationDetail = () => {
         });
       } catch (e) {
         console.error('Failed to notify admin:', e);
+      }
+
+      // Send email to admin about price rejection
+      try {
+        await emailAdminPriceRejected(reservation.id);
+      } catch (e) {
+        console.error('Failed to send admin email:', e);
       }
 
       toast.success('Reservation cancelled.');
@@ -237,7 +244,7 @@ const CustomerReservationDetail = () => {
 
       if (error) throw error;
 
-      // Notify admin
+      // Notify admin (in-app)
       try {
         await supabase.functions.invoke('create-notification', {
           body: {
@@ -250,6 +257,13 @@ const CustomerReservationDetail = () => {
         });
       } catch (e) {
         console.error('Failed to notify admin:', e);
+      }
+
+      // Send email to admin about cancellation
+      try {
+        await emailAdminReservationCancelled(reservation.id);
+      } catch (e) {
+        console.error('Failed to send admin email:', e);
       }
 
       // Notify driver if one was assigned

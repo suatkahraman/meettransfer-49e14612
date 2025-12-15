@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,6 +40,7 @@ const CustomerEditReservation = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { emailAdminReservationEdited } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [originalData, setOriginalData] = useState<Reservation | null>(null);
@@ -166,7 +168,7 @@ const CustomerEditReservation = () => {
 
       if (error) throw error;
 
-      // Notify admin about the changes
+      // Notify admin about the changes (in-app)
       try {
         await supabase.functions.invoke('create-notification', {
           body: {
@@ -179,6 +181,13 @@ const CustomerEditReservation = () => {
         });
       } catch (e) {
         console.error('Failed to notify admin:', e);
+      }
+
+      // Send email to admin about the edit
+      try {
+        await emailAdminReservationEdited(id!);
+      } catch (e) {
+        console.error('Failed to send admin email:', e);
       }
 
       // If driver was assigned, notify them too

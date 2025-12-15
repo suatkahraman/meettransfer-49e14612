@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompletionValidation } from '@/hooks/useCompletionValidation';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -76,6 +77,7 @@ const DriverJobDetails = () => {
   const { user, signOut } = useAuth();
   const { driverId } = useUserRole();
   const navigate = useNavigate();
+  const { emailAdminTripCompleted } = useEmailNotifications();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -299,7 +301,7 @@ const DriverJobDetails = () => {
             }
           }
 
-          // Notify admins
+          // Notify admins (in-app)
           await supabase.functions.invoke('create-notification', {
             body: {
               type: 'trip_completed',
@@ -309,6 +311,14 @@ const DriverJobDetails = () => {
               reservation_id: id,
             }
           });
+
+          // Send email to admin about trip completion
+          try {
+            await emailAdminTripCompleted(id, driverData?.name);
+            console.log('Trip completed email sent to admin');
+          } catch (emailError) {
+            console.error('Failed to send trip completed email:', emailError);
+          }
         } catch (notifyError) {
           console.error('Failed to send notifications:', notifyError);
         }
