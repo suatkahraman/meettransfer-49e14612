@@ -87,6 +87,7 @@ export type Database = {
           agency_notes: string | null
           agency_price_currency: string | null
           agency_profit: number | null
+          agency_user_id: string | null
           company_amount: number | null
           created_at: string | null
           customer_price: number | null
@@ -99,6 +100,7 @@ export type Database = {
           agency_notes?: string | null
           agency_price_currency?: string | null
           agency_profit?: number | null
+          agency_user_id?: string | null
           company_amount?: number | null
           created_at?: string | null
           customer_price?: number | null
@@ -111,6 +113,7 @@ export type Database = {
           agency_notes?: string | null
           agency_price_currency?: string | null
           agency_profit?: number | null
+          agency_user_id?: string | null
           company_amount?: number | null
           created_at?: string | null
           customer_price?: number | null
@@ -553,6 +556,7 @@ export type Database = {
         Row: {
           admin_set_price: number | null
           agency_id: string | null
+          agency_user_id: string | null
           created_at: string | null
           customer_id: string
           customer_name: string
@@ -586,6 +590,7 @@ export type Database = {
         Insert: {
           admin_set_price?: number | null
           agency_id?: string | null
+          agency_user_id?: string | null
           created_at?: string | null
           customer_id: string
           customer_name: string
@@ -619,6 +624,7 @@ export type Database = {
         Update: {
           admin_set_price?: number | null
           agency_id?: string | null
+          agency_user_id?: string | null
           created_at?: string | null
           customer_id?: string
           customer_name?: string
