@@ -505,9 +505,30 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get driver email if needed
     let driverEmail = "";
-    if (reservation.drivers?.user_id && type === 'driver_assigned_driver') {
-      const { data: { user } } = await supabase.auth.admin.getUserById(reservation.drivers.user_id);
-      driverEmail = user?.email || additional_data?.driver_email || "";
+    if (type === 'driver_assigned_driver') {
+      console.log('Driver data from reservation:', JSON.stringify(reservation.drivers));
+      
+      if (reservation.drivers?.user_id) {
+        try {
+          const { data: userData, error: userError } = await supabase.auth.admin.getUserById(reservation.drivers.user_id);
+          if (userError) {
+            console.error('Error fetching driver user:', userError);
+          } else {
+            driverEmail = userData?.user?.email || "";
+            console.log('Found driver email from auth:', driverEmail);
+          }
+        } catch (e) {
+          console.error('Exception fetching driver email:', e);
+        }
+      }
+      
+      // Fallback to additional_data if still no email
+      if (!driverEmail && additional_data?.driver_email) {
+        driverEmail = additional_data.driver_email;
+        console.log('Using driver email from additional_data:', driverEmail);
+      }
+      
+      console.log('Final driver email:', driverEmail);
     }
 
     // Prepare common data
