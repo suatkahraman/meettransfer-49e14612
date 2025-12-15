@@ -1319,18 +1319,33 @@ const AdminEditReservation = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label className="text-sm">Acentadan Alınacak Tutar ({getCurrencySymbol(formData.price_currency)})</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{getCurrencySymbol(formData.price_currency)}</span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={agencyDetails.customer_price}
-                          onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
-                          placeholder="0.00"
-                          className="pl-8"
-                        />
+                      <Label className="text-sm">Acentadan Alınacak Tutar</Label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{getCurrencySymbol(agencyDetails.agency_price_currency || formData.price_currency)}</span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={agencyDetails.customer_price}
+                            onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
+                            placeholder="0.00"
+                            className="pl-8"
+                          />
+                        </div>
+                        <Select 
+                          value={agencyDetails.agency_price_currency || formData.price_currency} 
+                          onValueChange={(v) => setAgencyDetails({...agencyDetails, agency_price_currency: v})}
+                        >
+                          <SelectTrigger className="w-28">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {currencies.map(c => (
+                              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
 
@@ -1355,11 +1370,11 @@ const AdminEditReservation = () => {
 
                           let error;
                           if (existingRecord) {
-                            const result = await supabase
+                          const result = await supabase
                               .from('agency_reservation_details')
                               .update({
                                 customer_price: agencyPrice,
-                                agency_price_currency: formData.price_currency,
+                                agency_price_currency: agencyDetails.agency_price_currency || formData.price_currency,
                                 company_amount: driverFee,
                                 agency_profit: profit,
                               })
@@ -1371,7 +1386,7 @@ const AdminEditReservation = () => {
                               .insert({
                                 reservation_id: id,
                                 customer_price: agencyPrice,
-                                agency_price_currency: formData.price_currency,
+                                agency_price_currency: agencyDetails.agency_price_currency || formData.price_currency,
                                 company_amount: driverFee,
                                 agency_profit: profit,
                               });
@@ -1385,7 +1400,7 @@ const AdminEditReservation = () => {
                             setAgencyDetails({
                               ...agencyDetails,
                               customer_price: agencyPrice.toString(),
-                              agency_price_currency: formData.price_currency
+                              agency_price_currency: agencyDetails.agency_price_currency || formData.price_currency
                             });
                             setAgencyPriceSaved(true);
                             toast.success('Acenta fiyatı kaydedildi');
@@ -1406,7 +1421,7 @@ const AdminEditReservation = () => {
                         <div className="flex justify-between items-center font-bold">
                           <span>Kaydedilen Tutar:</span>
                           <span className="text-blue-600">
-                            {getCurrencySymbol(formData.price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
+                            {getCurrencySymbol(agencyDetails.agency_price_currency || formData.price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
                           </span>
                         </div>
                       </div>
