@@ -12,7 +12,12 @@ import { ArrowLeft, Plus, Pencil, Trash2, MapPin, FileText } from 'lucide-react'
 import NotificationBell from '@/components/NotificationBell';
 
 const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
-const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
+const vehicleTypes = [
+  { value: 'mercedes-vito', label: 'Mercedes Vito' },
+  { value: 'mercedes-vclass', label: 'Mercedes Vip Vito' },
+  { value: 'maybach', label: 'Maybach' },
+  { value: 'minibus', label: 'Minibus' },
+];
 const paymentTypes = [
   { value: 'cash', label: 'Nakit' },
   { value: 'card', label: 'Kart' },
@@ -288,7 +293,7 @@ const AdminTemplates = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {vehicleTypes.map(v => (
-                      <SelectItem key={v} value={v}>{v.replace('-', ' ')}</SelectItem>
+                      <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

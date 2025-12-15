@@ -17,7 +17,12 @@ import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 
 // Airports list removed - pickup is now free text
-const vehicleTypes = ['mercedes-vito', 'mercedes-vclass', 'maybach', 'minibus'];
+const vehicleTypes = [
+  { value: 'mercedes-vito', label: 'Mercedes Vito' },
+  { value: 'mercedes-vclass', label: 'Mercedes Vip Vito' },
+  { value: 'maybach', label: 'Maybach' },
+  { value: 'minibus', label: 'Minibus' },
+];
 const paymentTypes = [
   { value: 'cash', label: 'Şoföre Nakit' },
   { value: 'payment_link', label: 'Online Ödeme Linki' },
@@ -482,7 +487,7 @@ const AdminCreateReservation = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {vehicleTypes.map(v => (
-                        <SelectItem key={v} value={v}>{v.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>
+                        <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
