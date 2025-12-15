@@ -8,9 +8,9 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRoute";
 import { lazy, Suspense } from "react";
 
-// Critical pages - loaded immediately
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+// Critical pages - lazy loaded with prefetch for better UX
+const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Auth pages - lazy loaded
 const Auth = lazy(() => import("./pages/Auth"));
@@ -173,7 +173,7 @@ const App = () => (
               <Route path="/admin/agency-accounting/:agencyId" element={<AdminRoute><LazyRoute><AdminAgencyAccounting /></LazyRoute></AdminRoute>} />
               <Route path="/admin/agency-balance/:agencyId" element={<AdminRoute><LazyRoute><AdminAgencyBalance /></LazyRoute></AdminRoute>} />
               
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
             </Routes>
           </AuthProvider>
         </LanguageProvider>
