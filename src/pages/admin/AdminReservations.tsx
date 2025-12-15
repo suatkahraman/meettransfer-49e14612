@@ -626,6 +626,11 @@ const AdminReservations = () => {
                                     </Badge>
                                   )}
                                 </>
+                              ) : reservation.payment_type === 'agency_pay' ? (
+                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                  <Building2 className="h-3 w-3 mr-1" />
+                                  Acenta Öder
+                                </Badge>
                               ) : (
                                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                                   <Banknote className="h-3 w-3 mr-1" />
@@ -737,6 +742,11 @@ const AdminReservations = () => {
                               </Badge>
                             )}
                           </>
+                        ) : reservation.payment_type === 'agency_pay' ? (
+                          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                            <Building2 className="h-3 w-3 mr-1" />
+                            Acenta Öder
+                          </Badge>
                         ) : (
                           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                             <Banknote className="h-3 w-3 mr-1" />

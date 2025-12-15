@@ -72,6 +72,8 @@ const paymentTypeLabels: Record<string, string> = {
   card: 'Kart',
   online: 'Online',
   none: 'Yok',
+  agency_pay: 'Acenta Öder',
+  payment_link: 'Online Ödeme',
 };
 
 const SWIPE_THRESHOLD = 100;
