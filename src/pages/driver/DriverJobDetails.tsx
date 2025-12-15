@@ -520,6 +520,28 @@ Notlar: ${reservation.driver_notes || '—'}
                   )}
                 </div>
               </div>
+
+              {/* Cash Amount to Collect - Prominent Display for Cash Payments */}
+              {reservation.payment_type === 'cash' && reservation.price !== null && (
+                <div className="bg-amber-100 dark:bg-amber-950/50 p-4 rounded-xl border-2 border-amber-300 dark:border-amber-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-amber-500 p-2 rounded-full">
+                        <Banknote className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-amber-800 dark:text-amber-200">Yolcudan Alınacak Tutar</div>
+                        <div className="text-xs text-amber-600 dark:text-amber-400">Transfer sonunda nakit olarak tahsil edilecek</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-3xl text-amber-800 dark:text-amber-200">
+                        {formatPrice(reservation.price, reservation.price_currency)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Currency Display - READ ONLY */}

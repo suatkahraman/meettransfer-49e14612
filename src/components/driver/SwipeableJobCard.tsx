@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban } from 'lucide-react';
+import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, Banknote } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -251,30 +251,48 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
               </div>
             </div>
 
-            {/* Price & Swipe Hints */}
-            <div className="flex items-center justify-between pt-2 border-t">
-              {canSwipeRight && (
-                <span className="text-xs text-green-600 flex items-center gap-1">
-                  <Play className="h-3 w-3" />
-                  Kabul etmek için sağa kaydır
-                </span>
+            {/* Price & Cash Amount */}
+            <div className="pt-2 border-t space-y-2">
+              {/* Cash amount to collect - prominent display */}
+              {reservation.payment_type === 'cash' && reservation.price !== null && (
+                <div className="flex items-center justify-between bg-amber-100 dark:bg-amber-950/50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                    <Banknote className="h-5 w-5" />
+                    <span className="text-sm font-semibold">Yolcudan Alınacak</span>
+                  </div>
+                  <span className="font-bold text-xl text-amber-700 dark:text-amber-300">
+                    {formatPrice(reservation.price, reservation.price_currency)}
+                  </span>
+                </div>
               )}
-              {reservation.status === 'active' && onComplete && !completionValidation.canComplete && (
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Ban className="h-3 w-3" />
-                  Transfer saati bekleniyor
-                </span>
-              )}
-              {canSwipeLeft && (
-                <span className="text-xs text-primary flex items-center gap-1">
-                  Tamamlamak için sola kaydır
-                  <CheckCircle className="h-3 w-3" />
-                </span>
-              )}
-              {!canSwipeRight && !canSwipeLeft && reservation.status !== 'active' && <span />}
-              <span className="font-bold text-lg text-primary">
-                {formatPrice(reservation.price, reservation.price_currency)}
-              </span>
+              
+              {/* Swipe hints and price for non-cash */}
+              <div className="flex items-center justify-between">
+                {canSwipeRight && (
+                  <span className="text-xs text-green-600 flex items-center gap-1">
+                    <Play className="h-3 w-3" />
+                    Kabul etmek için sağa kaydır
+                  </span>
+                )}
+                {reservation.status === 'active' && onComplete && !completionValidation.canComplete && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Ban className="h-3 w-3" />
+                    Transfer saati bekleniyor
+                  </span>
+                )}
+                {canSwipeLeft && (
+                  <span className="text-xs text-primary flex items-center gap-1">
+                    Tamamlamak için sola kaydır
+                    <CheckCircle className="h-3 w-3" />
+                  </span>
+                )}
+                {!canSwipeRight && !canSwipeLeft && reservation.status !== 'active' && <span />}
+                {reservation.payment_type !== 'cash' && (
+                  <span className="font-bold text-lg text-primary">
+                    {formatPrice(reservation.price, reservation.price_currency)}
+                  </span>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
