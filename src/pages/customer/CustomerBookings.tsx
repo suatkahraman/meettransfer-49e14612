@@ -23,6 +23,8 @@ interface Reservation {
   vehicle_type: string;
   price: number | null;
   price_currency: string | null;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   payment_type: string;
   status: string;
   driver_id: string | null;
@@ -316,14 +318,14 @@ const CustomerBookings = () => {
                       </div>
 
                       {/* Cash payment amount indicator */}
-                      {reservation.payment_type === 'cash' && reservation.price !== null && !['pending_price', 'waiting_for_customer_approval'].includes(reservation.status) && (
-                        <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg">
+                      {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && !['pending_price', 'waiting_for_customer_approval'].includes(reservation.status) && (
+                        <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-200 dark:border-amber-800">
                           <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
                             <Banknote className="h-4 w-4" />
                             <span className="text-sm font-medium">{t('cashToDriver')}</span>
                           </div>
                           <span className="font-bold text-amber-700 dark:text-amber-300">
-                            {formatPrice(reservation.price, reservation.price_currency)}
+                            {currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '₺'}{reservation.passenger_cash_amount}
                           </span>
                         </div>
                       )}
