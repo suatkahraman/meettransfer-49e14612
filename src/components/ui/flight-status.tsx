@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Clock, Plane, AlertTriangle, CheckCircle2, PlaneLanding, PlaneTakeoff } from 'lucide-react';
@@ -78,9 +78,16 @@ export const FlightStatus = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lastNotifiedRef = useRef<{ delay: number | null; status: string | null }>({ delay: null, status: null });
+  const onStatusChangeRef = useRef(onStatusChange);
+  const hasFetchedRef = useRef(false);
+  
+  // Keep callback ref updated without triggering re-renders
+  useEffect(() => {
+    onStatusChangeRef.current = onStatusChange;
+  }, [onStatusChange]);
 
-  // Notify driver about flight changes
-  const notifyDriver = async (flightData: FlightStatusData) => {
+  // Notify driver about flight changes - memoized
+  const notifyDriver = useCallback(async (flightData: FlightStatusData) => {
     if (!reservationId || !flightData.found) return;
 
     const currentDelay = flightData.arrival?.delay || 0;
@@ -111,9 +118,12 @@ export const FlightStatus = ({
     }
     
     lastNotifiedRef.current = { delay: currentDelay, status: currentStatus };
-  };
+  }, [reservationId]);
 
   useEffect(() => {
+    // Prevent duplicate fetches
+    if (hasFetchedRef.current) return;
+    
     const fetchStatus = async () => {
       if (!flightNumber || flightNumber.trim().length < 3) {
         setStatus(null);
@@ -122,6 +132,7 @@ export const FlightStatus = ({
 
       setLoading(true);
       setError(null);
+      hasFetchedRef.current = true;
 
       try {
         const { data, error: invokeError } = await supabase.functions.invoke('flight-status', {
@@ -140,7 +151,7 @@ export const FlightStatus = ({
         // Notify about changes and call callback
         if (data?.found) {
           notifyDriver(data);
-          onStatusChange?.(data);
+          onStatusChangeRef.current?.(data);
         }
       } catch (err) {
         console.error('Flight status fetch error:', err);
@@ -154,7 +165,7 @@ export const FlightStatus = ({
     // Debounce the API call
     const timeoutId = setTimeout(fetchStatus, 1000);
     return () => clearTimeout(timeoutId);
-  }, [flightNumber, date, reservationId]);
+  }, [flightNumber, date, notifyDriver]);
 
   if (!flightNumber || flightNumber.trim().length < 3) {
     return null;
