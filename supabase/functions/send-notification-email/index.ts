@@ -196,12 +196,18 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 <p style="margin: 10px 0 0; font-size: 36px; font-weight: bold; color: #111;">${data.price_display}</p>
               </div>
 
-              ${data.payment_type === 'cash' ? `
+              ${data.passenger_cash_display ? `
+              <div style="background: #fff8e1; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #ffb300;">
+                <p style="margin: 0; color: #f57c00; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">💵 CASH PAYMENT TO DRIVER</p>
+                <p style="margin: 10px 0 0; font-size: 32px; font-weight: bold; color: #e65100;">${data.passenger_cash_display}</p>
+                <p style="margin: 8px 0 0; color: #ef6c00; font-size: 13px;">Please pay this amount in cash to your driver at the end of the transfer.</p>
+              </div>
+              ` : (data.payment_type === 'cash' ? `
               <div style="background: #fff8e1; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #ffb300;">
                 <p style="margin: 0; color: #f57c00; font-size: 14px; font-weight: bold;">💵 Cash Payment to Driver</p>
                 <p style="margin: 8px 0 0; color: #e65100; font-size: 13px;">Please pay <strong>${data.price_display}</strong> in cash to your driver at the end of the transfer.</p>
               </div>
-              ` : ''}
+              ` : '')}
 
               <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
                 <tr>
@@ -266,7 +272,13 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #2196f3; letter-spacing: 3px;">${data.reservation_code}</p>
               </div>
 
-              ${data.payment_type === 'cash' ? `
+              ${data.passenger_cash_display ? `
+              <div style="background: #fff8e1; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #ffb300;">
+                <p style="margin: 0; color: #f57c00; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">💵 YOLCUDAN ALINACAK NAKİT</p>
+                <p style="margin: 10px 0 0; font-size: 32px; font-weight: bold; color: #e65100;">${data.passenger_cash_display}</p>
+                <p style="margin: 8px 0 0; color: #ef6c00; font-size: 13px;">Transfer sonunda müşteriden nakit olarak tahsil edilecek</p>
+              </div>
+              ` : (data.payment_type === 'cash' ? `
               <div style="background: #fff8e1; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #ffb300;">
                 <p style="margin: 0; color: #f57c00; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">💵 YOLCUDAN ALINACAK NAKİT</p>
                 <p style="margin: 10px 0 0; font-size: 32px; font-weight: bold; color: #e65100;">${data.price_display}</p>
@@ -276,7 +288,7 @@ const getEmailTemplate = (type: EmailType, data: any) => {
               <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #2196f3;">
                 <p style="margin: 0; color: #1565c0; font-size: 14px;">💳 Online Ödeme - Nakit almayınız</p>
               </div>
-              `}
+              `)}
 
               <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
                 <tr>
@@ -538,6 +550,12 @@ const handler = async (req: Request): Promise<Response> => {
       ? reservation.passenger_names.join(', ')
       : reservation.customer_name;
 
+    // Prepare passenger cash display
+    const passengerCashCurrencySymbol = currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '';
+    const passengerCashDisplay = reservation.passenger_cash_amount 
+      ? `${passengerCashCurrencySymbol}${reservation.passenger_cash_amount}` 
+      : null;
+
     const templateData = {
       reservation_id: reservation.id,
       reservation_code: reservation.reservation_code || 'N/A',
@@ -554,6 +572,7 @@ const handler = async (req: Request): Promise<Response> => {
       price_display: priceDisplay,
       driver_notes: reservation.driver_notes,
       payment_link: additional_data?.payment_link || reservation.payment_link || '',
+      passenger_cash_display: passengerCashDisplay,
     };
 
     const template = getEmailTemplate(type, templateData);
