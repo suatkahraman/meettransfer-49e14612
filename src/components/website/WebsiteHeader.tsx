@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { LogIn, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "./LanguageSelector";
+import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,6 +74,9 @@ const WebsiteHeader = () => {
         </nav>
 
         <div className="flex items-center gap-3">
+          <div className="hidden md:block">
+            <PushNotificationToggle />
+          </div>
           <LanguageSelector />
           
           {/* Auth Buttons - Desktop */}

@@ -1,13 +1,11 @@
 import { Bell, BellOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
-import { useAuth } from '@/contexts/AuthContext';
 
 export const PushNotificationToggle = () => {
-  const { user } = useAuth();
   const { isSupported, isSubscribed, isLoading, permission, subscribe, unsubscribe } = usePushNotifications();
 
-  if (!user || !isSupported) {
+  if (!isSupported) {
     return null;
   }
 
