@@ -451,7 +451,7 @@ const CustomerReservationDetail = () => {
                 
                 {/* Cash payment indicator */}
                 {reservation.payment_type === 'cash' && (
-                  <div className="pt-3 border-t">
+                  <div className="pt-3 border-t space-y-3">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <Banknote className="h-4 w-4 text-muted-foreground" />
@@ -461,6 +461,16 @@ const CustomerReservationDetail = () => {
                         <Banknote className="h-3 w-3 mr-1" />
                         Cash to Driver
                       </Badge>
+                    </div>
+                    {/* Cash amount to pay info - display only */}
+                    <div className="flex justify-between items-center bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Banknote className="h-4 w-4 text-amber-600" />
+                        <span className="text-sm font-medium text-amber-700 dark:text-amber-300">Amount to Pay Driver</span>
+                      </div>
+                      <span className="font-bold text-amber-700 dark:text-amber-300 text-lg">
+                        {priceDisplay}
+                      </span>
                     </div>
                   </div>
                 )}
