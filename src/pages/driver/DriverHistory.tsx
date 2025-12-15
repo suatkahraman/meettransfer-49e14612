@@ -13,6 +13,13 @@ import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const vehicleTypeLabels: Record<string, string> = {
+  'mercedes-vito': 'Mercedes Vito',
+  'mercedes-vclass': 'Mercedes Vip Vito',
+  'maybach': 'Maybach',
+  'minibus': 'Minibus',
+};
+
 interface Reservation {
   id: string;
   customer_name: string;
@@ -298,7 +305,7 @@ const DriverHistory = () => {
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Car className="h-3 w-3" />
-                          <span>{reservation.vehicle_type}</span>
+                          <span>{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <CreditCard className="h-3 w-3" />

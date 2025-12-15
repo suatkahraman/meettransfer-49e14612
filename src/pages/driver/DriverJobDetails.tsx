@@ -20,6 +20,13 @@ import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
 
+const vehicleTypeLabels: Record<string, string> = {
+  'mercedes-vito': 'Mercedes Vito',
+  'mercedes-vclass': 'Mercedes Vip Vito',
+  'maybach': 'Maybach',
+  'minibus': 'Minibus',
+};
+
 interface Reservation {
   id: string;
   reservation_code: string | null;
@@ -338,7 +345,7 @@ ${passengerList}
 Alış Noktası: ${reservation.pickup}
 Bırakış Noktası: ${reservation.dropoff}
 ${reservation.flight_number ? `Uçuş No: ${reservation.flight_number}\n` : ''}
-Araç: ${reservation.vehicle_type.replace('-', ' ')}
+Araç: ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}
 Ücret: ${reservation.price ? `${currencySymbol}${reservation.price}` : '—'}
 Toplanan Nakit: ${reservation.driver_cash_amount ? `${currencySymbol}${reservation.driver_cash_amount}` : '—'}
 
@@ -481,7 +488,7 @@ Notlar: ${reservation.driver_notes || '—'}
                 <Car className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <div className="text-sm text-muted-foreground">Araç</div>
-                  <div className="font-medium capitalize">{reservation.vehicle_type.replace('-', ' ')}</div>
+                  <div className="font-medium">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</div>
                 </div>
               </div>
 
