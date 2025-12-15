@@ -24,7 +24,8 @@ interface EmailOptions {
 export const useEmailNotifications = () => {
   const sendEmail = useCallback(async (options: EmailOptions) => {
     try {
-      console.log('Sending email notification:', options.type);
+      console.log('Sending email notification:', options.type, 'for reservation:', options.reservation_id);
+      console.log('Additional data:', JSON.stringify(options.additional_data));
       
       const { data, error } = await supabase.functions.invoke('send-notification-email', {
         body: {
@@ -35,14 +36,14 @@ export const useEmailNotifications = () => {
       });
 
       if (error) {
-        console.error('Failed to send email:', error);
+        console.error('Failed to send email - Supabase error:', error);
         return { success: false, error };
       }
 
-      console.log('Email sent successfully:', data);
+      console.log('Email function response:', JSON.stringify(data));
       return { success: true, data };
     } catch (error) {
-      console.error('Email notification error:', error);
+      console.error('Email notification exception:', error);
       return { success: false, error };
     }
   }, []);

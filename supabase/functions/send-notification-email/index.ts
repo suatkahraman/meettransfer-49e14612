@@ -615,6 +615,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending email to: ${recipient}`);
 
+    // Note: Using onboarding@resend.dev only works for sending to your own email.
+    // To send to other recipients, verify your domain at resend.com/domains
+    // and change from address to something like: noreply@meettransfer.app
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -622,7 +625,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Meet Transfer <onboarding@resend.dev>",
+        from: "Meet Transfer <noreply@meettransfer.app>",
         to: [recipient],
         subject: template.subject,
         html: template.html,
