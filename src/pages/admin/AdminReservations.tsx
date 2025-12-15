@@ -280,11 +280,16 @@ const AdminReservations = () => {
       // Send email to driver
       if (assignDialog.reservationId) {
         try {
-          // Get driver email from auth.users via edge function
-          await emailDriverAssigned(assignDialog.reservationId);
-          console.log('Driver assignment email sent');
+          const emailResult = await emailDriverAssigned(assignDialog.reservationId);
+          if (emailResult.success) {
+            console.log('Driver assignment email sent successfully:', emailResult);
+          } else {
+            console.error('Driver email failed:', emailResult.error);
+            toast.error('Şoför mail gönderilemedi: ' + (emailResult.error || 'Bilinmeyen hata'));
+          }
         } catch (err) {
           console.error('Failed to send driver email:', err);
+          toast.error('Şoför mail hatası');
         }
       }
 
