@@ -470,6 +470,7 @@ Notlar: ${reservation.driver_notes || '—'}
                     flightNumber={reservation.flight_number} 
                     date={reservation.pickup_date}
                     reservationId={reservation.id}
+                    refreshIntervalMs={0}
                   />
                 </div>
               )}

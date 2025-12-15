@@ -397,6 +397,7 @@ const CustomerReservationDetail = () => {
               <FlightStatus 
                 flightNumber={reservation.flight_number} 
                 date={reservation.pickup_date}
+                refreshIntervalMs={0}
               />
             )}
 
