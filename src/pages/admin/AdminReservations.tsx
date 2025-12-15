@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -100,6 +101,7 @@ const AdminReservations = () => {
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
   const { playSound } = useNotificationSound();
+  const { emailDriverAssigned } = useEmailNotifications();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
@@ -257,7 +259,7 @@ const AdminReservations = () => {
         new_data: { driver_id: selectedDriver, status: 'sent_to_driver', driver_name: selectedDriverData?.name },
       });
 
-      // Notify driver with price
+      // Notify driver with price (push notification)
       if (selectedDriverData?.user_id && reservation) {
         try {
           const priceDisplay = formatPrice(reservation.price, reservation.price_currency);
@@ -272,6 +274,17 @@ const AdminReservations = () => {
           });
         } catch (err) {
           console.error('Failed to create notification:', err);
+        }
+      }
+
+      // Send email to driver
+      if (assignDialog.reservationId) {
+        try {
+          // Get driver email from auth.users via edge function
+          await emailDriverAssigned(assignDialog.reservationId);
+          console.log('Driver assignment email sent');
+        } catch (err) {
+          console.error('Failed to send driver email:', err);
         }
       }
 
