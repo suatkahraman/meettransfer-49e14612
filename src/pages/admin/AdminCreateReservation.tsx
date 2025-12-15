@@ -532,21 +532,25 @@ const AdminCreateReservation = () => {
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Şoför Nakit Tutarı</Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={formData.driver_cash_amount}
-                        onChange={(e) => setFormData({...formData, driver_cash_amount: e.target.value})}
-                        className="pl-8"
-                        placeholder="0.00"
-                      />
+                  {/* Cash amount to collect from passenger - informational only */}
+                  {formData.payment_type === 'cash' && (
+                    <div className="space-y-2">
+                      <Label>Yolcudan Alınacak Nakit Tutar (Bilgi)</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.driver_cash_amount}
+                          onChange={(e) => setFormData({...formData, driver_cash_amount: e.target.value})}
+                          className="pl-8"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Bu tutar sadece bilgi amaçlıdır, hesaplamalara dahil edilmez.</p>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
