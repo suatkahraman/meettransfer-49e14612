@@ -6,12 +6,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import NotificationBell from '@/components/NotificationBell';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
+import { FlightStatus } from '@/components/ui/flight-status';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -27,6 +28,7 @@ interface Reservation {
   dropoff: string;
   pickup_date: string;
   pickup_time: string;
+  flight_number: string | null;
   vehicle_type: string;
   price: number | null;
   price_currency: string | null;
@@ -40,6 +42,41 @@ interface Reservation {
     plate_number: string | null;
   } | null;
 }
+
+// Simple component to show flight delay badge inline
+const FlightDelayBadge = ({ flightNumber, date }: { flightNumber: string; date: string }) => {
+  const [delay, setDelay] = useState<number | null>(null);
+  const [flightStatus, setFlightStatus] = useState<string | null>(null);
+
+  return (
+    <>
+      <FlightStatus
+        flightNumber={flightNumber}
+        date={date}
+        compact
+        refreshIntervalMs={0}
+        className="hidden"
+        onStatusChange={(status) => {
+          const d = status.arrival?.delay || status.departure?.delay || 0;
+          setDelay(d);
+          setFlightStatus(status.status?.toLowerCase() || null);
+        }}
+      />
+      {delay && delay > 0 && (
+        <Badge className="bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs flex items-center gap-1">
+          <AlertTriangle className="h-3 w-3" />
+          +{delay} min
+        </Badge>
+      )}
+      {flightStatus === 'cancelled' && (
+        <Badge className="bg-destructive/20 text-destructive text-xs flex items-center gap-1">
+          <AlertTriangle className="h-3 w-3" />
+          Cancelled
+        </Badge>
+      )}
+    </>
+  );
+};
 
 const statusColors: Record<string, string> = {
   'pending_price': 'bg-orange-500/20 text-orange-700 dark:text-orange-300',
@@ -239,10 +276,18 @@ const CustomerBookings = () => {
                             <span>{reservation.pickup_time}</span>
                           </div>
                         </div>
-                        <Badge className={`flex items-center gap-1 ${statusColors[reservation.status]}`}>
-                          {statusIcons[reservation.status]}
-                          {getStatusLabel(reservation.status)}
-                        </Badge>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge className={`flex items-center gap-1 ${statusColors[reservation.status]}`}>
+                            {statusIcons[reservation.status]}
+                            {getStatusLabel(reservation.status)}
+                          </Badge>
+                          {reservation.flight_number && (
+                            <FlightDelayBadge 
+                              flightNumber={reservation.flight_number} 
+                              date={reservation.pickup_date} 
+                            />
+                          )}
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
@@ -306,10 +351,18 @@ const CustomerBookings = () => {
                             <span>{reservation.pickup_time}</span>
                           </div>
                         </div>
-                        <Badge className={`flex items-center gap-1 ${statusColors[reservation.status] || 'bg-muted'}`}>
-                          {statusIcons[reservation.status]}
-                          {getStatusLabel(reservation.status)}
-                        </Badge>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge className={`flex items-center gap-1 ${statusColors[reservation.status] || 'bg-muted'}`}>
+                            {statusIcons[reservation.status]}
+                            {getStatusLabel(reservation.status)}
+                          </Badge>
+                          {reservation.flight_number && (
+                            <FlightDelayBadge 
+                              flightNumber={reservation.flight_number} 
+                              date={reservation.pickup_date} 
+                            />
+                          )}
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
