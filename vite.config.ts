@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: "autoUpdate",
+      // Manual update only: do not auto-check/apply SW updates.
+      registerType: "prompt",
       injectRegister: null,
       includeAssets: ["favicon.ico", "robots.txt"],
       manifest: {

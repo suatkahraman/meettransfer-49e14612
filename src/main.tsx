@@ -16,24 +16,8 @@ if ('serviceWorker' in navigator) {
       console.log('Push SW registration failed:', error);
     }
 
-    // Register PWA service worker dynamically
-    // NOTE: disable auto-reload on updates to avoid "page keeps refreshing" loops.
-    try {
-      // @ts-ignore - virtual module from vite-plugin-pwa
-      const { registerSW } = await import('virtual:pwa-register');
-      registerSW({
-        immediate: false,
-        onNeedRefresh() {
-          // Intentionally no auto refresh; user can refresh manually.
-          console.log('PWA update available (no auto-refresh)');
-        },
-        onOfflineReady() {
-          console.log('PWA offline ready');
-        },
-      });
-    } catch (error) {
-      console.log('PWA SW registration failed:', error);
-    }
+    // PWA service worker registration disabled to prevent auto update/reload loops.
+    // We keep ONLY push SW (/sw-push.js).
   };
 
   // Use setTimeout to defer SW registration outside critical path
