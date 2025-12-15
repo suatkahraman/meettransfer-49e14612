@@ -563,6 +563,7 @@ export type Database = {
           driver_earning: number | null
           driver_id: string | null
           driver_notes: string | null
+          driver_user_id: string | null
           dropoff: string
           flight_number: string | null
           id: string
@@ -595,6 +596,7 @@ export type Database = {
           driver_earning?: number | null
           driver_id?: string | null
           driver_notes?: string | null
+          driver_user_id?: string | null
           dropoff: string
           flight_number?: string | null
           id?: string
@@ -627,6 +629,7 @@ export type Database = {
           driver_earning?: number | null
           driver_id?: string | null
           driver_notes?: string | null
+          driver_user_id?: string | null
           dropoff?: string
           flight_number?: string | null
           id?: string
