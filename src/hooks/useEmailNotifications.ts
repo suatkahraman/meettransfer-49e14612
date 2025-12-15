@@ -4,10 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 type EmailType = 
   | 'new_reservation_admin'
   | 'price_accepted_admin'
+  | 'price_rejected_admin'
   | 'price_set_customer'
   | 'driver_assigned_driver'
   | 'payment_request_customer'
-  | 'payment_confirmed_customer';
+  | 'payment_confirmed_customer'
+  | 'trip_completed_admin'
+  | 'reservation_edited_admin'
+  | 'reservation_cancelled_admin';
 
 interface EmailOptions {
   type: EmailType;
@@ -110,13 +114,53 @@ export const useEmailNotifications = () => {
     });
   }, [sendEmail]);
 
+  // 7. When customer rejects price → Email to admin (info@meettransfer.app)
+  const emailAdminPriceRejected = useCallback(async (reservationId: string) => {
+    return sendEmail({
+      type: 'price_rejected_admin',
+      reservation_id: reservationId,
+    });
+  }, [sendEmail]);
+
+  // 8. When driver completes trip → Email to admin (info@meettransfer.app)
+  const emailAdminTripCompleted = useCallback(async (
+    reservationId: string,
+    driverName?: string
+  ) => {
+    return sendEmail({
+      type: 'trip_completed_admin',
+      reservation_id: reservationId,
+      additional_data: { driver_name: driverName },
+    });
+  }, [sendEmail]);
+
+  // 9. When customer edits reservation → Email to admin (info@meettransfer.app)
+  const emailAdminReservationEdited = useCallback(async (reservationId: string) => {
+    return sendEmail({
+      type: 'reservation_edited_admin',
+      reservation_id: reservationId,
+    });
+  }, [sendEmail]);
+
+  // 10. When customer cancels reservation → Email to admin (info@meettransfer.app)
+  const emailAdminReservationCancelled = useCallback(async (reservationId: string) => {
+    return sendEmail({
+      type: 'reservation_cancelled_admin',
+      reservation_id: reservationId,
+    });
+  }, [sendEmail]);
+
   return {
     sendEmail,
     emailAdminNewReservation,
     emailAdminPriceAccepted,
+    emailAdminPriceRejected,
     emailCustomerPriceSet,
     emailDriverAssigned,
     emailPaymentRequest,
     emailPaymentConfirmed,
+    emailAdminTripCompleted,
+    emailAdminReservationEdited,
+    emailAdminReservationCancelled,
   };
 };
