@@ -75,7 +75,7 @@ const WebsiteHeader = () => {
 
         <div className="flex items-center gap-3">
           {/* Book Your Transfer - Always visible */}
-          <Link to={getLocalizedPath("/book")} className="hidden sm:block">
+          <Link to={getLocalizedPath("/book")}>
             <Button variant="accent" size="sm" className="font-semibold">
               {t("bookNow")}
             </Button>
