@@ -528,6 +528,7 @@ const ReservationForm = () => {
                     <FlightStatus 
                       flightNumber={formData.flightNumber} 
                       date={formData.date}
+                      refreshIntervalMs={0}
                     />
                   )}
                 </div>
