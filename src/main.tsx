@@ -4,9 +4,9 @@ import "./index.css";
 
 createRoot(document.getElementById("root")!).render(<App />);
 
-// Defer service worker registration to avoid render blocking
+// Defer service worker registration to avoid render blocking and critical chain
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
+  const registerServiceWorkers = async () => {
     // Register PWA service worker dynamically
     try {
       // @ts-ignore - virtual module from vite-plugin-pwa
@@ -23,5 +23,10 @@ if ('serviceWorker' in navigator) {
     } catch (error) {
       console.log('Push SW registration failed:', error);
     }
+  };
+
+  // Use setTimeout to defer SW registration outside critical path
+  window.addEventListener('load', () => {
+    setTimeout(registerServiceWorkers, 3000);
   });
 }
