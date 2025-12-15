@@ -74,6 +74,12 @@ const WebsiteHeader = () => {
         </nav>
 
         <div className="flex items-center gap-3">
+          {/* Book Your Transfer - Always visible */}
+          <Link to={getLocalizedPath("/book")} className="hidden sm:block">
+            <Button variant="accent" size="sm" className="font-semibold">
+              {t("bookNow")}
+            </Button>
+          </Link>
           <div className="hidden md:block">
             <PushNotificationToggle />
           </div>
@@ -104,11 +110,6 @@ const WebsiteHeader = () => {
                 <Button variant="ghost" size="sm" className="gap-2">
                   <LogIn className="h-4 w-4" />
                   {t("login")}
-                </Button>
-              </Link>
-              <Link to={getLocalizedPath("/book")}>
-                <Button variant="accent" size="sm">
-                  {t("bookNow")}
                 </Button>
               </Link>
             </div>
