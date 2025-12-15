@@ -24,6 +24,8 @@ interface Reservation {
   price: number | null;
   price_currency: string | null;
   driver_cash_amount: number | null;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   status: string;
   customer_name: string;
   driver_id: string | null;
