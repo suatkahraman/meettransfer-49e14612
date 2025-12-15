@@ -37,6 +37,17 @@ const currencySymbols: Record<string, string> = {
   'GBP': '£',
 };
 
+const vehicleTypeLabels: Record<string, string> = {
+  'mercedes-vito': 'Mercedes Vito',
+  'mercedes-vclass': 'Mercedes Vip Vito',
+  'maybach': 'Maybach',
+  'minibus': 'Minibus',
+};
+
+const getVehicleLabel = (vehicleType: string): string => {
+  return vehicleTypeLabels[vehicleType] || vehicleType.replace(/-/g, ' ');
+};
+
 const getEmailTemplate = (type: EmailType, data: any) => {
   const baseUrl = "https://meettransfer.app";
   
@@ -90,7 +101,7 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle Type</strong></td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.vehicle_type?.replace(/-/g, ' ')}</td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${getVehicleLabel(data.vehicle_type)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Passengers</strong></td>
@@ -224,7 +235,7 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle</strong></td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.vehicle_type?.replace(/-/g, ' ')}</td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${getVehicleLabel(data.vehicle_type)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Payment Method</strong></td>
@@ -305,7 +316,7 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Araç Tipi</strong></td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.vehicle_type?.replace(/-/g, ' ')}</td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${getVehicleLabel(data.vehicle_type)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Yolcular</strong></td>
@@ -382,7 +393,7 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle</strong></td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.vehicle_type?.replace(/-/g, ' ')}</td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${getVehicleLabel(data.vehicle_type)}</td>
                 </tr>
               </table>
 
@@ -447,7 +458,7 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle</strong></td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.vehicle_type?.replace(/-/g, ' ')}</td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${getVehicleLabel(data.vehicle_type)}</td>
                 </tr>
               </table>
 

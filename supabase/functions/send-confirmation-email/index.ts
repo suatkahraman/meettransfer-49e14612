@@ -22,6 +22,17 @@ const currencySymbols: Record<string, string> = {
   'GBP': '£',
 };
 
+const vehicleTypeLabels: Record<string, string> = {
+  'mercedes-vito': 'Mercedes Vito',
+  'mercedes-vclass': 'Mercedes Vip Vito',
+  'maybach': 'Maybach',
+  'minibus': 'Minibus',
+};
+
+const getVehicleLabel = (vehicleType: string): string => {
+  return vehicleTypeLabels[vehicleType] || vehicleType.replace(/-/g, ' ');
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -150,7 +161,7 @@ const handler = async (req: Request): Promise<Response> => {
             ` : ''}
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Vehicle:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;">${reservation.vehicle_type.replace('-', ' ')}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee;">${getVehicleLabel(reservation.vehicle_type)}</td>
             </tr>
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Price:</strong></td>
