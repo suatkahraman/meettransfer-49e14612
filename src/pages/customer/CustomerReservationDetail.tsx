@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle } from 'lucide-react';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
@@ -640,22 +640,20 @@ const CustomerReservationDetail = () => {
                     <User className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">{reservation.drivers.name}</span>
                   </div>
-                  {(reservation.drivers.vehicle_model || reservation.drivers.plate_number) && (
+                  {reservation.drivers.plate_number && (
                     <div className="flex items-center gap-2">
                       <Car className="h-4 w-4 text-muted-foreground" />
-                      <span>
-                        {reservation.drivers.vehicle_model || ''}
-                        {reservation.drivers.vehicle_model && reservation.drivers.plate_number ? ' - ' : ''}
-                        {reservation.drivers.plate_number || ''}
-                      </span>
+                      <span>{reservation.drivers.plate_number}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <a href={`tel:${reservation.drivers.phone}`} className="text-primary">
-                      {reservation.drivers.phone}
-                    </a>
-                  </div>
+                  {/* WhatsApp Support Button */}
+                  <Button
+                    onClick={() => window.open('https://wa.me/905321748390', '_blank')}
+                    className="w-full mt-3 bg-[#25D366] hover:bg-[#22c55e] text-white"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    WhatsApp Support
+                  </Button>
                 </div>
               ) : (
                 <p className="text-muted-foreground text-sm">Driver will be assigned soon.</p>
