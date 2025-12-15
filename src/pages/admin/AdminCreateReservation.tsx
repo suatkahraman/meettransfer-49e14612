@@ -89,6 +89,8 @@ const AdminCreateReservation = () => {
     price: searchParams.get('price') || '',
     price_currency: searchParams.get('price_currency') || 'TRY',
     driver_cash_amount: '',
+    passenger_cash_amount: '',
+    passenger_cash_currency: 'TRY',
     status: 'confirmed',
     driver_id: '',
     agency_id: '',
@@ -227,6 +229,8 @@ const AdminCreateReservation = () => {
           price: formData.price ? parseFloat(formData.price) : null,
           price_currency: formData.price_currency,
           driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
+          passenger_cash_amount: formData.passenger_cash_amount ? parseFloat(formData.passenger_cash_amount) : null,
+          passenger_cash_currency: formData.passenger_cash_currency || 'TRY',
           status: formData.status,
           driver_id: formData.driver_id || null,
           agency_id: formData.agency_id || null,
@@ -532,25 +536,33 @@ const AdminCreateReservation = () => {
                       />
                     </div>
                   </div>
-                  {/* Cash amount to collect from passenger - informational only */}
-                  {formData.payment_type === 'cash' && (
-                    <div className="space-y-2">
-                      <Label>Yolcudan Alınacak Nakit Tutar (Bilgi)</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
+                  {/* Yolcudan Alınacak Nakit - New dedicated field */}
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-amber-700 dark:text-amber-400 font-semibold">Yolcudan Alınacak Nakit Tutar</Label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
                         <Input
                           type="number"
                           step="0.01"
                           min="0"
-                          value={formData.driver_cash_amount}
-                          onChange={(e) => setFormData({...formData, driver_cash_amount: e.target.value})}
-                          className="pl-8"
+                          value={formData.passenger_cash_amount}
+                          onChange={(e) => setFormData({...formData, passenger_cash_amount: e.target.value})}
                           placeholder="0.00"
                         />
                       </div>
-                      <p className="text-xs text-muted-foreground">Bu tutar sadece bilgi amaçlıdır, hesaplamalara dahil edilmez.</p>
+                      <Select value={formData.passenger_cash_currency} onValueChange={(v) => setFormData({...formData, passenger_cash_currency: v})}>
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {currencies.map(c => (
+                            <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  )}
+                    <p className="text-xs text-muted-foreground">Bu tutar sadece bilgi amaçlıdır, hesaplamalara dahil edilmez.</p>
+                  </div>
                 </div>
               </div>
 

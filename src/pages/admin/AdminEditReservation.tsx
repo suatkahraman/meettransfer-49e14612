@@ -123,6 +123,8 @@ const AdminEditReservation = () => {
     price: '',
     price_currency: 'TRY',
     driver_cash_amount: '',
+    passenger_cash_amount: '',
+    passenger_cash_currency: 'TRY',
     status: '',
     driver_id: '',
     agency_id: '',
@@ -193,6 +195,8 @@ const AdminEditReservation = () => {
         price: r.price?.toString() || '',
         price_currency: r.price_currency || 'TRY',
         driver_cash_amount: r.driver_cash_amount?.toString() || '',
+        passenger_cash_amount: (r as any).passenger_cash_amount?.toString() || '',
+        passenger_cash_currency: (r as any).passenger_cash_currency || 'TRY',
         status: r.status || '',
         driver_id: r.driver_id || '',
         agency_id: r.agency_id || '',
@@ -523,6 +527,8 @@ const AdminEditReservation = () => {
         price: parseFloat(formData.price) || null,
         price_currency: formData.price_currency,
         driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
+        passenger_cash_amount: formData.passenger_cash_amount ? parseFloat(formData.passenger_cash_amount) : null,
+        passenger_cash_currency: formData.passenger_cash_currency || 'TRY',
         status: formData.status,
         driver_id: formData.driver_id || null,
         agency_id: formData.agency_id && formData.agency_id !== 'none' ? formData.agency_id : null,
@@ -1260,6 +1266,37 @@ const AdminEditReservation = () => {
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Yolcudan Alınacak Nakit - New dedicated field */}
+              <div className="space-y-2 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                <Label className="text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-2">
+                  <Banknote className="h-4 w-4" />
+                  Yolcudan Alınacak Nakit Tutar
+                </Label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.passenger_cash_amount}
+                      onChange={(e) => setFormData({...formData, passenger_cash_amount: e.target.value})}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <Select value={formData.passenger_cash_currency} onValueChange={(v) => setFormData({...formData, passenger_cash_currency: v})}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map(c => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-xs text-amber-600 dark:text-amber-400">Bu tutar sadece bilgi amaçlıdır, hesaplamalara dahil edilmez.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

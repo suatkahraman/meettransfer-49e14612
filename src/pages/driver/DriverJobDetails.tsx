@@ -40,6 +40,8 @@ interface Reservation {
   driver_cash_amount: number | null;
   driver_notes: string | null;
   passenger_names: string[] | null;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -521,8 +523,17 @@ Notlar: ${reservation.driver_notes || '—'}
                 </div>
               </div>
 
-              {/* Cash Amount to Collect - Prominent Display for Cash Payments */}
-              {reservation.payment_type === 'cash' && reservation.price !== null && (
+              {/* Price Display */}
+              <div className="flex items-start gap-3">
+                <DollarSign className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <div className="text-sm text-muted-foreground">Transfer Ücreti</div>
+                  <div className="font-bold text-lg">{formatPrice(reservation.price, reservation.price_currency)}</div>
+                </div>
+              </div>
+
+              {/* Yolcudan Alınacak Nakit - Display only if set */}
+              {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
                 <div className="bg-amber-100 dark:bg-amber-950/50 p-4 rounded-xl border-2 border-amber-300 dark:border-amber-700">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -530,13 +541,13 @@ Notlar: ${reservation.driver_notes || '—'}
                         <Banknote className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-amber-800 dark:text-amber-200">Yolcudan Alınacak Tutar</div>
-                        <div className="text-xs text-amber-600 dark:text-amber-400">Transfer sonunda nakit olarak tahsil edilecek</div>
+                        <div className="text-sm font-medium text-amber-800 dark:text-amber-200">Yolcudan Alınacak Nakit</div>
+                        <div className="text-xs text-amber-600 dark:text-amber-400">Transfer sonunda tahsil edilecek</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-3xl text-amber-800 dark:text-amber-200">
-                        {formatPrice(reservation.price, reservation.price_currency)}
+                      <div className="font-bold text-2xl text-amber-800 dark:text-amber-200">
+                        {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
                       </div>
                     </div>
                   </div>
