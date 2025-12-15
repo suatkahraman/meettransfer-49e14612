@@ -196,6 +196,13 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 <p style="margin: 10px 0 0; font-size: 36px; font-weight: bold; color: #111;">${data.price_display}</p>
               </div>
 
+              ${data.payment_type === 'cash' ? `
+              <div style="background: #fff8e1; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #ffb300;">
+                <p style="margin: 0; color: #f57c00; font-size: 14px; font-weight: bold;">💵 Cash Payment to Driver</p>
+                <p style="margin: 8px 0 0; color: #e65100; font-size: 13px;">Please pay <strong>${data.price_display}</strong> in cash to your driver at the end of the transfer.</p>
+              </div>
+              ` : ''}
+
               <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Date & Time</strong></td>
@@ -212,6 +219,10 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle</strong></td>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.vehicle_type?.replace(/-/g, ' ')}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Payment Method</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.payment_type === 'cash' ? '💵 Cash to Driver' : '💳 Online Payment'}</td>
                 </tr>
               </table>
 
@@ -255,6 +266,18 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #2196f3; letter-spacing: 3px;">${data.reservation_code}</p>
               </div>
 
+              ${data.payment_type === 'cash' ? `
+              <div style="background: #fff8e1; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #ffb300;">
+                <p style="margin: 0; color: #f57c00; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">💵 YOLCUDAN ALINACAK NAKİT</p>
+                <p style="margin: 10px 0 0; font-size: 32px; font-weight: bold; color: #e65100;">${data.price_display}</p>
+                <p style="margin: 8px 0 0; color: #ef6c00; font-size: 13px;">Transfer sonunda müşteriden nakit olarak tahsil edilecek</p>
+              </div>
+              ` : `
+              <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #2196f3;">
+                <p style="margin: 0; color: #1565c0; font-size: 14px;">💳 Online Ödeme - Nakit almayınız</p>
+              </div>
+              `}
+
               <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Tarih & Saat</strong></td>
@@ -275,6 +298,10 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Yolcular</strong></td>
                   <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.passengers}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Ödeme Yöntemi</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.payment_type === 'cash' ? '💵 Nakit' : '💳 Online'}</td>
                 </tr>
                 ${data.driver_notes ? `
                 <tr>
@@ -501,6 +528,7 @@ const handler = async (req: Request): Promise<Response> => {
       pickup_date: reservation.pickup_date,
       pickup_time: reservation.pickup_time,
       vehicle_type: reservation.vehicle_type,
+      payment_type: reservation.payment_type,
       passengers: passengers,
       price_display: priceDisplay,
       driver_notes: reservation.driver_notes,
