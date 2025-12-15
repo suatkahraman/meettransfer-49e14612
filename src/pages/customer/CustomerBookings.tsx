@@ -13,6 +13,13 @@ import NotificationBell from '@/components/NotificationBell';
 import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 
+const vehicleTypeLabels: Record<string, string> = {
+  'mercedes-vito': 'Mercedes Vito',
+  'mercedes-vclass': 'Mercedes Vip Vito',
+  'maybach': 'Maybach',
+  'minibus': 'Minibus',
+};
+
 interface Reservation {
   id: string;
   reservation_code: string | null;
@@ -236,7 +243,7 @@ const CustomerBookings = () => {
                       <div className="flex items-center justify-between pt-2 border-t">
                         <div className="flex items-center gap-2">
                           <Car className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm capitalize">{reservation.vehicle_type.replace('-', ' ')}</span>
+                          <span className="text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           {reservation.price !== null && (
@@ -303,7 +310,7 @@ const CustomerBookings = () => {
                       <div className="flex items-center justify-between pt-2 border-t">
                         <div className="flex items-center gap-2">
                           <Car className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm capitalize">{reservation.vehicle_type.replace('-', ' ')}</span>
+                          <span className="text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           {reservation.price !== null ? (

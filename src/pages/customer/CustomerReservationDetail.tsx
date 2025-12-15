@@ -25,6 +25,13 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
+const vehicleTypeLabels: Record<string, string> = {
+  'mercedes-vito': 'Mercedes Vito',
+  'mercedes-vclass': 'Mercedes Vip Vito',
+  'maybach': 'Maybach',
+  'minibus': 'Minibus',
+};
+
 interface Reservation {
   id: string;
   reservation_code: string | null;
@@ -390,7 +397,7 @@ const CustomerReservationDetail = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Car className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{reservation.vehicle_type}</span>
+                <span className="text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
               </div>
             </div>
 
