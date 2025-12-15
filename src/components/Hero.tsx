@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import meetTransferLogo from "@/assets/meet-transfer-logo-optimized.webp";
+import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 
 export const Hero = () => {
   const { t, getLocalizedPath } = useLanguage();
