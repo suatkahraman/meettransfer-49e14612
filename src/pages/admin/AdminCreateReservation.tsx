@@ -489,9 +489,9 @@ const AdminCreateReservation = () => {
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg border-b pb-2">Ödeme ve Fiyat</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="space-y-2">
                     <Label>Ödeme Tipi</Label>
-                    <Select value={formData.payment_type} onValueChange={(v) => setFormData({...formData, payment_type: v})}>
+                    <Select value={formData.payment_type} onValueChange={(v) => setFormData({...formData, payment_type: v, agency_id: v === 'agency_pay' ? formData.agency_id : ''})}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -582,21 +582,22 @@ const AdminCreateReservation = () => {
                   </div>
                 </div>
 
-                {/* Agency Selection */}
-                <div className="space-y-2">
-                  <Label>Acenta</Label>
-                  <Select value={formData.agency_id} onValueChange={(v) => setFormData({...formData, agency_id: v === 'none' ? '' : v})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Acenta Yok (Direkt Müşteri)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Acenta Yok (Direkt Müşteri)</SelectItem>
-                      {agencies.map(a => (
-                        <SelectItem key={a.id} value={a.id}>{a.agency_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Agency Selection - Only show when payment type is agency_pay */}
+                {formData.payment_type === 'agency_pay' && (
+                  <div className="space-y-2">
+                    <Label>Acenta *</Label>
+                    <Select value={formData.agency_id} onValueChange={(v) => setFormData({...formData, agency_id: v === 'none' ? '' : v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Acenta seçin" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {agencies.map(a => (
+                          <SelectItem key={a.id} value={a.id}>{a.agency_name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               {/* Admin Notes */}
