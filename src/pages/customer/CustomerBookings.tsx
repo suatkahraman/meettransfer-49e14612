@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -42,18 +43,6 @@ const statusColors: Record<string, string> = {
   'cancelled_by_customer': 'bg-destructive/20 text-destructive',
 };
 
-const statusLabels: Record<string, string> = {
-  'pending_price': 'Waiting for Price',
-  'waiting_for_customer_approval': 'Action Required',
-  'customer_approved': 'Confirmed',
-  'customer_rejected': 'Cancelled',
-  'sent_to_driver': 'Driver Assigned',
-  'active': 'In Progress',
-  'completed': 'Completed',
-  'pending_admin_review': 'Under Review',
-  'cancelled_by_customer': 'Cancelled',
-};
-
 const statusIcons: Record<string, React.ReactNode> = {
   'pending_price': <Loader2 className="h-3 w-3 animate-spin" />,
   'waiting_for_customer_approval': <AlertCircle className="h-3 w-3" />,
@@ -75,10 +64,26 @@ const currencySymbols: Record<string, string> = {
 
 const CustomerBookings = () => {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const { playSound } = useNotificationSound();
+
+  const getStatusLabel = (status: string) => {
+    const statusLabels: Record<string, string> = {
+      'pending_price': t('statusPendingPrice'),
+      'waiting_for_customer_approval': t('statusActionRequired'),
+      'customer_approved': t('statusConfirmed'),
+      'customer_rejected': t('statusCancelled'),
+      'sent_to_driver': t('statusDriverAssigned'),
+      'active': t('statusInProgress'),
+      'completed': t('statusCompleted'),
+      'pending_admin_review': t('statusUnderReview'),
+      'cancelled_by_customer': t('statusCancelled'),
+    };
+    return statusLabels[status] || status;
+  };
 
   const fetchReservations = async () => {
     if (!user) return;
@@ -123,7 +128,7 @@ const CustomerBookings = () => {
           fetchReservations();
           if (payload.eventType === 'UPDATE') {
             playSound();
-            toast.info('Your reservation has been updated');
+            toast.info(t('reservationUpdated'));
           }
         }
       )
@@ -132,7 +137,7 @@ const CustomerBookings = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, playSound]);
+  }, [user, playSound, t]);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return null;
@@ -155,7 +160,7 @@ const CustomerBookings = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/customer')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">My Reservations</h1>
+          <h1 className="text-2xl font-serif">{t('myReservationsTitle')}</h1>
         </div>
         <div className="flex items-center gap-2">
           <PushNotificationToggle />
@@ -175,10 +180,10 @@ const CustomerBookings = () => {
         ) : reservations.length === 0 ? (
           <div className="text-center py-12">
             <Car className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">No reservations yet</p>
+            <p className="text-muted-foreground mb-4">{t('noReservationsYet')}</p>
             <Button onClick={() => navigate('/book')}>
               <Plus className="h-4 w-4 mr-2" />
-              Book a Transfer
+              {t('bookATransfer')}
             </Button>
           </div>
         ) : (
@@ -188,7 +193,7 @@ const CustomerBookings = () => {
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-purple-700 dark:text-purple-300">
                   <AlertCircle className="h-5 w-5" />
-                  Action Required ({actionRequired.length})
+                  {t('actionRequired')} ({actionRequired.length})
                 </h2>
                 {actionRequired.map((reservation) => (
                   <Card 
@@ -213,7 +218,7 @@ const CustomerBookings = () => {
                         </div>
                         <Badge className={`flex items-center gap-1 ${statusColors[reservation.status]}`}>
                           {statusIcons[reservation.status]}
-                          {statusLabels[reservation.status]}
+                          {getStatusLabel(reservation.status)}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -242,7 +247,7 @@ const CustomerBookings = () => {
 
                       <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg text-center">
                         <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                          Tap to review and approve your price
+                          {t('tapToReviewPrice')}
                         </p>
                       </div>
                     </CardContent>
@@ -255,7 +260,7 @@ const CustomerBookings = () => {
             {otherReservations.length > 0 && (
               <div className="space-y-3">
                 {actionRequired.length > 0 && (
-                  <h2 className="text-lg font-semibold">All Reservations</h2>
+                  <h2 className="text-lg font-semibold">{t('allReservations')}</h2>
                 )}
                 {otherReservations.map((reservation) => (
                   <Card 
@@ -280,7 +285,7 @@ const CustomerBookings = () => {
                         </div>
                         <Badge className={`flex items-center gap-1 ${statusColors[reservation.status] || 'bg-muted'}`}>
                           {statusIcons[reservation.status]}
-                          {statusLabels[reservation.status] || reservation.status}
+                          {getStatusLabel(reservation.status)}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -303,7 +308,7 @@ const CustomerBookings = () => {
                               {formatPrice(reservation.price, reservation.price_currency)}
                             </span>
                           ) : (
-                            <span className="text-sm text-muted-foreground">Price pending</span>
+                            <span className="text-sm text-muted-foreground">{t('pricePending')}</span>
                           )}
                           <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </div>
@@ -311,7 +316,7 @@ const CustomerBookings = () => {
 
                       {reservation.status === 'pending_price' && (
                         <div className="bg-orange-50 dark:bg-orange-950/30 p-2 rounded text-center text-sm text-orange-700 dark:text-orange-300">
-                          Waiting for Price
+                          {t('waitingForPrice')}
                         </div>
                       )}
 
@@ -326,20 +331,20 @@ const CustomerBookings = () => {
                               )}
                             </div>
                           ) : (
-                            <p className="text-center">Driver will be assigned soon</p>
+                            <p className="text-center">{t('driverAssignedSoon')}</p>
                           )}
                         </div>
                       )}
 
                       {reservation.status === 'active' && (
                         <div className="bg-cyan-50 dark:bg-cyan-950/30 p-2 rounded text-center text-sm text-cyan-700 dark:text-cyan-300">
-                          Trip in progress
+                          {t('tripInProgress')}
                         </div>
                       )}
 
                       {reservation.status === 'completed' && (
                         <div className="bg-green-50 dark:bg-green-950/30 p-2 rounded text-center text-sm text-green-700 dark:text-green-300">
-                          Trip completed
+                          {t('tripCompleted')}
                         </div>
                       )}
                     </CardContent>
@@ -352,7 +357,7 @@ const CustomerBookings = () => {
             <div className="pt-4">
               <Button onClick={() => navigate('/book')} className="w-full" size="lg">
                 <Plus className="h-4 w-4 mr-2" />
-                Book New Transfer
+                {t('bookNewTransfer')}
               </Button>
             </div>
           </div>

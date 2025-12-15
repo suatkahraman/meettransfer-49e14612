@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
@@ -61,18 +62,6 @@ const statusColors: Record<string, string> = {
   'cancelled_by_customer': 'bg-destructive/20 text-destructive',
 };
 
-const statusLabels: Record<string, string> = {
-  'pending_price': 'Awaiting Price',
-  'waiting_for_customer_approval': 'Price Ready - Your Approval Needed',
-  'customer_approved': 'Confirmed',
-  'customer_rejected': 'Cancelled',
-  'sent_to_driver': 'Driver Assigned',
-  'active': 'In Progress',
-  'completed': 'Completed',
-  'pending_admin_review': 'Pending Admin Review',
-  'cancelled_by_customer': 'Cancelled by You',
-};
-
 const currencySymbols: Record<string, string> = {
   'TRY': '₺',
   'EUR': '€',
@@ -83,12 +72,28 @@ const currencySymbols: Record<string, string> = {
 const CustomerReservationDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { emailAdminPriceAccepted } = useEmailNotifications();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      'pending_price': t('statusPendingPrice'),
+      'waiting_for_customer_approval': t('statusActionRequired'),
+      'customer_approved': t('statusConfirmed'),
+      'customer_rejected': t('statusCancelled'),
+      'sent_to_driver': t('statusDriverAssigned'),
+      'active': t('statusInProgress'),
+      'completed': t('statusCompleted'),
+      'pending_admin_review': t('statusUnderReview'),
+      'cancelled_by_customer': t('statusCancelled'),
+    };
+    return labels[status] || status;
+  };
 
   useEffect(() => {
     const fetchReservation = async () => {
