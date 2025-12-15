@@ -4,36 +4,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { Check, Award, Users, MapPin, Clock, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { SEOHead, SchemaOrg } from "@/components/seo";
-
-const stats = [
-  { value: "10+", label: "Years Experience" },
-  { value: "50,000+", label: "Transfers Completed" },
-  { value: "8", label: "Cities Covered" },
-  { value: "24/7", label: "Availability" },
-];
-
-const values = [
-  {
-    icon: Shield,
-    title: "Safety First",
-    description: "All our vehicles are regularly serviced and our drivers are professionally trained.",
-  },
-  {
-    icon: Award,
-    title: "Quality Service",
-    description: "We pride ourselves on delivering exceptional service with attention to every detail.",
-  },
-  {
-    icon: Clock,
-    title: "Punctuality",
-    description: "We monitor all flights and ensure your driver is always on time, every time.",
-  },
-  {
-    icon: Users,
-    title: "Customer Focus",
-    description: "Your comfort and satisfaction are our top priorities throughout your journey.",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const cities = [
   "Istanbul", "Antalya", "Bodrum", "Dalaman", "Izmir",
@@ -41,6 +12,38 @@ const cities = [
 ];
 
 const AboutPage = () => {
+  const { t } = useLanguage();
+
+  const stats = [
+    { value: "10+", label: t("yearsExperience") },
+    { value: "50,000+", label: t("transfersCompleted") },
+    { value: "8", label: t("citiesCovered") },
+    { value: "24/7", label: t("availability") },
+  ];
+
+  const values = [
+    {
+      icon: Shield,
+      title: t("safetyFirst"),
+      description: t("safetyFirstDesc"),
+    },
+    {
+      icon: Award,
+      title: t("qualityService"),
+      description: t("qualityServiceDesc"),
+    },
+    {
+      icon: Clock,
+      title: t("punctuality"),
+      description: t("punctualityDesc"),
+    },
+    {
+      icon: Users,
+      title: t("customerFocus"),
+      description: t("customerFocusDesc"),
+    },
+  ];
+
   return (
     <WebsiteLayout>
       <SEOHead
@@ -63,29 +66,21 @@ const AboutPage = () => {
       />
 
       <PageHeader
-        title="About Meet Transfer"
-        subtitle="Your Trusted Partner for Premium Airport Transfers"
+        title={t("aboutTitle")}
+        subtitle={t("aboutSubtitle")}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         {/* Intro */}
         <section className="prose max-w-none">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Who We Are - Turkey's Leading Airport Transfer Service
+            {t("whoWeAre")}
           </h1>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            <strong>Meet Transfer</strong> is Turkey's leading <strong>premium airport transfer service</strong>,
-            providing <strong>luxury transportation</strong> across the country's most popular
-            tourist destinations. Founded with a vision to offer travelers a
-            seamless and comfortable journey, we have grown to become the trusted
-            choice for discerning travelers, families, and business executives
-            alike.
+            {t("aboutIntro1")}
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            Our commitment to excellence is reflected in every aspect of our
-            service – from our immaculately maintained <strong>Mercedes fleet</strong> to our
-            <strong> professional, English-speaking drivers</strong> who undergo rigorous training.
-            We believe that your journey should be as enjoyable as your destination.
+            {t("aboutIntro2")}
           </p>
         </section>
 
@@ -107,7 +102,7 @@ const AboutPage = () => {
 
         {/* Values */}
         <section>
-          <h2 className="text-2xl font-bold mb-6">Why Choose Meet Transfer</h2>
+          <h2 className="text-2xl font-bold mb-6">{t("whyChooseMeetTransfer")}</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {values.map((value) => (
               <Card key={value.title} className="hover:shadow-lg transition-shadow">
@@ -129,7 +124,7 @@ const AboutPage = () => {
 
         {/* Cities */}
         <section className="bg-card rounded-xl p-8 shadow-sm">
-          <h2 className="text-2xl font-bold mb-4">Cities We Serve Across Turkey</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("citiesWeServe")}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {cities.map((city) => (
               <div
@@ -145,13 +140,9 @@ const AboutPage = () => {
 
         {/* Meet & Greet */}
         <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold mb-4">Our VIP Meet & Greet Service</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("meetGreetService")}</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Every <strong>airport transfer</strong> includes our signature <strong>Meet & Greet service</strong>.
-            Your driver will be waiting in the arrivals hall with a personalized
-            name board. We monitor your flight in real-time, so even if there are
-            delays, your driver will be there when you land. No waiting, no
-            searching – just a warm welcome and a helping hand with your luggage.
+            {t("meetGreetDesc")}
           </p>
         </section>
 
@@ -159,17 +150,15 @@ const AboutPage = () => {
         <section className="bg-secondary rounded-xl p-8 text-center">
           <div className="max-w-md mx-auto">
             <blockquote className="text-lg italic mb-4">
-              "Our mission is to provide every guest with a travel experience
-              that exceeds expectations. From the moment you book until you
-              reach your destination, we are committed to your comfort and safety."
+              "{t("ourMission")}"
             </blockquote>
             <div className="font-bold">Suat Kahraman</div>
-            <div className="text-sm text-muted-foreground">General Manager</div>
+            <div className="text-sm text-muted-foreground">{t("generalManager")}</div>
           </div>
         </section>
 
         <div className="text-center">
-          <h3 className="text-xl font-bold mb-4">Ready to Experience the Difference?</h3>
+          <h3 className="text-xl font-bold mb-4">{t("readyToExperience")}</h3>
           <WhatsAppButton
             variant="large"
             message="Hello, I would like to learn more about Meet Transfer services."

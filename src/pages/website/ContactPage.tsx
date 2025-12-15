@@ -63,7 +63,7 @@ const ContactPage = () => {
     // Simulate form submission
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    toast.success("Message sent successfully! We will contact you shortly.");
+    toast.success(t("messageSent"));
     setFormData({ name: "", phone: "", message: "" });
     setIsSubmitting(false);
   };
@@ -90,18 +90,18 @@ const ContactPage = () => {
       />
 
       <PageHeader
-        title="Contact Us"
-        subtitle="We're Here to Help 24/7"
+        title={t("contactTitle")}
+        subtitle={t("contactSubtitle")}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         {/* Main H1 */}
         <section>
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center text-foreground">
-            Contact Meet Transfer - Global Office Locations
+            {t("contactMainTitle")}
           </h1>
           <p className="text-center text-muted-foreground mb-8">
-            Serving you from multiple locations worldwide with 24/7 support
+            {t("servingWorldwide")}
           </p>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -155,9 +155,9 @@ const ContactPage = () => {
 
         {/* WhatsApp CTA */}
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">Fastest Way to Reach Us</h2>
+          <h2 className="text-xl font-bold mb-2">{t("fastestWay")}</h2>
           <p className="text-muted-foreground mb-4">
-            Get instant responses via WhatsApp for your airport transfer booking
+            {t("instantResponses")}
           </p>
           <WhatsAppButton variant="large" />
         </div>
@@ -165,7 +165,7 @@ const ContactPage = () => {
         {/* Contact Form */}
         <Card>
           <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-4">Send Us a Message</h2>
+            <h2 className="text-xl font-bold mb-4">{t("sendMessage")}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -177,7 +177,7 @@ const ContactPage = () => {
                       setFormData({ ...formData, name: e.target.value })
                     }
                     required
-                    placeholder="Your name"
+                    placeholder={t("yourName")}
                   />
                 </div>
                 <div className="space-y-2">
@@ -203,7 +203,7 @@ const ContactPage = () => {
                     setFormData({ ...formData, message: e.target.value })
                   }
                   required
-                  placeholder="How can we help you?"
+                  placeholder={t("howCanWeHelp")}
                   rows={5}
                 />
               </div>
@@ -213,7 +213,7 @@ const ContactPage = () => {
                 className="w-full h-12 rounded-xl"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Sending..." : t("send")}
+                {isSubmitting ? t("sending") : t("send")}
               </Button>
             </form>
           </CardContent>
