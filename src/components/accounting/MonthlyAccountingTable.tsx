@@ -11,6 +11,8 @@ interface Reservation {
   price: number | null;
   price_currency: string | null;
   driver_cash_amount: number | null;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   status: string;
   customer_name: string;
 }
@@ -55,6 +57,7 @@ export const MonthlyAccountingTable = ({ reservations, showActions, onEdit }: Mo
             <TableHead>Date</TableHead>
             <TableHead>Route</TableHead>
             <TableHead className="text-right">Price</TableHead>
+            <TableHead className="text-right">Yolcu Nakit</TableHead>
             <TableHead className="text-right">Cash Collected</TableHead>
             <TableHead>Status</TableHead>
             {showActions && <TableHead></TableHead>}
@@ -79,6 +82,13 @@ export const MonthlyAccountingTable = ({ reservations, showActions, onEdit }: Mo
               </TableCell>
               <TableCell className="text-right font-medium">
                 {formatCurrency(reservation.price, reservation.price_currency)}
+              </TableCell>
+              <TableCell className="text-right">
+                {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 ? (
+                  <span className="text-amber-700 font-medium">
+                    {formatCurrency(reservation.passenger_cash_amount, reservation.passenger_cash_currency)}
+                  </span>
+                ) : '-'}
               </TableCell>
               <TableCell className="text-right">
                 {formatCurrency(reservation.driver_cash_amount, reservation.price_currency)}
