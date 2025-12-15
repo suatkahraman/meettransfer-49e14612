@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,6 +47,7 @@ const vehicleTypes = [
 const ReservationForm = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { emailAdminNewReservation } = useEmailNotifications();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -377,16 +379,16 @@ const ReservationForm = () => {
             </div>
             
             <div className="space-y-2">
-              <h2 className="text-2xl font-serif font-semibold">Reservation Submitted!</h2>
+              <h2 className="text-2xl font-serif font-semibold">{t('reservationSubmitted')}</h2>
               <p className="text-muted-foreground">
-                Thank you for your request. Our team will review it and send you the price for approval.
+                {t('reservationSubmittedDesc')}
               </p>
             </div>
 
             <div className="bg-muted p-4 rounded-lg text-left space-y-2">
-              <p className="text-sm"><strong>Route:</strong> {formData.pickup} → {formData.dropoff}</p>
-              <p className="text-sm"><strong>Date:</strong> {formData.date} at {formData.time}</p>
-              <p className="text-sm"><strong>Vehicle:</strong> {vehicleTypes.find(v => v.value === formData.vehicleType)?.label}</p>
+              <p className="text-sm"><strong>{t('route')}:</strong> {formData.pickup} → {formData.dropoff}</p>
+              <p className="text-sm"><strong>{t('date')}:</strong> {formData.date} at {formData.time}</p>
+              <p className="text-sm"><strong>{t('vehicle')}:</strong> {vehicleTypes.find(v => v.value === formData.vehicleType)?.label}</p>
             </div>
 
             <div className="space-y-3 pt-2">
@@ -396,7 +398,7 @@ const ReservationForm = () => {
                 size="lg"
               >
                 <ClipboardList className="h-4 w-4 mr-2" />
-                My Reservations
+                {t('myReservations')}
               </Button>
               
               <Button 
@@ -420,7 +422,7 @@ const ReservationForm = () => {
                 }} 
                 className="w-full"
               >
-                Book Another Transfer
+                {t('bookAnotherTransfer')}
               </Button>
             </div>
           </CardContent>
@@ -434,22 +436,22 @@ const ReservationForm = () => {
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-serif">Meet Transfer</CardTitle>
-          <CardDescription>Book your airport transfer - we'll send you the price for approval</CardDescription>
+          <CardDescription>{t('bookingFormSubtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Transfer Details Section - Pick-up and Drop-off */}
             <div className="space-y-4 pb-4 border-b">
-              <h3 className="font-semibold text-lg">Transfer Details</h3>
+              <h3 className="font-semibold text-lg">{t('transferDetails')}</h3>
               
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  Pick-up Point
+                  {t('pickupPoint')}
                 </Label>
                 <GooglePlacesAutocomplete
                   onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
-                  placeholder="Enter Pick-up Point"
+                  placeholder={t('enterPickupPoint')}
                   className={errors.pickup ? 'border-destructive' : ''}
                   maxLength={200}
                 />
@@ -459,11 +461,11 @@ const ReservationForm = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  Drop-off Location
+                  {t('dropoffLocation')}
                 </Label>
                 <GooglePlacesAutocomplete
                   onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
-                  placeholder="Hotel name or full address"
+                  placeholder={t('hotelOrAddress')}
                   className={errors.dropoff ? 'border-destructive' : ''}
                   maxLength={200}
                 />
@@ -484,7 +486,7 @@ const ReservationForm = () => {
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    Date
+                    {t('date')}
                   </Label>
                   <Input
                     type="date"
@@ -495,7 +497,7 @@ const ReservationForm = () => {
                   {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label>Time</Label>
+                  <Label>{t('time')}</Label>
                   <Input
                     type="time"
                     value={formData.time}
@@ -541,14 +543,14 @@ const ReservationForm = () => {
                   disabled={!formData.pickup || !formData.dropoff}
                 >
                   <ArrowLeftRight className="h-4 w-4 mr-2" />
-                  Add Return Reservation
+                  {t('returnTrip')}
                 </Button>
               ) : (
                 <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-dashed space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold text-base flex items-center gap-2">
                       <ArrowLeftRight className="h-4 w-4" />
-                      Return Trip
+                      {t('returnTrip')}
                     </h4>
                     <Button
                       type="button"
@@ -565,16 +567,16 @@ const ReservationForm = () => {
                   </div>
                   
                   <div className="text-sm text-muted-foreground bg-background/50 p-2 rounded">
-                    <span className="font-medium">{formData.dropoff || 'Drop-off'}</span>
+                    <span className="font-medium">{formData.dropoff || t('dropoffLocation')}</span>
                     <span className="mx-2">→</span>
-                    <span className="font-medium">{formData.pickup || 'Pick-up'}</span>
+                    <span className="font-medium">{formData.pickup || t('pickupPoint')}</span>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        Return Date
+                        {t('returnDate')}
                       </Label>
                       <Input
                         type="date"
@@ -585,7 +587,7 @@ const ReservationForm = () => {
                       {errors.returnDate && <p className="text-sm text-destructive">{errors.returnDate}</p>}
                     </div>
                     <div className="space-y-2">
-                      <Label>Return Time</Label>
+                      <Label>{t('returnTime')}</Label>
                       <Input
                         type="time"
                         value={returnTripData.time}
@@ -613,19 +615,19 @@ const ReservationForm = () => {
 
             {/* Passengers Section */}
             <div className="space-y-4 pb-4 border-b">
-              <h3 className="font-semibold text-lg">Passengers</h3>
+              <h3 className="font-semibold text-lg">{t('passengers')}</h3>
               
               {/* Passenger Names - Multiple */}
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Passenger Names ({passengerNames.length})
+                  {t('passengers')} ({passengerNames.length})
                 </Label>
                 {passengerNames.map((name, index) => (
                   <div key={index} className="flex gap-2">
                     <div className="flex-1">
                       <Input
-                        placeholder={index === 0 ? 'Primary Passenger (Name & Surname)' : `Passenger ${index + 1}`}
+                        placeholder={index === 0 ? t('primaryPassenger') : `${t('passengers')} ${index + 1}`}
                         value={name}
                         onChange={(e) => updatePassenger(index, e.target.value)}
                         className={index === 0 && errors.passengerNames ? 'border-destructive' : ''}
@@ -655,7 +657,7 @@ const ReservationForm = () => {
                     className="w-full"
                   >
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Add Passenger
+                    {t('addPassenger')}
                   </Button>
                 )}
               </div>
@@ -663,15 +665,15 @@ const ReservationForm = () => {
 
             {/* Contact Info Section */}
             <div className="space-y-4 pb-4 border-b">
-              <h3 className="font-semibold text-lg">Contact Information</h3>
+              <h3 className="font-semibold text-lg">{t('contactDetails')}</h3>
 
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  Phone
+                  {t('phone')}
                 </Label>
                 <Input
-                  placeholder="+90 5XX XXX XXXX"
+                  placeholder={t('phonePlaceholder')}
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   className={errors.phone ? 'border-destructive' : ''}
@@ -683,7 +685,7 @@ const ReservationForm = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  Email
+                  {t('email')}
                 </Label>
                 <Input
                   type="email"
@@ -703,11 +705,11 @@ const ReservationForm = () => {
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                       <Lock className="h-4 w-4" />
-                      Password
+                      {t('password')}
                     </Label>
                     <Input
                       type="password"
-                      placeholder="Create a password (min 6 characters)"
+                      placeholder={t('passwordRequired')}
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       className={errors.password ? 'border-destructive' : ''}
@@ -715,7 +717,7 @@ const ReservationForm = () => {
                     />
                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                     <p className="text-xs text-muted-foreground">
-                      This will create your account so you can track your reservations
+                      {t('priceInfoMessage')}
                     </p>
                   </div>
 
@@ -724,7 +726,7 @@ const ReservationForm = () => {
                       <span className="w-full border-t" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                      <span className="bg-card px-2 text-muted-foreground">{t('orContinueWith')}</span>
                     </div>
                   </div>
 
@@ -759,12 +761,12 @@ const ReservationForm = () => {
                       />
                       <path
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                        fill="#EA4335"
-                      />
-                    </svg>
-                    Continue with Google
-                  </Button>
-                </>
+                      fill="#EA4335"
+                    />
+                  </svg>
+                  {t('googleSignIn')}
+                </Button>
+              </>
               )}
 
               {isLoggedIn && (
@@ -779,7 +781,7 @@ const ReservationForm = () => {
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
-                  Vehicle Type
+                  {t('vehicleType')}
                 </Label>
                 <RadioGroup value={formData.vehicleType} onValueChange={(v) => setFormData({...formData, vehicleType: v})}>
                   {vehicleTypes.map(vehicle => (
@@ -795,10 +797,10 @@ const ReservationForm = () => {
               <div className="space-y-3 pt-4 border-t">
                 <Label className="flex items-center gap-2 text-base font-semibold">
                   <CreditCard className="h-4 w-4" />
-                  Payment Option
+                  {t('paymentMethod')}
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Select how you would like to pay for your transfer
+                  {t('priceInfoMessage')}
                 </p>
                 <RadioGroup 
                   value={formData.paymentMethod} 
@@ -809,10 +811,10 @@ const ReservationForm = () => {
                     <div className="flex-1">
                       <Label htmlFor="payment_link" className="cursor-pointer font-medium flex items-center gap-2">
                         <CreditCard className="h-4 w-4 text-primary" />
-                        Payment Link
+                        {t('onlinePaymentLink')}
                       </Label>
                       <p className="text-xs text-muted-foreground mt-1">
-                        We'll send you a secure payment link via email after confirming the price
+                        {t('priceInfoMessage')}
                       </p>
                     </div>
                   </div>
@@ -821,10 +823,10 @@ const ReservationForm = () => {
                     <div className="flex-1">
                       <Label htmlFor="cash" className="cursor-pointer font-medium flex items-center gap-2">
                         <Banknote className="h-4 w-4 text-green-600" />
-                        Cash to Driver
+                        {t('cashToDriver')}
                       </Label>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Pay in cash directly to your driver at the end of your transfer
+                        {t('priceInfoMessage')}
                       </p>
                     </div>
                   </div>
@@ -846,18 +848,18 @@ const ReservationForm = () => {
 
             <div className="bg-muted p-4 rounded-lg text-center">
               <p className="text-sm text-muted-foreground">
-                After submitting, our team will review your request and send you the price for approval.
+                {t('priceInfoMessage')}
               </p>
             </div>
 
             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-              {isLoading ? 'Submitting...' : 'Submit Reservation Request'}
+              {isLoading ? t('submitting') : t('submitBookingRequest')}
             </Button>
 
             {!isLoggedIn && (
               <p className="text-center text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <a href="/auth" className="text-primary hover:underline">Login here</a>
+                {t('alreadyHaveAccount')}{' '}
+                <a href="/auth" className="text-primary hover:underline">{t('loginHere')}</a>
               </p>
             )}
           </form>
