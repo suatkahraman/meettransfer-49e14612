@@ -32,6 +32,8 @@ interface Reservation {
   payment_status: string | null;
   price: number | null;
   price_currency: string | null;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   admin_set_price: number | null;
   status: string;
   driver_id: string | null;
@@ -762,6 +764,12 @@ const AdminReservations = () => {
                             </span>
                           )}
                         </span>
+                        {/* Yolcudan Alınacak Nakit */}
+                        {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
+                          <span className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            💵 {currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '₺'}{reservation.passenger_cash_amount}
+                          </span>
+                        )}
                         {reservation.drivers && (
                           <span className="flex items-center gap-1">
                             <UserCheck className="h-4 w-4 text-green-600" />
