@@ -19,8 +19,7 @@ export const Hero = () => {
               alt="Meet Transfer Logo" 
               width={128}
               height={128}
-              loading="eager"
-              fetchPriority="high"
+              loading="lazy"
               decoding="async"
               className="h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 rounded-full object-cover shadow-2xl ring-4 ring-white/20"
             />
