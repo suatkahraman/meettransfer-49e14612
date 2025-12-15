@@ -16,6 +16,7 @@ type EmailType =
   | 'price_rejected_admin'       // Customer rejects price → Admin
   | 'price_set_customer'         // Admin sets price → Customer
   | 'driver_assigned_driver'     // Admin assigns driver → Driver
+  | 'driver_assigned_customer'   // Admin assigns driver → Customer
   | 'payment_request_customer'   // Admin sends payment link → Customer
   | 'payment_confirmed_customer' // Admin confirms payment → Customer
   | 'trip_completed_admin'       // Driver completes trip → Admin
@@ -30,6 +31,7 @@ interface EmailRequest {
     currency?: string;
     driver_email?: string;
     driver_name?: string;
+    driver_plate?: string;
     payment_link?: string;
   };
 }
@@ -344,6 +346,78 @@ const getEmailTemplate = (type: EmailType, data: any) => {
 
               <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
                 <p>© 2025 Meet Transfer. Tüm hakları saklıdır.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+    case 'driver_assigned_customer':
+      return {
+        subject: `🚗 Your Driver is Assigned - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">🚗 Your Driver is Assigned!</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">Your transfer is ready</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #4caf50; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <div style="background: #e8f5e9; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 2px solid #4caf50;">
+                <h2 style="margin: 0 0 20px 0; color: #2e7d32; font-size: 18px; text-align: center;">Your Driver Information</h2>
+                
+                <div style="background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                  <p style="margin: 0; color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Driver Name</p>
+                  <p style="margin: 5px 0 0; font-size: 20px; font-weight: bold; color: #111;">${data.driver_name || 'TBA'}</p>
+                </div>
+                
+                <div style="background: #fff; padding: 15px; border-radius: 8px;">
+                  <p style="margin: 0; color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Vehicle Plate Number</p>
+                  <p style="margin: 5px 0 0; font-size: 20px; font-weight: bold; color: #111;">${data.driver_plate || 'TBA'}</p>
+                </div>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Date & Time</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #d32f2f;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff}</td>
+                </tr>
+              </table>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <p style="color: #666; margin-bottom: 15px; font-size: 14px;">Need help? Contact us via WhatsApp</p>
+                <a href="https://wa.me/905321748390" style="display: inline-block; background: #25D366; color: #fff; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                  💬 WhatsApp Support
+                </a>
+              </div>
+
+              <div style="text-align: center; margin-top: 25px;">
+                <a href="${baseUrl}/customer/reservation/${data.reservation_id}" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">View Reservation</a>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>Thank you for choosing Meet Transfer!</p>
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
               </div>
             </div>
           </body>
@@ -841,6 +915,7 @@ const handler = async (req: Request): Promise<Response> => {
       payment_link: additional_data?.payment_link || reservation.payment_link || '',
       passenger_cash_display: passengerCashDisplay,
       driver_name: reservation.drivers?.name || additional_data?.driver_name || null,
+      driver_plate: reservation.drivers?.plate_number || additional_data?.driver_plate || null,
     };
 
     const template = getEmailTemplate(type, templateData);
@@ -859,6 +934,7 @@ const handler = async (req: Request): Promise<Response> => {
       case 'price_set_customer':
       case 'payment_request_customer':
       case 'payment_confirmed_customer':
+      case 'driver_assigned_customer':
         recipient = customerEmail;
         break;
       case 'driver_assigned_driver':

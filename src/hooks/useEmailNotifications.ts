@@ -7,6 +7,7 @@ type EmailType =
   | 'price_rejected_admin'
   | 'price_set_customer'
   | 'driver_assigned_driver'
+  | 'driver_assigned_customer'
   | 'payment_request_customer'
   | 'payment_confirmed_customer'
   | 'trip_completed_admin'
@@ -21,6 +22,7 @@ interface EmailOptions {
     currency?: string;
     driver_email?: string;
     driver_name?: string;
+    driver_plate?: string;
     payment_link?: string;
   };
 }
@@ -94,6 +96,19 @@ export const useEmailNotifications = () => {
     });
   }, [sendEmail]);
 
+  // 4b. When admin assigns driver → Email to customer (only name & plate)
+  const emailCustomerDriverAssigned = useCallback(async (
+    reservationId: string,
+    driverName?: string,
+    driverPlate?: string
+  ) => {
+    return sendEmail({
+      type: 'driver_assigned_customer',
+      reservation_id: reservationId,
+      additional_data: { driver_name: driverName, driver_plate: driverPlate },
+    });
+  }, [sendEmail]);
+
   // 5. When admin sends payment link → Email to customer
   const emailPaymentRequest = useCallback(async (
     reservationId: string,
@@ -157,6 +172,7 @@ export const useEmailNotifications = () => {
     emailAdminPriceRejected,
     emailCustomerPriceSet,
     emailDriverAssigned,
+    emailCustomerDriverAssigned,
     emailPaymentRequest,
     emailPaymentConfirmed,
     emailAdminTripCompleted,

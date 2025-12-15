@@ -81,6 +81,7 @@ interface Driver {
   id: string;
   name: string;
   user_id: string;
+  plate_number: string | null;
 }
 
 interface Agency {
@@ -94,7 +95,7 @@ const AdminEditReservation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
-  const { emailCustomerPriceSet, emailDriverAssigned, emailPaymentRequest, emailPaymentConfirmed } = useEmailNotifications();
+  const { emailCustomerPriceSet, emailDriverAssigned, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sendingPrice, setSendingPrice] = useState(false);
@@ -166,7 +167,7 @@ const AdminEditReservation = () => {
 
       const [reservationResult, driversResult, adminNotesResult, agenciesResult, agencyDetailsResult] = await Promise.all([
         supabase.from('reservations').select('*').eq('id', id).single(),
-        supabase.from('drivers').select('id, name, user_id').eq('active', true),
+        supabase.from('drivers').select('id, name, user_id, plate_number').eq('active', true),
         supabase.from('reservation_admin_notes').select('notes').eq('reservation_id', id).maybeSingle(),
         supabase.from('agencies').select('id, agency_name').order('agency_name'),
         supabase.from('agency_reservation_details').select('*').eq('reservation_id', id).maybeSingle(),
@@ -344,15 +345,15 @@ const AdminEditReservation = () => {
         }
       }
 
-      // Notify customer that driver has been assigned
-      if (customerId) {
+      // Notify customer with driver name and plate only (no phone, no vehicle model)
+      if (customerId && selectedDriver) {
         try {
           await supabase.functions.invoke('create-notification', {
             body: {
               user_id: customerId,
               reservation_id: id,
               title: 'Driver Assigned',
-              message: `Your driver has been assigned: ${selectedDriver?.name}. They will contact you before pickup.`,
+              message: `Your driver: ${selectedDriver.name}${selectedDriver.plate_number ? ` (${selectedDriver.plate_number})` : ''}`,
               type: 'driver_assigned'
             }
           });
@@ -367,6 +368,18 @@ const AdminEditReservation = () => {
           });
         } catch (e) {
           console.error('Failed to send confirmation email:', e);
+        }
+
+        // Send email to customer with driver name, plate, and WhatsApp support button
+        try {
+          await emailCustomerDriverAssigned(
+            id!,
+            selectedDriver.name,
+            selectedDriver.plate_number || undefined
+          );
+          console.log('Customer driver assignment email sent');
+        } catch (e) {
+          console.error('Failed to send customer driver email:', e);
         }
       }
 

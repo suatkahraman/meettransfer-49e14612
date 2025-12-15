@@ -38,6 +38,7 @@ interface Reservation {
   admin_set_price: number | null;
   status: string;
   driver_id: string | null;
+  customer_id: string | null;
   agency_id: string | null;
   drivers?: {
     id: string;
@@ -61,6 +62,7 @@ interface Driver {
   name: string;
   phone: string;
   user_id: string;
+  plate_number: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -101,7 +103,7 @@ const AdminReservations = () => {
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
   const { playSound } = useNotificationSound();
-  const { emailDriverAssigned } = useEmailNotifications();
+  const { emailDriverAssigned, emailCustomerDriverAssigned } = useEmailNotifications();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
@@ -187,7 +189,7 @@ const AdminReservations = () => {
   const fetchDrivers = async () => {
     const { data } = await supabase
       .from('drivers')
-      .select('id, name, phone, user_id')
+      .select('id, name, phone, user_id, plate_number')
       .eq('active', true);
     setDrivers(data || []);
   };
@@ -277,6 +279,23 @@ const AdminReservations = () => {
         }
       }
 
+      // Notify customer with driver name and plate only (no phone)
+      if (reservation?.customer_id && selectedDriverData) {
+        try {
+          await supabase.functions.invoke('create-notification', {
+            body: {
+              user_id: reservation.customer_id,
+              reservation_id: assignDialog.reservationId,
+              title: 'Driver Assigned',
+              message: `Your driver: ${selectedDriverData.name}${selectedDriverData.plate_number ? ` (${selectedDriverData.plate_number})` : ''}`,
+              type: 'driver_assigned'
+            }
+          });
+        } catch (err) {
+          console.error('Failed to notify customer:', err);
+        }
+      }
+
       // Send email to driver
       if (assignDialog.reservationId) {
         try {
@@ -290,6 +309,20 @@ const AdminReservations = () => {
         } catch (err) {
           console.error('Failed to send driver email:', err);
           toast.error('Şoför mail hatası');
+        }
+      }
+
+      // Send email to customer with driver name, plate, and WhatsApp support button
+      if (assignDialog.reservationId && selectedDriverData) {
+        try {
+          await emailCustomerDriverAssigned(
+            assignDialog.reservationId,
+            selectedDriverData.name,
+            selectedDriverData.plate_number || undefined
+          );
+          console.log('Customer driver assignment email sent');
+        } catch (err) {
+          console.error('Failed to send customer email:', err);
         }
       }
 
