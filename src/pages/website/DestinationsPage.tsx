@@ -7,77 +7,77 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 
-const destinations = [
-  {
-    id: 1,
-    name: "Istanbul",
-    airports: "IST & SAW",
-    tagline: "City & Airport Transfers",
-    icon: "✨",
-    IconComponent: Building2,
-    locations: ["Taksim", "Sultanahmet", "Beşiktaş", "Levent", "Galataport Cruise Port", "Bosphorus Hotels"],
-    vehicles: "Mercedes Vito, V-Class, VIP Minibus",
-    link: "/istanbul-transfer",
-  },
-  {
-    id: 2,
-    name: "Antalya",
-    airports: "AYT",
-    tagline: "Resort Destinations",
-    icon: "🏝️",
-    IconComponent: Waves,
-    locations: ["Lara", "Kundu", "Belek", "Side", "Alanya", "Kaş", "Kemer", "Golf Hotels & Resorts"],
-    vehicles: "Family-friendly minivan transfers",
-    link: "/antalya-transfer",
-  },
-  {
-    id: 3,
-    name: "Bodrum",
-    airports: "BJV",
-    tagline: "Luxury Marinas",
-    icon: "⚓",
-    IconComponent: Anchor,
-    locations: ["Yalıkavak Marina", "Türkbükü", "Gündoğan", "Torba", "Bodrum City Center"],
-    vehicles: "VIP V-Class & Minibus options",
-    link: "/bodrum-transfer",
-  },
-  {
-    id: 4,
-    name: "Dalaman",
-    airports: "DLM",
-    tagline: "Coastal Areas",
-    icon: "🌊",
-    IconComponent: Waves,
-    locations: ["Fethiye", "Ölüdeniz", "Göcek", "Marmaris", "Yacht Marina Transfers", "Villa & Resort Transport"],
-    vehicles: "VIP Mercedes fleet",
-    link: "/dalaman-transfer",
-  },
-  {
-    id: 5,
-    name: "Izmir",
-    airports: "ADB",
-    tagline: "Aegean Coast",
-    icon: "🏛️",
-    IconComponent: Landmark,
-    locations: ["Çeşme", "Alaçatı", "Ephesus", "Kuşadası", "Port & Hotel Transfers"],
-    vehicles: "Private Chauffeur Services",
-    link: "/izmir-transfer",
-  },
-  {
-    id: 6,
-    name: "Cappadocia",
-    airports: "NAV & ASR",
-    tagline: "Cave Hotels & Balloon Areas",
-    icon: "🎈",
-    IconComponent: Mountain,
-    locations: ["Göreme", "Ürgüp", "Avanos", "Uçhisar", "Airport Transfers"],
-    vehicles: "VIP tour chauffeurs",
-    link: "/cappadocia-transfer",
-  },
-];
-
 const DestinationsPage = () => {
-  const { getLocalizedPath } = useLanguage();
+  const { t, getLocalizedPath } = useLanguage();
+
+  const destinations = [
+    {
+      id: 1,
+      name: "Istanbul",
+      airports: "IST & SAW",
+      tagline: t("cityAirportTransfers"),
+      icon: "✨",
+      IconComponent: Building2,
+      locations: ["Taksim", "Sultanahmet", "Beşiktaş", "Levent", "Galataport Cruise Port", "Bosphorus Hotels"],
+      vehicles: "Mercedes Vito, V-Class, VIP Minibus",
+      link: "/istanbul-transfer",
+    },
+    {
+      id: 2,
+      name: "Antalya",
+      airports: "AYT",
+      tagline: t("resortDestinations"),
+      icon: "🏝️",
+      IconComponent: Waves,
+      locations: ["Lara", "Kundu", "Belek", "Side", "Alanya", "Kaş", "Kemer", "Golf Hotels & Resorts"],
+      vehicles: "Mercedes Vito, VIP Minibus",
+      link: "/antalya-transfer",
+    },
+    {
+      id: 3,
+      name: "Bodrum",
+      airports: "BJV",
+      tagline: t("luxuryMarinas"),
+      icon: "⚓",
+      IconComponent: Anchor,
+      locations: ["Yalıkavak Marina", "Türkbükü", "Gündoğan", "Torba", "Bodrum City Center"],
+      vehicles: "VIP V-Class & Minibus",
+      link: "/bodrum-transfer",
+    },
+    {
+      id: 4,
+      name: "Dalaman",
+      airports: "DLM",
+      tagline: t("coastalAreas"),
+      icon: "🌊",
+      IconComponent: Waves,
+      locations: ["Fethiye", "Ölüdeniz", "Göcek", "Marmaris", "Yacht Marina Transfers", "Villa & Resort Transport"],
+      vehicles: "VIP Mercedes fleet",
+      link: "/dalaman-transfer",
+    },
+    {
+      id: 5,
+      name: "Izmir",
+      airports: "ADB",
+      tagline: t("aegeanCoast"),
+      icon: "🏛️",
+      IconComponent: Landmark,
+      locations: ["Çeşme", "Alaçatı", "Ephesus", "Kuşadası", "Port & Hotel Transfers"],
+      vehicles: t("luxuryService"),
+      link: "/izmir-transfer",
+    },
+    {
+      id: 6,
+      name: "Cappadocia",
+      airports: "NAV & ASR",
+      tagline: t("caveHotelsBalloon"),
+      icon: "🎈",
+      IconComponent: Mountain,
+      locations: ["Göreme", "Ürgüp", "Avanos", "Uçhisar", "Airport Transfers"],
+      vehicles: "VIP tour chauffeurs",
+      link: "/cappadocia-transfer",
+    },
+  ];
   
   return (
     <WebsiteLayout>
@@ -101,19 +101,18 @@ const DestinationsPage = () => {
       />
 
       <PageHeader
-        title="VIP Destinations Across Turkey"
-        subtitle="Premium Airport Transfers & Private Chauffeur Services"
+        title={t("destinationsTitle")}
+        subtitle={t("destinationsSubtitle")}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
         {/* Main H1 */}
         <section className="text-center mb-10 md:mb-14">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Airport Transfer Destinations in Turkey
+            {t("destinationsMainTitle")}
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Discover the top destinations we serve across Turkey. From <strong>luxury marinas</strong> to <strong>historic city centers</strong>, 
-            Meet Transfer provides <strong>premium airport transfers</strong>, <strong>private chauffeurs</strong>, and <strong>VIP minivan service</strong> in every major region.
+            {t("destinationsIntro")}
           </p>
         </section>
 
@@ -150,7 +149,7 @@ const DestinationsPage = () => {
                   {/* Locations */}
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                      Key Locations
+                      {t("keyLocations")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {destination.locations.slice(0, 5).map((location, idx) => (
@@ -163,7 +162,7 @@ const DestinationsPage = () => {
                       ))}
                       {destination.locations.length > 5 && (
                         <span className="px-2 py-1 bg-muted text-muted-foreground rounded-md text-xs">
-                          +{destination.locations.length - 5} more
+                          +{destination.locations.length - 5} {t("more")}
                         </span>
                       )}
                     </div>
@@ -182,7 +181,7 @@ const DestinationsPage = () => {
                     variant="outline"
                   >
                     <Link to={`${getLocalizedPath("/book")}?destination=${encodeURIComponent(destination.name)}`}>
-                      Book {destination.name} Transfer
+                      {t("bookTransfer")} {destination.name} {t("transfer")}
                     </Link>
                   </Button>
                 </CardContent>
@@ -194,15 +193,14 @@ const DestinationsPage = () => {
         {/* CTA Section */}
         <div className="mt-12 md:mt-16 text-center bg-muted/50 rounded-2xl p-6 md:p-10">
           <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3">
-            Premium VIP Fleet Available
+            {t("premiumVipFleet")}
           </h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            All destinations feature our luxury <strong>Mercedes Vito, V-Class, VIP Minibus, and Maybach</strong> vehicles 
-            with professional chauffeurs, flight tracking, and 24/7 support.
+            {t("premiumVipFleetDesc")}
           </p>
           <Button asChild size="lg">
             <Link to="/whatsapp-booking">
-              Book via WhatsApp
+              {t("bookViaWhatsApp")}
             </Link>
           </Button>
         </div>

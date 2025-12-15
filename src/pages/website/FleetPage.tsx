@@ -28,43 +28,43 @@ import sprinter4 from "@/assets/sprinter-4.jpg";
 import sprinter5 from "@/assets/sprinter-5.jpg";
 import sprinter6 from "@/assets/sprinter-6.jpg";
 
-const vehicles = [
-  {
-    name: "Mercedes Vito VIP",
-    description: "Our most popular choice for airport transfers. The Mercedes Vito VIP offers spacious seating, ample luggage space, and premium comfort features perfect for families and small groups.",
-    passengers: 6,
-    luggage: 6,
-    features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
-    images: [vitoVip1, vitoVip2, vitoVip3, vitoVip4, vitoVip5],
-  },
-  {
-    name: "Mercedes Vito",
-    description: "The Mercedes Vito Comfortable family holiday transfer vehicles with best budget.",
-    passengers: 7,
-    luggage: 7,
-    features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-    images: [vito1, vito2, vito3, vito4, vito5, vito6],
-  },
-  {
-    name: "Mercedes Maybach",
-    description: "The pinnacle of automotive luxury. Our Maybach offers executive rear seating and the smoothest ride for VIP guests and business executives.",
-    passengers: 4,
-    luggage: 4,
-    features: ["Leather seats", "Rear entertainment", "Ambient lighting", "Mini bar", "Star ceiling", "TV"],
-    images: [maybach1, maybach2, maybach3, maybach4, maybach5, maybach6],
-  },
-  {
-    name: "Mercedes Sprinter VIP Minibus",
-    description: "Perfect for larger groups, our VIP Sprinter offers airline-style seating for up to 16 passengers with individual screens and premium amenities.",
-    passengers: 16,
-    luggage: 16,
-    features: ["Leather Seats", "Large luggage space", "WiFi", "USB"],
-    images: [sprinter1, sprinter2, sprinter3, sprinter4, sprinter5, sprinter6],
-  },
-];
-
 const FleetPage = () => {
   const { t } = useLanguage();
+
+  const vehicles = [
+    {
+      name: t("vitoVipName"),
+      description: t("vitoVipDesc"),
+      passengers: 6,
+      luggage: 6,
+      features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
+      images: [vitoVip1, vitoVip2, vitoVip3, vitoVip4, vitoVip5],
+    },
+    {
+      name: t("vitoName"),
+      description: t("vitoDesc"),
+      passengers: 7,
+      luggage: 7,
+      features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
+      images: [vito1, vito2, vito3, vito4, vito5, vito6],
+    },
+    {
+      name: t("maybachName"),
+      description: t("maybachDesc"),
+      passengers: 4,
+      luggage: 4,
+      features: ["Leather seats", "Rear entertainment", "Ambient lighting", "Mini bar", "Star ceiling", "TV"],
+      images: [maybach1, maybach2, maybach3, maybach4, maybach5, maybach6],
+    },
+    {
+      name: t("sprinterName"),
+      description: t("sprinterDesc"),
+      passengers: 16,
+      luggage: 16,
+      features: ["Leather Seats", "Large luggage space", "WiFi", "USB"],
+      images: [sprinter1, sprinter2, sprinter3, sprinter4, sprinter5, sprinter6],
+    },
+  ];
 
   return (
     <WebsiteLayout>
@@ -93,21 +93,17 @@ const FleetPage = () => {
       />
 
       <PageHeader
-        title="Our Fleet"
-        subtitle="Premium Mercedes Vehicles for Every Journey"
+        title={t("fleetTitle")}
+        subtitle={t("fleetSubtitle")}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Mercedes VIP Fleet - Travel in Style & Comfort
+            {t("fleetMainTitle")}
           </h1>
           <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto text-lg">
-            Our carefully curated fleet of <strong>Mercedes vehicles</strong> ensures you travel
-            in the utmost comfort and style. From efficient <strong>airport transfers</strong> to
-            <strong> luxury chauffeur service</strong>, we have the perfect vehicle for every
-            occasion. All vehicles are regularly maintained and cleaned to the
-            highest standards.
+            {t("fleetIntro")}
           </p>
         </section>
 
@@ -118,9 +114,9 @@ const FleetPage = () => {
         </div>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">Need Help Choosing?</h2>
+          <h2 className="text-xl font-bold mb-2">{t("needHelp")}</h2>
           <p className="text-muted-foreground mb-4">
-            Contact us and we'll recommend the best vehicle for your transfer needs
+            {t("contactForHelp")}
           </p>
           <WhatsAppButton
             variant="large"
