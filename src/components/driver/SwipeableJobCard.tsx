@@ -2,12 +2,13 @@ import { useState, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban } from 'lucide-react';
+import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { toast } from 'sonner';
+import { FlightStatus } from '@/components/ui/flight-status';
 
 interface Reservation {
   id: string;
@@ -82,6 +83,8 @@ const SWIPE_THRESHOLD = 100;
 
 export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }: SwipeableJobCardProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [flightDelay, setFlightDelay] = useState<number | null>(null);
+  const [flightStatusValue, setFlightStatusValue] = useState<string | null>(null);
   const x = useMotionValue(0);
   
   const config = statusConfig[reservation.status] || statusConfig.sent_to_driver;
@@ -238,10 +241,38 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
             {/* Tags Row */}
             <div className="flex flex-wrap gap-2">
               {reservation.flight_number && (
-                <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs text-red-600">
-                  <Plane className="h-3 w-3" />
-                  <span>{reservation.flight_number}</span>
-                </div>
+                <>
+                  <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs text-red-600">
+                    <Plane className="h-3 w-3" />
+                    <span>{reservation.flight_number}</span>
+                  </div>
+                  {/* Flight delay badge */}
+                  {flightDelay && flightDelay > 0 && (
+                    <div className="flex items-center gap-1 bg-amber-500/20 border border-amber-500/50 px-2 py-1 rounded text-xs text-amber-700">
+                      <AlertTriangle className="h-3 w-3" />
+                      <span>+{flightDelay} dk rötar</span>
+                    </div>
+                  )}
+                  {flightStatusValue === 'cancelled' && (
+                    <div className="flex items-center gap-1 bg-destructive/20 border border-destructive/50 px-2 py-1 rounded text-xs text-destructive">
+                      <AlertTriangle className="h-3 w-3" />
+                      <span>İptal</span>
+                    </div>
+                  )}
+                  {/* Hidden FlightStatus for fetching data */}
+                  <FlightStatus
+                    flightNumber={reservation.flight_number}
+                    date={reservation.pickup_date}
+                    compact
+                    refreshIntervalMs={0}
+                    className="hidden"
+                    onStatusChange={(status) => {
+                      const d = status.arrival?.delay || status.departure?.delay || 0;
+                      setFlightDelay(d);
+                      setFlightStatusValue(status.status?.toLowerCase() || null);
+                    }}
+                  />
+                </>
               )}
               <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs text-red-600">
                 <Car className="h-3 w-3" />
