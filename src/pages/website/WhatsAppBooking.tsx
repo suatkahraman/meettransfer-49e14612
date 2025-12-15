@@ -19,7 +19,7 @@ import { MessageCircle, ArrowRight } from "lucide-react";
 
 const vehicleTypes = [
   "Mercedes Vito",
-  "Mercedes V-Class",
+  "Mercedes Vip Vito",
   "Maybach",
   "Minibus",
 ];
