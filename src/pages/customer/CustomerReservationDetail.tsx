@@ -4,11 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff } from 'lucide-react';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
@@ -84,6 +85,8 @@ const CustomerReservationDetail = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { emailAdminPriceAccepted, emailAdminPriceRejected, emailAdminReservationCancelled } = useEmailNotifications();
+  const { isSubscribed, subscribe, unsubscribe, isLoading: pushLoading
+ } = usePushNotifications();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -341,11 +344,28 @@ const CustomerReservationDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/customer/bookings')} className="text-primary-foreground hover:bg-primary-foreground/10">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-serif">Reservation Details</h1>
+      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/customer/bookings')} className="text-primary-foreground hover:bg-primary-foreground/10">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-serif">Reservation Details</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => isSubscribed ? unsubscribe() : subscribe()}
+            disabled={pushLoading}
+            className="text-primary-foreground hover:bg-primary-foreground/10"
+            title={isSubscribed ? 'Notifications On' : 'Notifications Off'}
+          >
+            {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5 opacity-60" />}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10">
+            <Home className="h-5 w-5" />
+          </Button>
+        </div>
       </header>
 
       <main className="container mx-auto py-8 px-4 max-w-2xl">
