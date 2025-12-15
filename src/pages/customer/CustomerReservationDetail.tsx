@@ -311,7 +311,7 @@ const CustomerReservationDetail = () => {
                 <CardTitle className="text-xl">Transfer Details</CardTitle>
               </div>
               <Badge className={statusColors[reservation.status] || 'bg-muted'}>
-                {statusLabels[reservation.status] || reservation.status}
+                {getStatusLabel(reservation.status)}
               </Badge>
             </div>
           </CardHeader>
