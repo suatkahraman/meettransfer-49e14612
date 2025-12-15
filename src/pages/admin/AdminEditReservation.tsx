@@ -372,9 +372,14 @@ const AdminEditReservation = () => {
 
       // Send email notification to driver
       try {
-        await emailDriverAssigned(id!);
+        console.log('Calling emailDriverAssigned for reservation:', id);
+        const emailResult = await emailDriverAssigned(id!);
+        console.log('Driver email result:', JSON.stringify(emailResult));
+        if (!emailResult.success) {
+          console.error('Driver email failed:', emailResult.error);
+        }
       } catch (e) {
-        console.error('Failed to send driver email:', e);
+        console.error('Failed to send driver email - exception:', e);
       }
 
       // Audit log
