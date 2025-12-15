@@ -89,14 +89,40 @@
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
     <link rel="dns-prefetch" href="//images.unsplash.com" />
 
-    <!-- Critical CSS for FCP/LCP -->
+    <!-- Critical CSS for FCP/LCP - matches Hero component exactly -->
     <style>
       body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: #111111; color: white; }
       #root { min-height: 100vh; }
-      .hero-loading { background: linear-gradient(135deg, #111111 0%, rgba(17,17,17,0.95) 50%, rgba(17,17,17,0.8) 100%); min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
-      .hero-loading h1 { font-size: 2.5rem; font-weight: 700; margin: 0 0 1rem 0; max-width: 800px; }
-      .hero-loading p { font-size: 1.125rem; opacity: 0.9; margin: 0; max-width: 600px; }
-      @media (min-width: 768px) { .hero-loading h1 { font-size: 3.75rem; } .hero-loading p { font-size: 1.25rem; } }
+      .hero-loading { 
+        background: linear-gradient(135deg, #111111 0%, rgba(17,17,17,0.95) 50%, rgba(17,17,17,0.8) 100%); 
+        min-height: 70vh; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; 
+        text-align: center; 
+        padding: 4rem 1rem;
+      }
+      .hero-loading h1 { 
+        font-size: 2.25rem; 
+        font-weight: 700; 
+        margin: 0 0 1rem 0; 
+        line-height: 1.1;
+      }
+      .hero-loading .hero-subtitle { 
+        font-size: 1.125rem; 
+        opacity: 0.9; 
+        margin: 0; 
+        max-width: 42rem;
+        line-height: 1.625;
+      }
+      @media (min-width: 768px) { 
+        .hero-loading h1 { font-size: 3.75rem; } 
+        .hero-loading .hero-subtitle { font-size: 1.25rem; } 
+      }
+      @media (min-width: 1024px) { 
+        .hero-loading h1 { font-size: 4.5rem; } 
+      }
     </style>
 
     <!-- Structured Data - Organization -->
@@ -142,7 +168,7 @@
   </head>
 
   <body>
-    <div id="root"><div class="hero-loading"><h1>Premium VIP Airport Transfer Service</h1><p>Experience luxury travel with our professional chauffeur service across Turkey</p></div></div>
+    <div id="root"><div class="hero-loading"><h1>Premium VIP Airport Transfer Service</h1><p class="hero-subtitle">Best Airport Transfer Company Experience luxury travel with our professional chauffeur service across Turkey</p></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
