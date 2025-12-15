@@ -17,6 +17,9 @@ interface Reservation {
   vehicle_type: string;
   status: string;
   price: number | null;
+  price_currency: string | null;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   driver_earning: number | null;
 }
 
@@ -35,6 +38,13 @@ const statusColors: Record<string, string> = {
   'active': 'bg-green-500',
   'completed': 'bg-gray-500',
   'cancelled': 'bg-red-500',
+};
+
+const currencySymbols: Record<string, string> = {
+  'TRY': '₺',
+  'EUR': '€',
+  'USD': '$',
+  'GBP': '£',
 };
 
 const AdminDriverJobs = () => {
@@ -172,6 +182,16 @@ const AdminDriverJobs = () => {
                       <div className="pt-2 border-t mt-2">
                         <span className="text-muted-foreground">Şoför Kazancı:</span>{' '}
                         <span className="font-medium text-green-600">${reservation.driver_earning}</span>
+                      </div>
+                    )}
+
+                    {/* Yolcudan Alınacak Nakit */}
+                    {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
+                      <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-200 dark:border-amber-800 mt-2">
+                        <span className="text-sm text-amber-700 dark:text-amber-300 font-medium">💵 Yolcudan Alınacak Nakit</span>
+                        <span className="font-bold text-amber-700 dark:text-amber-300">
+                          {currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '₺'}{reservation.passenger_cash_amount}
+                        </span>
                       </div>
                     )}
                   </div>
