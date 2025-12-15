@@ -3,8 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-// This should match your VAPID_PUBLIC_KEY
-const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
+// VAPID Public Key for Web Push
+const VAPID_PUBLIC_KEY = 'BP3443JUKs9-80SKdwtiYac7YrALgxcsAJNIm0RABGG7cjT8eGwiINjbuO4FBdanQ0yA6EOklaSkVz6ZBJKBK6A';
 
 function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
