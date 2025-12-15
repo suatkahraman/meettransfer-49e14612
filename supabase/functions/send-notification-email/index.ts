@@ -774,29 +774,40 @@ const handler = async (req: Request): Promise<Response> => {
     // Get driver email if needed
     let driverEmail = "";
     if (type === 'driver_assigned_driver') {
-      console.log('Driver data from reservation:', JSON.stringify(reservation.drivers));
+      console.log('=== DRIVER EMAIL LOOKUP START ===');
+      console.log('Reservation ID:', reservation_id);
+      console.log('Driver ID from reservation:', reservation.driver_id);
+      console.log('Driver data from reservation.drivers:', JSON.stringify(reservation.drivers));
       
       if (reservation.drivers?.user_id) {
+        console.log('Driver user_id found:', reservation.drivers.user_id);
         try {
           const { data: userData, error: userError } = await supabase.auth.admin.getUserById(reservation.drivers.user_id);
+          console.log('Auth getUserById result - userData:', JSON.stringify(userData));
+          console.log('Auth getUserById result - error:', JSON.stringify(userError));
+          
           if (userError) {
-            console.error('Error fetching driver user:', userError);
+            console.error('Error fetching driver user from auth:', userError.message);
+          } else if (userData?.user?.email) {
+            driverEmail = userData.user.email;
+            console.log('SUCCESS: Found driver email from auth:', driverEmail);
           } else {
-            driverEmail = userData?.user?.email || "";
-            console.log('Found driver email from auth:', driverEmail);
+            console.log('WARNING: No email in userData:', JSON.stringify(userData));
           }
         } catch (e) {
           console.error('Exception fetching driver email:', e);
         }
+      } else {
+        console.log('WARNING: No user_id in reservation.drivers');
       }
       
       // Fallback to additional_data if still no email
       if (!driverEmail && additional_data?.driver_email) {
         driverEmail = additional_data.driver_email;
-        console.log('Using driver email from additional_data:', driverEmail);
+        console.log('FALLBACK: Using driver email from additional_data:', driverEmail);
       }
       
-      console.log('Final driver email:', driverEmail);
+      console.log('=== DRIVER EMAIL LOOKUP END === Final email:', driverEmail || 'NONE');
     }
 
     // Prepare common data
