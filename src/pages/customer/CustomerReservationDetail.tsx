@@ -91,6 +91,8 @@ const CustomerReservationDetail = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [flightDelay, setFlightDelay] = useState<number | null>(null);
+  const [flightStatus, setFlightStatus] = useState<string | null>(null);
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
@@ -462,13 +464,46 @@ const CustomerReservationDetail = () => {
               </div>
             </div>
 
-            {/* Flight Status */}
+            {/* Flight Status with Delay Alert */}
             {reservation.flight_number && (
-              <FlightStatus 
-                flightNumber={reservation.flight_number} 
-                date={reservation.pickup_date}
-                refreshIntervalMs={0}
-              />
+              <div className="space-y-3">
+                {/* Delay Alert Banner */}
+                {flightDelay && flightDelay > 0 && (
+                  <div className="bg-amber-500/20 border border-amber-500/50 rounded-lg p-4 flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium text-amber-700">Flight Delayed</div>
+                      <div className="text-sm text-amber-600">
+                        Your flight {reservation.flight_number} is delayed by {flightDelay} minutes. 
+                        Your driver will be notified automatically.
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {flightStatus === 'cancelled' && (
+                  <div className="bg-destructive/20 border border-destructive/50 rounded-lg p-4 flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium text-destructive">Flight Cancelled</div>
+                      <div className="text-sm text-destructive/80">
+                        Your flight {reservation.flight_number} has been cancelled. 
+                        Please contact us to reschedule your transfer.
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <FlightStatus 
+                  flightNumber={reservation.flight_number} 
+                  date={reservation.pickup_date}
+                  refreshIntervalMs={5 * 60 * 1000}
+                  reservationId={reservation.id}
+                  onStatusChange={(status) => {
+                    const delay = status.arrival?.delay || status.departure?.delay || 0;
+                    setFlightDelay(delay);
+                    setFlightStatus(status.status?.toLowerCase() || null);
+                  }}
+                />
+              </div>
             )}
 
             {/* Price Section - only show if price is set */}
