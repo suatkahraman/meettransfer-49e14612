@@ -104,32 +104,59 @@ const CustomerReservationDetail = () => {
     return labels[status] || status;
   };
 
+  const fetchReservation = async () => {
+    if (!id || !user) return;
+
+    const { data, error } = await supabase
+      .from('reservations')
+      .select(`
+        *,
+        drivers (name, phone, plate_number, vehicle_model)
+      `)
+      .eq('id', id)
+      .eq('customer_id', user.id)
+      .single();
+
+    if (error) {
+      toast.error('Reservation not found');
+      navigate('/customer/bookings');
+      return;
+    }
+
+    setReservation(data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchReservation = async () => {
-      if (!id || !user) return;
-
-      const { data, error } = await supabase
-        .from('reservations')
-        .select(`
-          *,
-          drivers (name, phone, plate_number, vehicle_model)
-        `)
-        .eq('id', id)
-        .eq('customer_id', user.id)
-        .single();
-
-      if (error) {
-        toast.error('Reservation not found');
-        navigate('/customer/bookings');
-        return;
-      }
-
-      setReservation(data);
-      setLoading(false);
-    };
-
     fetchReservation();
   }, [id, user, navigate]);
+
+  // Real-time subscription for reservation updates
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel(`customer-reservation-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'reservations',
+          filter: `id=eq.${id}`
+        },
+        (payload) => {
+          console.log('Reservation updated:', payload);
+          // Refetch to get updated drivers relation
+          fetchReservation();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id]);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return null;
