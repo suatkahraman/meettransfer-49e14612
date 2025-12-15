@@ -22,6 +22,8 @@ interface Reservation {
   payment_type: string;
   price: number | null;
   price_currency: string | null;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   status: string;
   driver_confirmed: boolean | null;
 }
@@ -250,6 +252,18 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
                 <span>{paymentTypeLabels[reservation.payment_type] || reservation.payment_type}</span>
               </div>
             </div>
+
+            {/* Passenger Cash Amount */}
+            {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">💵 Yolcudan Alınacak Nakit</span>
+                  <span className="font-bold text-lg text-amber-700 dark:text-amber-400">
+                    {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR')}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Price & Swipe hints */}
             <div className="pt-2 border-t">

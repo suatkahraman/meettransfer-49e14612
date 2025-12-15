@@ -29,6 +29,8 @@ interface Reservation {
   payment_type: string;
   price: number | null;
   price_currency: string | null;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   status: string;
   driver_confirmed: boolean | null;
 }
