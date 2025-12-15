@@ -6,74 +6,86 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRoute";
+import { lazy, Suspense } from "react";
+
+// Critical pages - loaded immediately
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import LoginScreen from "./pages/auth/LoginScreen";
-import SignupScreen from "./pages/auth/SignupScreen";
-import ReservationForm from "./pages/ReservationForm";
-import InstallApp from "./pages/InstallApp";
 import NotFound from "./pages/NotFound";
 
-// Customer Pages
-import CustomerHome from "./pages/customer/CustomerHome";
-import CustomerBookings from "./pages/customer/CustomerBookings";
-import CustomerReservationDetail from "./pages/customer/CustomerReservationDetail";
-import CustomerEditReservation from "./pages/customer/CustomerEditReservation";
-import CustomerReviewPage from "./pages/customer/CustomerReviewPage";
+// Auth pages - lazy loaded
+const Auth = lazy(() => import("./pages/Auth"));
+const LoginScreen = lazy(() => import("./pages/auth/LoginScreen"));
+const SignupScreen = lazy(() => import("./pages/auth/SignupScreen"));
+const ReservationForm = lazy(() => import("./pages/ReservationForm"));
+const InstallApp = lazy(() => import("./pages/InstallApp"));
 
-// Driver Pages
-import DriverHome from "./pages/driver/DriverHome";
-import DriverJobDetails from "./pages/driver/DriverJobDetails";
-import DriverAccounting from "./pages/driver/DriverAccounting";
-import DriverHistory from "./pages/driver/DriverHistory";
+// Customer Pages - lazy loaded
+const CustomerHome = lazy(() => import("./pages/customer/CustomerHome"));
+const CustomerBookings = lazy(() => import("./pages/customer/CustomerBookings"));
+const CustomerReservationDetail = lazy(() => import("./pages/customer/CustomerReservationDetail"));
+const CustomerEditReservation = lazy(() => import("./pages/customer/CustomerEditReservation"));
+const CustomerReviewPage = lazy(() => import("./pages/customer/CustomerReviewPage"));
 
-// Admin Pages
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminReservations from "./pages/admin/AdminReservations";
-import AdminEditReservation from "./pages/admin/AdminEditReservation";
-import AdminCreateReservation from "./pages/admin/AdminCreateReservation";
-import AdminDrivers from "./pages/admin/AdminDrivers";
-import AdminDriverJobs from "./pages/admin/AdminDriverJobs";
-import AdminAccounting from "./pages/admin/AdminAccounting";
-import AdminMonthlyAccounting from "./pages/admin/AdminMonthlyAccounting";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminSetup from "./pages/admin/AdminSetup";
-import AdminTemplates from "./pages/admin/AdminTemplates";
-import AdminCalendar from "./pages/admin/AdminCalendar";
-import AdminAgencies from "./pages/admin/AdminAgencies";
-import AdminAgencyAccounting from "./pages/admin/AdminAgencyAccounting";
-import AdminFlightMonitor from "./pages/admin/AdminFlightMonitor";
-import AdminAgencyBalance from "./pages/admin/AdminAgencyBalance";
+// Driver Pages - lazy loaded
+const DriverHome = lazy(() => import("./pages/driver/DriverHome"));
+const DriverJobDetails = lazy(() => import("./pages/driver/DriverJobDetails"));
+const DriverAccounting = lazy(() => import("./pages/driver/DriverAccounting"));
+const DriverHistory = lazy(() => import("./pages/driver/DriverHistory"));
+const DriverMonthlyAccounting = lazy(() => import("./pages/driver/DriverMonthlyAccounting"));
 
-import DriverMonthlyAccounting from "./pages/driver/DriverMonthlyAccounting";
+// Admin Pages - lazy loaded
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminReservations = lazy(() => import("./pages/admin/AdminReservations"));
+const AdminEditReservation = lazy(() => import("./pages/admin/AdminEditReservation"));
+const AdminCreateReservation = lazy(() => import("./pages/admin/AdminCreateReservation"));
+const AdminDrivers = lazy(() => import("./pages/admin/AdminDrivers"));
+const AdminDriverJobs = lazy(() => import("./pages/admin/AdminDriverJobs"));
+const AdminAccounting = lazy(() => import("./pages/admin/AdminAccounting"));
+const AdminMonthlyAccounting = lazy(() => import("./pages/admin/AdminMonthlyAccounting"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminSetup = lazy(() => import("./pages/admin/AdminSetup"));
+const AdminTemplates = lazy(() => import("./pages/admin/AdminTemplates"));
+const AdminCalendar = lazy(() => import("./pages/admin/AdminCalendar"));
+const AdminAgencies = lazy(() => import("./pages/admin/AdminAgencies"));
+const AdminAgencyAccounting = lazy(() => import("./pages/admin/AdminAgencyAccounting"));
+const AdminFlightMonitor = lazy(() => import("./pages/admin/AdminFlightMonitor"));
+const AdminAgencyBalance = lazy(() => import("./pages/admin/AdminAgencyBalance"));
 
-// Website Pages
-import IstanbulTransfer from "./pages/website/IstanbulTransfer";
-import AntalyaTransfer from "./pages/website/AntalyaTransfer";
-import BodrumTransfer from "./pages/website/BodrumTransfer";
-import DalamanTransfer from "./pages/website/DalamanTransfer";
-import IzmirTransfer from "./pages/website/IzmirTransfer";
-import CappadociaTransfer from "./pages/website/CappadociaTransfer";
-import EphesusPamukkale from "./pages/website/EphesusPamukkale";
-import LuxuryChauffeur from "./pages/website/LuxuryChauffeur";
-import FleetPage from "./pages/website/FleetPage";
-import AboutPage from "./pages/website/AboutPage";
-import ContactPage from "./pages/website/ContactPage";
-import ReviewsPage from "./pages/website/ReviewsPage";
-import DestinationsPage from "./pages/website/DestinationsPage";
-import WhatsAppBooking from "./pages/website/WhatsAppBooking";
-import TermsPage from "./pages/website/TermsPage";
-import ServicesPage from "./pages/website/ServicesPage";
+// Website Pages - lazy loaded
+const IstanbulTransfer = lazy(() => import("./pages/website/IstanbulTransfer"));
+const AntalyaTransfer = lazy(() => import("./pages/website/AntalyaTransfer"));
+const BodrumTransfer = lazy(() => import("./pages/website/BodrumTransfer"));
+const DalamanTransfer = lazy(() => import("./pages/website/DalamanTransfer"));
+const IzmirTransfer = lazy(() => import("./pages/website/IzmirTransfer"));
+const CappadociaTransfer = lazy(() => import("./pages/website/CappadociaTransfer"));
+const EphesusPamukkale = lazy(() => import("./pages/website/EphesusPamukkale"));
+const LuxuryChauffeur = lazy(() => import("./pages/website/LuxuryChauffeur"));
+const FleetPage = lazy(() => import("./pages/website/FleetPage"));
+const AboutPage = lazy(() => import("./pages/website/AboutPage"));
+const ContactPage = lazy(() => import("./pages/website/ContactPage"));
+const ReviewsPage = lazy(() => import("./pages/website/ReviewsPage"));
+const DestinationsPage = lazy(() => import("./pages/website/DestinationsPage"));
+const WhatsAppBooking = lazy(() => import("./pages/website/WhatsAppBooking"));
+const TermsPage = lazy(() => import("./pages/website/TermsPage"));
+const ServicesPage = lazy(() => import("./pages/website/ServicesPage"));
 
 const queryClient = new QueryClient();
 
 // Language prefixes for non-English routes
 const LANG_PREFIXES = ["de", "fr", "ru", "it", "es"];
 
-// Helper to create localized routes
+// Simple loading fallback
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
+
+// Helper to create localized routes with Suspense
 const localizedRoutes = (basePath: string, element: React.ReactNode) => {
+  const wrappedElement = <Suspense fallback={<PageLoader />}>{element}</Suspense>;
   const routes = [
-    <Route key={`en-${basePath}`} path={basePath} element={element} />,
+    <Route key={`en-${basePath}`} path={basePath} element={wrappedElement} />,
   ];
   
   LANG_PREFIXES.forEach((prefix) => {
@@ -81,12 +93,17 @@ const localizedRoutes = (basePath: string, element: React.ReactNode) => {
       ? `/${prefix}` 
       : `/${prefix}${basePath}`;
     routes.push(
-      <Route key={`${prefix}-${basePath}`} path={localizedPath} element={element} />
+      <Route key={`${prefix}-${basePath}`} path={localizedPath} element={wrappedElement} />
     );
   });
   
   return routes;
 };
+
+// Wrapper for lazy-loaded routes
+const LazyRoute = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={<PageLoader />}>{children}</Suspense>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -118,43 +135,43 @@ const App = () => (
               {localizedRoutes("/book", <ReservationForm />)}
               
               {/* Auth routes - Not localized (use common language) */}
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/login" element={<LoginScreen />} />
-              <Route path="/signup" element={<SignupScreen />} />
-              <Route path="/install" element={<InstallApp />} />
+              <Route path="/auth" element={<LazyRoute><Auth /></LazyRoute>} />
+              <Route path="/login" element={<LazyRoute><LoginScreen /></LazyRoute>} />
+              <Route path="/signup" element={<LazyRoute><SignupScreen /></LazyRoute>} />
+              <Route path="/install" element={<LazyRoute><InstallApp /></LazyRoute>} />
               
               {/* Customer Routes - Protected */}
-              <Route path="/customer" element={<CustomerRoute><CustomerHome /></CustomerRoute>} />
-              <Route path="/customer/bookings" element={<CustomerRoute><CustomerBookings /></CustomerRoute>} />
-              <Route path="/customer/reservations" element={<CustomerRoute><CustomerBookings /></CustomerRoute>} />
-              <Route path="/customer/reservation/:id" element={<CustomerRoute><CustomerReservationDetail /></CustomerRoute>} />
-              <Route path="/customer/reservation/:id/edit" element={<CustomerRoute><CustomerEditReservation /></CustomerRoute>} />
-              <Route path="/customer/review/:reservationId" element={<CustomerRoute><CustomerReviewPage /></CustomerRoute>} />
+              <Route path="/customer" element={<CustomerRoute><LazyRoute><CustomerHome /></LazyRoute></CustomerRoute>} />
+              <Route path="/customer/bookings" element={<CustomerRoute><LazyRoute><CustomerBookings /></LazyRoute></CustomerRoute>} />
+              <Route path="/customer/reservations" element={<CustomerRoute><LazyRoute><CustomerBookings /></LazyRoute></CustomerRoute>} />
+              <Route path="/customer/reservation/:id" element={<CustomerRoute><LazyRoute><CustomerReservationDetail /></LazyRoute></CustomerRoute>} />
+              <Route path="/customer/reservation/:id/edit" element={<CustomerRoute><LazyRoute><CustomerEditReservation /></LazyRoute></CustomerRoute>} />
+              <Route path="/customer/review/:reservationId" element={<CustomerRoute><LazyRoute><CustomerReviewPage /></LazyRoute></CustomerRoute>} />
               
               {/* Driver Routes - Protected */}
-              <Route path="/driver" element={<DriverRoute><DriverHome /></DriverRoute>} />
-              <Route path="/driver/job/:id" element={<DriverRoute><DriverJobDetails /></DriverRoute>} />
-              <Route path="/driver/accounting" element={<DriverRoute><DriverAccounting /></DriverRoute>} />
-              <Route path="/driver/monthly-accounting" element={<DriverRoute><DriverMonthlyAccounting /></DriverRoute>} />
-              <Route path="/driver/history" element={<DriverRoute><DriverHistory /></DriverRoute>} />
+              <Route path="/driver" element={<DriverRoute><LazyRoute><DriverHome /></LazyRoute></DriverRoute>} />
+              <Route path="/driver/job/:id" element={<DriverRoute><LazyRoute><DriverJobDetails /></LazyRoute></DriverRoute>} />
+              <Route path="/driver/accounting" element={<DriverRoute><LazyRoute><DriverAccounting /></LazyRoute></DriverRoute>} />
+              <Route path="/driver/monthly-accounting" element={<DriverRoute><LazyRoute><DriverMonthlyAccounting /></LazyRoute></DriverRoute>} />
+              <Route path="/driver/history" element={<DriverRoute><LazyRoute><DriverHistory /></LazyRoute></DriverRoute>} />
               
               {/* Admin Routes - Protected */}
-              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-              <Route path="/admin/setup" element={<AdminSetup />} />
-              <Route path="/admin/reservations" element={<AdminRoute><AdminReservations /></AdminRoute>} />
-              <Route path="/admin/reservations/create" element={<AdminRoute><AdminCreateReservation /></AdminRoute>} />
-              <Route path="/admin/reservations/:id" element={<AdminRoute><AdminEditReservation /></AdminRoute>} />
-              <Route path="/admin/drivers" element={<AdminRoute><AdminDrivers /></AdminRoute>} />
-              <Route path="/admin/drivers/:driverId/jobs" element={<AdminRoute><AdminDriverJobs /></AdminRoute>} />
-              <Route path="/admin/accounting" element={<AdminRoute><AdminAccounting /></AdminRoute>} />
-              <Route path="/admin/monthly-accounting" element={<AdminRoute><AdminMonthlyAccounting /></AdminRoute>} />
-              <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
-              <Route path="/admin/templates" element={<AdminRoute><AdminTemplates /></AdminRoute>} />
-              <Route path="/admin/calendar" element={<AdminRoute><AdminCalendar /></AdminRoute>} />
-              <Route path="/admin/flight-monitor" element={<AdminRoute><AdminFlightMonitor /></AdminRoute>} />
-              <Route path="/admin/agencies" element={<AdminRoute><AdminAgencies /></AdminRoute>} />
-              <Route path="/admin/agency-accounting/:agencyId" element={<AdminRoute><AdminAgencyAccounting /></AdminRoute>} />
-              <Route path="/admin/agency-balance/:agencyId" element={<AdminRoute><AdminAgencyBalance /></AdminRoute>} />
+              <Route path="/admin" element={<AdminRoute><LazyRoute><AdminDashboard /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/setup" element={<LazyRoute><AdminSetup /></LazyRoute>} />
+              <Route path="/admin/reservations" element={<AdminRoute><LazyRoute><AdminReservations /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/reservations/create" element={<AdminRoute><LazyRoute><AdminCreateReservation /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/reservations/:id" element={<AdminRoute><LazyRoute><AdminEditReservation /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/drivers" element={<AdminRoute><LazyRoute><AdminDrivers /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/drivers/:driverId/jobs" element={<AdminRoute><LazyRoute><AdminDriverJobs /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/accounting" element={<AdminRoute><LazyRoute><AdminAccounting /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/monthly-accounting" element={<AdminRoute><LazyRoute><AdminMonthlyAccounting /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/settings" element={<AdminRoute><LazyRoute><AdminSettings /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/templates" element={<AdminRoute><LazyRoute><AdminTemplates /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/calendar" element={<AdminRoute><LazyRoute><AdminCalendar /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/flight-monitor" element={<AdminRoute><LazyRoute><AdminFlightMonitor /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/agencies" element={<AdminRoute><LazyRoute><AdminAgencies /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/agency-accounting/:agencyId" element={<AdminRoute><LazyRoute><AdminAgencyAccounting /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/agency-balance/:agencyId" element={<AdminRoute><LazyRoute><AdminAgencyBalance /></LazyRoute></AdminRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
