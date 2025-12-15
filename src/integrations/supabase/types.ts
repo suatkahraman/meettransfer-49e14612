@@ -566,6 +566,8 @@ export type Database = {
           dropoff: string
           flight_number: string | null
           id: string
+          passenger_cash_amount: number | null
+          passenger_cash_currency: string | null
           passenger_names: string[] | null
           payment_link: string | null
           payment_status: string | null
@@ -596,6 +598,8 @@ export type Database = {
           dropoff: string
           flight_number?: string | null
           id?: string
+          passenger_cash_amount?: number | null
+          passenger_cash_currency?: string | null
           passenger_names?: string[] | null
           payment_link?: string | null
           payment_status?: string | null
@@ -626,6 +630,8 @@ export type Database = {
           dropoff?: string
           flight_number?: string | null
           id?: string
+          passenger_cash_amount?: number | null
+          passenger_cash_currency?: string | null
           passenger_names?: string[] | null
           payment_link?: string | null
           payment_status?: string | null
