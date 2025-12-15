@@ -89,6 +89,13 @@
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
     <link rel="dns-prefetch" href="//images.unsplash.com" />
 
+    <!-- Critical CSS for FCP -->
+    <style>
+      body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+      #root { min-height: 100vh; }
+      .hero-loading { background: linear-gradient(135deg, #111111 0%, rgba(17,17,17,0.95) 50%, rgba(17,17,17,0.8) 100%); min-height: 70vh; display: flex; align-items: center; justify-content: center; }
+    </style>
+
     <!-- Structured Data - Organization -->
     <script type="application/ld+json">
     {
@@ -132,7 +139,7 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="hero-loading"></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
