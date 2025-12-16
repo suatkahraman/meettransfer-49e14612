@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy } from 'lucide-react';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
@@ -766,6 +766,44 @@ const AdminEditReservation = () => {
     toast.success('Reservation updated');
     navigate('/admin/reservations');
     setSaving(false);
+  };
+
+  const copyReservationDetails = async () => {
+    const validPassengers = passengerNames.filter(n => n.trim());
+    const passengerList = validPassengers.length > 0
+      ? validPassengers.map((name, index) => `  ${index + 1}. ${name}`).join('\n')
+      : '  —';
+
+    const symbol = getCurrencySymbol(formData.price_currency);
+    const driverInfo = drivers.find(d => d.id === formData.driver_id);
+    
+    const text = `---------------------------------
+Rezervasyon Kodu: ${reservationCode || id?.slice(0, 8) || '—'}
+Durum: ${statusLabels[formData.status] || formData.status}
+Tarih & Saat: ${formData.pickup_date} – ${formData.pickup_time}
+
+Yolcular:
+${passengerList}
+
+Alış Noktası: ${formData.pickup || '—'}
+Bırakış Noktası: ${formData.dropoff || '—'}
+${formData.flight_number ? `Uçuş No: ${formData.flight_number}\n` : ''}
+Araç: ${vehicleTypes.find(v => v.value === formData.vehicle_type)?.label || formData.vehicle_type}
+Ücret: ${formData.price ? `${symbol}${formData.price}` : '—'}
+${formData.passenger_cash_amount ? `Yolcu Nakit: ${getCurrencySymbol(formData.passenger_cash_currency)}${formData.passenger_cash_amount}\n` : ''}
+Ödeme Tipi: ${paymentTypes.find(p => p.value === formData.payment_type)?.label || formData.payment_type}
+
+Müşteri Telefon: ${formData.customer_phone || '—'}
+${driverInfo ? `Şoför: ${driverInfo.name} (${driverInfo.plate_number || '—'})\n` : ''}
+Admin Notları: ${formData.admin_notes || '—'}
+---------------------------------`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Rezervasyon detayları kopyalandı.');
+    } catch (err) {
+      toast.error('Kopyalama başarısız oldu.');
+    }
   };
 
   if (loading) {
@@ -1659,10 +1697,21 @@ const AdminEditReservation = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={saving}>
-                <Save className="h-4 w-4 mr-2" />
-                {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={copyReservationDetails}
+                  className="flex-shrink-0"
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Kopyala
+                </Button>
+                <Button type="submit" className="flex-1" disabled={saving}>
+                  <Save className="h-4 w-4 mr-2" />
+                  {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
