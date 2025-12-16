@@ -818,6 +818,21 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("type and reservation_id are required");
     }
 
+    if (!RESEND_API_KEY) {
+      console.error('Missing RESEND_API_KEY');
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'MISSING_RESEND_API_KEY',
+          message: 'Email service is not configured',
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
     console.log(`Sending ${type} email for reservation:`, reservation_id);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -852,14 +867,14 @@ const handler = async (req: Request): Promise<Response> => {
       console.log('Reservation ID:', reservation_id);
       console.log('Driver ID from reservation:', reservation.driver_id);
       console.log('Driver data from reservation.drivers:', JSON.stringify(reservation.drivers));
-      
+
       if (reservation.drivers?.user_id) {
         console.log('Driver user_id found:', reservation.drivers.user_id);
         try {
           const { data: userData, error: userError } = await supabase.auth.admin.getUserById(reservation.drivers.user_id);
           console.log('Auth getUserById result - userData:', JSON.stringify(userData));
           console.log('Auth getUserById result - error:', JSON.stringify(userError));
-          
+
           if (userError) {
             console.error('Error fetching driver user from auth:', userError.message);
           } else if (userData?.user?.email) {
@@ -874,13 +889,13 @@ const handler = async (req: Request): Promise<Response> => {
       } else {
         console.log('WARNING: No user_id in reservation.drivers');
       }
-      
+
       // Fallback to additional_data if still no email
       if (!driverEmail && additional_data?.driver_email) {
         driverEmail = additional_data.driver_email;
         console.log('FALLBACK: Using driver email from additional_data:', driverEmail);
       }
-      
+
       console.log('=== DRIVER EMAIL LOOKUP END === Final email:', driverEmail || 'NONE');
     }
 
@@ -943,10 +958,28 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!recipient) {
-      console.log(`No recipient email found for ${type}`);
+      const debug = {
+        type,
+        reservation_id,
+        customer_id: reservation.customer_id,
+        driver_id: reservation.driver_id,
+        customer_email_found: Boolean(customerEmail),
+        driver_email_found: Boolean(driverEmail),
+        driver_user_id: reservation.drivers?.user_id || null,
+      };
+
+      console.error(`No recipient email found for ${type}`, debug);
       return new Response(
-        JSON.stringify({ success: false, message: "No recipient email found" }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        JSON.stringify({
+          success: false,
+          error: 'NO_RECIPIENT_EMAIL',
+          message: `No recipient email found for ${type}`,
+          debug,
+        }),
+        {
+          status: 422,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
       );
     }
 

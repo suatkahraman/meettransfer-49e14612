@@ -386,13 +386,18 @@ const AdminEditReservation = () => {
       // Send email notification to driver
       try {
         console.log('Calling emailDriverAssigned for reservation:', id);
-        const emailResult = await emailDriverAssigned(id!);
+        const emailResult = await emailDriverAssigned(id!, undefined, selectedDriver?.name);
         console.log('Driver email result:', JSON.stringify(emailResult));
         if (!emailResult.success) {
           console.error('Driver email failed:', emailResult.error);
+          const errMsg = typeof emailResult.error === 'string'
+            ? emailResult.error
+            : String((emailResult.error as any)?.message || emailResult.error || 'Bilinmeyen hata');
+          toast.error(`Şoför mail gönderilemedi: ${errMsg}`);
         }
       } catch (e) {
         console.error('Failed to send driver email - exception:', e);
+        toast.error('Şoför mail hatası');
       }
 
       // Audit log

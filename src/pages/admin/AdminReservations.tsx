@@ -299,12 +299,20 @@ const AdminReservations = () => {
       // Send email to driver
       if (assignDialog.reservationId) {
         try {
-          const emailResult = await emailDriverAssigned(assignDialog.reservationId);
+          const emailResult = await emailDriverAssigned(
+            assignDialog.reservationId,
+            undefined,
+            selectedDriverData?.name
+          );
+
           if (emailResult.success) {
             console.log('Driver assignment email sent successfully:', emailResult);
           } else {
             console.error('Driver email failed:', emailResult.error);
-            toast.error('Şoför mail gönderilemedi: ' + (emailResult.error || 'Bilinmeyen hata'));
+            const errMsg = typeof emailResult.error === 'string'
+              ? emailResult.error
+              : String((emailResult.error as any)?.message || emailResult.error || 'Bilinmeyen hata');
+            toast.error(`Şoför mail gönderilemedi: ${errMsg}`);
           }
         } catch (err) {
           console.error('Failed to send driver email:', err);
