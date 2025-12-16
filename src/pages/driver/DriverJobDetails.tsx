@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle, Banknote } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -38,6 +38,8 @@ interface Reservation {
   pickup_date: string;
   pickup_time: string;
   flight_number: string | null;
+  flight_arrival_time: string | null;
+  flight_status: string | null;
   vehicle_type: string;
   payment_type: string;
   price: number;
@@ -117,6 +119,40 @@ const DriverJobDetails = () => {
     };
 
     fetchData();
+
+    // Set up real-time subscription for flight updates
+    if (id) {
+      const channel = supabase
+        .channel(`reservation-${id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'reservations',
+            filter: `id=eq.${id}`,
+          },
+          (payload) => {
+            console.log('[DriverJobDetails] Real-time update received:', payload);
+            const newData = payload.new as Reservation;
+            
+            // Check if flight data changed
+            if (newData.flight_arrival_time !== reservation?.flight_arrival_time ||
+                newData.flight_status !== reservation?.flight_status) {
+              toast.info('Uçuş bilgisi güncellendi!', {
+                icon: <Plane className="h-4 w-4" />,
+              });
+            }
+            
+            setReservation(newData);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [id, driverId]);
 
   const getCurrencySymbol = (currency: string | null) => {
@@ -480,16 +516,34 @@ Notlar: ${reservation.driver_notes || '—'}
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <Plane className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
+                    <div className="flex-1">
                       <div className="text-sm text-muted-foreground">Uçuş</div>
                       <AirlineDisplay flightNumber={reservation.flight_number} size="md" />
+                      {reservation.flight_arrival_time && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs bg-primary/10">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Varış: {reservation.flight_arrival_time}
+                          </Badge>
+                          {reservation.flight_status && (
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {reservation.flight_status}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <FlightStatus 
                     flightNumber={reservation.flight_number} 
                     date={reservation.pickup_date}
                     reservationId={reservation.id}
-                    refreshIntervalMs={0}
+                    refreshIntervalMs={5 * 60 * 1000}
+                    onArrivalTimeChange={(time) => {
+                      console.log('[DriverJobDetails] Flight arrival time updated:', time);
+                      // Update local state immediately for better UX
+                      setReservation(prev => prev ? { ...prev, flight_arrival_time: time } : null);
+                    }}
                   />
                 </div>
               )}

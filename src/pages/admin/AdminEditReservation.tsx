@@ -16,6 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
+import { FlightStatus } from '@/components/ui/flight-status';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = [
@@ -1427,12 +1428,14 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Saat</Label>
+                  <Label>Saat {formData.flight_number && formData.flight_number.length >= 3 && <span className="text-xs text-amber-600 font-normal">(Uçuş varış saatinden otomatik)</span>}</Label>
                   <Input
                     type="time"
                     value={formData.pickup_time}
                     onChange={(e) => setFormData({...formData, pickup_time: e.target.value})}
                     required
+                    disabled={!!formData.flight_number && formData.flight_number.length >= 3}
+                    className={formData.flight_number && formData.flight_number.length >= 3 ? 'bg-muted' : ''}
                   />
                 </div>
                 <div className="space-y-2">
@@ -1446,6 +1449,17 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                   )}
                 </div>
               </div>
+              
+              {/* Flight Status Display */}
+              {formData.flight_number && formData.flight_number.length >= 3 && formData.pickup_date && (
+                <FlightStatus 
+                  flightNumber={formData.flight_number}
+                  date={formData.pickup_date}
+                  reservationId={id}
+                  onArrivalTimeChange={(time) => setFormData(prev => ({ ...prev, pickup_time: time }))}
+                  refreshIntervalMs={5 * 60 * 1000}
+                />
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
