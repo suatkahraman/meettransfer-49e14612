@@ -11,7 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy, ChevronDown } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
@@ -768,7 +769,7 @@ const AdminEditReservation = () => {
     setSaving(false);
   };
 
-  const copyReservationDetails = async () => {
+  const copyReservationDetails = async (lang: string = 'TR') => {
     const validPassengers = passengerNames.filter(n => n.trim());
     const passengerList = validPassengers.length > 0
       ? validPassengers.map((name, index) => `  ${index + 1}. ${name}`).join('\n')
@@ -776,31 +777,62 @@ const AdminEditReservation = () => {
 
     const symbol = getCurrencySymbol(formData.price_currency);
     const driverInfo = drivers.find(d => d.id === formData.driver_id);
+    const vehicleLabel = vehicleTypes.find(v => v.value === formData.vehicle_type)?.label || formData.vehicle_type;
     
-    const text = `---------------------------------
-Rezervasyon Kodu: ${reservationCode || id?.slice(0, 8) || '—'}
-Durum: ${statusLabels[formData.status] || formData.status}
-Tarih & Saat: ${formData.pickup_date} – ${formData.pickup_time}
+    const labels: Record<string, Record<string, string>> = {
+      TR: { reservationCode: 'Rezervasyon Kodu', status: 'Durum', dateTime: 'Tarih & Saat', passengers: 'Yolcular', pickup: 'Alış Noktası', dropoff: 'Bırakış Noktası', flight: 'Uçuş No', vehicle: 'Araç', price: 'Ücret', passengerCash: 'Yolcu Nakit', paymentType: 'Ödeme Tipi', customerPhone: 'Müşteri Telefon', driver: 'Şoför', notes: 'Notlar', copied: 'Rezervasyon detayları kopyalandı.' },
+      EN: { reservationCode: 'Reservation Code', status: 'Status', dateTime: 'Date & Time', passengers: 'Passengers', pickup: 'Pick-up Point', dropoff: 'Drop-off Point', flight: 'Flight No', vehicle: 'Vehicle', price: 'Price', passengerCash: 'Passenger Cash', paymentType: 'Payment Type', customerPhone: 'Customer Phone', driver: 'Driver', notes: 'Notes', copied: 'Reservation details copied.' },
+      DE: { reservationCode: 'Buchungscode', status: 'Status', dateTime: 'Datum & Uhrzeit', passengers: 'Passagiere', pickup: 'Abholort', dropoff: 'Zielort', flight: 'Flug Nr', vehicle: 'Fahrzeug', price: 'Preis', passengerCash: 'Bargeld Fahrgast', paymentType: 'Zahlungsart', customerPhone: 'Kundentelefon', driver: 'Fahrer', notes: 'Anmerkungen', copied: 'Buchungsdetails kopiert.' },
+      FR: { reservationCode: 'Code de réservation', status: 'Statut', dateTime: 'Date & Heure', passengers: 'Passagers', pickup: 'Point de prise en charge', dropoff: 'Point de dépose', flight: 'N° de vol', vehicle: 'Véhicule', price: 'Prix', passengerCash: 'Espèces passager', paymentType: 'Type de paiement', customerPhone: 'Téléphone client', driver: 'Chauffeur', notes: 'Notes', copied: 'Détails de réservation copiés.' },
+      RU: { reservationCode: 'Код бронирования', status: 'Статус', dateTime: 'Дата и время', passengers: 'Пассажиры', pickup: 'Место посадки', dropoff: 'Место высадки', flight: 'Номер рейса', vehicle: 'Транспорт', price: 'Цена', passengerCash: 'Наличные пассажира', paymentType: 'Способ оплаты', customerPhone: 'Телефон клиента', driver: 'Водитель', notes: 'Примечания', copied: 'Детали бронирования скопированы.' },
+      IT: { reservationCode: 'Codice prenotazione', status: 'Stato', dateTime: 'Data e Ora', passengers: 'Passeggeri', pickup: 'Punto di ritiro', dropoff: 'Punto di consegna', flight: 'N° volo', vehicle: 'Veicolo', price: 'Prezzo', passengerCash: 'Contanti passeggero', paymentType: 'Tipo di pagamento', customerPhone: 'Telefono cliente', driver: 'Autista', notes: 'Note', copied: 'Dettagli prenotazione copiati.' },
+      ES: { reservationCode: 'Código de reserva', status: 'Estado', dateTime: 'Fecha y Hora', passengers: 'Pasajeros', pickup: 'Punto de recogida', dropoff: 'Punto de destino', flight: 'N° de vuelo', vehicle: 'Vehículo', price: 'Precio', passengerCash: 'Efectivo pasajero', paymentType: 'Tipo de pago', customerPhone: 'Teléfono cliente', driver: 'Conductor', notes: 'Notas', copied: 'Detalles de reserva copiados.' },
+    };
+    const l = labels[lang] || labels.TR;
+    
+    const statusTranslations: Record<string, Record<string, string>> = {
+      TR: statusLabels,
+      EN: { 'pending_price': 'Pending Price', 'waiting_for_customer_approval': 'Waiting Customer Approval', 'customer_approved': 'Customer Approved', 'customer_rejected': 'Customer Rejected', 'confirmed': 'Confirmed', 'sent_to_driver': 'Sent to Driver', 'active': 'Active', 'completed': 'Completed', 'pending_admin_review': 'Pending Review', 'cancelled_by_customer': 'Cancelled by Customer' },
+      DE: { 'pending_price': 'Preis ausstehend', 'waiting_for_customer_approval': 'Wartet auf Genehmigung', 'customer_approved': 'Kunde genehmigt', 'customer_rejected': 'Kunde abgelehnt', 'confirmed': 'Bestätigt', 'sent_to_driver': 'An Fahrer gesendet', 'active': 'Aktiv', 'completed': 'Abgeschlossen', 'pending_admin_review': 'Überprüfung erforderlich', 'cancelled_by_customer': 'Vom Kunden storniert' },
+      FR: { 'pending_price': 'Prix en attente', 'waiting_for_customer_approval': 'En attente d\'approbation', 'customer_approved': 'Client approuvé', 'customer_rejected': 'Client refusé', 'confirmed': 'Confirmé', 'sent_to_driver': 'Envoyé au chauffeur', 'active': 'Actif', 'completed': 'Terminé', 'pending_admin_review': 'En attente de révision', 'cancelled_by_customer': 'Annulé par le client' },
+      RU: { 'pending_price': 'Ожидание цены', 'waiting_for_customer_approval': 'Ожидание одобрения', 'customer_approved': 'Одобрено клиентом', 'customer_rejected': 'Отклонено', 'confirmed': 'Подтверждено', 'sent_to_driver': 'Отправлено водителю', 'active': 'Активно', 'completed': 'Завершено', 'pending_admin_review': 'На рассмотрении', 'cancelled_by_customer': 'Отменено клиентом' },
+      IT: { 'pending_price': 'Prezzo in attesa', 'waiting_for_customer_approval': 'In attesa di approvazione', 'customer_approved': 'Cliente approvato', 'customer_rejected': 'Cliente rifiutato', 'confirmed': 'Confermato', 'sent_to_driver': 'Inviato all\'autista', 'active': 'Attivo', 'completed': 'Completato', 'pending_admin_review': 'In revisione', 'cancelled_by_customer': 'Annullato dal cliente' },
+      ES: { 'pending_price': 'Precio pendiente', 'waiting_for_customer_approval': 'Esperando aprobación', 'customer_approved': 'Cliente aprobado', 'customer_rejected': 'Cliente rechazado', 'confirmed': 'Confirmado', 'sent_to_driver': 'Enviado al conductor', 'active': 'Activo', 'completed': 'Completado', 'pending_admin_review': 'En revisión', 'cancelled_by_customer': 'Cancelado por cliente' },
+    };
+    const statusLabel = (statusTranslations[lang] || statusTranslations.TR)[formData.status] || formData.status;
 
-Yolcular:
+    const paymentTranslations: Record<string, Record<string, string>> = {
+      TR: { cash: 'Şoföre Nakit', payment_link: 'Online Ödeme Linki', agency_pay: 'Acente Ödemesi' },
+      EN: { cash: 'Cash to Driver', payment_link: 'Online Payment Link', agency_pay: 'Agency Payment' },
+      DE: { cash: 'Bargeld an Fahrer', payment_link: 'Online-Zahlungslink', agency_pay: 'Agenturzahlung' },
+      FR: { cash: 'Espèces au chauffeur', payment_link: 'Lien de paiement', agency_pay: 'Paiement agence' },
+      RU: { cash: 'Наличные водителю', payment_link: 'Онлайн-оплата', agency_pay: 'Оплата агентства' },
+      IT: { cash: 'Contanti all\'autista', payment_link: 'Link di pagamento', agency_pay: 'Pagamento agenzia' },
+      ES: { cash: 'Efectivo al conductor', payment_link: 'Enlace de pago', agency_pay: 'Pago de agencia' },
+    };
+    const paymentLabel = (paymentTranslations[lang] || paymentTranslations.TR)[formData.payment_type] || formData.payment_type;
+
+    const text = `---------------------------------
+${l.reservationCode}: ${reservationCode || id?.slice(0, 8) || '—'}
+${l.status}: ${statusLabel}
+${l.dateTime}: ${formData.pickup_date} – ${formData.pickup_time}
+
+${l.passengers}:
 ${passengerList}
 
-Alış Noktası: ${formData.pickup || '—'}
-Bırakış Noktası: ${formData.dropoff || '—'}
-${formData.flight_number ? `Uçuş No: ${formData.flight_number}\n` : ''}
-Araç: ${vehicleTypes.find(v => v.value === formData.vehicle_type)?.label || formData.vehicle_type}
-Ücret: ${formData.price ? `${symbol}${formData.price}` : '—'}
-${formData.passenger_cash_amount ? `Yolcu Nakit: ${getCurrencySymbol(formData.passenger_cash_currency)}${formData.passenger_cash_amount}\n` : ''}
-Ödeme Tipi: ${paymentTypes.find(p => p.value === formData.payment_type)?.label || formData.payment_type}
+${l.pickup}: ${formData.pickup || '—'}
+${l.dropoff}: ${formData.dropoff || '—'}
+${formData.flight_number ? `${l.flight}: ${formData.flight_number}\n` : ''}${l.vehicle}: ${vehicleLabel}
+${l.price}: ${formData.price ? `${symbol}${formData.price}` : '—'}
+${formData.passenger_cash_amount ? `${l.passengerCash}: ${getCurrencySymbol(formData.passenger_cash_currency)}${formData.passenger_cash_amount}\n` : ''}${l.paymentType}: ${paymentLabel}
 
-Müşteri Telefon: ${formData.customer_phone || '—'}
-${driverInfo ? `Şoför: ${driverInfo.name} (${driverInfo.plate_number || '—'})\n` : ''}
-Admin Notları: ${formData.admin_notes || '—'}
+${l.customerPhone}: ${formData.customer_phone || '—'}
+${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '—'})\n` : ''}${l.notes}: ${formData.admin_notes || '—'}
 ---------------------------------`;
 
     try {
       await navigator.clipboard.writeText(text);
-      toast.success('Rezervasyon detayları kopyalandı.');
+      toast.success(l.copied);
     } catch (err) {
       toast.error('Kopyalama başarısız oldu.');
     }
@@ -1698,15 +1730,24 @@ Admin Notları: ${formData.admin_notes || '—'}
               </div>
 
               <div className="flex gap-2">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={copyReservationDetails}
-                  className="flex-shrink-0"
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Kopyala
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button type="button" variant="outline" className="flex-shrink-0">
+                      <Copy className="h-4 w-4 mr-2" />
+                      Kopyala
+                      <ChevronDown className="h-4 w-4 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="bg-background">
+                    <DropdownMenuItem onClick={() => copyReservationDetails('TR')}>🇹🇷 Türkçe</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => copyReservationDetails('EN')}>🇬🇧 English</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => copyReservationDetails('DE')}>🇩🇪 Deutsch</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => copyReservationDetails('FR')}>🇫🇷 Français</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => copyReservationDetails('RU')}>🇷🇺 Русский</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => copyReservationDetails('IT')}>🇮🇹 Italiano</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => copyReservationDetails('ES')}>🇪🇸 Español</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button type="submit" className="flex-1" disabled={saving}>
                   <Save className="h-4 w-4 mr-2" />
                   {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
