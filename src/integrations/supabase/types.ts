@@ -569,8 +569,12 @@ export type Database = {
           driver_notes: string | null
           driver_user_id: string | null
           dropoff: string
+          flight_arrival_time: string | null
+          flight_last_checked: string | null
           flight_number: string | null
+          flight_status: string | null
           id: string
+          last_notified_arrival_time: string | null
           passenger_cash_amount: number | null
           passenger_cash_currency: string | null
           passenger_names: string[] | null
@@ -603,8 +607,12 @@ export type Database = {
           driver_notes?: string | null
           driver_user_id?: string | null
           dropoff: string
+          flight_arrival_time?: string | null
+          flight_last_checked?: string | null
           flight_number?: string | null
+          flight_status?: string | null
           id?: string
+          last_notified_arrival_time?: string | null
           passenger_cash_amount?: number | null
           passenger_cash_currency?: string | null
           passenger_names?: string[] | null
@@ -637,8 +645,12 @@ export type Database = {
           driver_notes?: string | null
           driver_user_id?: string | null
           dropoff?: string
+          flight_arrival_time?: string | null
+          flight_last_checked?: string | null
           flight_number?: string | null
+          flight_status?: string | null
           id?: string
+          last_notified_arrival_time?: string | null
           passenger_cash_amount?: number | null
           passenger_cash_currency?: string | null
           passenger_names?: string[] | null
