@@ -39,7 +39,7 @@ const translations: Record<Language, Record<string, string>> = {
     login: "Login",
     logout: "Logout",
     myAccount: "My Account",
-    bookNow: "Book Now",
+    bookNow: "Request Your Price",
     
     // Hero Section
     heroTitle: "Premium Transfer Services",
@@ -344,7 +344,7 @@ const translations: Record<Language, Record<string, string>> = {
     login: "Anmelden",
     logout: "Abmelden",
     myAccount: "Mein Konto",
-    bookNow: "Jetzt buchen",
+    bookNow: "Preis anfragen",
     
     // Hero Section
     heroTitle: "Premium Transfer Services",
@@ -645,7 +645,7 @@ const translations: Record<Language, Record<string, string>> = {
     login: "Connexion",
     logout: "Déconnexion",
     myAccount: "Mon compte",
-    bookNow: "Réserver",
+    bookNow: "Demander votre prix",
     
     // Hero Section
     heroTitle: "Services de Transfert Premium",
@@ -946,7 +946,7 @@ const translations: Record<Language, Record<string, string>> = {
     login: "Вход",
     logout: "Выход",
     myAccount: "Мой аккаунт",
-    bookNow: "Забронировать",
+    bookNow: "Запросить цену",
     
     // Hero Section
     heroTitle: "Премиум Трансфер Сервис",
@@ -1247,7 +1247,7 @@ const translations: Record<Language, Record<string, string>> = {
     login: "Accedi",
     logout: "Esci",
     myAccount: "Il mio account",
-    bookNow: "Prenota ora",
+    bookNow: "Richiedi il tuo prezzo",
     
     // Hero Section
     heroTitle: "Servizi di Trasferimento Premium",
@@ -1548,7 +1548,7 @@ const translations: Record<Language, Record<string, string>> = {
     login: "Iniciar sesión",
     logout: "Cerrar sesión",
     myAccount: "Mi cuenta",
-    bookNow: "Reservar",
+    bookNow: "Solicitar precio",
     
     // Hero Section
     heroTitle: "Servicios de Traslado Premium",
