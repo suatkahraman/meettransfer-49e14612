@@ -416,7 +416,26 @@ const AdminEditReservation = () => {
       // Send email notification to driver
       try {
         console.log('Calling emailDriverAssigned for reservation:', id);
-        const emailResult = await emailDriverAssigned(id!, undefined, selectedDriver?.name);
+
+        // Resolve the exact email address that will be used for sending
+        let resolvedDriverEmail: string | undefined = undefined;
+
+        if (formData.driver_id) {
+          const { data: emailData, error: emailError } = await supabase.functions.invoke('get-driver-email', {
+            body: { driver_id: formData.driver_id },
+          });
+
+          if (emailError) {
+            console.error('Failed to fetch driver email (for email send):', emailError);
+          } else if ((emailData as any)?.email) {
+            resolvedDriverEmail = (emailData as any).email as string;
+            setDriverEmail(resolvedDriverEmail);
+          } else {
+            console.warn('No driver email found (for email send).', emailData);
+          }
+        }
+
+        const emailResult = await emailDriverAssigned(id!, resolvedDriverEmail, selectedDriver?.name);
         console.log('Driver email result:', JSON.stringify(emailResult));
         if (!emailResult.success) {
           console.error('Driver email failed:', emailResult.error);
