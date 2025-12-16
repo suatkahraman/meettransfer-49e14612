@@ -538,17 +538,23 @@ const CustomerReservationDetail = () => {
                     {/* Show Pay Now button if payment is pending and link exists */}
                     {reservation.payment_status !== 'paid' && reservation.payment_link && (
                       <div className="mt-3">
-                        <a 
-                          href={reservation.payment_link} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="block"
+                        <Button 
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          onClick={() => {
+                            const link = reservation.payment_link;
+                            if (link) {
+                              // Ensure proper URL format
+                              const url = link.startsWith('http://') || link.startsWith('https://') 
+                                ? link 
+                                : `https://${link}`;
+                              // Use window.location for maximum compatibility on mobile browsers
+                              window.location.href = url;
+                            }
+                          }}
                         >
-                          <Button className="w-full bg-green-600 hover:bg-green-700">
-                            <CreditCard className="h-4 w-4 mr-2" />
-                            Pay Now
-                          </Button>
-                        </a>
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Pay Now
+                        </Button>
                       </div>
                     )}
                   </div>
