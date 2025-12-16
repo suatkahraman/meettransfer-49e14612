@@ -32,7 +32,7 @@ export const useEmailNotifications = () => {
     try {
       console.log('Sending email notification:', options.type, 'for reservation:', options.reservation_id);
       console.log('Additional data:', JSON.stringify(options.additional_data));
-      
+
       const { data, error } = await supabase.functions.invoke('send-notification-email', {
         body: {
           type: options.type,
@@ -42,8 +42,21 @@ export const useEmailNotifications = () => {
       });
 
       if (error) {
-        console.error('Failed to send email - Supabase error:', error);
-        return { success: false, error };
+        console.error('Failed to send email - function invoke error:', error);
+        const message = (error as any)?.message ? String((error as any).message) : String(error);
+        return { success: false, error: message };
+      }
+
+      // The function may return HTTP 200 with { success: false, ... }.
+      // Treat that as a failure so the UI can surface the real reason.
+      const anyData = data as any;
+      if (anyData?.success === false) {
+        console.error('Email function reported failure:', JSON.stringify(anyData));
+        return {
+          success: false,
+          error: anyData?.message || anyData?.error || 'Email function reported failure',
+          data,
+        };
       }
 
       console.log('Email function response:', JSON.stringify(data));
