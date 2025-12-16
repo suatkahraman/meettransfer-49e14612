@@ -895,7 +895,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Fiyat</Label>
+                  <Label>Bütçe</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                     <Input
@@ -1505,7 +1505,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Fiyat</Label>
+                  <Label>Bütçe</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                     <Input
