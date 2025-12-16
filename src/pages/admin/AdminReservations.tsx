@@ -299,9 +299,26 @@ const AdminReservations = () => {
       // Send email to driver
       if (assignDialog.reservationId) {
         try {
+          // Resolve the exact email address that will be used for sending
+          let resolvedDriverEmail: string | undefined = undefined;
+
+          if (selectedDriverData?.id) {
+            const { data: emailData, error: emailError } = await supabase.functions.invoke('get-driver-email', {
+              body: { driver_id: selectedDriverData.id },
+            });
+
+            if (emailError) {
+              console.error('Failed to fetch driver email (for email send):', emailError);
+            } else if ((emailData as any)?.email) {
+              resolvedDriverEmail = (emailData as any).email as string;
+            } else {
+              console.warn('No driver email found (for email send).', emailData);
+            }
+          }
+
           const emailResult = await emailDriverAssigned(
             assignDialog.reservationId,
-            undefined,
+            resolvedDriverEmail,
             selectedDriverData?.name
           );
 
