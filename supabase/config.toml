@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.flight-status]
 verify_jwt = false
+
+[functions.get-driver-email]
+verify_jwt = true

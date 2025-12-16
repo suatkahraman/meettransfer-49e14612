@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User } from 'lucide-react';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
@@ -109,6 +109,8 @@ const AdminEditReservation = () => {
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [reservationCode, setReservationCode] = useState<string | null>(null);
+  const [driverEmail, setDriverEmail] = useState<string | null>(null);
+  const [loadingDriverEmail, setLoadingDriverEmail] = useState(false);
   const [agencyDetails, setAgencyDetails] = useState<{
     customer_price: string;
     agency_price_currency: string;
@@ -232,6 +234,34 @@ const AdminEditReservation = () => {
       setDrivers(driversResult.data || []);
       setAgencies(agenciesResult.data || []);
       setLoading(false);
+
+      // Fetch driver email if driver is assigned
+      if (r.driver_id) {
+        fetchDriverEmail(r.driver_id);
+      }
+    };
+
+    const fetchDriverEmail = async (driverId: string) => {
+      setLoadingDriverEmail(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('get-driver-email', {
+          body: { driver_id: driverId }
+        });
+        if (error) {
+          console.error('Failed to fetch driver email:', error);
+          setDriverEmail(null);
+        } else if (data?.email) {
+          setDriverEmail(data.email);
+        } else {
+          console.warn('No email found for driver:', driverId);
+          setDriverEmail(null);
+        }
+      } catch (e) {
+        console.error('Exception fetching driver email:', e);
+        setDriverEmail(null);
+      } finally {
+        setLoadingDriverEmail(false);
+      }
     };
 
     fetchData();
@@ -908,6 +938,66 @@ const AdminEditReservation = () => {
                 <UserCheck className="h-4 w-4 mr-2" />
                 {assigningDriver ? 'Atanıyor...' : 'Şoföre Ata'}
               </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Assigned Driver Info Card - Show when driver is assigned */}
+        {formData.driver_id && (formData.status === 'sent_to_driver' || formData.status === 'active' || formData.status === 'completed') && (
+          <Card className="border-yellow-300 bg-yellow-50 dark:bg-yellow-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
+                <UserCheck className="h-5 w-5" />
+                Atanan Şoför Bilgileri
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {(() => {
+                const assignedDriver = drivers.find(d => d.id === formData.driver_id);
+                return (
+                  <>
+                    <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                      <User className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Şoför Adı</p>
+                        <p className="font-semibold">{assignedDriver?.name || 'Bilinmiyor'}</p>
+                      </div>
+                    </div>
+                    
+                    {assignedDriver?.plate_number && (
+                      <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                        <Car className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Plaka</p>
+                          <p className="font-semibold">{assignedDriver.plate_number}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                      <Mail className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">E-posta (mail gönderiminde kullanılan)</p>
+                        {loadingDriverEmail ? (
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span className="text-sm text-muted-foreground">Yükleniyor...</span>
+                          </div>
+                        ) : driverEmail ? (
+                          <p className="font-semibold text-green-600">{driverEmail}</p>
+                        ) : (
+                          <p className="text-destructive font-semibold">E-posta bulunamadı!</p>
+                        )}
+                      </div>
+                      {!loadingDriverEmail && !driverEmail && (
+                        <Badge variant="destructive" className="text-xs">
+                          Mail gönderilemez
+                        </Badge>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </CardContent>
           </Card>
         )}

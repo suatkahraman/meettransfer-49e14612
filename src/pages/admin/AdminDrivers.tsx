@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2, Star } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2, Star, Mail } from 'lucide-react';
 
 const regions = [
   { value: 'Istanbul', label: 'İstanbul' },
@@ -48,6 +48,8 @@ const AdminDrivers = () => {
   const [deletingDriver, setDeletingDriver] = useState<Driver | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [viewingDriverEmail, setViewingDriverEmail] = useState<string | null>(null);
+  const [loadingDriverEmail, setLoadingDriverEmail] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -320,9 +322,25 @@ const AdminDrivers = () => {
                       <Button 
                         variant="outline" 
                         size="icon"
-                        onClick={() => {
+                        onClick={async () => {
                           setViewingDriver(driver);
                           setViewDialogOpen(true);
+                          setViewingDriverEmail(null);
+                          setLoadingDriverEmail(true);
+                          try {
+                            const { data, error } = await supabase.functions.invoke('get-driver-email', {
+                              body: { driver_id: driver.id }
+                            });
+                            if (error) {
+                              console.error('Failed to fetch driver email:', error);
+                            } else if (data?.email) {
+                              setViewingDriverEmail(data.email);
+                            }
+                          } catch (e) {
+                            console.error('Exception fetching driver email:', e);
+                          } finally {
+                            setLoadingDriverEmail(false);
+                          }
                         }}
                         title="Detayları Gör"
                       >
@@ -508,7 +526,7 @@ const AdminDrivers = () => {
       </Dialog>
 
       {/* View Driver Details Dialog */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+      <Dialog open={viewDialogOpen} onOpenChange={(open) => { setViewDialogOpen(open); if (!open) { setViewingDriverEmail(null); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Şoför Detayları</DialogTitle>
@@ -553,6 +571,21 @@ const AdminDrivers = () => {
                     <MapPin className="h-4 w-4" /> Bölge
                   </span>
                   <span className="font-medium">{viewingDriver.region || 'Atanmadı'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Mail className="h-4 w-4" /> E-posta
+                  </span>
+                  {loadingDriverEmail ? (
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Yükleniyor...
+                    </span>
+                  ) : viewingDriverEmail ? (
+                    <span className="font-medium text-green-600">{viewingDriverEmail}</span>
+                  ) : (
+                    <span className="font-medium text-destructive">E-posta bulunamadı</span>
+                  )}
                 </div>
               </div>
             </div>
