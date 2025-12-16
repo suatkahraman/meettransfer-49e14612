@@ -476,11 +476,16 @@ const getEmailTemplate = (type: EmailType, data: any) => {
               </table>
 
               <div style="text-align: center; margin-top: 25px;">
-                <a href="${data.payment_link}" style="display: inline-block; background: #4caf50; color: #fff; padding: 18px 50px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px;">👉 Pay Now</a>
+                <a href="${data.payment_link?.startsWith('http') ? data.payment_link : 'https://' + data.payment_link}" style="display: inline-block; background: #4caf50; color: #fff; padding: 18px 50px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px;">👉 Pay Now</a>
               </div>
 
-              <p style="text-align: center; margin-top: 20px; color: #888; font-size: 13px;">
-                Click the button above to complete your secure payment.
+              <p style="text-align: center; margin-top: 15px; color: #666; font-size: 13px;">
+                Or copy this link to your browser:<br/>
+                <a href="${data.payment_link?.startsWith('http') ? data.payment_link : 'https://' + data.payment_link}" style="color: #2196f3; word-break: break-all;">${data.payment_link?.startsWith('http') ? data.payment_link : 'https://' + data.payment_link}</a>
+              </p>
+
+              <p style="text-align: center; margin-top: 10px; color: #888; font-size: 12px;">
+                Click the button above or copy the link to complete your secure payment.
               </p>
 
               <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
