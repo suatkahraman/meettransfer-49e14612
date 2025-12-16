@@ -45,6 +45,44 @@ export const Hero = () => {
             </Button>
           </div>
 
+          {/* Booking Process Section */}
+          <div className="mt-10 pt-8 border-t border-white/20">
+            <h2 className="text-xl md:text-2xl font-semibold text-white mb-6">
+              🔁 {t("howBookingWorks")}
+            </h2>
+            <p className="text-white/90 mb-6 text-sm md:text-base">{t("bookingProcessIntro")}</p>
+            
+            <div className="grid md:grid-cols-3 gap-4 md:gap-6 text-left mb-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="text-accent font-bold text-lg mb-2">1️⃣ {t("step1Title")}</div>
+                <p className="text-white/80 text-sm">{t("step1Desc")}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="text-accent font-bold text-lg mb-2">2️⃣ {t("step2Title")}</div>
+                <p className="text-white/80 text-sm">{t("step2Desc")}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="text-accent font-bold text-lg mb-2">3️⃣ {t("step3Title")}</div>
+                <p className="text-white/80 text-sm">{t("step3Desc")}</p>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-white/90 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-accent">✅</span>
+                <span>{t("benefit1")}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-accent">✅</span>
+                <span>{t("benefit2")}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-accent">✅</span>
+                <span>{t("benefit3")}</span>
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-wrap justify-center gap-8 pt-8 text-white/80 text-sm font-sans">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-accent"></div>

@@ -50,6 +50,19 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Professional Drivers",
     luxuryFleet: "Luxury Fleet",
     
+    // Booking Process
+    howBookingWorks: "How Our Booking Process Works",
+    bookingProcessIntro: "Request your price first – then confirm your booking",
+    step1Title: "Request Your Price",
+    step1Desc: "Fill in the reservation form and send a price request. Our team reviews your transfer details and prepares the best possible price.",
+    step2Title: "Receive Your Offer",
+    step2Desc: "You will receive your transfer price by email and in your reservation panel.",
+    step3Title: "Accept & Confirm",
+    step3Desc: "If you accept the price, your reservation is instantly confirmed. If not, you can simply decline – no obligation.",
+    benefit1: "No automatic pricing",
+    benefit2: "No hidden fees",
+    benefit3: "You only confirm if you agree with the price",
+    
     // Features Section
     whyChooseUs: "Why Choose Us",
     experienceTheDifference: "Experience the difference with our premium transfer service",
@@ -355,6 +368,19 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Professionelle Fahrer",
     luxuryFleet: "Luxusflotte",
     
+    // Booking Process
+    howBookingWorks: "So funktioniert unser Buchungsprozess",
+    bookingProcessIntro: "Fordern Sie zuerst Ihren Preis an – dann bestätigen Sie Ihre Buchung",
+    step1Title: "Preis anfragen",
+    step1Desc: "Füllen Sie das Reservierungsformular aus und senden Sie eine Preisanfrage. Unser Team prüft Ihre Transferdetails und erstellt den bestmöglichen Preis.",
+    step2Title: "Angebot erhalten",
+    step2Desc: "Sie erhalten Ihren Transferpreis per E-Mail und in Ihrem Reservierungspanel.",
+    step3Title: "Akzeptieren & Bestätigen",
+    step3Desc: "Wenn Sie den Preis akzeptieren, wird Ihre Reservierung sofort bestätigt. Falls nicht, können Sie einfach ablehnen – keine Verpflichtung.",
+    benefit1: "Keine automatische Preisgestaltung",
+    benefit2: "Keine versteckten Gebühren",
+    benefit3: "Sie bestätigen nur, wenn Sie mit dem Preis einverstanden sind",
+    
     // Features Section
     whyChooseUs: "Warum uns wählen",
     experienceTheDifference: "Erleben Sie den Unterschied mit unserem Premium-Transferservice",
@@ -656,6 +682,19 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Chauffeurs professionnels",
     luxuryFleet: "Flotte de luxe",
     
+    // Booking Process
+    howBookingWorks: "Comment fonctionne notre processus de réservation",
+    bookingProcessIntro: "Demandez d'abord votre prix – puis confirmez votre réservation",
+    step1Title: "Demandez votre prix",
+    step1Desc: "Remplissez le formulaire de réservation et envoyez une demande de prix. Notre équipe examine vos détails de transfert et prépare le meilleur prix possible.",
+    step2Title: "Recevez votre offre",
+    step2Desc: "Vous recevrez le prix de votre transfert par e-mail et dans votre panneau de réservation.",
+    step3Title: "Acceptez & Confirmez",
+    step3Desc: "Si vous acceptez le prix, votre réservation est instantanément confirmée. Sinon, vous pouvez simplement refuser – sans obligation.",
+    benefit1: "Pas de tarification automatique",
+    benefit2: "Pas de frais cachés",
+    benefit3: "Vous ne confirmez que si vous acceptez le prix",
+
     // Features Section
     whyChooseUs: "Pourquoi nous choisir",
     experienceTheDifference: "Découvrez la différence avec notre service de transfert premium",
@@ -957,6 +996,19 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Профессиональные водители",
     luxuryFleet: "Люкс автопарк",
     
+    // Booking Process
+    howBookingWorks: "Как работает наш процесс бронирования",
+    bookingProcessIntro: "Сначала запросите цену – затем подтвердите бронирование",
+    step1Title: "Запросите цену",
+    step1Desc: "Заполните форму бронирования и отправьте запрос на цену. Наша команда рассмотрит детали трансфера и подготовит лучшую цену.",
+    step2Title: "Получите предложение",
+    step2Desc: "Вы получите цену трансфера по электронной почте и в вашей панели бронирования.",
+    step3Title: "Примите и подтвердите",
+    step3Desc: "Если вы принимаете цену, ваше бронирование мгновенно подтверждается. Если нет, вы можете просто отказаться – без обязательств.",
+    benefit1: "Нет автоматического ценообразования",
+    benefit2: "Нет скрытых платежей",
+    benefit3: "Вы подтверждаете только если согласны с ценой",
+
     // Features Section
     whyChooseUs: "Почему выбирают нас",
     experienceTheDifference: "Почувствуйте разницу с нашим премиальным трансфер-сервисом",
@@ -1258,6 +1310,19 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Autisti professionisti",
     luxuryFleet: "Flotta di lusso",
     
+    // Booking Process
+    howBookingWorks: "Come funziona il nostro processo di prenotazione",
+    bookingProcessIntro: "Richiedi prima il tuo prezzo – poi conferma la tua prenotazione",
+    step1Title: "Richiedi il tuo prezzo",
+    step1Desc: "Compila il modulo di prenotazione e invia una richiesta di prezzo. Il nostro team esamina i dettagli del trasferimento e prepara il miglior prezzo possibile.",
+    step2Title: "Ricevi la tua offerta",
+    step2Desc: "Riceverai il prezzo del trasferimento via e-mail e nel tuo pannello prenotazioni.",
+    step3Title: "Accetta e Conferma",
+    step3Desc: "Se accetti il prezzo, la tua prenotazione viene confermata istantaneamente. In caso contrario, puoi semplicemente rifiutare – nessun obbligo.",
+    benefit1: "Nessun prezzo automatico",
+    benefit2: "Nessun costo nascosto",
+    benefit3: "Confermi solo se sei d'accordo con il prezzo",
+
     // Features Section
     whyChooseUs: "Perché sceglierci",
     experienceTheDifference: "Scopri la differenza con il nostro servizio di trasferimento premium",
@@ -1559,6 +1624,19 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Conductores profesionales",
     luxuryFleet: "Flota de lujo",
     
+    // Booking Process
+    howBookingWorks: "Cómo funciona nuestro proceso de reserva",
+    bookingProcessIntro: "Solicita primero tu precio – luego confirma tu reserva",
+    step1Title: "Solicita tu precio",
+    step1Desc: "Completa el formulario de reserva y envía una solicitud de precio. Nuestro equipo revisa los detalles de tu traslado y prepara el mejor precio posible.",
+    step2Title: "Recibe tu oferta",
+    step2Desc: "Recibirás el precio de tu traslado por correo electrónico y en tu panel de reservas.",
+    step3Title: "Acepta y Confirma",
+    step3Desc: "Si aceptas el precio, tu reserva se confirma al instante. Si no, puedes simplemente rechazar – sin compromiso.",
+    benefit1: "Sin precios automáticos",
+    benefit2: "Sin cargos ocultos",
+    benefit3: "Solo confirmas si estás de acuerdo con el precio",
+
     // Features Section
     whyChooseUs: "Por qué elegirnos",
     experienceTheDifference: "Experimenta la diferencia con nuestro servicio de traslado premium",
