@@ -598,7 +598,7 @@ Notlar: ${reservation.driver_notes || '—'}
               <div className="flex items-start gap-3">
                 <DollarSign className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Transfer Ücreti</div>
+                  <div className="text-sm text-muted-foreground">Bütçe</div>
                   <div className="font-bold text-lg">{formatPrice(reservation.price, reservation.price_currency)}</div>
                 </div>
               </div>
