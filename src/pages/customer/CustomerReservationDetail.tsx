@@ -41,6 +41,8 @@ interface Reservation {
   pickup_date: string;
   pickup_time: string;
   flight_number: string | null;
+  flight_arrival_time: string | null;
+  flight_status: string | null;
   vehicle_type: string;
   payment_type: string;
   payment_status: string | null;
@@ -136,7 +138,7 @@ const CustomerReservationDetail = () => {
     fetchReservation();
   }, [id, user, navigate]);
 
-  // Real-time subscription for reservation updates
+  // Real-time subscription for reservation updates (including flight changes)
   useEffect(() => {
     if (!id) return;
 
@@ -152,6 +154,13 @@ const CustomerReservationDetail = () => {
         },
         (payload) => {
           console.log('Reservation updated:', payload);
+          const newData = payload.new as any;
+          
+          // Check if flight info changed
+          if (reservation && newData.flight_arrival_time !== reservation.flight_arrival_time) {
+            toast.info('Flight arrival time has been updated');
+          }
+          
           // Refetch to get updated drivers relation
           fetchReservation();
         }
@@ -161,7 +170,7 @@ const CustomerReservationDetail = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [id]);
+  }, [id, reservation?.flight_arrival_time]);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return null;
@@ -501,6 +510,11 @@ const CustomerReservationDetail = () => {
                     const delay = status.arrival?.delay || status.departure?.delay || 0;
                     setFlightDelay(delay);
                     setFlightStatus(status.status?.toLowerCase() || null);
+                  }}
+                  onArrivalTimeChange={(newTime) => {
+                    if (newTime && reservation.flight_arrival_time !== newTime) {
+                      setReservation(prev => prev ? { ...prev, flight_arrival_time: newTime } : prev);
+                    }
                   }}
                 />
               </div>
