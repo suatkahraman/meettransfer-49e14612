@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -72,6 +73,7 @@ const AdminCreateReservation = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { logAction } = useAuditLog();
+  const { emailDriverAssigned } = useEmailNotifications();
   const [saving, setSaving] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -211,6 +213,12 @@ const AdminCreateReservation = () => {
       return;
     }
 
+    // If admin marks as "sent_to_driver", a driver must be selected so notifications/emails are reliable
+    if (formData.status === 'sent_to_driver' && !formData.driver_id) {
+      toast.error('"Şoföre Gönderildi" seçildi: Lütfen şoför seçin');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -291,6 +299,38 @@ const AdminCreateReservation = () => {
           }
         } catch (err) {
           console.error('Failed to notify driver:', err);
+        }
+      }
+
+      // Send email to driver when reservation is created already as "sent_to_driver"
+      if (formData.status === 'sent_to_driver' && formData.driver_id && reservation) {
+        try {
+          const selectedDriver = drivers.find(d => d.id === formData.driver_id);
+
+          // Resolve the exact email address that will be used for sending
+          let resolvedDriverEmail: string | undefined = undefined;
+          const { data: emailData, error: emailError } = await supabase.functions.invoke('get-driver-email', {
+            body: { driver_id: formData.driver_id },
+          });
+
+          if (emailError) {
+            console.error('Failed to fetch driver email (for email send):', emailError);
+          } else if ((emailData as any)?.email) {
+            resolvedDriverEmail = (emailData as any).email as string;
+          } else {
+            console.warn('No driver email found (for email send).', emailData);
+          }
+
+          const emailResult = await emailDriverAssigned(reservation.id, resolvedDriverEmail, selectedDriver?.name);
+          if (!emailResult.success) {
+            const errMsg = typeof emailResult.error === 'string'
+              ? emailResult.error
+              : String((emailResult.error as any)?.message || emailResult.error || 'Bilinmeyen hata');
+            toast.error(`Şoför mail gönderilemedi: ${errMsg}`);
+          }
+        } catch (err) {
+          console.error('Failed to send driver email:', err);
+          toast.error('Şoför mail hatası');
         }
       }
 

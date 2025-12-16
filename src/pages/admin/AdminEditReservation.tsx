@@ -718,6 +718,51 @@ const AdminEditReservation = () => {
       },
     });
 
+    // If this save action effectively sends the job to the driver, also send driver email reliably.
+    try {
+      const prevStatus = (originalData?.status as string | undefined) || '';
+      const prevDriverId = (originalData?.driver_id as string | undefined) || '';
+      const newStatus = formData.status;
+      const newDriverId = formData.driver_id || '';
+
+      const shouldSendDriverEmail =
+        Boolean(id) &&
+        newStatus === 'sent_to_driver' &&
+        Boolean(newDriverId) &&
+        (prevStatus !== 'sent_to_driver' || prevDriverId !== newDriverId);
+
+      if (shouldSendDriverEmail) {
+        const selectedDriver = drivers.find(d => d.id === newDriverId);
+
+        // Resolve the exact email address that will be used for sending
+        let resolvedDriverEmail: string | undefined = driverEmail || undefined;
+
+        const { data: emailData, error: emailError } = await supabase.functions.invoke('get-driver-email', {
+          body: { driver_id: newDriverId },
+        });
+
+        if (emailError) {
+          console.error('Failed to fetch driver email (for email send):', emailError);
+        } else if ((emailData as any)?.email) {
+          resolvedDriverEmail = (emailData as any).email as string;
+          setDriverEmail(resolvedDriverEmail);
+        } else {
+          console.warn('No driver email found (for email send).', emailData);
+        }
+
+        const emailResult = await emailDriverAssigned(id!, resolvedDriverEmail, selectedDriver?.name);
+        if (!emailResult.success) {
+          const errMsg = typeof emailResult.error === 'string'
+            ? emailResult.error
+            : String((emailResult.error as any)?.message || emailResult.error || 'Bilinmeyen hata');
+          toast.error(`Şoför mail gönderilemedi: ${errMsg}`);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to send driver email (save flow):', e);
+      toast.error('Şoför mail hatası');
+    }
+
     toast.success('Reservation updated');
     navigate('/admin/reservations');
     setSaving(false);
