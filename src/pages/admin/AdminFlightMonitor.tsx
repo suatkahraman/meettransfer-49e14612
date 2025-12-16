@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Plane, RefreshCw, Clock, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Plane, RefreshCw, Clock, AlertTriangle, CheckCircle, XCircle, PlaneLanding } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import FlightStatus from '@/components/ui/flight-status';
@@ -18,6 +19,8 @@ interface Reservation {
   reservation_code: string;
   customer_name: string;
   flight_number: string | null;
+  flight_arrival_time: string | null;
+  flight_status: string | null;
   pickup: string;
   dropoff: string;
   pickup_date: string;
@@ -48,6 +51,8 @@ const AdminFlightMonitor = () => {
         reservation_code,
         customer_name,
         flight_number,
+        flight_arrival_time,
+        flight_status,
         pickup,
         dropoff,
         pickup_date,
@@ -299,6 +304,38 @@ const AdminFlightMonitor = () => {
                           showFlightNumber
                         />
                       </div>
+                      
+                      {/* Stored Flight Info */}
+                      {(reservation.flight_arrival_time || reservation.flight_status) && (
+                        <div className="mb-3 p-2 bg-muted/50 rounded-md space-y-1">
+                          {reservation.flight_arrival_time && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <PlaneLanding className="h-4 w-4 text-primary" />
+                              <span className="font-medium">Varış Saati:</span>
+                              <span className="text-primary font-bold">{reservation.flight_arrival_time}</span>
+                            </div>
+                          )}
+                          {reservation.flight_status && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Badge 
+                                variant="outline" 
+                                className={cn(
+                                  "text-xs capitalize",
+                                  reservation.flight_status === 'delayed' && "text-amber-600 border-amber-300 bg-amber-50",
+                                  reservation.flight_status === 'landed' && "text-green-600 border-green-300 bg-green-50",
+                                  reservation.flight_status === 'cancelled' && "text-red-600 border-red-300 bg-red-50",
+                                  reservation.flight_status === 'active' && "text-blue-600 border-blue-300 bg-blue-50"
+                                )}
+                              >
+                                {reservation.flight_status === 'delayed' && <AlertTriangle className="h-3 w-3 mr-1" />}
+                                {reservation.flight_status === 'landed' && <CheckCircle className="h-3 w-3 mr-1" />}
+                                {reservation.flight_status}
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
                       <FlightStatus 
                         flightNumber={reservation.flight_number || ''} 
                         date={reservation.pickup_date}

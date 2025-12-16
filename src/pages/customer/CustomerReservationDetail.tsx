@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
@@ -476,20 +477,56 @@ const CustomerReservationDetail = () => {
             {/* Flight Status with Delay Alert */}
             {reservation.flight_number && (
               <div className="space-y-3">
+                {/* Stored Flight Info - Always show if available */}
+                {(reservation.flight_arrival_time || reservation.flight_status) && (
+                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <Plane className="h-4 w-4" />
+                      Flight Information
+                    </div>
+                    <div className="flex items-center justify-between">
+                      {reservation.flight_arrival_time && (
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-5 w-5 text-primary" />
+                          <div>
+                            <div className="text-xs text-muted-foreground">Estimated Arrival</div>
+                            <div className="text-xl font-bold text-primary">{reservation.flight_arrival_time}</div>
+                          </div>
+                        </div>
+                      )}
+                      {reservation.flight_status && (
+                        <Badge 
+                          className={cn(
+                            "capitalize",
+                            reservation.flight_status === 'delayed' && "bg-amber-500/20 text-amber-700 border-amber-300",
+                            reservation.flight_status === 'landed' && "bg-green-500/20 text-green-700 border-green-300",
+                            reservation.flight_status === 'cancelled' && "bg-destructive/20 text-destructive",
+                            reservation.flight_status === 'active' && "bg-blue-500/20 text-blue-700",
+                            reservation.flight_status === 'scheduled' && "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {reservation.flight_status === 'delayed' && <AlertTriangle className="h-3 w-3 mr-1" />}
+                          {reservation.flight_status}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Delay Alert Banner */}
-                {flightDelay && flightDelay > 0 && (
+                {(flightDelay && flightDelay > 0) || reservation.flight_status === 'delayed' ? (
                   <div className="bg-amber-500/20 border border-amber-500/50 rounded-lg p-4 flex items-start gap-3">
                     <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <div className="font-medium text-amber-700">Flight Delayed</div>
                       <div className="text-sm text-amber-600">
-                        Your flight {reservation.flight_number} is delayed by {flightDelay} minutes. 
+                        Your flight {reservation.flight_number} is delayed{flightDelay ? ` by ${flightDelay} minutes` : ''}. 
                         Your driver will be notified automatically.
                       </div>
                     </div>
                   </div>
-                )}
-                {flightStatus === 'cancelled' && (
+                ) : null}
+                {(flightStatus === 'cancelled' || reservation.flight_status === 'cancelled') && (
                   <div className="bg-destructive/20 border border-destructive/50 rounded-lg p-4 flex items-start gap-3">
                     <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
                     <div>
