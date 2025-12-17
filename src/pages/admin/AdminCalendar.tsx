@@ -15,6 +15,8 @@ interface Reservation {
   customer_name: string;
   pickup: string;
   dropoff: string;
+  pickup_place_name: string | null;
+  dropoff_place_name: string | null;
   pickup_date: string;
   pickup_time: string;
   status: string;
@@ -261,7 +263,9 @@ const AdminCalendar = () => {
                             </div>
                             <div className="flex items-center gap-1 truncate mt-0.5">
                               <MapPin className="h-3 w-3 flex-shrink-0" />
-                              <span className="truncate">{reservation.pickup} → {reservation.dropoff}</span>
+                              <span className="truncate">
+                                {reservation.pickup_place_name || reservation.pickup.split(',')[0]} → {reservation.dropoff_place_name || reservation.dropoff.split(',')[0]}
+                              </span>
                             </div>
                             {reservation.drivers && (
                               <div className="flex items-center gap-1 mt-0.5 opacity-80">
