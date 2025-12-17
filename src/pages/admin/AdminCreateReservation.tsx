@@ -485,6 +485,7 @@ const AdminCreateReservation = () => {
                           address={formData.pickup}
                           type="pickup"
                           size="sm"
+                          showAddress={true}
                         />
                       </div>
                     )}
@@ -508,6 +509,7 @@ const AdminCreateReservation = () => {
                           address={formData.dropoff}
                           type="dropoff"
                           size="sm"
+                          showAddress={true}
                         />
                       </div>
                     )}
