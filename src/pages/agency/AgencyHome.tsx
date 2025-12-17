@@ -6,11 +6,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, MapPin, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw } from 'lucide-react';
+import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { LocationDisplay } from '@/components/ui/location-display';
 
 interface Driver {
   id: string;
@@ -24,6 +25,8 @@ interface Reservation {
   customer_name: string;
   pickup: string;
   dropoff: string;
+  pickup_place_name: string | null;
+  dropoff_place_name: string | null;
   pickup_date: string;
   pickup_time: string;
   vehicle_type: string;
@@ -91,6 +94,7 @@ const AgencyHome = () => {
       .from('reservations')
       .select(`
         id, reservation_code, customer_name, pickup, dropoff,
+        pickup_place_name, dropoff_place_name,
         pickup_date, pickup_time, vehicle_type, status, driver_id,
         drivers:driver_id (id, name, plate_number)
       `)
@@ -188,14 +192,18 @@ const AgencyHome = () => {
             <span>{reservation.pickup_time}</span>
           </div>
 
-          <div className="flex items-start gap-2">
-            <MapPin className="h-4 w-4 text-primary mt-0.5" />
-            <span className="text-muted-foreground">{reservation.pickup}</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <MapPin className="h-4 w-4 text-destructive mt-0.5" />
-            <span className="text-muted-foreground">{reservation.dropoff}</span>
-          </div>
+          <LocationDisplay
+            placeName={reservation.pickup_place_name}
+            address={reservation.pickup}
+            type="pickup"
+            size="sm"
+          />
+          <LocationDisplay
+            placeName={reservation.dropoff_place_name}
+            address={reservation.dropoff}
+            type="dropoff"
+            size="sm"
+          />
 
           {reservation.drivers && (
             <div className="flex items-center gap-2 pt-2 border-t">
