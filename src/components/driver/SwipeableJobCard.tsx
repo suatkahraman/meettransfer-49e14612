@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle } from 'lucide-react';
+import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -31,6 +31,7 @@ interface Reservation {
 
 interface SwipeableJobCardProps {
   reservation: Reservation;
+  adminNotes?: string | null;
   onAccept?: () => Promise<void>;
   onComplete?: () => Promise<void>;
   onClick?: () => void;
@@ -81,7 +82,7 @@ const paymentTypeLabels: Record<string, string> = {
 
 const SWIPE_THRESHOLD = 100;
 
-export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }: SwipeableJobCardProps) => {
+export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete, onClick }: SwipeableJobCardProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [flightDelay, setFlightDelay] = useState<number | null>(null);
   const [flightStatusValue, setFlightStatusValue] = useState<string | null>(null);
@@ -292,6 +293,19 @@ export const SwipeableJobCard = ({ reservation, onAccept, onComplete, onClick }:
                   <span className="font-bold text-lg text-amber-700 dark:text-amber-400">
                     {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR')}
                   </span>
+                </div>
+              </div>
+            )}
+
+            {/* Admin Notes */}
+            {adminNotes && (
+              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg px-3 py-2">
+                <div className="flex items-start gap-2">
+                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-blue-700 dark:text-blue-400 font-medium block">Admin Notları</span>
+                    <span className="text-xs text-blue-600 dark:text-blue-300 line-clamp-2">{adminNotes}</span>
+                  </div>
                 </div>
               </div>
             )}
