@@ -1435,6 +1435,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                         address={formData.pickup}
                         type="pickup"
                         size="sm"
+                        showAddress={true}
                       />
                     </div>
                   )}
@@ -1459,6 +1460,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                         address={formData.dropoff}
                         type="dropoff"
                         size="sm"
+                        showAddress={true}
                       />
                     </div>
                   )}
