@@ -97,18 +97,24 @@ const loadGoogleMapsScript = (): Promise<void> => {
 interface GooglePlacesAutocompleteProps {
   /** Called ONLY when a place is selected from suggestions */
   onPlaceSelected?: (value: string, details?: PlaceDetails) => void;
+  /** Shorthand alias for onPlaceSelected with simplified signature */
+  onPlaceSelect?: (place: { name?: string; formatted_address: string; lat?: number | null; lng?: number | null }) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
   maxLength?: number;
+  /** Initial value to display in the input */
+  initialValue?: string;
 }
 
 export const GooglePlacesAutocomplete = ({
   onPlaceSelected,
+  onPlaceSelect,
   placeholder = 'Enter location',
   className,
   disabled = false,
   maxLength = 200,
+  initialValue,
 }: GooglePlacesAutocompleteProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
@@ -119,6 +125,13 @@ export const GooglePlacesAutocomplete = ({
   useEffect(() => {
     onPlaceSelectedRef.current = onPlaceSelected;
   }, [onPlaceSelected]);
+
+  // Set initial value once
+  useEffect(() => {
+    if (initialValue && inputRef.current && !inputRef.current.value) {
+      inputRef.current.value = initialValue;
+    }
+  }, [initialValue]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -185,6 +198,14 @@ export const GooglePlacesAutocomplete = ({
 
           // React state update ONLY here (if parent uses it)
           onPlaceSelectedRef.current?.(displayText, details);
+          
+          // Also call simplified onPlaceSelect if provided
+          onPlaceSelect?.({
+            name: placeName,
+            formatted_address: formattedAddress,
+            lat,
+            lng,
+          });
         }
       });
 
