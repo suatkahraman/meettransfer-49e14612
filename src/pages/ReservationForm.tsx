@@ -14,7 +14,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X } from 'lucide-react';
 import { z } from 'zod';
-import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
@@ -72,6 +72,13 @@ const ReservationForm = () => {
     vehicleType: 'mercedes-vito',
     notes: '',
     paymentMethod: '' as 'payment_link' | 'cash' | '',
+    // Place details
+    pickup_place_name: '',
+    pickup_lat: null as number | null,
+    pickup_lng: null as number | null,
+    dropoff_place_name: '',
+    dropoff_lat: null as number | null,
+    dropoff_lng: null as number | null,
   });
 
   // Pre-fill form if user is logged in
@@ -278,6 +285,13 @@ const ReservationForm = () => {
           status: 'pending_price',
           price: null,
           price_currency: null,
+          // Place details
+          pickup_place_name: formData.pickup_place_name || null,
+          pickup_lat: formData.pickup_lat,
+          pickup_lng: formData.pickup_lng,
+          dropoff_place_name: formData.dropoff_place_name || null,
+          dropoff_lat: formData.dropoff_lat,
+          dropoff_lng: formData.dropoff_lng,
         })
         .select()
         .single();
@@ -329,6 +343,13 @@ const ReservationForm = () => {
             status: 'pending_price',
             price: null,
             price_currency: null,
+            // Place details - swapped for return trip
+            pickup_place_name: formData.dropoff_place_name || null,
+            pickup_lat: formData.dropoff_lat,
+            pickup_lng: formData.dropoff_lng,
+            dropoff_place_name: formData.pickup_place_name || null,
+            dropoff_lat: formData.pickup_lat,
+            dropoff_lng: formData.pickup_lng,
           })
           .select()
           .single();
@@ -418,6 +439,12 @@ const ReservationForm = () => {
                     flightNumber: '',
                     vehicleType: 'mercedes-vito',
                     notes: '',
+                    pickup_place_name: '',
+                    pickup_lat: null,
+                    pickup_lng: null,
+                    dropoff_place_name: '',
+                    dropoff_lat: null,
+                    dropoff_lng: null,
                   });
                 }} 
                 className="w-full"
@@ -450,7 +477,13 @@ const ReservationForm = () => {
                   {t('pickupPoint')}
                 </Label>
                 <GooglePlacesAutocomplete
-                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
+                  onPlaceSelected={(value, details) => setFormData((prev) => ({ 
+                    ...prev, 
+                    pickup: value,
+                    pickup_place_name: details?.placeName || '',
+                    pickup_lat: details?.lat || null,
+                    pickup_lng: details?.lng || null,
+                  }))}
                   placeholder={t('enterPickupPoint')}
                   className={errors.pickup ? 'border-destructive' : ''}
                   maxLength={200}
@@ -464,7 +497,13 @@ const ReservationForm = () => {
                   {t('dropoffLocation')}
                 </Label>
                 <GooglePlacesAutocomplete
-                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
+                  onPlaceSelected={(value, details) => setFormData((prev) => ({ 
+                    ...prev, 
+                    dropoff: value,
+                    dropoff_place_name: details?.placeName || '',
+                    dropoff_lat: details?.lat || null,
+                    dropoff_lng: details?.lng || null,
+                  }))}
                   placeholder={t('hotelOrAddress')}
                   className={errors.dropoff ? 'border-destructive' : ''}
                   maxLength={200}

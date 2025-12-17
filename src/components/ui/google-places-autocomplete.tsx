@@ -31,7 +31,23 @@ interface GoogleMapsAutocomplete {
     formatted_address?: string;
     name?: string;
     address_components?: unknown[];
+    place_id?: string;
+    geometry?: {
+      location?: {
+        lat: () => number;
+        lng: () => number;
+      };
+    };
   };
+}
+
+// Place details returned by the component
+export interface PlaceDetails {
+  placeName: string;       // Establishment/place name (e.g., "Regnum Carya Golf & Resort")
+  formattedAddress: string; // Full formatted address
+  displayText: string;     // Combined text for display (name + address or just address)
+  lat: number | null;
+  lng: number | null;
 }
 
 // NEW API KEY (publishable)
@@ -80,7 +96,7 @@ const loadGoogleMapsScript = (): Promise<void> => {
 
 interface GooglePlacesAutocompleteProps {
   /** Called ONLY when a place is selected from suggestions */
-  onPlaceSelected?: (value: string) => void;
+  onPlaceSelected?: (value: string, details?: PlaceDetails) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -130,7 +146,7 @@ export const GooglePlacesAutocomplete = ({
         inputRef.current,
         {
           types: ['establishment', 'geocode'],
-          fields: ['formatted_address', 'name', 'address_components'],
+          fields: ['formatted_address', 'name', 'address_components', 'place_id', 'geometry'],
           componentRestrictions: { country: 'tr' },
         }
       );
@@ -138,13 +154,37 @@ export const GooglePlacesAutocomplete = ({
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
         if (place && inputRef.current) {
-          const address = place.formatted_address || place.name || '';
+          const placeName = place.name || '';
+          const formattedAddress = place.formatted_address || '';
+          
+          // Create display text: if we have both name and address, show name first
+          // If name is already part of address, just use address
+          let displayText = formattedAddress;
+          if (placeName && formattedAddress && !formattedAddress.toLowerCase().startsWith(placeName.toLowerCase())) {
+            displayText = `${placeName}, ${formattedAddress}`;
+          } else if (placeName && !formattedAddress) {
+            displayText = placeName;
+          }
+
+          // Get coordinates
+          const lat = place.geometry?.location?.lat() || null;
+          const lng = place.geometry?.location?.lng() || null;
+
+          // Create place details object
+          const details: PlaceDetails = {
+            placeName,
+            formattedAddress,
+            displayText,
+            lat,
+            lng,
+          };
 
           // Let Google / DOM control the input value directly
-          inputRef.current.value = address;
+          // Show place name prominently if available
+          inputRef.current.value = placeName || formattedAddress;
 
           // React state update ONLY here (if parent uses it)
-          onPlaceSelectedRef.current?.(address);
+          onPlaceSelectedRef.current?.(displayText, details);
         }
       });
 

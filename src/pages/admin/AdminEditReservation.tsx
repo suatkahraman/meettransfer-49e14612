@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy, ChevronDown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
@@ -141,6 +141,13 @@ const AdminEditReservation = () => {
     admin_notes: '',
     payment_link: '',
     payment_status: 'pending',
+    // Place details
+    pickup_place_name: '',
+    pickup_lat: null as number | null,
+    pickup_lng: null as number | null,
+    dropoff_place_name: '',
+    dropoff_lat: null as number | null,
+    dropoff_lng: null as number | null,
   });
 
   const getCurrencySymbol = (currency: string) => {
@@ -213,6 +220,13 @@ const AdminEditReservation = () => {
         admin_notes: adminNotesResult.data?.notes || '',
         payment_link: r.payment_link || '',
         payment_status: r.payment_status || 'pending',
+        // Place details
+        pickup_place_name: (r as any).pickup_place_name || '',
+        pickup_lat: (r as any).pickup_lat || null,
+        pickup_lng: (r as any).pickup_lng || null,
+        dropoff_place_name: (r as any).dropoff_place_name || '',
+        dropoff_lat: (r as any).dropoff_lat || null,
+        dropoff_lng: (r as any).dropoff_lng || null,
       };
       
       setOriginalData(initialData);
@@ -614,6 +628,13 @@ const AdminEditReservation = () => {
         passenger_names: validPassengerNames,
         payment_link: formData.payment_link || null,
         payment_status: formData.payment_status,
+        // Place details
+        pickup_place_name: formData.pickup_place_name || null,
+        pickup_lat: formData.pickup_lat,
+        pickup_lng: formData.pickup_lng,
+        dropoff_place_name: formData.dropoff_place_name || null,
+        dropoff_lat: formData.dropoff_lat,
+        dropoff_lng: formData.dropoff_lng,
       })
       .eq('id', id);
 
@@ -1393,14 +1414,26 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                 <div className="space-y-2">
                   <Label>Alış Noktası</Label>
                   <GooglePlacesAutocomplete
-                    onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
+                    onPlaceSelected={(value, details) => setFormData((prev) => ({ 
+                      ...prev, 
+                      pickup: value,
+                      pickup_place_name: details?.placeName || '',
+                      pickup_lat: details?.lat || null,
+                      pickup_lng: details?.lng || null,
+                    }))}
                     placeholder="Alış noktasını girin"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Bırakış Noktası</Label>
                   <GooglePlacesAutocomplete
-                    onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
+                    onPlaceSelected={(value, details) => setFormData((prev) => ({ 
+                      ...prev, 
+                      dropoff: value,
+                      dropoff_place_name: details?.placeName || '',
+                      dropoff_lat: details?.lat || null,
+                      dropoff_lng: details?.lng || null,
+                    }))}
                     placeholder="Bırakış noktasını girin"
                   />
                 </div>

@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus } from 'lucide-react';
-import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
@@ -103,6 +103,13 @@ const AdminCreateReservation = () => {
     driver_id: '',
     agency_id: '',
     admin_notes: '',
+    // Place details
+    pickup_place_name: '',
+    pickup_lat: null as number | null,
+    pickup_lng: null as number | null,
+    dropoff_place_name: '',
+    dropoff_lat: null as number | null,
+    dropoff_lng: null as number | null,
   });
   
   // Multiple passenger names support (max 15)
@@ -249,6 +256,13 @@ const AdminCreateReservation = () => {
           driver_id: formData.driver_id || null,
           agency_id: formData.agency_id || null,
           passenger_names: validPassengerNames,
+          // Place details
+          pickup_place_name: formData.pickup_place_name || null,
+          pickup_lat: formData.pickup_lat,
+          pickup_lng: formData.pickup_lng,
+          dropoff_place_name: formData.dropoff_place_name || null,
+          dropoff_lat: formData.dropoff_lat,
+          dropoff_lng: formData.dropoff_lng,
         })
         .select()
         .single();
@@ -464,14 +478,26 @@ const AdminCreateReservation = () => {
                   <div className="space-y-2">
                     <Label>Alış Noktası *</Label>
                     <GooglePlacesAutocomplete
-                      onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
+                      onPlaceSelected={(value, details) => setFormData((prev) => ({ 
+                        ...prev, 
+                        pickup: value,
+                        pickup_place_name: details?.placeName || '',
+                        pickup_lat: details?.lat || null,
+                        pickup_lng: details?.lng || null,
+                      }))}
                       placeholder="Alış noktasını girin"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Bırakış Noktası *</Label>
                     <GooglePlacesAutocomplete
-                      onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
+                      onPlaceSelected={(value, details) => setFormData((prev) => ({ 
+                        ...prev, 
+                        dropoff: value,
+                        dropoff_place_name: details?.placeName || '',
+                        dropoff_lat: details?.lat || null,
+                        dropoff_lng: details?.lng || null,
+                      }))}
                       placeholder="Otel veya adres"
                     />
                   </div>
