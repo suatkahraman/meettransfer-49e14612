@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { AirlineDisplay } from '@/components/ui/airline-display';
+import { LocationDisplay } from '@/components/ui/location-display';
 
 interface Driver {
   id: string;
@@ -28,6 +29,8 @@ interface Reservation {
   customer_phone: string;
   pickup: string;
   dropoff: string;
+  pickup_place_name: string | null;
+  dropoff_place_name: string | null;
   pickup_date: string;
   pickup_time: string;
   flight_number: string | null;
@@ -97,6 +100,7 @@ const AgencyReservationDetail = () => {
         .from('reservations')
         .select(`
           id, reservation_code, customer_name, customer_phone, pickup, dropoff,
+          pickup_place_name, dropoff_place_name,
           pickup_date, pickup_time, flight_number, vehicle_type, status,
           passenger_names, driver_id,
           drivers:driver_id (id, name, plate_number, vehicle_model)
@@ -191,6 +195,13 @@ const AgencyReservationDetail = () => {
       ? reservation.passenger_names.map((name, i) => `${i + 1}. ${name}`).join('\n')
       : reservation.customer_name;
 
+    const pickupFormatted = reservation.pickup_place_name && reservation.pickup_place_name !== reservation.pickup
+      ? `${reservation.pickup_place_name}\n${reservation.pickup}`
+      : reservation.pickup;
+    const dropoffFormatted = reservation.dropoff_place_name && reservation.dropoff_place_name !== reservation.dropoff
+      ? `${reservation.dropoff_place_name}\n${reservation.dropoff}`
+      : reservation.dropoff;
+
     const details = [
       `Reservation: ${reservation.reservation_code || 'N/A'}`,
       `Date: ${format(new Date(reservation.pickup_date), 'dd/MM/yyyy')}`,
@@ -201,8 +212,11 @@ const AgencyReservationDetail = () => {
       '',
       `Phone: ${reservation.customer_phone}`,
       '',
-      `Pickup: ${reservation.pickup}`,
-      `Drop-off: ${reservation.dropoff}`,
+      `Pickup:`,
+      pickupFormatted,
+      '',
+      `Drop-off:`,
+      dropoffFormatted,
       reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
       `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
       '',
@@ -303,20 +317,19 @@ const AgencyReservationDetail = () => {
                 </div>
               )}
 
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <div className="text-sm text-muted-foreground">Pickup</div>
-                  <div className="font-medium">{reservation.pickup}</div>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-destructive mt-0.5" />
-                <div>
-                  <div className="text-sm text-muted-foreground">Drop-off</div>
-                  <div className="font-medium">{reservation.dropoff}</div>
-                </div>
+              <div className="space-y-3">
+                <LocationDisplay
+                  placeName={reservation.pickup_place_name}
+                  address={reservation.pickup}
+                  type="pickup"
+                  size="md"
+                />
+                <LocationDisplay
+                  placeName={reservation.dropoff_place_name}
+                  address={reservation.dropoff}
+                  type="dropoff"
+                  size="md"
+                />
               </div>
 
               {reservation.flight_number && (
@@ -371,6 +384,12 @@ const AgencyReservationDetail = () => {
                   const passengerList = reservation.passenger_names && reservation.passenger_names.length > 0
                     ? reservation.passenger_names.map((name, i) => `${i + 1}. ${name}`).join('\n')
                     : reservation.customer_name;
+                  const pickupFormatted = reservation.pickup_place_name && reservation.pickup_place_name !== reservation.pickup
+                    ? `${reservation.pickup_place_name}\n${reservation.pickup}`
+                    : reservation.pickup;
+                  const dropoffFormatted = reservation.dropoff_place_name && reservation.dropoff_place_name !== reservation.dropoff
+                    ? `${reservation.dropoff_place_name}\n${reservation.dropoff}`
+                    : reservation.dropoff;
                   const details = [
                     `Reservation: ${reservation.reservation_code || 'N/A'}`,
                     `Date: ${format(new Date(reservation.pickup_date), 'dd/MM/yyyy')}`,
@@ -381,8 +400,11 @@ const AgencyReservationDetail = () => {
                     '',
                     `Phone: ${reservation.customer_phone}`,
                     '',
-                    `Pickup: ${reservation.pickup}`,
-                    `Drop-off: ${reservation.dropoff}`,
+                    `Pickup:`,
+                    pickupFormatted,
+                    '',
+                    `Drop-off:`,
+                    dropoffFormatted,
                     reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
                     `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
                     '',
