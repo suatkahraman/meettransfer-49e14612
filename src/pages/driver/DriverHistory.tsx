@@ -12,6 +12,7 @@ import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LocationDisplay } from '@/components/ui/location-display';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -26,6 +27,8 @@ interface Reservation {
   customer_phone: string;
   pickup: string;
   dropoff: string;
+  pickup_place_name: string | null;
+  dropoff_place_name: string | null;
   pickup_date: string;
   pickup_time: string;
   vehicle_type: string;
@@ -285,19 +288,19 @@ const DriverHistory = () => {
                     </div>
 
                     {/* Route */}
-                    <div className="bg-muted/50 rounded-lg p-2 space-y-1.5">
-                      <div className="flex items-start gap-2 text-sm">
-                        <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <MapPin className="h-2.5 w-2.5 text-green-600" />
-                        </div>
-                        <span className="text-xs leading-tight">{reservation.pickup}</span>
-                      </div>
-                      <div className="flex items-start gap-2 text-sm">
-                        <div className="w-4 h-4 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <MapPin className="h-2.5 w-2.5 text-red-500" />
-                        </div>
-                        <span className="text-xs leading-tight">{reservation.dropoff}</span>
-                      </div>
+                    <div className="bg-muted/50 rounded-lg p-2 space-y-2">
+                      <LocationDisplay
+                        placeName={reservation.pickup_place_name}
+                        address={reservation.pickup}
+                        type="pickup"
+                        size="sm"
+                      />
+                      <LocationDisplay
+                        placeName={reservation.dropoff_place_name}
+                        address={reservation.dropoff}
+                        type="dropoff"
+                        size="sm"
+                      />
                     </div>
 
                     {/* Footer */}
