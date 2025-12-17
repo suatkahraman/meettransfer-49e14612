@@ -82,8 +82,8 @@ const DestinationsPage = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Airport Transfer Destinations in Turkey - Meet Transfer"
-        description="VIP airport transfers to all major Turkey destinations: Istanbul, Antalya, Bodrum, Dalaman, Izmir, Cappadocia. Mercedes fleet, professional drivers, 24/7 service."
+        title={t("seoDestinationsTitle")}
+        description={t("seoDestinationsDesc")}
         keywords="Turkey airport transfer destinations, Istanbul transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, VIP transfer Turkey"
         canonicalPath="/destinations"
       />

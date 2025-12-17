@@ -69,8 +69,8 @@ const FleetPage = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Mercedes VIP Fleet - Luxury Transfer Vehicles | Meet Transfer"
-        description="Explore our premium Mercedes fleet: Vito VIP, V-Class, Maybach, Sprinter Minibus. Luxury airport transfer vehicles with leather seats, WiFi, professional drivers."
+        title={t("seoFleetTitle")}
+        description={t("seoFleetDesc")}
         keywords="Mercedes VIP transfer, luxury transfer fleet, Mercedes Vito transfer, Mercedes Maybach chauffeur, VIP minibus Turkey, airport transfer vehicles, Mercedes V-Class transfer"
         canonicalPath="/fleet"
       />

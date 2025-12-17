@@ -83,8 +83,8 @@ const ServicesPage = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="VIP Airport Transfer Services in Turkey - Meet Transfer"
-        description="Premium VIP airport transfer and private chauffeur services across Turkey. Istanbul, Antalya, Bodrum, Dalaman, Izmir, Cappadocia. Mercedes fleet, 24/7 service."
+        title={t("seoServicesTitle")}
+        description={t("seoServicesDesc")}
         keywords="VIP airport transfer Turkey, private chauffeur service, luxury transfer service, Istanbul airport transfer, Antalya airport transfer, Bodrum airport transfer, Turkey transfer services, Mercedes VIP transfer"
         canonicalPath="/services"
       />

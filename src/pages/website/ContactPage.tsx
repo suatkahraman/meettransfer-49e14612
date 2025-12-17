@@ -71,8 +71,8 @@ const ContactPage = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Contact Meet Transfer - 24/7 VIP Airport Transfer Support"
-        description="Contact Meet Transfer for premium airport transfers in Turkey. 24/7 WhatsApp support, global offices in Istanbul, USA, Germany, Dubai. Book your VIP transfer today!"
+        title={t("seoContactTitle")}
+        description={t("seoContactDesc")}
         keywords="contact Meet Transfer, airport transfer booking, WhatsApp transfer booking, Turkey transfer contact, Istanbul transfer phone, VIP transfer support"
         canonicalPath="/contact"
       />
