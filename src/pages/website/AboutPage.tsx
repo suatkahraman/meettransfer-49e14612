@@ -47,8 +47,8 @@ const AboutPage = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="About Meet Transfer - Premium VIP Airport Transfer Service in Turkey"
-        description="Meet Transfer is Turkey's leading premium airport transfer service with 10+ years experience, 50,000+ completed transfers. Professional drivers, Mercedes fleet, 24/7 service."
+        title={t("seoAboutTitle")}
+        description={t("seoAboutDesc")}
         keywords="about Meet Transfer, Turkey airport transfer company, VIP transfer service Turkey, professional chauffeur Turkey, luxury transfer company, airport transfer experience"
         canonicalPath="/about"
       />
