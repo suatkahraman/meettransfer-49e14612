@@ -236,6 +236,73 @@ const translations: Record<Language, Record<string, string>> = {
     doorToDoor: "Door-to-Door Service",
     learnMore: "Learn More",
     
+    // Transfer Page Common
+    transferSubtitle: "Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service",
+    privateAirportTransferIn: "Private Airport Transfer in",
+    popularTransferDestinations: "Popular Transfer Destinations",
+    vipFleetForTransfers: "VIP Fleet for Transfers",
+    airportTransferPricesTitle: "Airport Transfer Prices",
+    bookYourAirportTransfer: "Book Your Airport Transfer",
+    getWhatsAppConfirmation: "Get instant confirmation via WhatsApp for your transfer",
+    transferFaqTitle: "Transfer FAQ",
+    fixedPriceTransfers: "Fixed Price Transfers",
+    viewAllVehicles: "View All Vehicles",
+    historicalSitesWeCover: "Historical Sites We Cover",
+    vipFleetForHistoricalTours: "VIP Fleet for Historical Tours",
+    bookYourHistoricalTour: "Book Your Historical Tour",
+    getWhatsAppConfirmationEphesus: "Get instant confirmation via WhatsApp for your Ephesus or Pamukkale transfer",
+    
+    // Istanbul Transfer Content
+    istanbulTransferTitle: "Istanbul Airport Transfer – VIP Chauffeur Service",
+    istanbulTransferH1: "Private Airport Transfer in Istanbul",
+    istanbulTransferIntro: "Experience seamless Istanbul airport transfers with Meet Transfer. Our professional chauffeurs provide door-to-door service from Istanbul Airport (IST) and Sabiha Gökçen Airport (SAW) to any destination in the city and beyond. With our VIP meet & greet service, your driver will be waiting with a name board at the arrivals hall. We monitor all flights in real-time to ensure punctual pickup regardless of delays. Available 24/7, our luxury Mercedes vehicles offer comfort, WiFi, complimentary water, and professional service for your private Istanbul transfer.",
+    istanbulWhatsApp: "Hello, I would like to book a transfer from Istanbul Airport.",
+    
+    // Bodrum Transfer Content
+    bodrumTransferTitle: "Bodrum Airport Transfer – VIP Chauffeur Service",
+    bodrumTransferH1: "Private Airport Transfer in Bodrum",
+    bodrumTransferIntro: "Arrive in style at the stunning Bodrum Peninsula. Meet Transfer offers premium Bodrum airport transfers from Milas-Bodrum Airport (BJV) to all exclusive destinations including Yalıkavak, Türkbükü, and Gümüşlük. Our luxury Mercedes vehicles and professional drivers ensure a comfortable journey to your yacht, villa, or beach resort. We serve all Bodrum marinas and hotels on the peninsula with 24/7 availability for your private Bodrum transfer.",
+    bodrumWhatsApp: "Hello, I would like to book a transfer from Bodrum Airport.",
+    bodrumCityServiceTitle: "Bodrum City Transfer Service",
+    bodrumCityServiceDesc: "Whether you are arriving at Milas-Bodrum Airport or need a transfer within the peninsula, our professional drivers will meet you with a personalized name sign and ensure a smooth journey.",
+    meetGreetArrival: "Meet & Greet at arrival hall",
+    doorToDoorAnyLocation: "Door-to-door service to any location",
+    professionalEnglishDrivers: "Professional English-speaking drivers",
+    flexibleScheduling: "Flexible scheduling for your convenience",
+    
+    // Cappadocia Transfer Content
+    cappadociaTransferTitle: "Cappadocia Airport Transfer – VIP Chauffeur Service",
+    cappadociaTransferH1: "Private Airport Transfer in Cappadocia",
+    cappadociaTransferIntro: "Experience the magic of Cappadocia with Meet Transfer. We provide premium Cappadocia airport transfers from both Nevşehir Airport (NAV) and Kayseri Airport (ASR) to all cave hotels and destinations in the region including Göreme, Ürgüp, and Uçhisar. Our drivers are familiar with every fairy chimney and can assist with balloon flight schedules. Start your Cappadocia adventure in comfort and style with our VIP transfer service.",
+    cappadociaWhatsApp: "Hello, I would like to book a transfer in Cappadocia.",
+    
+    // Izmir Transfer Content
+    izmirTransferTitle: "Izmir Airport Transfer – VIP Chauffeur Service",
+    izmirTransferH1: "Private Airport Transfer in Izmir",
+    izmirTransferIntro: "Explore the Aegean coast with Meet Transfer. We offer premium Izmir airport transfers from Adnan Menderes Airport (ADB) to popular destinations including Çeşme, Alaçatı, Kuşadası, and historical Ephesus. Our experienced drivers know the region well and provide comfortable journeys in luxury Mercedes vehicles. Available 24/7 with flight monitoring and VIP meet & greet service for your private Izmir transfer.",
+    izmirWhatsApp: "Hello, I would like to book a transfer from Izmir Airport.",
+    
+    // Dalaman Transfer Content
+    dalamanTransferTitle: "Dalaman Airport Transfer – VIP Chauffeur Service",
+    dalamanTransferH1: "Private Airport Transfer in Dalaman",
+    dalamanTransferIntro: "Discover the beautiful Turquoise Coast with Meet Transfer. We provide premium Dalaman airport transfers from Dalaman Airport (DLM) to stunning destinations including Fethiye, Ölüdeniz, Marmaris, and Göcek. Our professional drivers and luxury Mercedes vehicles ensure a comfortable journey through scenic coastal roads. With 24/7 availability and flight tracking, we guarantee a stress-free start to your private Dalaman transfer.",
+    dalamanWhatsApp: "Hello, I would like to book a transfer from Dalaman Airport.",
+    
+    // Ephesus & Pamukkale Transfer Content
+    ephesusTransferTitle: "Ephesus & Pamukkale Transfer – VIP Chauffeur Service",
+    ephesusTransferSubtitle: "Mercedes Vito, V-Class, Maybach | Private Tours & Transfers",
+    ephesusTransferH1: "Private Transfers to Ephesus & Pamukkale",
+    ephesusTransferIntro: "Explore Turkey's most famous ancient sites with Meet Transfer. We provide private transfers and tours to the spectacular ruins of Ephesus, the cotton castle terraces of Pamukkale, and other historical gems like the House of Virgin Mary and Hierapolis. Perfect for cruise passengers from Kuşadası or travelers from Izmir and surrounding regions. Our experienced drivers and optional licensed guides ensure an unforgettable cultural experience.",
+    ephesusWhatsApp: "Hello, I would like to book a transfer to Ephesus/Pamukkale.",
+    ephesusTransferPrices: "Ephesus & Pamukkale Transfer Prices",
+    ephesusTransferFaq: "Ephesus & Pamukkale FAQ",
+    
+    // Antalya Transfer Content
+    antalyaTransferTitle: "Antalya Airport Transfer – VIP Chauffeur Service",
+    antalyaTransferH1: "Private Airport Transfer in Antalya",
+    antalyaTransferIntro: "Experience premium Antalya airport transfers with Meet Transfer. Our professional chauffeurs provide door-to-door service from Antalya Airport (AYT) to all major resort destinations including Belek, Side, Alanya, Kemer, and Lara. With our VIP meet & greet service, your driver will be waiting at the arrivals hall. We monitor all flights in real-time to ensure punctual pickup. Available 24/7, our luxury Mercedes vehicles offer comfort for your private Antalya transfer.",
+    antalyaWhatsApp: "Hello, I would like to book a transfer from Antalya Airport.",
+    
     // Booking Form
     bookingFormSubtitle: "Book your airport transfer - we'll send you the price for approval",
     transferDetails: "Transfer Details",
@@ -723,6 +790,73 @@ const translations: Record<Language, Record<string, string>> = {
     seoEphesusDesc: "Private Transfers und Touren zu Ephesus und Pamukkale. Kreuzfahrt-Ausflüge, geführte Touren mit lizenzierten Guides, Mercedes-Flotte.",
     seoLuxuryTitle: "Luxus Chauffeur Service Türkei - VIP Privater Fahrer | Meet Transfer",
     seoLuxuryDesc: "Premium Luxus Chauffeur Service in der Türkei. Geschäftsreisen, Veranstaltungstransport, VIP Flughafenservice, Tagesmiete. Mercedes-Flotte, professionelle Fahrer, 24/7 Service.",
+    
+    // Transfer Page Common
+    transferSubtitle: "Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service",
+    privateAirportTransferIn: "Privater Flughafentransfer in",
+    popularTransferDestinations: "Beliebte Transferziele",
+    vipFleetForTransfers: "VIP Flotte für Transfers",
+    airportTransferPricesTitle: "Flughafentransfer Preise",
+    bookYourAirportTransfer: "Buchen Sie Ihren Flughafentransfer",
+    getWhatsAppConfirmation: "Erhalten Sie sofortige Bestätigung per WhatsApp für Ihren Transfer",
+    transferFaqTitle: "Transfer FAQ",
+    fixedPriceTransfers: "Festpreis Transfers",
+    viewAllVehicles: "Alle Fahrzeuge anzeigen",
+    historicalSitesWeCover: "Historische Stätten die wir bedienen",
+    vipFleetForHistoricalTours: "VIP Flotte für historische Touren",
+    bookYourHistoricalTour: "Buchen Sie Ihre historische Tour",
+    getWhatsAppConfirmationEphesus: "Erhalten Sie sofortige Bestätigung per WhatsApp für Ihren Ephesus oder Pamukkale Transfer",
+    
+    // Istanbul Transfer Content
+    istanbulTransferTitle: "Istanbul Flughafentransfer – VIP Chauffeur Service",
+    istanbulTransferH1: "Privater Flughafentransfer in Istanbul",
+    istanbulTransferIntro: "Erleben Sie nahtlose Istanbul Flughafentransfers mit Meet Transfer. Unsere professionellen Chauffeure bieten Tür-zu-Tür-Service vom Istanbul Flughafen (IST) und Sabiha Gökçen Flughafen (SAW) zu jedem Ziel in der Stadt und darüber hinaus.",
+    istanbulWhatsApp: "Hallo, ich möchte einen Transfer vom Istanbul Flughafen buchen.",
+    
+    // Bodrum Transfer Content
+    bodrumTransferTitle: "Bodrum Flughafentransfer – VIP Chauffeur Service",
+    bodrumTransferH1: "Privater Flughafentransfer in Bodrum",
+    bodrumTransferIntro: "Kommen Sie stilvoll auf der atemberaubenden Bodrum Halbinsel an. Meet Transfer bietet Premium Bodrum Flughafentransfers vom Milas-Bodrum Flughafen (BJV) zu allen exklusiven Zielen.",
+    bodrumWhatsApp: "Hallo, ich möchte einen Transfer vom Bodrum Flughafen buchen.",
+    bodrumCityServiceTitle: "Bodrum Stadttransfer Service",
+    bodrumCityServiceDesc: "Ob Sie am Milas-Bodrum Flughafen ankommen oder einen Transfer innerhalb der Halbinsel benötigen, unsere professionellen Fahrer empfangen Sie mit einem personalisierten Namensschild.",
+    meetGreetArrival: "Meet & Greet in der Ankunftshalle",
+    doorToDoorAnyLocation: "Tür-zu-Tür-Service zu jedem Ort",
+    professionalEnglishDrivers: "Professionelle englischsprachige Fahrer",
+    flexibleScheduling: "Flexible Terminplanung für Ihre Bequemlichkeit",
+    
+    // Cappadocia Transfer Content
+    cappadociaTransferTitle: "Kappadokien Flughafentransfer – VIP Chauffeur Service",
+    cappadociaTransferH1: "Privater Flughafentransfer in Kappadokien",
+    cappadociaTransferIntro: "Erleben Sie die Magie Kappadokiens mit Meet Transfer. Wir bieten Premium Kappadokien Flughafentransfers von beiden Flughäfen Nevşehir (NAV) und Kayseri (ASR) zu allen Höhlenhotels und Zielen in der Region.",
+    cappadociaWhatsApp: "Hallo, ich möchte einen Transfer in Kappadokien buchen.",
+    
+    // Izmir Transfer Content
+    izmirTransferTitle: "Izmir Flughafentransfer – VIP Chauffeur Service",
+    izmirTransferH1: "Privater Flughafentransfer in Izmir",
+    izmirTransferIntro: "Erkunden Sie die Ägäisküste mit Meet Transfer. Wir bieten Premium Izmir Flughafentransfers vom Adnan Menderes Flughafen (ADB) zu beliebten Zielen wie Çeşme, Alaçatı, Kuşadası und dem historischen Ephesus.",
+    izmirWhatsApp: "Hallo, ich möchte einen Transfer vom Izmir Flughafen buchen.",
+    
+    // Dalaman Transfer Content
+    dalamanTransferTitle: "Dalaman Flughafentransfer – VIP Chauffeur Service",
+    dalamanTransferH1: "Privater Flughafentransfer in Dalaman",
+    dalamanTransferIntro: "Entdecken Sie die wunderschöne Türkisküste mit Meet Transfer. Wir bieten Premium Dalaman Flughafentransfers vom Dalaman Flughafen (DLM) zu atemberaubenden Zielen wie Fethiye, Ölüdeniz, Marmaris und Göcek.",
+    dalamanWhatsApp: "Hallo, ich möchte einen Transfer vom Dalaman Flughafen buchen.",
+    
+    // Ephesus & Pamukkale Transfer Content
+    ephesusTransferTitle: "Ephesus & Pamukkale Transfer – VIP Chauffeur Service",
+    ephesusTransferSubtitle: "Mercedes Vito, V-Class, Maybach | Private Touren & Transfers",
+    ephesusTransferH1: "Private Transfers nach Ephesus & Pamukkale",
+    ephesusTransferIntro: "Erkunden Sie die berühmtesten antiken Stätten der Türkei mit Meet Transfer. Wir bieten private Transfers und Touren zu den spektakulären Ruinen von Ephesus und den Kalksinterterrassen von Pamukkale.",
+    ephesusWhatsApp: "Hallo, ich möchte einen Transfer nach Ephesus/Pamukkale buchen.",
+    ephesusTransferPrices: "Ephesus & Pamukkale Transfer Preise",
+    ephesusTransferFaq: "Ephesus & Pamukkale FAQ",
+    
+    // Antalya Transfer Content
+    antalyaTransferTitle: "Antalya Flughafentransfer – VIP Chauffeur Service",
+    antalyaTransferH1: "Privater Flughafentransfer in Antalya",
+    antalyaTransferIntro: "Erleben Sie Premium Antalya Flughafentransfers mit Meet Transfer. Unsere professionellen Chauffeure bieten Tür-zu-Tür-Service vom Antalya Flughafen (AYT) zu allen wichtigen Ferienorten wie Belek, Side, Alanya, Kemer und Lara.",
+    antalyaWhatsApp: "Hallo, ich möchte einen Transfer vom Antalya Flughafen buchen.",
   },
   FR: {
     // Navigation
@@ -1068,6 +1202,73 @@ const translations: Record<Language, Record<string, string>> = {
     seoEphesusDesc: "Transferts privés et tours à Ephèse et Pamukkale. Excursions de croisière, tours guidés avec guides licenciés, flotte Mercedes.",
     seoLuxuryTitle: "Service Chauffeur de Luxe Turquie - Chauffeur Privé VIP | Meet Transfer",
     seoLuxuryDesc: "Service chauffeur de luxe premium en Turquie. Voyages d'affaires, transport événementiel, service aéroport VIP, location journée. Flotte Mercedes, chauffeurs professionnels, service 24/7.",
+    
+    // Transfer Page Common
+    transferSubtitle: "Mercedes Vito, V-Class, Maybach | Service Meet & Greet 24/7",
+    privateAirportTransferIn: "Transfert Aéroport Privé à",
+    popularTransferDestinations: "Destinations de Transfert Populaires",
+    vipFleetForTransfers: "Flotte VIP pour Transferts",
+    airportTransferPricesTitle: "Prix des Transferts Aéroport",
+    bookYourAirportTransfer: "Réservez Votre Transfert Aéroport",
+    getWhatsAppConfirmation: "Obtenez une confirmation instantanée par WhatsApp pour votre transfert",
+    transferFaqTitle: "FAQ Transfert",
+    fixedPriceTransfers: "Transferts à Prix Fixe",
+    viewAllVehicles: "Voir Tous les Véhicules",
+    historicalSitesWeCover: "Sites Historiques Que Nous Desservons",
+    vipFleetForHistoricalTours: "Flotte VIP pour Tours Historiques",
+    bookYourHistoricalTour: "Réservez Votre Tour Historique",
+    getWhatsAppConfirmationEphesus: "Obtenez une confirmation instantanée par WhatsApp pour votre transfert à Éphèse ou Pamukkale",
+    
+    // Istanbul Transfer Content
+    istanbulTransferTitle: "Transfert Aéroport Istanbul – Service Chauffeur VIP",
+    istanbulTransferH1: "Transfert Aéroport Privé à Istanbul",
+    istanbulTransferIntro: "Découvrez des transferts aéroport Istanbul fluides avec Meet Transfer. Nos chauffeurs professionnels offrent un service porte-à-porte depuis l'Aéroport d'Istanbul (IST) et l'Aéroport Sabiha Gökçen (SAW) vers toute destination.",
+    istanbulWhatsApp: "Bonjour, je voudrais réserver un transfert depuis l'aéroport d'Istanbul.",
+    
+    // Bodrum Transfer Content
+    bodrumTransferTitle: "Transfert Aéroport Bodrum – Service Chauffeur VIP",
+    bodrumTransferH1: "Transfert Aéroport Privé à Bodrum",
+    bodrumTransferIntro: "Arrivez avec style sur la magnifique péninsule de Bodrum. Meet Transfer offre des transferts aéroport Bodrum premium depuis l'Aéroport Milas-Bodrum (BJV) vers toutes les destinations exclusives.",
+    bodrumWhatsApp: "Bonjour, je voudrais réserver un transfert depuis l'aéroport de Bodrum.",
+    bodrumCityServiceTitle: "Service de Transfert Ville Bodrum",
+    bodrumCityServiceDesc: "Que vous arriviez à l'aéroport Milas-Bodrum ou que vous ayez besoin d'un transfert dans la péninsule, nos chauffeurs professionnels vous accueilleront avec un panneau nominatif personnalisé.",
+    meetGreetArrival: "Meet & Greet au hall d'arrivée",
+    doorToDoorAnyLocation: "Service porte-à-porte vers n'importe quel lieu",
+    professionalEnglishDrivers: "Chauffeurs professionnels anglophones",
+    flexibleScheduling: "Planification flexible pour votre confort",
+    
+    // Cappadocia Transfer Content
+    cappadociaTransferTitle: "Transfert Aéroport Cappadoce – Service Chauffeur VIP",
+    cappadociaTransferH1: "Transfert Aéroport Privé en Cappadoce",
+    cappadociaTransferIntro: "Découvrez la magie de la Cappadoce avec Meet Transfer. Nous offrons des transferts aéroport Cappadoce premium depuis les aéroports de Nevşehir (NAV) et Kayseri (ASR) vers tous les hôtels troglodytes et destinations de la région.",
+    cappadociaWhatsApp: "Bonjour, je voudrais réserver un transfert en Cappadoce.",
+    
+    // Izmir Transfer Content
+    izmirTransferTitle: "Transfert Aéroport Izmir – Service Chauffeur VIP",
+    izmirTransferH1: "Transfert Aéroport Privé à Izmir",
+    izmirTransferIntro: "Explorez la côte égéenne avec Meet Transfer. Nous offrons des transferts aéroport Izmir premium depuis l'Aéroport Adnan Menderes (ADB) vers les destinations populaires comme Çeşme, Alaçatı, Kuşadası et l'historique Éphèse.",
+    izmirWhatsApp: "Bonjour, je voudrais réserver un transfert depuis l'aéroport d'Izmir.",
+    
+    // Dalaman Transfer Content
+    dalamanTransferTitle: "Transfert Aéroport Dalaman – Service Chauffeur VIP",
+    dalamanTransferH1: "Transfert Aéroport Privé à Dalaman",
+    dalamanTransferIntro: "Découvrez la magnifique Côte Turquoise avec Meet Transfer. Nous offrons des transferts aéroport Dalaman premium depuis l'Aéroport de Dalaman (DLM) vers des destinations spectaculaires comme Fethiye, Ölüdeniz, Marmaris et Göcek.",
+    dalamanWhatsApp: "Bonjour, je voudrais réserver un transfert depuis l'aéroport de Dalaman.",
+    
+    // Ephesus & Pamukkale Transfer Content
+    ephesusTransferTitle: "Transfert Éphèse & Pamukkale – Service Chauffeur VIP",
+    ephesusTransferSubtitle: "Mercedes Vito, V-Class, Maybach | Tours Privés & Transferts",
+    ephesusTransferH1: "Transferts Privés vers Éphèse & Pamukkale",
+    ephesusTransferIntro: "Explorez les sites antiques les plus célèbres de Turquie avec Meet Transfer. Nous offrons des transferts privés et des tours vers les ruines spectaculaires d'Éphèse et les terrasses de travertin de Pamukkale.",
+    ephesusWhatsApp: "Bonjour, je voudrais réserver un transfert vers Éphèse/Pamukkale.",
+    ephesusTransferPrices: "Prix des Transferts Éphèse & Pamukkale",
+    ephesusTransferFaq: "FAQ Éphèse & Pamukkale",
+    
+    // Antalya Transfer Content
+    antalyaTransferTitle: "Transfert Aéroport Antalya – Service Chauffeur VIP",
+    antalyaTransferH1: "Transfert Aéroport Privé à Antalya",
+    antalyaTransferIntro: "Découvrez des transferts aéroport Antalya premium avec Meet Transfer. Nos chauffeurs professionnels offrent un service porte-à-porte depuis l'Aéroport d'Antalya (AYT) vers toutes les grandes stations balnéaires comme Belek, Side, Alanya, Kemer et Lara.",
+    antalyaWhatsApp: "Bonjour, je voudrais réserver un transfert depuis l'aéroport d'Antalya.",
   },
   RU: {
     // Navigation
@@ -1413,6 +1614,73 @@ const translations: Record<Language, Record<string, string>> = {
     seoEphesusDesc: "Частные трансферы и туры в Эфес и Памуккале. Круизные экскурсии, туры с лицензированными гидами, парк Mercedes.",
     seoLuxuryTitle: "Люкс Шофер Сервис Турция - VIP Частный Водитель | Meet Transfer",
     seoLuxuryDesc: "Премиум люкс шофер сервис в Турции. Бизнес-путешествия, транспорт для мероприятий, VIP аэропорт сервис, аренда на день. Парк Mercedes, профессиональные водители, сервис 24/7.",
+    
+    // Transfer Page Common
+    transferSubtitle: "Mercedes Vito, V-Class, Maybach | Meet & Greet сервис 24/7",
+    privateAirportTransferIn: "Частный трансфер из аэропорта в",
+    popularTransferDestinations: "Популярные направления трансфера",
+    vipFleetForTransfers: "VIP парк для трансферов",
+    airportTransferPricesTitle: "Цены на трансфер из аэропорта",
+    bookYourAirportTransfer: "Забронируйте ваш трансфер из аэропорта",
+    getWhatsAppConfirmation: "Получите мгновенное подтверждение через WhatsApp для вашего трансфера",
+    transferFaqTitle: "FAQ по трансферу",
+    fixedPriceTransfers: "Трансферы по фиксированной цене",
+    viewAllVehicles: "Посмотреть все автомобили",
+    historicalSitesWeCover: "Исторические места которые мы обслуживаем",
+    vipFleetForHistoricalTours: "VIP парк для исторических туров",
+    bookYourHistoricalTour: "Забронируйте ваш исторический тур",
+    getWhatsAppConfirmationEphesus: "Получите мгновенное подтверждение через WhatsApp для вашего трансфера в Эфес или Памуккале",
+    
+    // Istanbul Transfer Content
+    istanbulTransferTitle: "Трансфер из Аэропорта Стамбул – VIP Шофер Сервис",
+    istanbulTransferH1: "Частный трансфер из аэропорта в Стамбуле",
+    istanbulTransferIntro: "Испытайте беспроблемные трансферы из аэропорта Стамбула с Meet Transfer. Наши профессиональные водители обеспечивают сервис от двери до двери из аэропорта Стамбул (IST) и аэропорта Сабиха Гёкчен (SAW) в любую точку города.",
+    istanbulWhatsApp: "Здравствуйте, я хотел бы забронировать трансфер из аэропорта Стамбула.",
+    
+    // Bodrum Transfer Content
+    bodrumTransferTitle: "Трансфер из Аэропорта Бодрум – VIP Шофер Сервис",
+    bodrumTransferH1: "Частный трансфер из аэропорта в Бодруме",
+    bodrumTransferIntro: "Прибывайте стильно на потрясающий полуостров Бодрум. Meet Transfer предлагает премиум трансферы из аэропорта Милас-Бодрум (BJV) до всех эксклюзивных направлений.",
+    bodrumWhatsApp: "Здравствуйте, я хотел бы забронировать трансфер из аэропорта Бодрума.",
+    bodrumCityServiceTitle: "Городской трансфер сервис Бодрум",
+    bodrumCityServiceDesc: "Прибываете ли вы в аэропорт Милас-Бодрум или нуждаетесь в трансфере по полуострову, наши профессиональные водители встретят вас с персонализированной табличкой с именем.",
+    meetGreetArrival: "Meet & Greet в зале прилёта",
+    doorToDoorAnyLocation: "Сервис от двери до двери в любое место",
+    professionalEnglishDrivers: "Профессиональные англоговорящие водители",
+    flexibleScheduling: "Гибкое планирование для вашего удобства",
+    
+    // Cappadocia Transfer Content
+    cappadociaTransferTitle: "Трансфер из Аэропорта Каппадокия – VIP Шофер Сервис",
+    cappadociaTransferH1: "Частный трансфер из аэропорта в Каппадокии",
+    cappadociaTransferIntro: "Испытайте магию Каппадокии с Meet Transfer. Мы предоставляем премиум трансферы из обоих аэропортов Невшехир (NAV) и Кайсери (ASR) до всех пещерных отелей и направлений региона.",
+    cappadociaWhatsApp: "Здравствуйте, я хотел бы забронировать трансфер в Каппадокии.",
+    
+    // Izmir Transfer Content
+    izmirTransferTitle: "Трансфер из Аэропорта Измир – VIP Шофер Сервис",
+    izmirTransferH1: "Частный трансфер из аэропорта в Измире",
+    izmirTransferIntro: "Исследуйте Эгейское побережье с Meet Transfer. Мы предлагаем премиум трансферы из аэропорта Аднан Мендерес (ADB) в популярные направления включая Чешме, Алачаты, Кушадасы и исторический Эфес.",
+    izmirWhatsApp: "Здравствуйте, я хотел бы забронировать трансфер из аэропорта Измира.",
+    
+    // Dalaman Transfer Content
+    dalamanTransferTitle: "Трансфер из Аэропорта Даламан – VIP Шофер Сервис",
+    dalamanTransferH1: "Частный трансфер из аэропорта в Даламане",
+    dalamanTransferIntro: "Откройте красивое Бирюзовое побережье с Meet Transfer. Мы предоставляем премиум трансферы из аэропорта Даламан (DLM) до потрясающих направлений включая Фетхие, Олюдениз, Мармарис и Гёджек.",
+    dalamanWhatsApp: "Здравствуйте, я хотел бы забронировать трансфер из аэропорта Даламана.",
+    
+    // Ephesus & Pamukkale Transfer Content
+    ephesusTransferTitle: "Трансфер в Эфес и Памуккале – VIP Шофер Сервис",
+    ephesusTransferSubtitle: "Mercedes Vito, V-Class, Maybach | Частные туры и трансферы",
+    ephesusTransferH1: "Частные трансферы в Эфес и Памуккале",
+    ephesusTransferIntro: "Исследуйте самые известные античные достопримечательности Турции с Meet Transfer. Мы предоставляем частные трансферы и туры к впечатляющим руинам Эфеса и травертиновым террасам Памуккале.",
+    ephesusWhatsApp: "Здравствуйте, я хотел бы забронировать трансфер в Эфес/Памуккале.",
+    ephesusTransferPrices: "Цены на трансфер в Эфес и Памуккале",
+    ephesusTransferFaq: "FAQ Эфес и Памуккале",
+    
+    // Antalya Transfer Content
+    antalyaTransferTitle: "Трансфер из Аэропорта Анталья – VIP Шофер Сервис",
+    antalyaTransferH1: "Частный трансфер из аэропорта в Анталье",
+    antalyaTransferIntro: "Испытайте премиум трансферы из аэропорта Анталья с Meet Transfer. Наши профессиональные водители обеспечивают сервис от двери до двери из аэропорта Анталья (AYT) до всех основных курортов включая Белек, Сиде, Аланья, Кемер и Лара.",
+    antalyaWhatsApp: "Здравствуйте, я хотел бы забронировать трансфер из аэропорта Антальи.",
   },
   IT: {
     // Navigation
@@ -1758,6 +2026,73 @@ const translations: Record<Language, Record<string, string>> = {
     seoEphesusDesc: "Trasferimenti privati e tour a Efeso e Pamukkale. Escursioni da crociera, tour guidati con guide autorizzate, flotta Mercedes.",
     seoLuxuryTitle: "Servizio Autista di Lusso Turchia - Autista Privato VIP | Meet Transfer",
     seoLuxuryDesc: "Servizio autista di lusso premium in Turchia. Viaggi d'affari, trasporto eventi, servizio aeroporto VIP, noleggio giornaliero. Flotta Mercedes, autisti professionali, servizio 24/7.",
+    
+    // Transfer Page Common
+    transferSubtitle: "Mercedes Vito, V-Class, Maybach | Servizio Meet & Greet 24/7",
+    privateAirportTransferIn: "Trasferimento Aeroporto Privato a",
+    popularTransferDestinations: "Destinazioni di Trasferimento Popolari",
+    vipFleetForTransfers: "Flotta VIP per Trasferimenti",
+    airportTransferPricesTitle: "Prezzi Trasferimento Aeroporto",
+    bookYourAirportTransfer: "Prenota il Tuo Trasferimento Aeroporto",
+    getWhatsAppConfirmation: "Ottieni conferma istantanea tramite WhatsApp per il tuo trasferimento",
+    transferFaqTitle: "FAQ Trasferimento",
+    fixedPriceTransfers: "Trasferimenti a Prezzo Fisso",
+    viewAllVehicles: "Vedi Tutti i Veicoli",
+    historicalSitesWeCover: "Siti Storici Che Serviamo",
+    vipFleetForHistoricalTours: "Flotta VIP per Tour Storici",
+    bookYourHistoricalTour: "Prenota il Tuo Tour Storico",
+    getWhatsAppConfirmationEphesus: "Ottieni conferma istantanea tramite WhatsApp per il tuo trasferimento a Efeso o Pamukkale",
+    
+    // Istanbul Transfer Content
+    istanbulTransferTitle: "Trasferimento Aeroporto Istanbul – Servizio Autista VIP",
+    istanbulTransferH1: "Trasferimento Aeroporto Privato a Istanbul",
+    istanbulTransferIntro: "Scopri trasferimenti aeroporto Istanbul senza problemi con Meet Transfer. I nostri autisti professionali offrono servizio porta a porta dall'Aeroporto di Istanbul (IST) e dall'Aeroporto Sabiha Gökçen (SAW) verso qualsiasi destinazione.",
+    istanbulWhatsApp: "Ciao, vorrei prenotare un trasferimento dall'aeroporto di Istanbul.",
+    
+    // Bodrum Transfer Content
+    bodrumTransferTitle: "Trasferimento Aeroporto Bodrum – Servizio Autista VIP",
+    bodrumTransferH1: "Trasferimento Aeroporto Privato a Bodrum",
+    bodrumTransferIntro: "Arriva con stile nella splendida penisola di Bodrum. Meet Transfer offre trasferimenti aeroporto Bodrum premium dall'Aeroporto Milas-Bodrum (BJV) verso tutte le destinazioni esclusive.",
+    bodrumWhatsApp: "Ciao, vorrei prenotare un trasferimento dall'aeroporto di Bodrum.",
+    bodrumCityServiceTitle: "Servizio Trasferimento Città Bodrum",
+    bodrumCityServiceDesc: "Che tu arrivi all'aeroporto Milas-Bodrum o abbia bisogno di un trasferimento nella penisola, i nostri autisti professionali ti accoglieranno con un cartello nominativo personalizzato.",
+    meetGreetArrival: "Meet & Greet nella sala arrivi",
+    doorToDoorAnyLocation: "Servizio porta a porta verso qualsiasi luogo",
+    professionalEnglishDrivers: "Autisti professionali anglofoni",
+    flexibleScheduling: "Programmazione flessibile per la tua comodità",
+    
+    // Cappadocia Transfer Content
+    cappadociaTransferTitle: "Trasferimento Aeroporto Cappadocia – Servizio Autista VIP",
+    cappadociaTransferH1: "Trasferimento Aeroporto Privato in Cappadocia",
+    cappadociaTransferIntro: "Scopri la magia della Cappadocia con Meet Transfer. Offriamo trasferimenti aeroporto Cappadocia premium da entrambi gli aeroporti Nevşehir (NAV) e Kayseri (ASR) verso tutti gli hotel rupestri e le destinazioni della regione.",
+    cappadociaWhatsApp: "Ciao, vorrei prenotare un trasferimento in Cappadocia.",
+    
+    // Izmir Transfer Content
+    izmirTransferTitle: "Trasferimento Aeroporto Izmir – Servizio Autista VIP",
+    izmirTransferH1: "Trasferimento Aeroporto Privato a Izmir",
+    izmirTransferIntro: "Esplora la costa egea con Meet Transfer. Offriamo trasferimenti aeroporto Izmir premium dall'Aeroporto Adnan Menderes (ADB) verso destinazioni popolari come Çeşme, Alaçatı, Kuşadası e la storica Efeso.",
+    izmirWhatsApp: "Ciao, vorrei prenotare un trasferimento dall'aeroporto di Izmir.",
+    
+    // Dalaman Transfer Content
+    dalamanTransferTitle: "Trasferimento Aeroporto Dalaman – Servizio Autista VIP",
+    dalamanTransferH1: "Trasferimento Aeroporto Privato a Dalaman",
+    dalamanTransferIntro: "Scopri la bellissima Costa Turchese con Meet Transfer. Offriamo trasferimenti aeroporto Dalaman premium dall'Aeroporto di Dalaman (DLM) verso destinazioni spettacolari come Fethiye, Ölüdeniz, Marmaris e Göcek.",
+    dalamanWhatsApp: "Ciao, vorrei prenotare un trasferimento dall'aeroporto di Dalaman.",
+    
+    // Ephesus & Pamukkale Transfer Content
+    ephesusTransferTitle: "Trasferimento Efeso & Pamukkale – Servizio Autista VIP",
+    ephesusTransferSubtitle: "Mercedes Vito, V-Class, Maybach | Tour Privati & Trasferimenti",
+    ephesusTransferH1: "Trasferimenti Privati verso Efeso & Pamukkale",
+    ephesusTransferIntro: "Esplora i siti antichi più famosi della Turchia con Meet Transfer. Offriamo trasferimenti privati e tour verso le spettacolari rovine di Efeso e le terrazze di travertino di Pamukkale.",
+    ephesusWhatsApp: "Ciao, vorrei prenotare un trasferimento verso Efeso/Pamukkale.",
+    ephesusTransferPrices: "Prezzi Trasferimento Efeso & Pamukkale",
+    ephesusTransferFaq: "FAQ Efeso & Pamukkale",
+    
+    // Antalya Transfer Content
+    antalyaTransferTitle: "Trasferimento Aeroporto Antalya – Servizio Autista VIP",
+    antalyaTransferH1: "Trasferimento Aeroporto Privato ad Antalya",
+    antalyaTransferIntro: "Scopri trasferimenti aeroporto Antalya premium con Meet Transfer. I nostri autisti professionali offrono servizio porta a porta dall'Aeroporto di Antalya (AYT) verso tutte le principali località turistiche come Belek, Side, Alanya, Kemer e Lara.",
+    antalyaWhatsApp: "Ciao, vorrei prenotare un trasferimento dall'aeroporto di Antalya.",
   },
   ES: {
     // Navigation
@@ -2103,6 +2438,73 @@ const translations: Record<Language, Record<string, string>> = {
     seoEphesusDesc: "Traslados privados y tours a Éfeso y Pamukkale. Excursiones de crucero, tours guiados con guías licenciados, flota Mercedes.",
     seoLuxuryTitle: "Servicio Chófer de Lujo Turquía - Chófer Privado VIP | Meet Transfer",
     seoLuxuryDesc: "Servicio premium de chófer de lujo en Turquía. Viajes de negocios, transporte de eventos, servicio aeropuerto VIP, alquiler diario. Flota Mercedes, chóferes profesionales, servicio 24/7.",
+    
+    // Transfer Page Common
+    transferSubtitle: "Mercedes Vito, V-Class, Maybach | Servicio Meet & Greet 24/7",
+    privateAirportTransferIn: "Traslado Aeropuerto Privado en",
+    popularTransferDestinations: "Destinos de Traslado Populares",
+    vipFleetForTransfers: "Flota VIP para Traslados",
+    airportTransferPricesTitle: "Precios de Traslado Aeropuerto",
+    bookYourAirportTransfer: "Reserve Su Traslado Aeropuerto",
+    getWhatsAppConfirmation: "Obtenga confirmación instantánea por WhatsApp para su traslado",
+    transferFaqTitle: "FAQ Traslado",
+    fixedPriceTransfers: "Traslados a Precio Fijo",
+    viewAllVehicles: "Ver Todos los Vehículos",
+    historicalSitesWeCover: "Sitios Históricos Que Servimos",
+    vipFleetForHistoricalTours: "Flota VIP para Tours Históricos",
+    bookYourHistoricalTour: "Reserve Su Tour Histórico",
+    getWhatsAppConfirmationEphesus: "Obtenga confirmación instantánea por WhatsApp para su traslado a Éfeso o Pamukkale",
+    
+    // Istanbul Transfer Content
+    istanbulTransferTitle: "Traslado Aeropuerto Estambul – Servicio Chófer VIP",
+    istanbulTransferH1: "Traslado Aeropuerto Privado en Estambul",
+    istanbulTransferIntro: "Experimente traslados aeropuerto Estambul sin problemas con Meet Transfer. Nuestros chóferes profesionales ofrecen servicio puerta a puerta desde el Aeropuerto de Estambul (IST) y el Aeropuerto Sabiha Gökçen (SAW) a cualquier destino.",
+    istanbulWhatsApp: "Hola, me gustaría reservar un traslado desde el aeropuerto de Estambul.",
+    
+    // Bodrum Transfer Content
+    bodrumTransferTitle: "Traslado Aeropuerto Bodrum – Servicio Chófer VIP",
+    bodrumTransferH1: "Traslado Aeropuerto Privado en Bodrum",
+    bodrumTransferIntro: "Llegue con estilo a la impresionante península de Bodrum. Meet Transfer ofrece traslados aeropuerto Bodrum premium desde el Aeropuerto Milas-Bodrum (BJV) a todos los destinos exclusivos.",
+    bodrumWhatsApp: "Hola, me gustaría reservar un traslado desde el aeropuerto de Bodrum.",
+    bodrumCityServiceTitle: "Servicio de Traslado Ciudad Bodrum",
+    bodrumCityServiceDesc: "Ya sea que llegue al aeropuerto Milas-Bodrum o necesite un traslado dentro de la península, nuestros chóferes profesionales le recibirán con un cartel nominativo personalizado.",
+    meetGreetArrival: "Meet & Greet en la sala de llegadas",
+    doorToDoorAnyLocation: "Servicio puerta a puerta a cualquier lugar",
+    professionalEnglishDrivers: "Chóferes profesionales de habla inglesa",
+    flexibleScheduling: "Programación flexible para su conveniencia",
+    
+    // Cappadocia Transfer Content
+    cappadociaTransferTitle: "Traslado Aeropuerto Capadocia – Servicio Chófer VIP",
+    cappadociaTransferH1: "Traslado Aeropuerto Privado en Capadocia",
+    cappadociaTransferIntro: "Experimente la magia de Capadocia con Meet Transfer. Ofrecemos traslados aeropuerto Capadocia premium desde ambos aeropuertos Nevşehir (NAV) y Kayseri (ASR) a todos los hoteles cueva y destinos de la región.",
+    cappadociaWhatsApp: "Hola, me gustaría reservar un traslado en Capadocia.",
+    
+    // Izmir Transfer Content
+    izmirTransferTitle: "Traslado Aeropuerto Izmir – Servicio Chófer VIP",
+    izmirTransferH1: "Traslado Aeropuerto Privado en Izmir",
+    izmirTransferIntro: "Explore la costa del Egeo con Meet Transfer. Ofrecemos traslados aeropuerto Izmir premium desde el Aeropuerto Adnan Menderes (ADB) a destinos populares como Çeşme, Alaçatı, Kuşadası y la histórica Éfeso.",
+    izmirWhatsApp: "Hola, me gustaría reservar un traslado desde el aeropuerto de Izmir.",
+    
+    // Dalaman Transfer Content
+    dalamanTransferTitle: "Traslado Aeropuerto Dalaman – Servicio Chófer VIP",
+    dalamanTransferH1: "Traslado Aeropuerto Privado en Dalaman",
+    dalamanTransferIntro: "Descubra la hermosa Costa Turquesa con Meet Transfer. Ofrecemos traslados aeropuerto Dalaman premium desde el Aeropuerto de Dalaman (DLM) a destinos espectaculares como Fethiye, Ölüdeniz, Marmaris y Göcek.",
+    dalamanWhatsApp: "Hola, me gustaría reservar un traslado desde el aeropuerto de Dalaman.",
+    
+    // Ephesus & Pamukkale Transfer Content
+    ephesusTransferTitle: "Traslado Éfeso & Pamukkale – Servicio Chófer VIP",
+    ephesusTransferSubtitle: "Mercedes Vito, V-Class, Maybach | Tours Privados & Traslados",
+    ephesusTransferH1: "Traslados Privados a Éfeso & Pamukkale",
+    ephesusTransferIntro: "Explore los sitios antiguos más famosos de Turquía con Meet Transfer. Ofrecemos traslados privados y tours a las espectaculares ruinas de Éfeso y las terrazas de travertino de Pamukkale.",
+    ephesusWhatsApp: "Hola, me gustaría reservar un traslado a Éfeso/Pamukkale.",
+    ephesusTransferPrices: "Precios Traslado Éfeso & Pamukkale",
+    ephesusTransferFaq: "FAQ Éfeso & Pamukkale",
+    
+    // Antalya Transfer Content
+    antalyaTransferTitle: "Traslado Aeropuerto Antalya – Servicio Chófer VIP",
+    antalyaTransferH1: "Traslado Aeropuerto Privado en Antalya",
+    antalyaTransferIntro: "Experimente traslados aeropuerto Antalya premium con Meet Transfer. Nuestros chóferes profesionales ofrecen servicio puerta a puerta desde el Aeropuerto de Antalya (AYT) a todos los principales destinos turísticos como Belek, Side, Alanya, Kemer y Lara.",
+    antalyaWhatsApp: "Hola, me gustaría reservar un traslado desde el aeropuerto de Antalya.",
   },
   AR: {
     // Navigation
@@ -2448,6 +2850,73 @@ const translations: Record<Language, Record<string, string>> = {
     seoEphesusDesc: "نقل خاص وجولات إلى أفسس وباموكالي. رحلات بحرية، جولات مع مرشدين مرخصين، أسطول مرسيدس.",
     seoLuxuryTitle: "خدمة سائق فاخر تركيا - سائق خاص VIP | Meet Transfer",
     seoLuxuryDesc: "خدمة سائق فاخر متميزة في تركيا. سفر الأعمال، نقل المناسبات، خدمة مطار VIP، تأجير يومي. أسطول مرسيدس، سائقون محترفون، خدمة 24/7.",
+    
+    // Transfer Page Common
+    transferSubtitle: "Mercedes Vito, V-Class, Maybach | خدمة Meet & Greet على مدار الساعة",
+    privateAirportTransferIn: "نقل خاص من المطار في",
+    popularTransferDestinations: "وجهات النقل الشائعة",
+    vipFleetForTransfers: "أسطول VIP للنقل",
+    airportTransferPricesTitle: "أسعار نقل المطار",
+    bookYourAirportTransfer: "احجز نقلك من المطار",
+    getWhatsAppConfirmation: "احصل على تأكيد فوري عبر واتساب لنقلك",
+    transferFaqTitle: "الأسئلة الشائعة عن النقل",
+    fixedPriceTransfers: "نقل بأسعار ثابتة",
+    viewAllVehicles: "عرض جميع المركبات",
+    historicalSitesWeCover: "المواقع التاريخية التي نخدمها",
+    vipFleetForHistoricalTours: "أسطول VIP للجولات التاريخية",
+    bookYourHistoricalTour: "احجز جولتك التاريخية",
+    getWhatsAppConfirmationEphesus: "احصل على تأكيد فوري عبر واتساب لنقلك إلى أفسس أو باموكالي",
+    
+    // Istanbul Transfer Content
+    istanbulTransferTitle: "نقل مطار إسطنبول – خدمة سائق VIP",
+    istanbulTransferH1: "نقل خاص من المطار في إسطنبول",
+    istanbulTransferIntro: "استمتع بنقل سلس من مطار إسطنبول مع Meet Transfer. يقدم سائقونا المحترفون خدمة من الباب إلى الباب من مطار إسطنبول (IST) ومطار صبيحة جوكشن (SAW) إلى أي وجهة.",
+    istanbulWhatsApp: "مرحباً، أود حجز نقل من مطار إسطنبول.",
+    
+    // Bodrum Transfer Content
+    bodrumTransferTitle: "نقل مطار بودروم – خدمة سائق VIP",
+    bodrumTransferH1: "نقل خاص من المطار في بودروم",
+    bodrumTransferIntro: "استقبل بأناقة في شبه جزيرة بودروم الرائعة. يقدم Meet Transfer نقل مطار بودروم الفاخر من مطار ميلاس-بودروم (BJV) إلى جميع الوجهات الحصرية.",
+    bodrumWhatsApp: "مرحباً، أود حجز نقل من مطار بودروم.",
+    bodrumCityServiceTitle: "خدمة نقل مدينة بودروم",
+    bodrumCityServiceDesc: "سواء كنت تصل إلى مطار ميلاس-بودروم أو تحتاج إلى نقل داخل شبه الجزيرة، سيستقبلك سائقونا المحترفون بلافتة باسمك.",
+    meetGreetArrival: "استقبال وترحيب في صالة الوصول",
+    doorToDoorAnyLocation: "خدمة من الباب إلى الباب لأي موقع",
+    professionalEnglishDrivers: "سائقون محترفون يتحدثون الإنجليزية",
+    flexibleScheduling: "جدولة مرنة لراحتك",
+    
+    // Cappadocia Transfer Content
+    cappadociaTransferTitle: "نقل مطار كابادوكيا – خدمة سائق VIP",
+    cappadociaTransferH1: "نقل خاص من المطار في كابادوكيا",
+    cappadociaTransferIntro: "استمتع بسحر كابادوكيا مع Meet Transfer. نقدم نقل مطار كابادوكيا الفاخر من مطاري نوشهير (NAV) وقيصري (ASR) إلى جميع فنادق الكهوف والوجهات في المنطقة.",
+    cappadociaWhatsApp: "مرحباً، أود حجز نقل في كابادوكيا.",
+    
+    // Izmir Transfer Content
+    izmirTransferTitle: "نقل مطار إزمير – خدمة سائق VIP",
+    izmirTransferH1: "نقل خاص من المطار في إزمير",
+    izmirTransferIntro: "استكشف ساحل بحر إيجة مع Meet Transfer. نقدم نقل مطار إزمير الفاخر من مطار عدنان مندريس (ADB) إلى الوجهات الشهيرة مثل تشيشمي، ألاتشاتي، كوشاداسي وأفسس التاريخية.",
+    izmirWhatsApp: "مرحباً، أود حجز نقل من مطار إزمير.",
+    
+    // Dalaman Transfer Content
+    dalamanTransferTitle: "نقل مطار دالامان – خدمة سائق VIP",
+    dalamanTransferH1: "نقل خاص من المطار في دالامان",
+    dalamanTransferIntro: "اكتشف ساحل الفيروز الجميل مع Meet Transfer. نقدم نقل مطار دالامان الفاخر من مطار دالامان (DLM) إلى وجهات رائعة مثل فتحية، أولودينيز، مرمريس وغوجيك.",
+    dalamanWhatsApp: "مرحباً، أود حجز نقل من مطار دالامان.",
+    
+    // Ephesus & Pamukkale Transfer Content
+    ephesusTransferTitle: "نقل أفسس وباموكالي – خدمة سائق VIP",
+    ephesusTransferSubtitle: "Mercedes Vito, V-Class, Maybach | جولات خاصة ونقل",
+    ephesusTransferH1: "نقل خاص إلى أفسس وباموكالي",
+    ephesusTransferIntro: "استكشف أشهر المواقع الأثرية في تركيا مع Meet Transfer. نقدم نقل خاص وجولات إلى أطلال أفسس المذهلة وشرفات الحجر الجيري في باموكالي.",
+    ephesusWhatsApp: "مرحباً، أود حجز نقل إلى أفسس/باموكالي.",
+    ephesusTransferPrices: "أسعار نقل أفسس وباموكالي",
+    ephesusTransferFaq: "الأسئلة الشائعة عن أفسس وباموكالي",
+    
+    // Antalya Transfer Content
+    antalyaTransferTitle: "نقل مطار أنطاليا – خدمة سائق VIP",
+    antalyaTransferH1: "نقل خاص من المطار في أنطاليا",
+    antalyaTransferIntro: "استمتع بنقل مطار أنطاليا الفاخر مع Meet Transfer. يقدم سائقونا المحترفون خدمة من الباب إلى الباب من مطار أنطاليا (AYT) إلى جميع المنتجعات الرئيسية مثل بيليك، سايد، ألانيا، كيمير ولارا.",
+    antalyaWhatsApp: "مرحباً، أود حجز نقل من مطار أنطاليا.",
   },
 };
 
