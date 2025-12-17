@@ -17,6 +17,7 @@ import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-p
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
+import { LocationDisplay } from '@/components/ui/location-display';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = [
@@ -477,6 +478,16 @@ const AdminCreateReservation = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Alış Noktası *</Label>
+                    {formData.pickup_place_name && (
+                      <div className="mb-2 p-2 bg-muted/50 rounded-lg">
+                        <LocationDisplay
+                          placeName={formData.pickup_place_name}
+                          address={formData.pickup}
+                          type="pickup"
+                          size="sm"
+                        />
+                      </div>
+                    )}
                     <GooglePlacesAutocomplete
                       onPlaceSelected={(value, details) => setFormData((prev) => ({ 
                         ...prev, 
@@ -490,6 +501,16 @@ const AdminCreateReservation = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>Bırakış Noktası *</Label>
+                    {formData.dropoff_place_name && (
+                      <div className="mb-2 p-2 bg-muted/50 rounded-lg">
+                        <LocationDisplay
+                          placeName={formData.dropoff_place_name}
+                          address={formData.dropoff}
+                          type="dropoff"
+                          size="sm"
+                        />
+                      </div>
+                    )}
                     <GooglePlacesAutocomplete
                       onPlaceSelected={(value, details) => setFormData((prev) => ({ 
                         ...prev, 
