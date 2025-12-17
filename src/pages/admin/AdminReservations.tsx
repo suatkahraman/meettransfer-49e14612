@@ -17,6 +17,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
+import { LocationDisplay } from '@/components/ui/location-display';
 
 interface Reservation {
   id: string;
@@ -25,6 +26,8 @@ interface Reservation {
   customer_phone: string;
   pickup: string;
   dropoff: string;
+  pickup_place_name: string | null;
+  dropoff_place_name: string | null;
   pickup_date: string;
   pickup_time: string;
   flight_number: string | null;
@@ -610,11 +613,19 @@ const AdminReservations = () => {
                             <span className="font-medium">{reservation.customer_name}</span>
                           </div>
 
-                          <div className="flex items-center gap-2 text-sm">
-                            <MapPin className="h-4 w-4 text-primary" />
-                            <span>{reservation.pickup}</span>
-                            <span>→</span>
-                            <span>{reservation.dropoff}</span>
+                          <div className="space-y-1">
+                            <LocationDisplay
+                              placeName={reservation.pickup_place_name}
+                              address={reservation.pickup}
+                              type="pickup"
+                              size="sm"
+                            />
+                            <LocationDisplay
+                              placeName={reservation.dropoff_place_name}
+                              address={reservation.dropoff}
+                              type="dropoff"
+                              size="sm"
+                            />
                           </div>
                         </div>
                         
@@ -678,11 +689,19 @@ const AdminReservations = () => {
                               <span className="text-sm text-muted-foreground">{reservation.customer_phone}</span>
                             </div>
 
-                            <div className="flex items-center gap-2 text-sm">
-                              <MapPin className="h-4 w-4 text-primary" />
-                              <span>{reservation.pickup}</span>
-                              <span>→</span>
-                              <span>{reservation.dropoff}</span>
+                            <div className="space-y-1">
+                              <LocationDisplay
+                                placeName={reservation.pickup_place_name}
+                                address={reservation.pickup}
+                                type="pickup"
+                                size="sm"
+                              />
+                              <LocationDisplay
+                                placeName={reservation.dropoff_place_name}
+                                address={reservation.dropoff}
+                                type="dropoff"
+                                size="sm"
+                              />
                             </div>
 
                             <div className="flex items-center gap-4 text-sm flex-wrap">
@@ -800,11 +819,19 @@ const AdminReservations = () => {
                         <span className="text-sm text-muted-foreground">{reservation.customer_phone}</span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        <span>{reservation.pickup}</span>
-                        <span>→</span>
-                        <span>{reservation.dropoff}</span>
+                      <div className="space-y-1">
+                        <LocationDisplay
+                          placeName={reservation.pickup_place_name}
+                          address={reservation.pickup}
+                          type="pickup"
+                          size="sm"
+                        />
+                        <LocationDisplay
+                          placeName={reservation.dropoff_place_name}
+                          address={reservation.dropoff}
+                          type="dropoff"
+                          size="sm"
+                        />
                       </div>
 
                       <div className="flex items-center gap-4 text-sm flex-wrap">
