@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { toast } from 'sonner';
 import { FlightStatus } from '@/components/ui/flight-status';
+import { LocationDisplay } from '@/components/ui/location-display';
 
 interface Reservation {
   id: string;
@@ -27,6 +28,9 @@ interface Reservation {
   passenger_cash_currency: string | null;
   status: string;
   driver_confirmed: boolean | null;
+  // Place details
+  pickup_place_name?: string | null;
+  dropoff_place_name?: string | null;
 }
 
 interface SwipeableJobCardProps {
@@ -225,18 +229,18 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
 
             {/* Route */}
             <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <MapPin className="h-3 w-3 text-green-600" />
-                </div>
-                <span className="text-sm leading-tight">{reservation.pickup}</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <MapPin className="h-3 w-3 text-red-500" />
-                </div>
-                <span className="text-sm leading-tight">{reservation.dropoff}</span>
-              </div>
+              <LocationDisplay
+                placeName={reservation.pickup_place_name}
+                address={reservation.pickup}
+                type="pickup"
+                size="sm"
+              />
+              <LocationDisplay
+                placeName={reservation.dropoff_place_name}
+                address={reservation.dropoff}
+                type="dropoff"
+                size="sm"
+              />
             </div>
 
             {/* Tags Row */}

@@ -33,6 +33,9 @@ interface Reservation {
   passenger_cash_currency: string | null;
   status: string;
   driver_confirmed: boolean | null;
+  // Place details
+  pickup_place_name: string | null;
+  dropoff_place_name: string | null;
 }
 
 const PULL_THRESHOLD = 80;

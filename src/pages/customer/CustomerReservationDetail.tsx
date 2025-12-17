@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
+import { LocationDisplay } from '@/components/ui/location-display';
 import { format } from 'date-fns';
 import {
   AlertDialog,
@@ -55,6 +56,13 @@ interface Reservation {
   status: string;
   driver_id: string | null;
   passenger_names: string[] | null;
+  // Place details
+  pickup_place_name: string | null;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+  dropoff_place_name: string | null;
+  dropoff_lat: number | null;
+  dropoff_lng: number | null;
   drivers?: {
     name: string;
     phone: string;
@@ -410,20 +418,18 @@ const CustomerReservationDetail = () => {
 
             {/* Route */}
             <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-primary mt-1" />
-                <div>
-                  <div className="text-sm text-muted-foreground">Pickup</div>
-                  <div className="font-medium">{reservation.pickup}</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-destructive mt-1" />
-                <div>
-                  <div className="text-sm text-muted-foreground">Drop-off</div>
-                  <div className="font-medium">{reservation.dropoff}</div>
-                </div>
-              </div>
+              <LocationDisplay
+                placeName={reservation.pickup_place_name}
+                address={reservation.pickup}
+                type="pickup"
+                size="md"
+              />
+              <LocationDisplay
+                placeName={reservation.dropoff_place_name}
+                address={reservation.dropoff}
+                type="dropoff"
+                size="md"
+              />
             </div>
 
             {/* Route Map */}
