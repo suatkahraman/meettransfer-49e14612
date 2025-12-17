@@ -20,6 +20,7 @@ import NotificationBell from '@/components/NotificationBell';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
+import { LocationDisplay } from '@/components/ui/location-display';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -52,6 +53,13 @@ interface Reservation {
   passenger_names: string[] | null;
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
+  // Place details
+  pickup_place_name: string | null;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+  dropoff_place_name: string | null;
+  dropoff_lat: number | null;
+  dropoff_lng: number | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -393,6 +401,17 @@ const DriverJobDetails = () => {
     const formattedDate = format(new Date(reservation.pickup_date), 'dd MMM yyyy');
     const currencySymbol = getCurrencySymbol(reservation.price_currency);
     
+    // Format location with place name + address
+    const formatLocation = (placeName: string | null, address: string) => {
+      if (placeName && placeName.trim() && !address.toLowerCase().startsWith(placeName.toLowerCase())) {
+        return `${placeName}\n${address}`;
+      }
+      return address;
+    };
+    
+    const pickupFormatted = formatLocation(reservation.pickup_place_name, reservation.pickup);
+    const dropoffFormatted = formatLocation(reservation.dropoff_place_name, reservation.dropoff);
+    
     const text = `---------------------------------
 Rezervasyon Kodu: ${reservation.reservation_code || reservation.id.slice(0, 8)}
 Tarih & Saat: ${formattedDate} – ${reservation.pickup_time}
@@ -400,8 +419,12 @@ Tarih & Saat: ${formattedDate} – ${reservation.pickup_time}
 Yolcular:
 ${passengerList}
 
-Alış Noktası: ${reservation.pickup}
-Bırakış Noktası: ${reservation.dropoff}
+Alış Noktası:
+${pickupFormatted}
+
+Bırakış Noktası:
+${dropoffFormatted}
+
 ${reservation.flight_number ? `Uçuş No: ${reservation.flight_number}\n` : ''}
 Araç: ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}
 Ücret: ${reservation.price ? `${currencySymbol}${reservation.price}` : '—'}
@@ -508,19 +531,27 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <div className="text-sm text-muted-foreground">Alış Noktası</div>
-                  <div className="font-medium">{reservation.pickup}</div>
+              <div className="space-y-4">
+                <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-3 border border-green-200 dark:border-green-800">
+                  <div className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">Alış Noktası</div>
+                  <LocationDisplay
+                    placeName={reservation.pickup_place_name}
+                    address={reservation.pickup}
+                    type="pickup"
+                    size="lg"
+                    showIcon={false}
+                  />
                 </div>
-              </div>
 
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-destructive mt-0.5" />
-                <div>
-                  <div className="text-sm text-muted-foreground">Bırakış Noktası</div>
-                  <div className="font-medium">{reservation.dropoff}</div>
+                <div className="bg-red-50 dark:bg-red-950/30 rounded-lg p-3 border border-red-200 dark:border-red-800">
+                  <div className="text-xs text-red-600 dark:text-red-400 font-medium mb-1">Bırakış Noktası</div>
+                  <LocationDisplay
+                    placeName={reservation.dropoff_place_name}
+                    address={reservation.dropoff}
+                    type="dropoff"
+                    size="lg"
+                    showIcon={false}
+                  />
                 </div>
               </div>
 
