@@ -53,17 +53,17 @@ const VehicleCard = ({
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="aspect-video bg-muted relative overflow-hidden group">
+      <div className="aspect-[4/3] bg-muted relative overflow-hidden group">
         <div className="overflow-hidden h-full" ref={emblaRef}>
           <div className="flex h-full touch-pan-y">
             {images.map((image, index) => (
-              <div key={index} className="flex-[0_0_100%] min-w-0 h-full">
+              <div key={index} className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center bg-secondary/30">
                 <img
                   src={image}
                   alt={`${name} - Image ${index + 1}`}
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
             ))}
