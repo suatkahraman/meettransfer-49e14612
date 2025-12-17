@@ -834,6 +834,16 @@ const AdminEditReservation = () => {
     };
     const paymentLabel = (paymentTranslations[lang] || paymentTranslations.TR)[formData.payment_type] || formData.payment_type;
 
+    // Format pickup location with place name + address
+    const pickupFormatted = formData.pickup_place_name && formData.pickup_place_name !== formData.pickup
+      ? `${formData.pickup_place_name}\n${formData.pickup}`
+      : formData.pickup || '—';
+    
+    // Format dropoff location with place name + address
+    const dropoffFormatted = formData.dropoff_place_name && formData.dropoff_place_name !== formData.dropoff
+      ? `${formData.dropoff_place_name}\n${formData.dropoff}`
+      : formData.dropoff || '—';
+
     const text = `---------------------------------
 ${l.reservationCode}: ${reservationCode || id?.slice(0, 8) || '—'}
 ${l.status}: ${statusLabel}
@@ -842,8 +852,12 @@ ${l.dateTime}: ${formData.pickup_date} – ${formData.pickup_time}
 ${l.passengers}:
 ${passengerList}
 
-${l.pickup}: ${formData.pickup || '—'}
-${l.dropoff}: ${formData.dropoff || '—'}
+${l.pickup}:
+${pickupFormatted}
+
+${l.dropoff}:
+${dropoffFormatted}
+
 ${formData.flight_number ? `${l.flight}: ${formData.flight_number}\n` : ''}${l.vehicle}: ${vehicleLabel}
 ${l.price}: ${formData.price ? `${symbol}${formData.price}` : '—'}
 ${formData.passenger_cash_amount ? `${l.passengerCash}: ${getCurrencySymbol(formData.passenger_cash_currency)}${formData.passenger_cash_amount}\n` : ''}${l.paymentType}: ${paymentLabel}
