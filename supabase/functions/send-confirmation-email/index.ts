@@ -3,8 +3,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -33,6 +31,18 @@ const getVehicleLabel = (vehicleType: string): string => {
   return vehicleTypeLabels[vehicleType] || vehicleType.replace(/-/g, ' ');
 };
 
+// Helper function to format location display (place_name + address)
+const formatLocation = (placeName: string | null, address: string): string => {
+  if (!placeName || placeName === address) {
+    return address;
+  }
+  // Check if address already contains the place name to avoid duplication
+  if (address.toLowerCase().includes(placeName.toLowerCase())) {
+    return address;
+  }
+  return `${placeName}<br/><span style="color: #888; font-size: 12px;">${address}</span>`;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -53,7 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch reservation with driver details
+    // Fetch reservation with driver details including place names
     const { data: reservation, error: fetchError } = await supabase
       .from("reservations")
       .select(`
@@ -102,6 +112,10 @@ const handler = async (req: Request): Promise<Response> => {
       ? reservation.passenger_names.map((name: string, i: number) => `${i + 1}. ${name}`).join('<br>')
       : reservation.customer_name;
 
+    // Format location displays with place_name + address
+    const pickupDisplay = formatLocation(reservation.pickup_place_name, reservation.pickup);
+    const dropoffDisplay = formatLocation(reservation.dropoff_place_name, reservation.dropoff);
+
     // Driver info
     const driverInfo = reservation.drivers
       ? `
@@ -147,11 +161,11 @@ const handler = async (req: Request): Promise<Response> => {
             </tr>
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Pick-up:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;">${reservation.pickup}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee;">${pickupDisplay}</td>
             </tr>
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Drop-off:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;">${reservation.dropoff}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #eee;">${dropoffDisplay}</td>
             </tr>
             ${reservation.flight_number ? `
             <tr>

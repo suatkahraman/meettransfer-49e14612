@@ -15,6 +15,17 @@ interface NotifyRequest {
   old_arrival_time?: string;
 }
 
+// Helper function to format location display (place_name + address)
+const formatLocation = (placeName: string | null, address: string): string => {
+  if (!placeName || placeName === address) {
+    return address;
+  }
+  if (address.toLowerCase().includes(placeName.toLowerCase())) {
+    return address;
+  }
+  return `${placeName} (${address})`;
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -32,10 +43,10 @@ serve(async (req) => {
     console.log(`[FlightNotify] Flight: ${flight_number}, Status: ${status}, Delay: ${delay_minutes}min`);
     console.log(`[FlightNotify] Old arrival: ${old_arrival_time || 'N/A'}, New arrival: ${arrival_time || 'N/A'}`);
 
-    // Get reservation with driver info (NO customer contact details for driver notifications)
+    // Get reservation with driver info including place names
     const { data: reservation, error: resError } = await supabase
       .from('reservations')
-      .select('id, reservation_code, pickup, dropoff, pickup_date, pickup_time, driver_id, customer_id, customer_name, last_notified_arrival_time, flight_arrival_time')
+      .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, driver_id, customer_id, customer_name, last_notified_arrival_time, flight_arrival_time')
       .eq('id', reservation_id)
       .single();
 
@@ -71,6 +82,10 @@ serve(async (req) => {
 
     const oldTimeFormatted = formatTimeDisplay(old_arrival_time);
     const newTimeFormatted = formatTimeDisplay(arrival_time);
+
+    // Format location displays
+    const pickupDisplay = formatLocation(reservation.pickup_place_name, reservation.pickup);
+    const dropoffDisplay = formatLocation(reservation.dropoff_place_name, reservation.dropoff);
 
     // Build driver notification messages (NO pricing, NO customer contact)
     let driverTitle = '';
@@ -163,8 +178,8 @@ serve(async (req) => {
                   reservationCode: reservation.reservation_code || '',
                   flightNumber: flight_number,
                   message: 'Bu rezervasyonun uçuşu iptal edildi.',
-                  pickup: reservation.pickup,
-                  dropoff: reservation.dropoff,
+                  pickup: pickupDisplay,
+                  dropoff: dropoffDisplay,
                   pickupDate: reservation.pickup_date,
                   pickupTime: reservation.pickup_time,
                   baseUrl,
@@ -178,8 +193,8 @@ serve(async (req) => {
                   reservationCode: reservation.reservation_code || '',
                   flightNumber: flight_number,
                   message: 'Uçuş indi. Müşteriyi karşılamaya hazırlanın.',
-                  pickup: reservation.pickup,
-                  dropoff: reservation.dropoff,
+                  pickup: pickupDisplay,
+                  dropoff: dropoffDisplay,
                   pickupDate: reservation.pickup_date,
                   pickupTime: reservation.pickup_time,
                   baseUrl,
@@ -198,8 +213,8 @@ serve(async (req) => {
                     : 'Uçuş varış saati güncellendi.',
                   oldTime: oldTimeFormatted,
                   newTime: newTimeFormatted,
-                  pickup: reservation.pickup,
-                  dropoff: reservation.dropoff,
+                  pickup: pickupDisplay,
+                  dropoff: dropoffDisplay,
                   pickupDate: reservation.pickup_date,
                   pickupTime: reservation.pickup_time,
                   baseUrl,
@@ -312,8 +327,8 @@ serve(async (req) => {
                 message: customerMessage,
                 oldTime: oldTimeFormatted,
                 newTime: newTimeFormatted,
-                pickup: reservation.pickup,
-                dropoff: reservation.dropoff,
+                pickup: pickupDisplay,
+                dropoff: dropoffDisplay,
                 pickupDate: reservation.pickup_date,
                 baseUrl,
                 reservationId: reservation.id,

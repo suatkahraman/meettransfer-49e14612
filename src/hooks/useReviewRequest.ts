@@ -9,6 +9,8 @@ interface ReviewRequestParams {
   pickupDate: string;
   pickup: string;
   dropoff: string;
+  pickupPlaceName?: string;
+  dropoffPlaceName?: string;
 }
 
 export const useReviewRequest = () => {

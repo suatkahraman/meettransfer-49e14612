@@ -16,7 +16,21 @@ interface ReviewRequestPayload {
   pickupDate: string;
   pickup: string;
   dropoff: string;
+  pickupPlaceName?: string;
+  dropoffPlaceName?: string;
 }
+
+// Helper function to format location display (place_name + address)
+const formatLocation = (placeName: string | null | undefined, address: string): string => {
+  if (!placeName || placeName === address) {
+    return address;
+  }
+  // Check if address already contains the place name to avoid duplication
+  if (address.toLowerCase().includes(placeName.toLowerCase())) {
+    return address;
+  }
+  return `${placeName} (${address})`;
+};
 
 const handler = async (req: Request): Promise<Response> => {
   console.log("send-review-request function called");
@@ -38,6 +52,8 @@ const handler = async (req: Request): Promise<Response> => {
       pickupDate,
       pickup,
       dropoff,
+      pickupPlaceName,
+      dropoffPlaceName,
     } = payload;
 
     if (!customerEmail || !reservationId) {
@@ -48,8 +64,12 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const appUrl = Deno.env.get("SUPABASE_URL")?.replace(".supabase.co", ".lovable.app") || "https://meettransfer.app";
     const reviewUrl = `https://meettransfer.app/customer/review/${reservationId}`;
+
+    // Format route display with place names
+    const pickupDisplay = formatLocation(pickupPlaceName, pickup);
+    const dropoffDisplay = formatLocation(dropoffPlaceName, dropoff);
+    const routeDisplay = `${pickupDisplay} → ${dropoffDisplay}`;
 
     console.log("Sending review request email to:", customerEmail);
 
@@ -113,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
                     </tr>
                     <tr>
                       <td style="padding: 8px 0; color: #888888; font-size: 14px;">Route:</td>
-                      <td style="padding: 8px 0; color: #111111; font-size: 14px;">${pickup} → ${dropoff}</td>
+                      <td style="padding: 8px 0; color: #111111; font-size: 14px;">${routeDisplay}</td>
                     </tr>
                   </table>
                 </div>
