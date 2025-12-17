@@ -84,6 +84,7 @@ const DriverJobDetails = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [showCashDialog, setShowCashDialog] = useState(false);
+  const [adminNotes, setAdminNotes] = useState<string | null>(null);
   
   // Driver editable fields
   const [driverPrice, setDriverPrice] = useState('');
@@ -114,6 +115,17 @@ const DriverJobDetails = () => {
         setDriverPrice(resData.price?.toString() || '');
         setDriverCashAmount(resData.driver_cash_amount?.toString() || '');
         setDriverNotes(resData.driver_notes || '');
+        
+        // Fetch admin notes
+        const { data: notesData } = await supabase
+          .from('reservation_admin_notes')
+          .select('notes')
+          .eq('reservation_id', resData.id)
+          .maybeSingle();
+        
+        if (notesData?.notes) {
+          setAdminNotes(notesData.notes);
+        }
       }
       setLoading(false);
     };
@@ -396,7 +408,7 @@ Araç: ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type
 Toplanan Nakit: ${reservation.driver_cash_amount ? `${currencySymbol}${reservation.driver_cash_amount}` : '—'}
 
 Müşteri Telefon: ${reservation.customer_phone}
-Notlar: ${reservation.driver_notes || '—'}
+${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driver_notes || '—'}
 ---------------------------------`;
 
     try {
@@ -620,6 +632,21 @@ Notlar: ${reservation.driver_notes || '—'}
                       <div className="font-bold text-2xl text-amber-800 dark:text-amber-200">
                         {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Admin Notes - Read Only */}
+              {adminNotes && (
+                <div className="bg-blue-50 dark:bg-blue-950/50 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-blue-500 p-2 rounded-full flex-shrink-0">
+                      <ClipboardCopy className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-blue-800 dark:text-blue-200">Admin Notları</div>
+                      <div className="text-sm text-blue-700 dark:text-blue-300 mt-1 whitespace-pre-wrap">{adminNotes}</div>
                     </div>
                   </div>
                 </div>
