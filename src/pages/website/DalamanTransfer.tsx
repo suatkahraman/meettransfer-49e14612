@@ -99,30 +99,25 @@ const DalamanTransfer = () => {
       />
 
       <PageHeader
-        title="Dalaman Airport Transfer – VIP Chauffeur Service"
-        subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
+        title={t("dalamanTransferTitle")}
+        subtitle={t("transferSubtitle")}
         backgroundImage="https://images.unsplash.com/photo-1600240644455-3edc55c375fe?w=1600"
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Private Airport Transfer in Dalaman
+            {t("dalamanTransferH1")}
           </h1>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            Discover the beautiful Turquoise Coast with Meet Transfer. We provide
-            premium <strong>Dalaman airport transfers</strong> from <strong>Dalaman Airport (DLM)</strong> to stunning
-            destinations including <strong>Fethiye, Ölüdeniz, Marmaris, and Göcek</strong>. Our
-            professional drivers and luxury <strong>Mercedes vehicles</strong> ensure a comfortable journey
-            through scenic coastal roads. With 24/7 availability and flight
-            tracking, we guarantee a stress-free start to your <strong>private Dalaman transfer</strong>.
+            {t("dalamanTransferIntro")}
           </p>
         </section>
 
         <FeatureList />
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Dalaman Transfer Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("popularTransferDestinations")} Dalaman</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -137,7 +132,7 @@ const DalamanTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Dalaman Transfers</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("vipFleetForTransfers")} Dalaman</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -145,29 +140,29 @@ const DalamanTransfer = () => {
           </div>
           <Link to="/fleet" className="inline-block mt-4">
             <Button variant="outline" className="gap-2">
-              View All Vehicles <ArrowRight className="h-4 w-4" />
+              {t("viewAllVehicles")} <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Dalaman Airport Transfer Prices</h2>
-          <PriceTable items={prices} title="Fixed Price Transfers" />
+          <h2 className="text-2xl font-bold mb-4">{t("airportTransferPricesTitle")} Dalaman</h2>
+          <PriceTable items={prices} title={t("fixedPriceTransfers")} />
         </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Dalaman Airport Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">{t("bookYourAirportTransfer")} Dalaman</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp for your Dalaman transfer
+            {t("getWhatsAppConfirmation")}
           </p>
           <WhatsAppButton
             variant="large"
-            message="Hello, I would like to book a transfer from Dalaman Airport."
+            message={t("dalamanWhatsApp")}
           />
         </div>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Dalaman Transfer FAQ</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("transferFaqTitle")} Dalaman</h2>
           <FAQSection items={faqItems} />
         </section>
       </div>

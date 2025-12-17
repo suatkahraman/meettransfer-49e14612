@@ -99,30 +99,25 @@ const AntalyaTransfer = () => {
       />
 
       <PageHeader
-        title="Antalya Airport Transfer – VIP Chauffeur Service"
-        subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
+        title={t("antalyaTransferTitle")}
+        subtitle={t("transferSubtitle")}
         backgroundImage="https://images.unsplash.com/photo-1566552881560-0be862a7c445?w=1600"
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Private Airport Transfer in Antalya
+            {t("antalyaTransferH1")}
           </h1>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            Welcome to the Turkish Riviera! Meet Transfer provides premium <strong>Antalya airport
-            transfers</strong> from <strong>Antalya Airport (AYT)</strong> to all popular beach resorts
-            including <strong>Lara, Belek, Side, Alanya, and Kemer</strong>. Our professional drivers
-            ensure a comfortable and stress-free journey to your hotel. With <strong>VIP meet &
-            greet service</strong>, flight monitoring, and luxury <strong>Mercedes vehicles</strong>, your vacation
-            starts the moment you land. Book your <strong>private Antalya transfer</strong> today!
+            {t("antalyaTransferIntro")}
           </p>
         </section>
 
         <FeatureList />
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Antalya Transfer Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("popularTransferDestinations")} Antalya</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -137,7 +132,7 @@ const AntalyaTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Antalya Transfers</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("vipFleetForTransfers")} Antalya</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -145,29 +140,29 @@ const AntalyaTransfer = () => {
           </div>
           <Link to="/fleet" className="inline-block mt-4">
             <Button variant="outline" className="gap-2">
-              View All Vehicles <ArrowRight className="h-4 w-4" />
+              {t("viewAllVehicles")} <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Antalya Airport Transfer Prices</h2>
-          <PriceTable items={prices} title="Fixed Price Transfers" />
+          <h2 className="text-2xl font-bold mb-4">{t("airportTransferPricesTitle")} Antalya</h2>
+          <PriceTable items={prices} title={t("fixedPriceTransfers")} />
         </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Antalya Airport Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">{t("bookYourAirportTransfer")} Antalya</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp for your Antalya transfer
+            {t("getWhatsAppConfirmation")}
           </p>
           <WhatsAppButton
             variant="large"
-            message="Hello, I would like to book a transfer from Antalya Airport."
+            message={t("antalyaWhatsApp")}
           />
         </div>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Antalya Transfer FAQ</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("transferFaqTitle")} Antalya</h2>
           <FAQSection items={faqItems} />
         </section>
       </div>

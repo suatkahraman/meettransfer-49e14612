@@ -98,30 +98,25 @@ const IzmirTransfer = () => {
       />
 
       <PageHeader
-        title="Izmir Airport Transfer – VIP Chauffeur Service"
-        subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
+        title={t("izmirTransferTitle")}
+        subtitle={t("transferSubtitle")}
         backgroundImage="https://images.unsplash.com/photo-1565361849078-294849288a2d?w=1600"
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Private Airport Transfer in Izmir
+            {t("izmirTransferH1")}
           </h1>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            Explore the Aegean coast with Meet Transfer. We offer premium <strong>Izmir airport
-            transfers</strong> from <strong>Adnan Menderes Airport (ADB)</strong> to popular destinations
-            including <strong>Çeşme, Alaçatı, Kuşadası, and historical Ephesus</strong>. Our
-            experienced drivers know the region well and provide comfortable
-            journeys in luxury <strong>Mercedes vehicles</strong>. Available 24/7 with flight
-            monitoring and <strong>VIP meet & greet service</strong> for your <strong>private Izmir transfer</strong>.
+            {t("izmirTransferIntro")}
           </p>
         </section>
 
         <FeatureList />
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Izmir Transfer Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("popularTransferDestinations")} Izmir</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -136,7 +131,7 @@ const IzmirTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Izmir Transfers</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("vipFleetForTransfers")} Izmir</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -144,29 +139,29 @@ const IzmirTransfer = () => {
           </div>
           <Link to="/fleet" className="inline-block mt-4">
             <Button variant="outline" className="gap-2">
-              View All Vehicles <ArrowRight className="h-4 w-4" />
+              {t("viewAllVehicles")} <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Izmir Airport Transfer Prices</h2>
-          <PriceTable items={prices} title="Fixed Price Transfers" />
+          <h2 className="text-2xl font-bold mb-4">{t("airportTransferPricesTitle")} Izmir</h2>
+          <PriceTable items={prices} title={t("fixedPriceTransfers")} />
         </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Izmir Airport Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">{t("bookYourAirportTransfer")} Izmir</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp for your Izmir transfer
+            {t("getWhatsAppConfirmation")}
           </p>
           <WhatsAppButton
             variant="large"
-            message="Hello, I would like to book a transfer from Izmir Airport."
+            message={t("izmirWhatsApp")}
           />
         </div>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Izmir Transfer FAQ</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("transferFaqTitle")} Izmir</h2>
           <FAQSection items={faqItems} />
         </section>
       </div>

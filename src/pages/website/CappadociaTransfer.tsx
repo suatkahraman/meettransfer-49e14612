@@ -100,30 +100,25 @@ const CappadociaTransfer = () => {
       />
 
       <PageHeader
-        title="Cappadocia Airport Transfer – VIP Chauffeur Service"
-        subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
+        title={t("cappadociaTransferTitle")}
+        subtitle={t("transferSubtitle")}
         backgroundImage="https://images.unsplash.com/photo-1641128324972-af3212f0f6bd?w=1600"
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Private Airport Transfer in Cappadocia
+            {t("cappadociaTransferH1")}
           </h1>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            Experience the magic of <strong>Cappadocia</strong> with Meet Transfer. We provide
-            premium <strong>Cappadocia airport transfers</strong> from both <strong>Nevşehir Airport (NAV)</strong> and <strong>Kayseri
-            Airport (ASR)</strong> to all cave hotels and destinations in the region
-            including <strong>Göreme, Ürgüp, and Uçhisar</strong>. Our drivers are familiar with
-            every fairy chimney and can assist with <strong>balloon flight schedules</strong>.
-            Start your Cappadocia adventure in comfort and style with our <strong>VIP transfer service</strong>.
+            {t("cappadociaTransferIntro")}
           </p>
         </section>
 
         <FeatureList />
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Cappadocia Transfer Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("popularTransferDestinations")} Cappadocia</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -138,7 +133,7 @@ const CappadociaTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Cappadocia Transfers</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("vipFleetForTransfers")} Cappadocia</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -146,29 +141,29 @@ const CappadociaTransfer = () => {
           </div>
           <Link to="/fleet" className="inline-block mt-4">
             <Button variant="outline" className="gap-2">
-              View All Vehicles <ArrowRight className="h-4 w-4" />
+              {t("viewAllVehicles")} <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Cappadocia Airport Transfer Prices</h2>
-          <PriceTable items={prices} title="Fixed Price Transfers" />
+          <h2 className="text-2xl font-bold mb-4">{t("airportTransferPricesTitle")} Cappadocia</h2>
+          <PriceTable items={prices} title={t("fixedPriceTransfers")} />
         </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Cappadocia Airport Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">{t("bookYourAirportTransfer")} Cappadocia</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp for your Cappadocia transfer
+            {t("getWhatsAppConfirmation")}
           </p>
           <WhatsAppButton
             variant="large"
-            message="Hello, I would like to book a transfer in Cappadocia."
+            message={t("cappadociaWhatsApp")}
           />
         </div>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Cappadocia Transfer FAQ</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("transferFaqTitle")} Cappadocia</h2>
           <FAQSection items={faqItems} />
         </section>
       </div>

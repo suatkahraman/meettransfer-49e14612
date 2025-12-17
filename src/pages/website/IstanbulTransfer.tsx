@@ -105,35 +105,25 @@ const IstanbulTransfer = () => {
       />
 
       <PageHeader
-        title="Istanbul Airport Transfer – VIP Chauffeur Service"
-        subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
+        title={t("istanbulTransferTitle")}
+        subtitle={t("transferSubtitle")}
         backgroundImage="https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=1600"
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
-        {/* Main H1 for SEO */}
         <section className="prose max-w-none">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Private Airport Transfer in Istanbul
+            {t("istanbulTransferH1")}
           </h1>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            Experience seamless <strong>Istanbul airport transfers</strong> with Meet Transfer.
-            Our professional chauffeurs provide door-to-door service from <strong>Istanbul
-            Airport (IST)</strong> and <strong>Sabiha Gökçen Airport (SAW)</strong> to any destination in
-            the city and beyond. With our <strong>VIP meet & greet service</strong>, your driver will
-            be waiting with a name board at the arrivals hall. We monitor all
-            flights in real-time to ensure punctual pickup regardless of delays.
-            Available 24/7, our luxury <strong>Mercedes vehicles</strong> offer comfort, WiFi,
-            complimentary water, and professional service for your <strong>private Istanbul transfer</strong>.
+            {t("istanbulTransferIntro")}
           </p>
         </section>
 
-        {/* Features */}
         <FeatureList />
 
-        {/* Destinations */}
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Istanbul Transfer Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("popularTransferDestinations")} Istanbul</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -147,9 +137,8 @@ const IstanbulTransfer = () => {
           </div>
         </section>
 
-        {/* Fleet */}
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Istanbul Transfers</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("vipFleetForTransfers")} Istanbul</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -157,32 +146,29 @@ const IstanbulTransfer = () => {
           </div>
           <Link to="/fleet" className="inline-block mt-4">
             <Button variant="outline" className="gap-2">
-              View All Vehicles <ArrowRight className="h-4 w-4" />
+              {t("viewAllVehicles")} <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </section>
 
-        {/* Price List */}
         <section>
-          <h2 className="text-2xl font-bold mb-4">Istanbul Airport Transfer Prices</h2>
-          <PriceTable items={prices} title="Fixed Price Transfers" />
+          <h2 className="text-2xl font-bold mb-4">{t("airportTransferPricesTitle")} Istanbul</h2>
+          <PriceTable items={prices} title={t("fixedPriceTransfers")} />
         </section>
 
-        {/* WhatsApp CTA */}
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Istanbul Airport Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">{t("bookYourAirportTransfer")} Istanbul</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp for your Istanbul transfer
+            {t("getWhatsAppConfirmation")}
           </p>
           <WhatsAppButton
             variant="large"
-            message="Hello, I would like to book a transfer from Istanbul Airport."
+            message={t("istanbulWhatsApp")}
           />
         </div>
 
-        {/* FAQ */}
         <section>
-          <h2 className="text-2xl font-bold mb-4">Istanbul Transfer FAQ</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("transferFaqTitle")} Istanbul</h2>
           <FAQSection items={faqItems} />
         </section>
       </div>
