@@ -376,6 +376,8 @@ const translations: Record<Language, Record<string, string>> = {
     seoDalamanDesc: "Premium Dalaman airport transfer service to Fethiye, Ölüdeniz, Marmaris, Göcek. VIP meet & greet, Mercedes fleet, fixed prices.",
     seoEphesusTitle: "Ephesus & Pamukkale Transfer - Private Tours & VIP Transfers | Meet Transfer",
     seoEphesusDesc: "Private transfers and tours to Ephesus and Pamukkale. Cruise shore excursions, guided tours with licensed guides, Mercedes fleet.",
+    seoLuxuryTitle: "Luxury Chauffeur Service Turkey - VIP Private Driver | Meet Transfer",
+    seoLuxuryDesc: "Premium luxury chauffeur service in Turkey. Business travel, event transportation, VIP airport service, full-day hire. Mercedes fleet, professional drivers, 24/7 service.",
   },
   DE: {
     // Navigation
@@ -719,6 +721,8 @@ const translations: Record<Language, Record<string, string>> = {
     seoDalamanDesc: "Premium Dalaman Flughafentransfer nach Fethiye, Ölüdeniz, Marmaris, Göcek. VIP Meet & Greet, Mercedes-Flotte, Festpreise.",
     seoEphesusTitle: "Ephesus & Pamukkale Transfer - Private Touren & VIP Transfers | Meet Transfer",
     seoEphesusDesc: "Private Transfers und Touren zu Ephesus und Pamukkale. Kreuzfahrt-Ausflüge, geführte Touren mit lizenzierten Guides, Mercedes-Flotte.",
+    seoLuxuryTitle: "Luxus Chauffeur Service Türkei - VIP Privater Fahrer | Meet Transfer",
+    seoLuxuryDesc: "Premium Luxus Chauffeur Service in der Türkei. Geschäftsreisen, Veranstaltungstransport, VIP Flughafenservice, Tagesmiete. Mercedes-Flotte, professionelle Fahrer, 24/7 Service.",
   },
   FR: {
     // Navigation
@@ -1062,6 +1066,8 @@ const translations: Record<Language, Record<string, string>> = {
     seoDalamanDesc: "Service premium de transfert aéroport Dalaman vers Fethiye, Ölüdeniz, Marmaris, Göcek. VIP Meet & Greet, flotte Mercedes, prix fixes.",
     seoEphesusTitle: "Transfert Ephèse & Pamukkale - Tours Privés & Transferts VIP | Meet Transfer",
     seoEphesusDesc: "Transferts privés et tours à Ephèse et Pamukkale. Excursions de croisière, tours guidés avec guides licenciés, flotte Mercedes.",
+    seoLuxuryTitle: "Service Chauffeur de Luxe Turquie - Chauffeur Privé VIP | Meet Transfer",
+    seoLuxuryDesc: "Service chauffeur de luxe premium en Turquie. Voyages d'affaires, transport événementiel, service aéroport VIP, location journée. Flotte Mercedes, chauffeurs professionnels, service 24/7.",
   },
   RU: {
     // Navigation
@@ -1405,6 +1411,8 @@ const translations: Record<Language, Record<string, string>> = {
     seoDalamanDesc: "Премиум трансфер из аэропорта Даламан в Фетхие, Олюдениз, Мармарис, Гёджек. VIP Meet & Greet, парк Mercedes, фиксированные цены.",
     seoEphesusTitle: "Трансфер в Эфес и Памуккале - Частные Туры и VIP Трансферы | Meet Transfer",
     seoEphesusDesc: "Частные трансферы и туры в Эфес и Памуккале. Круизные экскурсии, туры с лицензированными гидами, парк Mercedes.",
+    seoLuxuryTitle: "Люкс Шофер Сервис Турция - VIP Частный Водитель | Meet Transfer",
+    seoLuxuryDesc: "Премиум люкс шофер сервис в Турции. Бизнес-путешествия, транспорт для мероприятий, VIP аэропорт сервис, аренда на день. Парк Mercedes, профессиональные водители, сервис 24/7.",
   },
   IT: {
     // Navigation
@@ -1748,6 +1756,8 @@ const translations: Record<Language, Record<string, string>> = {
     seoDalamanDesc: "Servizio premium di trasferimento aeroporto Dalaman verso Fethiye, Ölüdeniz, Marmaris, Göcek. VIP Meet & Greet, flotta Mercedes, prezzi fissi.",
     seoEphesusTitle: "Trasferimento Efeso & Pamukkale - Tour Privati & Trasferimenti VIP | Meet Transfer",
     seoEphesusDesc: "Trasferimenti privati e tour a Efeso e Pamukkale. Escursioni da crociera, tour guidati con guide autorizzate, flotta Mercedes.",
+    seoLuxuryTitle: "Servizio Autista di Lusso Turchia - Autista Privato VIP | Meet Transfer",
+    seoLuxuryDesc: "Servizio autista di lusso premium in Turchia. Viaggi d'affari, trasporto eventi, servizio aeroporto VIP, noleggio giornaliero. Flotta Mercedes, autisti professionali, servizio 24/7.",
   },
   ES: {
     // Navigation
@@ -2091,6 +2101,8 @@ const translations: Record<Language, Record<string, string>> = {
     seoDalamanDesc: "Servicio premium de traslado aeropuerto Dalaman a Fethiye, Ölüdeniz, Marmaris, Göcek. VIP Meet & Greet, flota Mercedes, precios fijos.",
     seoEphesusTitle: "Traslado Éfeso & Pamukkale - Tours Privados & Transfers VIP | Meet Transfer",
     seoEphesusDesc: "Traslados privados y tours a Éfeso y Pamukkale. Excursiones de crucero, tours guiados con guías licenciados, flota Mercedes.",
+    seoLuxuryTitle: "Servicio Chófer de Lujo Turquía - Chófer Privado VIP | Meet Transfer",
+    seoLuxuryDesc: "Servicio premium de chófer de lujo en Turquía. Viajes de negocios, transporte de eventos, servicio aeropuerto VIP, alquiler diario. Flota Mercedes, chóferes profesionales, servicio 24/7.",
   },
   AR: {
     // Navigation
@@ -2434,6 +2446,8 @@ const translations: Record<Language, Record<string, string>> = {
     seoDalamanDesc: "خدمة نقل فاخرة من مطار دالامان إلى فتحية، أولودينيز، مرمريس، غوجيك. VIP استقبال وترحيب، أسطول مرسيدس، أسعار ثابتة.",
     seoEphesusTitle: "نقل أفسس وباموكالي - جولات خاصة ونقل VIP | Meet Transfer",
     seoEphesusDesc: "نقل خاص وجولات إلى أفسس وباموكالي. رحلات بحرية، جولات مع مرشدين مرخصين، أسطول مرسيدس.",
+    seoLuxuryTitle: "خدمة سائق فاخر تركيا - سائق خاص VIP | Meet Transfer",
+    seoLuxuryDesc: "خدمة سائق فاخر متميزة في تركيا. سفر الأعمال، نقل المناسبات، خدمة مطار VIP، تأجير يومي. أسطول مرسيدس، سائقون محترفون، خدمة 24/7.",
   },
 };
 

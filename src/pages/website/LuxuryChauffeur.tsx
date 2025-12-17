@@ -5,6 +5,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { Check, Star, Clock, Shield, Award, Car } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const services = [
   {
@@ -46,11 +47,13 @@ const features = [
 ];
 
 const LuxuryChauffeur = () => {
+  const { t } = useLanguage();
+  
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Luxury Chauffeur Service Turkey - VIP Private Driver | Meet Transfer"
-        description="Premium luxury chauffeur service in Turkey. Business travel, event transportation, VIP airport service, full-day hire. Mercedes fleet, professional drivers, 24/7 service."
+        title={t("seoLuxuryTitle")}
+        description={t("seoLuxuryDesc")}
         keywords="luxury chauffeur Turkey, VIP private driver, business travel Turkey, event transportation, hourly chauffeur service, Mercedes chauffeur, private driver Istanbul, executive car service"
         canonicalPath="/luxury-chauffeur"
       />
