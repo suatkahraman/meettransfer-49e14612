@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import GoogleRouteMap from '@/components/ui/google-route-map';
+import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 
 const vehicleTypes = [
   { value: 'mercedes-vito', label: 'Mercedes Vito' },
@@ -24,6 +25,12 @@ interface Reservation {
   id: string;
   pickup: string;
   dropoff: string;
+  pickup_place_name: string | null;
+  dropoff_place_name: string | null;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+  dropoff_lat: number | null;
+  dropoff_lng: number | null;
   pickup_date: string;
   pickup_time: string;
   flight_number: string | null;
@@ -47,6 +54,12 @@ const CustomerEditReservation = () => {
   const [formData, setFormData] = useState({
     pickup: '',
     dropoff: '',
+    pickup_place_name: '',
+    dropoff_place_name: '',
+    pickup_lat: null as number | null,
+    pickup_lng: null as number | null,
+    dropoff_lat: null as number | null,
+    dropoff_lng: null as number | null,
     pickup_date: '',
     pickup_time: '',
     flight_number: '',
@@ -86,6 +99,12 @@ const CustomerEditReservation = () => {
       setFormData({
         pickup: data.pickup || '',
         dropoff: data.dropoff || '',
+        pickup_place_name: data.pickup_place_name || '',
+        dropoff_place_name: data.dropoff_place_name || '',
+        pickup_lat: data.pickup_lat || null,
+        pickup_lng: data.pickup_lng || null,
+        dropoff_lat: data.dropoff_lat || null,
+        dropoff_lng: data.dropoff_lng || null,
         pickup_date: data.pickup_date || '',
         pickup_time: data.pickup_time || '',
         flight_number: data.flight_number || '',
@@ -154,6 +173,12 @@ const CustomerEditReservation = () => {
         .update({
           pickup: formData.pickup,
           dropoff: formData.dropoff,
+          pickup_place_name: formData.pickup_place_name || null,
+          dropoff_place_name: formData.dropoff_place_name || null,
+          pickup_lat: formData.pickup_lat,
+          pickup_lng: formData.pickup_lng,
+          dropoff_lat: formData.dropoff_lat,
+          dropoff_lng: formData.dropoff_lng,
           pickup_date: formData.pickup_date,
           pickup_time: formData.pickup_time,
           flight_number: formData.flight_number || null,
@@ -259,25 +284,37 @@ const CustomerEditReservation = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Pick-up Point */}
               <div className="space-y-2">
-                <Label htmlFor="pickup">Pick-up Point *</Label>
-                <Input
-                  id="pickup"
-                  value={formData.pickup}
-                  onChange={(e) => setFormData({ ...formData, pickup: e.target.value })}
+                <Label>Pick-up Point *</Label>
+                <GooglePlacesAutocomplete
                   placeholder="Enter Pick-up Point"
-                  required
+                  initialValue={formData.pickup_place_name || formData.pickup}
+                  onPlaceSelect={(place) => {
+                    setFormData({
+                      ...formData,
+                      pickup: place.formatted_address,
+                      pickup_place_name: place.name || '',
+                      pickup_lat: place.lat || null,
+                      pickup_lng: place.lng || null,
+                    });
+                  }}
                 />
               </div>
 
               {/* Drop-off */}
               <div className="space-y-2">
-                <Label htmlFor="dropoff">Drop-off Location *</Label>
-                <Input
-                  id="dropoff"
-                  value={formData.dropoff}
-                  onChange={(e) => setFormData({ ...formData, dropoff: e.target.value })}
+                <Label>Drop-off Location *</Label>
+                <GooglePlacesAutocomplete
                   placeholder="Enter destination"
-                  required
+                  initialValue={formData.dropoff_place_name || formData.dropoff}
+                  onPlaceSelect={(place) => {
+                    setFormData({
+                      ...formData,
+                      dropoff: place.formatted_address,
+                      dropoff_place_name: place.name || '',
+                      dropoff_lat: place.lat || null,
+                      dropoff_lng: place.lng || null,
+                    });
+                  }}
                 />
               </div>
 
