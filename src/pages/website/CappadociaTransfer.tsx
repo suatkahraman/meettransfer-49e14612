@@ -9,6 +9,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 
@@ -67,11 +68,13 @@ const vehicles = [
 ];
 
 const CappadociaTransfer = () => {
+  const { t } = useLanguage();
+  
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Cappadocia Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
-        description="Premium Cappadocia airport transfer service from Nevşehir and Kayseri airports to Göreme, Ürgüp, Uçhisar. VIP meet & greet, Mercedes fleet. Book your private Cappadocia transfer!"
+        title={t("seoCappadociaTitle")}
+        description={t("seoCappadociaDesc")}
         keywords="Cappadocia airport transfer, Nevşehir airport transfer, Kayseri airport transfer, Göreme transfer, Ürgüp transfer, Cappadocia VIP transfer, Cappadocia private driver, balloon flight transfer, cave hotel transfer"
         canonicalPath="/cappadocia-transfer"
       />

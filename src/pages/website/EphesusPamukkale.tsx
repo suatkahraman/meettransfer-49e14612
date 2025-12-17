@@ -9,6 +9,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 
@@ -64,11 +65,13 @@ const vehicles = [
 ];
 
 const EphesusPamukkale = () => {
+  const { t } = useLanguage();
+  
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Ephesus & Pamukkale Transfer - Private Tours & VIP Transfers | Meet Transfer"
-        description="Private transfers and tours to Ephesus and Pamukkale. Cruise shore excursions from Kuşadası, guided tours with licensed guides. Mercedes fleet, professional drivers."
+        title={t("seoEphesusTitle")}
+        description={t("seoEphesusDesc")}
         keywords="Ephesus transfer, Pamukkale transfer, Ephesus tour, Pamukkale tour, Kuşadası cruise excursion, Ephesus private tour, Hierapolis transfer, Turkey ancient sites tour, Selçuk transfer"
         canonicalPath="/ephesus-pamukkale"
       />

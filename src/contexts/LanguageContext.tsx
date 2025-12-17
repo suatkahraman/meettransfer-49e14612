@@ -370,6 +370,12 @@ const translations: Record<Language, Record<string, string>> = {
     seoBodrumDesc: "Premium Bodrum airport transfer service. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Bodrum transfer today!",
     seoCappadociaTitle: "Cappadocia Airport Transfer - VIP Private Chauffeur Service | Meet Transfer",
     seoCappadociaDesc: "Premium Cappadocia airport transfer service. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Cappadocia transfer today!",
+    seoIzmirTitle: "Izmir Airport Transfer - VIP Private Chauffeur Service | Meet Transfer",
+    seoIzmirDesc: "Premium Izmir airport transfer service to Çeşme, Alaçatı, Kuşadası, Ephesus. VIP meet & greet, Mercedes fleet, fixed prices.",
+    seoDalamanTitle: "Dalaman Airport Transfer - VIP Private Chauffeur Service | Meet Transfer",
+    seoDalamanDesc: "Premium Dalaman airport transfer service to Fethiye, Ölüdeniz, Marmaris, Göcek. VIP meet & greet, Mercedes fleet, fixed prices.",
+    seoEphesusTitle: "Ephesus & Pamukkale Transfer - Private Tours & VIP Transfers | Meet Transfer",
+    seoEphesusDesc: "Private transfers and tours to Ephesus and Pamukkale. Cruise shore excursions, guided tours with licensed guides, Mercedes fleet.",
   },
   DE: {
     // Navigation
@@ -707,6 +713,12 @@ const translations: Record<Language, Record<string, string>> = {
     seoBodrumDesc: "Premium Bodrum Flughafentransfer. VIP Meet & Greet, Mercedes-Flotte, Festpreise.",
     seoCappadociaTitle: "Kappadokien Flughafentransfer - VIP Privatchauffeur Service | Meet Transfer",
     seoCappadociaDesc: "Premium Kappadokien Flughafentransfer. VIP Meet & Greet, Mercedes-Flotte, Festpreise.",
+    seoIzmirTitle: "Izmir Flughafentransfer - VIP Privatchauffeur Service | Meet Transfer",
+    seoIzmirDesc: "Premium Izmir Flughafentransfer nach Çeşme, Alaçatı, Kuşadası, Ephesus. VIP Meet & Greet, Mercedes-Flotte, Festpreise.",
+    seoDalamanTitle: "Dalaman Flughafentransfer - VIP Privatchauffeur Service | Meet Transfer",
+    seoDalamanDesc: "Premium Dalaman Flughafentransfer nach Fethiye, Ölüdeniz, Marmaris, Göcek. VIP Meet & Greet, Mercedes-Flotte, Festpreise.",
+    seoEphesusTitle: "Ephesus & Pamukkale Transfer - Private Touren & VIP Transfers | Meet Transfer",
+    seoEphesusDesc: "Private Transfers und Touren zu Ephesus und Pamukkale. Kreuzfahrt-Ausflüge, geführte Touren mit lizenzierten Guides, Mercedes-Flotte.",
   },
   FR: {
     // Navigation
@@ -1044,6 +1056,12 @@ const translations: Record<Language, Record<string, string>> = {
     seoBodrumDesc: "Service premium de transfert aéroport Bodrum. VIP Meet & Greet, flotte Mercedes, prix fixes.",
     seoCappadociaTitle: "Transfert Aéroport Cappadoce - Service VIP Chauffeur Privé | Meet Transfer",
     seoCappadociaDesc: "Service premium de transfert aéroport Cappadoce. VIP Meet & Greet, flotte Mercedes, prix fixes.",
+    seoIzmirTitle: "Transfert Aéroport Izmir - Service VIP Chauffeur Privé | Meet Transfer",
+    seoIzmirDesc: "Service premium de transfert aéroport Izmir vers Çeşme, Alaçatı, Kuşadası, Ephèse. VIP Meet & Greet, flotte Mercedes, prix fixes.",
+    seoDalamanTitle: "Transfert Aéroport Dalaman - Service VIP Chauffeur Privé | Meet Transfer",
+    seoDalamanDesc: "Service premium de transfert aéroport Dalaman vers Fethiye, Ölüdeniz, Marmaris, Göcek. VIP Meet & Greet, flotte Mercedes, prix fixes.",
+    seoEphesusTitle: "Transfert Ephèse & Pamukkale - Tours Privés & Transferts VIP | Meet Transfer",
+    seoEphesusDesc: "Transferts privés et tours à Ephèse et Pamukkale. Excursions de croisière, tours guidés avec guides licenciés, flotte Mercedes.",
   },
   RU: {
     // Navigation
@@ -1381,6 +1399,12 @@ const translations: Record<Language, Record<string, string>> = {
     seoBodrumDesc: "Премиум трансфер из аэропорта Бодрум. VIP Meet & Greet, парк Mercedes, фиксированные цены.",
     seoCappadociaTitle: "Трансфер из Аэропорта Каппадокия - VIP Частный Шофер | Meet Transfer",
     seoCappadociaDesc: "Премиум трансфер из аэропорта Каппадокия. VIP Meet & Greet, парк Mercedes, фиксированные цены.",
+    seoIzmirTitle: "Трансфер из Аэропорта Измир - VIP Частный Шофер | Meet Transfer",
+    seoIzmirDesc: "Премиум трансфер из аэропорта Измир в Чешме, Алачаты, Кушадасы, Эфес. VIP Meet & Greet, парк Mercedes, фиксированные цены.",
+    seoDalamanTitle: "Трансфер из Аэропорта Даламан - VIP Частный Шофер | Meet Transfer",
+    seoDalamanDesc: "Премиум трансфер из аэропорта Даламан в Фетхие, Олюдениз, Мармарис, Гёджек. VIP Meet & Greet, парк Mercedes, фиксированные цены.",
+    seoEphesusTitle: "Трансфер в Эфес и Памуккале - Частные Туры и VIP Трансферы | Meet Transfer",
+    seoEphesusDesc: "Частные трансферы и туры в Эфес и Памуккале. Круизные экскурсии, туры с лицензированными гидами, парк Mercedes.",
   },
   IT: {
     // Navigation
@@ -1718,6 +1742,12 @@ const translations: Record<Language, Record<string, string>> = {
     seoBodrumDesc: "Servizio premium di trasferimento aeroporto Bodrum. VIP Meet & Greet, flotta Mercedes, prezzi fissi.",
     seoCappadociaTitle: "Trasferimento Aeroporto Cappadocia - Servizio VIP Autista Privato | Meet Transfer",
     seoCappadociaDesc: "Servizio premium di trasferimento aeroporto Cappadocia. VIP Meet & Greet, flotta Mercedes, prezzi fissi.",
+    seoIzmirTitle: "Trasferimento Aeroporto Izmir - Servizio VIP Autista Privato | Meet Transfer",
+    seoIzmirDesc: "Servizio premium di trasferimento aeroporto Izmir verso Çeşme, Alaçatı, Kuşadası, Efeso. VIP Meet & Greet, flotta Mercedes, prezzi fissi.",
+    seoDalamanTitle: "Trasferimento Aeroporto Dalaman - Servizio VIP Autista Privato | Meet Transfer",
+    seoDalamanDesc: "Servizio premium di trasferimento aeroporto Dalaman verso Fethiye, Ölüdeniz, Marmaris, Göcek. VIP Meet & Greet, flotta Mercedes, prezzi fissi.",
+    seoEphesusTitle: "Trasferimento Efeso & Pamukkale - Tour Privati & Trasferimenti VIP | Meet Transfer",
+    seoEphesusDesc: "Trasferimenti privati e tour a Efeso e Pamukkale. Escursioni da crociera, tour guidati con guide autorizzate, flotta Mercedes.",
   },
   ES: {
     // Navigation
@@ -2055,6 +2085,12 @@ const translations: Record<Language, Record<string, string>> = {
     seoBodrumDesc: "Servicio premium de traslado aeropuerto Bodrum. VIP Meet & Greet, flota Mercedes, precios fijos.",
     seoCappadociaTitle: "Traslado Aeropuerto Capadocia - Servicio VIP Chófer Privado | Meet Transfer",
     seoCappadociaDesc: "Servicio premium de traslado aeropuerto Capadocia. VIP Meet & Greet, flota Mercedes, precios fijos.",
+    seoIzmirTitle: "Traslado Aeropuerto Izmir - Servicio VIP Chófer Privado | Meet Transfer",
+    seoIzmirDesc: "Servicio premium de traslado aeropuerto Izmir a Çeşme, Alaçatı, Kuşadası, Éfeso. VIP Meet & Greet, flota Mercedes, precios fijos.",
+    seoDalamanTitle: "Traslado Aeropuerto Dalaman - Servicio VIP Chófer Privado | Meet Transfer",
+    seoDalamanDesc: "Servicio premium de traslado aeropuerto Dalaman a Fethiye, Ölüdeniz, Marmaris, Göcek. VIP Meet & Greet, flota Mercedes, precios fijos.",
+    seoEphesusTitle: "Traslado Éfeso & Pamukkale - Tours Privados & Transfers VIP | Meet Transfer",
+    seoEphesusDesc: "Traslados privados y tours a Éfeso y Pamukkale. Excursiones de crucero, tours guiados con guías licenciados, flota Mercedes.",
   },
   AR: {
     // Navigation
@@ -2392,6 +2428,12 @@ const translations: Record<Language, Record<string, string>> = {
     seoBodrumDesc: "خدمة نقل فاخرة من مطار بودروم. VIP استقبال وترحيب، أسطول مرسيدس، أسعار ثابتة.",
     seoCappadociaTitle: "نقل مطار كابادوكيا - خدمة VIP سائق خاص | Meet Transfer",
     seoCappadociaDesc: "خدمة نقل فاخرة من مطار كابادوكيا. VIP استقبال وترحيب، أسطول مرسيدس، أسعار ثابتة.",
+    seoIzmirTitle: "نقل مطار إزمير - خدمة VIP سائق خاص | Meet Transfer",
+    seoIzmirDesc: "خدمة نقل فاخرة من مطار إزمير إلى تشيشمي، ألاتشاتي، كوشاداسي، أفسس. VIP استقبال وترحيب، أسطول مرسيدس، أسعار ثابتة.",
+    seoDalamanTitle: "نقل مطار دالامان - خدمة VIP سائق خاص | Meet Transfer",
+    seoDalamanDesc: "خدمة نقل فاخرة من مطار دالامان إلى فتحية، أولودينيز، مرمريس، غوجيك. VIP استقبال وترحيب، أسطول مرسيدس، أسعار ثابتة.",
+    seoEphesusTitle: "نقل أفسس وباموكالي - جولات خاصة ونقل VIP | Meet Transfer",
+    seoEphesusDesc: "نقل خاص وجولات إلى أفسس وباموكالي. رحلات بحرية، جولات مع مرشدين مرخصين، أسطول مرسيدس.",
   },
 };
 
