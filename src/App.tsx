@@ -72,7 +72,7 @@ const ServicesPage = lazy(() => import("./pages/website/ServicesPage"));
 const queryClient = new QueryClient();
 
 // Language prefixes for non-English routes
-const LANG_PREFIXES = ["de", "fr", "ru", "it", "es"];
+const LANG_PREFIXES = ["de", "fr", "ru", "it", "es", "ar"];
 
 // Simple loading fallback
 const PageLoader = () => (
