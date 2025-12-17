@@ -569,6 +569,9 @@ export type Database = {
           driver_notes: string | null
           driver_user_id: string | null
           dropoff: string
+          dropoff_lat: number | null
+          dropoff_lng: number | null
+          dropoff_place_name: string | null
           flight_arrival_time: string | null
           flight_last_checked: string | null
           flight_number: string | null
@@ -583,6 +586,9 @@ export type Database = {
           payment_type: string
           pickup: string
           pickup_date: string
+          pickup_lat: number | null
+          pickup_lng: number | null
+          pickup_place_name: string | null
           pickup_time: string
           price: number | null
           price_currency: string | null
@@ -607,6 +613,9 @@ export type Database = {
           driver_notes?: string | null
           driver_user_id?: string | null
           dropoff: string
+          dropoff_lat?: number | null
+          dropoff_lng?: number | null
+          dropoff_place_name?: string | null
           flight_arrival_time?: string | null
           flight_last_checked?: string | null
           flight_number?: string | null
@@ -621,6 +630,9 @@ export type Database = {
           payment_type: string
           pickup: string
           pickup_date: string
+          pickup_lat?: number | null
+          pickup_lng?: number | null
+          pickup_place_name?: string | null
           pickup_time: string
           price?: number | null
           price_currency?: string | null
@@ -645,6 +657,9 @@ export type Database = {
           driver_notes?: string | null
           driver_user_id?: string | null
           dropoff?: string
+          dropoff_lat?: number | null
+          dropoff_lng?: number | null
+          dropoff_place_name?: string | null
           flight_arrival_time?: string | null
           flight_last_checked?: string | null
           flight_number?: string | null
@@ -659,6 +674,9 @@ export type Database = {
           payment_type?: string
           pickup?: string
           pickup_date?: string
+          pickup_lat?: number | null
+          pickup_lng?: number | null
+          pickup_place_name?: string | null
           pickup_time?: string
           price?: number | null
           price_currency?: string | null
