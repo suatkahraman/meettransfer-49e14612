@@ -17,6 +17,7 @@ import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-p
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
+import { LocationDisplay } from '@/components/ui/location-display';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = [
@@ -1427,7 +1428,18 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Alış Noktası</Label>
+                  {formData.pickup_place_name && (
+                    <div className="mb-2 p-2 bg-muted/50 rounded-lg">
+                      <LocationDisplay
+                        placeName={formData.pickup_place_name}
+                        address={formData.pickup}
+                        type="pickup"
+                        size="sm"
+                      />
+                    </div>
+                  )}
                   <GooglePlacesAutocomplete
+                    initialValue={formData.pickup}
                     onPlaceSelected={(value, details) => setFormData((prev) => ({ 
                       ...prev, 
                       pickup: value,
@@ -1440,7 +1452,18 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                 </div>
                 <div className="space-y-2">
                   <Label>Bırakış Noktası</Label>
+                  {formData.dropoff_place_name && (
+                    <div className="mb-2 p-2 bg-muted/50 rounded-lg">
+                      <LocationDisplay
+                        placeName={formData.dropoff_place_name}
+                        address={formData.dropoff}
+                        type="dropoff"
+                        size="sm"
+                      />
+                    </div>
+                  )}
                   <GooglePlacesAutocomplete
+                    initialValue={formData.dropoff}
                     onPlaceSelected={(value, details) => setFormData((prev) => ({ 
                       ...prev, 
                       dropoff: value,
