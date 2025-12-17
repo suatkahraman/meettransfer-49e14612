@@ -9,6 +9,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 
@@ -66,11 +67,13 @@ const vehicles = [
 ];
 
 const AntalyaTransfer = () => {
+  const { t } = useLanguage();
+  
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Antalya Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
-        description="Premium Antalya airport transfer service to Belek, Side, Alanya, Kemer. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Antalya transfer today!"
+        title={t("seoAntalyaTitle")}
+        description={t("seoAntalyaDesc")}
         keywords="Antalya airport transfer, AYT airport transfer, Belek airport transfer, Side airport transfer, Alanya airport transfer, Kemer transfer, Antalya VIP transfer, Antalya private driver, Turkey Riviera transfer"
         canonicalPath="/antalya-transfer"
       />

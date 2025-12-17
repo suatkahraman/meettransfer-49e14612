@@ -6,17 +6,19 @@ import { Features } from "@/components/Features";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   // Auto-redirect first-time visitors based on browser language
   useBrowserLanguageRedirect();
+  const { t } = useLanguage();
 
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Meet Transfer - Premium VIP Airport Transfer & Chauffeur Service in Turkey"
-        description="Luxury VIP airport transfer and private chauffeur service in Turkey. Professional drivers, Mercedes fleet, 24/7 service. Istanbul, Antalya, Bodrum, Dalaman, Cappadocia transfers."
-        keywords="airport transfer Turkey, VIP airport transfer, private chauffeur service, luxury airport transfer, Istanbul transfer, Antalya transfer, Bodrum transfer, Turkey private driver, Mercedes transfer"
+        title={t("seoHomeTitle")}
+        description={t("seoHomeDesc")}
+        keywords={t("seoHomeKeywords")}
         canonicalPath="/"
       />
       <SchemaOrg
