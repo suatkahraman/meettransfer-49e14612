@@ -6,7 +6,7 @@ interface LocalizedRoutesProps {
 }
 
 // Language prefixes for non-English routes
-const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es"];
+const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es", "ar"];
 
 /**
  * Creates routes for a page that supports multiple languages.
