@@ -12,7 +12,7 @@ interface SEOHeadProps {
   noIndex?: boolean;
 }
 
-const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es"];
+const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es", "ar"];
 const LANGUAGE_CODES: Record<Language, string> = {
   EN: "en",
   DE: "de",
@@ -20,6 +20,7 @@ const LANGUAGE_CODES: Record<Language, string> = {
   RU: "ru",
   IT: "it",
   ES: "es",
+  AR: "ar",
 };
 
 const SEOHead = ({
@@ -106,7 +107,7 @@ const SEOHead = ({
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
 
     // Add hreflang tags for all languages
-    const languages: Language[] = ["EN", "DE", "FR", "RU", "IT", "ES"];
+    const languages: Language[] = ["EN", "DE", "FR", "RU", "IT", "ES", "AR"];
     languages.forEach(lang => {
       const hreflang = document.createElement('link');
       hreflang.setAttribute('rel', 'alternate');
