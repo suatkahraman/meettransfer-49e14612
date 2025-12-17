@@ -5,7 +5,6 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import vitoVip1 from "@/assets/vito-vip-1.jpg";
-import vito1 from "@/assets/vito-1.jpg";
 import vito2 from "@/assets/vito-2.jpg";
 import vito3 from "@/assets/vito-3.jpg";
 import vito4 from "@/assets/vito-4.jpg";
@@ -46,7 +45,7 @@ const FleetPage = () => {
       passengers: 7,
       luggage: 7,
       features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-      images: [vito1, vito2, vito3, vito4, vito5, vito6],
+      images: [vito2, vito3, vito4, vito5, vito6],
     },
     {
       name: t("maybachName"),
