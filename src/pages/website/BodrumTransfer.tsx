@@ -100,23 +100,18 @@ const BodrumTransfer = () => {
       />
 
       <PageHeader
-        title="Bodrum Airport Transfer – VIP Chauffeur Service"
-        subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
+        title={t("bodrumTransferTitle")}
+        subtitle={t("transferSubtitle")}
         backgroundImage="https://images.unsplash.com/photo-1568196555325-8c46f49ed55e?w=1600"
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
         <section className="prose max-w-none">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Private Airport Transfer in Bodrum
+            {t("bodrumTransferH1")}
           </h1>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            Arrive in style at the stunning Bodrum Peninsula. Meet Transfer
-            offers premium <strong>Bodrum airport transfers</strong> from <strong>Milas-Bodrum Airport (BJV)</strong> to
-            all exclusive destinations including <strong>Yalıkavak, Türkbükü, and Gümüşlük</strong>.
-            Our luxury <strong>Mercedes vehicles</strong> and professional drivers ensure a comfortable
-            journey to your yacht, villa, or beach resort. We serve all <strong>Bodrum marinas</strong>
-            and hotels on the peninsula with 24/7 availability for your <strong>private Bodrum transfer</strong>.
+            {t("bodrumTransferIntro")}
           </p>
         </section>
 
@@ -124,27 +119,26 @@ const BodrumTransfer = () => {
 
         <section className="grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h2 className="text-2xl font-bold mb-4">Bodrum City Transfer Service</h2>
+            <h2 className="text-2xl font-bold mb-4">{t("bodrumCityServiceTitle")}</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              Whether you're arriving at Milas-Bodrum Airport or need a transfer within the peninsula, 
-              our professional drivers will meet you with a personalized name sign and ensure a smooth journey.
+              {t("bodrumCityServiceDesc")}
             </p>
             <ul className="space-y-2 text-muted-foreground">
               <li className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-accent" />
-                Meet & Greet at arrival hall
+                {t("meetGreetArrival")}
               </li>
               <li className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-accent" />
-                Door-to-door service to any location
+                {t("doorToDoorAnyLocation")}
               </li>
               <li className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-accent" />
-                Professional English-speaking drivers
+                {t("professionalEnglishDrivers")}
               </li>
               <li className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-accent" />
-                Flexible scheduling for your convenience
+                {t("flexibleScheduling")}
               </li>
             </ul>
           </div>
@@ -159,7 +153,7 @@ const BodrumTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Popular Bodrum Transfer Destinations</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("popularTransferDestinations")} Bodrum</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {destinations.map((dest) => (
               <div
@@ -174,7 +168,7 @@ const BodrumTransfer = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">VIP Fleet for Bodrum Transfers</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("vipFleetForTransfers")} Bodrum</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.name} {...vehicle} />
@@ -182,29 +176,29 @@ const BodrumTransfer = () => {
           </div>
           <Link to="/fleet" className="inline-block mt-4">
             <Button variant="outline" className="gap-2">
-              View All Vehicles <ArrowRight className="h-4 w-4" />
+              {t("viewAllVehicles")} <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Bodrum Airport Transfer Prices</h2>
-          <PriceTable items={prices} title="Fixed Price Transfers" />
+          <h2 className="text-2xl font-bold mb-4">{t("airportTransferPricesTitle")} Bodrum</h2>
+          <PriceTable items={prices} title={t("fixedPriceTransfers")} />
         </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Book Your Bodrum Airport Transfer</h3>
+          <h3 className="text-xl font-bold mb-2">{t("bookYourAirportTransfer")} Bodrum</h3>
           <p className="text-muted-foreground mb-4">
-            Get instant confirmation via WhatsApp for your Bodrum transfer
+            {t("getWhatsAppConfirmation")}
           </p>
           <WhatsAppButton
             variant="large"
-            message="Hello, I would like to book a transfer from Bodrum Airport."
+            message={t("bodrumWhatsApp")}
           />
         </div>
 
         <section>
-          <h2 className="text-2xl font-bold mb-4">Bodrum Transfer FAQ</h2>
+          <h2 className="text-2xl font-bold mb-4">{t("transferFaqTitle")} Bodrum</h2>
           <FAQSection items={faqItems} />
         </section>
       </div>
