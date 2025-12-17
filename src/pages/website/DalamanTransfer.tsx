@@ -9,6 +9,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 
@@ -66,11 +67,13 @@ const vehicles = [
 ];
 
 const DalamanTransfer = () => {
+  const { t } = useLanguage();
+  
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Dalaman Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
-        description="Premium Dalaman airport transfer service to Fethiye, Ölüdeniz, Marmaris, Göcek. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Dalaman transfer today!"
+        title={t("seoDalamanTitle")}
+        description={t("seoDalamanDesc")}
         keywords="Dalaman airport transfer, DLM airport transfer, Fethiye airport transfer, Ölüdeniz transfer, Marmaris transfer, Göcek transfer, Dalaman VIP transfer, Dalaman private driver, Turquoise Coast transfer"
         canonicalPath="/dalaman-transfer"
       />

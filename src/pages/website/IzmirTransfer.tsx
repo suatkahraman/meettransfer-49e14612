@@ -9,6 +9,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 
@@ -65,11 +66,13 @@ const vehicles = [
 ];
 
 const IzmirTransfer = () => {
+  const { t } = useLanguage();
+  
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Izmir Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
-        description="Premium Izmir airport transfer service to Çeşme, Alaçatı, Kuşadası, Ephesus. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Izmir transfer today!"
+        title={t("seoIzmirTitle")}
+        description={t("seoIzmirDesc")}
         keywords="Izmir airport transfer, ADB airport transfer, Çeşme airport transfer, Alaçatı transfer, Kuşadası transfer, Ephesus transfer, Izmir VIP transfer, Izmir private driver, Aegean Coast transfer"
         canonicalPath="/izmir-transfer"
       />

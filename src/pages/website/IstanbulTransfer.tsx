@@ -9,6 +9,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 
@@ -72,11 +73,13 @@ const vehicles = [
 ];
 
 const IstanbulTransfer = () => {
+  const { t } = useLanguage();
+  
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Istanbul Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
-        description="Premium Istanbul airport transfer service from IST and Sabiha Gökçen Airport. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Istanbul transfer today!"
+        title={t("seoIstanbulTitle")}
+        description={t("seoIstanbulDesc")}
         keywords="Istanbul airport transfer, IST airport transfer, Sabiha Gökçen transfer, Istanbul private driver, Istanbul VIP transfer, Istanbul chauffeur service, Taksim airport transfer, Sultanahmet airport transfer"
         canonicalPath="/istanbul-transfer"
       />

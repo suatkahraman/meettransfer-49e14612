@@ -9,6 +9,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useLanguage } from "@/contexts/LanguageContext";
 import bodrumMeetTransfer from "@/assets/bodrum-meet-transfer.png";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
@@ -67,11 +68,13 @@ const vehicles = [
 ];
 
 const BodrumTransfer = () => {
+  const { t } = useLanguage();
+  
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Bodrum Airport Transfer - VIP Private Chauffeur Service | Meet Transfer"
-        description="Premium Bodrum airport transfer service to Yalıkavak, Türkbükü, Gümüşlük, marinas. VIP meet & greet, Mercedes fleet, fixed prices. Book your private Bodrum transfer today!"
+        title={t("seoBodrumTitle")}
+        description={t("seoBodrumDesc")}
         keywords="Bodrum airport transfer, BJV airport transfer, Yalıkavak transfer, Türkbükü transfer, Gümüşlük transfer, Bodrum VIP transfer, Bodrum private driver, Bodrum marina transfer, Bodrum Peninsula transfer"
         canonicalPath="/bodrum-transfer"
       />
