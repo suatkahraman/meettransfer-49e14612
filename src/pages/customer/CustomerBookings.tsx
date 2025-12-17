@@ -13,6 +13,7 @@ import NotificationBell from '@/components/NotificationBell';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { FlightStatus } from '@/components/ui/flight-status';
+import { LocationDisplay } from '@/components/ui/location-display';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -26,6 +27,8 @@ interface Reservation {
   reservation_code: string | null;
   pickup: string;
   dropoff: string;
+  pickup_place_name: string | null;
+  dropoff_place_name: string | null;
   pickup_date: string;
   pickup_time: string;
   flight_number: string | null;
@@ -291,11 +294,19 @@ const CustomerBookings = () => {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        <span>{reservation.pickup}</span>
-                        <span className="text-muted-foreground">→</span>
-                        <span>{reservation.dropoff}</span>
+                      <div className="space-y-2">
+                        <LocationDisplay
+                          placeName={reservation.pickup_place_name}
+                          address={reservation.pickup}
+                          type="pickup"
+                          size="sm"
+                        />
+                        <LocationDisplay
+                          placeName={reservation.dropoff_place_name}
+                          address={reservation.dropoff}
+                          type="dropoff"
+                          size="sm"
+                        />
                       </div>
                       
                       <div className="flex items-center justify-between pt-2 border-t">
@@ -366,11 +377,19 @@ const CustomerBookings = () => {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        <span>{reservation.pickup}</span>
-                        <span className="text-muted-foreground">→</span>
-                        <span>{reservation.dropoff}</span>
+                      <div className="space-y-2">
+                        <LocationDisplay
+                          placeName={reservation.pickup_place_name}
+                          address={reservation.pickup}
+                          type="pickup"
+                          size="sm"
+                        />
+                        <LocationDisplay
+                          placeName={reservation.dropoff_place_name}
+                          address={reservation.dropoff}
+                          type="dropoff"
+                          size="sm"
+                        />
                       </div>
                       
                       <div className="flex items-center justify-between pt-2 border-t">
