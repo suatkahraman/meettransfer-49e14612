@@ -42,6 +42,7 @@ const DriverHome = () => {
   const { driverId } = useUserRole();
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { playSound } = useNotificationSound();
@@ -78,6 +79,24 @@ const DriverHome = () => {
         return dateTimeA.getTime() - dateTimeB.getTime();
       });
       setReservations(sortedData);
+      
+      // Fetch admin notes for all reservations
+      if (sortedData.length > 0) {
+        const ids = sortedData.map(r => r.id);
+        const { data: notesData } = await supabase
+          .from('reservation_admin_notes')
+          .select('reservation_id, notes')
+          .in('reservation_id', ids);
+        
+        if (notesData) {
+          const notesObj: Record<string, string> = {};
+          notesData.forEach(n => {
+            if (n.notes) notesObj[n.reservation_id] = n.notes;
+          });
+          setAdminNotesMap(notesObj);
+        }
+      }
+      
       if (showToast) toast.success('Jobs refreshed');
     }
     setLoading(false);
@@ -439,6 +458,7 @@ const DriverHome = () => {
                         >
                           <SwipeableJobCard
                             reservation={reservation}
+                            adminNotes={adminNotesMap[reservation.id]}
                             onAccept={() => handleAcceptJob(reservation.id)}
                             onClick={() => navigate(`/driver/job/${reservation.id}`)}
                           />
@@ -488,6 +508,7 @@ const DriverHome = () => {
                         >
                           <SwipeableJobCard
                             reservation={reservation}
+                            adminNotes={adminNotesMap[reservation.id]}
                             onComplete={() => handleCompleteJob(reservation.id)}
                             onClick={() => navigate(`/driver/job/${reservation.id}`)}
                           />
@@ -537,6 +558,7 @@ const DriverHome = () => {
                         >
                           <SwipeableJobCard
                             reservation={reservation}
+                            adminNotes={adminNotesMap[reservation.id]}
                             onClick={() => navigate(`/driver/job/${reservation.id}`)}
                           />
                         </motion.div>
