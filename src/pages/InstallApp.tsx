@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Download, Share, Plus, MoreVertical, Smartphone, Check } from 'lucide-react';
+import { ArrowLeft, Download, Share, Plus, MoreVertical, Check, Bell, Zap, Wifi } from 'lucide-react';
+import { SEOHead } from '@/components/seo';
+import logo from '@/assets/meet-transfer-logo-optimized.webp';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -96,6 +98,12 @@ const InstallApp = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-secondary">
+      <SEOHead 
+        title="Install Meet Transfer App | Premium Airport Transfer"
+        description="Install Meet Transfer app on your device for quick access to luxury airport transfers across Turkey."
+        canonicalPath="/install"
+      />
+      
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="flex items-center h-14 px-4">
           <Link to="/" className="flex items-center gap-2 text-foreground">
@@ -108,8 +116,8 @@ const InstallApp = () => {
       <div className="flex-1 flex items-center justify-center p-4 py-8">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-4">
-            <div className="mx-auto w-20 h-20 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-              <Smartphone className="h-10 w-10 text-accent" />
+            <div className="mx-auto w-24 h-24 rounded-2xl overflow-hidden shadow-lg border border-border">
+              <img src={logo} alt="Meet Transfer" className="w-full h-full object-cover" />
             </div>
             <CardTitle className="text-2xl md:text-3xl font-serif">Install Meet Transfer</CardTitle>
             <CardDescription>
@@ -122,25 +130,25 @@ const InstallApp = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm">
                 <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                  <Check className="h-4 w-4 text-accent" />
+                  <Zap className="h-4 w-4 text-accent" />
                 </div>
                 <span>Quick access from your home screen</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                  <Check className="h-4 w-4 text-accent" />
+                  <Bell className="h-4 w-4 text-accent" />
                 </div>
-                <span>Fullscreen app experience</span>
+                <span>Push notifications for trip updates</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                  <Check className="h-4 w-4 text-accent" />
+                  <Download className="h-4 w-4 text-accent" />
                 </div>
                 <span>Faster loading times</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                  <Check className="h-4 w-4 text-accent" />
+                  <Wifi className="h-4 w-4 text-accent" />
                 </div>
                 <span>Works offline</span>
               </div>
