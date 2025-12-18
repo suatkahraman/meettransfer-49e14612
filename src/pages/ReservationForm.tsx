@@ -380,6 +380,14 @@ const ReservationForm = () => {
         ? 'Both reservations submitted! We will contact you with pricing.'
         : 'Reservation submitted! We will contact you with pricing.';
       toast.success(successMessage);
+      
+      // Fire Google Ads conversion event on successful booking submission
+      if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+        (window as any).gtag('event', 'conversion', {
+          'send_to': 'AW-668686697/BOOK_REQUEST_ID'
+        });
+      }
+      
       setIsSubmitted(true);
     } catch (error: any) {
       console.error('Reservation error:', error);
