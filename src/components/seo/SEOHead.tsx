@@ -12,8 +12,11 @@ interface SEOHeadProps {
   noIndex?: boolean;
 }
 
-const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es", "ar"];
-const LANGUAGE_CODES: Record<Language, string> = {
+// All supported language prefixes in URL paths
+const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es", "ar", "tr"];
+
+// Language code mapping for hreflang attributes
+const LANGUAGE_CODES: Record<Language | "TR", string> = {
   EN: "en",
   DE: "de",
   FR: "fr",
@@ -21,6 +24,7 @@ const LANGUAGE_CODES: Record<Language, string> = {
   IT: "it",
   ES: "es",
   AR: "ar",
+  TR: "tr",
 };
 
 const SEOHead = ({
@@ -36,20 +40,35 @@ const SEOHead = ({
   const { language } = useLanguage();
   const baseUrl = 'https://meettransfer.app';
 
-  // Get base path without language prefix
-  const getBasePath = () => {
+  // Get the base path without any language prefix
+  const getBasePath = (): string => {
     const pathParts = location.pathname.split("/").filter(Boolean);
     const firstPart = pathParts[0]?.toLowerCase();
     
     if (LANGUAGE_PREFIXES.includes(firstPart)) {
-      return "/" + pathParts.slice(1).join("/") || "/";
+      const remainingPath = pathParts.slice(1).join("/");
+      return remainingPath ? `/${remainingPath}` : "/";
     }
-    return location.pathname;
+    return location.pathname || "/";
+  };
+
+  // Get the current language from URL
+  const getCurrentLanguageFromUrl = (): string => {
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    const firstPart = pathParts[0]?.toLowerCase();
+    
+    if (LANGUAGE_PREFIXES.includes(firstPart)) {
+      return firstPart;
+    }
+    return "en"; // Default to English if no language prefix
   };
 
   const basePath = canonicalPath || getBasePath();
-  const fullUrl = `${baseUrl}${location.pathname}`;
-  const canonicalUrl = `${baseUrl}${language === "EN" ? basePath : `/${language.toLowerCase()}${basePath === "/" ? "" : basePath}`}`;
+  const currentLangFromUrl = getCurrentLanguageFromUrl();
+  
+  // SELF-REFERENCING CANONICAL: Always use the exact current URL path
+  const canonicalUrl = `${baseUrl}${location.pathname === "/" ? "" : location.pathname}`;
+  const fullUrl = canonicalUrl;
 
   useEffect(() => {
     // Update title
@@ -85,14 +104,26 @@ const SEOHead = ({
     updateMeta('og:type', ogType, true);
     updateMeta('og:image', ogImage, true);
     updateMeta('og:site_name', 'Meet Transfer', true);
-    updateMeta('og:locale', `${LANGUAGE_CODES[language]}_${LANGUAGE_CODES[language].toUpperCase()}`, true);
+    
+    // Set og:locale based on current URL language
+    const localeMap: Record<string, string> = {
+      en: 'en_US',
+      de: 'de_DE',
+      fr: 'fr_FR',
+      ru: 'ru_RU',
+      it: 'it_IT',
+      es: 'es_ES',
+      ar: 'ar_SA',
+      tr: 'tr_TR',
+    };
+    updateMeta('og:locale', localeMap[currentLangFromUrl] || 'en_US', true);
 
     // Twitter
     updateMeta('twitter:title', title);
     updateMeta('twitter:description', description);
     updateMeta('twitter:image', ogImage);
 
-    // Update canonical
+    // Update canonical - SELF-REFERENCING
     let canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) {
       canonical.setAttribute('href', canonicalUrl);
@@ -106,31 +137,44 @@ const SEOHead = ({
     // Remove existing hreflang tags
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
 
+    // All languages for hreflang (including Turkish)
+    const allLanguages = ["en", "de", "fr", "ru", "it", "es", "ar", "tr"];
+    
     // Add hreflang tags for all languages
-    const languages: Language[] = ["EN", "DE", "FR", "RU", "IT", "ES", "AR"];
-    languages.forEach(lang => {
+    allLanguages.forEach(lang => {
       const hreflang = document.createElement('link');
       hreflang.setAttribute('rel', 'alternate');
-      hreflang.setAttribute('hreflang', LANGUAGE_CODES[lang]);
-      const langPath = lang === "EN" 
-        ? basePath 
-        : `/${lang.toLowerCase()}${basePath === "/" ? "" : basePath}`;
-      hreflang.setAttribute('href', `${baseUrl}${langPath}`);
+      hreflang.setAttribute('hreflang', lang);
+      
+      // Build the URL for this language version
+      let langUrl: string;
+      if (lang === "en") {
+        // English is the default (no prefix)
+        langUrl = basePath === "/" ? baseUrl : `${baseUrl}${basePath}`;
+      } else {
+        // Other languages have a prefix
+        langUrl = basePath === "/" 
+          ? `${baseUrl}/${lang}` 
+          : `${baseUrl}/${lang}${basePath}`;
+      }
+      
+      hreflang.setAttribute('href', langUrl);
       document.head.appendChild(hreflang);
     });
 
-    // Add x-default hreflang (pointing to English)
+    // Add x-default hreflang (pointing to English version)
     const xDefault = document.createElement('link');
     xDefault.setAttribute('rel', 'alternate');
     xDefault.setAttribute('hreflang', 'x-default');
-    xDefault.setAttribute('href', `${baseUrl}${basePath}`);
+    const xDefaultUrl = basePath === "/" ? baseUrl : `${baseUrl}${basePath}`;
+    xDefault.setAttribute('href', xDefaultUrl);
     document.head.appendChild(xDefault);
 
     return () => {
       // Cleanup hreflang tags on unmount
       document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
     };
-  }, [title, description, keywords, fullUrl, canonicalUrl, ogImage, ogType, noIndex, language, basePath]);
+  }, [title, description, keywords, fullUrl, canonicalUrl, ogImage, ogType, noIndex, currentLangFromUrl, basePath]);
 
   return null;
 };
