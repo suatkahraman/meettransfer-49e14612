@@ -29,7 +29,11 @@ interface ProductSchema {
   };
 }
 
-type SchemaType = LocalBusinessSchema | TransportationServiceSchema | FAQSchema | BreadcrumbSchema | ProductSchema;
+interface MerchantProductSchema {
+  type: 'MerchantProduct';
+}
+
+type SchemaType = LocalBusinessSchema | TransportationServiceSchema | FAQSchema | BreadcrumbSchema | ProductSchema | MerchantProductSchema;
 
 interface SchemaOrgProps {
   schemas: SchemaType[];
@@ -174,6 +178,60 @@ const generateProductSchema = (product: ProductSchema) => ({
   }),
 });
 
+const generateMerchantProductSchema = () => ({
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: 'Meet Transfer – VIP Airport Transfer Service',
+  description: 'Luxury private airport transfer service in Turkey with fixed prices, professional chauffeurs and VIP Mercedes vehicles.',
+  brand: {
+    '@type': 'Brand',
+    name: 'Meet Transfer',
+  },
+  image: [
+    'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+    'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
+  ],
+  offers: {
+    '@type': 'Offer',
+    url: 'https://meettransfer.app/',
+    priceCurrency: 'USD',
+    price: '0',
+    priceValidUntil: '2026-12-31',
+    availability: 'https://schema.org/InStock',
+    itemCondition: 'https://schema.org/NewCondition',
+    shippingDetails: {
+      '@type': 'OfferShippingDetails',
+      shippingRate: {
+        '@type': 'MonetaryAmount',
+        value: '0',
+        currency: 'USD',
+      },
+      deliveryTime: {
+        '@type': 'ShippingDeliveryTime',
+        handlingTime: {
+          '@type': 'QuantitativeValue',
+          minValue: 0,
+          maxValue: 0,
+          unitCode: 'DAY',
+        },
+        transitTime: {
+          '@type': 'QuantitativeValue',
+          minValue: 0,
+          maxValue: 0,
+          unitCode: 'DAY',
+        },
+      },
+    },
+    hasMerchantReturnPolicy: {
+      '@type': 'MerchantReturnPolicy',
+      returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+      merchantReturnDays: 1,
+      returnMethod: 'https://schema.org/ReturnByCancellation',
+      returnFees: 'https://schema.org/FreeReturn',
+    },
+  },
+});
+
 const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
   useEffect(() => {
     // Remove existing schema scripts
@@ -199,6 +257,9 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
           break;
         case 'Product':
           schemaData = generateProductSchema(schema as ProductSchema);
+          break;
+        case 'MerchantProduct':
+          schemaData = generateMerchantProductSchema();
           break;
         default:
           return;

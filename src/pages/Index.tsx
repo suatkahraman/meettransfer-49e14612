@@ -25,6 +25,7 @@ const Index = () => {
         schemas={[
           { type: 'LocalBusiness' },
           { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia'] },
+          { type: 'MerchantProduct' },
         ]}
       />
       <Hero />
