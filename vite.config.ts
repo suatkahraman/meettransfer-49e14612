@@ -17,19 +17,27 @@ export default defineConfig(({ mode }) => ({
       // Manual update only: do not auto-check/apply SW updates.
       registerType: "prompt",
       injectRegister: null,
-      includeAssets: ["favicon.ico", "robots.txt"],
+      includeAssets: ["favicon.ico", "apple-touch-icon.png", "robots.txt", "sitemap.xml"],
       manifest: {
+        id: "/",
         name: "Meet Transfer - Premium Airport Transfers",
         short_name: "Meet Transfer",
         description: "Luxury airport transfer and chauffeur service across Turkey. Professional drivers, premium fleet, 24/7 availability.",
+        lang: "en",
+        dir: "ltr",
         theme_color: "#111111",
-        background_color: "#ffffff",
+        background_color: "#111111",
         display: "standalone",
         orientation: "portrait",
         scope: "/",
-        start_url: "/",
-        categories: ["travel", "transportation"],
+        start_url: "/?source=pwa",
+        categories: ["travel", "transportation", "lifestyle"],
         icons: [
+          {
+            src: "/favicon.ico",
+            sizes: "48x48",
+            type: "image/x-icon"
+          },
           {
             src: "/pwa-192x192.png",
             sizes: "192x192",
@@ -55,18 +63,43 @@ export default defineConfig(({ mode }) => ({
             purpose: "maskable"
           }
         ],
+        shortcuts: [
+          {
+            name: "Book Transfer",
+            short_name: "Book",
+            description: "Book a new airport transfer",
+            url: "/whatsapp-booking?source=pwa",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }]
+          },
+          {
+            name: "My Bookings",
+            short_name: "Bookings",
+            description: "View your reservations",
+            url: "/customer?source=pwa",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }]
+          },
+          {
+            name: "Contact Us",
+            short_name: "Contact",
+            description: "Get in touch with us",
+            url: "/contact?source=pwa",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }]
+          }
+        ],
         screenshots: [
           {
             src: "/screenshot-wide.png",
             sizes: "1280x720",
             type: "image/png",
-            form_factor: "wide"
+            form_factor: "wide",
+            label: "Meet Transfer Homepage"
           },
           {
             src: "/screenshot-narrow.png",
             sizes: "720x1280",
             type: "image/png",
-            form_factor: "narrow"
+            form_factor: "narrow",
+            label: "Meet Transfer Mobile View"
           }
         ]
       },
