@@ -93,6 +93,7 @@ const AntalyaTransfer = () => {
             type: 'Product',
             name: 'Antalya Airport Transfer Service',
             description: 'Premium VIP airport transfer from Antalya Airport (AYT) to all beach resorts',
+            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
             offers: { price: '35', priceCurrency: 'USD' },
           },
         ]}

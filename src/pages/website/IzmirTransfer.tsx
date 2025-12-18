@@ -92,6 +92,7 @@ const IzmirTransfer = () => {
             type: 'Product',
             name: 'Izmir Airport Transfer Service',
             description: 'Premium VIP airport transfer from Adnan Menderes Airport (ADB) to Aegean Coast destinations',
+            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
             offers: { price: '35', priceCurrency: 'USD' },
           },
         ]}

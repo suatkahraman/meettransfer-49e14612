@@ -94,6 +94,7 @@ const CappadociaTransfer = () => {
             type: 'Product',
             name: 'Cappadocia Airport Transfer Service',
             description: 'Premium VIP airport transfer from Nevşehir (NAV) and Kayseri (ASR) airports to Cappadocia cave hotels',
+            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
             offers: { price: '40', priceCurrency: 'USD' },
           },
         ]}

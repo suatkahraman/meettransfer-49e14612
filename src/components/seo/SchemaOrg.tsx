@@ -23,6 +23,7 @@ interface ProductSchema {
   type: 'Product';
   name: string;
   description: string;
+  image?: string[];
   offers?: {
     price: string;
     priceCurrency: string;
@@ -164,6 +165,7 @@ const generateProductSchema = (product: ProductSchema) => ({
     '@type': 'Brand',
     name: 'Meet Transfer',
   },
+  ...(product.image && { image: product.image }),
   ...(product.offers && {
     offers: {
       '@type': 'Offer',

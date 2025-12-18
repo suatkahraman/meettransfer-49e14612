@@ -94,6 +94,7 @@ const BodrumTransfer = () => {
             type: 'Product',
             name: 'Bodrum Airport Transfer Service',
             description: 'Premium VIP airport transfer from Milas-Bodrum Airport (BJV) to all Bodrum Peninsula destinations',
+            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
             offers: { price: '40', priceCurrency: 'USD' },
           },
         ]}
