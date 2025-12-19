@@ -1145,6 +1145,16 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                       </div>
                     )}
 
+                    {formData.price && (
+                      <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                        <DollarSign className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Bütçe</p>
+                          <p className="font-semibold text-green-600">{getCurrencySymbol(formData.price_currency)}{formData.price}</p>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
                       <Mail className="h-5 w-5 text-muted-foreground" />
                       <div className="flex-1">
