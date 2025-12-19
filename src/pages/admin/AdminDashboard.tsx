@@ -8,6 +8,7 @@ import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, S
 import { startOfMonth, endOfMonth, startOfDay, endOfDay, format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
+import { MonthlyProfitCard } from '@/components/admin/MonthlyProfitCard';
 
 interface KPIs {
   newToday: number;
@@ -172,6 +173,11 @@ const AdminDashboard = () => {
               <div className="text-2xl font-bold text-primary">₺{loading ? '-' : kpis.monthlyRevenue.toFixed(0)}</div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Monthly Profit Card */}
+        <div className="mb-8">
+          <MonthlyProfitCard />
         </div>
 
         {/* Navigation Menu */}
