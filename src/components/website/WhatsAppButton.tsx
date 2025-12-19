@@ -1,6 +1,7 @@
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { trackConversion, CONVERSION_LABELS } from "@/lib/gtag";
 
 interface WhatsAppButtonProps {
   phone?: string;
@@ -18,6 +19,9 @@ const WhatsAppButton = ({
   const { t } = useLanguage();
 
   const handleClick = () => {
+    // Track WhatsApp click conversion
+    trackConversion(CONVERSION_LABELS.WHATSAPP_CLICK);
+    
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${phone}?text=${encodedMessage}`, "_blank");
   };

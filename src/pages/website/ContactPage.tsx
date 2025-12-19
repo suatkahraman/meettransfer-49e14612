@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { trackConversion, CONVERSION_LABELS } from "@/lib/gtag";
 
 const globalOffices = [
   {
@@ -62,6 +63,9 @@ const ContactPage = () => {
 
     // Simulate form submission
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Track contact form conversion
+    trackConversion(CONVERSION_LABELS.CONTACT_FORM_SUBMIT);
 
     toast.success(t("messageSent"));
     setFormData({ name: "", phone: "", message: "" });

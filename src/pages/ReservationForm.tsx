@@ -18,6 +18,7 @@ import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-p
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
+import { trackConversion, CONVERSION_LABELS } from '@/lib/gtag';
 
 const reservationSchema = z.object({
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
@@ -382,11 +383,7 @@ const ReservationForm = () => {
       toast.success(successMessage);
       
       // Fire Google Ads conversion event on successful booking submission
-      if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
-        (window as any).gtag('event', 'conversion', {
-          'send_to': 'AW-668686697/BOOK_REQUEST_ID'
-        });
-      }
+      trackConversion(CONVERSION_LABELS.RESERVATION_SUBMIT);
       
       setIsSubmitted(true);
     } catch (error: any) {
