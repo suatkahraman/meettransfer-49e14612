@@ -38,7 +38,7 @@ export const MonthlyProfitCard = () => {
     const monthEnd = endOfMonth(currentMonth);
     
     try {
-      // Fetch completed reservations with prices for the month
+      // Fetch completed reservations with agency assigned for the month
       const { data: reservations, error: resError } = await supabase
         .from("reservations")
         .select(`
@@ -50,6 +50,8 @@ export const MonthlyProfitCard = () => {
           agency_id
         `)
         .eq("status", "completed")
+        .not("agency_id", "is", null)
+        .not("price", "is", null)
         .gte("pickup_date", format(monthStart, "yyyy-MM-dd"))
         .lte("pickup_date", format(monthEnd, "yyyy-MM-dd"));
 
@@ -59,10 +61,8 @@ export const MonthlyProfitCard = () => {
         return;
       }
 
-      // Get reservation IDs that have agency
-      const reservationIds = reservations
-        ?.filter(r => r.agency_id)
-        .map(r => r.id) || [];
+      // Get all reservation IDs (all have agency since we filtered above)
+      const reservationIds = reservations?.map(r => r.id) || [];
 
       // Fetch agency reservation details for company_amount (Acenta Fiyatı)
       let agencyDetails: Record<string, number> = {};
