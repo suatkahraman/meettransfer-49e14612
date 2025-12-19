@@ -44,9 +44,8 @@ export const MonthlyProfitCard = () => {
         .select(`
           id,
           pickup_date,
-          driver_earning,
-          status,
           price,
+          status,
           agency_id
         `)
         .eq("status", "completed")
@@ -64,17 +63,17 @@ export const MonthlyProfitCard = () => {
       // Get all reservation IDs (all have agency since we filtered above)
       const reservationIds = reservations?.map(r => r.id) || [];
 
-      // Fetch agency reservation details for company_amount (Acenta Fiyatı)
+      // Fetch agency reservation details for customer_price (Acenta Fiyatı - Admin yazdığı)
       let agencyDetails: Record<string, number> = {};
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
           .from("agency_reservation_details")
-          .select("reservation_id, company_amount")
+          .select("reservation_id, customer_price")
           .in("reservation_id", reservationIds);
 
         if (!agencyError && agencyData) {
           agencyDetails = agencyData.reduce((acc, item) => {
-            acc[item.reservation_id] = item.company_amount || 0;
+            acc[item.reservation_id] = item.customer_price || 0;
             return acc;
           }, {} as Record<string, number>);
         }
@@ -103,12 +102,12 @@ export const MonthlyProfitCard = () => {
         const dayData = dailyMap.get(dateStr);
         
         if (dayData) {
-          // Agency Income (Acenta Fiyatı - company_amount)
+          // Agency Income (Acenta Fiyatı - customer_price from agency_reservation_details)
           const agencyIncome = agencyDetails[res.id] || 0;
           dayData.agencyIncome += agencyIncome;
           
-          // Driver Expense (Bütçe - driver_earning)
-          const driverExpense = res.driver_earning || 0;
+          // Driver Expense (Bütçe - price from reservations)
+          const driverExpense = res.price || 0;
           dayData.driverExpense += driverExpense;
           
           // Net Profit = Acenta Geliri - Şöför Gideri
