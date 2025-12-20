@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.get-driver-email]
 verify_jwt = true
+
+[functions.send-whatsapp]
+verify_jwt = true
