@@ -4,10 +4,12 @@ import { useUserRole } from './useUserRole';
 export const useNotificationSound = () => {
   const { role } = useUserRole();
   const isAdmin = role === 'admin';
+  const isDriver = role === 'driver';
+  const isImportantRole = isAdmin || isDriver;
 
   const vibrate = useCallback(() => {
-    // Vibration API - only for admin users
-    if (isAdmin && 'vibrate' in navigator) {
+    // Vibration API - for admin and driver users
+    if (isImportantRole && 'vibrate' in navigator) {
       try {
         // Pattern: vibrate 200ms, pause 100ms, vibrate 200ms, pause 100ms, vibrate 300ms
         navigator.vibrate([200, 100, 200, 100, 300]);
@@ -15,7 +17,7 @@ export const useNotificationSound = () => {
         console.log('Vibration not supported:', error);
       }
     }
-  }, [isAdmin]);
+  }, [isImportantRole]);
 
   const playSound = useCallback(() => {
     try {
@@ -26,20 +28,20 @@ export const useNotificationSound = () => {
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      // Admin users get louder notifications
-      const volume = isAdmin ? 0.8 : 0.3;
-      const duration = isAdmin ? 0.5 : 0.3;
+      // Admin and driver users get louder notifications
+      const volume = isImportantRole ? 0.8 : 0.3;
+      const duration = isImportantRole ? 0.5 : 0.3;
 
-      // Pleasant notification tone - more prominent for admins
+      // Pleasant notification tone - more prominent for admins and drivers
       oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5 note
       oscillator.frequency.setValueAtTime(1108.73, audioContext.currentTime + 0.1); // C#6 note
       
-      if (isAdmin) {
-        // Add a second tone burst for admin notifications
+      if (isImportantRole) {
+        // Add a second tone burst for admin/driver notifications
         oscillator.frequency.setValueAtTime(880, audioContext.currentTime + 0.2); // A5 again
         oscillator.frequency.setValueAtTime(1318.51, audioContext.currentTime + 0.3); // E6 note (higher)
         
-        // Trigger vibration for admin
+        // Trigger vibration for admin/driver
         vibrate();
       }
       
@@ -51,7 +53,7 @@ export const useNotificationSound = () => {
     } catch (error) {
       console.log('Audio not supported:', error);
     }
-  }, [isAdmin, vibrate]);
+  }, [isImportantRole, vibrate]);
 
   return { playSound, vibrate };
 };
