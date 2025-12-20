@@ -5,6 +5,18 @@ export const useNotificationSound = () => {
   const { role } = useUserRole();
   const isAdmin = role === 'admin';
 
+  const vibrate = useCallback(() => {
+    // Vibration API - only for admin users
+    if (isAdmin && 'vibrate' in navigator) {
+      try {
+        // Pattern: vibrate 200ms, pause 100ms, vibrate 200ms, pause 100ms, vibrate 300ms
+        navigator.vibrate([200, 100, 200, 100, 300]);
+      } catch (error) {
+        console.log('Vibration not supported:', error);
+      }
+    }
+  }, [isAdmin]);
+
   const playSound = useCallback(() => {
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -26,6 +38,9 @@ export const useNotificationSound = () => {
         // Add a second tone burst for admin notifications
         oscillator.frequency.setValueAtTime(880, audioContext.currentTime + 0.2); // A5 again
         oscillator.frequency.setValueAtTime(1318.51, audioContext.currentTime + 0.3); // E6 note (higher)
+        
+        // Trigger vibration for admin
+        vibrate();
       }
       
       gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
@@ -36,7 +51,7 @@ export const useNotificationSound = () => {
     } catch (error) {
       console.log('Audio not supported:', error);
     }
-  }, [isAdmin]);
+  }, [isAdmin, vibrate]);
 
-  return { playSound };
+  return { playSound, vibrate };
 };
