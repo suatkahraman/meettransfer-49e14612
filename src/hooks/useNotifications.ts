@@ -272,6 +272,7 @@ export const useNotifications = () => {
       message: `New transfer request from ${customerName}. Please set a price.`,
       type: 'new_reservation',
       notify_admins: true,
+      send_whatsapp: true,
     });
   }, [sendNotification]);
 

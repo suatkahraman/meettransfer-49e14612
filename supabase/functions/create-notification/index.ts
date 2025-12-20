@@ -192,8 +192,10 @@ Deno.serve(async (req) => {
       // Send push notifications and WhatsApp messages to all admins
       for (const admin of adminRoles) {
         await sendPushToUser(supabaseAdmin, admin.user_id, title, message, reservation_id ? `/admin/reservations/${reservation_id}` : '/admin/reservations');
-        // Also send WhatsApp to admins
-        await sendWhatsAppToUser(admin.user_id, title, message);
+        // Also send WhatsApp to admins if requested
+        if (send_whatsapp) {
+          await sendWhatsAppToUser(admin.user_id, title, message);
+        }
       }
 
       return new Response(
