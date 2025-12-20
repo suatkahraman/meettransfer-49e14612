@@ -13,6 +13,7 @@ interface CreateNotificationRequest {
   type: string
   notify_admins?: boolean
   send_push?: boolean
+  send_whatsapp?: boolean
 }
 
 async function sendPushToUser(supabase: any, userId: string, title: string, body: string, url?: string) {
@@ -66,6 +67,37 @@ async function sendPushToUser(supabase: any, userId: string, title: string, body
   }
 }
 
+async function sendWhatsAppToUser(userId: string, title: string, message: string) {
+  try {
+    console.log(`Attempting to send WhatsApp message to user ${userId}`);
+    
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    const whatsappResponse = await fetch(`${supabaseUrl}/functions/v1/send-whatsapp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${serviceKey}`,
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        title,
+        message,
+      }),
+    });
+
+    if (!whatsappResponse.ok) {
+      const errorText = await whatsappResponse.text();
+      console.error('WhatsApp message request failed:', errorText);
+    } else {
+      console.log('WhatsApp message sent successfully');
+    }
+  } catch (error) {
+    console.error('Error sending WhatsApp message:', error);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -104,7 +136,7 @@ Deno.serve(async (req) => {
     }
 
     const body: CreateNotificationRequest = await req.json()
-    const { user_id, reservation_id, title, message, type, notify_admins, send_push } = body
+    const { user_id, reservation_id, title, message, type, notify_admins, send_push, send_whatsapp } = body
 
     // If notify_admins is true, send notification to all admin users
     if (notify_admins) {
@@ -157,9 +189,11 @@ Deno.serve(async (req) => {
 
       console.log(`Created ${data.length} notifications for admins`)
 
-      // Send push notifications to all admins
+      // Send push notifications and WhatsApp messages to all admins
       for (const admin of adminRoles) {
         await sendPushToUser(supabaseAdmin, admin.user_id, title, message, reservation_id ? `/admin/reservations/${reservation_id}` : '/admin/reservations');
+        // Also send WhatsApp to admins
+        await sendWhatsAppToUser(admin.user_id, title, message);
       }
 
       return new Response(

@@ -27,6 +27,7 @@ interface NotificationOptions {
   type: NotificationType;
   notify_admins?: boolean;
   send_push?: boolean;
+  send_whatsapp?: boolean;
   url?: string;
 }
 
@@ -71,6 +72,22 @@ export const useNotifications = () => {
         } catch (pushError) {
           console.error('Push notification failed:', pushError);
           // Don't fail the whole operation if push fails
+        }
+      }
+
+      // Also send WhatsApp message if requested (for admin/driver users)
+      if (options.send_whatsapp && options.user_id) {
+        try {
+          await supabase.functions.invoke('send-whatsapp', {
+            body: {
+              user_id: options.user_id,
+              title: options.title,
+              message: options.message,
+            }
+          });
+        } catch (whatsappError) {
+          console.error('WhatsApp notification failed:', whatsappError);
+          // Don't fail the whole operation if WhatsApp fails
         }
       }
 
@@ -207,6 +224,7 @@ export const useNotifications = () => {
       message: `New transfer: ${pickup} → ${dropoff} on ${date} at ${time}.${priceText}`,
       type: 'driver_assigned',
       send_push: true,
+      send_whatsapp: true,
       url: `/driver/job/${reservationId}`,
     });
   }, [sendNotification]);
@@ -223,6 +241,7 @@ export const useNotifications = () => {
       message: `Reservation updated: ${changes}`,
       type: 'reservation_updated',
       send_push: true,
+      send_whatsapp: true,
       url: `/driver/job/${reservationId}`,
     });
   }, [sendNotification]);
@@ -238,6 +257,7 @@ export const useNotifications = () => {
       message: 'A reservation assigned to you has been cancelled.',
       type: 'reservation_cancelled',
       send_push: true,
+      send_whatsapp: true,
       url: `/driver`,
     });
   }, [sendNotification]);
