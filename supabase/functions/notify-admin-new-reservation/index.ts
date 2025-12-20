@@ -11,6 +11,8 @@ interface NotifyAdminRequest {
   pickup: string
   dropoff: string
   pickup_date: string
+  /** When true, also send WhatsApp to admins (defaults to true). */
+  send_whatsapp?: boolean
 }
 
 Deno.serve(async (req) => {
@@ -49,7 +51,8 @@ Deno.serve(async (req) => {
     }
 
     const body: NotifyAdminRequest = await req.json()
-    const { reservation_id, customer_name, pickup, dropoff, pickup_date } = body
+    const { reservation_id, customer_name, pickup, dropoff, pickup_date, send_whatsapp } = body
+    const shouldSendWhatsApp = send_whatsapp !== false
 
     if (!reservation_id) {
       console.error('No reservation_id provided')
@@ -70,7 +73,7 @@ Deno.serve(async (req) => {
     // Verify the user owns this reservation
     const { data: reservation, error: reservationError } = await supabaseAdmin
       .from('reservations')
-      .select('customer_id')
+      .select('customer_id, reservation_code')
       .eq('id', reservation_id)
       .maybeSingle()
 
@@ -147,8 +150,117 @@ Deno.serve(async (req) => {
 
     console.log(`Notified ${adminRoles.length} admin(s) about new reservation`)
 
+    // Optional: also send WhatsApp to admins
+    let whatsappAttempted = 0
+    let whatsappSent = 0
+    let whatsappFailed = 0
+    let whatsappSkippedNoPhone = 0
+    let whatsappSkippedNotConfigured = 0
+
+    if (shouldSendWhatsApp) {
+      const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
+      const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN')
+      const twilioWhatsAppNumber = Deno.env.get('TWILIO_WHATSAPP_NUMBER')
+
+      if (!twilioAccountSid || !twilioAuthToken || !twilioWhatsAppNumber) {
+        console.warn('WhatsApp not sent: Twilio credentials not configured')
+        whatsappSkippedNotConfigured = adminRoles.length
+      } else {
+        const adminIds = adminRoles.map(a => a.user_id)
+
+        const { data: adminProfiles, error: adminProfilesError } = await supabaseAdmin
+          .from('profiles')
+          .select('id, phone')
+          .in('id', adminIds)
+
+        if (adminProfilesError) {
+          console.error('Failed to fetch admin phones:', adminProfilesError)
+          whatsappFailed = adminRoles.length
+        } else {
+          const phoneByUserId = new Map<string, string>()
+          for (const p of adminProfiles || []) {
+            if (p?.id && p?.phone) phoneByUserId.set(p.id, p.phone)
+          }
+
+          const from = twilioWhatsAppNumber.startsWith('whatsapp:')
+            ? twilioWhatsAppNumber
+            : `whatsapp:${twilioWhatsAppNumber}`
+
+          const title = 'New Reservation Request'
+          const details = [
+            `Customer: ${customer_name}`,
+            `Date: ${pickup_date}`,
+            `Pickup: ${pickup}`,
+            `Dropoff: ${dropoff}`,
+            reservation?.reservation_code ? `Code: ${reservation.reservation_code}` : null,
+          ].filter(Boolean).join('\n')
+
+          const fullMessage = `*${title}*\n\n${details}`
+
+          const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`
+          const credentials = btoa(`${twilioAccountSid}:${twilioAuthToken}`)
+
+          for (const admin of adminRoles) {
+            whatsappAttempted++
+
+            const phoneRaw = phoneByUserId.get(admin.user_id)
+            if (!phoneRaw) {
+              whatsappSkippedNoPhone++
+              console.log(`Skipping WhatsApp: no phone on profile for admin ${admin.user_id}`)
+              continue
+            }
+
+            const digits = phoneRaw.replace(/[^\d+]/g, '')
+            const formattedPhone = digits.startsWith('+') ? digits : `+${digits}`
+
+            const formData = new URLSearchParams()
+            formData.append('From', from)
+            formData.append('To', `whatsapp:${formattedPhone}`)
+            formData.append('Body', fullMessage)
+
+            const twilioResponse = await fetch(twilioUrl, {
+              method: 'POST',
+              headers: {
+                Authorization: `Basic ${credentials}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: formData.toString(),
+            })
+
+            const twilioText = await twilioResponse.text()
+            let twilioJson: any = null
+            try {
+              twilioJson = JSON.parse(twilioText)
+            } catch {
+              // ignore parse failure
+            }
+
+            if (!twilioResponse.ok) {
+              whatsappFailed++
+              console.error('Twilio WhatsApp error:', { status: twilioResponse.status, body: twilioJson || twilioText })
+              continue
+            }
+
+            whatsappSent++
+            console.log('WhatsApp message sent successfully:', twilioJson?.sid)
+          }
+        }
+      }
+    }
+
     return new Response(
-      JSON.stringify({ success: true, admins_notified: adminRoles.length }),
+      JSON.stringify({
+        success: true,
+        admins_notified: adminRoles.length,
+        whatsapp: {
+          enabled: shouldSendWhatsApp,
+          attempted: whatsappAttempted,
+          sent: whatsappSent,
+          failed: whatsappFailed,
+          skipped_no_phone: whatsappSkippedNoPhone,
+          skipped_not_configured: whatsappSkippedNotConfigured,
+        }
+      }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
