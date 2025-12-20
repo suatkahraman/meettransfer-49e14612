@@ -160,7 +160,8 @@ Deno.serve(async (req) => {
     if (shouldSendWhatsApp) {
       const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
       const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-      const twilioWhatsAppNumber = Deno.env.get('TWILIO_WHATSAPP_NUMBER')
+      const twilioWhatsAppNumberRaw = Deno.env.get('TWILIO_WHATSAPP_NUMBER')
+      const twilioWhatsAppNumber = twilioWhatsAppNumberRaw?.trim()
 
       if (!twilioAccountSid || !twilioAuthToken || !twilioWhatsAppNumber) {
         console.warn('WhatsApp not sent: Twilio credentials not configured')
