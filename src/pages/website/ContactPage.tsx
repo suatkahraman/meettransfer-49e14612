@@ -19,7 +19,8 @@ const globalOffices = [
     country: "Türkiye",
     city: "İstanbul Headquarters",
     address: "Istanbul Airport (IST) – VIP Meet & Greet Terminal Office",
-    phone: "+90 532 174 8390",
+    phone: "+1 555 805 1101",
+    whatsappOnly: true,
     email: "info@meettransfer.app",
   },
   {
@@ -28,6 +29,7 @@ const globalOffices = [
     city: "Los Angeles",
     address: "La Fashion District, Los Angeles, CA 854",
     phone: "+1 205 650 8400",
+    whatsappOnly: false,
     email: null,
   },
   {
@@ -36,6 +38,7 @@ const globalOffices = [
     city: "Berlin",
     address: "Street Business Center, Berlin 245",
     phone: "+1 205 650 8400",
+    whatsappOnly: false,
     email: null,
   },
   {
@@ -44,6 +47,7 @@ const globalOffices = [
     city: "Dubai",
     address: "Downtown Business Tower, Dubai 35",
     phone: "+1 205 650 8400",
+    whatsappOnly: false,
     email: null,
   },
 ];
@@ -127,14 +131,21 @@ const ContactPage = () => {
                           <span className="text-muted-foreground">{office.address}</span>
                         </div>
                         
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-accent flex-shrink-0" />
-                          <a 
-                            href={`tel:${office.phone.replace(/\s/g, '')}`}
-                            className="text-muted-foreground hover:text-accent transition-colors"
-                          >
-                            {office.phone}
-                          </a>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-accent flex-shrink-0" />
+                            <a 
+                              href={`tel:${office.phone.replace(/\s/g, '')}`}
+                              className="text-muted-foreground hover:text-accent transition-colors"
+                            >
+                              {office.phone}
+                            </a>
+                          </div>
+                          {office.whatsappOnly && (
+                            <span className="text-xs text-accent ml-6 mt-0.5">
+                              {t("whatsappOnly")}
+                            </span>
+                          )}
                         </div>
                         
                         {office.email && (

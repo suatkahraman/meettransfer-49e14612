@@ -235,6 +235,7 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Flight Tracking",
     doorToDoor: "Door-to-Door Service",
     learnMore: "Learn More",
+    whatsappOnly: "WhatsApp Only",
     
     // Transfer Page Common
     transferSubtitle: "Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service",
@@ -651,6 +652,7 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Flugverfolgung",
     doorToDoor: "Tür-zu-Tür-Service",
     learnMore: "Mehr erfahren",
+    whatsappOnly: "Nur WhatsApp",
     
     // Booking Form
     bookingFormSubtitle: "Buchen Sie Ihren Flughafentransfer - wir senden Ihnen den Preis zur Genehmigung",
@@ -1063,6 +1065,7 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Suivi de vol",
     doorToDoor: "Service Porte-à-Porte",
     learnMore: "En savoir plus",
+    whatsappOnly: "WhatsApp uniquement",
     
     // Booking Form
     bookingFormSubtitle: "Réservez votre transfert aéroport - nous vous enverrons le prix pour approbation",
@@ -1475,6 +1478,7 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Отслеживание рейса",
     doorToDoor: "От двери до двери",
     learnMore: "Узнать больше",
+    whatsappOnly: "Только WhatsApp",
     
     // Booking Form
     bookingFormSubtitle: "Забронируйте трансфер из аэропорта - мы отправим вам цену на утверждение",
@@ -1887,6 +1891,7 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Tracciamento volo",
     doorToDoor: "Servizio Porta a Porta",
     learnMore: "Scopri di più",
+    whatsappOnly: "Solo WhatsApp",
     
     // Booking Form
     bookingFormSubtitle: "Prenota il tuo trasferimento aeroportuale - ti invieremo il prezzo per approvazione",
@@ -2299,6 +2304,7 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "Seguimiento de vuelo",
     doorToDoor: "Servicio Puerta a Puerta",
     learnMore: "Más información",
+    whatsappOnly: "Solo WhatsApp",
     
     // Booking Form
     bookingFormSubtitle: "Reserva tu traslado desde el aeropuerto - te enviaremos el precio para aprobación",
@@ -2711,6 +2717,7 @@ const translations: Record<Language, Record<string, string>> = {
     flightTracking: "تتبع الرحلة",
     doorToDoor: "خدمة من الباب للباب",
     learnMore: "اعرف المزيد",
+    whatsappOnly: "واتساب فقط",
     
     // Booking Form
     bookingFormSubtitle: "احجز نقل المطار - سنرسل لك السعر للموافقة",
