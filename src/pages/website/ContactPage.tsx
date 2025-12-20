@@ -28,8 +28,8 @@ const globalOffices = [
     country: "USA",
     city: "Los Angeles",
     address: "La Fashion District, Los Angeles, CA 854",
-    phone: "+1 205 650 8400",
-    whatsappOnly: false,
+    phone: "+1 555 805 1101",
+    whatsappOnly: true,
     email: null,
   },
   {
@@ -37,8 +37,8 @@ const globalOffices = [
     country: "Germany",
     city: "Berlin",
     address: "Street Business Center, Berlin 245",
-    phone: "+1 205 650 8400",
-    whatsappOnly: false,
+    phone: "+1 555 805 1101",
+    whatsappOnly: true,
     email: null,
   },
   {
@@ -46,8 +46,8 @@ const globalOffices = [
     country: "UAE",
     city: "Dubai",
     address: "Downtown Business Tower, Dubai 35",
-    phone: "+1 205 650 8400",
-    whatsappOnly: false,
+    phone: "+1 555 805 1101",
+    whatsappOnly: true,
     email: null,
   },
 ];
