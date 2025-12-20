@@ -20,7 +20,8 @@ serve(async (req) => {
   try {
     const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
     const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
-    const twilioWhatsAppNumber = Deno.env.get("TWILIO_WHATSAPP_NUMBER");
+    const twilioWhatsAppNumberRaw = Deno.env.get("TWILIO_WHATSAPP_NUMBER");
+    const twilioWhatsAppNumber = twilioWhatsAppNumberRaw?.trim();
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -109,7 +110,10 @@ serve(async (req) => {
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
     
     const formData = new URLSearchParams();
-    formData.append("From", `whatsapp:${twilioWhatsAppNumber}`);
+    const from = twilioWhatsAppNumber.startsWith('whatsapp:')
+      ? twilioWhatsAppNumber
+      : `whatsapp:${twilioWhatsAppNumber}`;
+    formData.append("From", from);
     formData.append("To", `whatsapp:${formattedPhone}`);
     formData.append("Body", fullMessage);
 
