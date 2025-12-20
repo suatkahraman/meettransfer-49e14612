@@ -30,9 +30,12 @@ const WhatsAppButton = ({
     return (
       <Button
         onClick={handleClick}
-        className={`bg-[#25D366] hover:bg-[#22c55e] text-white h-14 px-8 text-lg rounded-xl ${className}`}
+        className={`bg-[#25D366] hover:bg-[#22c55e] text-white h-14 px-8 text-lg rounded-xl relative ${className}`}
       >
-        <MessageCircle className="h-6 w-6 mr-2" />
+        <span className="relative mr-2">
+          <MessageCircle className="h-6 w-6" />
+          <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+        </span>
         {t("whatsappBooking")}
       </Button>
     );
@@ -42,9 +45,12 @@ const WhatsAppButton = ({
     <Button
       onClick={handleClick}
       variant="accent"
-      className={`h-12 rounded-xl ${className}`}
+      className={`h-12 rounded-xl relative ${className}`}
     >
-      <MessageCircle className="h-5 w-5 mr-2" />
+      <span className="relative mr-2">
+        <MessageCircle className="h-5 w-5" />
+        <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+      </span>
       {t("whatsappBooking")}
     </Button>
   );
