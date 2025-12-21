@@ -50,6 +50,16 @@ const IsPrivateTransferWorthIt = () => {
         schemas={[
           { type: 'LocalBusiness' },
           {
+            type: 'Article',
+            headline: 'Is Private Transfer Worth It in Turkey?',
+            description: 'We break down the real costs and benefits of private airport transfers in Turkey. From safety to convenience, discover why thousands choose VIP transfers.',
+            image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
+            datePublished: '2024-11-20',
+            dateModified: '2024-11-20',
+            author: 'Meet Transfer',
+            readingTime: '14',
+          },
+          {
             type: 'FAQPage',
             questions: faqItems.map(item => ({
               question: item.question,

@@ -93,6 +93,16 @@ const IstanbulAirportToCityGuide = () => {
         schemas={[
           { type: 'LocalBusiness' },
           {
+            type: 'Article',
+            headline: 'Best Way to Get from Istanbul Airport to City Center',
+            description: 'Complete guide to Istanbul Airport transportation. Compare private transfers, taxis, metro & buses. Find the safest, fastest way to reach Taksim, Sultanahmet.',
+            image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
+            datePublished: '2024-12-15',
+            dateModified: '2024-12-15',
+            author: 'Meet Transfer',
+            readingTime: '12',
+          },
+          {
             type: 'FAQPage',
             questions: faqItems.map(item => ({
               question: item.question,
