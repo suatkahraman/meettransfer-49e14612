@@ -45,9 +45,11 @@ export const Hero = () => {
             </Button>
           </div>
           <div className="flex justify-center pt-2">
-            <Button size="lg" variant="outline" className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
-              <Phone className="mr-2 h-5 w-5" />
-              {t("callNow")}
+            <Button asChild size="lg" variant="outline" className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
+              <a href="tel:+905321748390">
+                <Phone className="mr-2 h-5 w-5" />
+                {t("callNow")}
+              </a>
             </Button>
           </div>
 
