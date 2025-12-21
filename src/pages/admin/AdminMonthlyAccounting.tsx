@@ -4,10 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Users } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Users, Wallet, FileText } from 'lucide-react';
 import { MonthNavigator } from '@/components/accounting/MonthNavigator';
 import { MonthlySummaryCard } from '@/components/accounting/MonthlySummaryCard';
 import { MonthlyAccountingTable } from '@/components/accounting/MonthlyAccountingTable';
+import { DriverPaymentDialog } from '@/components/accounting/DriverPaymentDialog';
+import { DriverPaymentsTable } from '@/components/accounting/DriverPaymentsTable';
+import { DriverBalanceCard } from '@/components/accounting/DriverBalanceCard';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 
 interface Driver {
@@ -37,6 +41,23 @@ interface DriverSummary {
   totalCash: number;
   balance: number;
   transferCount: number;
+  totalPayments: number;
+  netBalance: number;
+}
+
+interface DriverPayment {
+  id: string;
+  driver_id: string;
+  amount: number;
+  payment_date: string;
+  notes: string | null;
+  created_at: string;
+  driver_name?: string;
+}
+
+interface DriverBalance {
+  driver_id: string;
+  balance: number;
 }
 
 const AdminMonthlyAccounting = () => {
@@ -47,7 +68,10 @@ const AdminMonthlyAccounting = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [driverSummaries, setDriverSummaries] = useState<DriverSummary[]>([]);
+  const [driverPayments, setDriverPayments] = useState<DriverPayment[]>([]);
+  const [driverBalances, setDriverBalances] = useState<DriverBalance[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('reservations');
 
   useEffect(() => {
     const fetchDrivers = async () => {
@@ -59,6 +83,42 @@ const AdminMonthlyAccounting = () => {
     };
     fetchDrivers();
   }, []);
+
+  const fetchPaymentsAndBalances = async () => {
+    const monthStart = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
+    const monthEnd = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
+
+    // Fetch payments for the month
+    let paymentsQuery = supabase
+      .from('driver_payments')
+      .select('*')
+      .gte('payment_date', monthStart)
+      .lte('payment_date', monthEnd)
+      .order('payment_date', { ascending: false });
+
+    if (selectedDriver !== 'all') {
+      paymentsQuery = paymentsQuery.eq('driver_id', selectedDriver);
+    }
+
+    const { data: paymentsData } = await paymentsQuery;
+    
+    if (paymentsData) {
+      const paymentsWithDriverNames = paymentsData.map(p => ({
+        ...p,
+        driver_name: drivers.find(d => d.id === p.driver_id)?.name || '-'
+      }));
+      setDriverPayments(paymentsWithDriverNames);
+    }
+
+    // Fetch all driver balances
+    const { data: balancesData } = await supabase
+      .from('driver_balances')
+      .select('*');
+    
+    if (balancesData) {
+      setDriverBalances(balancesData);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -102,7 +162,9 @@ const AdminMonthlyAccounting = () => {
             totalPrice: 0,
             totalCash: 0,
             balance: 0,
-            transferCount: 0
+            transferCount: 0,
+            totalPayments: 0,
+            netBalance: 0
           };
 
           existing.totalPrice += res.price || 0;
@@ -115,6 +177,8 @@ const AdminMonthlyAccounting = () => {
 
         setDriverSummaries(Array.from(summaryMap.values()));
       }
+      
+      await fetchPaymentsAndBalances();
       setLoading(false);
     };
 
@@ -125,23 +189,33 @@ const AdminMonthlyAccounting = () => {
 
   const totalPrice = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
   const totalCash = reservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
+  const totalPaymentsThisMonth = driverPayments.reduce((sum, p) => sum + p.amount, 0);
 
   const handleEditReservation = (reservation: Reservation) => {
     navigate(`/admin/reservations/${reservation.id}/edit`);
   };
 
+  const handlePaymentAdded = () => {
+    const monthStart = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
+    const monthEnd = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
+    fetchPaymentsAndBalances();
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => navigate('/admin')} 
-          className="text-primary-foreground hover:bg-primary-foreground/10"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-serif">Aylık Muhasebe</h1>
+      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate('/admin')} 
+            className="text-primary-foreground hover:bg-primary-foreground/10"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-serif">Aylık Muhasebe</h1>
+        </div>
+        <DriverPaymentDialog drivers={drivers} onPaymentAdded={handlePaymentAdded} />
       </header>
 
       <main className="container mx-auto py-6 px-4 space-y-6">
@@ -152,102 +226,210 @@ const AdminMonthlyAccounting = () => {
           onNextMonth={() => setCurrentMonth(addMonths(currentMonth, 1))}
         />
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-4">
-          <Select value={selectedDriver} onValueChange={setSelectedDriver}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Şoför seçin" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tüm Şoförler</SelectItem>
-              {drivers.map(driver => (
-                <SelectItem key={driver.id} value={driver.id}>{driver.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsTrigger value="reservations" className="gap-2">
+              <FileText className="h-4 w-4" />
+              Rezervasyonlar
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="gap-2">
+              <Wallet className="h-4 w-4" />
+              Şoför Ödemeleri
+            </TabsTrigger>
+          </TabsList>
 
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Durum seçin" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tüm Durumlar</SelectItem>
-              <SelectItem value="completed">Tamamlandı</SelectItem>
-              <SelectItem value="assigned">Atandı</SelectItem>
-              <SelectItem value="sent_to_driver">Şoföre Gönderildi</SelectItem>
-              <SelectItem value="active">Aktif</SelectItem>
-              <SelectItem value="cancelled">İptal Edildi</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+          <TabsContent value="reservations" className="space-y-6">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4">
+              <Select value={selectedDriver} onValueChange={setSelectedDriver}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Şoför seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tüm Şoförler</SelectItem>
+                  {drivers.map(driver => (
+                    <SelectItem key={driver.id} value={driver.id}>{driver.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-        {loading ? (
-          <div className="text-center py-12">Yükleniyor...</div>
-        ) : (
-          <>
-            {/* Monthly Summary */}
-            <MonthlySummaryCard
-              totalTransfers={reservations.length}
-              totalPrice={totalPrice}
-              totalCashCollected={totalCash}
-            />
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Durum seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tüm Durumlar</SelectItem>
+                  <SelectItem value="completed">Tamamlandı</SelectItem>
+                  <SelectItem value="assigned">Atandı</SelectItem>
+                  <SelectItem value="sent_to_driver">Şoföre Gönderildi</SelectItem>
+                  <SelectItem value="active">Aktif</SelectItem>
+                  <SelectItem value="cancelled">İptal Edildi</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            {/* Driver Breakdown */}
-            {selectedDriver === 'all' && driverSummaries.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Users className="h-5 w-5" />
-                    Şoför Dağılımı
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {driverSummaries.map(summary => {
-                      const balanceColor = summary.balance > 0 ? 'text-amber-600' : summary.balance < 0 ? 'text-blue-600' : 'text-green-600';
-                      return (
-                        <div 
-                          key={summary.driver.id}
-                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                        >
-                          <div>
-                            <div className="font-medium">{summary.driver.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {summary.transferCount} transfer
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm">
-                              Fiyat: ₺{summary.totalPrice.toFixed(2)} | Nakit: ₺{summary.totalCash.toFixed(2)}
-                            </div>
-                            <div className={`font-semibold ${balanceColor}`}>
-                              Bakiye: ₺{Math.abs(summary.balance).toFixed(2)}
-                              {summary.balance > 0 ? ' (borçlu)' : summary.balance < 0 ? ' (alacaklı)' : ' (kapalı)'}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Reservations Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Rezervasyonlar</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <MonthlyAccountingTable
-                  reservations={reservations}
-                  showActions={true}
-                  onEdit={handleEditReservation}
+            {loading ? (
+              <div className="text-center py-12">Yükleniyor...</div>
+            ) : (
+              <>
+                {/* Monthly Summary */}
+                <MonthlySummaryCard
+                  totalTransfers={reservations.length}
+                  totalPrice={totalPrice}
+                  totalCashCollected={totalCash}
                 />
-              </CardContent>
-            </Card>
-          </>
-        )}
+
+                {/* Driver Breakdown */}
+                {selectedDriver === 'all' && driverSummaries.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Users className="h-5 w-5" />
+                        Şoför Dağılımı
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {driverSummaries.map(summary => {
+                          const driverBalance = driverBalances.find(b => b.driver_id === summary.driver.id)?.balance || 0;
+                          const netBalance = summary.balance - driverBalance;
+                          const balanceColor = netBalance > 0 ? 'text-amber-600' : netBalance < 0 ? 'text-blue-600' : 'text-green-600';
+                          return (
+                            <div 
+                              key={summary.driver.id}
+                              className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                            >
+                              <div>
+                                <div className="font-medium">{summary.driver.name}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {summary.transferCount} transfer | Ödenen: ₺{driverBalance.toFixed(2)}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm">
+                                  Fiyat: ₺{summary.totalPrice.toFixed(2)} | Nakit: ₺{summary.totalCash.toFixed(2)}
+                                </div>
+                                <div className={`font-semibold ${balanceColor}`}>
+                                  Bakiye: ₺{Math.abs(netBalance).toFixed(2)}
+                                  {netBalance > 0 ? ' (alacak)' : netBalance < 0 ? ' (verecek)' : ' (kapalı)'}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Reservations Table */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Rezervasyonlar</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MonthlyAccountingTable
+                      reservations={reservations}
+                      showActions={true}
+                      onEdit={handleEditReservation}
+                    />
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </TabsContent>
+
+          <TabsContent value="payments" className="space-y-6">
+            {/* Driver Filter */}
+            <div className="flex flex-wrap gap-4">
+              <Select value={selectedDriver} onValueChange={setSelectedDriver}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Şoför seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tüm Şoförler</SelectItem>
+                  {drivers.map(driver => (
+                    <SelectItem key={driver.id} value={driver.id}>{driver.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-12">Yükleniyor...</div>
+            ) : (
+              <>
+                {/* Payments Summary */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Wallet className="h-5 w-5" />
+                      Bu Ay Yapılan Ödemeler
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-green-600">
+                      ₺{totalPaymentsThisMonth.toFixed(2)}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {driverPayments.length} ödeme kaydı
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Driver Balances */}
+                {selectedDriver === 'all' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Users className="h-5 w-5" />
+                        Şoför Bakiyeleri (Toplam Cari)
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {drivers.map(driver => {
+                          const balance = driverBalances.find(b => b.driver_id === driver.id)?.balance || 0;
+                          if (balance === 0) return null;
+                          return (
+                            <div 
+                              key={driver.id}
+                              className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                            >
+                              <div className="font-medium">{driver.name}</div>
+                              <div className="font-semibold text-green-600">
+                                ₺{balance.toFixed(2)} ödendi
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {driverBalances.length === 0 && (
+                          <div className="text-center py-4 text-muted-foreground">
+                            Henüz ödeme yapılmamış
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Payments Table */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Ödeme Geçmişi</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DriverPaymentsTable 
+                      payments={driverPayments} 
+                      showDriver={selectedDriver === 'all'} 
+                    />
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
