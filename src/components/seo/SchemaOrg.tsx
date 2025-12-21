@@ -182,12 +182,19 @@ const generateProductSchema = (product: ProductSchema) => ({
 
 const generateMerchantProductSchema = () => ({
   '@context': 'https://schema.org',
-  '@type': 'Product',
+  '@type': 'Service',
   name: 'Meet Transfer – VIP Airport Transfer Service',
   description: 'Luxury private airport transfer service in Turkey with fixed prices, professional chauffeurs and VIP Mercedes vehicles.',
-  brand: {
-    '@type': 'Brand',
+  provider: {
+    '@type': 'Organization',
     name: 'Meet Transfer',
+    url: baseUrl,
+    logo: companyInfo.logo,
+  },
+  serviceType: 'Airport Transfer',
+  areaServed: {
+    '@type': 'Country',
+    name: 'Turkey',
   },
   image: [
     'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
@@ -196,40 +203,14 @@ const generateMerchantProductSchema = () => ({
   offers: {
     '@type': 'Offer',
     url: 'https://meettransfer.app/',
-    priceCurrency: 'USD',
-    price: '0',
+    priceCurrency: 'EUR',
+    price: '50',
     priceValidUntil: '2026-12-31',
     availability: 'https://schema.org/InStock',
-    itemCondition: 'https://schema.org/NewCondition',
-    shippingDetails: {
-      '@type': 'OfferShippingDetails',
-      shippingRate: {
-        '@type': 'MonetaryAmount',
-        value: '0',
-        currency: 'USD',
-      },
-      deliveryTime: {
-        '@type': 'ShippingDeliveryTime',
-        handlingTime: {
-          '@type': 'QuantitativeValue',
-          minValue: 0,
-          maxValue: 0,
-          unitCode: 'DAY',
-        },
-        transitTime: {
-          '@type': 'QuantitativeValue',
-          minValue: 0,
-          maxValue: 0,
-          unitCode: 'DAY',
-        },
-      },
-    },
     hasMerchantReturnPolicy: {
       '@type': 'MerchantReturnPolicy',
-      returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-      merchantReturnDays: 1,
-      returnMethod: 'https://schema.org/ReturnByCancellation',
-      returnFees: 'https://schema.org/FreeReturn',
+      applicableCountry: 'TR',
+      returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
     },
   },
 });
