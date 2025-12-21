@@ -68,6 +68,12 @@ const DestinationsPage = lazy(() => import("./pages/website/DestinationsPage"));
 const WhatsAppBooking = lazy(() => import("./pages/website/WhatsAppBooking"));
 const TermsPage = lazy(() => import("./pages/website/TermsPage"));
 const ServicesPage = lazy(() => import("./pages/website/ServicesPage"));
+const BlogPage = lazy(() => import("./pages/website/BlogPage"));
+const IstanbulAirportToCityGuide = lazy(() => import("./pages/website/blog/IstanbulAirportToCityGuide"));
+const IstanbulTransferPriceGuide = lazy(() => import("./pages/website/blog/IstanbulTransferPriceGuide"));
+const PrivateVsTaxiTurkey = lazy(() => import("./pages/website/blog/PrivateVsTaxiTurkey"));
+const AntalyaAirportTransferGuide = lazy(() => import("./pages/website/blog/AntalyaAirportTransferGuide"));
+const IsPrivateTransferWorthIt = lazy(() => import("./pages/website/blog/IsPrivateTransferWorthIt"));
 
 const queryClient = new QueryClient();
 
@@ -133,6 +139,12 @@ const App = () => (
               {localizedRoutes("/ephesus-pamukkale", <EphesusPamukkale />)}
               {localizedRoutes("/luxury-chauffeur", <LuxuryChauffeur />)}
               {localizedRoutes("/book", <ReservationForm />)}
+              {localizedRoutes("/blog", <BlogPage />)}
+              {localizedRoutes("/blog/istanbul-airport-to-city-guide", <IstanbulAirportToCityGuide />)}
+              {localizedRoutes("/blog/istanbul-transfer-price-guide", <IstanbulTransferPriceGuide />)}
+              {localizedRoutes("/blog/private-vs-taxi-turkey", <PrivateVsTaxiTurkey />)}
+              {localizedRoutes("/blog/antalya-airport-transfer-guide", <AntalyaAirportTransferGuide />)}
+              {localizedRoutes("/blog/is-private-transfer-worth-it", <IsPrivateTransferWorthIt />)}
               
               {/* Auth routes - Not localized (use common language) */}
               <Route path="/auth" element={<LazyRoute><Auth /></LazyRoute>} />
