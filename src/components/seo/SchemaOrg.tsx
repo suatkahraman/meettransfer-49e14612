@@ -141,6 +141,19 @@ const generateTransportationServiceSchema = (areaServed?: string[]) => ({
     serviceUrl: baseUrl,
     servicePhone: companyInfo.telephone,
   },
+  offers: {
+    '@type': 'Offer',
+    url: baseUrl,
+    priceCurrency: 'EUR',
+    price: '50',
+    priceValidUntil: '2026-12-31',
+    availability: 'https://schema.org/InStock',
+    hasMerchantReturnPolicy: {
+      '@type': 'MerchantReturnPolicy',
+      applicableCountry: 'TR',
+      returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+    },
+  },
 });
 
 const generateFAQSchema = (questions: { question: string; answer: string }[]) => ({
