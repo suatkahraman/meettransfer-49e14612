@@ -14,7 +14,7 @@ declare global {
 
 // Conversion labels for different events
 export const CONVERSION_LABELS = {
-  RESERVATION_SUBMIT: 'AW-668686697/reservation_submit',
+  RESERVATION_SUBMIT: 'AW-668686697/P-SqCJuKoK8aEOmy7b4C',
   CONTACT_FORM_SUBMIT: 'AW-668686697/contact_form',
   WHATSAPP_CLICK: 'AW-668686697/whatsapp_click',
   PHONE_CALL: 'AW-668686697/phone_call',
