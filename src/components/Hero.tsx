@@ -36,9 +36,15 @@ export const Hero = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Button asChild size="lg" variant="accent" className="text-base px-8 h-12">
-              <Link to={getLocalizedPath("/book")}>{t("bookYourTransfer")}</Link>
+            <Button asChild size="lg" variant="outline" className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
+              <Link to={getLocalizedPath("/auth")}>{t("login")}</Link>
             </Button>
+            <span className="text-white/80 font-medium text-sm uppercase tracking-wide">{t("and")}</span>
+            <Button asChild size="lg" variant="accent" className="text-base px-8 h-12">
+              <Link to={getLocalizedPath("/book")}>{t("requestPrice")}</Link>
+            </Button>
+          </div>
+          <div className="flex justify-center pt-2">
             <Button size="lg" variant="outline" className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
               <Phone className="mr-2 h-5 w-5" />
               {t("callNow")}
