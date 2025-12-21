@@ -166,7 +166,7 @@ const AdminDashboard = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
-                Gelir ({format(new Date(), 'MMM', { locale: tr })})
+                Aylık Şöför Gideri
               </CardTitle>
             </CardHeader>
             <CardContent>
