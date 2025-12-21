@@ -75,6 +75,16 @@ const IstanbulTransferPriceGuide = () => {
         schemas={[
           { type: 'LocalBusiness' },
           {
+            type: 'Article',
+            headline: 'Istanbul Airport Transfer Price Guide 2025',
+            description: 'Updated Istanbul Airport transfer prices for 2025. Compare private transfer, taxi, and bus costs. Fixed pricing, no hidden fees.',
+            image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+            datePublished: '2024-12-10',
+            dateModified: '2024-12-10',
+            author: 'Meet Transfer',
+            readingTime: '10',
+          },
+          {
             type: 'FAQPage',
             questions: faqItems.map(item => ({
               question: item.question,

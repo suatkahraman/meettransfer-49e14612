@@ -34,7 +34,18 @@ interface MerchantProductSchema {
   type: 'MerchantProduct';
 }
 
-type SchemaType = LocalBusinessSchema | TransportationServiceSchema | FAQSchema | BreadcrumbSchema | ProductSchema | MerchantProductSchema;
+interface ArticleSchema {
+  type: 'Article';
+  headline: string;
+  description: string;
+  image?: string;
+  datePublished: string;
+  dateModified?: string;
+  author?: string;
+  readingTime?: string;
+}
+
+type SchemaType = LocalBusinessSchema | TransportationServiceSchema | FAQSchema | BreadcrumbSchema | ProductSchema | MerchantProductSchema | ArticleSchema;
 
 interface SchemaOrgProps {
   schemas: SchemaType[];
@@ -215,6 +226,38 @@ const generateMerchantProductSchema = () => ({
   },
 });
 
+const generateArticleSchema = (article: ArticleSchema) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: article.headline,
+  description: article.description,
+  image: article.image || 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+  datePublished: article.datePublished,
+  dateModified: article.dateModified || article.datePublished,
+  author: {
+    '@type': 'Organization',
+    name: article.author || 'Meet Transfer',
+    url: baseUrl,
+    logo: companyInfo.logo,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Meet Transfer',
+    url: baseUrl,
+    logo: {
+      '@type': 'ImageObject',
+      url: companyInfo.logo,
+    },
+  },
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': baseUrl,
+  },
+  ...(article.readingTime && {
+    timeRequired: `PT${parseInt(article.readingTime)}M`,
+  }),
+});
+
 const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
   useEffect(() => {
     // Remove existing schema scripts
@@ -243,6 +286,9 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
           break;
         case 'MerchantProduct':
           schemaData = generateMerchantProductSchema();
+          break;
+        case 'Article':
+          schemaData = generateArticleSchema(schema as ArticleSchema);
           break;
         default:
           return;
