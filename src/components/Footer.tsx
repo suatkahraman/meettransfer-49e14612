@@ -35,9 +35,9 @@ const TripAdvisorBadge = () => (
 );
 
 const socialLinks = [
-  { icon: Facebook, href: "https://m.facebook.com/100095122861655/", label: "Facebook" },
-  { icon: Instagram, href: "https://www.instagram.com/meettransfer/", label: "Instagram" },
-  { icon: Twitter, href: "https://x.com/meettransfer", label: "X" },
+  { icon: Instagram, href: "https://www.instagram.com/meettransfer", label: "Instagram" },
+  { icon: Facebook, href: "https://www.facebook.com/share/17w6b51DcX/", label: "Facebook" },
+  { icon: Twitter, href: "https://x.com/MeetTransfer", label: "X" },
   { icon: Youtube, href: "https://www.youtube.com/@meettransfer", label: "YouTube" },
 ];
 
