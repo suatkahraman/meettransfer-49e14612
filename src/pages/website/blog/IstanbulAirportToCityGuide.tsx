@@ -94,7 +94,7 @@ const IstanbulAirportToCityGuide = () => {
           { type: 'LocalBusiness' },
           {
             type: 'FAQPage',
-            faqs: faqItems.map(item => ({
+            questions: faqItems.map(item => ({
               question: item.question,
               answer: item.answer
             }))
