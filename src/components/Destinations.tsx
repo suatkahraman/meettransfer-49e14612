@@ -61,24 +61,28 @@ export const Destinations = () => {
       airports: "IST / SAW",
       descKey: "istanbulDesc",
       image: istanbulTransfer,
+      link: "/istanbul-airport-transfer",
     },
     {
       routeKey: "antalyaResorts",
       airports: "AYT",
       descKey: "antalyaDesc",
       image: antalyaTransfer,
+      link: "/antalya-airport-transfer",
     },
     {
       routeKey: "bodrumCity",
       airports: "BJV",
       descKey: "bodrumDesc",
       image: bodrumTransfer,
+      link: "/bodrum-airport-transfer",
     },
     {
       routeKey: "cappadociaTours",
       airports: "NAV / ASR",
       descKey: "cappadociaDesc",
       image: cappadociaTransfer,
+      link: "/cappadocia-airport-transfer",
     },
   ];
 
@@ -99,25 +103,27 @@ export const Destinations = () => {
               className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer animate-in fade-in slide-in-from-bottom-8" 
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className="relative h-48 overflow-hidden">
-                <LazyImage 
-                  src={destination.image} 
-                  alt={t(destination.routeKey)}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className="flex items-center gap-2 text-white/90 text-xs mb-1">
-                    <MapPin className="h-3 w-3" />
-                    <span className="font-sans">{destination.airports}</span>
+              <Link to={getLocalizedPath(destination.link)}>
+                <div className="relative h-48 overflow-hidden">
+                  <LazyImage 
+                    src={destination.image} 
+                    alt={t(destination.routeKey)}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex items-center gap-2 text-white/90 text-xs mb-1">
+                      <MapPin className="h-3 w-3" />
+                      <span className="font-sans">{destination.airports}</span>
+                    </div>
+                    <h3 className="text-white font-bold text-lg">{t(destination.routeKey)}</h3>
                   </div>
-                  <h3 className="text-white font-bold text-lg">{t(destination.routeKey)}</h3>
                 </div>
-              </div>
+              </Link>
               <div className="p-5 space-y-4">
                 <p className="text-sm text-muted-foreground font-sans leading-relaxed">{t(destination.descKey)}</p>
                 <Button asChild variant="ghost" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                  <Link to={getLocalizedPath("/book")}>
+                  <Link to={getLocalizedPath(destination.link)}>
                     {t("bookNow")}
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>

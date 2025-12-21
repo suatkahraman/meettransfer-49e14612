@@ -2,7 +2,7 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark } from "lucide-react";
+import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -20,7 +20,12 @@ const DestinationsPage = () => {
       IconComponent: Building2,
       locations: ["Taksim", "Sultanahmet", "Beşiktaş", "Levent", "Galataport Cruise Port", "Bosphorus Hotels"],
       vehicles: "Mercedes Vito, V-Class, VIP Minibus",
-      link: "/istanbul-transfer",
+      link: "/istanbul-airport-transfer",
+      extraLinks: [
+        { label: "Hotel Transfer", path: "/istanbul-airport-hotel-transfer" },
+        { label: "VIP Transfer", path: "/ist-city-center-vip-transfer" },
+        { label: "Sabiha Gökçen", path: "/sabiha-gokcen-private-transfer" },
+      ],
     },
     {
       id: 2,
@@ -31,7 +36,7 @@ const DestinationsPage = () => {
       IconComponent: Waves,
       locations: ["Lara", "Kundu", "Belek", "Side", "Alanya", "Kaş", "Kemer", "Golf Hotels & Resorts"],
       vehicles: "Mercedes Vito, VIP Minibus",
-      link: "/antalya-transfer",
+      link: "/antalya-airport-transfer",
     },
     {
       id: 3,
@@ -42,7 +47,7 @@ const DestinationsPage = () => {
       IconComponent: Anchor,
       locations: ["Yalıkavak Marina", "Türkbükü", "Gündoğan", "Torba", "Bodrum City Center"],
       vehicles: "VIP V-Class & Minibus",
-      link: "/bodrum-transfer",
+      link: "/bodrum-airport-transfer",
     },
     {
       id: 4,
@@ -53,7 +58,7 @@ const DestinationsPage = () => {
       IconComponent: Waves,
       locations: ["Fethiye", "Ölüdeniz", "Göcek", "Marmaris", "Yacht Marina Transfers", "Villa & Resort Transport"],
       vehicles: "VIP Mercedes fleet",
-      link: "/dalaman-transfer",
+      link: "/dalaman-airport-transfer",
     },
     {
       id: 5,
@@ -64,7 +69,7 @@ const DestinationsPage = () => {
       IconComponent: Landmark,
       locations: ["Çeşme", "Alaçatı", "Ephesus", "Kuşadası", "Port & Hotel Transfers"],
       vehicles: t("luxuryService"),
-      link: "/izmir-transfer",
+      link: "/izmir-airport-transfer",
     },
     {
       id: 6,
@@ -75,7 +80,7 @@ const DestinationsPage = () => {
       IconComponent: Mountain,
       locations: ["Göreme", "Ürgüp", "Avanos", "Uçhisar", "Airport Transfers"],
       vehicles: "VIP tour chauffeurs",
-      link: "/cappadocia-transfer",
+      link: "/cappadocia-airport-transfer",
     },
   ];
   
@@ -174,13 +179,29 @@ const DestinationsPage = () => {
                     <span>{destination.vehicles}</span>
                   </div>
 
-                  {/* Book Now Button */}
+                  {/* Extra Links for Istanbul */}
+                  {'extraLinks' in destination && destination.extraLinks && (
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
+                      {destination.extraLinks.map((extraLink, idx) => (
+                        <Link 
+                          key={idx}
+                          to={getLocalizedPath(extraLink.path)}
+                          className="text-xs text-primary hover:underline flex items-center gap-1"
+                        >
+                          <ArrowRight className="h-3 w-3" />
+                          {extraLink.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* View Details Button */}
                   <Button 
                     asChild 
                     className="w-full mt-2 group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                     variant="outline"
                   >
-                    <Link to={`${getLocalizedPath("/book")}?destination=${encodeURIComponent(destination.name)}`}>
+                    <Link to={getLocalizedPath(destination.link)}>
                       {t("bookTransfer")} {destination.name} {t("transfer")}
                     </Link>
                   </Button>
