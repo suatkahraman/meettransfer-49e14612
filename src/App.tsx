@@ -60,6 +60,17 @@ const IzmirTransfer = lazy(() => import("./pages/website/IzmirTransfer"));
 const CappadociaTransfer = lazy(() => import("./pages/website/CappadociaTransfer"));
 const EphesusPamukkale = lazy(() => import("./pages/website/EphesusPamukkale"));
 const LuxuryChauffeur = lazy(() => import("./pages/website/LuxuryChauffeur"));
+
+// New SEO Landing Pages
+const IstanbulAirportTransfer = lazy(() => import("./pages/website/IstanbulAirportTransfer"));
+const AntalyaAirportTransfer = lazy(() => import("./pages/website/AntalyaAirportTransfer"));
+const BodrumAirportTransfer = lazy(() => import("./pages/website/BodrumAirportTransfer"));
+const CappadociaAirportTransfer = lazy(() => import("./pages/website/CappadociaAirportTransfer"));
+const DalamanAirportTransfer = lazy(() => import("./pages/website/DalamanAirportTransfer"));
+const IzmirAirportTransfer = lazy(() => import("./pages/website/IzmirAirportTransfer"));
+const IstanbulAirportHotelTransfer = lazy(() => import("./pages/website/IstanbulAirportHotelTransfer"));
+const IstCityCenterVipTransfer = lazy(() => import("./pages/website/IstCityCenterVipTransfer"));
+const SabihaGokcenPrivateTransfer = lazy(() => import("./pages/website/SabihaGokcenPrivateTransfer"));
 const FleetPage = lazy(() => import("./pages/website/FleetPage"));
 const AboutPage = lazy(() => import("./pages/website/AboutPage"));
 const ContactPage = lazy(() => import("./pages/website/ContactPage"));
@@ -139,6 +150,17 @@ const App = () => (
               {localizedRoutes("/ephesus-pamukkale", <EphesusPamukkale />)}
               {localizedRoutes("/luxury-chauffeur", <LuxuryChauffeur />)}
               {localizedRoutes("/book", <ReservationForm />)}
+              
+              {/* SEO Landing Pages */}
+              {localizedRoutes("/istanbul-airport-transfer", <IstanbulAirportTransfer />)}
+              {localizedRoutes("/antalya-airport-transfer", <AntalyaAirportTransfer />)}
+              {localizedRoutes("/bodrum-airport-transfer", <BodrumAirportTransfer />)}
+              {localizedRoutes("/cappadocia-airport-transfer", <CappadociaAirportTransfer />)}
+              {localizedRoutes("/dalaman-airport-transfer", <DalamanAirportTransfer />)}
+              {localizedRoutes("/izmir-airport-transfer", <IzmirAirportTransfer />)}
+              {localizedRoutes("/istanbul-airport-hotel-transfer", <IstanbulAirportHotelTransfer />)}
+              {localizedRoutes("/ist-city-center-vip-transfer", <IstCityCenterVipTransfer />)}
+              {localizedRoutes("/sabiha-gokcen-private-transfer", <SabihaGokcenPrivateTransfer />)}
               {localizedRoutes("/blog", <BlogPage />)}
               {localizedRoutes("/blog/istanbul-airport-to-city-guide", <IstanbulAirportToCityGuide />)}
               {localizedRoutes("/blog/istanbul-transfer-price-guide", <IstanbulTransferPriceGuide />)}
