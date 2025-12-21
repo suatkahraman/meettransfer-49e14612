@@ -5,10 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, LogOut } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, LogOut, FileText, Wallet } from 'lucide-react';
 import { MonthNavigator } from '@/components/accounting/MonthNavigator';
 import { MonthlySummaryCard } from '@/components/accounting/MonthlySummaryCard';
 import { MonthlyAccountingTable } from '@/components/accounting/MonthlyAccountingTable';
+import { DriverBalanceCard } from '@/components/accounting/DriverBalanceCard';
+import { DriverPaymentsTable } from '@/components/accounting/DriverPaymentsTable';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 
 interface Reservation {
@@ -26,13 +29,25 @@ interface Reservation {
   customer_name: string;
 }
 
+interface DriverPayment {
+  id: string;
+  driver_id: string;
+  amount: number;
+  payment_date: string;
+  notes: string | null;
+  created_at: string;
+}
+
 const DriverMonthlyAccounting = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { driverId } = useUserRole();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [payments, setPayments] = useState<DriverPayment[]>([]);
+  const [totalBalance, setTotalBalance] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('reservations');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,7 +57,8 @@ const DriverMonthlyAccounting = () => {
       const monthStart = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
       const monthEnd = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
 
-      const { data } = await supabase
+      // Fetch reservations
+      const { data: reservationsData } = await supabase
         .from('reservations')
         .select('*')
         .eq('driver_id', driverId)
@@ -50,9 +66,34 @@ const DriverMonthlyAccounting = () => {
         .lte('pickup_date', monthEnd)
         .order('pickup_date', { ascending: true });
 
-      if (data) {
-        setReservations(data);
+      if (reservationsData) {
+        setReservations(reservationsData);
       }
+
+      // Fetch payments for this month
+      const { data: paymentsData } = await supabase
+        .from('driver_payments')
+        .select('*')
+        .eq('driver_id', driverId)
+        .gte('payment_date', monthStart)
+        .lte('payment_date', monthEnd)
+        .order('payment_date', { ascending: false });
+
+      if (paymentsData) {
+        setPayments(paymentsData);
+      }
+
+      // Fetch total balance
+      const { data: balanceData } = await supabase
+        .from('driver_balances')
+        .select('balance')
+        .eq('driver_id', driverId)
+        .maybeSingle();
+
+      if (balanceData) {
+        setTotalBalance(balanceData.balance);
+      }
+
       setLoading(false);
     };
 
@@ -74,6 +115,18 @@ const DriverMonthlyAccounting = () => {
             fetchData();
           }
         )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'driver_payments',
+            filter: `driver_id=eq.${driverId}`
+          },
+          () => {
+            fetchData();
+          }
+        )
         .subscribe();
 
       return () => {
@@ -84,6 +137,8 @@ const DriverMonthlyAccounting = () => {
 
   const totalPrice = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
   const totalCash = reservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
+  const totalPaymentsThisMonth = payments.reduce((sum, p) => sum + p.amount, 0);
+  const monthlyEarnings = totalPrice - totalCash;
 
   const handleViewDetails = (reservation: Reservation) => {
     navigate(`/driver/job/${reservation.id}`);
@@ -125,26 +180,94 @@ const DriverMonthlyAccounting = () => {
           <div className="text-center py-12">Yükleniyor...</div>
         ) : (
           <>
-            {/* Monthly Summary */}
-            <MonthlySummaryCard
-              totalTransfers={reservations.length}
-              totalPrice={totalPrice}
-              totalCashCollected={totalCash}
+            {/* Driver Balance Card */}
+            <DriverBalanceCard
+              balance={totalBalance}
+              totalPayments={totalBalance}
+              totalEarnings={monthlyEarnings}
             />
 
-            {/* Reservations Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Transferler</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <MonthlyAccountingTable
-                  reservations={reservations}
-                  showActions={true}
-                  onEdit={handleViewDetails}
+            {/* Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="reservations" className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  Transferler
+                </TabsTrigger>
+                <TabsTrigger value="payments" className="gap-2">
+                  <Wallet className="h-4 w-4" />
+                  Ödemeler
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="reservations" className="space-y-6">
+                {/* Monthly Summary */}
+                <MonthlySummaryCard
+                  totalTransfers={reservations.length}
+                  totalPrice={totalPrice}
+                  totalCashCollected={totalCash}
                 />
-              </CardContent>
-            </Card>
+
+                {/* Reservations Table */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Transferler</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MonthlyAccountingTable
+                      reservations={reservations}
+                      showActions={true}
+                      onEdit={handleViewDetails}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="payments" className="space-y-6">
+                {/* Payments Summary */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Wallet className="h-5 w-5" />
+                      Bu Ay Alınan Ödemeler
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-green-600">
+                      ₺{totalPaymentsThisMonth.toFixed(2)}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {payments.length} ödeme kaydı
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Total Balance */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Toplam Cari Bakiye</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-blue-600">
+                      ₺{totalBalance.toFixed(2)}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Tüm zamanlar toplam ödeme
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Payments Table */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Ödeme Geçmişi</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DriverPaymentsTable payments={payments} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </>
         )}
       </main>

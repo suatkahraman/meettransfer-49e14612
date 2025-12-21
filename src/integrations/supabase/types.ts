@@ -293,6 +293,73 @@ export type Database = {
           },
         ]
       }
+      driver_balances: {
+        Row: {
+          balance: number
+          driver_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          driver_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          driver_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_balances_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: true
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          driver_id: string
+          id: string
+          notes: string | null
+          payment_date: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          driver_id: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          driver_id?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_payments_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_reviews: {
         Row: {
           comment: string | null
