@@ -111,6 +111,11 @@ const generateLocalBusinessSchema = () => ({
           name: 'VIP Airport Transfer',
           description: 'Luxury airport transfer with meet & greet service',
         },
+        hasMerchantReturnPolicy: {
+          '@type': 'MerchantReturnPolicy',
+          applicableCountry: 'TR',
+          returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+        },
       },
       {
         '@type': 'Offer',
@@ -118,6 +123,11 @@ const generateLocalBusinessSchema = () => ({
           '@type': 'Service',
           name: 'Hourly Chauffeur Service',
           description: 'Private chauffeur service by the hour',
+        },
+        hasMerchantReturnPolicy: {
+          '@type': 'MerchantReturnPolicy',
+          applicableCountry: 'TR',
+          returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
         },
       },
     ],
