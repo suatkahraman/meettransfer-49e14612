@@ -141,18 +141,59 @@ const CustomerHome = () => {
           toast.error('Admin bildirimi gönderilemedi (backend).');
         } else {
           const whatsapp = (notifyResponse.data as any)?.whatsapp;
+          const sid = Array.isArray(whatsapp?.results) ? whatsapp.results?.[0]?.sid : null;
+
           if (whatsapp?.enabled && whatsapp?.failed > 0) {
             const firstErr = Array.isArray(whatsapp?.errors) ? whatsapp.errors[0] : null;
             toast.error(
               `WhatsApp gönderilemedi (Twilio). ` +
                 (firstErr?.message ? `Hata: ${firstErr.message}` : 'Lütfen Twilio ayarlarını kontrol edin.')
             );
-          } else if (whatsapp?.enabled && Array.isArray(whatsapp?.results) && whatsapp.results[0]?.status_after && ['failed', 'undelivered'].includes(whatsapp.results[0].status_after)) {
+          } else if (
+            whatsapp?.enabled &&
+            Array.isArray(whatsapp?.results) &&
+            whatsapp.results[0]?.status_after &&
+            ['failed', 'undelivered'].includes(whatsapp.results[0].status_after)
+          ) {
             const r = whatsapp.results[0];
             toast.error(
-              `WhatsApp durumu başarısız: ${r.status_after}` +
-                (r.error_message ? ` (${r.error_message})` : '')
+              `WhatsApp durumu başarısız: ${r.status_after}` + (r.error_message ? ` (${r.error_message})` : '')
             );
+          }
+
+          // Delivery status check (Twilio sometimes updates status later than the initial response)
+          if (sid) {
+            const checkAfter = (delayMs: number) => {
+              setTimeout(async () => {
+                try {
+                  const statusRes = await supabase.functions.invoke('whatsapp-status', {
+                    body: {
+                      reservation_id: insertedReservation.id,
+                      message_sid: sid,
+                    },
+                  });
+
+                  if (statusRes.error) {
+                    console.error('WhatsApp status check error:', statusRes.error);
+                    return;
+                  }
+
+                  const status = (statusRes.data as any)?.status as string | undefined;
+                  const errMsg = (statusRes.data as any)?.error_message as string | null | undefined;
+
+                  if (status && ['failed', 'undelivered'].includes(status)) {
+                    toast.error(`WhatsApp teslim edilemedi: ${status}${errMsg ? ` (${errMsg})` : ''}`);
+                  } else if (status && delayMs >= 120000 && !['delivered', 'read'].includes(status)) {
+                    toast.info(`WhatsApp henüz teslim edilmedi. Durum: ${status}`);
+                  }
+                } catch (e) {
+                  console.error('WhatsApp status check failed:', e);
+                }
+              }, delayMs);
+            };
+
+            checkAfter(45000);
+            checkAfter(120000);
           }
         }
       } catch (notifyError) {
