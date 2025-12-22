@@ -310,9 +310,18 @@ const ReservationForm = () => {
             pickup_date: formData.date,
           }
         });
-        
+
         if (notifyResponse.error) {
           console.error('Admin notification error:', notifyResponse.error);
+        } else {
+          const whatsapp = (notifyResponse.data as any)?.whatsapp;
+          if (whatsapp?.enabled && whatsapp?.failed > 0) {
+            const firstErr = Array.isArray(whatsapp?.errors) ? whatsapp.errors[0] : null;
+            toast.error(
+              `WhatsApp gönderilemedi (Twilio). ` +
+                (firstErr?.message ? `Hata: ${firstErr.message}` : 'Lütfen Twilio ayarlarını kontrol edin.')
+            );
+          }
         }
       } catch (notifyError) {
         console.error('Failed to notify admin:', notifyError);
