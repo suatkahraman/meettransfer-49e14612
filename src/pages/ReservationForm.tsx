@@ -395,6 +395,8 @@ const ReservationForm = () => {
             status: 'pending_price',
             price: null,
             price_currency: null,
+            // Promo code for return trip
+            promo_code: isPromoCodeValid ? promoCode.trim() : null,
             // Place details - swapped for return trip
             pickup_place_name: formData.dropoff_place_name || null,
             pickup_lat: formData.dropoff_lat,

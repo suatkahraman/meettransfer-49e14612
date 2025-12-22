@@ -659,6 +659,7 @@ export type Database = {
           pickup_time: string
           price: number | null
           price_currency: string | null
+          promo_code: string | null
           reservation_code: string | null
           status: string
           updated_at: string | null
@@ -703,6 +704,7 @@ export type Database = {
           pickup_time: string
           price?: number | null
           price_currency?: string | null
+          promo_code?: string | null
           reservation_code?: string | null
           status?: string
           updated_at?: string | null
@@ -747,6 +749,7 @@ export type Database = {
           pickup_time?: string
           price?: number | null
           price_currency?: string | null
+          promo_code?: string | null
           reservation_code?: string | null
           status?: string
           updated_at?: string | null
