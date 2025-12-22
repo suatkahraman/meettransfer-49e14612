@@ -1,7 +1,7 @@
 import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-export type Language = "EN" | "DE" | "FR" | "RU" | "IT" | "ES" | "AR";
+export type Language = "EN" | "DE" | "FR" | "RU" | "IT" | "ES" | "AR" | "TR";
 
 interface LanguageContextType {
   language: Language;
@@ -17,6 +17,7 @@ const LANGUAGE_PREFIXES: Record<string, Language> = {
   it: "IT",
   es: "ES",
   ar: "AR",
+  tr: "TR",
 };
 
 const LANGUAGE_TO_PREFIX: Record<Language, string> = {
@@ -27,6 +28,7 @@ const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   IT: "/it",
   ES: "/es",
   AR: "/ar",
+  TR: "/tr",
 };
 
 const translations: Record<Language, Record<string, string>> = {
@@ -337,6 +339,10 @@ const translations: Record<Language, Record<string, string>> = {
     returnDate: "Return Date",
     returnTime: "Return Time",
     returnFlightNumber: "Return Flight Number",
+    promoCode: "Promotion Code",
+    promoCodePlaceholder: "Enter promotion code",
+    promoCodeSuccess: "You will receive your price with a 40% discount.",
+    promoCodeInvalid: "Invalid promotion code",
     contactDetails: "Contact Details",
     emailAddress: "Email Address",
     password: "Password",
@@ -689,6 +695,10 @@ const translations: Record<Language, Record<string, string>> = {
     returnDate: "Rückfahrtdatum",
     returnTime: "Rückfahrtzeit",
     returnFlightNumber: "Rückflug-Nummer",
+    promoCode: "Aktionscode",
+    promoCodePlaceholder: "Aktionscode eingeben",
+    promoCodeSuccess: "Sie erhalten Ihren Preis mit 40% Rabatt.",
+    promoCodeInvalid: "Ungültiger Aktionscode",
     contactDetails: "Kontaktdaten",
     emailAddress: "E-Mail-Adresse",
     password: "Passwort",
@@ -1104,6 +1114,10 @@ const translations: Record<Language, Record<string, string>> = {
     returnDate: "Date de retour",
     returnTime: "Heure de retour",
     returnFlightNumber: "Numéro de vol retour",
+    promoCode: "Code promo",
+    promoCodePlaceholder: "Entrer le code promo",
+    promoCodeSuccess: "Vous recevrez votre prix avec une réduction de 40%.",
+    promoCodeInvalid: "Code promo invalide",
     contactDetails: "Coordonnées",
     emailAddress: "Adresse e-mail",
     password: "Mot de passe",
@@ -1519,6 +1533,10 @@ const translations: Record<Language, Record<string, string>> = {
     returnDate: "Дата возвращения",
     returnTime: "Время возвращения",
     returnFlightNumber: "Номер обратного рейса",
+    promoCode: "Промокод",
+    promoCodePlaceholder: "Введите промокод",
+    promoCodeSuccess: "Вы получите цену со скидкой 40%.",
+    promoCodeInvalid: "Недействительный промокод",
     contactDetails: "Контактные данные",
     emailAddress: "Адрес электронной почты",
     password: "Пароль",
@@ -1934,6 +1952,10 @@ const translations: Record<Language, Record<string, string>> = {
     returnDate: "Data di ritorno",
     returnTime: "Ora di ritorno",
     returnFlightNumber: "Numero volo ritorno",
+    promoCode: "Codice promozionale",
+    promoCodePlaceholder: "Inserisci codice promozionale",
+    promoCodeSuccess: "Riceverai il tuo prezzo con uno sconto del 40%.",
+    promoCodeInvalid: "Codice promozionale non valido",
     contactDetails: "Dettagli contatto",
     emailAddress: "Indirizzo email",
     password: "Password",
@@ -2349,6 +2371,10 @@ const translations: Record<Language, Record<string, string>> = {
     returnDate: "Fecha de regreso",
     returnTime: "Hora de regreso",
     returnFlightNumber: "Número de vuelo de regreso",
+    promoCode: "Código promocional",
+    promoCodePlaceholder: "Ingresa código promocional",
+    promoCodeSuccess: "Recibirás tu precio con un 40% de descuento.",
+    promoCodeInvalid: "Código promocional inválido",
     contactDetails: "Datos de contacto",
     emailAddress: "Dirección de correo",
     password: "Contraseña",
@@ -2764,6 +2790,10 @@ const translations: Record<Language, Record<string, string>> = {
     returnDate: "تاريخ العودة",
     returnTime: "وقت العودة",
     returnFlightNumber: "رقم رحلة العودة",
+    promoCode: "رمز العرض",
+    promoCodePlaceholder: "أدخل رمز العرض",
+    promoCodeSuccess: "ستحصل على السعر بخصم 40%.",
+    promoCodeInvalid: "رمز العرض غير صالح",
     contactDetails: "بيانات الاتصال",
     emailAddress: "البريد الإلكتروني",
     password: "كلمة المرور",
@@ -2938,6 +2968,51 @@ const translations: Record<Language, Record<string, string>> = {
     antalyaTransferH1: "نقل خاص من المطار في أنطاليا",
     antalyaTransferIntro: "استمتع بنقل مطار أنطاليا الفاخر مع Meet Transfer. يقدم سائقونا المحترفون خدمة من الباب إلى الباب من مطار أنطاليا (AYT) إلى جميع المنتجعات الرئيسية مثل بيليك، سايد، ألانيا، كيمير ولارا.",
     antalyaWhatsApp: "مرحباً، أود حجز نقل من مطار أنطاليا.",
+  },
+  TR: {
+    // Turkish translations - core keys for promo code feature
+    // Other keys will fall back to EN
+    home: "Ana Sayfa",
+    cities: "Şehirler",
+    fleet: "Filo",
+    about: "Hakkımızda",
+    contact: "İletişim",
+    services: "Hizmetler",
+    login: "Giriş",
+    logout: "Çıkış",
+    myAccount: "Hesabım",
+    bookNow: "Fiyat İste",
+    returnTrip: "Gidiş-Dönüş",
+    returnDate: "Dönüş Tarihi",
+    returnTime: "Dönüş Saati",
+    returnFlightNumber: "Dönüş Uçuş Numarası",
+    promoCode: "Promosyon Kodu",
+    promoCodePlaceholder: "Promosyon kodunu girin",
+    promoCodeSuccess: "Fiyatınızı %40 indirimli alacaksınız.",
+    promoCodeInvalid: "Geçersiz promosyon kodu",
+    contactDetails: "İletişim Bilgileri",
+    phone: "Telefon",
+    email: "E-posta",
+    password: "Şifre",
+    passengers: "Yolcular",
+    primaryPassenger: "Birincil Yolcu (Ad Soyad)",
+    addPassenger: "Yolcu Ekle",
+    vehicleType: "Araç Tipi",
+    paymentMethod: "Ödeme Yöntemi",
+    cashToDriver: "Şoföre Nakit",
+    onlinePaymentLink: "Online Ödeme Linki",
+    submitBookingRequest: "Rezervasyon Talebini Gönder",
+    reservationSubmitted: "Rezervasyon Gönderildi!",
+    reservationSubmittedDesc: "Talebiniz için teşekkürler. Ekibimiz inceleyecek ve size fiyat onayı için gönderecek.",
+    date: "Tarih",
+    time: "Saat",
+    pickupPoint: "Alış Noktası",
+    dropoffLocation: "Bırakış Noktası",
+    flightNumber: "Uçuş Numarası",
+    notes: "Notlar",
+    route: "Güzergah",
+    vehicle: "Araç",
+    priceInfoMessage: "Gönderdikten sonra ekibimiz talebinizi inceleyecek ve onayınız için size bir fiyat gönderecek.",
   },
 };
 

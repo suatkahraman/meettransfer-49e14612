@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2 } from 'lucide-react';
 import { z } from 'zod';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -56,6 +56,8 @@ const ReservationForm = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [hasReturnTrip, setHasReturnTrip] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
   const [returnTripData, setReturnTripData] = useState({
     date: '',
     time: '',
@@ -134,6 +136,19 @@ const ReservationForm = () => {
     const updated = [...passengerNames];
     updated[index] = value;
     setPassengerNames(updated);
+  };
+
+  const VALID_PROMO_CODE = 'Meet40Return';
+
+  const handlePromoCodeChange = (value: string) => {
+    setPromoCode(value);
+    if (value.trim() === '') {
+      setIsPromoCodeValid(null);
+    } else if (value.trim().toLowerCase() === VALID_PROMO_CODE.toLowerCase()) {
+      setIsPromoCodeValid(true);
+    } else {
+      setIsPromoCodeValid(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -640,6 +655,8 @@ const ReservationForm = () => {
                       onClick={() => {
                         setHasReturnTrip(false);
                         setReturnTripData({ date: '', time: '', flightNumber: '' });
+                        setPromoCode('');
+                        setIsPromoCodeValid(null);
                       }}
                       className="text-muted-foreground hover:text-destructive"
                     >
@@ -689,6 +706,35 @@ const ReservationForm = () => {
                         maxLength={20}
                       />
                     </div>
+                  </div>
+
+                  {/* Promo Code Field */}
+                  <div className="space-y-2 pt-2 border-t">
+                    <Label className="flex items-center gap-2">
+                      <Tag className="h-4 w-4" />
+                      {t('promoCode')}
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        placeholder={t('promoCodePlaceholder')}
+                        value={promoCode}
+                        onChange={(e) => handlePromoCodeChange(e.target.value)}
+                        className={`pr-10 ${isPromoCodeValid === true ? 'border-green-500 focus-visible:ring-green-500' : isPromoCodeValid === false ? 'border-destructive' : ''}`}
+                        maxLength={50}
+                      />
+                      {isPromoCodeValid === true && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                      )}
+                    </div>
+                    {isPromoCodeValid === true && (
+                      <p className="text-sm text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {t('promoCodeSuccess')}
+                      </p>
+                    )}
+                    {isPromoCodeValid === false && promoCode.trim() !== '' && (
+                      <p className="text-sm text-destructive">{t('promoCodeInvalid')}</p>
+                    )}
                   </div>
                 </div>
               )}
