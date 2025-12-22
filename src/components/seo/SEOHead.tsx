@@ -103,6 +103,9 @@ const SEOHead = ({
     updateMeta('og:url', fullUrl, true);
     updateMeta('og:type', ogType, true);
     updateMeta('og:image', ogImage, true);
+    updateMeta('og:image:width', '1200', true);
+    updateMeta('og:image:height', '630', true);
+    updateMeta('og:image:alt', title, true);
     updateMeta('og:site_name', 'Meet Transfer', true);
     
     // Set og:locale based on current URL language
@@ -119,9 +122,12 @@ const SEOHead = ({
     updateMeta('og:locale', localeMap[currentLangFromUrl] || 'en_US', true);
 
     // Twitter
+    updateMeta('twitter:card', 'summary_large_image');
+    updateMeta('twitter:site', '@meettransfer');
     updateMeta('twitter:title', title);
     updateMeta('twitter:description', description);
     updateMeta('twitter:image', ogImage);
+    updateMeta('twitter:image:alt', title);
 
     // Update canonical - SELF-REFERENCING
     let canonical = document.querySelector('link[rel="canonical"]');
