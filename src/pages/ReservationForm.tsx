@@ -313,6 +313,7 @@ const ReservationForm = () => {
 
         if (notifyResponse.error) {
           console.error('Admin notification error:', notifyResponse.error);
+          toast.error('Admin bildirimi gönderilemedi (backend).');
         } else {
           const whatsapp = (notifyResponse.data as any)?.whatsapp;
           if (whatsapp?.enabled && whatsapp?.failed > 0) {
@@ -321,10 +322,17 @@ const ReservationForm = () => {
               `WhatsApp gönderilemedi (Twilio). ` +
                 (firstErr?.message ? `Hata: ${firstErr.message}` : 'Lütfen Twilio ayarlarını kontrol edin.')
             );
+          } else if (whatsapp?.enabled && Array.isArray(whatsapp?.results) && whatsapp.results[0]?.status_after && ['failed', 'undelivered'].includes(whatsapp.results[0].status_after)) {
+            const r = whatsapp.results[0];
+            toast.error(
+              `WhatsApp durumu başarısız: ${r.status_after}` +
+                (r.error_message ? ` (${r.error_message})` : '')
+            );
           }
         }
       } catch (notifyError) {
         console.error('Failed to notify admin:', notifyError);
+        toast.error('Admin bildirimi gönderilemedi (backend).');
       }
 
       // Send email notification to admin
