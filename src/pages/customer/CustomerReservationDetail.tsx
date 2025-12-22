@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
@@ -56,6 +56,7 @@ interface Reservation {
   status: string;
   driver_id: string | null;
   passenger_names: string[] | null;
+  promo_code: string | null;
   // Place details
   pickup_place_name: string | null;
   pickup_lat: number | null;
@@ -568,7 +569,29 @@ const CustomerReservationDetail = () => {
               <div className="bg-muted p-4 rounded-lg space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Price</span>
-                  <span className="font-bold text-primary text-2xl">{priceDisplay}</span>
+                  <div className="text-right">
+                    {reservation.promo_code && reservation.price ? (
+                      <>
+                        {/* Original price with strikethrough */}
+                        <span className="text-muted-foreground line-through text-lg mr-2">
+                          {priceDisplay}
+                        </span>
+                        {/* Discounted price */}
+                        <span className="font-bold text-green-600 dark:text-green-400 text-2xl">
+                          {formatPrice(Math.round(reservation.price * 0.6), reservation.price_currency)}
+                        </span>
+                        {/* Discount badge */}
+                        <div className="flex items-center justify-end gap-1 mt-1">
+                          <Tag className="h-3 w-3 text-green-600 dark:text-green-400" />
+                          <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                            40% {t('discount') || 'discount'}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <span className="font-bold text-primary text-2xl">{priceDisplay}</span>
+                    )}
+                  </div>
                 </div>
                 
                 {/* Payment Status Indicator */}
