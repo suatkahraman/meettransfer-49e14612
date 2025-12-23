@@ -234,6 +234,11 @@ async function sendWhatsAppMessage(
     formData.append("To", to);
     formData.append("Body", message);
 
+    const callbackBase = Deno.env.get("SUPABASE_URL")?.trim();
+    if (callbackBase) {
+      formData.append("StatusCallback", `${callbackBase}/functions/v1/whatsapp-delivery-webhook`);
+    }
+
     const credentials = btoa(`${accountSid}:${authToken}`);
 
     const response = await fetch(twilioUrl, {
