@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LogIn, LogOut, User } from "lucide-react";
+import { LogIn, LogOut, User, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "./LanguageSelector";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { InstallAppButton } from "./InstallAppButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -90,6 +91,10 @@ const WebsiteHeader = () => {
               {t("bookNow")}
             </Button>
           </Link>
+          {/* Install App Button (Desktop) */}
+          <div className="hidden md:block">
+            <InstallAppButton variant="ghost" size="sm" />
+          </div>
           <div className="hidden md:block">
             <PushNotificationToggle />
           </div>
@@ -171,6 +176,14 @@ const WebsiteHeader = () => {
                   </DropdownMenuItem>
                 );
               })}
+              
+              {/* Install App - Mobile Menu */}
+              <DropdownMenuItem asChild>
+                <Link to="/install" className="w-full cursor-pointer gap-2">
+                  <Download className="h-4 w-4" />
+                  {t("installApp") || "Install App"}
+                </Link>
+              </DropdownMenuItem>
               
               <DropdownMenuSeparator />
               
