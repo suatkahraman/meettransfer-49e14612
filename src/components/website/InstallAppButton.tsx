@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Download, Smartphone, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
+import { IOSInstallModal } from "./IOSInstallModal";
 
 interface InstallAppButtonProps {
   variant?: "default" | "ghost" | "outline" | "accent";
@@ -23,6 +25,7 @@ export function InstallAppButton({
   const { canInstall, isInstalled, isStandalone, isIOS, isAndroid, promptInstall } = usePWAInstall();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
+  const [showIOSModal, setShowIOSModal] = useState(false);
 
   // Don't show if already running in standalone mode (app is open)
   if (isStandalone) {
@@ -44,10 +47,10 @@ export function InstallAppButton({
         );
       }
     } else if (isIOS) {
-      // iOS - show instructions page
-      navigate("/install");
+      // iOS - show modal with instructions
+      setShowIOSModal(true);
     } else if (isAndroid) {
-      // Android without install prompt - try to trigger browser install
+      // Android without install prompt - show instructions page
       navigate("/install");
     } else {
       // Desktop fallback
@@ -64,14 +67,18 @@ export function InstallAppButton({
     : (isIOS ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />);
 
   return (
-    <Button
-      variant={variant}
-      size={size}
-      onClick={handleClick}
-      className={`gap-2 ${fullWidth ? "w-full" : ""} ${className}`}
-    >
-      {showIcon && icon}
-      {buttonLabel}
-    </Button>
+    <>
+      <Button
+        variant={variant}
+        size={size}
+        onClick={handleClick}
+        className={`gap-2 ${fullWidth ? "w-full" : ""} ${className}`}
+      >
+        {showIcon && icon}
+        {buttonLabel}
+      </Button>
+
+      <IOSInstallModal open={showIOSModal} onOpenChange={setShowIOSModal} />
+    </>
   );
 }
