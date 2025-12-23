@@ -51,6 +51,11 @@ const AdminAgencies = lazy(() => import("./pages/admin/AdminAgencies"));
 const AdminAgencyAccounting = lazy(() => import("./pages/admin/AdminAgencyAccounting"));
 const AdminFlightMonitor = lazy(() => import("./pages/admin/AdminFlightMonitor"));
 const AdminAgencyBalance = lazy(() => import("./pages/admin/AdminAgencyBalance"));
+const AdminWhatsAppChat = lazy(() => import("./pages/admin/AdminWhatsAppChat"));
+
+// Customer Portal Pages
+const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
+const ConfirmBooking = lazy(() => import("./pages/ConfirmBooking"));
 
 // Website Pages - lazy loaded
 const IstanbulTransfer = lazy(() => import("./pages/website/IstanbulTransfer"));
@@ -210,6 +215,11 @@ const App = () => (
               <Route path="/admin/agencies" element={<AdminRoute><LazyRoute><AdminAgencies /></LazyRoute></AdminRoute>} />
               <Route path="/admin/agency-accounting/:agencyId" element={<AdminRoute><LazyRoute><AdminAgencyAccounting /></LazyRoute></AdminRoute>} />
               <Route path="/admin/agency-balance/:agencyId" element={<AdminRoute><LazyRoute><AdminAgencyBalance /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/whatsapp" element={<AdminRoute><LazyRoute><AdminWhatsAppChat /></LazyRoute></AdminRoute>} />
+              
+              {/* Customer Portal & Booking Confirmation - Public */}
+              <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />
+              <Route path="/confirm-booking" element={<LazyRoute><ConfirmBooking /></LazyRoute>} />
               
                 <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
               </Routes>

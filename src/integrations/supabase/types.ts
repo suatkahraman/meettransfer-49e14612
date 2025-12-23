@@ -293,6 +293,39 @@ export type Database = {
           },
         ]
       }
+      customer_magic_links: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          customer_phone: string
+          customer_user_id: string | null
+          expires_at: string
+          id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_phone: string
+          customer_user_id?: string | null
+          expires_at: string
+          id?: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_phone?: string
+          customer_user_id?: string | null
+          expires_at?: string
+          id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
       driver_balances: {
         Row: {
           balance: number
@@ -628,6 +661,8 @@ export type Database = {
           customer_id: string
           customer_name: string
           customer_phone: string
+          discount_amount: number | null
+          discount_percentage: number | null
           driver_cash: boolean | null
           driver_cash_amount: number | null
           driver_confirmed: boolean | null
@@ -644,7 +679,9 @@ export type Database = {
           flight_number: string | null
           flight_status: string | null
           id: string
+          is_return_transfer: boolean | null
           last_notified_arrival_time: string | null
+          original_reservation_id: string | null
           passenger_cash_amount: number | null
           passenger_cash_currency: string | null
           passenger_names: string[] | null
@@ -673,6 +710,8 @@ export type Database = {
           customer_id: string
           customer_name: string
           customer_phone: string
+          discount_amount?: number | null
+          discount_percentage?: number | null
           driver_cash?: boolean | null
           driver_cash_amount?: number | null
           driver_confirmed?: boolean | null
@@ -689,7 +728,9 @@ export type Database = {
           flight_number?: string | null
           flight_status?: string | null
           id?: string
+          is_return_transfer?: boolean | null
           last_notified_arrival_time?: string | null
+          original_reservation_id?: string | null
           passenger_cash_amount?: number | null
           passenger_cash_currency?: string | null
           passenger_names?: string[] | null
@@ -718,6 +759,8 @@ export type Database = {
           customer_id?: string
           customer_name?: string
           customer_phone?: string
+          discount_amount?: number | null
+          discount_percentage?: number | null
           driver_cash?: boolean | null
           driver_cash_amount?: number | null
           driver_confirmed?: boolean | null
@@ -734,7 +777,9 @@ export type Database = {
           flight_number?: string | null
           flight_status?: string | null
           id?: string
+          is_return_transfer?: boolean | null
           last_notified_arrival_time?: string | null
+          original_reservation_id?: string | null
           passenger_cash_amount?: number | null
           passenger_cash_currency?: string | null
           passenger_names?: string[] | null
@@ -770,6 +815,13 @@ export type Database = {
             referencedRelation: "drivers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reservations_original_reservation_id_fkey"
+            columns: ["original_reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -792,6 +844,153 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      whatsapp_booking_confirmations: {
+        Row: {
+          confirmation_token: string
+          confirmed_at: string | null
+          conversation_id: string
+          created_at: string | null
+          currency: string | null
+          expires_at: string
+          id: string
+          price: number
+          reservation_id: string | null
+          status: string | null
+        }
+        Insert: {
+          confirmation_token: string
+          confirmed_at?: string | null
+          conversation_id: string
+          created_at?: string | null
+          currency?: string | null
+          expires_at: string
+          id?: string
+          price: number
+          reservation_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          confirmation_token?: string
+          confirmed_at?: string | null
+          conversation_id?: string
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string
+          id?: string
+          price?: number
+          reservation_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_booking_confirmations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_booking_confirmations_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_conversations: {
+        Row: {
+          created_at: string | null
+          customer_name: string | null
+          customer_phone: string
+          customer_user_id: string | null
+          id: string
+          last_message_at: string | null
+          status: string | null
+          unread_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_name?: string | null
+          customer_phone: string
+          customer_user_id?: string | null
+          id?: string
+          last_message_at?: string | null
+          status?: string | null
+          unread_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_name?: string | null
+          customer_phone?: string
+          customer_user_id?: string | null
+          id?: string
+          last_message_at?: string | null
+          status?: string | null
+          unread_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          direction: string
+          id: string
+          message_type: string | null
+          metadata: Json | null
+          reservation_id: string | null
+          sent_by_user_id: string | null
+          status: string | null
+          twilio_sid: string | null
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          direction: string
+          id?: string
+          message_type?: string | null
+          metadata?: Json | null
+          reservation_id?: string | null
+          sent_by_user_id?: string | null
+          status?: string | null
+          twilio_sid?: string | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          direction?: string
+          id?: string
+          message_type?: string | null
+          metadata?: Json | null
+          reservation_id?: string | null
+          sent_by_user_id?: string | null
+          status?: string | null
+          twilio_sid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
