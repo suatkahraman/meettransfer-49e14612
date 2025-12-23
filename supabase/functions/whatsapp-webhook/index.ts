@@ -138,7 +138,7 @@ serve(async (req) => {
             expires_at: expiresAt.toISOString(),
           });
 
-        const appUrl = Deno.env.get("APP_URL") || "https://meet-transfer.com";
+        const appUrl = "https://meettransfer.app";
         const customerLink = `${appUrl}/customer-portal?token=${token}`;
 
         const confirmationMessage = `✅ Your booking is confirmed.
