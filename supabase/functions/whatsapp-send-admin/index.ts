@@ -103,7 +103,7 @@ Please confirm your booking by replying "Confirm".`;
       // Generate magic link for customer account
       const token = crypto.randomUUID();
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
-      const appUrl = Deno.env.get("APP_URL") || "https://meet-transfer.com";
+      const appUrl = "https://meettransfer.app";
 
       await supabase
         .from("customer_magic_links")
