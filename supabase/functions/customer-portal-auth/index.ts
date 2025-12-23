@@ -152,20 +152,6 @@ serve(async (req) => {
       .update({ used_at: new Date().toISOString() })
       .eq("id", magicLink.id);
 
-    // Generate a session for the user
-    const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
-      type: "magiclink",
-      email: `${magicLink.customer_phone.replace(/\+/g, "")}@whatsapp.meettransfer.com`,
-    });
-
-    if (sessionError) {
-      console.error("Error generating session:", sessionError);
-      return new Response(
-        JSON.stringify({ error: "Failed to authenticate" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     // Get customer data - first try by customer_id, then by phone match
     let { data: reservations } = await supabase
       .from("reservations")
@@ -202,7 +188,6 @@ serve(async (req) => {
         phone: magicLink.customer_phone,
         reservations: reservations || [],
         conversation_id: conversation?.id,
-        auth_url: sessionData.properties?.hashed_token,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
