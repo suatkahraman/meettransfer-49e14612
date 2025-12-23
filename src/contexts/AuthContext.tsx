@@ -23,6 +23,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Handle OAuth callback - clean up URL hash if present
+    const handleOAuthCallback = async () => {
+      const hash = window.location.hash;
+      if (hash && hash.includes('access_token=')) {
+        // Let Supabase handle the hash - it will update the session
+        // Clean up the URL after processing
+        const cleanUrl = window.location.pathname + window.location.search;
+        window.history.replaceState(null, '', cleanUrl);
+      }
+    };
+    
+    handleOAuthCallback();
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -43,11 +56,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
               const userRole = roleData?.role || 'customer';
               
-              // Only redirect if on login/signup/auth pages
+              // Check if URL has OAuth hash (callback) or is on auth pages
               const currentPath = window.location.pathname;
+              const hasOAuthHash = window.location.hash.includes('access_token=');
               const isAuthPage = ['/login', '/signup', '/auth'].some(p => currentPath.includes(p));
               
-              if (isAuthPage) {
+              if (isAuthPage || hasOAuthHash) {
+                // Clean up URL hash
+                if (hasOAuthHash) {
+                  const cleanUrl = currentPath + window.location.search;
+                  window.history.replaceState(null, '', cleanUrl);
+                }
+                
                 switch (userRole) {
                   case 'admin':
                     navigate('/admin', { replace: true });
