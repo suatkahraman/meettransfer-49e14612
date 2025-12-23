@@ -60,21 +60,42 @@ serve(async (req) => {
     if (!userId) {
       const normalizedMagicPhone = normalizePhone(magicLink.customer_phone);
       
-      // Find existing user by normalized phone in reservations
-      const { data: allReservations } = await supabase
-        .from("reservations")
-        .select("customer_id, customer_phone");
+      // First, check profiles table for existing user with matching phone
+      const { data: allProfiles } = await supabase
+        .from("profiles")
+        .select("id, phone");
       
-      const matchingReservation = (allReservations || []).find(res => {
-        const normalizedResPhone = normalizePhone(res.customer_phone || "");
-        return normalizedResPhone === normalizedMagicPhone || 
-               normalizedResPhone.endsWith(normalizedMagicPhone.slice(-10)) ||
-               normalizedMagicPhone.endsWith(normalizedResPhone.slice(-10));
+      const matchingProfile = (allProfiles || []).find(profile => {
+        if (!profile.phone) return false;
+        const normalizedProfilePhone = normalizePhone(profile.phone);
+        return normalizedProfilePhone === normalizedMagicPhone || 
+               normalizedProfilePhone.endsWith(normalizedMagicPhone.slice(-10)) ||
+               normalizedMagicPhone.endsWith(normalizedProfilePhone.slice(-10));
       });
 
-      if (matchingReservation) {
-        userId = matchingReservation.customer_id;
+      if (matchingProfile) {
+        userId = matchingProfile.id;
+        console.log(`Found existing user by phone in profiles: ${userId}`);
       } else {
+        // Find existing user by normalized phone in reservations
+        const { data: allReservations } = await supabase
+          .from("reservations")
+          .select("customer_id, customer_phone");
+        
+        const matchingReservation = (allReservations || []).find(res => {
+          const normalizedResPhone = normalizePhone(res.customer_phone || "");
+          return normalizedResPhone === normalizedMagicPhone || 
+                 normalizedResPhone.endsWith(normalizedMagicPhone.slice(-10)) ||
+                 normalizedMagicPhone.endsWith(normalizedResPhone.slice(-10));
+        });
+
+        if (matchingReservation) {
+          userId = matchingReservation.customer_id;
+          console.log(`Found existing user by phone in reservations: ${userId}`);
+        }
+      }
+
+      if (!userId) {
         // Create new user account
         const email = `${magicLink.customer_phone.replace(/\+/g, "")}@whatsapp.meettransfer.com`;
         const password = crypto.randomUUID();
