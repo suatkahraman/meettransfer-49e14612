@@ -78,6 +78,7 @@ const ReviewsPage = lazy(() => import("./pages/website/ReviewsPage"));
 const DestinationsPage = lazy(() => import("./pages/website/DestinationsPage"));
 const WhatsAppBooking = lazy(() => import("./pages/website/WhatsAppBooking"));
 const TermsPage = lazy(() => import("./pages/website/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/website/PrivacyPage"));
 const ServicesPage = lazy(() => import("./pages/website/ServicesPage"));
 const BlogPage = lazy(() => import("./pages/website/BlogPage"));
 const IstanbulAirportToCityGuide = lazy(() => import("./pages/website/blog/IstanbulAirportToCityGuide"));
@@ -140,6 +141,7 @@ const App = () => (
               {localizedRoutes("/contact", <ContactPage />)}
               {localizedRoutes("/reviews", <ReviewsPage />)}
               {localizedRoutes("/terms", <TermsPage />)}
+              {localizedRoutes("/privacy", <PrivacyPage />)}
               {localizedRoutes("/whatsapp-booking", <WhatsAppBooking />)}
               {localizedRoutes("/istanbul-transfer", <IstanbulTransfer />)}
               {localizedRoutes("/antalya-transfer", <AntalyaTransfer />)}
