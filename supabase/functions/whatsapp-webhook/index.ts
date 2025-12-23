@@ -153,13 +153,15 @@ You can also create new reservations from your account.
 If you book a round-trip (return transfer), you will receive a 40% discount on your return transfer.`;
 
         // Send confirmation message
-        await sendWhatsAppMessage(
+        console.log(`Sending confirmation to ${customerPhone}, from: ${twilioWhatsAppNumber}`);
+        const confirmSid = await sendWhatsAppMessage(
           twilioAccountSid,
           twilioAuthToken,
           twilioWhatsAppNumber!,
           customerPhone,
           confirmationMessage
         );
+        console.log(`Confirmation message SID: ${confirmSid}`);
 
         // Store outgoing message
         await supabase
@@ -169,6 +171,7 @@ If you book a round-trip (return transfer), you will receive a 40% discount on y
             direction: "outgoing",
             content: confirmationMessage,
             reservation_id: pendingConfirmation.reservation_id,
+            twilio_sid: confirmSid,
           });
 
         return new Response(
