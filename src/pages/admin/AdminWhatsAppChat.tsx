@@ -396,15 +396,14 @@ export default function AdminWhatsAppChat() {
                             </Select>
                           </div>
                         </div>
-                        {reservations.length > 0 && (
+                        {reservations.length > 0 ? (
                           <div className="space-y-2">
-                            <Label>Link to Reservation (optional)</Label>
+                            <Label>Link to Reservation <span className="text-destructive">*</span></Label>
                             <Select value={reservationId} onValueChange={setReservationId}>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select reservation" />
+                                <SelectValue placeholder="Select reservation (required)" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">None</SelectItem>
                                 {reservations.map((res) => (
                                   <SelectItem key={res.id} value={res.id}>
                                     {res.pickup} → {res.dropoff} ({format(new Date(res.pickup_date), "MMM d")})
@@ -413,11 +412,15 @@ export default function AdminWhatsAppChat() {
                               </SelectContent>
                             </Select>
                           </div>
+                        ) : (
+                          <div className="p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
+                            No reservations found for this phone number. Create a reservation first before sending a price.
+                          </div>
                         )}
                         <Button
                           className="w-full"
                           onClick={() => sendMessage("price")}
-                          disabled={!price || sending}
+                          disabled={!price || !reservationId || sending}
                         >
                           {sending ? "Sending..." : "Send Price with Confirm Button"}
                         </Button>
