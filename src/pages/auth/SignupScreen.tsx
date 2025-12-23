@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { usePWADetect } from '@/hooks/usePWADetect';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { z } from 'zod';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Google Icon SVG component
@@ -43,9 +44,12 @@ const signupSchema = z.object({
 
 const SignupScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
+  const { isIOS, isStandalone } = usePWADetect();
   const navigate = useNavigate();
 
   // Role-based redirect if already logged in
@@ -171,33 +175,70 @@ const SignupScreen = () => {
           </CardHeader>
           
           <CardContent className="space-y-4">
+            {/* iOS PWA Notice */}
+            {isIOS && isStandalone && (
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
+                <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-amber-600 dark:text-amber-400">iOS Uygulaması</p>
+                  <p className="text-muted-foreground mt-1">
+                    Google ile kayıt Safari'de açılacaktır. Alternatif olarak e-posta ile kayıt olabilirsiniz.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Google Error Message */}
+            {googleError && (
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm">
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <p className="text-destructive">{googleError}</p>
+              </div>
+            )}
+
             {/* Google Sign-Up Button */}
             <Button
               type="button"
               variant="outline"
               className="w-full h-12 rounded-xl text-base font-medium"
               onClick={async () => {
-                setIsLoading(true);
+                setIsGoogleLoading(true);
+                setGoogleError(null);
+                
                 try {
-                  const { error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                      redirectTo: `${window.location.origin}/customer/bookings`,
-                    },
-                  });
+                  if (isIOS && isStandalone) {
+                    const authUrl = `${window.location.origin}/signup?oauth=google`;
+                    const opened = window.open(authUrl, '_blank');
+                    if (!opened) {
+                      setGoogleError('iOS uygulamasında Google ile kayıt için Safari\'de açın.');
+                      setIsGoogleLoading(false);
+                      return;
+                    }
+                    toast.info('Google ile kayıt için Safari açılıyor...');
+                    setIsGoogleLoading(false);
+                    return;
+                  }
+
+                  const { error } = await signInWithGoogle();
                   if (error) {
-                    toast.error(error.message);
+                    setGoogleError(error.message);
                   }
                 } catch (error) {
-                  toast.error('Failed to sign up with Google');
+                  setGoogleError('Google ile kayıt yapılamadı');
                 } finally {
-                  setIsLoading(false);
+                  setIsGoogleLoading(false);
                 }
               }}
-              disabled={isLoading}
+              disabled={isGoogleLoading || isLoading}
             >
-              <GoogleIcon />
-              <span className="ml-2">Continue with Google</span>
+              {isGoogleLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <GoogleIcon />
+              )}
+              <span className="ml-2">
+                {isGoogleLoading ? 'Yönlendiriliyor...' : 'Continue with Google'}
+              </span>
             </Button>
 
             <div className="relative">
