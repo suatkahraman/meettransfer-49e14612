@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { usePWADetect } from '@/hooks/usePWADetect';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Mail, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Google Icon SVG component
@@ -56,11 +57,14 @@ type ViewMode = 'login' | 'forgot' | 'reset' | 'reset-sent';
 const LoginScreen = () => {
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<ViewMode>('login');
   const [resetEmail, setResetEmail] = useState('');
+  const [googleError, setGoogleError] = useState<string | null>(null);
   const { signIn, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
+  const { isIOS, isStandalone, isPWA, isSafari } = usePWADetect();
   const navigate = useNavigate();
 
   // Check if returning from password reset email
@@ -355,24 +359,76 @@ const LoginScreen = () => {
         );
 
       default:
+        // Improved Google OAuth handler for iOS
         const handleGoogleLogin = async () => {
-          setIsLoading(true);
+          setIsGoogleLoading(true);
+          setGoogleError(null);
+          
           try {
-            const { error } = await supabase.auth.signInWithOAuth({
-              provider: 'google',
-              options: {
-                redirectTo: `${window.location.origin}/customer/bookings`,
-              },
-            });
-            if (error) {
-              toast.error(error.message);
+            // Determine the best redirect URL based on context
+            const baseUrl = window.location.origin;
+            const redirectTo = `${baseUrl}/login`;
+            
+            // For iOS PWA standalone mode, show a helpful message
+            if (isIOS && isStandalone) {
+              // iOS standalone PWA has OAuth limitations
+              // Open in Safari for better OAuth support
+              const authUrl = `${baseUrl}/login?oauth=google`;
+              
+              // Try to open in Safari
+              const opened = window.open(authUrl, '_blank');
+              if (!opened) {
+                setGoogleError('iOS uygulamasında Google ile giriş için Safari\'de açın. Alternatif olarak e-posta ile giriş yapabilirsiniz.');
+                setIsGoogleLoading(false);
+                return;
+              }
+              
+              toast.info('Google ile giriş için Safari açılıyor...');
+              setIsGoogleLoading(false);
+              return;
             }
-          } catch (error) {
-            toast.error('Failed to sign in with Google');
+
+            // Check if we should trigger OAuth from URL param (for PWA->Safari handoff)
+            const shouldTriggerOAuth = searchParams.get('oauth') === 'google';
+            
+            if (shouldTriggerOAuth || !isStandalone) {
+              // Standard OAuth flow - works in browser
+              const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                  redirectTo,
+                  queryParams: {
+                    access_type: 'offline',
+                    prompt: 'select_account',
+                  },
+                },
+              });
+              
+              if (error) {
+                console.error('Google OAuth error:', error);
+                setGoogleError(error.message);
+                toast.error(error.message);
+              }
+            }
+          } catch (error: any) {
+            console.error('Google login error:', error);
+            setGoogleError('Google ile giriş yapılamadı. Lütfen e-posta ile deneyin.');
+            toast.error('Google ile giriş yapılamadı');
           } finally {
-            setIsLoading(false);
+            setIsGoogleLoading(false);
           }
         };
+
+        // Auto-trigger OAuth if redirected from PWA
+        useEffect(() => {
+          const oauthParam = searchParams.get('oauth');
+          if (oauthParam === 'google' && !user) {
+            handleGoogleLogin();
+          }
+        }, [searchParams]);
+
+        // Show iOS PWA warning
+        const showIOSWarning = isIOS && isStandalone;
 
         return (
           <Card className="w-full max-w-md">
@@ -382,16 +438,43 @@ const LoginScreen = () => {
             </CardHeader>
             
             <CardContent className="space-y-4">
+              {/* iOS PWA Notice */}
+              {showIOSWarning && (
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
+                  <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-600 dark:text-amber-400">iOS Uygulaması</p>
+                    <p className="text-muted-foreground mt-1">
+                      Google ile giriş Safari'de açılacaktır. Alternatif olarak e-posta ile giriş yapabilirsiniz.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Google Error Message */}
+              {googleError && (
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm">
+                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                  <p className="text-destructive">{googleError}</p>
+                </div>
+              )}
+
               {/* Google Sign-In Button */}
               <Button
                 type="button"
                 variant="outline"
                 className="w-full h-12 rounded-xl text-base font-medium"
                 onClick={handleGoogleLogin}
-                disabled={isLoading}
+                disabled={isGoogleLoading || isLoading}
               >
-                <GoogleIcon />
-                <span className="ml-2">Continue with Google</span>
+                {isGoogleLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <GoogleIcon />
+                )}
+                <span className="ml-2">
+                  {isGoogleLoading ? 'Yönlendiriliyor...' : 'Continue with Google'}
+                </span>
               </Button>
 
               <div className="relative">
