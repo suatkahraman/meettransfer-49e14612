@@ -14,7 +14,8 @@ Please send:
 • Destination
 • Date & time
 • Number of passengers
-• Email address`;
+• Email address
+• Vehicle Type: Vito / Vip Vito / Mercedes Maybach / Minibus`;
 
 serve(async (req) => {
   // Handle CORS preflight
