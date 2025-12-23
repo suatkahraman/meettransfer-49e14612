@@ -417,6 +417,7 @@ export default function AdminWhatsAppChat() {
       passengers: "",
       email: "",
       name: selectedConversation?.customer_name || "",
+      vehicle_type: "",
     };
 
     for (const msg of incomingMessages) {
@@ -452,6 +453,20 @@ export default function AdminWhatsAppChat() {
         if (lowerLine.includes("@") && lowerLine.includes(".")) {
           const emailMatch = line.match(/[\w.-]+@[\w.-]+\.\w+/);
           if (emailMatch) info.email = emailMatch[0];
+        }
+        // Parse vehicle type
+        if (lowerLine.includes("vehicle") || lowerLine.includes("araç") || lowerLine.includes("vito") || lowerLine.includes("maybach") || lowerLine.includes("minibus") || lowerLine.includes("sprinter")) {
+          if (!info.vehicle_type) {
+            if (lowerLine.includes("maybach")) {
+              info.vehicle_type = "mercedes-maybach";
+            } else if (lowerLine.includes("vip") && lowerLine.includes("vito")) {
+              info.vehicle_type = "vip-vito";
+            } else if (lowerLine.includes("vito")) {
+              info.vehicle_type = "mercedes-vito";
+            } else if (lowerLine.includes("minibus") || lowerLine.includes("sprinter")) {
+              info.vehicle_type = "mercedes-sprinter";
+            }
+          }
         }
       }
     }
@@ -622,7 +637,7 @@ export default function AdminWhatsAppChat() {
                                   pickup_date: info.date || "",
                                   pickup_time: info.time || "",
                                   customer_name: info.name || selectedConversation?.customer_name || "",
-                                  vehicle_type: "mercedes-vito",
+                                  vehicle_type: info.vehicle_type || "mercedes-vito",
                                   flight_number: "",
                                 });
                                 setShowQuickReservation(true);
