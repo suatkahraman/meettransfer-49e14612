@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import WebsiteHeader from "./WebsiteHeader";
 import BottomNavigation from "./BottomNavigation";
-import ChatBot from "./ChatBot";
 import { PWAInstallBanner } from "./PWAInstallBanner";
 
 interface WebsiteLayoutProps {
@@ -50,7 +49,6 @@ const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) =
       </motion.main>
       {showBottomNav && <BottomNavigation />}
       <PWAInstallBanner />
-      <ChatBot />
     </div>
   );
 };
