@@ -48,7 +48,7 @@ export const Hero = () => {
           <div className="flex flex-col sm:flex-row justify-center items-center gap-3 pt-2">
             <Button asChild size="lg" variant="outline" className="text-base px-8 h-12 bg-[#25D366]/20 border-[#25D366]/50 text-white hover:bg-[#25D366] hover:text-white backdrop-blur-sm">
               <a 
-                href="https://wa.me/905321748390?text=Hello%20%F0%9F%91%8B%20I%20would%20like%20to%20book%20a%20transfer." 
+                href="https://wa.me/15558051101?text=Hello%20%F0%9F%91%8B%20I%20would%20like%20to%20book%20a%20transfer." 
                 target="_blank" 
                 rel="noopener noreferrer"
               >
