@@ -48,7 +48,7 @@ serve(async (req) => {
       .from("whatsapp_conversations")
       .select("*")
       .eq("customer_phone", customerPhone)
-      .single();
+      .maybeSingle();
 
     const isNewCustomer = !conversation;
 
@@ -106,7 +106,7 @@ serve(async (req) => {
         .eq("status", "pending")
         .order("created_at", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (pendingConfirmation) {
         // Mark as confirmed
