@@ -1,8 +1,9 @@
-import { Download, Smartphone } from "lucide-react";
+import { Download, Smartphone, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { toast } from "sonner";
 
 interface InstallAppButtonProps {
   variant?: "default" | "ghost" | "outline" | "accent";
@@ -19,26 +20,48 @@ export function InstallAppButton({
   className = "",
   fullWidth = false,
 }: InstallAppButtonProps) {
-  const { canInstall, isInstalled, isStandalone, isIOS, promptInstall } = usePWAInstall();
+  const { canInstall, isInstalled, isStandalone, isIOS, isAndroid, promptInstall } = usePWAInstall();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
-  // Don't show if already installed or running in standalone mode
-  if (isInstalled || isStandalone) {
+  // Don't show if already running in standalone mode (app is open)
+  if (isStandalone) {
     return null;
   }
 
   const handleClick = async () => {
     if (canInstall) {
       // Native install prompt available (Android/Desktop Chrome)
-      await promptInstall();
+      const installed = await promptInstall();
+      if (installed) {
+        toast.success(
+          language === 'TR' ? 'Uygulama kuruldu!' : 'App installed!',
+          {
+            description: language === 'TR' 
+              ? 'Artık ana ekranınızdan erişebilirsiniz' 
+              : 'You can now access it from your home screen'
+          }
+        );
+      }
+    } else if (isIOS) {
+      // iOS - show instructions page
+      navigate("/install");
+    } else if (isAndroid) {
+      // Android without install prompt - try to trigger browser install
+      navigate("/install");
     } else {
-      // Redirect to install page for iOS or other browsers
+      // Desktop fallback
       navigate("/install");
     }
   };
 
-  const buttonLabel = t("installApp") || "Install App";
+  const buttonLabel = isInstalled 
+    ? (language === 'TR' ? 'Uygulamayı Aç' : 'Open App')
+    : (t("installApp") || "Install App");
+
+  const icon = isInstalled 
+    ? <ExternalLink className="h-4 w-4" />
+    : (isIOS ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />);
 
   return (
     <Button
@@ -47,7 +70,7 @@ export function InstallAppButton({
       onClick={handleClick}
       className={`gap-2 ${fullWidth ? "w-full" : ""} ${className}`}
     >
-      {showIcon && (isIOS ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />)}
+      {showIcon && icon}
       {buttonLabel}
     </Button>
   );

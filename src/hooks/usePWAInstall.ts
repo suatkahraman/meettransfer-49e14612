@@ -49,6 +49,12 @@ export function usePWAInstall() {
       setIsInstalled(true);
       setDeferredPrompt(null);
       setCanInstall(false);
+      
+      // Try to open the installed app after a short delay
+      setTimeout(() => {
+        // Redirect to home to trigger standalone mode
+        window.location.href = window.location.origin;
+      }, 500);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -82,6 +88,18 @@ export function usePWAInstall() {
     }
   }, [deferredPrompt]);
 
+  // Function to check if app can be opened via installed PWA
+  const openInstalledApp = useCallback(() => {
+    if (isStandalone) {
+      // Already in standalone mode
+      return true;
+    }
+    
+    // Try to open the app URL which will open in installed PWA if available
+    window.location.href = window.location.origin;
+    return false;
+  }, [isStandalone]);
+
   return {
     canInstall,
     isInstalled,
@@ -89,6 +107,7 @@ export function usePWAInstall() {
     isIOS,
     isAndroid,
     promptInstall,
+    openInstalledApp,
     deferredPrompt,
   };
 }
