@@ -19,14 +19,19 @@ const InstallApp = () => {
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    // Check if already installed
-    const standalone = window.matchMedia('(display-mode: standalone)').matches;
-    setIsStandalone(standalone);
+    // Check if already installed - iOS specific check
+    const isIOSStandalone = (window.navigator as any).standalone === true;
+    const isDisplayStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    setIsStandalone(isIOSStandalone || isDisplayStandalone);
     
-    // Check platform
+    // Check platform - more robust iOS detection (includes iPad Pro with desktop Safari)
     const userAgent = navigator.userAgent.toLowerCase();
-    setIsIOS(/iphone|ipad|ipod/.test(userAgent));
+    const isIOSDevice = (/iphone|ipad|ipod/.test(userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+    setIsIOS(isIOSDevice);
     setIsAndroid(/android/.test(userAgent));
+    
+    console.log('[InstallApp] Platform:', { isIOS: isIOSDevice, isAndroid: /android/.test(userAgent), standalone: isIOSStandalone || isDisplayStandalone });
 
     // Listen for install prompt
     const handleBeforeInstall = (e: Event) => {
