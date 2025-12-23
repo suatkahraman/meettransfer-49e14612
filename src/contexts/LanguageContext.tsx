@@ -44,6 +44,7 @@ const translations: Record<Language, Record<string, string>> = {
     logout: "Logout",
     myAccount: "My Account",
     bookNow: "Request Your Price",
+    installApp: "Install App",
     
     // Hero Section
     heroTitle: "Premium Transfer Services",
@@ -468,6 +469,7 @@ const translations: Record<Language, Record<string, string>> = {
     logout: "Abmelden",
     myAccount: "Mein Konto",
     bookNow: "Preis anfragen",
+    installApp: "App installieren",
     
     // Hero Section
     heroTitle: "Premium Transfer Services",
@@ -888,6 +890,7 @@ const translations: Record<Language, Record<string, string>> = {
     logout: "Déconnexion",
     myAccount: "Mon compte",
     bookNow: "Demander votre prix",
+    installApp: "Installer l'app",
     
     // Hero Section
     heroTitle: "Services de Transfert Premium",
@@ -1308,6 +1311,7 @@ const translations: Record<Language, Record<string, string>> = {
     logout: "Выход",
     myAccount: "Мой аккаунт",
     bookNow: "Запросить цену",
+    installApp: "Установить приложение",
     
     // Hero Section
     heroTitle: "Премиум Трансфер Сервис",
@@ -1728,6 +1732,7 @@ const translations: Record<Language, Record<string, string>> = {
     logout: "Esci",
     myAccount: "Il mio account",
     bookNow: "Richiedi il tuo prezzo",
+    installApp: "Installa app",
     
     // Hero Section
     heroTitle: "Servizi di Trasferimento Premium",
@@ -2148,6 +2153,7 @@ const translations: Record<Language, Record<string, string>> = {
     logout: "Cerrar sesión",
     myAccount: "Mi cuenta",
     bookNow: "Solicitar precio",
+    installApp: "Instalar app",
     
     // Hero Section
     heroTitle: "Servicios de Traslado Premium",
@@ -2568,6 +2574,7 @@ const translations: Record<Language, Record<string, string>> = {
     logout: "تسجيل الخروج",
     myAccount: "حسابي",
     bookNow: "اطلب السعر",
+    installApp: "تثبيت التطبيق",
     
     // Hero Section
     heroTitle: "خدمات النقل الفاخرة",
@@ -2989,6 +2996,7 @@ const translations: Record<Language, Record<string, string>> = {
     logout: "Çıkış",
     myAccount: "Hesabım",
     bookNow: "Fiyat İste",
+    installApp: "Uygulamayı Yükle",
     returnTrip: "Gidiş-Dönüş",
     returnDate: "Dönüş Tarihi",
     returnTime: "Dönüş Saati",
