@@ -322,11 +322,11 @@ export default function AdminWhatsAppChat() {
       toast.success("Reservation created successfully");
       
       // Add to reservations list and select it
-      setReservations([newReservation, ...reservations]);
+      const updatedReservations = [newReservation, ...reservations];
+      setReservations(updatedReservations);
       setReservationId(newReservation.id);
-      setShowQuickReservation(false);
       
-      // Reset form
+      // Reset form but keep quick reservation closed
       setQuickReservation({
         pickup: "",
         dropoff: "",
@@ -336,6 +336,9 @@ export default function AdminWhatsAppChat() {
         vehicle_type: "mercedes-vito",
         flight_number: "",
       });
+      setShowQuickReservation(false);
+      
+      console.log("Created reservation:", newReservation.id, "Total reservations:", updatedReservations.length);
     } catch (error: any) {
       console.error("Error creating reservation:", error);
       toast.error(error.message || "Failed to create reservation");
