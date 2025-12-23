@@ -85,12 +85,14 @@ const TermsPage = () => {
           we can provide the appropriate seat.
         </p>
 
-        <h2>8. Privacy Policy</h2>
+        <h2>8. Privacy</h2>
         <p>
-          We collect personal information solely for the purpose of providing
-          our transfer services. Your data is stored securely and never shared
-          with third parties for marketing purposes. We may share information
-          with our drivers solely for service delivery.
+          Your privacy is important to us. Please review our{" "}
+          <a href="/privacy" className="text-primary hover:underline">
+            Privacy Policy
+          </a>{" "}
+          for detailed information about how we collect, use, and protect your
+          personal data.
         </p>
 
         <h2>9. Liability</h2>
