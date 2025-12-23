@@ -45,6 +45,37 @@ const vehicleTypes = [
   { value: 'minibus', label: 'Minibus' },
 ];
 
+const FORM_STORAGE_KEY = 'reservation_form_draft';
+
+interface StoredFormData {
+  formData: typeof defaultFormData;
+  passengerNames: string[];
+  hasReturnTrip: boolean;
+  returnTripData: { date: string; time: string; flightNumber: string };
+  promoCode: string;
+  isPromoCodeValid: boolean | null;
+}
+
+const defaultFormData = {
+  phone: '',
+  email: '',
+  password: '',
+  pickup: '',
+  dropoff: '',
+  date: '',
+  time: '',
+  flightNumber: '',
+  vehicleType: 'mercedes-vito',
+  notes: '',
+  paymentMethod: '' as 'payment_link' | 'cash' | '',
+  pickup_place_name: '',
+  pickup_lat: null as number | null,
+  pickup_lng: null as number | null,
+  dropoff_place_name: '',
+  dropoff_lat: null as number | null,
+  dropoff_lng: null as number | null,
+};
+
 const ReservationForm = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -63,42 +94,61 @@ const ReservationForm = () => {
     time: '',
     flightNumber: '',
   });
-  const [formData, setFormData] = useState({
-    phone: '',
-    email: '',
-    password: '',
-    pickup: '',
-    dropoff: '',
-    date: '',
-    time: '',
-    flightNumber: '',
-    vehicleType: 'mercedes-vito',
-    notes: '',
-    paymentMethod: '' as 'payment_link' | 'cash' | '',
-    // Place details
-    pickup_place_name: '',
-    pickup_lat: null as number | null,
-    pickup_lng: null as number | null,
-    dropoff_place_name: '',
-    dropoff_lat: null as number | null,
-    dropoff_lng: null as number | null,
-  });
+  const [formData, setFormData] = useState(defaultFormData);
 
-  // Pre-fill form if user is logged in
+  // Load saved form data on mount
+  useEffect(() => {
+    const savedData = localStorage.getItem(FORM_STORAGE_KEY);
+    if (savedData) {
+      try {
+        const parsed: StoredFormData = JSON.parse(savedData);
+        setFormData(prev => ({ ...prev, ...parsed.formData, password: '' }));
+        if (parsed.passengerNames?.length > 0) {
+          setPassengerNames(parsed.passengerNames);
+        }
+        setHasReturnTrip(parsed.hasReturnTrip || false);
+        setReturnTripData(parsed.returnTripData || { date: '', time: '', flightNumber: '' });
+        setPromoCode(parsed.promoCode || '');
+        setIsPromoCodeValid(parsed.isPromoCodeValid ?? null);
+      } catch (e) {
+        console.error('Failed to parse saved form data:', e);
+      }
+    }
+  }, []);
+
+  // Save form data whenever it changes
+  useEffect(() => {
+    const dataToSave: StoredFormData = {
+      formData: { ...formData, password: '' },
+      passengerNames,
+      hasReturnTrip,
+      returnTripData,
+      promoCode,
+      isPromoCodeValid,
+    };
+    localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(dataToSave));
+  }, [formData, passengerNames, hasReturnTrip, returnTripData, promoCode, isPromoCodeValid]);
+
+  // Pre-fill form if user is logged in (only email/phone, preserve other form data)
   useEffect(() => {
     if (user) {
       setIsLoggedIn(true);
       setFormData(prev => ({
         ...prev,
-        email: user.email || '',
+        email: user.email || prev.email,
       }));
       
-      // Set primary passenger name from user metadata
-      if (user.user_metadata?.full_name) {
-        setPassengerNames([user.user_metadata.full_name]);
+      // Only set passenger name if not already filled
+      if (user.user_metadata?.full_name && passengerNames[0] === '') {
+        setPassengerNames(prev => {
+          if (prev[0] === '') {
+            return [user.user_metadata.full_name, ...prev.slice(1)];
+          }
+          return prev;
+        });
       }
       
-      // Fetch profile for phone
+      // Fetch profile for phone (only if not already filled)
       const fetchProfile = async () => {
         const { data } = await supabase
           .from('profiles')
@@ -107,12 +157,19 @@ const ReservationForm = () => {
           .single();
         
         if (data) {
-          if (data.full_name) {
-            setPassengerNames([data.full_name]);
+          // Only set passenger name if not already filled
+          if (data.full_name && passengerNames[0] === '') {
+            setPassengerNames(prev => {
+              if (prev[0] === '') {
+                return [data.full_name, ...prev.slice(1)];
+              }
+              return prev;
+            });
           }
+          // Only set phone if not already filled
           setFormData(prev => ({
             ...prev,
-            phone: data.phone || '',
+            phone: prev.phone || data.phone || '',
           }));
         }
       };
@@ -434,6 +491,9 @@ const ReservationForm = () => {
         ? 'Both reservations submitted! We will contact you with pricing.'
         : 'Reservation submitted! We will contact you with pricing.';
       toast.success(successMessage);
+      
+      // Clear saved form data after successful submission
+      localStorage.removeItem(FORM_STORAGE_KEY);
       
       // Fire Google Ads conversion event on successful booking submission
       trackConversion(CONVERSION_LABELS.RESERVATION_SUBMIT);
