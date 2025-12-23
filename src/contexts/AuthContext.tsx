@@ -155,23 +155,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const redirectUrl = `${window.location.origin}/login`;
       
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'select_account',
+      // Check if running as installed PWA (standalone mode)
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                          (window.navigator as any).standalone === true;
+      
+      if (isStandalone) {
+        // For PWA standalone mode, we need to get the OAuth URL and open it in system browser
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'select_account',
+            },
+            skipBrowserRedirect: true, // Don't auto-redirect, we'll handle it
           },
-        },
-      });
-      
-      if (error) {
-        toast.error(error.message);
-        return { error };
+        });
+        
+        if (error) {
+          toast.error(error.message);
+          return { error };
+        }
+        
+        // Open OAuth URL in system browser
+        if (data?.url) {
+          window.open(data.url, '_blank');
+          toast.info('Lütfen açılan tarayıcıda Google ile giriş yapın, ardından uygulamayı tekrar açın.');
+        }
+        
+        return { error: null };
+      } else {
+        // Normal browser flow
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'select_account',
+            },
+          },
+        });
+        
+        if (error) {
+          toast.error(error.message);
+          return { error };
+        }
+        
+        return { error: null };
       }
-      
-      return { error: null };
     } catch (error: any) {
       toast.error('Google ile giriş yapılırken hata oluştu');
       return { error };
