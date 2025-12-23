@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRoute";
+import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
 import { lazy, Suspense } from "react";
 
 // Critical pages - lazy loaded with prefetch for better UX
@@ -129,9 +130,10 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <LanguageProvider>
-          <AuthProvider>
-            <Routes>
+        <OAuthCallbackHandler>
+          <LanguageProvider>
+            <AuthProvider>
+              <Routes>
               {/* Localized Website Pages - Support all languages */}
               {localizedRoutes("/", <Index />)}
               {localizedRoutes("/services", <ServicesPage />)}
@@ -209,10 +211,11 @@ const App = () => (
               <Route path="/admin/agency-accounting/:agencyId" element={<AdminRoute><LazyRoute><AdminAgencyAccounting /></LazyRoute></AdminRoute>} />
               <Route path="/admin/agency-balance/:agencyId" element={<AdminRoute><LazyRoute><AdminAgencyBalance /></LazyRoute></AdminRoute>} />
               
-              <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
-            </Routes>
-          </AuthProvider>
-        </LanguageProvider>
+                <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
+              </Routes>
+            </AuthProvider>
+          </LanguageProvider>
+        </OAuthCallbackHandler>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
