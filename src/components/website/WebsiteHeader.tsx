@@ -91,9 +91,13 @@ const WebsiteHeader = () => {
               {t("bookNow")}
             </Button>
           </Link>
-          {/* Install App Button (Desktop) */}
+          {/* Install App Button (Desktop) - More prominent */}
           <div className="hidden md:block">
-            <InstallAppButton variant="ghost" size="sm" />
+            <InstallAppButton 
+              variant="outline" 
+              size="sm" 
+              className="border-accent/50 hover:bg-accent/10 hover:border-accent text-foreground"
+            />
           </div>
           <div className="hidden md:block">
             <PushNotificationToggle />
