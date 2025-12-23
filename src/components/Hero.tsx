@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { InstallAppButton } from "@/components/website/InstallAppButton";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 
 export const Hero = () => {
@@ -44,13 +45,21 @@ export const Hero = () => {
               <Link to={getLocalizedPath("/book")}>{t("requestPrice")}</Link>
             </Button>
           </div>
-          <div className="flex justify-center pt-2">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-3 pt-2">
             <Button asChild size="lg" variant="outline" className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
               <a href="tel:+905321748390">
                 <Phone className="mr-2 h-5 w-5" />
                 {t("callNow")}
               </a>
             </Button>
+            {/* Install App Button - visible on mobile */}
+            <div className="sm:hidden">
+              <InstallAppButton 
+                variant="outline" 
+                size="lg" 
+                className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm"
+              />
+            </div>
           </div>
 
           {/* Booking Process Section */}
