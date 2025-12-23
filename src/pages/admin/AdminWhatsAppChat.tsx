@@ -35,6 +35,11 @@ import {
   RefreshCw,
   CheckCircle,
   Clock,
+  Plus,
+  MapPin,
+  Calendar,
+  Car,
+  Plane,
 } from "lucide-react";
 
 interface Conversation {
@@ -76,6 +81,19 @@ export default function AdminWhatsAppChat() {
   const [reservationId, setReservationId] = useState("");
   const [reservations, setReservations] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Quick reservation form state
+  const [showQuickReservation, setShowQuickReservation] = useState(false);
+  const [quickReservation, setQuickReservation] = useState({
+    pickup: "",
+    dropoff: "",
+    pickup_date: "",
+    pickup_time: "",
+    customer_name: "",
+    vehicle_type: "mercedes-vito",
+    flight_number: "",
+  });
+  const [creatingReservation, setCreatingReservation] = useState(false);
 
   useEffect(() => {
     fetchConversations();
@@ -266,6 +284,119 @@ export default function AdminWhatsAppChat() {
     }
   };
 
+  const createQuickReservation = async () => {
+    if (!selectedConversation) return;
+    
+    const { pickup, dropoff, pickup_date, pickup_time, customer_name, vehicle_type, flight_number } = quickReservation;
+    
+    if (!pickup || !dropoff || !pickup_date || !pickup_time || !customer_name) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setCreatingReservation(true);
+    try {
+      // Create a temporary customer ID (will be linked later via phone)
+      const tempCustomerId = crypto.randomUUID();
+      
+      const { data: newReservation, error } = await supabase
+        .from("reservations")
+        .insert({
+          customer_id: tempCustomerId,
+          customer_name: customer_name.trim(),
+          customer_phone: selectedConversation.customer_phone,
+          pickup: pickup.trim(),
+          dropoff: dropoff.trim(),
+          pickup_date,
+          pickup_time,
+          flight_number: flight_number?.trim() || null,
+          vehicle_type,
+          payment_type: "cash",
+          status: "awaiting-price",
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success("Reservation created successfully");
+      
+      // Add to reservations list and select it
+      setReservations([newReservation, ...reservations]);
+      setReservationId(newReservation.id);
+      setShowQuickReservation(false);
+      
+      // Reset form
+      setQuickReservation({
+        pickup: "",
+        dropoff: "",
+        pickup_date: "",
+        pickup_time: "",
+        customer_name: selectedConversation.customer_name || "",
+        vehicle_type: "mercedes-vito",
+        flight_number: "",
+      });
+    } catch (error: any) {
+      console.error("Error creating reservation:", error);
+      toast.error(error.message || "Failed to create reservation");
+    } finally {
+      setCreatingReservation(false);
+    }
+  };
+
+  // Parse messages to extract customer info
+  const parseCustomerInfoFromMessages = () => {
+    const incomingMessages = messages.filter(m => m.direction === "incoming");
+    let info = {
+      pickup: "",
+      dropoff: "",
+      date: "",
+      time: "",
+      passengers: "",
+      email: "",
+      name: selectedConversation?.customer_name || "",
+    };
+
+    for (const msg of incomingMessages) {
+      const content = msg.content.toLowerCase();
+      const lines = msg.content.split("\n");
+      
+      for (const line of lines) {
+        const lowerLine = line.toLowerCase();
+        if (lowerLine.includes("airport") || lowerLine.includes("ist") || lowerLine.includes("ayt") || lowerLine.includes("saw")) {
+          if (!info.pickup) info.pickup = line.replace(/[•\-:]/g, "").trim();
+        }
+        if (lowerLine.includes("destination") || lowerLine.includes("hotel") || lowerLine.includes("taksim")) {
+          if (!info.dropoff) info.dropoff = line.replace(/[•\-:]/g, "").replace(/destination/i, "").trim();
+        }
+        if (lowerLine.includes("date") || lowerLine.match(/\d{1,2}[./-]\d{1,2}[./-]\d{2,4}/)) {
+          const dateMatch = line.match(/(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})/);
+          if (dateMatch) {
+            const day = dateMatch[1].padStart(2, "0");
+            const month = dateMatch[2].padStart(2, "0");
+            let year = dateMatch[3];
+            if (year.length === 2) year = "20" + year;
+            info.date = `${year}-${month}-${day}`;
+          }
+          const timeMatch = line.match(/(\d{1,2})[:.h](\d{2})/);
+          if (timeMatch) {
+            info.time = `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}`;
+          }
+        }
+        if (lowerLine.includes("passenger")) {
+          const numMatch = line.match(/(\d+)/);
+          if (numMatch) info.passengers = numMatch[1];
+        }
+        if (lowerLine.includes("@") && lowerLine.includes(".")) {
+          const emailMatch = line.match(/[\w.-]+@[\w.-]+\.\w+/);
+          if (emailMatch) info.email = emailMatch[0];
+        }
+      }
+    }
+    
+    return info;
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -412,9 +543,135 @@ export default function AdminWhatsAppChat() {
                               </SelectContent>
                             </Select>
                           </div>
+                        ) : !showQuickReservation ? (
+                          <div className="space-y-3">
+                            <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground">
+                              No reservations found for this phone number.
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => {
+                                const info = parseCustomerInfoFromMessages();
+                                setQuickReservation({
+                                  pickup: info.pickup || "",
+                                  dropoff: info.dropoff || "",
+                                  pickup_date: info.date || "",
+                                  pickup_time: info.time || "",
+                                  customer_name: info.name || selectedConversation?.customer_name || "",
+                                  vehicle_type: "mercedes-vito",
+                                  flight_number: "",
+                                });
+                                setShowQuickReservation(true);
+                              }}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Create Quick Reservation
+                            </Button>
+                          </div>
                         ) : (
-                          <div className="p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
-                            No reservations found for this phone number. Create a reservation first before sending a price.
+                          <div className="space-y-3 border rounded-lg p-3 bg-muted/30">
+                            <div className="flex items-center justify-between">
+                              <Label className="font-semibold">Quick Reservation</Label>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowQuickReservation(false)}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-xs flex items-center gap-1">
+                                <User className="h-3 w-3" /> Customer Name *
+                              </Label>
+                              <Input
+                                value={quickReservation.customer_name}
+                                onChange={(e) => setQuickReservation({...quickReservation, customer_name: e.target.value})}
+                                placeholder="Customer name"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-xs flex items-center gap-1">
+                                <MapPin className="h-3 w-3" /> Pick-up *
+                              </Label>
+                              <Input
+                                value={quickReservation.pickup}
+                                onChange={(e) => setQuickReservation({...quickReservation, pickup: e.target.value})}
+                                placeholder="e.g. Istanbul Airport (IST)"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-xs flex items-center gap-1">
+                                <MapPin className="h-3 w-3" /> Drop-off *
+                              </Label>
+                              <Input
+                                value={quickReservation.dropoff}
+                                onChange={(e) => setQuickReservation({...quickReservation, dropoff: e.target.value})}
+                                placeholder="e.g. Taksim, Istanbul"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="space-y-2">
+                                <Label className="text-xs flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" /> Date *
+                                </Label>
+                                <Input
+                                  type="date"
+                                  value={quickReservation.pickup_date}
+                                  onChange={(e) => setQuickReservation({...quickReservation, pickup_date: e.target.value})}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-xs flex items-center gap-1">
+                                  <Clock className="h-3 w-3" /> Time *
+                                </Label>
+                                <Input
+                                  type="time"
+                                  value={quickReservation.pickup_time}
+                                  onChange={(e) => setQuickReservation({...quickReservation, pickup_time: e.target.value})}
+                                />
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-xs flex items-center gap-1">
+                                <Plane className="h-3 w-3" /> Flight Number
+                              </Label>
+                              <Input
+                                value={quickReservation.flight_number}
+                                onChange={(e) => setQuickReservation({...quickReservation, flight_number: e.target.value})}
+                                placeholder="e.g. TK123"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-xs flex items-center gap-1">
+                                <Car className="h-3 w-3" /> Vehicle
+                              </Label>
+                              <Select 
+                                value={quickReservation.vehicle_type} 
+                                onValueChange={(v) => setQuickReservation({...quickReservation, vehicle_type: v})}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="mercedes-vito">Mercedes Vito</SelectItem>
+                                  <SelectItem value="mercedes-vclass">Mercedes VIP Vito</SelectItem>
+                                  <SelectItem value="maybach">Maybach</SelectItem>
+                                  <SelectItem value="minibus">Minibus</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <Button
+                              type="button"
+                              className="w-full"
+                              onClick={createQuickReservation}
+                              disabled={creatingReservation}
+                            >
+                              {creatingReservation ? "Creating..." : "Create Reservation"}
+                            </Button>
                           </div>
                         )}
                         <Button
