@@ -33,6 +33,8 @@ export function InstallAppButton({
   }
 
   const handleClick = async () => {
+    console.log('[InstallAppButton] Click:', { canInstall, isIOS, isAndroid, isStandalone });
+    
     if (canInstall) {
       // Native install prompt available (Android/Desktop Chrome)
       const installed = await promptInstall();
@@ -47,10 +49,12 @@ export function InstallAppButton({
         );
       }
     } else if (isIOS) {
-      // iOS - show modal with instructions
+      // iOS - show modal with instructions (iOS doesn't support beforeinstallprompt)
+      console.log('[InstallAppButton] Opening iOS modal');
       setShowIOSModal(true);
     } else if (isAndroid) {
       // Android without install prompt - show instructions page
+      console.log('[InstallAppButton] Navigating to /install for Android');
       navigate("/install");
     } else {
       // Desktop fallback

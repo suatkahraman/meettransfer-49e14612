@@ -24,18 +24,30 @@ export function usePWAInstall() {
   const [canInstall, setCanInstall] = useState(false);
 
   useEffect(() => {
-    // Check if running in standalone mode (already installed)
-    const standalone = window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true;
+    // Check if running in standalone mode (already installed) - iOS specific check
+    const isIOSStandalone = (window.navigator as any).standalone === true;
+    const isDisplayStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const standalone = isIOSStandalone || isDisplayStandalone;
     setIsStandalone(standalone);
     setIsInstalled(standalone);
 
-    // Detect platform
+    // Detect platform - more robust iOS detection
     const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) && !(window as any).MSStream;
+    const isIOSDevice = (/iphone|ipad|ipod/.test(userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && 
+      !(window as any).MSStream;
     const isAndroidDevice = /android/.test(userAgent);
     setIsIOS(isIOSDevice);
     setIsAndroid(isAndroidDevice);
+    
+    console.log('[PWA] Platform detection:', { 
+      isIOSDevice, 
+      isAndroidDevice, 
+      standalone,
+      isIOSStandalone,
+      isDisplayStandalone,
+      userAgent: userAgent.substring(0, 100)
+    });
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
