@@ -296,13 +296,52 @@ export default function AdminWhatsAppChat() {
 
     setCreatingReservation(true);
     try {
-      // Create a temporary customer ID (will be linked later via phone)
-      const tempCustomerId = crypto.randomUUID();
+      let customerId = selectedConversation.customer_user_id;
+      
+      // If no customer account exists, create one
+      if (!customerId) {
+        console.log("No customer account found, creating one...");
+        
+        // Generate a random password for the customer
+        const randomPassword = crypto.randomUUID().slice(0, 12) + "Aa1!";
+        const customerEmail = `customer_${selectedConversation.customer_phone.replace(/\+/g, '')}@meettransfer.customer`;
+        
+        const { data: createResult, error: createError } = await supabase.functions.invoke(
+          "create-user-account",
+          {
+            body: {
+              email: customerEmail,
+              password: randomPassword,
+              role: "customer",
+              name: customer_name.trim(),
+              phone: selectedConversation.customer_phone,
+            },
+          }
+        );
+
+        if (createError) {
+          console.error("Error creating customer account:", createError);
+          throw new Error("Failed to create customer account: " + createError.message);
+        }
+
+        if (!createResult?.user_id) {
+          throw new Error("Failed to get customer user ID");
+        }
+
+        customerId = createResult.user_id;
+        console.log("Created customer account:", customerId);
+
+        // Update the conversation with the new customer_user_id
+        await supabase
+          .from("whatsapp_conversations")
+          .update({ customer_user_id: customerId, customer_name: customer_name.trim() })
+          .eq("id", selectedConversation.id);
+      }
       
       const { data: newReservation, error } = await supabase
         .from("reservations")
         .insert({
-          customer_id: tempCustomerId,
+          customer_id: customerId,
           customer_name: customer_name.trim(),
           customer_phone: selectedConversation.customer_phone,
           pickup: pickup.trim(),
