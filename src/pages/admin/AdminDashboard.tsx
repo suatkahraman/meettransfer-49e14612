@@ -118,9 +118,9 @@ const AdminDashboard = () => {
   }, []);
 
   const menuItems = [
+    { icon: MessageCircle, label: 'WhatsApp Chat', path: '/admin/whatsapp', badge: unreadWhatsApp },
     { icon: ClipboardList, label: 'Rezervasyonlar', path: '/admin/reservations' },
     { icon: CalendarDays, label: 'Takvim', path: '/admin/calendar' },
-    { icon: MessageCircle, label: 'WhatsApp Chat', path: '/admin/whatsapp', badge: unreadWhatsApp },
     { icon: Plane, label: 'Uçuş Takip', path: '/admin/flight-monitor' },
     { icon: Users, label: 'Şoförler', path: '/admin/drivers' },
     { icon: Building2, label: 'Acenteler', path: '/admin/agencies' },
