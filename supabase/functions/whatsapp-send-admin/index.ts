@@ -84,7 +84,6 @@ serve(async (req) => {
       // Create booking confirmation with token
       const confirmationToken = crypto.randomUUID();
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-      const appUrl = Deno.env.get("APP_URL") || "https://meet-transfer.com";
 
       await supabase
         .from("whatsapp_booking_confirmations")
@@ -97,13 +96,9 @@ serve(async (req) => {
           expires_at: expiresAt.toISOString(),
         });
 
-      const confirmUrl = `${appUrl}/confirm-booking?token=${confirmationToken}`;
-
       finalMessage = `Your transfer price is ${currency === "EUR" ? "€" : currency}${price} 🚐
 
-Please confirm your booking by clicking the link below or replying "Confirm":
-
-👉 ${confirmUrl}`;
+Please confirm your booking by replying "Confirm".`;
     } else if (message_type === "magic_link") {
       // Generate magic link for customer account
       const token = crypto.randomUUID();
