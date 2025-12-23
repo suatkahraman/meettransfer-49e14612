@@ -298,44 +298,64 @@ export default function AdminWhatsAppChat() {
     try {
       let customerId = selectedConversation.customer_user_id;
       
-      // If no customer account exists, create one
+      // If no customer account in conversation, check by phone number first
       if (!customerId) {
-        console.log("No customer account found, creating one...");
+        console.log("Checking for existing customer by phone:", selectedConversation.customer_phone);
         
-        // Generate a random password for the customer
-        const randomPassword = crypto.randomUUID().slice(0, 12) + "Aa1!";
-        const customerEmail = `customer_${selectedConversation.customer_phone.replace(/\+/g, '')}@meettransfer.customer`;
+        // Search for existing customer by phone number in profiles table
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("phone", selectedConversation.customer_phone)
+          .maybeSingle();
         
-        const { data: createResult, error: createError } = await supabase.functions.invoke(
-          "create-user-account",
-          {
-            body: {
-              email: customerEmail,
-              password: randomPassword,
-              role: "customer",
-              name: customer_name.trim(),
-              phone: selectedConversation.customer_phone,
-            },
+        if (existingProfile) {
+          customerId = existingProfile.id;
+          console.log("Found existing customer by phone:", customerId);
+          
+          // Update the conversation with the existing customer_user_id
+          await supabase
+            .from("whatsapp_conversations")
+            .update({ customer_user_id: customerId, customer_name: customer_name.trim() })
+            .eq("id", selectedConversation.id);
+        } else {
+          console.log("No existing customer found, creating new account...");
+          
+          // Generate a random password for the customer
+          const randomPassword = crypto.randomUUID().slice(0, 12) + "Aa1!";
+          const customerEmail = `customer_${selectedConversation.customer_phone.replace(/\+/g, '')}@meettransfer.customer`;
+          
+          const { data: createResult, error: createError } = await supabase.functions.invoke(
+            "create-user-account",
+            {
+              body: {
+                email: customerEmail,
+                password: randomPassword,
+                role: "customer",
+                name: customer_name.trim(),
+                phone: selectedConversation.customer_phone,
+              },
+            }
+          );
+
+          if (createError) {
+            console.error("Error creating customer account:", createError);
+            throw new Error("Failed to create customer account: " + createError.message);
           }
-        );
 
-        if (createError) {
-          console.error("Error creating customer account:", createError);
-          throw new Error("Failed to create customer account: " + createError.message);
+          if (!createResult?.user_id) {
+            throw new Error("Failed to get customer user ID");
+          }
+
+          customerId = createResult.user_id;
+          console.log("Created new customer account:", customerId);
+
+          // Update the conversation with the new customer_user_id
+          await supabase
+            .from("whatsapp_conversations")
+            .update({ customer_user_id: customerId, customer_name: customer_name.trim() })
+            .eq("id", selectedConversation.id);
         }
-
-        if (!createResult?.user_id) {
-          throw new Error("Failed to get customer user ID");
-        }
-
-        customerId = createResult.user_id;
-        console.log("Created customer account:", customerId);
-
-        // Update the conversation with the new customer_user_id
-        await supabase
-          .from("whatsapp_conversations")
-          .update({ customer_user_id: customerId, customer_name: customer_name.trim() })
-          .eq("id", selectedConversation.id);
       }
       
       const { data: newReservation, error } = await supabase
