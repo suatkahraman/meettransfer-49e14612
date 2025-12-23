@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import WebsiteHeader from "./WebsiteHeader";
 import BottomNavigation from "./BottomNavigation";
 import ChatBot from "./ChatBot";
+import { PWAInstallBanner } from "./PWAInstallBanner";
 
 interface WebsiteLayoutProps {
   children: ReactNode;
@@ -48,6 +49,7 @@ const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) =
         {children}
       </motion.main>
       {showBottomNav && <BottomNavigation />}
+      <PWAInstallBanner />
       <ChatBot />
     </div>
   );
