@@ -17,6 +17,11 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Helper function to normalize phone numbers for matching
+    const normalizePhone = (phone: string): string => {
+      return phone.replace(/[^\d]/g, "").replace(/^0+/, "").replace(/^90/, "");
+    };
+
     const { token } = await req.json();
 
     if (!token) {
@@ -53,16 +58,22 @@ serve(async (req) => {
     let userId = magicLink.customer_user_id;
 
     if (!userId) {
-      // Find existing user by phone in profiles or reservations
-      const { data: existingReservation } = await supabase
+      const normalizedMagicPhone = normalizePhone(magicLink.customer_phone);
+      
+      // Find existing user by normalized phone in reservations
+      const { data: allReservations } = await supabase
         .from("reservations")
-        .select("customer_id")
-        .eq("customer_phone", magicLink.customer_phone)
-        .limit(1)
-        .single();
+        .select("customer_id, customer_phone");
+      
+      const matchingReservation = (allReservations || []).find(res => {
+        const normalizedResPhone = normalizePhone(res.customer_phone || "");
+        return normalizedResPhone === normalizedMagicPhone || 
+               normalizedResPhone.endsWith(normalizedMagicPhone.slice(-10)) ||
+               normalizedMagicPhone.endsWith(normalizedResPhone.slice(-10));
+      });
 
-      if (existingReservation) {
-        userId = existingReservation.customer_id;
+      if (matchingReservation) {
+        userId = matchingReservation.customer_id;
       } else {
         // Create new user account
         const email = `${magicLink.customer_phone.replace(/\+/g, "")}@whatsapp.meettransfer.com`;
@@ -134,12 +145,28 @@ serve(async (req) => {
       );
     }
 
-    // Get customer data
-    const { data: reservations } = await supabase
+    // Get customer data - first try by customer_id, then by phone match
+    let { data: reservations } = await supabase
       .from("reservations")
       .select("*")
       .eq("customer_id", userId)
       .order("pickup_date", { ascending: false });
+
+    // If no reservations found by customer_id, try matching by phone
+    if (!reservations || reservations.length === 0) {
+      const { data: allRes } = await supabase
+        .from("reservations")
+        .select("*")
+        .order("pickup_date", { ascending: false });
+      
+      const normalizedMagicPhone = normalizePhone(magicLink.customer_phone);
+      reservations = (allRes || []).filter(res => {
+        const normalizedResPhone = normalizePhone(res.customer_phone || "");
+        return normalizedResPhone === normalizedMagicPhone || 
+               normalizedResPhone.endsWith(normalizedMagicPhone.slice(-10)) ||
+               normalizedMagicPhone.endsWith(normalizedResPhone.slice(-10));
+      });
+    }
 
     const { data: conversation } = await supabase
       .from("whatsapp_conversations")
