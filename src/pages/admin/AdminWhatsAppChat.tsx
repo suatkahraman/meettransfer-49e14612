@@ -75,6 +75,7 @@ export default function AdminWhatsAppChat() {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [checkingMessageId, setCheckingMessageId] = useState<string | null>(null);
   const [priceDialogOpen, setPriceDialogOpen] = useState(false);
   const [price, setPrice] = useState("");
   const [currency, setCurrency] = useState("EUR");
@@ -120,20 +121,34 @@ export default function AdminWhatsAppChat() {
       fetchMessages(selectedConversation.id);
       markAsRead(selectedConversation.id);
 
-      // Subscribe to messages for this conversation
+      // Subscribe to messages for this conversation (INSERT + UPDATE so delivery status changes appear)
       const messagesChannel = supabase
         .channel(`whatsapp-messages-${selectedConversation.id}`)
         .on(
           "postgres_changes",
           {
-            event: "INSERT",
+            event: "*",
             schema: "public",
             table: "whatsapp_messages",
             filter: `conversation_id=eq.${selectedConversation.id}`,
           },
-          (payload) => {
-            setMessages((prev) => [...prev, payload.new as Message]);
-            scrollToBottom();
+          (payload: any) => {
+            setMessages((prev) => {
+              if (payload.eventType === "INSERT") {
+                return [...prev, payload.new as Message];
+              }
+              if (payload.eventType === "UPDATE") {
+                return prev.map((m) => (m.id === payload.new.id ? (payload.new as Message) : m));
+              }
+              if (payload.eventType === "DELETE") {
+                return prev.filter((m) => m.id !== payload.old.id);
+              }
+              return prev;
+            });
+
+            if (payload.eventType === "INSERT") {
+              scrollToBottom();
+            }
           }
         )
         .subscribe();
@@ -281,6 +296,29 @@ export default function AdminWhatsAppChat() {
       toast.error(error.message || "Failed to send link");
     } finally {
       setSending(false);
+    }
+  };
+
+  const checkMessageStatus = async (msg: Message) => {
+    if (!msg.twilio_sid) {
+      toast.error("This message has no delivery SID");
+      return;
+    }
+
+    setCheckingMessageId(msg.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("whatsapp-message-status", {
+        body: { message_id: msg.id },
+      });
+      if (error) throw error;
+
+      const status = data?.status ? String(data.status) : "unknown";
+      toast.success(`WhatsApp status: ${status}`);
+    } catch (error: any) {
+      console.error("Error checking message status:", error);
+      toast.error(error.message || "Failed to check status");
+    } finally {
+      setCheckingMessageId(null);
     }
   };
 
@@ -791,8 +829,24 @@ export default function AdminWhatsAppChat() {
                           <p className="text-xs opacity-70">
                             {format(new Date(msg.created_at), "HH:mm")}
                           </p>
+
                           {msg.direction === "outgoing" && (
-                            <CheckCircle className="h-3 w-3 opacity-70" />
+                            <>
+                              <span className="text-xs opacity-70">• {msg.status || "sent"}</span>
+                              {msg.twilio_sid && (
+                                <button
+                                  type="button"
+                                  className="ml-1 inline-flex items-center opacity-70 hover:opacity-100"
+                                  onClick={() => checkMessageStatus(msg)}
+                                  disabled={checkingMessageId === msg.id}
+                                  title="Check WhatsApp delivery status"
+                                >
+                                  <RefreshCw
+                                    className={`h-3 w-3 ${checkingMessageId === msg.id ? "animate-spin" : ""}`}
+                                  />
+                                </button>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>

@@ -62,3 +62,9 @@ verify_jwt = false
 
 [functions.whatsapp-status]
 verify_jwt = true
+
+[functions.whatsapp-delivery-webhook]
+verify_jwt = false
+
+[functions.whatsapp-message-status]
+verify_jwt = true
