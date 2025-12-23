@@ -29,6 +29,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Handle OAuth callback - redirect based on role
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Defer role check to avoid Supabase deadlock
+          setTimeout(async () => {
+            try {
+              const { data: roleData } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+
+              const userRole = roleData?.role || 'customer';
+              
+              // Only redirect if on login/signup/auth pages
+              const currentPath = window.location.pathname;
+              const isAuthPage = ['/login', '/signup', '/auth'].some(p => currentPath.includes(p));
+              
+              if (isAuthPage) {
+                switch (userRole) {
+                  case 'admin':
+                    navigate('/admin', { replace: true });
+                    break;
+                  case 'driver':
+                    navigate('/driver', { replace: true });
+                    break;
+                  case 'agency':
+                    navigate('/agency', { replace: true });
+                    break;
+                  default:
+                    navigate('/customer', { replace: true });
+                }
+              }
+            } catch (error) {
+              console.error('Role fetch error:', error);
+              navigate('/customer', { replace: true });
+            }
+          }, 0);
+        }
       }
     );
 
@@ -40,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const signIn = async (email: string, password: string) => {
     try {
