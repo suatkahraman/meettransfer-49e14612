@@ -9,7 +9,7 @@ import { startOfMonth, endOfMonth, startOfDay, endOfDay, format } from 'date-fns
 import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
 import { MonthlyProfitCard } from '@/components/admin/MonthlyProfitCard';
-
+import { Badge } from '@/components/ui/badge';
 interface KPIs {
   newToday: number;
   pendingAssignment: number;
@@ -29,6 +29,7 @@ const AdminDashboard = () => {
     monthlyRevenue: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [unreadWhatsApp, setUnreadWhatsApp] = useState(0);
 
   useEffect(() => {
     const fetchKPIs = async () => {
@@ -88,10 +89,38 @@ const AdminDashboard = () => {
     fetchKPIs();
   }, []);
 
+  // Fetch unread WhatsApp messages count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      const { data } = await supabase
+        .from('whatsapp_conversations')
+        .select('unread_count');
+      
+      const total = data?.reduce((sum, c) => sum + (c.unread_count || 0), 0) || 0;
+      setUnreadWhatsApp(total);
+    };
+
+    fetchUnreadCount();
+
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel('whatsapp-unread')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'whatsapp_conversations' },
+        () => fetchUnreadCount()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const menuItems = [
     { icon: ClipboardList, label: 'Rezervasyonlar', path: '/admin/reservations' },
     { icon: CalendarDays, label: 'Takvim', path: '/admin/calendar' },
-    { icon: MessageCircle, label: 'WhatsApp Chat', path: '/admin/whatsapp' },
+    { icon: MessageCircle, label: 'WhatsApp Chat', path: '/admin/whatsapp', badge: unreadWhatsApp },
     { icon: Plane, label: 'Uçuş Takip', path: '/admin/flight-monitor' },
     { icon: Users, label: 'Şoförler', path: '/admin/drivers' },
     { icon: Building2, label: 'Acenteler', path: '/admin/agencies' },
@@ -186,9 +215,16 @@ const AdminDashboard = () => {
           {menuItems.map((item) => (
             <Card 
               key={item.path} 
-              className="cursor-pointer hover:shadow-lg transition-shadow hover:border-primary"
+              className="cursor-pointer hover:shadow-lg transition-shadow hover:border-primary relative"
               onClick={() => navigate(item.path)}
             >
+              {item.badge && item.badge > 0 && (
+                <Badge 
+                  className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground min-w-[24px] h-6 flex items-center justify-center"
+                >
+                  {item.badge > 99 ? '99+' : item.badge}
+                </Badge>
+              )}
               <CardContent className="flex flex-col items-center justify-center py-8">
                 <item.icon className="h-12 w-12 text-primary mb-3" />
                 <span className="font-medium">{item.label}</span>
