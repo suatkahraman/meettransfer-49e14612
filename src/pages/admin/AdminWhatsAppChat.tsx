@@ -176,16 +176,30 @@ export default function AdminWhatsAppChat() {
     }
   };
 
+  const normalizePhone = (phone: string): string => {
+    // Remove all non-digit characters except leading +
+    return phone.replace(/[^\d+]/g, "").replace(/^0+/, "").replace(/^\+90/, "").replace(/^90/, "");
+  };
+
   const fetchReservationsForPhone = async (phone: string) => {
     try {
+      // Get all reservations and filter by normalized phone
       const { data, error } = await supabase
         .from("reservations")
         .select("*")
-        .eq("customer_phone", phone)
         .order("pickup_date", { ascending: false });
 
       if (error) throw error;
-      setReservations(data || []);
+      
+      const normalizedInputPhone = normalizePhone(phone);
+      const filtered = (data || []).filter(res => {
+        const normalizedResPhone = normalizePhone(res.customer_phone || "");
+        return normalizedResPhone === normalizedInputPhone || 
+               normalizedResPhone.endsWith(normalizedInputPhone) ||
+               normalizedInputPhone.endsWith(normalizedResPhone);
+      });
+      
+      setReservations(filtered);
     } catch (error) {
       console.error("Error fetching reservations:", error);
     }
