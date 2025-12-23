@@ -7,11 +7,11 @@ interface WhatsAppButtonProps {
   phone?: string;
   message?: string;
   className?: string;
-  variant?: "default" | "large";
+  variant?: "default" | "large" | "floating";
 }
 
 const WhatsAppButton = ({
-  phone = "905321748390",
+  phone = "15558051101",
   message = "Hello, I would like to book a transfer.",
   className = "",
   variant = "default",
@@ -25,6 +25,19 @@ const WhatsAppButton = ({
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${phone}?text=${encodedMessage}`, "_blank");
   };
+
+  if (variant === "floating") {
+    return (
+      <button
+        onClick={handleClick}
+        className={`fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#22c55e] text-white h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-110 ${className}`}
+        aria-label="WhatsApp"
+      >
+        <MessageCircle className="h-7 w-7" />
+        <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+      </button>
+    );
+  }
 
   if (variant === "large") {
     return (

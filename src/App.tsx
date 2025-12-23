@@ -8,6 +8,7 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRoute";
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
 import { lazy, Suspense } from "react";
+import FloatingWhatsApp from "./components/website/FloatingWhatsApp";
 
 // Critical pages - lazy loaded with prefetch for better UX
 const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
@@ -223,6 +224,7 @@ const App = () => (
               
                 <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
               </Routes>
+              <FloatingWhatsApp />
             </AuthProvider>
           </LanguageProvider>
         </OAuthCallbackHandler>
