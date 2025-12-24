@@ -40,7 +40,9 @@ import {
   Calendar,
   Car,
   Plane,
+  ArrowLeft,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Conversation {
   id: string;
@@ -69,6 +71,7 @@ interface Message {
 
 export default function AdminWhatsAppChat() {
   const { session } = useAuth();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -524,14 +527,25 @@ export default function AdminWhatsAppChat() {
       {/* Conversations List */}
       <Card className="w-80 flex-shrink-0">
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              WhatsApp Inbox
-            </CardTitle>
-            <Button variant="ghost" size="icon" onClick={fetchConversations}>
-              <RefreshCw className="h-4 w-4" />
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="w-fit -ml-2"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Geri
             </Button>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MessageCircle className="h-5 w-5" />
+                WhatsApp Inbox
+              </CardTitle>
+              <Button variant="ghost" size="icon" onClick={fetchConversations}>
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
