@@ -185,31 +185,6 @@ export const Hero = () => {
               </Button>
             </div>
           </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Button asChild size="lg" variant="outline" className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
-              <Link to={getLocalizedPath("/auth")}>{t("login")}</Link>
-            </Button>
-            <span className="text-white/80 font-medium text-sm uppercase tracking-wide">{t("and")}</span>
-            <Button asChild size="lg" variant="outline" className="text-base px-8 h-12 bg-[#25D366]/20 border-[#25D366]/50 text-white hover:bg-[#25D366] hover:text-white backdrop-blur-sm">
-              <a 
-                href="https://wa.me/15558051101?text=Hello%20%F0%9F%91%8B%20I%20would%20like%20to%20book%20a%20transfer." 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <MessageCircle className="mr-2 h-5 w-5" />
-                WhatsApp
-              </a>
-            </Button>
-            {/* Install App Button - visible on mobile */}
-            <div className="sm:hidden">
-              <InstallAppButton 
-                variant="outline" 
-                size="lg" 
-                className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm"
-              />
-            </div>
-          </div>
 
           {/* Booking Process Section */}
           <div className="mt-10 pt-8 border-t border-white/20">
