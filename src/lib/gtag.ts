@@ -1,5 +1,5 @@
-// Google Ads Conversion Tracking Utility
-// Google Ads Conversion ID: AW-668686697
+// Google Analytics 4 Tracking Utility
+// GA4 Measurement ID: G-668686697
 
 declare global {
   interface Window {
