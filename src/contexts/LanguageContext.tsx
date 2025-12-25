@@ -47,7 +47,7 @@ const translations: Record<Language, Record<string, string>> = {
     installApp: "Install App",
     
     // Hero Section
-    heroTitle: "Premium Transfer Services",
+    heroTitle: "Get Best Price Now",
     heroSubtitle: "Best Airport Transfer Company Experience luxury travel with our professional chauffeur service. Reliable, comfortable, and elegant transportation for every journey.",
     bookYourTransfer: "Book Your Transfer",
     requestPrice: "Request Price",
@@ -472,7 +472,7 @@ const translations: Record<Language, Record<string, string>> = {
     installApp: "App installieren",
     
     // Hero Section
-    heroTitle: "Premium Transfer Services",
+    heroTitle: "Jetzt besten Preis erhalten",
     heroSubtitle: "Bestes Flughafentransfer-Unternehmen. Erleben Sie Luxusreisen mit unserem professionellen Chauffeurservice. Zuverlässig, komfortabel und elegant für jede Reise.",
     bookYourTransfer: "Transfer buchen",
     requestPrice: "Preis anfragen",
@@ -893,7 +893,7 @@ const translations: Record<Language, Record<string, string>> = {
     installApp: "Installer l'app",
     
     // Hero Section
-    heroTitle: "Services de Transfert Premium",
+    heroTitle: "Obtenez le Meilleur Prix Maintenant",
     heroSubtitle: "La meilleure société de transfert aéroport. Vivez le voyage de luxe avec notre service de chauffeur professionnel. Transport fiable, confortable et élégant pour chaque trajet.",
     bookYourTransfer: "Réserver votre transfert",
     requestPrice: "Demander le prix",
@@ -1314,7 +1314,7 @@ const translations: Record<Language, Record<string, string>> = {
     installApp: "Установить приложение",
     
     // Hero Section
-    heroTitle: "Премиум Трансфер Сервис",
+    heroTitle: "Получите лучшую цену сейчас",
     heroSubtitle: "Лучшая компания по трансферу из аэропорта. Испытайте роскошное путешествие с нашим профессиональным сервисом водителя. Надежный, комфортный и элегантный транспорт для каждой поездки.",
     bookYourTransfer: "Забронировать трансфер",
     requestPrice: "Запросить цену",
@@ -1735,7 +1735,7 @@ const translations: Record<Language, Record<string, string>> = {
     installApp: "Installa app",
     
     // Hero Section
-    heroTitle: "Servizi di Trasferimento Premium",
+    heroTitle: "Ottieni il Miglior Prezzo Ora",
     heroSubtitle: "La migliore compagnia di trasferimento aeroportuale. Vivi il viaggio di lusso con il nostro servizio di autista professionale. Trasporto affidabile, confortevole ed elegante per ogni viaggio.",
     bookYourTransfer: "Prenota il tuo trasferimento",
     requestPrice: "Richiedi prezzo",
@@ -2156,7 +2156,7 @@ const translations: Record<Language, Record<string, string>> = {
     installApp: "Instalar app",
     
     // Hero Section
-    heroTitle: "Servicios de Traslado Premium",
+    heroTitle: "Obtén el Mejor Precio Ahora",
     heroSubtitle: "La mejor compañía de traslados desde el aeropuerto. Experimenta el viaje de lujo con nuestro servicio de chófer profesional. Transporte fiable, cómodo y elegante para cada viaje.",
     bookYourTransfer: "Reserva tu traslado",
     requestPrice: "Solicitar precio",
@@ -2577,7 +2577,7 @@ const translations: Record<Language, Record<string, string>> = {
     installApp: "تثبيت التطبيق",
     
     // Hero Section
-    heroTitle: "خدمات النقل الفاخرة",
+    heroTitle: "احصل على أفضل سعر الآن",
     heroSubtitle: "أفضل شركة نقل من وإلى المطار. استمتع بالسفر الفاخر مع خدمة السائق المحترف. نقل موثوق ومريح وأنيق لكل رحلة.",
     bookYourTransfer: "احجز نقلك",
     requestPrice: "اطلب السعر",
