@@ -5,6 +5,7 @@ import { Language, SUPPORTED_LANGUAGES } from "./useLanguageFromUrl";
 const LANGUAGE_DETECTED_KEY = "meet_transfer_lang_detected";
 
 const BROWSER_LANG_MAP: Record<string, Language> = {
+  tr: "TR",
   de: "DE",
   fr: "FR",
   ru: "RU",
@@ -16,6 +17,7 @@ const BROWSER_LANG_MAP: Record<string, Language> = {
 
 const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   EN: "",
+  TR: "/tr",
   DE: "/de",
   FR: "/fr",
   RU: "/ru",
@@ -37,7 +39,7 @@ export const useBrowserLanguageRedirect = () => {
     // Check if already on a language-prefixed path
     const pathParts = location.pathname.split("/").filter(Boolean);
     const firstPart = pathParts[0]?.toLowerCase();
-    const languagePrefixes = ["de", "fr", "ru", "it", "es", "ar"];
+    const languagePrefixes = ["tr", "de", "fr", "ru", "it", "es", "ar"];
     
     if (languagePrefixes.includes(firstPart)) {
       // Already on a language path, mark as detected
