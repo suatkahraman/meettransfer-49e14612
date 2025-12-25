@@ -1072,6 +1072,62 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
           </Card>
         )}
 
+        {/* Customer Rejected Price Card - Admin can send new price */}
+        {formData.status === 'customer_rejected' && (
+          <Card className="border-destructive bg-destructive/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <X className="h-5 w-5" />
+                Müşteri Fiyatı Reddetti
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-destructive/80">
+                Müşteri önceki fiyat teklifini kabul etmedi. Yeni bir fiyat belirleyip tekrar gönderebilirsiniz.
+              </p>
+              <div className="space-y-3">
+                <div className="flex gap-2 items-center">
+                  <div className="flex-1">
+                    <Label>Yeni Fiyat</Label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="number"
+                        min="0"
+                        value={formData.price}
+                        onChange={(e) => setFormData({...formData, price: e.target.value})}
+                        placeholder="Yeni fiyat girin"
+                        className="text-lg pl-8"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-24">
+                    <Label>Para Birimi</Label>
+                    <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currencies.map(c => (
+                          <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+              <Button 
+                onClick={handleSendPriceToCustomer} 
+                disabled={sendingPrice || !formData.price}
+                className="w-full bg-orange-600 hover:bg-orange-700"
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {sendingPrice ? 'Gönderiliyor...' : 'Yeni Fiyatı Müşteriye Gönder'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Assign Driver Card - after customer approval OR for confirmed manual reservations */}
         {(formData.status === 'customer_approved' || formData.status === 'confirmed') && !formData.driver_id && (
           <Card className="border-emerald-300 bg-emerald-50 dark:bg-emerald-950/30">

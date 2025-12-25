@@ -78,6 +78,7 @@ const vehicleLabels: Record<string, string> = {
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500",
   price_sent: "bg-blue-500",
+  price_rejected: "bg-orange-500",
   confirmed: "bg-green-500",
   rejected: "bg-red-500",
   expired: "bg-gray-500",
@@ -86,6 +87,7 @@ const statusColors: Record<string, string> = {
 const statusLabels: Record<string, string> = {
   pending: "Bekliyor",
   price_sent: "Fiyat Gönderildi",
+  price_rejected: "Fiyat Reddedildi",
   confirmed: "Onaylandı",
   rejected: "Reddedildi",
   expired: "Süresi Doldu",
@@ -396,18 +398,25 @@ export default function AdminQuickBookings() {
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
-                            {request.status === "pending" && (
+                            {(request.status === "pending" || request.status === "price_rejected") && (
                               <Dialog
                                 open={priceDialogOpen && selectedRequest?.id === request.id}
                                 onOpenChange={(open) => {
                                   setPriceDialogOpen(open);
-                                  if (open) setSelectedRequest(request);
+                                  if (open) {
+                                    setSelectedRequest(request);
+                                    // Pre-fill with previous price if rejected
+                                    if (request.status === "price_rejected" && request.price) {
+                                      setPrice(request.price.toString());
+                                      setCurrency(request.price_currency || "EUR");
+                                    }
+                                  }
                                 }}
                               >
                                 <DialogTrigger asChild>
-                                  <Button size="sm">
+                                  <Button size="sm" variant={request.status === "price_rejected" ? "default" : "default"} className={request.status === "price_rejected" ? "bg-orange-600 hover:bg-orange-700" : ""}>
                                     <Send className="h-4 w-4 mr-2" />
-                                    Send Price
+                                    {request.status === "price_rejected" ? "Yeni Fiyat Gönder" : "Send Price"}
                                   </Button>
                                 </DialogTrigger>
                                 <DialogContent>

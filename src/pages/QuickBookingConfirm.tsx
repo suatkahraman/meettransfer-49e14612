@@ -94,7 +94,7 @@ export default function QuickBookingConfirm() {
           const newData = payload.new as BookingRequest;
           
           if (newData.status === "price_sent" && newData.price) {
-            toast.success("Price received! You can now review and confirm.");
+            toast.success("New price received! You can now review and confirm.");
             setBooking(newData);
             setWaitingForPrice(false);
             setError(null);
@@ -147,8 +147,8 @@ export default function QuickBookingConfirm() {
         return;
       }
 
-      // If price not set yet, show waiting state with realtime updates
-      if (data.status === "pending") {
+      // If price not set yet OR price was rejected, show waiting state with realtime updates
+      if (data.status === "pending" || data.status === "price_rejected") {
         setBooking(data as BookingRequest);
         setWaitingForPrice(true);
         return;
@@ -297,16 +297,17 @@ export default function QuickBookingConfirm() {
 
     setRejecting(true);
     try {
+      // Update status to price_rejected instead of rejected - allows admin to send new price
       const { error } = await supabase
         .from("quick_booking_requests")
         .update({
-          status: "rejected",
+          status: "price_rejected",
         })
         .eq("id", booking.id);
 
       if (error) throw error;
 
-      // Notify admin about the rejection
+      // Notify admin about the rejection so they can send a new price
       try {
         await supabase.functions.invoke("notify-admin-quick-booking-rejected", {
           body: {
@@ -319,6 +320,7 @@ export default function QuickBookingConfirm() {
             passengers: booking.passengers,
             price: booking.price,
             priceCurrency: booking.price_currency,
+            priceRejected: true, // Flag to indicate price was rejected, not booking
           },
         });
       } catch (notifyError) {
@@ -326,10 +328,13 @@ export default function QuickBookingConfirm() {
         // Don't block the flow if notification fails
       }
 
-      setError("You have rejected this price offer. Feel free to request a new quote anytime.");
+      // Show waiting state - customer waits for new price
+      setBooking({ ...booking, status: "price_rejected", price: null });
+      setWaitingForPrice(true);
+      toast.info("Price rejected. Admin will send you a new offer soon.");
     } catch (err: any) {
       console.error("Reject error:", err);
-      setError(err.message || "Failed to reject booking");
+      setError(err.message || "Failed to reject price");
     } finally {
       setRejecting(false);
     }
