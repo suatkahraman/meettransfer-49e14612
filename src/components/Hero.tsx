@@ -1,11 +1,31 @@
 import { useState } from "react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, MapPin, Navigation } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MessageCircle, MapPin, Navigation, CalendarIcon, Clock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { InstallAppButton } from "@/components/website/InstallAppButton";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
+import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
+
+// Generate time options from 00:00 to 23:30 in 30-minute intervals
+const generateTimeOptions = () => {
+  const times: string[] = [];
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      const h = hour.toString().padStart(2, '0');
+      const m = minute.toString().padStart(2, '0');
+      times.push(`${h}:${m}`);
+    }
+  }
+  return times;
+};
+
+const timeOptions = generateTimeOptions();
 
 export const Hero = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -13,12 +33,16 @@ export const Hero = () => {
   
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [time, setTime] = useState("");
 
   const handleRequestPrice = () => {
-    // Navigate to booking form with pickup and dropoff as URL params
+    // Navigate to booking form with pickup, dropoff, date and time as URL params
     const params = new URLSearchParams();
     if (pickup) params.set("pickup", pickup);
     if (dropoff) params.set("dropoff", dropoff);
+    if (date) params.set("date", format(date, "yyyy-MM-dd"));
+    if (time) params.set("time", time);
     navigate(`${getLocalizedPath("/book")}${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
@@ -61,6 +85,7 @@ export const Hero = () => {
           {/* Quick Booking Form */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 max-w-2xl mx-auto border border-white/20 shadow-2xl">
             <div className="space-y-4">
+              {/* Location Fields */}
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Pick-up Point */}
                 <div className="relative">
@@ -90,6 +115,62 @@ export const Hero = () => {
                       className="pl-10 h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md focus:ring-2 focus:ring-accent"
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Date & Time Fields */}
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Date Picker */}
+                <div className="relative">
+                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">
+                    {t("pickupDate")}
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full h-12 justify-start text-left font-normal bg-white border-0 text-foreground rounded-lg shadow-md hover:bg-white/95",
+                          !date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
+                        {date ? format(date, "dd/MM/yyyy") : <span>{t("selectDate")}</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={setDate}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Time Picker */}
+                <div className="relative">
+                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">
+                    {t("pickupTime")}
+                  </label>
+                  <Select value={time} onValueChange={setTime}>
+                    <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
+                      <div className="flex items-center">
+                        <Clock className="mr-2 h-5 w-5 text-primary" />
+                        <SelectValue placeholder={t("selectTime")} />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {timeOptions.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
