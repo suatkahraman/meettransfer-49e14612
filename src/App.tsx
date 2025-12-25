@@ -94,6 +94,7 @@ const IstanbulTransferPriceGuide = lazy(() => import("./pages/website/blog/Istan
 const PrivateVsTaxiTurkey = lazy(() => import("./pages/website/blog/PrivateVsTaxiTurkey"));
 const AntalyaAirportTransferGuide = lazy(() => import("./pages/website/blog/AntalyaAirportTransferGuide"));
 const IsPrivateTransferWorthIt = lazy(() => import("./pages/website/blog/IsPrivateTransferWorthIt"));
+const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 
 const queryClient = new QueryClient();
 
@@ -178,6 +179,7 @@ const App = () => (
               {localizedRoutes("/blog/private-vs-taxi-turkey", <PrivateVsTaxiTurkey />)}
               {localizedRoutes("/blog/antalya-airport-transfer-guide", <AntalyaAirportTransferGuide />)}
               {localizedRoutes("/blog/is-private-transfer-worth-it", <IsPrivateTransferWorthIt />)}
+              {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}
               <Route path="/auth" element={<LazyRoute><Auth /></LazyRoute>} />
