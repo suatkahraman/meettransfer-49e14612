@@ -160,6 +160,16 @@ export default function QuickBookingCustomerInfo() {
     );
   }
 
+  // Auto-redirect after successful submission
+  useEffect(() => {
+    if (submitted) {
+      const timer = setTimeout(() => {
+        navigate("/customer/bookings");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [submitted, navigate]);
+
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
