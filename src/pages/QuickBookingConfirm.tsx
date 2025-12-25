@@ -3,8 +3,9 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign } from "lucide-react";
+import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { toast } from "sonner";
 
 interface BookingRequest {
   id: string;
@@ -35,16 +36,62 @@ export default function QuickBookingConfirm() {
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+  const [waitingForPrice, setWaitingForPrice] = useState(false);
+
+  const token = searchParams.get("token");
 
   useEffect(() => {
-    const token = searchParams.get("token");
     if (token) {
       fetchBooking(token);
     } else {
       setError("No confirmation token provided");
       setLoading(false);
     }
-  }, [searchParams]);
+  }, [token]);
+
+  // Realtime subscription for price updates
+  useEffect(() => {
+    if (!token || !waitingForPrice) return;
+
+    console.log("Setting up realtime subscription for token:", token);
+    
+    const channel = supabase
+      .channel(`quick-booking-${token}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "quick_booking_requests",
+          filter: `confirmation_token=eq.${token}`,
+        },
+        (payload) => {
+          console.log("Realtime update received:", payload);
+          const newData = payload.new as BookingRequest;
+          
+          if (newData.status === "price_sent" && newData.price) {
+            toast.success("Price received! You can now review and confirm.");
+            setBooking(newData);
+            setWaitingForPrice(false);
+            setError(null);
+          } else if (newData.status === "rejected") {
+            setError("This booking has been rejected");
+            setWaitingForPrice(false);
+          } else if (newData.status === "expired") {
+            setError("This price offer has expired");
+            setWaitingForPrice(false);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log("Realtime subscription status:", status);
+      });
+
+    return () => {
+      console.log("Removing realtime subscription");
+      supabase.removeChannel(channel);
+    };
+  }, [token, waitingForPrice]);
 
   const fetchBooking = async (token: string) => {
     try {
@@ -76,8 +123,15 @@ export default function QuickBookingConfirm() {
         return;
       }
 
+      // If price not set yet, show waiting state with realtime updates
+      if (data.status === "pending") {
+        setBooking(data as BookingRequest);
+        setWaitingForPrice(true);
+        return;
+      }
+
       if (data.status !== "price_sent") {
-        setError("Price has not been set yet. Please wait for our team to send you a price.");
+        setError("Unable to process this booking request.");
         return;
       }
 
@@ -202,6 +256,102 @@ export default function QuickBookingConfirm() {
   }
 
   if (!booking) return null;
+
+  // Waiting for price state
+  if (waitingForPrice) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
+        <Card className="max-w-lg w-full">
+          <CardContent className="pt-6">
+            {/* Header */}
+            <div className="text-center mb-6">
+              <div className="h-16 w-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <Clock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h1 className="text-2xl font-bold mb-2">Waiting for Price</h1>
+              <p className="text-muted-foreground">
+                Our team is reviewing your request and will send you a price shortly.
+              </p>
+            </div>
+
+            {/* Transfer Details */}
+            <div className="bg-muted/50 rounded-lg p-4 mb-6 space-y-3">
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Pick-up</p>
+                  <p className="font-medium">{booking.pickup}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-accent mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Drop-off</p>
+                  <p className="font-medium">{booking.dropoff}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Date</p>
+                    <p className="font-medium">
+                      {format(parseISO(booking.pickup_date), "dd/MM/yyyy")}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Time</p>
+                    <p className="font-medium">{booking.pickup_time}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <Car className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Vehicle</p>
+                    <p className="font-medium">{vehicleLabels[booking.vehicle_type]}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Passengers</p>
+                    <p className="font-medium">{booking.passengers}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Waiting indicator */}
+            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <RefreshCw className="h-5 w-5 text-amber-600 dark:text-amber-400 animate-spin" />
+                <p className="font-medium text-amber-700 dark:text-amber-300">
+                  Waiting for price quote...
+                </p>
+              </div>
+              <p className="text-sm text-amber-600 dark:text-amber-400">
+                This page will update automatically when we send you a price.
+              </p>
+            </div>
+
+            <p className="text-xs text-muted-foreground text-center mt-4">
+              You can keep this page open or check back later.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
