@@ -23,51 +23,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Handle OAuth callback - clean up URL hash if present
-    const handleOAuthCallback = async () => {
-      const hash = window.location.hash;
-      if (hash && hash.includes('access_token=')) {
-        // Let Supabase handle the hash - it will update the session
-        // Clean up the URL after processing
-        const cleanUrl = window.location.pathname + window.location.search;
-        window.history.replaceState(null, '', cleanUrl);
-      }
-    };
-    
-    handleOAuthCallback();
+    let isMounted = true;
 
-    // Set up auth state listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      (event, currentSession) => {
+        if (!isMounted) return;
+        
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
         setLoading(false);
 
-        // Handle OAuth callback - redirect based on role
-        if (event === 'SIGNED_IN' && session?.user) {
+        // Handle successful sign in - redirect based on role
+        if (event === 'SIGNED_IN' && currentSession?.user) {
           // Defer role check to avoid Supabase deadlock
           setTimeout(async () => {
+            if (!isMounted) return;
+            
             try {
               const { data: roleData } = await supabase
                 .from('user_roles')
                 .select('role')
-                .eq('user_id', session.user.id)
+                .eq('user_id', currentSession.user.id)
                 .maybeSingle();
 
               const userRole = roleData?.role || 'customer';
               
-              // Check if URL has OAuth hash (callback) or is on auth pages
+              // Clean up URL hash if present (OAuth callback)
+              if (window.location.hash.includes('access_token=')) {
+                const cleanUrl = window.location.pathname + window.location.search;
+                window.history.replaceState(null, '', cleanUrl);
+              }
+              
+              // Check if on auth pages - need to redirect
               const currentPath = window.location.pathname;
-              const hasOAuthHash = window.location.hash.includes('access_token=');
               const isAuthPage = ['/login', '/signup', '/auth'].some(p => currentPath.includes(p));
               
-              if (isAuthPage || hasOAuthHash) {
-                // Clean up URL hash
-                if (hasOAuthHash) {
-                  const cleanUrl = currentPath + window.location.search;
-                  window.history.replaceState(null, '', cleanUrl);
-                }
-                
+              if (isAuthPage) {
                 switch (userRole) {
                   case 'admin':
                     navigate('/admin', { replace: true });
@@ -84,21 +76,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               }
             } catch (error) {
               console.error('Role fetch error:', error);
-              navigate('/customer', { replace: true });
+              if (isMounted) {
+                navigate('/customer', { replace: true });
+              }
             }
           }, 0);
         }
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // THEN check for existing session (including OAuth callback tokens in URL)
+    const initializeAuth = async () => {
+      try {
+        // This call will also process any access_token in the URL hash
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        
+        if (isMounted) {
+          setSession(existingSession);
+          setUser(existingSession?.user ?? null);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    initializeAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const signIn = async (email: string, password: string) => {
