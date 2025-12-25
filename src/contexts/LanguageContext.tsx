@@ -59,6 +59,8 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "24/7 Service",
     professionalDrivers: "Professional Drivers",
     luxuryFleet: "Luxury Fleet",
+    addReturnTrip: "Add Return Trip",
+    returnTripDiscount: "Book return trip and get 40% OFF with code: Meet40Return",
     
     // Booking Process
     howBookingWorks: "How Our Booking Process Works",
@@ -526,6 +528,8 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "24/7 Service",
     professionalDrivers: "Professionelle Fahrer",
     luxuryFleet: "Luxusflotte",
+    addReturnTrip: "Rückfahrt hinzufügen",
+    returnTripDiscount: "Buchen Sie die Rückfahrt und erhalten Sie 40% Rabatt mit Code: Meet40Return",
     
     // Booking Process
     howBookingWorks: "So funktioniert unser Buchungsprozess",
@@ -989,6 +993,8 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "Service 24/7",
     professionalDrivers: "Chauffeurs professionnels",
     luxuryFleet: "Flotte de luxe",
+    addReturnTrip: "Ajouter un trajet retour",
+    returnTripDiscount: "Réservez le trajet retour et obtenez 40% de réduction avec le code: Meet40Return",
     
     // Booking Process
     howBookingWorks: "Comment fonctionne notre processus de réservation",
@@ -1452,6 +1458,8 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "Сервис 24/7",
     professionalDrivers: "Профессиональные водители",
     luxuryFleet: "Люкс автопарк",
+    addReturnTrip: "Добавить обратный трансфер",
+    returnTripDiscount: "Забронируйте обратный трансфер и получите скидку 40% с кодом: Meet40Return",
     
     // Booking Process
     howBookingWorks: "Как работает наш процесс бронирования",
@@ -1915,6 +1923,8 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "Servizio 24/7",
     professionalDrivers: "Autisti professionisti",
     luxuryFleet: "Flotta di lusso",
+    addReturnTrip: "Aggiungi viaggio di ritorno",
+    returnTripDiscount: "Prenota il viaggio di ritorno e ottieni il 40% di sconto con il codice: Meet40Return",
     
     // Booking Process
     howBookingWorks: "Come funziona il nostro processo di prenotazione",
@@ -2378,6 +2388,8 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "Servicio 24/7",
     professionalDrivers: "Conductores profesionales",
     luxuryFleet: "Flota de lujo",
+    addReturnTrip: "Añadir viaje de regreso",
+    returnTripDiscount: "Reserva el viaje de regreso y obtén 40% de descuento con el código: Meet40Return",
     
     // Booking Process
     howBookingWorks: "Cómo funciona nuestro proceso de reserva",
@@ -2841,6 +2853,8 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "خدمة 24/7",
     professionalDrivers: "سائقون محترفون",
     luxuryFleet: "أسطول فاخر",
+    addReturnTrip: "إضافة رحلة العودة",
+    returnTripDiscount: "احجز رحلة العودة واحصل على خصم 40% مع الكود: Meet40Return",
     
     // Booking Process
     howBookingWorks: "كيف تعمل عملية الحجز",
@@ -3304,6 +3318,8 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "7/24 Hizmet",
     professionalDrivers: "Profesyonel Şoförler",
     luxuryFleet: "Lüks Filo",
+    addReturnTrip: "Dönüş Yolculuğu Ekle",
+    returnTripDiscount: "Dönüş yolculuğu rezervasyonu yapın ve Meet40Return koduyla %40 indirim kazanın",
     
     // Booking Process
     howBookingWorks: "Rezervasyon Sürecimiz Nasıl İşliyor",

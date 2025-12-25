@@ -4,17 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { InstallAppButton } from "@/components/website/InstallAppButton";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
 import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// Generate time options from 00:00 to 23:30 in 30-minute intervals
 const generateTimeOptions = () => {
   const times: string[] = [];
   for (let hour = 0; hour < 24; hour++) {
@@ -36,7 +36,6 @@ const vehicleTypes = [
   { value: 'minibus', label: 'Minibus' },
 ];
 
-// Get or create a session ID for anonymous users
 const getSessionId = () => {
   let sessionId = localStorage.getItem('quick_booking_session_id');
   if (!sessionId) {
@@ -47,7 +46,7 @@ const getSessionId = () => {
 };
 
 export const Hero = () => {
-  const { t, getLocalizedPath } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   
   const [pickup, setPickup] = useState("");
@@ -57,10 +56,18 @@ export const Hero = () => {
   const [vehicleType, setVehicleType] = useState("mercedes-vito");
   const [passengers, setPassengers] = useState("1");
   const [submitting, setSubmitting] = useState(false);
+  
+  const [hasReturnTrip, setHasReturnTrip] = useState(false);
+  const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
+  const [returnTime, setReturnTime] = useState("");
 
   const handleRequestPrice = async () => {
-    // Validate required fields
     if (!pickup || !dropoff || !date || !time) {
+      toast.error(t("pleaseFilAllFields") || "Please fill in all required fields");
+      return;
+    }
+    
+    if (hasReturnTrip && (!returnDate || !returnTime)) {
       toast.error(t("pleaseFilAllFields") || "Please fill in all required fields");
       return;
     }
@@ -85,9 +92,12 @@ export const Hero = () => {
 
       if (error) throw error;
 
-      // Navigate to confirmation page to wait for price
-      navigate(`/quick-booking-confirm?token=${data.confirmation_token}`);
-      toast.success(t("priceRequestSent") || "Your price request has been sent! Waiting for price quote.");
+      let url = `/quick-booking-confirm?token=${data.confirmation_token}`;
+      if (hasReturnTrip && returnDate && returnTime) {
+        url += `&hasReturn=true&returnDate=${format(returnDate, "yyyy-MM-dd")}&returnTime=${returnTime}`;
+      }
+      navigate(url);
+      toast.success(t("priceRequestSent") || "Your price request has been sent!");
     } catch (error: any) {
       console.error("Error submitting request:", error);
       toast.error(error.message || "Failed to submit request");
@@ -122,7 +132,6 @@ export const Hero = () => {
             />
           </div>
           
-          
           <div className="space-y-4">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
               {t("heroTitle")}
@@ -137,208 +146,137 @@ export const Hero = () => {
             <div className="space-y-4">
               {/* Location Fields */}
               <div className="grid md:grid-cols-2 gap-4">
-                {/* Pick-up Point */}
                 <div className="relative">
-                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">
-                    {t("pickupPoint")}
-                  </label>
+                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("pickupPoint")}</label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
-                    <GooglePlacesAutocomplete
-                      onPlaceSelected={handlePickupSelected}
-                      placeholder={t("enterPickupPoint")}
-                      className="pl-10 h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md focus:ring-2 focus:ring-accent"
-                    />
+                    <GooglePlacesAutocomplete onPlaceSelected={handlePickupSelected} placeholder={t("enterPickupPoint")} className="pl-10 h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md focus:ring-2 focus:ring-accent" />
                   </div>
                 </div>
-
-                {/* Drop-off Point */}
                 <div className="relative">
-                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">
-                    {t("dropoffLocation")}
-                  </label>
+                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("dropoffLocation")}</label>
                   <div className="relative">
                     <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-accent z-10" />
-                    <GooglePlacesAutocomplete
-                      onPlaceSelected={handleDropoffSelected}
-                      placeholder={t("hotelOrAddress")}
-                      className="pl-10 h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md focus:ring-2 focus:ring-accent"
-                    />
+                    <GooglePlacesAutocomplete onPlaceSelected={handleDropoffSelected} placeholder={t("hotelOrAddress")} className="pl-10 h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md focus:ring-2 focus:ring-accent" />
                   </div>
                 </div>
               </div>
 
-              {/* Date & Time Fields */}
+              {/* Date & Time */}
               <div className="grid md:grid-cols-2 gap-4">
-                {/* Date Picker */}
                 <div className="relative">
-                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">
-                    {t("pickupDate")}
-                  </label>
+                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("pickupDate")}</label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full h-12 justify-start text-left font-normal bg-white border-0 text-foreground rounded-lg shadow-md hover:bg-white/95",
-                          !date && "text-muted-foreground"
-                        )}
-                      >
+                      <Button variant="outline" className={cn("w-full h-12 justify-start text-left font-normal bg-white border-0 text-foreground rounded-lg shadow-md hover:bg-white/95", !date && "text-muted-foreground")}>
                         <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
                         {date ? format(date, "dd/MM/yyyy") : <span>{t("selectDate")}</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={setDate}
-                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
+                      <Calendar mode="single" selected={date} onSelect={setDate} disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} initialFocus className={cn("p-3 pointer-events-auto")} />
                     </PopoverContent>
                   </Popover>
                 </div>
-
-                {/* Time Picker */}
                 <div className="relative">
-                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">
-                    {t("pickupTime")}
-                  </label>
+                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("pickupTime")}</label>
                   <Select value={time} onValueChange={setTime}>
                     <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
-                      <div className="flex items-center">
-                        <Clock className="mr-2 h-5 w-5 text-primary" />
-                        <SelectValue placeholder={t("selectTime")} />
-                      </div>
+                      <div className="flex items-center"><Clock className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectTime")} /></div>
                     </SelectTrigger>
-                    <SelectContent className="max-h-[300px]">
-                      {timeOptions.map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
+                    <SelectContent className="max-h-[300px]">{timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>
 
-              {/* Vehicle Type Selector */}
+              {/* Vehicle & Passengers */}
               <div className="relative">
-                <label className="text-white/90 text-sm font-medium mb-2 block text-left">
-                  {t("vehicleType")}
-                </label>
+                <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("vehicleType")}</label>
                 <Select value={vehicleType} onValueChange={setVehicleType}>
                   <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
-                    <div className="flex items-center">
-                      <Car className="mr-2 h-5 w-5 text-primary" />
-                      <SelectValue placeholder={t("selectVehicle")} />
-                    </div>
+                    <div className="flex items-center"><Car className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectVehicle")} /></div>
                   </SelectTrigger>
-                  <SelectContent className="bg-white z-50">
-                    {vehicleTypes.map((vehicle) => (
-                      <SelectItem key={vehicle.value} value={vehicle.value}>
-                        {vehicle.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectContent className="bg-white z-50">{vehicleTypes.map((v) => <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
 
-              {/* Passenger Count Selector */}
               <div className="relative">
-                <label className="text-white/90 text-sm font-medium mb-2 block text-left">
-                  {t("passengers")}
-                </label>
+                <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("passengers")}</label>
                 <Select value={passengers} onValueChange={setPassengers}>
                   <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
-                    <div className="flex items-center">
-                      <Users className="mr-2 h-5 w-5 text-primary" />
-                      <SelectValue placeholder={t("selectPassengers")} />
-                    </div>
+                    <div className="flex items-center"><Users className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectPassengers")} /></div>
                   </SelectTrigger>
-                  <SelectContent className="bg-white z-50 max-h-[300px]">
-                    {Array.from({ length: 19 }, (_, i) => i + 1).map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num} {num === 1 ? t("passenger") : t("passengersPlural")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectContent className="bg-white z-50 max-h-[300px]">{Array.from({ length: 19 }, (_, i) => i + 1).map((num) => <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? t("passenger") : t("passengersPlural")}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
 
-              {/* Request Price Button */}
-              <Button 
-                onClick={handleRequestPrice}
-                size="lg" 
-                variant="accent" 
-                className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    {t("sending") || "Sending..."}
-                  </>
-                ) : (
-                  t("requestPrice")
+              {/* Return Trip Option */}
+              <div className="bg-white/10 rounded-lg p-4 space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Checkbox id="returnTrip" checked={hasReturnTrip} onCheckedChange={(checked) => setHasReturnTrip(checked === true)} className="border-white/60 data-[state=checked]:bg-accent data-[state=checked]:border-accent" />
+                  <Label htmlFor="returnTrip" className="flex items-center gap-2 cursor-pointer text-white font-medium">
+                    <ArrowLeftRight className="h-4 w-4 text-accent" />
+                    {t("addReturnTrip")}
+                  </Label>
+                </div>
+                
+                {hasReturnTrip && (
+                  <div className="grid md:grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="relative">
+                      <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("returnDate")}</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full h-12 justify-start text-left font-normal bg-white border-0 text-foreground rounded-lg shadow-md hover:bg-white/95", !returnDate && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
+                            {returnDate ? format(returnDate, "dd/MM/yyyy") : <span>{t("selectDate")}</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar mode="single" selected={returnDate} onSelect={setReturnDate} disabled={(d) => d < (date || new Date())} initialFocus className={cn("p-3 pointer-events-auto")} />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="relative">
+                      <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("returnTime")}</label>
+                      <Select value={returnTime} onValueChange={setReturnTime}>
+                        <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
+                          <div className="flex items-center"><Clock className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectTime")} /></div>
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px]">{timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 )}
+                
+                {hasReturnTrip && <p className="text-accent text-sm font-medium flex items-center gap-2">🎁 {t("returnTripDiscount")}</p>}
+              </div>
+
+              <Button onClick={handleRequestPrice} size="lg" variant="accent" className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300" disabled={submitting}>
+                {submitting ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />{t("sending") || "Sending..."}</> : t("requestPrice")}
               </Button>
             </div>
           </div>
 
-          {/* Booking Process Section */}
+          {/* Booking Process */}
           <div className="mt-10 pt-8 border-t border-white/20">
-            <h2 className="text-xl md:text-2xl font-semibold text-white mb-6">
-              🔁 {t("howBookingWorks")}
-            </h2>
+            <h2 className="text-xl md:text-2xl font-semibold text-white mb-6">🔁 {t("howBookingWorks")}</h2>
             <p className="text-white/90 mb-6 text-sm md:text-base">{t("bookingProcessIntro")}</p>
-            
             <div className="grid md:grid-cols-3 gap-4 md:gap-6 text-left mb-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-accent font-bold text-lg mb-2">1️⃣ {t("step1Title")}</div>
-                <p className="text-white/80 text-sm">{t("step1Desc")}</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-accent font-bold text-lg mb-2">2️⃣ {t("step2Title")}</div>
-                <p className="text-white/80 text-sm">{t("step2Desc")}</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-accent font-bold text-lg mb-2">3️⃣ {t("step3Title")}</div>
-                <p className="text-white/80 text-sm">{t("step3Desc")}</p>
-              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4"><div className="text-accent font-bold text-lg mb-2">1️⃣ {t("step1Title")}</div><p className="text-white/80 text-sm">{t("step1Desc")}</p></div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4"><div className="text-accent font-bold text-lg mb-2">2️⃣ {t("step2Title")}</div><p className="text-white/80 text-sm">{t("step2Desc")}</p></div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4"><div className="text-accent font-bold text-lg mb-2">3️⃣ {t("step3Title")}</div><p className="text-white/80 text-sm">{t("step3Desc")}</p></div>
             </div>
-            
             <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-white/90 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-accent">✅</span>
-                <span>{t("benefit1")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-accent">✅</span>
-                <span>{t("benefit2")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-accent">✅</span>
-                <span>{t("benefit3")}</span>
-              </div>
+              <div className="flex items-center gap-2"><span className="text-accent">✅</span><span>{t("benefit1")}</span></div>
+              <div className="flex items-center gap-2"><span className="text-accent">✅</span><span>{t("benefit2")}</span></div>
+              <div className="flex items-center gap-2"><span className="text-accent">✅</span><span>{t("benefit3")}</span></div>
             </div>
           </div>
 
           <div className="flex flex-wrap justify-center gap-8 pt-8 text-white/80 text-sm font-sans">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-accent"></div>
-              <span>{t("service247")}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-accent"></div>
-              <span>{t("professionalDrivers")}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-accent"></div>
-              <span>{t("luxuryFleet")}</span>
-            </div>
+            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-accent"></div><span>{t("service247")}</span></div>
+            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-accent"></div><span>{t("professionalDrivers")}</span></div>
+            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-accent"></div><span>{t("luxuryFleet")}</span></div>
           </div>
         </div>
       </div>
