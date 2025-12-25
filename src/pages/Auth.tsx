@@ -35,6 +35,14 @@ const GoogleIcon = () => (
   </svg>
 );
 
+// Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
+const passwordSchema = z.string()
+  .min(6, 'Password must be at least 6 characters')
+  .max(100)
+  .regex(/[A-Z]/, 'Password must contain at least 1 uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least 1 lowercase letter')
+  .regex(/\d.*\d.*\d.*\d/, 'Password must contain at least 4 digits');
+
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
@@ -44,7 +52,7 @@ const signupSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters').max(100),
   phone: z.string().min(5, 'Phone number is required'),
   email: z.string().email('Invalid email address').max(255),
-  password: z.string().min(6, 'Password must be at least 6 characters').max(100),
+  password: passwordSchema,
 });
 
 const resetEmailSchema = z.object({
@@ -52,8 +60,8 @@ const resetEmailSchema = z.object({
 });
 
 const newPasswordSchema = z.object({
-  password: z.string().min(6, 'Password must be at least 6 characters').max(100),
-  confirmPassword: z.string().min(6, 'Password must be at least 6 characters').max(100),
+  password: passwordSchema,
+  confirmPassword: passwordSchema,
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -430,7 +438,10 @@ const Auth = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
-                  <Input id="signup-password" name="password" type="password" placeholder="••••••••" required />
+                  <Input id="signup-password" name="password" type="password" placeholder="Ab2215" required />
+                  <p className="text-xs text-muted-foreground">
+                    1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
+                  </p>
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
