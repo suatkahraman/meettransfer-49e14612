@@ -374,9 +374,9 @@ export default function QuickBookingConfirm() {
               <div className="h-16 w-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-4 animate-pulse">
                 <Clock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
               </div>
-              <h1 className="text-2xl font-bold mb-2">Waiting for Price</h1>
+              <h1 className="text-2xl font-bold mb-2">{t("qbWaitingForPrice")}</h1>
               <p className="text-muted-foreground">
-                Our team is reviewing your request and will send you a price shortly.
+                {t("qbWaitingForPriceDesc")}
               </p>
             </div>
 
@@ -385,7 +385,7 @@ export default function QuickBookingConfirm() {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Pick-up</p>
+                  <p className="text-sm text-muted-foreground">{t("qbPickup")}</p>
                   <p className="font-medium">{booking.pickup}</p>
                 </div>
               </div>
@@ -393,7 +393,7 @@ export default function QuickBookingConfirm() {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-accent mt-0.5" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Drop-off</p>
+                  <p className="text-sm text-muted-foreground">{t("qbDropoff")}</p>
                   <p className="font-medium">{booking.dropoff}</p>
                 </div>
               </div>
@@ -402,7 +402,7 @@ export default function QuickBookingConfirm() {
                 <div className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Date</p>
+                    <p className="text-sm text-muted-foreground">{t("qbDate")}</p>
                     <p className="font-medium">
                       {format(parseISO(booking.pickup_date), "dd/MM/yyyy")}
                     </p>
@@ -412,7 +412,7 @@ export default function QuickBookingConfirm() {
                 <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Time</p>
+                    <p className="text-sm text-muted-foreground">{t("qbTime")}</p>
                     <p className="font-medium">{booking.pickup_time}</p>
                   </div>
                 </div>
@@ -422,7 +422,7 @@ export default function QuickBookingConfirm() {
                 <div className="flex items-center gap-2">
                   <Car className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Vehicle</p>
+                    <p className="text-sm text-muted-foreground">{t("qbVehicle")}</p>
                     <p className="font-medium">{vehicleLabels[booking.vehicle_type]}</p>
                   </div>
                 </div>
@@ -430,7 +430,7 @@ export default function QuickBookingConfirm() {
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Passengers</p>
+                    <p className="text-sm text-muted-foreground">{t("qbPassengers")}</p>
                     <p className="font-medium">{booking.passengers}</p>
                   </div>
                 </div>
@@ -442,16 +442,16 @@ export default function QuickBookingConfirm() {
               <div className="flex items-center justify-center gap-2 mb-2">
                 <RefreshCw className="h-5 w-5 text-amber-600 dark:text-amber-400 animate-spin" />
                 <p className="font-medium text-amber-700 dark:text-amber-300">
-                  Waiting for price quote...
+                  {t("qbWaitingForPriceQuote")}
                 </p>
               </div>
               <p className="text-sm text-amber-600 dark:text-amber-400">
-                This page will update automatically when we send you a price.
+                {t("qbPageAutoUpdate")}
               </p>
             </div>
 
             <p className="text-xs text-muted-foreground text-center mt-4">
-              You can keep this page open or check back later.
+              {t("qbKeepPageOpen")}
             </p>
           </CardContent>
         </Card>
@@ -468,9 +468,9 @@ export default function QuickBookingConfirm() {
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <DollarSign className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold mb-2">Your Price Quote</h1>
+            <h1 className="text-2xl font-bold mb-2">{t("qbYourPriceQuote")}</h1>
             <p className="text-muted-foreground">
-              Review your transfer details and confirm booking
+              {t("qbReviewAndConfirm")}
             </p>
           </div>
 
@@ -479,7 +479,7 @@ export default function QuickBookingConfirm() {
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 text-primary mt-0.5" />
               <div>
-                <p className="text-sm text-muted-foreground">Pick-up</p>
+                <p className="text-sm text-muted-foreground">{t("qbPickup")}</p>
                 <p className="font-medium">{booking.pickup}</p>
               </div>
             </div>
@@ -487,7 +487,7 @@ export default function QuickBookingConfirm() {
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 text-accent mt-0.5" />
               <div>
-                <p className="text-sm text-muted-foreground">Drop-off</p>
+                <p className="text-sm text-muted-foreground">{t("qbDropoff")}</p>
                 <p className="font-medium">{booking.dropoff}</p>
               </div>
             </div>
@@ -496,7 +496,7 @@ export default function QuickBookingConfirm() {
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Date</p>
+                  <p className="text-sm text-muted-foreground">{t("qbDate")}</p>
                   <p className="font-medium">
                     {format(parseISO(booking.pickup_date), "dd/MM/yyyy")}
                   </p>
@@ -506,7 +506,7 @@ export default function QuickBookingConfirm() {
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Time</p>
+                  <p className="text-sm text-muted-foreground">{t("qbTime")}</p>
                   <p className="font-medium">{booking.pickup_time}</p>
                 </div>
               </div>
@@ -516,7 +516,7 @@ export default function QuickBookingConfirm() {
               <div className="flex items-center gap-2">
                 <Car className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Vehicle</p>
+                  <p className="text-sm text-muted-foreground">{t("qbVehicle")}</p>
                   <p className="font-medium">{vehicleLabels[booking.vehicle_type]}</p>
                 </div>
               </div>
@@ -524,7 +524,7 @@ export default function QuickBookingConfirm() {
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Passengers</p>
+                  <p className="text-sm text-muted-foreground">{t("qbPassengers")}</p>
                   <p className="font-medium">{booking.passengers}</p>
                 </div>
               </div>
@@ -541,7 +541,7 @@ export default function QuickBookingConfirm() {
               />
               <Label htmlFor="returnTrip" className="flex items-center gap-2 cursor-pointer font-medium">
                 <ArrowLeftRight className="h-4 w-4 text-primary" />
-                Add Return Transfer
+                {t("qbAddReturnTransfer")}
               </Label>
             </div>
 
@@ -549,7 +549,7 @@ export default function QuickBookingConfirm() {
               <div className="space-y-4 mt-4 pl-6 border-l-2 border-primary/30">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="returnDate">Return Date</Label>
+                    <Label htmlFor="returnDate">{t("qbReturnDate")}</Label>
                     <Input
                       id="returnDate"
                       type="date"
@@ -559,7 +559,7 @@ export default function QuickBookingConfirm() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="returnTime">Return Time</Label>
+                    <Label htmlFor="returnTime">{t("qbReturnTime")}</Label>
                     <Input
                       id="returnTime"
                       type="time"
@@ -573,12 +573,12 @@ export default function QuickBookingConfirm() {
                 <div className="space-y-2">
                   <Label htmlFor="promoCode" className="flex items-center gap-2">
                     <Tag className="h-4 w-4" />
-                    Promo Code (for 40% off return)
+                    {t("qbPromoCodeLabel")}
                   </Label>
                   <div className="relative">
                     <Input
                       id="promoCode"
-                      placeholder="Enter promo code"
+                      placeholder={t("qbEnterPromoCode")}
                       value={promoCode}
                       onChange={(e) => handlePromoCodeChange(e.target.value)}
                       className={`pr-10 ${
@@ -596,19 +596,19 @@ export default function QuickBookingConfirm() {
                   {isPromoCodeValid === true && (
                     <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
                       <CheckCircle2 className="h-4 w-4" />
-                      40% discount applied to return transfer!
+                      {t("qbDiscountApplied")}
                     </p>
                   )}
                   {isPromoCodeValid === false && (
                     <p className="text-sm text-red-600 dark:text-red-400">
-                      Invalid promo code
+                      {t("qbInvalidPromoCode")}
                     </p>
                   )}
                 </div>
 
                 <div className="bg-primary/5 rounded p-3 text-sm">
                   <p className="text-muted-foreground">
-                    <strong>Return Route:</strong> {booking.dropoff} → {booking.pickup}
+                    <strong>{t("qbReturnRoute")}:</strong> {booking.dropoff} → {booking.pickup}
                   </p>
                 </div>
               </div>
@@ -619,7 +619,7 @@ export default function QuickBookingConfirm() {
           <div className="bg-primary/10 rounded-lg p-6 mb-6 text-center">
             {!hasReturnTrip ? (
               <>
-                <p className="text-sm text-muted-foreground mb-2">Your Transfer Price</p>
+                <p className="text-sm text-muted-foreground mb-2">{t("qbYourTransferPrice")}</p>
                 <p className="text-4xl font-bold text-primary">
                   {booking.price_currency === "EUR" && "€"}
                   {booking.price_currency === "USD" && "$"}
@@ -634,7 +634,7 @@ export default function QuickBookingConfirm() {
             ) : (
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-sm">
-                  <span>Outbound Transfer</span>
+                  <span>{t("qbOutboundTransfer")}</span>
                   <span className="font-medium">
                     {booking.price_currency === "EUR" && "€"}
                     {booking.price_currency === "USD" && "$"}
@@ -645,7 +645,7 @@ export default function QuickBookingConfirm() {
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="flex items-center gap-2">
-                    Return Transfer
+                    {t("qbReturnTransfer")}
                     {isPromoCodeValid && (
                       <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
                         40% OFF
@@ -671,7 +671,7 @@ export default function QuickBookingConfirm() {
                 </div>
                 <div className="border-t pt-3">
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold">Total</span>
+                    <span className="font-semibold">{t("qbTotal")}</span>
                     <span className="text-2xl font-bold text-primary">
                       {booking.price_currency === "EUR" && "€"}
                       {booking.price_currency === "USD" && "$"}
@@ -687,7 +687,7 @@ export default function QuickBookingConfirm() {
 
           {/* Payment Method Selection */}
           <div className="bg-muted/50 rounded-lg p-4 mb-6">
-            <Label className="text-base font-medium mb-4 block">Payment Method</Label>
+            <Label className="text-base font-medium mb-4 block">{t("qbPaymentMethod")}</Label>
             <RadioGroup
               value={paymentMethod}
               onValueChange={(value) => setPaymentMethod(value as "cash" | "payment_link")}
@@ -698,8 +698,8 @@ export default function QuickBookingConfirm() {
                 <Label htmlFor="cash" className="flex items-center gap-2 cursor-pointer flex-1">
                   <Banknote className="h-5 w-5 text-green-600" />
                   <div>
-                    <p className="font-medium">Pay Cash to Driver</p>
-                    <p className="text-sm text-muted-foreground">Pay in cash when your driver arrives</p>
+                    <p className="font-medium">{t("qbPayCashToDriver")}</p>
+                    <p className="text-sm text-muted-foreground">{t("qbPayCashDesc")}</p>
                   </div>
                 </Label>
               </div>
@@ -708,8 +708,8 @@ export default function QuickBookingConfirm() {
                 <Label htmlFor="payment_link" className="flex items-center gap-2 cursor-pointer flex-1">
                   <CreditCard className="h-5 w-5 text-blue-600" />
                   <div>
-                    <p className="font-medium">Pay Online (Card/Bank)</p>
-                    <p className="text-sm text-muted-foreground">Receive a secure payment link via email</p>
+                    <p className="font-medium">{t("qbPayOnline")}</p>
+                    <p className="text-sm text-muted-foreground">{t("qbPayOnlineDesc")}</p>
                   </div>
                 </Label>
               </div>
@@ -729,7 +729,7 @@ export default function QuickBookingConfirm() {
               ) : (
                 <XCircle className="h-4 w-4 mr-2" />
               )}
-              Reject
+              {t("qbReject")}
             </Button>
 
             <Button
@@ -742,12 +742,12 @@ export default function QuickBookingConfirm() {
               ) : (
                 <CheckCircle className="h-4 w-4 mr-2" />
               )}
-              Confirm Booking
+              {t("qbConfirmBooking")}
             </Button>
           </div>
 
           <p className="text-xs text-muted-foreground text-center mt-4">
-            By confirming, you'll proceed to complete your booking details.
+            {t("qbByConfirming")}
           </p>
         </CardContent>
       </Card>
