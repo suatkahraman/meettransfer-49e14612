@@ -74,3 +74,6 @@ verify_jwt = true
 
 [functions.track-visit]
 verify_jwt = false
+
+[functions.notify-admin-quick-booking-confirmed]
+verify_jwt = false
