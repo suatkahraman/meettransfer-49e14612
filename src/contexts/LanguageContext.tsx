@@ -48,7 +48,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Get Best Price Now",
-    heroSubtitle: "Best Airport Transfer Company Experience luxury travel with our professional chauffeur service. Reliable, comfortable, and elegant transportation for every journey.",
+    heroSubtitle: "✈️ Round-Trip Transfers – 40% OFF! Book your Arrival & Return Airport Transfer Together on Reservations forms and Save 40% instantly 🎁 Use Promo Code on Return: Meet40Return. Best Airport Transfer Company in All Major Airport in Turkey",
     bookYourTransfer: "Book Your Transfer",
     requestPrice: "Request Price",
     and: "And",
@@ -473,7 +473,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Jetzt besten Preis erhalten",
-    heroSubtitle: "Bestes Flughafentransfer-Unternehmen. Erleben Sie Luxusreisen mit unserem professionellen Chauffeurservice. Zuverlässig, komfortabel und elegant für jede Reise.",
+    heroSubtitle: "✈️ Hin- und Rücktransfers – 40% RABATT! Buchen Sie Ihre Ankunft & Rückreise Flughafentransfer zusammen im Reservierungsformular und sparen Sie sofort 40% 🎁 Promo-Code für Rückreise: Meet40Return. Bestes Flughafentransfer-Unternehmen an allen großen Flughäfen der Türkei",
     bookYourTransfer: "Transfer buchen",
     requestPrice: "Preis anfragen",
     and: "Und",
@@ -894,7 +894,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Obtenez le Meilleur Prix Maintenant",
-    heroSubtitle: "La meilleure société de transfert aéroport. Vivez le voyage de luxe avec notre service de chauffeur professionnel. Transport fiable, confortable et élégant pour chaque trajet.",
+    heroSubtitle: "✈️ Transferts Aller-Retour – 40% DE RÉDUCTION! Réservez votre Transfert Aéroport Aller & Retour ensemble sur les formulaires de réservation et économisez 40% instantanément 🎁 Code Promo pour le Retour: Meet40Return. Meilleure Société de Transfert Aéroport dans tous les Grands Aéroports de Turquie",
     bookYourTransfer: "Réserver votre transfert",
     requestPrice: "Demander le prix",
     and: "Et",
@@ -1315,7 +1315,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Получите лучшую цену сейчас",
-    heroSubtitle: "Лучшая компания по трансферу из аэропорта. Испытайте роскошное путешествие с нашим профессиональным сервисом водителя. Надежный, комфортный и элегантный транспорт для каждой поездки.",
+    heroSubtitle: "✈️ Трансферы Туда-Обратно – СКИДКА 40%! Забронируйте трансфер из/в аэропорт вместе в форме бронирования и сэкономьте 40% мгновенно 🎁 Промокод для обратного трансфера: Meet40Return. Лучшая компания по трансферу во всех крупных аэропортах Турции",
     bookYourTransfer: "Забронировать трансфер",
     requestPrice: "Запросить цену",
     and: "И",
@@ -1736,7 +1736,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Ottieni il Miglior Prezzo Ora",
-    heroSubtitle: "La migliore compagnia di trasferimento aeroportuale. Vivi il viaggio di lusso con il nostro servizio di autista professionale. Trasporto affidabile, confortevole ed elegante per ogni viaggio.",
+    heroSubtitle: "✈️ Trasferimenti Andata e Ritorno – 40% DI SCONTO! Prenota il tuo Trasferimento Aeroportuale Andata & Ritorno insieme nei moduli di prenotazione e risparmia subito il 40% 🎁 Codice Promo per il Ritorno: Meet40Return. Migliore Compagnia di Trasferimento in tutti i Principali Aeroporti della Turchia",
     bookYourTransfer: "Prenota il tuo trasferimento",
     requestPrice: "Richiedi prezzo",
     and: "E",
@@ -2157,7 +2157,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Obtén el Mejor Precio Ahora",
-    heroSubtitle: "La mejor compañía de traslados desde el aeropuerto. Experimenta el viaje de lujo con nuestro servicio de chófer profesional. Transporte fiable, cómodo y elegante para cada viaje.",
+    heroSubtitle: "✈️ Traslados de Ida y Vuelta – ¡40% DE DESCUENTO! Reserva tu Traslado Aeropuerto de Llegada y Regreso juntos en los formularios de reserva y ahorra 40% al instante 🎁 Código Promocional para Regreso: Meet40Return. Mejor Compañía de Traslados en Todos los Principales Aeropuertos de Turquía",
     bookYourTransfer: "Reserva tu traslado",
     requestPrice: "Solicitar precio",
     and: "Y",
@@ -2578,7 +2578,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "احصل على أفضل سعر الآن",
-    heroSubtitle: "أفضل شركة نقل من وإلى المطار. استمتع بالسفر الفاخر مع خدمة السائق المحترف. نقل موثوق ومريح وأنيق لكل رحلة.",
+    heroSubtitle: "✈️ نقل ذهاب وإياب – خصم 40%! احجز نقل المطار للوصول والعودة معًا في نماذج الحجز ووفر 40% فورًا 🎁 رمز العرض للعودة: Meet40Return. أفضل شركة نقل في جميع المطارات الرئيسية في تركيا",
     bookYourTransfer: "احجز نقلك",
     requestPrice: "اطلب السعر",
     and: "و",
