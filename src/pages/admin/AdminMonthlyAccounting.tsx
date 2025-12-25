@@ -192,7 +192,7 @@ const AdminMonthlyAccounting = () => {
   const totalPaymentsThisMonth = driverPayments.reduce((sum, p) => sum + p.amount, 0);
 
   const handleEditReservation = (reservation: Reservation) => {
-    navigate(`/admin/reservations/${reservation.id}/edit`);
+    navigate(`/admin/reservations/${reservation.id}`);
   };
 
   const handlePaymentAdded = () => {
