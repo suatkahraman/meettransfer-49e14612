@@ -68,3 +68,9 @@ verify_jwt = false
 
 [functions.whatsapp-message-status]
 verify_jwt = true
+
+[functions.send-quick-booking-price]
+verify_jwt = true
+
+[functions.track-visit]
+verify_jwt = false
