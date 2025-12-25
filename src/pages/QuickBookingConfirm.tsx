@@ -2,9 +2,12 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2 } from "lucide-react";
+import { format, parseISO, addDays } from "date-fns";
 import { toast } from "sonner";
 
 interface BookingRequest {
@@ -28,6 +31,8 @@ const vehicleLabels: Record<string, string> = {
   minibus: "Minibus",
 };
 
+const VALID_PROMO_CODE = "Meet40Return";
+
 export default function QuickBookingConfirm() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -37,6 +42,17 @@ export default function QuickBookingConfirm() {
   const [confirming, setConfirming] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [waitingForPrice, setWaitingForPrice] = useState(false);
+  
+  // Return trip state
+  const [hasReturnTrip, setHasReturnTrip] = useState(false);
+  const [returnTripData, setReturnTripData] = useState({
+    date: "",
+    time: "",
+  });
+  
+  // Promo code state
+  const [promoCode, setPromoCode] = useState("");
+  const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
 
   const token = searchParams.get("token");
 
@@ -144,8 +160,46 @@ export default function QuickBookingConfirm() {
     }
   };
 
+  const handlePromoCodeChange = (value: string) => {
+    setPromoCode(value);
+    if (value.trim() === "") {
+      setIsPromoCodeValid(null);
+    } else if (value.trim().toLowerCase() === VALID_PROMO_CODE.toLowerCase()) {
+      setIsPromoCodeValid(true);
+    } else {
+      setIsPromoCodeValid(false);
+    }
+  };
+
+  // Calculate return price with discount
+  const getReturnPrice = () => {
+    if (!booking?.price) return null;
+    if (hasReturnTrip && isPromoCodeValid) {
+      return booking.price * 0.6; // 40% discount
+    }
+    return hasReturnTrip ? booking.price : null;
+  };
+
+  const getTotalPrice = () => {
+    if (!booking?.price) return null;
+    const returnPrice = getReturnPrice();
+    return booking.price + (returnPrice || 0);
+  };
+
   const handleConfirm = async () => {
     if (!booking) return;
+
+    // Validate return trip if enabled
+    if (hasReturnTrip) {
+      if (!returnTripData.date) {
+        toast.error("Please select a return date");
+        return;
+      }
+      if (!returnTripData.time) {
+        toast.error("Please select a return time");
+        return;
+      }
+    }
 
     setConfirming(true);
     try {
@@ -160,6 +214,10 @@ export default function QuickBookingConfirm() {
 
       if (updateError) throw updateError;
 
+      // Calculate prices for notification
+      const returnPrice = getReturnPrice();
+      const totalPrice = getTotalPrice();
+
       // Notify admin about the confirmation
       try {
         await supabase.functions.invoke("notify-admin-quick-booking-confirmed", {
@@ -173,6 +231,12 @@ export default function QuickBookingConfirm() {
             passengers: booking.passengers,
             price: booking.price,
             priceCurrency: booking.price_currency,
+            hasReturnTrip,
+            returnDate: returnTripData.date,
+            returnTime: returnTripData.time,
+            returnPrice,
+            totalPrice,
+            promoCode: isPromoCodeValid ? promoCode : null,
           },
         });
       } catch (notifyError) {
@@ -191,6 +255,17 @@ export default function QuickBookingConfirm() {
       params.set("price", booking.price?.toString() || "");
       params.set("currency", booking.price_currency);
       params.set("quickBookingId", booking.id);
+      
+      // Add return trip info if enabled
+      if (hasReturnTrip) {
+        params.set("hasReturn", "true");
+        params.set("returnDate", returnTripData.date);
+        params.set("returnTime", returnTripData.time);
+        params.set("returnPrice", returnPrice?.toString() || "");
+        if (isPromoCodeValid) {
+          params.set("promoCode", promoCode);
+        }
+      }
 
       navigate(`/book?${params.toString()}`);
     } catch (err: any) {
@@ -445,19 +520,158 @@ export default function QuickBookingConfirm() {
             </div>
           </div>
 
+          {/* Return Trip Option */}
+          <div className="bg-muted/50 rounded-lg p-4 mb-4">
+            <div className="flex items-center space-x-3 mb-4">
+              <Checkbox
+                id="returnTrip"
+                checked={hasReturnTrip}
+                onCheckedChange={(checked) => setHasReturnTrip(checked === true)}
+              />
+              <Label htmlFor="returnTrip" className="flex items-center gap-2 cursor-pointer font-medium">
+                <ArrowLeftRight className="h-4 w-4 text-primary" />
+                Add Return Transfer
+              </Label>
+            </div>
+
+            {hasReturnTrip && (
+              <div className="space-y-4 mt-4 pl-6 border-l-2 border-primary/30">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="returnDate">Return Date</Label>
+                    <Input
+                      id="returnDate"
+                      type="date"
+                      value={returnTripData.date}
+                      onChange={(e) => setReturnTripData(prev => ({ ...prev, date: e.target.value }))}
+                      min={booking.pickup_date}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="returnTime">Return Time</Label>
+                    <Input
+                      id="returnTime"
+                      type="time"
+                      value={returnTripData.time}
+                      onChange={(e) => setReturnTripData(prev => ({ ...prev, time: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                {/* Promo Code Section */}
+                <div className="space-y-2">
+                  <Label htmlFor="promoCode" className="flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    Promo Code (for 40% off return)
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="promoCode"
+                      placeholder="Enter promo code"
+                      value={promoCode}
+                      onChange={(e) => handlePromoCodeChange(e.target.value)}
+                      className={`pr-10 ${
+                        isPromoCodeValid === true ? "border-green-500 focus:ring-green-500" :
+                        isPromoCodeValid === false ? "border-red-500 focus:ring-red-500" : ""
+                      }`}
+                    />
+                    {isPromoCodeValid === true && (
+                      <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                    )}
+                    {isPromoCodeValid === false && (
+                      <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500" />
+                    )}
+                  </div>
+                  {isPromoCodeValid === true && (
+                    <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                      <CheckCircle2 className="h-4 w-4" />
+                      40% discount applied to return transfer!
+                    </p>
+                  )}
+                  {isPromoCodeValid === false && (
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      Invalid promo code
+                    </p>
+                  )}
+                </div>
+
+                <div className="bg-primary/5 rounded p-3 text-sm">
+                  <p className="text-muted-foreground">
+                    <strong>Return Route:</strong> {booking.dropoff} → {booking.pickup}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Price Display */}
           <div className="bg-primary/10 rounded-lg p-6 mb-6 text-center">
-            <p className="text-sm text-muted-foreground mb-2">Your Transfer Price</p>
-            <p className="text-4xl font-bold text-primary">
-              {booking.price_currency === "EUR" && "€"}
-              {booking.price_currency === "USD" && "$"}
-              {booking.price_currency === "GBP" && "£"}
-              {booking.price_currency === "TRY" && "₺"}
-              {booking.price}
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              {booking.price_currency}
-            </p>
+            {!hasReturnTrip ? (
+              <>
+                <p className="text-sm text-muted-foreground mb-2">Your Transfer Price</p>
+                <p className="text-4xl font-bold text-primary">
+                  {booking.price_currency === "EUR" && "€"}
+                  {booking.price_currency === "USD" && "$"}
+                  {booking.price_currency === "GBP" && "£"}
+                  {booking.price_currency === "TRY" && "₺"}
+                  {booking.price}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {booking.price_currency}
+                </p>
+              </>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span>Outbound Transfer</span>
+                  <span className="font-medium">
+                    {booking.price_currency === "EUR" && "€"}
+                    {booking.price_currency === "USD" && "$"}
+                    {booking.price_currency === "GBP" && "£"}
+                    {booking.price_currency === "TRY" && "₺"}
+                    {booking.price}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="flex items-center gap-2">
+                    Return Transfer
+                    {isPromoCodeValid && (
+                      <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
+                        40% OFF
+                      </span>
+                    )}
+                  </span>
+                  <span className="font-medium">
+                    {isPromoCodeValid && booking.price && (
+                      <span className="line-through text-muted-foreground mr-2">
+                        {booking.price_currency === "EUR" && "€"}
+                        {booking.price_currency === "USD" && "$"}
+                        {booking.price_currency === "GBP" && "£"}
+                        {booking.price_currency === "TRY" && "₺"}
+                        {booking.price}
+                      </span>
+                    )}
+                    {booking.price_currency === "EUR" && "€"}
+                    {booking.price_currency === "USD" && "$"}
+                    {booking.price_currency === "GBP" && "£"}
+                    {booking.price_currency === "TRY" && "₺"}
+                    {getReturnPrice()?.toFixed(0)}
+                  </span>
+                </div>
+                <div className="border-t pt-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Total</span>
+                    <span className="text-2xl font-bold text-primary">
+                      {booking.price_currency === "EUR" && "€"}
+                      {booking.price_currency === "USD" && "$"}
+                      {booking.price_currency === "GBP" && "£"}
+                      {booking.price_currency === "TRY" && "₺"}
+                      {getTotalPrice()?.toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
