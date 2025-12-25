@@ -37,34 +37,13 @@ serve(async (req) => {
 
     const requestData: CreateReservationRequest = await req.json();
 
-    const PLACEHOLDER_CUSTOMER_ID = "00000000-0000-0000-0000-000000000000";
-
     console.log("Creating reservation for quick booking:", requestData.bookingId);
 
-    // Ensure placeholder profile exists (required by reservations_customer_id_fkey)
-    const { error: placeholderProfileError } = await supabase
-      .from("profiles")
-      .upsert(
-        {
-          id: PLACEHOLDER_CUSTOMER_ID,
-          full_name: "Pending Customer Info",
-          phone: null,
-        },
-        { onConflict: "id" }
-      );
-
-    if (placeholderProfileError) {
-      console.error("Error creating placeholder profile:", placeholderProfileError);
-      throw new Error(
-        `Failed to create placeholder profile: ${placeholderProfileError.message}`,
-      );
-    }
-
-    // Create main reservation with a placeholder customer_id (will be updated when customer registers)
+    // Create main reservation WITHOUT customer_id (will be set later when customer registers)
     const { data: reservation, error: reservationError } = await supabase
       .from("reservations")
       .insert({
-        customer_id: PLACEHOLDER_CUSTOMER_ID,
+        customer_id: null, // Will be filled when customer completes the form
         customer_name: "Pending Customer Info",
         customer_phone: "",
         pickup: requestData.pickup,
@@ -93,7 +72,7 @@ serve(async (req) => {
       const { data: returnRes, error: returnError } = await supabase
         .from("reservations")
         .insert({
-          customer_id: PLACEHOLDER_CUSTOMER_ID,
+          customer_id: null, // Will be filled when customer completes the form
           customer_name: "Pending Customer Info",
           customer_phone: "",
           pickup: requestData.dropoff, // Swapped for return
