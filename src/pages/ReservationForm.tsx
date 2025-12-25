@@ -101,6 +101,7 @@ const ReservationForm = () => {
   const urlDropoff = searchParams.get('dropoff') || '';
   const urlDate = searchParams.get('date') || '';
   const urlTime = searchParams.get('time') || '';
+  const urlVehicleType = searchParams.get('vehicleType') || '';
   
   const [formData, setFormData] = useState(() => ({
     ...defaultFormData,
@@ -108,6 +109,7 @@ const ReservationForm = () => {
     dropoff: urlDropoff,
     date: urlDate,
     time: urlTime,
+    vehicleType: urlVehicleType || defaultFormData.vehicleType,
   }));
 
   // Load saved form data on mount
