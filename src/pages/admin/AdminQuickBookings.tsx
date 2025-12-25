@@ -36,6 +36,8 @@ import {
   Loader2,
   ArrowLeft,
   Eye,
+  CreditCard,
+  Link as LinkIcon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -59,6 +61,8 @@ interface QuickBookingRequest {
   created_at: string;
   confirmed_at: string | null;
   expires_at: string;
+  payment_method: string | null;
+  payment_link: string | null;
 }
 
 const vehicleLabels: Record<string, string> = {
@@ -90,10 +94,13 @@ export default function AdminQuickBookings() {
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<QuickBookingRequest | null>(null);
   const [priceDialogOpen, setPriceDialogOpen] = useState(false);
+  const [paymentLinkDialogOpen, setPaymentLinkDialogOpen] = useState(false);
   const [price, setPrice] = useState("");
   const [currency, setCurrency] = useState("EUR");
+  const [paymentLink, setPaymentLink] = useState("");
   // Email input removed - customer provides email after confirming price
   const [sendingPrice, setSendingPrice] = useState(false);
+  const [sendingPaymentLink, setSendingPaymentLink] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -163,6 +170,49 @@ export default function AdminQuickBookings() {
       toast.error(error.message || "Failed to send price");
     } finally {
       setSendingPrice(false);
+    }
+  };
+
+  const sendPaymentLink = async () => {
+    if (!selectedRequest || !paymentLink) {
+      toast.error("Please enter a payment link");
+      return;
+    }
+
+    if (!selectedRequest.customer_email) {
+      toast.error("Customer email is not available. Customer needs to complete the reservation form first.");
+      return;
+    }
+
+    setSendingPaymentLink(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-payment-link", {
+        body: {
+          quickBookingId: selectedRequest.id,
+          paymentLink,
+          customerEmail: selectedRequest.customer_email,
+          customerName: selectedRequest.customer_name,
+          pickup: selectedRequest.pickup,
+          dropoff: selectedRequest.dropoff,
+          pickupDate: selectedRequest.pickup_date,
+          pickupTime: selectedRequest.pickup_time,
+          price: selectedRequest.price,
+          priceCurrency: selectedRequest.price_currency,
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("Payment link sent to customer!");
+      setPaymentLinkDialogOpen(false);
+      setPaymentLink("");
+      setSelectedRequest(null);
+      fetchRequests();
+    } catch (error: any) {
+      console.error("Error sending payment link:", error);
+      toast.error(error.message || "Failed to send payment link");
+    } finally {
+      setSendingPaymentLink(false);
     }
   };
 
@@ -288,6 +338,16 @@ export default function AdminQuickBookings() {
                                 {request.price} {request.price_currency}
                               </div>
                             )}
+                            
+                            {request.payment_method && (
+                              <Badge variant="outline" className={request.payment_method === "payment_link" ? "text-blue-600 border-blue-600" : "text-green-600 border-green-600"}>
+                                {request.payment_method === "payment_link" ? (
+                                  <><CreditCard className="h-3 w-3 mr-1" /> Online</>
+                                ) : (
+                                  <>💵 Cash</>
+                                )}
+                              </Badge>
+                            )}
                           </div>
 
                           <div className="flex gap-2">
@@ -386,10 +446,92 @@ export default function AdminQuickBookings() {
                             )}
 
                             {request.status === "confirmed" && (
-                              <Badge className="bg-green-500">
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Confirmed
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                {request.payment_method === "payment_link" && !request.payment_link && request.customer_email && (
+                                  <Dialog
+                                    open={paymentLinkDialogOpen && selectedRequest?.id === request.id}
+                                    onOpenChange={(open) => {
+                                      setPaymentLinkDialogOpen(open);
+                                      if (open) setSelectedRequest(request);
+                                    }}
+                                  >
+                                    <DialogTrigger asChild>
+                                      <Button size="sm" variant="default">
+                                        <LinkIcon className="h-4 w-4 mr-2" />
+                                        Add Payment Link
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                      <DialogHeader>
+                                        <DialogTitle>Send Payment Link</DialogTitle>
+                                      </DialogHeader>
+                                      <div className="space-y-4">
+                                        <div className="bg-muted/50 p-4 rounded-lg space-y-2 text-sm">
+                                          <p>
+                                            <strong>Customer:</strong> {request.customer_name || "N/A"}
+                                          </p>
+                                          <p>
+                                            <strong>Email:</strong> {request.customer_email}
+                                          </p>
+                                          <p>
+                                            <strong>Transfer:</strong> {request.pickup} → {request.dropoff}
+                                          </p>
+                                          <p>
+                                            <strong>Price:</strong> {request.price} {request.price_currency}
+                                          </p>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                          <Label>Payment Link URL</Label>
+                                          <Input
+                                            type="url"
+                                            value={paymentLink}
+                                            onChange={(e) => setPaymentLink(e.target.value)}
+                                            placeholder="https://..."
+                                          />
+                                          <p className="text-xs text-muted-foreground">
+                                            Enter your Stripe, PayPal, or bank payment link
+                                          </p>
+                                        </div>
+
+                                        <Button
+                                          onClick={sendPaymentLink}
+                                          disabled={sendingPaymentLink || !paymentLink}
+                                          className="w-full"
+                                        >
+                                          {sendingPaymentLink ? (
+                                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                          ) : (
+                                            <Send className="h-4 w-4 mr-2" />
+                                          )}
+                                          Send Payment Link
+                                        </Button>
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                )}
+                                
+                                {request.payment_method === "payment_link" && request.payment_link && (
+                                  <Badge className="bg-blue-500">
+                                    <CreditCard className="h-4 w-4 mr-1" />
+                                    Link Sent
+                                  </Badge>
+                                )}
+                                
+                                {request.payment_method === "payment_link" && !request.customer_email && (
+                                  <Badge variant="outline" className="text-amber-600 border-amber-600">
+                                    <Clock className="h-4 w-4 mr-1" />
+                                    Awaiting Form
+                                  </Badge>
+                                )}
+                                
+                                {request.payment_method !== "payment_link" && (
+                                  <Badge className="bg-green-500">
+                                    <CheckCircle className="h-4 w-4 mr-1" />
+                                    Cash
+                                  </Badge>
+                                )}
+                              </div>
                             )}
 
                             {request.status === "rejected" && (
