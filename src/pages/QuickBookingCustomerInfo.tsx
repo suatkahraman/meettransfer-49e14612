@@ -61,6 +61,16 @@ export default function QuickBookingCustomerInfo() {
     }
   }, [reservationId]);
 
+  // Auto-redirect after successful submission
+  useEffect(() => {
+    if (submitted) {
+      const timer = setTimeout(() => {
+        navigate("/customer/bookings");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [submitted, navigate]);
+
   const fetchReservation = async () => {
     try {
       // Use edge function to bypass RLS (reservation has null customer_id at this point)
@@ -159,16 +169,6 @@ export default function QuickBookingCustomerInfo() {
       </div>
     );
   }
-
-  // Auto-redirect after successful submission
-  useEffect(() => {
-    if (submitted) {
-      const timer = setTimeout(() => {
-        navigate("/customer/bookings");
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [submitted, navigate]);
 
   if (submitted) {
     return (
