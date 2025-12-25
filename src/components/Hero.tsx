@@ -211,7 +211,7 @@ export const Hero = () => {
                     <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
                       <div className="flex items-center"><Clock className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectTime")} /></div>
                     </SelectTrigger>
-                    <SelectContent className="max-h-[300px]">{timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}</SelectContent>
+                    <SelectContent className="max-h-[300px] z-50">{timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>
@@ -269,7 +269,7 @@ export const Hero = () => {
                         <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
                           <div className="flex items-center"><Clock className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectTime")} /></div>
                         </SelectTrigger>
-                        <SelectContent className="max-h-[300px]">{timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}</SelectContent>
+                        <SelectContent className="max-h-[300px] z-50">{timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   </div>
