@@ -92,6 +92,7 @@ export default function AdminQuickBookings() {
   const [priceDialogOpen, setPriceDialogOpen] = useState(false);
   const [price, setPrice] = useState("");
   const [currency, setCurrency] = useState("EUR");
+  const [customerEmail, setCustomerEmail] = useState("");
   const [sendingPrice, setSendingPrice] = useState(false);
 
   useEffect(() => {
@@ -139,20 +140,48 @@ export default function AdminQuickBookings() {
 
     setSendingPrice(true);
     try {
-      const { error } = await supabase
+      // Update the quick booking request with price
+      const { error: updateError } = await supabase
         .from("quick_booking_requests")
         .update({
           price: parseFloat(price),
           price_currency: currency,
           status: "price_sent",
+          customer_email: customerEmail || null,
         })
         .eq("id", selectedRequest.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
-      toast.success("Price sent successfully");
+      // Send email notification if email is provided
+      if (customerEmail) {
+        try {
+          const { error: emailError } = await supabase.functions.invoke("send-quick-booking-price", {
+            body: {
+              quick_booking_id: selectedRequest.id,
+              price: parseFloat(price),
+              currency,
+              customer_email: customerEmail,
+            },
+          });
+
+          if (emailError) {
+            console.error("Email error:", emailError);
+            toast.warning("Price saved but email failed to send");
+          } else {
+            toast.success("Price sent and email notification delivered!");
+          }
+        } catch (emailErr) {
+          console.error("Email function error:", emailErr);
+          toast.warning("Price saved but email notification failed");
+        }
+      } else {
+        toast.success("Price sent successfully");
+      }
+
       setPriceDialogOpen(false);
       setPrice("");
+      setCustomerEmail("");
       setSelectedRequest(null);
       fetchRequests();
     } catch (error: any) {
@@ -354,6 +383,20 @@ export default function AdminQuickBookings() {
                                       </div>
                                     </div>
 
+                                    {/* Customer Email for Notification */}
+                                    <div className="space-y-2">
+                                      <Label>Customer Email (Optional)</Label>
+                                      <Input
+                                        type="email"
+                                        value={customerEmail}
+                                        onChange={(e) => setCustomerEmail(e.target.value)}
+                                        placeholder="customer@email.com"
+                                      />
+                                      <p className="text-xs text-muted-foreground">
+                                        If provided, an email with the price quote will be sent to the customer.
+                                      </p>
+                                    </div>
+
                                     <Button
                                       onClick={sendPrice}
                                       disabled={sendingPrice || !price}
@@ -364,7 +407,7 @@ export default function AdminQuickBookings() {
                                       ) : (
                                         <Send className="h-4 w-4 mr-2" />
                                       )}
-                                      Send Price
+                                      {customerEmail ? "Send Price & Email" : "Send Price"}
                                     </Button>
                                   </div>
                                 </DialogContent>
