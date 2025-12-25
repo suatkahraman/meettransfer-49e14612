@@ -10,6 +10,7 @@ import {
 
 const languages = [
   { code: "EN" as Language, label: "English", flag: "🇬🇧", prefix: "" },
+  { code: "TR" as Language, label: "Türkçe", flag: "🇹🇷", prefix: "/tr" },
   { code: "DE" as Language, label: "Deutsch", flag: "🇩🇪", prefix: "/de" },
   { code: "FR" as Language, label: "Français", flag: "🇫🇷", prefix: "/fr" },
   { code: "RU" as Language, label: "Русский", flag: "🇷🇺", prefix: "/ru" },
@@ -18,7 +19,7 @@ const languages = [
   { code: "AR" as Language, label: "العربية", flag: "🇸🇦", prefix: "/ar" },
 ] as const;
 
-const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es", "ar"];
+const LANGUAGE_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar"];
 
 const LanguageSelector = () => {
   const { language } = useLanguage();
