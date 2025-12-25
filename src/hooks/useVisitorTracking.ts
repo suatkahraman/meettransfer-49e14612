@@ -45,8 +45,11 @@ const EXCLUDED_ROUTES = [
   '/signup',
 ];
 
-// Check if user has admin role
-async function checkIsAdmin(): Promise<boolean> {
+// Roles that should be excluded from tracking
+const EXCLUDED_ROLES: Array<'admin' | 'driver' | 'agency'> = ['admin', 'driver', 'agency'];
+
+// Check if user has an excluded role (admin, driver, agency)
+async function checkIsExcludedUser(): Promise<boolean> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
@@ -55,7 +58,7 @@ async function checkIsAdmin(): Promise<boolean> {
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
-      .eq('role', 'admin')
+      .in('role', EXCLUDED_ROLES)
       .maybeSingle();
     
     return !!roleData;
@@ -69,7 +72,7 @@ export function useVisitorTracking() {
   const visitIdRef = useRef<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const presenceRef = useRef<any | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isExcludedUser, setIsExcludedUser] = useState<boolean | null>(null);
   const ctxRef = useRef<{
     visitorId: string;
     sessionStart: string;
@@ -79,31 +82,30 @@ export function useVisitorTracking() {
     geo: { countryCode: string; countryName: string; city: string };
   } | null>(null);
 
-  // Check admin status on mount and auth changes
+  // Check excluded user status on mount and auth changes
   useEffect(() => {
-    const checkAdmin = async () => {
-      const adminStatus = await checkIsAdmin();
-      setIsAdmin(adminStatus);
+    const checkExcluded = async () => {
+      const excludedStatus = await checkIsExcludedUser();
+      setIsExcludedUser(excludedStatus);
     };
     
-    checkAdmin();
+    checkExcluded();
     
     // Re-check on auth state change
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkAdmin();
+      checkExcluded();
     });
     
     return () => {
       subscription.unsubscribe();
     };
   }, []);
-
   useEffect(() => {
-    // Wait for admin check to complete
-    if (isAdmin === null) return;
+    // Wait for excluded user check to complete
+    if (isExcludedUser === null) return;
     
-    // Don't track admin users
-    if (isAdmin) {
+    // Don't track admin, driver, agency users
+    if (isExcludedUser) {
       return;
     }
     
@@ -256,7 +258,7 @@ export function useVisitorTracking() {
         intervalRef.current = null;
       }
     };
-  }, [location.pathname, isAdmin]);
+  }, [location.pathname, isExcludedUser]);
 
   useEffect(() => {
     return () => {
