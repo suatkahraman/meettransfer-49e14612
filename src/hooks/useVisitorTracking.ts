@@ -48,88 +48,179 @@ const EXCLUDED_ROUTES = [
 export function useVisitorTracking() {
   const location = useLocation();
   const visitIdRef = useRef<string | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const presenceRef = useRef<any | null>(null);
+  const ctxRef = useRef<{
+    visitorId: string;
+    sessionStart: string;
+    browser: string;
+    device: string;
+    referrer: string | null;
+    geo: { countryCode: string; countryName: string; city: string };
+  } | null>(null);
 
   useEffect(() => {
-    // Don't track admin/internal routes
-    const isExcluded = EXCLUDED_ROUTES.some(route => 
-      location.pathname.startsWith(route)
-    );
-    
+    const isExcluded = EXCLUDED_ROUTES.some((route) => location.pathname.startsWith(route));
+
+    const stop = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (presenceRef.current) {
+        supabase.removeChannel(presenceRef.current);
+        presenceRef.current = null;
+      }
+      visitIdRef.current = null;
+    };
+
     if (isExcluded) {
+      stop();
       return;
     }
 
-    const visitorId = getVisitorId();
-    const now = new Date().toISOString();
+    let cancelled = false;
 
-    // Track page visit
-    const trackVisit = async () => {
+    const ensureContext = async () => {
+      if (ctxRef.current) return ctxRef.current;
+
+      const visitorId = getVisitorId();
+      const sessionStart = new Date().toISOString();
+
+      // Geo lookup (best effort)
+      let countryCode = '';
+      let countryName = '';
+      let city = '';
       try {
-        // Get country info from free API
-        let countryCode = '';
-        let countryName = '';
-        let city = '';
-        
-        try {
-          const geoResponse = await fetch('https://ipapi.co/json/');
-          if (geoResponse.ok) {
-            const geoData = await geoResponse.json();
-            countryCode = geoData.country_code || '';
-            countryName = geoData.country_name || '';
-            city = geoData.city || '';
-          }
-        } catch {
-          // Silently fail geo lookup
+        const geoResponse = await fetch('https://ipapi.co/json/');
+        if (geoResponse.ok) {
+          const geoData = await geoResponse.json();
+          countryCode = geoData.country_code || '';
+          countryName = geoData.country_name || '';
+          city = geoData.city || '';
         }
-
-        const { data, error } = await supabase
-          .from('page_visits')
-          .insert({
-            visitor_id: visitorId,
-            page_path: location.pathname,
-            country_code: countryCode,
-            country_name: countryName,
-            city: city,
-            browser: getBrowserInfo(),
-            device: getDeviceInfo(),
-            referrer: document.referrer || null,
-            session_start: now,
-            last_activity: now,
-          })
-          .select('id')
-          .single();
-
-        if (!error && data) {
-          visitIdRef.current = data.id;
-        }
-      } catch (err) {
-        console.error('Error tracking visit:', err);
-      }
-    };
-
-    trackVisit();
-
-    // Update last activity periodically
-    const updateActivity = async () => {
-      if (!visitIdRef.current) return;
-      
-      try {
-        await supabase
-          .from('page_visits')
-          .update({ last_activity: new Date().toISOString() })
-          .eq('id', visitIdRef.current);
       } catch {
-        // Silently fail
+        // ignore
+      }
+
+      ctxRef.current = {
+        visitorId,
+        sessionStart,
+        browser: getBrowserInfo(),
+        device: getDeviceInfo(),
+        referrer: document.referrer || null,
+        geo: { countryCode, countryName, city },
+      };
+
+      return ctxRef.current;
+    };
+
+    const ensurePresenceChannel = async (ctx: NonNullable<typeof ctxRef.current>) => {
+      if (presenceRef.current) return;
+
+      const channel = supabase.channel('mt_visitors', {
+        config: { presence: { key: ctx.visitorId } },
+      });
+
+      presenceRef.current = channel;
+
+      channel.subscribe(async (status) => {
+        if (status !== 'SUBSCRIBED' || cancelled) return;
+        try {
+          await channel.track({
+            visitor_id: ctx.visitorId,
+            page_path: location.pathname,
+            country_code: ctx.geo.countryCode,
+            country_name: ctx.geo.countryName,
+            city: ctx.geo.city,
+            browser: ctx.browser,
+            device: ctx.device,
+            last_activity: new Date().toISOString(),
+          });
+        } catch {
+          // ignore presence errors
+        }
+      });
+    };
+
+    const heartbeat = async () => {
+      const ctx = await ensureContext();
+      if (!ctx || cancelled) return;
+
+      await ensurePresenceChannel(ctx);
+
+      const lastActivity = new Date().toISOString();
+
+      // 1) Live presence (for anlık ziyaretçi)
+      try {
+        await presenceRef.current?.track({
+          visitor_id: ctx.visitorId,
+          page_path: location.pathname,
+          country_code: ctx.geo.countryCode,
+          country_name: ctx.geo.countryName,
+          city: ctx.geo.city,
+          browser: ctx.browser,
+          device: ctx.device,
+          last_activity: lastActivity,
+        });
+      } catch {
+        // ignore
+      }
+
+      // 2) DB write (for historical analytics) via backend function
+      try {
+        const { data, error } = await supabase.functions.invoke('track-visit', {
+          body: {
+            visit_id: visitIdRef.current,
+            visitor_id: ctx.visitorId,
+            page_path: location.pathname,
+            country_code: ctx.geo.countryCode,
+            country_name: ctx.geo.countryName,
+            city: ctx.geo.city,
+            browser: ctx.browser,
+            device: ctx.device,
+            referrer: ctx.referrer,
+            session_start: ctx.sessionStart,
+            last_activity: lastActivity,
+          },
+        });
+
+        if (error) {
+          console.error('[VisitorTracking] track-visit error:', error);
+          return;
+        }
+
+        const newVisitId = (data as any)?.visit_id || (data as any)?.id;
+        if (newVisitId) visitIdRef.current = newVisitId;
+      } catch (err) {
+        console.error('[VisitorTracking] unexpected error:', err);
       }
     };
 
-    intervalRef.current = setInterval(updateActivity, ACTIVITY_INTERVAL);
+    void heartbeat();
+
+    intervalRef.current = setInterval(() => {
+      void heartbeat();
+    }, ACTIVITY_INTERVAL);
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, [location.pathname]);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (presenceRef.current) {
+        supabase.removeChannel(presenceRef.current);
+        presenceRef.current = null;
+      }
+    };
+  }, []);
 }
