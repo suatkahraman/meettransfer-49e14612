@@ -57,8 +57,6 @@ export const Hero = () => {
   const [vehicleType, setVehicleType] = useState("mercedes-vito");
   const [passengers, setPassengers] = useState("1");
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [confirmationToken, setConfirmationToken] = useState<string | null>(null);
 
   const handleRequestPrice = async () => {
     // Validate required fields
@@ -87,9 +85,9 @@ export const Hero = () => {
 
       if (error) throw error;
 
-      setConfirmationToken(data.confirmation_token);
-      setSubmitted(true);
-      toast.success(t("priceRequestSent") || "Your price request has been sent! We will send you a price quote shortly.");
+      // Navigate to confirmation page to wait for price
+      navigate(`/quick-booking-confirm?token=${data.confirmation_token}`);
+      toast.success(t("priceRequestSent") || "Your price request has been sent! Waiting for price quote.");
     } catch (error: any) {
       console.error("Error submitting request:", error);
       toast.error(error.message || "Failed to submit request");
@@ -271,41 +269,22 @@ export const Hero = () => {
               </div>
 
               {/* Request Price Button */}
-              {submitted ? (
-                <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4 text-center">
-                  <p className="text-white font-medium mb-2">
-                    ✅ {t("priceRequestSentTitle") || "Request Received!"}
-                  </p>
-                  <p className="text-white/80 text-sm mb-3">
-                    {t("priceRequestSentMessage") || "We will send you a price quote shortly. Check this page for updates."}
-                  </p>
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    className="bg-white/10 text-white border-white/30 hover:bg-white/20"
-                    onClick={() => navigate(`/quick-booking-confirm?token=${confirmationToken}`)}
-                  >
-                    {t("checkPriceStatus") || "Check Price Status"}
-                  </Button>
-                </div>
-              ) : (
-                <Button 
-                  onClick={handleRequestPrice}
-                  size="lg" 
-                  variant="accent" 
-                  className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                  disabled={submitting}
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      {t("sending") || "Sending..."}
-                    </>
-                  ) : (
-                    t("requestPrice")
-                  )}
-                </Button>
-              )}
+              <Button 
+                onClick={handleRequestPrice}
+                size="lg" 
+                variant="accent" 
+                className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    {t("sending") || "Sending..."}
+                  </>
+                ) : (
+                  t("requestPrice")
+                )}
+              </Button>
             </div>
           </div>
 
