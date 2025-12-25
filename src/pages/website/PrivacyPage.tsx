@@ -136,7 +136,7 @@ const PrivacyPage = () => {
         <p>
           <strong>Meet Transfer</strong><br />
           Email: info@meettransfer.app<br />
-          Phone/WhatsApp: +90 532 174 8390<br />
+          Phone/WhatsApp: +1 (555) 805-1101<br />
           Address: Istanbul, Turkey
         </p>
 

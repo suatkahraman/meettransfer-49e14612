@@ -59,7 +59,7 @@ const companyInfo = {
   url: baseUrl,
   logo: `${baseUrl}/favicon.png`,
   description: 'Premium VIP airport transfer and chauffeur service in Turkey. Luxury Mercedes fleet with professional drivers.',
-  telephone: '+905321748390',
+  telephone: '+15558051101',
   email: 'info@meettransfer.app',
   address: {
     '@type': 'PostalAddress',
