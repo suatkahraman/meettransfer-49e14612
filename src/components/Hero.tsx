@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, Car } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { InstallAppButton } from "@/components/website/InstallAppButton";
@@ -43,6 +43,7 @@ export const Hero = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState("");
   const [vehicleType, setVehicleType] = useState("mercedes-vito");
+  const [passengers, setPassengers] = useState("1");
 
   const handleRequestPrice = () => {
     // Navigate to booking form with all params
@@ -52,6 +53,7 @@ export const Hero = () => {
     if (date) params.set("date", format(date, "yyyy-MM-dd"));
     if (time) params.set("time", time);
     if (vehicleType) params.set("vehicleType", vehicleType);
+    if (passengers) params.set("passengers", passengers);
     navigate(`${getLocalizedPath("/book")}${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
@@ -199,6 +201,28 @@ export const Hero = () => {
                     {vehicleTypes.map((vehicle) => (
                       <SelectItem key={vehicle.value} value={vehicle.value}>
                         {vehicle.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Passenger Count Selector */}
+              <div className="relative">
+                <label className="text-white/90 text-sm font-medium mb-2 block text-left">
+                  {t("passengers")}
+                </label>
+                <Select value={passengers} onValueChange={setPassengers}>
+                  <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
+                    <div className="flex items-center">
+                      <Users className="mr-2 h-5 w-5 text-primary" />
+                      <SelectValue placeholder={t("selectPassengers")} />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white z-50 max-h-[300px]">
+                    {Array.from({ length: 19 }, (_, i) => i + 1).map((num) => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {num} {num === 1 ? t("passenger") : t("passengersPlural")}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -86,7 +86,10 @@ const ReservationForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [passengerNames, setPassengerNames] = useState<string[]>(['']);
+  const urlPassengerCount = parseInt(searchParams.get('passengers') || '1', 10);
+  const [passengerNames, setPassengerNames] = useState<string[]>(() => 
+    Array.from({ length: Math.max(1, Math.min(19, urlPassengerCount)) }, () => '')
+  );
   const [hasReturnTrip, setHasReturnTrip] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
