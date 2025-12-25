@@ -45,6 +45,9 @@ const translations: Record<Language, Record<string, string>> = {
     myAccount: "My Account",
     bookNow: "Request Your Price",
     installApp: "Install App",
+    blog: "Blog",
+    enableNotifications: "Enable Notifications",
+    notificationsOn: "Notifications On",
     
     // Hero Section
     heroTitle: "Get Best Price Now",
@@ -470,6 +473,9 @@ const translations: Record<Language, Record<string, string>> = {
     myAccount: "Mein Konto",
     bookNow: "Preis anfragen",
     installApp: "App installieren",
+    blog: "Blog",
+    enableNotifications: "Benachrichtigungen aktivieren",
+    notificationsOn: "Benachrichtigungen an",
     
     // Hero Section
     heroTitle: "Jetzt besten Preis erhalten",
@@ -891,6 +897,9 @@ const translations: Record<Language, Record<string, string>> = {
     myAccount: "Mon compte",
     bookNow: "Demander votre prix",
     installApp: "Installer l'app",
+    blog: "Blog",
+    enableNotifications: "Activer les notifications",
+    notificationsOn: "Notifications activées",
     
     // Hero Section
     heroTitle: "Obtenez le Meilleur Prix Maintenant",
@@ -1312,6 +1321,9 @@ const translations: Record<Language, Record<string, string>> = {
     myAccount: "Мой аккаунт",
     bookNow: "Запросить цену",
     installApp: "Установить приложение",
+    blog: "Блог",
+    enableNotifications: "Включить уведомления",
+    notificationsOn: "Уведомления включены",
     
     // Hero Section
     heroTitle: "Получите лучшую цену сейчас",
@@ -1733,6 +1745,9 @@ const translations: Record<Language, Record<string, string>> = {
     myAccount: "Il mio account",
     bookNow: "Richiedi il tuo prezzo",
     installApp: "Installa app",
+    blog: "Blog",
+    enableNotifications: "Abilita notifiche",
+    notificationsOn: "Notifiche attive",
     
     // Hero Section
     heroTitle: "Ottieni il Miglior Prezzo Ora",
@@ -2154,6 +2169,9 @@ const translations: Record<Language, Record<string, string>> = {
     myAccount: "Mi cuenta",
     bookNow: "Solicitar precio",
     installApp: "Instalar app",
+    blog: "Blog",
+    enableNotifications: "Activar notificaciones",
+    notificationsOn: "Notificaciones activas",
     
     // Hero Section
     heroTitle: "Obtén el Mejor Precio Ahora",
@@ -2575,6 +2593,9 @@ const translations: Record<Language, Record<string, string>> = {
     myAccount: "حسابي",
     bookNow: "اطلب السعر",
     installApp: "تثبيت التطبيق",
+    blog: "المدونة",
+    enableNotifications: "تفعيل الإشعارات",
+    notificationsOn: "الإشعارات مفعلة",
     
     // Hero Section
     heroTitle: "احصل على أفضل سعر الآن",
@@ -2996,6 +3017,9 @@ const translations: Record<Language, Record<string, string>> = {
     myAccount: "Hesabım",
     bookNow: "Fiyat İste",
     installApp: "Uygulamayı Yükle",
+    blog: "Blog",
+    enableNotifications: "Bildirimleri Etkinleştir",
+    notificationsOn: "Bildirimler Açık",
     
     // Hero Section
     heroTitle: "En İyi Fiyatı Şimdi Alın",

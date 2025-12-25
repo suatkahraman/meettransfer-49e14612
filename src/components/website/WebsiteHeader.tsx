@@ -34,7 +34,7 @@ const WebsiteHeader = () => {
     { path: "/services", label: t("services") || "Services" },
     { path: "/destinations", label: t("cities") },
     { path: "/fleet", label: t("fleet") },
-    { path: "/blog", label: "Blog" },
+    { path: "/blog", label: t("blog") || "Blog" },
     { path: "/about", label: t("about") },
     { path: "/contact", label: t("contact") },
   ];
