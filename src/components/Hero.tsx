@@ -62,6 +62,10 @@ export const Hero = () => {
   const [hasReturnTrip, setHasReturnTrip] = useState(false);
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
   const [returnTime, setReturnTime] = useState("");
+  
+  // Popover open states
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
+  const [returnDatePopoverOpen, setReturnDatePopoverOpen] = useState(false);
 
   const handleRequestPrice = async () => {
     if (!pickup || !dropoff || !date || !time) {
@@ -189,15 +193,15 @@ export const Hero = () => {
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="relative">
                   <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("pickupDate")}</label>
-                  <Popover>
+                  <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className={cn("w-full h-12 justify-start text-left font-normal bg-white border-0 text-foreground rounded-lg shadow-md hover:bg-white/95", !date && "text-muted-foreground")}>
                         <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
                         {date ? format(date, "dd/MM/yyyy") : <span>{t("selectDate")}</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={date} onSelect={setDate} disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} initialFocus className={cn("p-3 pointer-events-auto")} />
+                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                      <Calendar mode="single" selected={date} onSelect={(selectedDate) => { setDate(selectedDate); setDatePopoverOpen(false); }} disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} initialFocus className={cn("p-3 pointer-events-auto")} />
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -247,15 +251,15 @@ export const Hero = () => {
                   <div className="grid md:grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="relative">
                       <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("returnDate")}</label>
-                      <Popover>
+                      <Popover open={returnDatePopoverOpen} onOpenChange={setReturnDatePopoverOpen}>
                         <PopoverTrigger asChild>
                           <Button variant="outline" className={cn("w-full h-12 justify-start text-left font-normal bg-white border-0 text-foreground rounded-lg shadow-md hover:bg-white/95", !returnDate && "text-muted-foreground")}>
                             <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
                             {returnDate ? format(returnDate, "dd/MM/yyyy") : <span>{t("selectDate")}</span>}
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={returnDate} onSelect={setReturnDate} disabled={(d) => d < (date || new Date())} initialFocus className={cn("p-3 pointer-events-auto")} />
+                        <PopoverContent className="w-auto p-0 z-50" align="start">
+                          <Calendar mode="single" selected={returnDate} onSelect={(selectedDate) => { setReturnDate(selectedDate); setReturnDatePopoverOpen(false); }} disabled={(d) => d < (date || new Date())} initialFocus className={cn("p-3 pointer-events-auto")} />
                         </PopoverContent>
                       </Popover>
                     </div>
