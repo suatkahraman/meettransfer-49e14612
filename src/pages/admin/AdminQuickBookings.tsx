@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DialogFooter } from "@/components/ui/dialog";
+import PriceHistoryCard from "@/components/admin/PriceHistoryCard";
 
 interface QuickBookingRequest {
   id: string;
@@ -157,17 +158,31 @@ export default function AdminQuickBookings() {
 
     setSendingPrice(true);
     try {
+      const priceValue = parseFloat(price);
+      
       // Update the quick booking request with price
       const { error: updateError } = await supabase
         .from("quick_booking_requests")
         .update({
-          price: parseFloat(price),
+          price: priceValue,
           price_currency: currency,
           status: "price_sent",
         })
         .eq("id", selectedRequest.id);
 
       if (updateError) throw updateError;
+
+      // Record price in history
+      try {
+        await supabase.from("price_history").insert({
+          quick_booking_id: selectedRequest.id,
+          price: priceValue,
+          price_currency: currency,
+          action: "sent",
+        });
+      } catch (e) {
+        console.error("Failed to record price history:", e);
+      }
 
       toast.success("Price sent successfully");
 
@@ -424,6 +439,9 @@ export default function AdminQuickBookings() {
                                     <DialogTitle>Send Price</DialogTitle>
                                   </DialogHeader>
                                   <div className="space-y-4">
+                                    {/* Price History */}
+                                    <PriceHistoryCard quickBookingId={request.id} />
+                                    
                                     <div className="bg-muted/50 p-4 rounded-lg space-y-2 text-sm">
                                       <p>
                                         <strong>From:</strong> {request.pickup}

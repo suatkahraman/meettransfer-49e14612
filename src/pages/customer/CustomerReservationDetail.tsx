@@ -203,6 +203,20 @@ const CustomerReservationDetail = () => {
 
       if (error) throw error;
 
+      // Record in price history
+      if (reservation.price) {
+        try {
+          await supabase.from('price_history').insert({
+            reservation_id: reservation.id,
+            price: reservation.price,
+            price_currency: reservation.price_currency || 'TRY',
+            action: 'accepted',
+          });
+        } catch (e) {
+          console.error('Failed to record price history:', e);
+        }
+      }
+
       // Notify admin (in-app)
       try {
         await supabase.functions.invoke('create-notification', {
@@ -245,6 +259,20 @@ const CustomerReservationDetail = () => {
         .eq('id', reservation.id);
 
       if (error) throw error;
+
+      // Record in price history
+      if (reservation.price) {
+        try {
+          await supabase.from('price_history').insert({
+            reservation_id: reservation.id,
+            price: reservation.price,
+            price_currency: reservation.price_currency || 'TRY',
+            action: 'rejected',
+          });
+        } catch (e) {
+          console.error('Failed to record price history:', e);
+        }
+      }
 
       // Notify admin (in-app)
       try {

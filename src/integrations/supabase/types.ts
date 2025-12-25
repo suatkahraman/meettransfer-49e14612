@@ -572,6 +572,57 @@ export type Database = {
         }
         Relationships: []
       }
+      price_history: {
+        Row: {
+          action: string
+          admin_user_id: string | null
+          created_at: string
+          customer_note: string | null
+          id: string
+          price: number
+          price_currency: string
+          quick_booking_id: string | null
+          reservation_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id?: string | null
+          created_at?: string
+          customer_note?: string | null
+          id?: string
+          price: number
+          price_currency?: string
+          quick_booking_id?: string | null
+          reservation_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string | null
+          created_at?: string
+          customer_note?: string | null
+          id?: string
+          price?: number
+          price_currency?: string
+          quick_booking_id?: string | null
+          reservation_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_history_quick_booking_id_fkey"
+            columns: ["quick_booking_id"]
+            isOneToOne: false
+            referencedRelation: "quick_booking_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_history_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null

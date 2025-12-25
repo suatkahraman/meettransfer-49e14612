@@ -18,6 +18,7 @@ import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
+import PriceHistoryCard from '@/components/admin/PriceHistoryCard';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = [
@@ -307,6 +308,18 @@ const AdminEditReservation = () => {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Record price in history
+      try {
+        await supabase.from('price_history').insert({
+          reservation_id: id,
+          price: priceValue,
+          price_currency: formData.price_currency,
+          action: 'sent',
+        });
+      } catch (e) {
+        console.error('Failed to record price history:', e);
+      }
 
       // Notify customer
       if (customerId) {
@@ -1071,6 +1084,9 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
             </CardContent>
           </Card>
         )}
+
+        {/* Price History Card */}
+        <PriceHistoryCard reservationId={id} />
 
         {/* Customer Rejected Price Card - Admin can send new price */}
         {formData.status === 'customer_rejected' && (

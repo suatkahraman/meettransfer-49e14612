@@ -245,6 +245,20 @@ export default function QuickBookingConfirm() {
       const reservation = result.reservation;
       const returnReservationCode = result.returnReservation?.reservationCode || null;
 
+      // Record price acceptance in history
+      if (booking.price) {
+        try {
+          await supabase.from("price_history").insert({
+            quick_booking_id: booking.id,
+            price: booking.price,
+            price_currency: booking.price_currency,
+            action: "accepted",
+          });
+        } catch (e) {
+          console.error("Failed to record price history:", e);
+        }
+      }
+
       // Notify admin about the confirmation
       try {
         await supabase.functions.invoke("notify-admin-quick-booking-confirmed", {
@@ -306,6 +320,20 @@ export default function QuickBookingConfirm() {
         .eq("id", booking.id);
 
       if (error) throw error;
+
+      // Record price rejection in history
+      if (booking.price) {
+        try {
+          await supabase.from("price_history").insert({
+            quick_booking_id: booking.id,
+            price: booking.price,
+            price_currency: booking.price_currency,
+            action: "rejected",
+          });
+        } catch (e) {
+          console.error("Failed to record price history:", e);
+        }
+      }
 
       // Notify admin about the rejection so they can send a new price
       try {
