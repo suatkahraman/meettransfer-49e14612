@@ -1,5 +1,4 @@
-// Google Analytics 4 + Google Ads Tracking Utility
-// GA4 Property ID: G-507992036
+// Google Ads Conversion Tracking Utility
 // Google Ads Conversion ID: AW-668686697
 
 declare global {
@@ -12,9 +11,6 @@ declare global {
     dataLayer: unknown[];
   }
 }
-
-// GA4 Measurement ID
-export const GA4_MEASUREMENT_ID = 'G-507992036';
 
 // Conversion labels for different events
 export const CONVERSION_LABELS = {
