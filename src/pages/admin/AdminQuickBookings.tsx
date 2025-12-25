@@ -35,7 +35,6 @@ import {
   XCircle,
   Loader2,
   ArrowLeft,
-  Eye,
   CreditCard,
   Link as LinkIcon,
 } from "lucide-react";
@@ -186,9 +185,23 @@ export default function AdminQuickBookings() {
 
     setSendingPaymentLink(true);
     try {
+      // First, find the reservation created from this quick booking
+      const { data: reservations, error: resError } = await supabase
+        .from("reservations")
+        .select("id")
+        .eq("pickup", selectedRequest.pickup)
+        .eq("dropoff", selectedRequest.dropoff)
+        .eq("pickup_date", selectedRequest.pickup_date)
+        .eq("pickup_time", selectedRequest.pickup_time)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      const reservationId = reservations && reservations.length > 0 ? reservations[0].id : null;
+
       const { error } = await supabase.functions.invoke("send-payment-link", {
         body: {
           quickBookingId: selectedRequest.id,
+          reservationId,
           paymentLink,
           customerEmail: selectedRequest.customer_email,
           customerName: selectedRequest.customer_name,
@@ -214,15 +227,6 @@ export default function AdminQuickBookings() {
     } finally {
       setSendingPaymentLink(false);
     }
-  };
-
-  const getConfirmUrl = (token: string) => {
-    return `${window.location.origin}/quick-booking-confirm?token=${token}`;
-  };
-
-  const copyConfirmLink = (token: string) => {
-    navigator.clipboard.writeText(getConfirmUrl(token));
-    toast.success("Confirmation link copied!");
   };
 
   if (loading) {
@@ -435,14 +439,10 @@ export default function AdminQuickBookings() {
                             )}
 
                             {request.status === "price_sent" && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => copyConfirmLink(request.confirmation_token)}
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                Copy Link
-                              </Button>
+                              <Badge variant="outline" className="text-blue-600 border-blue-600">
+                                <Clock className="h-4 w-4 mr-1" />
+                                Müşteri Onayı Bekleniyor
+                              </Badge>
                             )}
 
                             {request.status === "confirmed" && (
