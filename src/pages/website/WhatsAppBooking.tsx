@@ -50,7 +50,7 @@ const [formData, setFormData] = useState({
 Please confirm availability and price.`;
 
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/905301234567?text=${encodedMessage}`, "_blank");
+    window.open(`https://wa.me/15558051101?text=${encodedMessage}`, "_blank");
   };
 
   return (
