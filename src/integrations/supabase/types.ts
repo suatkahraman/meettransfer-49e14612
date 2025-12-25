@@ -527,6 +527,51 @@ export type Database = {
           },
         ]
       }
+      page_visits: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country_code: string | null
+          country_name: string | null
+          created_at: string
+          device: string | null
+          id: string
+          last_activity: string
+          page_path: string
+          referrer: string | null
+          session_start: string
+          visitor_id: string
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          last_activity?: string
+          page_path: string
+          referrer?: string | null
+          session_start?: string
+          visitor_id: string
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          last_activity?: string
+          page_path?: string
+          referrer?: string | null
+          session_start?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null

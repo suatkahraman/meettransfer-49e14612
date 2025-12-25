@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import WebsiteHeader from "./WebsiteHeader";
 import BottomNavigation from "./BottomNavigation";
 import { PWAInstallBanner } from "./PWAInstallBanner";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 
 interface WebsiteLayoutProps {
   children: ReactNode;
@@ -32,6 +33,9 @@ const pageTransition = {
 
 const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) => {
   const location = useLocation();
+  
+  // Track visitor for analytics
+  useVisitorTracking();
 
   return (
     <div className="min-h-screen bg-background">
