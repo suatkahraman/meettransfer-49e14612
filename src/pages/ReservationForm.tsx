@@ -20,10 +20,18 @@ import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { trackConversion, CONVERSION_LABELS } from '@/lib/gtag';
 
+// Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
+const passwordSchema = z.string()
+  .min(6, 'Password must be at least 6 characters')
+  .max(100)
+  .regex(/[A-Z]/, 'Password must contain at least 1 uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least 1 lowercase letter')
+  .regex(/\d.*\d.*\d.*\d/, 'Password must contain at least 4 digits');
+
 const reservationSchema = z.object({
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
   email: z.string().trim().email("Invalid email address").max(255),
-  password: z.string().min(6, "Password must be at least 6 characters").max(100).optional(),
+  password: passwordSchema.optional(),
   pickup: z.string().trim().min(2, "Pick-up point must be at least 2 characters").max(200, "Pick-up point is too long"),
   dropoff: z.string().trim().min(2, "Drop-off location is required").max(200),
   date: z.string().min(1, "Please select a date"),
@@ -275,7 +283,7 @@ const ReservationForm = () => {
     // Validate - password only required if not logged in
     const schemaToUse = isLoggedIn 
       ? reservationSchema.omit({ password: true })
-      : reservationSchema.extend({ password: z.string().min(6, "Password must be at least 6 characters") });
+      : reservationSchema.extend({ password: passwordSchema });
 
     const result = schemaToUse.safeParse(formData);
     if (!result.success) {
@@ -956,12 +964,15 @@ const ReservationForm = () => {
                     </Label>
                     <Input
                       type="password"
-                      placeholder={t('passwordRequired')}
+                      placeholder="Ab2215"
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       className={errors.password ? 'border-destructive' : ''}
                       maxLength={100}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
+                    </p>
                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                     <p className="text-xs text-muted-foreground">
                       {t('priceInfoMessage')}
