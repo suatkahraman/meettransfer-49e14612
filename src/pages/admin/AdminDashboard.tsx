@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2, Plane, MessageCircle, BarChart3 } from 'lucide-react';
+import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2, Plane, MessageCircle, BarChart3, Inbox } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfDay, endOfDay, format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
@@ -30,6 +30,7 @@ const AdminDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [unreadWhatsApp, setUnreadWhatsApp] = useState(0);
+  const [pendingQuickBookings, setPendingQuickBookings] = useState(0);
 
   useEffect(() => {
     const fetchKPIs = async () => {
@@ -117,7 +118,36 @@ const AdminDashboard = () => {
     };
   }, []);
 
+  // Fetch pending quick bookings count
+  useEffect(() => {
+    const fetchPendingQuickBookings = async () => {
+      const { count } = await supabase
+        .from('quick_booking_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      
+      setPendingQuickBookings(count || 0);
+    };
+
+    fetchPendingQuickBookings();
+
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel('quick-bookings-count')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'quick_booking_requests' },
+        () => fetchPendingQuickBookings()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const menuItems = [
+    { icon: Inbox, label: 'Quick Bookings', path: '/admin/quick-bookings', badge: pendingQuickBookings },
     { icon: MessageCircle, label: 'WhatsApp Chat', path: '/admin/whatsapp', badge: unreadWhatsApp },
     { icon: ClipboardList, label: 'Rezervasyonlar', path: '/admin/reservations' },
     { icon: CalendarDays, label: 'Takvim', path: '/admin/calendar' },
