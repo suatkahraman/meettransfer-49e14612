@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
 import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
@@ -47,6 +48,7 @@ const getSessionId = () => {
 
 export const Hero = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   
   const [pickup, setPickup] = useState("");
@@ -72,6 +74,27 @@ export const Hero = () => {
       return;
     }
 
+    // If user is logged in, redirect to reservation form
+    if (user) {
+      const params = new URLSearchParams();
+      params.set("pickup", pickup);
+      params.set("dropoff", dropoff);
+      params.set("date", format(date, "yyyy-MM-dd"));
+      params.set("time", time);
+      params.set("vehicleType", vehicleType);
+      params.set("passengers", passengers);
+      
+      if (hasReturnTrip && returnDate && returnTime) {
+        params.set("hasReturn", "true");
+        params.set("returnDate", format(returnDate, "yyyy-MM-dd"));
+        params.set("returnTime", returnTime);
+      }
+      
+      navigate(`/book?${params.toString()}`);
+      return;
+    }
+
+    // For anonymous users, use QuickBookingConfirm flow
     setSubmitting(true);
     try {
       const sessionId = getSessionId();
@@ -115,7 +138,7 @@ export const Hero = () => {
   };
   
   return (
-    <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/80">
+    <section id="booking-form" className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/80">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40"></div>
       
       <div className="container relative z-10 px-4 py-16 md:py-24">

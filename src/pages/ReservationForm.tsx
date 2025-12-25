@@ -79,13 +79,24 @@ const defaultFormData = {
 const ReservationForm = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
-  const { t } = useLanguage();
+  const { user, loading: authLoading } = useAuth();
+  const { t, getLocalizedPath } = useLanguage();
   const { emailAdminNewReservation } = useEmailNotifications();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Check if coming from QuickBooking flow
+  const quickBookingIdParam = searchParams.get('quickBookingId') || '';
+  const isFromQuickBookingFlow = !!quickBookingIdParam;
+  
+  // Redirect non-logged-in users to homepage quick booking form (unless from QuickBooking)
+  useEffect(() => {
+    if (!authLoading && !user && !isFromQuickBookingFlow) {
+      navigate(getLocalizedPath("/#booking-form"), { replace: true });
+    }
+  }, [user, authLoading, navigate, getLocalizedPath, isFromQuickBookingFlow]);
   const urlPassengerCount = parseInt(searchParams.get('passengers') || '1', 10);
   const [passengerNames, setPassengerNames] = useState<string[]>(() => 
     Array.from({ length: Math.max(1, Math.min(19, urlPassengerCount)) }, () => '')

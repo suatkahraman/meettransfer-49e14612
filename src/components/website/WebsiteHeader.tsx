@@ -77,7 +77,7 @@ const WebsiteHeader = () => {
         </nav>
 
         {/* Center - Book Button (Mobile) */}
-        <Link to={getLocalizedPath("/book")} className="md:hidden">
+        <Link to={user ? getLocalizedPath("/book") : getLocalizedPath("/#booking-form")} className="md:hidden">
           <Button variant="accent" size="sm" className="font-semibold text-xs px-3">
             {t("bookNow")}
           </Button>
@@ -86,7 +86,7 @@ const WebsiteHeader = () => {
         {/* Right - Actions */}
         <div className="flex items-center gap-2">
           {/* Book Button (Desktop) */}
-          <Link to={getLocalizedPath("/book")} className="hidden md:block">
+          <Link to={user ? getLocalizedPath("/book") : getLocalizedPath("/#booking-form")} className="hidden md:block">
             <Button variant="accent" size="sm" className="font-semibold">
               {t("bookNow")}
             </Button>
@@ -217,7 +217,7 @@ const WebsiteHeader = () => {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <div className="p-2">
-                    <Link to={getLocalizedPath("/book")}>
+                    <Link to={getLocalizedPath("/#booking-form")}>
                       <Button variant="accent" className="w-full">
                         {t("bookNow")}
                       </Button>
