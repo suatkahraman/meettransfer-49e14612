@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, User, Phone, Mail, MapPin, Calendar, Clock, Car, CheckCircle } from "lucide-react";
+import { Loader2, User, Phone, Mail, MapPin, Calendar, Clock, Car, CheckCircle, Lock, Eye, EyeOff } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -15,6 +15,7 @@ const customerInfoSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
   email: z.string().trim().email("Invalid email address").max(255),
+  password: z.string().min(6, "Password must be at least 6 characters").max(100),
 });
 
 const vehicleLabels: Record<string, string> = {
@@ -31,6 +32,7 @@ export default function QuickBookingCustomerInfo() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const reservationId = searchParams.get("reservationId") || "";
@@ -51,6 +53,7 @@ export default function QuickBookingCustomerInfo() {
     name: "",
     phone: "",
     email: "",
+    password: "",
   });
 
   useEffect(() => {
@@ -130,7 +133,7 @@ export default function QuickBookingCustomerInfo() {
     setSubmitting(true);
 
     try {
-      // Call edge function to update reservation with customer info
+      // Call edge function to update reservation with customer info and create account
       const { data, error } = await supabase.functions.invoke(
         "update-quick-booking-customer",
         {
@@ -139,6 +142,7 @@ export default function QuickBookingCustomerInfo() {
             customerName: formData.name.trim(),
             customerPhone: formData.phone.trim(),
             customerEmail: formData.email.trim(),
+            customerPassword: formData.password,
             returnReservationCode: returnReservationCode || null,
           },
         }
@@ -147,8 +151,19 @@ export default function QuickBookingCustomerInfo() {
       if (error) throw error;
       if (!data.success) throw new Error(data.error || "Failed to update reservation");
 
+      // Sign in the user with their new credentials
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+
+      if (signInError) {
+        console.error("Auto sign-in error:", signInError);
+        // Still show success, user can login manually
+      }
+
       setSubmitted(true);
-      toast.success("Your information has been saved!");
+      toast.success("Account created and booking confirmed!");
     } catch (err: any) {
       console.error("Submit error:", err);
       toast.error(err.message || "Failed to save your information");
@@ -329,17 +344,45 @@ export default function QuickBookingCustomerInfo() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className={errors.email ? "border-destructive" : ""}
               />
-              {errors.email && <p className="text-sm text-destructive">{errors.phone}</p>}
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="flex items-center gap-2">
+                <Lock className="h-4 w-4" />
+                Create Password *
+              </Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Min. 6 characters"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className={errors.password ? "border-destructive pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+              <p className="text-xs text-muted-foreground">
+                This password will be used to access your reservations. You can view and manage all your bookings after logging in.
+              </p>
             </div>
 
             <Button type="submit" className="w-full" size="lg" disabled={submitting}>
               {submitting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  Creating Account & Confirming...
                 </>
               ) : (
-                "Confirm Booking"
+                "Create Account & Confirm Booking"
               )}
             </Button>
           </form>

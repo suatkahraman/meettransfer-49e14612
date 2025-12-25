@@ -11,6 +11,7 @@ interface UpdateCustomerRequest {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
+  customerPassword: string;
   returnReservationCode?: string;
 }
 
@@ -29,6 +30,11 @@ serve(async (req) => {
     
     console.log("Updating reservation with customer info:", requestData.reservationId);
 
+    // Validate password
+    if (!requestData.customerPassword || requestData.customerPassword.length < 6) {
+      throw new Error("Password must be at least 6 characters");
+    }
+
     // Check if user already exists with this email
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
     const existingUser = existingUsers?.users?.find(u => u.email === requestData.customerEmail);
@@ -36,12 +42,33 @@ serve(async (req) => {
     let userId: string;
 
     if (existingUser) {
+      // User exists - update their password so they can login
+      const { error: updateError } = await supabase.auth.admin.updateUserById(
+        existingUser.id,
+        { password: requestData.customerPassword }
+      );
+      
+      if (updateError) {
+        console.error("Error updating user password:", updateError);
+        // Continue anyway - they might already know their password
+      }
+      
       userId = existingUser.id;
       console.log("Using existing user:", userId);
+      
+      // Update profile
+      await supabase
+        .from("profiles")
+        .upsert({
+          id: userId,
+          full_name: requestData.customerName,
+          phone: requestData.customerPhone,
+        }, { onConflict: "id" });
     } else {
-      // Create a new user account (without password - they can set it later via magic link)
+      // Create a new user account WITH password
       const { data: newUser, error: createUserError } = await supabase.auth.admin.createUser({
         email: requestData.customerEmail,
+        password: requestData.customerPassword,
         email_confirm: true,
         user_metadata: {
           full_name: requestData.customerName,
