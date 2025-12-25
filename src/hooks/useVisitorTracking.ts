@@ -45,8 +45,21 @@ const EXCLUDED_ROUTES = [
   '/signup',
 ];
 
+// Domains that should be excluded from tracking (development/preview environments)
+const EXCLUDED_DOMAINS = [
+  'lovableproject.com',
+  'localhost',
+  '127.0.0.1',
+];
+
 // Roles that should be excluded from tracking
 const EXCLUDED_ROLES: Array<'admin' | 'driver' | 'agency'> = ['admin', 'driver', 'agency'];
+
+// Check if current domain is a development/preview environment
+function isExcludedDomain(): boolean {
+  const hostname = window.location.hostname;
+  return EXCLUDED_DOMAINS.some(domain => hostname.includes(domain));
+}
 
 // Check if user has an excluded role (admin, driver, agency)
 async function checkIsExcludedUser(): Promise<boolean> {
@@ -106,6 +119,11 @@ export function useVisitorTracking() {
     
     // Don't track admin, driver, agency users
     if (isExcludedUser) {
+      return;
+    }
+
+    // Don't track development/preview environments (Lovable, localhost)
+    if (isExcludedDomain()) {
       return;
     }
     
