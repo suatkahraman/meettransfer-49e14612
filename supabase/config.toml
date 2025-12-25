@@ -89,3 +89,6 @@ verify_jwt = false
 
 [functions.update-quick-booking-customer]
 verify_jwt = false
+
+[functions.get-quick-booking-reservation]
+verify_jwt = false
