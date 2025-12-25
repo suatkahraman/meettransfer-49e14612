@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote } from "lucide-react";
 import { format, parseISO, addDays } from "date-fns";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BookingRequest {
   id: string;
@@ -37,6 +38,7 @@ const vehicleLabels: Record<string, string> = {
 const VALID_PROMO_CODE = "Meet40Return";
 
 export default function QuickBookingConfirm() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -334,8 +336,8 @@ export default function QuickBookingConfirm() {
         <Card className="max-w-md w-full mx-4">
           <CardContent className="pt-6 text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-            <h2 className="text-xl font-semibold mb-2">Loading your price quote...</h2>
-            <p className="text-muted-foreground">Please wait</p>
+            <h2 className="text-xl font-semibold mb-2">{t("qbLoadingPriceQuote")}</h2>
+            <p className="text-muted-foreground">{t("qbPleaseWait")}</p>
           </CardContent>
         </Card>
       </div>
@@ -350,9 +352,9 @@ export default function QuickBookingConfirm() {
             <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
               <XCircle className="h-8 w-8 text-destructive" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">Unable to Load</h2>
+            <h2 className="text-xl font-semibold mb-2">{t("qbUnableToLoad")}</h2>
             <p className="text-muted-foreground mb-6">{error}</p>
-            <Button onClick={() => navigate("/")}>Go to Homepage</Button>
+            <Button onClick={() => navigate("/")}>{t("qbGoToHomepage")}</Button>
           </CardContent>
         </Card>
       </div>
