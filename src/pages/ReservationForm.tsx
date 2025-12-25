@@ -403,11 +403,16 @@ const ReservationForm = () => {
 
       if (reservationError) throw reservationError;
 
-      // Update quick booking request status if coming from quick booking
+      // Update quick booking request with customer email if coming from quick booking
       if (quickBookingId) {
         await supabase
           .from('quick_booking_requests')
-          .update({ status: 'completed' })
+          .update({ 
+            status: 'completed',
+            customer_email: formData.email.trim(),
+            customer_name: primaryPassengerName,
+            customer_phone: formData.phone.trim(),
+          })
           .eq('id', quickBookingId);
       }
 

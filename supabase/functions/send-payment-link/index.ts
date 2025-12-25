@@ -10,6 +10,7 @@ const corsHeaders = {
 
 interface SendPaymentLinkRequest {
   quickBookingId: string;
+  reservationId?: string;
   paymentLink: string;
   customerEmail: string;
   customerName?: string;
@@ -29,6 +30,7 @@ serve(async (req) => {
   try {
     const {
       quickBookingId,
+      reservationId,
       paymentLink,
       customerEmail,
       customerName,
@@ -63,6 +65,21 @@ serve(async (req) => {
     if (updateError) {
       console.error("Error updating quick booking:", updateError);
       throw updateError;
+    }
+
+    // Also update the reservation if reservationId is provided
+    if (reservationId) {
+      const { error: resUpdateError } = await supabase
+        .from("reservations")
+        .update({ payment_link: paymentLink })
+        .eq("id", reservationId);
+
+      if (resUpdateError) {
+        console.error("Error updating reservation:", resUpdateError);
+        // Don't throw, just log - the quick booking update succeeded
+      } else {
+        console.log("Reservation payment link updated:", reservationId);
+      }
     }
 
     // Get currency symbol
