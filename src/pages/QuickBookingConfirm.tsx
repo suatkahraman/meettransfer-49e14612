@@ -273,33 +273,16 @@ export default function QuickBookingConfirm() {
         console.error("Failed to notify admin:", notifyError);
       }
 
-      // Navigate to reservation form with reservation ID
+      // Navigate to customer info page to collect details
       const params = new URLSearchParams();
       params.set("reservationId", reservation.id);
       params.set("reservationCode", reservation.reservationCode || "");
-      params.set("pickup", booking.pickup);
-      params.set("dropoff", booking.dropoff);
-      params.set("date", booking.pickup_date);
-      params.set("time", booking.pickup_time);
-      params.set("vehicleType", booking.vehicle_type);
-      params.set("passengers", booking.passengers.toString());
-      params.set("price", booking.price?.toString() || "");
-      params.set("currency", booking.price_currency);
-      params.set("quickBookingId", booking.id);
-      params.set("paymentMethod", paymentMethod);
       
-      if (hasReturnTrip) {
-        params.set("hasReturn", "true");
-        params.set("returnDate", returnTripData.date);
-        params.set("returnTime", returnTripData.time);
-        params.set("returnPrice", returnPrice?.toString() || "");
-        params.set("returnReservationCode", returnReservationCode || "");
-        if (isPromoCodeValid) {
-          params.set("promoCode", promoCode);
-        }
+      if (hasReturnTrip && returnReservationCode) {
+        params.set("returnReservationCode", returnReservationCode);
       }
 
-      navigate(`/book?${params.toString()}`);
+      navigate(`/quick-booking-info?${params.toString()}`);
     } catch (err: any) {
       console.error("Confirm error:", err);
       toast.error(err.message || "Failed to confirm booking");

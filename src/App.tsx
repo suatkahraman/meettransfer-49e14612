@@ -59,6 +59,7 @@ const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const ConfirmBooking = lazy(() => import("./pages/ConfirmBooking"));
 const QuickBookingConfirm = lazy(() => import("./pages/QuickBookingConfirm"));
+const QuickBookingCustomerInfo = lazy(() => import("./pages/QuickBookingCustomerInfo"));
 
 // Admin Quick Bookings
 const AdminQuickBookings = lazy(() => import("./pages/admin/AdminQuickBookings"));
@@ -231,6 +232,7 @@ const App = () => (
               <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />
               <Route path="/confirm-booking" element={<LazyRoute><ConfirmBooking /></LazyRoute>} />
               <Route path="/quick-booking-confirm" element={<LazyRoute><QuickBookingConfirm /></LazyRoute>} />
+              <Route path="/quick-booking-info" element={<LazyRoute><QuickBookingCustomerInfo /></LazyRoute>} />
               
                 <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
               </Routes>
