@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -64,8 +64,57 @@ const LoginScreen = () => {
   const [googleError, setGoogleError] = useState<string | null>(null);
   const { signIn, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
-  const { isIOS, isStandalone, isPWA, isSafari } = usePWADetect();
+  const { isIOS, isStandalone } = usePWADetect();
   const navigate = useNavigate();
+
+  // Improved Google OAuth handler
+  const handleGoogleLogin = useCallback(async () => {
+    setIsGoogleLoading(true);
+    setGoogleError(null);
+    
+    try {
+      const baseUrl = window.location.origin;
+      const redirectTo = `${baseUrl}/login`;
+      
+      // For iOS PWA standalone mode, show a helpful message
+      if (isIOS && isStandalone) {
+        const authUrl = `${baseUrl}/login?oauth=google`;
+        const opened = window.open(authUrl, '_blank');
+        if (!opened) {
+          setGoogleError('iOS uygulamasında Google ile giriş için Safari\'de açın. Alternatif olarak e-posta ile giriş yapabilirsiniz.');
+          setIsGoogleLoading(false);
+          return;
+        }
+        toast.info('Google ile giriş için Safari açılıyor...');
+        setIsGoogleLoading(false);
+        return;
+      }
+
+      // Standard OAuth flow
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
+        },
+      });
+      
+      if (error) {
+        console.error('Google OAuth error:', error);
+        setGoogleError(error.message);
+        toast.error(error.message);
+      }
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      setGoogleError('Google ile giriş yapılamadı. Lütfen e-posta ile deneyin.');
+      toast.error('Google ile giriş yapılamadı');
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  }, [isIOS, isStandalone]);
 
   // Check if returning from password reset email
   useEffect(() => {
@@ -74,6 +123,14 @@ const LoginScreen = () => {
       setViewMode('reset');
     }
   }, [searchParams]);
+
+  // Auto-trigger OAuth if redirected from PWA
+  useEffect(() => {
+    const oauthParam = searchParams.get('oauth');
+    if (oauthParam === 'google' && !user && !authLoading) {
+      handleGoogleLogin();
+    }
+  }, [searchParams, user, authLoading, handleGoogleLogin]);
 
   // Role-based redirect after login
   useEffect(() => {
@@ -184,7 +241,6 @@ const LoginScreen = () => {
       } else {
         toast.success('Password updated successfully!');
         setViewMode('login');
-        // Clear URL params
         navigate('/login', { replace: true });
       }
     } catch (error) {
@@ -201,6 +257,9 @@ const LoginScreen = () => {
       setIsLoading(false);
     }
   };
+
+  // Show iOS PWA warning
+  const showIOSWarning = isIOS && isStandalone;
 
   const renderContent = () => {
     switch (viewMode) {
@@ -359,77 +418,6 @@ const LoginScreen = () => {
         );
 
       default:
-        // Improved Google OAuth handler for iOS
-        const handleGoogleLogin = async () => {
-          setIsGoogleLoading(true);
-          setGoogleError(null);
-          
-          try {
-            // Determine the best redirect URL based on context
-            const baseUrl = window.location.origin;
-            const redirectTo = `${baseUrl}/login`;
-            
-            // For iOS PWA standalone mode, show a helpful message
-            if (isIOS && isStandalone) {
-              // iOS standalone PWA has OAuth limitations
-              // Open in Safari for better OAuth support
-              const authUrl = `${baseUrl}/login?oauth=google`;
-              
-              // Try to open in Safari
-              const opened = window.open(authUrl, '_blank');
-              if (!opened) {
-                setGoogleError('iOS uygulamasında Google ile giriş için Safari\'de açın. Alternatif olarak e-posta ile giriş yapabilirsiniz.');
-                setIsGoogleLoading(false);
-                return;
-              }
-              
-              toast.info('Google ile giriş için Safari açılıyor...');
-              setIsGoogleLoading(false);
-              return;
-            }
-
-            // Check if we should trigger OAuth from URL param (for PWA->Safari handoff)
-            const shouldTriggerOAuth = searchParams.get('oauth') === 'google';
-            
-            if (shouldTriggerOAuth || !isStandalone) {
-              // Standard OAuth flow - works in browser
-              const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                  redirectTo,
-                  queryParams: {
-                    access_type: 'offline',
-                    prompt: 'select_account',
-                  },
-                },
-              });
-              
-              if (error) {
-                console.error('Google OAuth error:', error);
-                setGoogleError(error.message);
-                toast.error(error.message);
-              }
-            }
-          } catch (error: any) {
-            console.error('Google login error:', error);
-            setGoogleError('Google ile giriş yapılamadı. Lütfen e-posta ile deneyin.');
-            toast.error('Google ile giriş yapılamadı');
-          } finally {
-            setIsGoogleLoading(false);
-          }
-        };
-
-        // Auto-trigger OAuth if redirected from PWA
-        useEffect(() => {
-          const oauthParam = searchParams.get('oauth');
-          if (oauthParam === 'google' && !user) {
-            handleGoogleLogin();
-          }
-        }, [searchParams]);
-
-        // Show iOS PWA warning
-        const showIOSWarning = isIOS && isStandalone;
-
         return (
           <Card className="w-full max-w-md">
             <CardHeader className="text-center space-y-2">
