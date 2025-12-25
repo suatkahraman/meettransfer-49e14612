@@ -211,9 +211,17 @@ export default function QuickBookingCustomerInfo() {
               </div>
             )}
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-6">
               A confirmation email has been sent to <span className="font-medium">{formData.email}</span>
             </p>
+
+            <Button 
+              onClick={() => navigate("/customer/bookings")} 
+              className="w-full"
+              size="lg"
+            >
+              View My Reservations
+            </Button>
           </CardContent>
         </Card>
       </div>
