@@ -38,8 +38,11 @@ import {
   CreditCard,
   Link as LinkIcon,
   Edit,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { DialogFooter } from "@/components/ui/dialog";
 
 interface QuickBookingRequest {
   id: string;
@@ -101,6 +104,11 @@ export default function AdminQuickBookings() {
   // Email input removed - customer provides email after confirming price
   const [sendingPrice, setSendingPrice] = useState(false);
   const [sendingPaymentLink, setSendingPaymentLink] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; request: QuickBookingRequest | null }>({
+    open: false,
+    request: null,
+  });
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -230,6 +238,29 @@ export default function AdminQuickBookings() {
     }
   };
 
+  const handleDeleteRequest = async () => {
+    if (!deleteDialog.request) return;
+
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("quick_booking_requests")
+        .delete()
+        .eq("id", deleteDialog.request.id);
+
+      if (error) throw error;
+
+      toast.success("Booking request deleted");
+      setDeleteDialog({ open: false, request: null });
+      fetchRequests();
+    } catch (error: any) {
+      console.error("Error deleting request:", error);
+      toast.error(error.message || "Failed to delete request");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -355,7 +386,16 @@ export default function AdminQuickBookings() {
                             )}
                           </div>
 
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
+                            {/* Delete Button - always visible */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => setDeleteDialog({ open: true, request })}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                             {request.status === "pending" && (
                               <Dialog
                                 open={priceDialogOpen && selectedRequest?.id === request.id}
@@ -580,6 +620,49 @@ export default function AdminQuickBookings() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              İsteği Sil
+            </DialogTitle>
+          </DialogHeader>
+          {deleteDialog.request && (
+            <div className="space-y-2 text-sm">
+              <p className="text-muted-foreground">
+                Bu fiyat isteğini silmek istediğinizden emin misiniz?
+              </p>
+              <div className="bg-muted/50 p-3 rounded-lg space-y-1">
+                <p><strong>Güzergah:</strong> {deleteDialog.request.pickup} → {deleteDialog.request.dropoff}</p>
+                <p><strong>Tarih:</strong> {format(parseISO(deleteDialog.request.pickup_date), "dd/MM/yyyy")} {deleteDialog.request.pickup_time}</p>
+                {deleteDialog.request.customer_name && (
+                  <p><strong>Müşteri:</strong> {deleteDialog.request.customer_name}</p>
+                )}
+              </div>
+              <p className="text-destructive text-xs">Bu işlem geri alınamaz.</p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialog({ open: false, request: null })}>
+              İptal
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteRequest} 
+              disabled={deleting}
+            >
+              {deleting ? (
+                <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Siliniyor...</>
+              ) : (
+                "Evet, Sil"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
