@@ -138,6 +138,7 @@ export default function AdminQuickBookings() {
       const { data, error } = await supabase
         .from("quick_booking_requests")
         .select("*")
+        .neq("status", "completed")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
