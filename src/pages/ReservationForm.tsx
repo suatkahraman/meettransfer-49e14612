@@ -99,11 +99,15 @@ const ReservationForm = () => {
   // Get initial values from URL params
   const urlPickup = searchParams.get('pickup') || '';
   const urlDropoff = searchParams.get('dropoff') || '';
+  const urlDate = searchParams.get('date') || '';
+  const urlTime = searchParams.get('time') || '';
   
   const [formData, setFormData] = useState(() => ({
     ...defaultFormData,
     pickup: urlPickup,
     dropoff: urlDropoff,
+    date: urlDate,
+    time: urlTime,
   }));
 
   // Load saved form data on mount
