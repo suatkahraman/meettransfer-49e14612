@@ -35,11 +35,19 @@ const GoogleIcon = () => (
   </svg>
 );
 
+// Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
+const passwordSchema = z.string()
+  .min(6, 'Password must be at least 6 characters')
+  .max(100)
+  .regex(/[A-Z]/, 'Password must contain at least 1 uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least 1 lowercase letter')
+  .regex(/\d.*\d.*\d.*\d/, 'Password must contain at least 4 digits');
+
 const signupSchema = z.object({
   fullName: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
   phone: z.string().trim().min(5, 'Phone number is required').max(20),
   email: z.string().trim().email('Invalid email address').max(255),
-  password: z.string().min(6, 'Password must be at least 6 characters').max(100),
+  password: passwordSchema,
 });
 
 const SignupScreen = () => {
@@ -299,11 +307,14 @@ const SignupScreen = () => {
                   id="password" 
                   name="password" 
                   type="password" 
-                  placeholder="••••••••" 
+                  placeholder="Ab2215" 
                   required 
                   className="h-12"
                   autoComplete="new-password"
                 />
+                <p className="text-xs text-muted-foreground">
+                  1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
+                </p>
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
               
