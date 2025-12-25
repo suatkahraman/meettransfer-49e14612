@@ -1,12 +1,34 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { MessageCircle, MapPin, Navigation } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { InstallAppButton } from "@/components/website/InstallAppButton";
+import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 
 export const Hero = () => {
   const { t, getLocalizedPath } = useLanguage();
+  const navigate = useNavigate();
+  
+  const [pickup, setPickup] = useState("");
+  const [dropoff, setDropoff] = useState("");
+
+  const handleRequestPrice = () => {
+    // Navigate to booking form with pickup and dropoff as URL params
+    const params = new URLSearchParams();
+    if (pickup) params.set("pickup", pickup);
+    if (dropoff) params.set("dropoff", dropoff);
+    navigate(`${getLocalizedPath("/book")}${params.toString() ? `?${params.toString()}` : ""}`);
+  };
+
+  const handlePickupSelected = (value: string, details?: PlaceDetails) => {
+    setPickup(details?.displayText || value);
+  };
+
+  const handleDropoffSelected = (value: string, details?: PlaceDetails) => {
+    setDropoff(details?.displayText || value);
+  };
   
   return (
     <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/80">
@@ -35,17 +57,59 @@ export const Hero = () => {
               {t("heroSubtitle")}
             </p>
           </div>
+
+          {/* Quick Booking Form */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 max-w-2xl mx-auto border border-white/20 shadow-2xl">
+            <div className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Pick-up Point */}
+                <div className="relative">
+                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">
+                    {t("pickupPoint")}
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
+                    <GooglePlacesAutocomplete
+                      onPlaceSelected={handlePickupSelected}
+                      placeholder={t("enterPickupPoint")}
+                      className="pl-10 h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+                </div>
+
+                {/* Drop-off Point */}
+                <div className="relative">
+                  <label className="text-white/90 text-sm font-medium mb-2 block text-left">
+                    {t("dropoffLocation")}
+                  </label>
+                  <div className="relative">
+                    <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-accent z-10" />
+                    <GooglePlacesAutocomplete
+                      onPlaceSelected={handleDropoffSelected}
+                      placeholder={t("hotelOrAddress")}
+                      className="pl-10 h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Request Price Button */}
+              <Button 
+                onClick={handleRequestPrice}
+                size="lg" 
+                variant="accent" 
+                className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                {t("requestPrice")}
+              </Button>
+            </div>
+          </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Button asChild size="lg" variant="outline" className="text-base px-8 h-12 bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
               <Link to={getLocalizedPath("/auth")}>{t("login")}</Link>
             </Button>
             <span className="text-white/80 font-medium text-sm uppercase tracking-wide">{t("and")}</span>
-            <Button asChild size="lg" variant="accent" className="text-base px-8 h-12">
-              <Link to={getLocalizedPath("/book")}>{t("requestPrice")}</Link>
-            </Button>
-          </div>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-3 pt-2">
             <Button asChild size="lg" variant="outline" className="text-base px-8 h-12 bg-[#25D366]/20 border-[#25D366]/50 text-white hover:bg-[#25D366] hover:text-white backdrop-blur-sm">
               <a 
                 href="https://wa.me/15558051101?text=Hello%20%F0%9F%91%8B%20I%20would%20like%20to%20book%20a%20transfer." 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -78,6 +78,7 @@ const defaultFormData = {
 
 const ReservationForm = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { t } = useLanguage();
   const { emailAdminNewReservation } = useEmailNotifications();
@@ -94,7 +95,16 @@ const ReservationForm = () => {
     time: '',
     flightNumber: '',
   });
-  const [formData, setFormData] = useState(defaultFormData);
+  
+  // Get initial values from URL params
+  const urlPickup = searchParams.get('pickup') || '';
+  const urlDropoff = searchParams.get('dropoff') || '';
+  
+  const [formData, setFormData] = useState(() => ({
+    ...defaultFormData,
+    pickup: urlPickup,
+    dropoff: urlDropoff,
+  }));
 
   // Load saved form data on mount
   useEffect(() => {
@@ -605,6 +615,7 @@ const ReservationForm = () => {
                   placeholder={t('enterPickupPoint')}
                   className={errors.pickup ? 'border-destructive' : ''}
                   maxLength={200}
+                  initialValue={formData.pickup}
                 />
                 {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
               </div>
@@ -625,6 +636,7 @@ const ReservationForm = () => {
                   placeholder={t('hotelOrAddress')}
                   className={errors.dropoff ? 'border-destructive' : ''}
                   maxLength={200}
+                  initialValue={formData.dropoff}
                 />
                 {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
               </div>
