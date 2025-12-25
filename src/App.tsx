@@ -98,7 +98,7 @@ const IsPrivateTransferWorthIt = lazy(() => import("./pages/website/blog/IsPriva
 const queryClient = new QueryClient();
 
 // Language prefixes for non-English routes
-const LANG_PREFIXES = ["de", "fr", "ru", "it", "es", "ar"];
+const LANG_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar"];
 
 // Simple loading fallback
 const PageLoader = () => (
