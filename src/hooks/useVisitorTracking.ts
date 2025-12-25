@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -45,11 +45,31 @@ const EXCLUDED_ROUTES = [
   '/signup',
 ];
 
+// Check if user has admin role
+async function checkIsAdmin(): Promise<boolean> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+    
+    return !!roleData;
+  } catch {
+    return false;
+  }
+}
+
 export function useVisitorTracking() {
   const location = useLocation();
   const visitIdRef = useRef<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const presenceRef = useRef<any | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const ctxRef = useRef<{
     visitorId: string;
     sessionStart: string;
@@ -59,7 +79,34 @@ export function useVisitorTracking() {
     geo: { countryCode: string; countryName: string; city: string };
   } | null>(null);
 
+  // Check admin status on mount and auth changes
   useEffect(() => {
+    const checkAdmin = async () => {
+      const adminStatus = await checkIsAdmin();
+      setIsAdmin(adminStatus);
+    };
+    
+    checkAdmin();
+    
+    // Re-check on auth state change
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      checkAdmin();
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    // Wait for admin check to complete
+    if (isAdmin === null) return;
+    
+    // Don't track admin users
+    if (isAdmin) {
+      return;
+    }
+    
     const isExcluded = EXCLUDED_ROUTES.some((route) => location.pathname.startsWith(route));
 
     const stop = () => {
@@ -209,7 +256,7 @@ export function useVisitorTracking() {
         intervalRef.current = null;
       }
     };
-  }, [location.pathname]);
+  }, [location.pathname, isAdmin]);
 
   useEffect(() => {
     return () => {
