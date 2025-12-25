@@ -106,6 +106,26 @@ export default function QuickBookingConfirm() {
 
       if (updateError) throw updateError;
 
+      // Notify admin about the confirmation
+      try {
+        await supabase.functions.invoke("notify-admin-quick-booking-confirmed", {
+          body: {
+            bookingId: booking.id,
+            pickup: booking.pickup,
+            dropoff: booking.dropoff,
+            pickupDate: booking.pickup_date,
+            pickupTime: booking.pickup_time,
+            vehicleType: booking.vehicle_type,
+            passengers: booking.passengers,
+            price: booking.price,
+            priceCurrency: booking.price_currency,
+          },
+        });
+      } catch (notifyError) {
+        console.error("Failed to notify admin:", notifyError);
+        // Don't block the flow if notification fails
+      }
+
       // Navigate to reservation form with pre-filled data
       const params = new URLSearchParams();
       params.set("pickup", booking.pickup);
