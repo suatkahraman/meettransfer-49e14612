@@ -215,70 +215,35 @@ export default function QuickBookingConfirm() {
       const returnPrice = getReturnPrice();
       const totalPrice = getTotalPrice();
 
-      // Create reservation immediately with pending_customer_info status
-      // This will auto-generate MT code via database trigger
-      const { data: reservation, error: reservationError } = await supabase
-        .from("reservations")
-        .insert({
-          customer_id: "00000000-0000-0000-0000-000000000000", // Placeholder - will be updated
-          customer_name: "Pending",
-          customer_phone: "",
-          pickup: booking.pickup,
-          dropoff: booking.dropoff,
-          pickup_date: booking.pickup_date,
-          pickup_time: booking.pickup_time,
-          vehicle_type: booking.vehicle_type,
-          payment_type: paymentMethod,
-          status: "pending_customer_info",
-          price: booking.price,
-          price_currency: booking.price_currency,
-        })
-        .select()
-        .single();
-
-      if (reservationError) throw reservationError;
-
-      // Create return trip reservation if enabled
-      let returnReservationCode = null;
-      if (hasReturnTrip && returnTripData.date && returnTripData.time) {
-        const { data: returnReservation, error: returnError } = await supabase
-          .from("reservations")
-          .insert({
-            customer_id: "00000000-0000-0000-0000-000000000000", // Placeholder
-            customer_name: "Pending",
-            customer_phone: "",
-            pickup: booking.dropoff, // Swapped
-            dropoff: booking.pickup, // Swapped
-            pickup_date: returnTripData.date,
-            pickup_time: returnTripData.time,
-            vehicle_type: booking.vehicle_type,
-            payment_type: paymentMethod,
-            status: "pending_customer_info",
-            price: returnPrice,
-            price_currency: booking.price_currency,
-            is_return_transfer: true,
-            original_reservation_id: reservation.id,
-            promo_code: isPromoCodeValid ? promoCode : null,
-          })
-          .select()
-          .single();
-
-        if (!returnError && returnReservation) {
-          returnReservationCode = returnReservation.reservation_code;
+      // Use edge function to create reservation (bypasses RLS for anonymous users)
+      const { data: result, error: fnError } = await supabase.functions.invoke(
+        "create-quick-booking-reservation",
+        {
+          body: {
+            bookingId: booking.id,
+            pickup: booking.pickup,
+            dropoff: booking.dropoff,
+            pickupDate: booking.pickup_date,
+            pickupTime: booking.pickup_time,
+            vehicleType: booking.vehicle_type,
+            passengers: booking.passengers,
+            price: booking.price,
+            priceCurrency: booking.price_currency,
+            paymentMethod,
+            hasReturnTrip,
+            returnDate: returnTripData.date || null,
+            returnTime: returnTripData.time || null,
+            returnPrice: returnPrice || null,
+            promoCode: isPromoCodeValid ? promoCode : null,
+          },
         }
-      }
+      );
 
-      // Update quick booking status
-      const { error: updateError } = await supabase
-        .from("quick_booking_requests")
-        .update({
-          status: "confirmed",
-          confirmed_at: new Date().toISOString(),
-          payment_method: paymentMethod,
-        })
-        .eq("id", booking.id);
+      if (fnError) throw fnError;
+      if (!result.success) throw new Error(result.error || "Failed to create reservation");
 
-      if (updateError) throw updateError;
+      const reservation = result.reservation;
+      const returnReservationCode = result.returnReservation?.reservationCode || null;
 
       // Notify admin about the confirmation
       try {
@@ -286,7 +251,7 @@ export default function QuickBookingConfirm() {
           body: {
             bookingId: booking.id,
             reservationId: reservation.id,
-            reservationCode: reservation.reservation_code,
+            reservationCode: reservation.reservationCode,
             pickup: booking.pickup,
             dropoff: booking.dropoff,
             pickupDate: booking.pickup_date,
@@ -311,7 +276,7 @@ export default function QuickBookingConfirm() {
       // Navigate to reservation form with reservation ID
       const params = new URLSearchParams();
       params.set("reservationId", reservation.id);
-      params.set("reservationCode", reservation.reservation_code || "");
+      params.set("reservationCode", reservation.reservationCode || "");
       params.set("pickup", booking.pickup);
       params.set("dropoff", booking.dropoff);
       params.set("date", booking.pickup_date);
@@ -337,6 +302,7 @@ export default function QuickBookingConfirm() {
       navigate(`/book?${params.toString()}`);
     } catch (err: any) {
       console.error("Confirm error:", err);
+      toast.error(err.message || "Failed to confirm booking");
       setError(err.message || "Failed to confirm booking");
     } finally {
       setConfirming(false);
