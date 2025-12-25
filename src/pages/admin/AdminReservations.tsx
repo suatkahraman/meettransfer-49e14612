@@ -123,6 +123,12 @@ const AdminReservations = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkAssignDialog, setBulkAssignDialog] = useState(false);
   const [bulkAssigning, setBulkAssigning] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; reservationId: string | null; reservationName: string }>({
+    open: false,
+    reservationId: null,
+    reservationName: '',
+  });
+  const [deleting, setDeleting] = useState(false);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '-';
@@ -455,15 +461,20 @@ const AdminReservations = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bu rezervasyonu silmek istediğinizden emin misiniz?')) return;
+  const openDeleteDialog = (id: string, customerName: string) => {
+    setDeleteDialog({ open: true, reservationId: id, reservationName: customerName });
+  };
 
-    const reservationToDelete = reservations.find(r => r.id === id);
+  const handleConfirmDelete = async () => {
+    if (!deleteDialog.reservationId) return;
+
+    setDeleting(true);
+    const reservationToDelete = reservations.find(r => r.id === deleteDialog.reservationId);
 
     const { error } = await supabase
       .from('reservations')
       .delete()
-      .eq('id', id);
+      .eq('id', deleteDialog.reservationId);
 
     if (error) {
       toast.error('Rezervasyon silinemedi');
@@ -471,7 +482,7 @@ const AdminReservations = () => {
       await logAction({
         action: 'DELETE',
         table_name: 'reservations',
-        record_id: id,
+        record_id: deleteDialog.reservationId,
         old_data: reservationToDelete ? {
           customer_name: reservationToDelete.customer_name,
           pickup: reservationToDelete.pickup,
@@ -484,6 +495,8 @@ const AdminReservations = () => {
       toast.success('Rezervasyon silindi');
       fetchReservations();
     }
+    setDeleting(false);
+    setDeleteDialog({ open: false, reservationId: null, reservationName: '' });
   };
 
   return (
@@ -792,7 +805,7 @@ const AdminReservations = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleDelete(reservation.id)}
+                            onClick={() => openDeleteDialog(reservation.id, reservation.customer_name)}
                             className="text-destructive hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -968,7 +981,7 @@ const AdminReservations = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleDelete(reservation.id)}
+                        onClick={() => openDeleteDialog(reservation.id, reservation.customer_name)}
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -1042,6 +1055,36 @@ const AdminReservations = () => {
             </Button>
             <Button onClick={handleBulkAssign} disabled={!selectedDriver || bulkAssigning}>
               {bulkAssigning ? 'Atanıyor...' : `${selectedIds.size} Rezervasyona Ata`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Rezervasyonu Sil
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            <strong>{deleteDialog.reservationName}</strong> adına kayıtlı rezervasyonu silmek istediğinizden emin misiniz?
+          </p>
+          <p className="text-sm text-destructive">
+            Bu işlem geri alınamaz.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialog({ open: false, reservationId: null, reservationName: '' })}>
+              İptal
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleConfirmDelete} 
+              disabled={deleting}
+            >
+              {deleting ? 'Siliniyor...' : 'Evet, Sil'}
             </Button>
           </DialogFooter>
         </DialogContent>
