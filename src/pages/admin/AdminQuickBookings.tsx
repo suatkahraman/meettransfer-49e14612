@@ -37,6 +37,7 @@ import {
   ArrowLeft,
   CreditCard,
   Link as LinkIcon,
+  Edit,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -446,7 +447,35 @@ export default function AdminQuickBookings() {
                             )}
 
                             {request.status === "confirmed" && (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {/* Edit Reservation Button */}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={async () => {
+                                    // Find the reservation created from this quick booking
+                                    const { data: reservations, error } = await supabase
+                                      .from("reservations")
+                                      .select("id")
+                                      .eq("pickup", request.pickup)
+                                      .eq("dropoff", request.dropoff)
+                                      .eq("pickup_date", request.pickup_date)
+                                      .eq("pickup_time", request.pickup_time)
+                                      .order("created_at", { ascending: false })
+                                      .limit(1);
+
+                                    if (error || !reservations || reservations.length === 0) {
+                                      toast.error("Reservation not found");
+                                      return;
+                                    }
+
+                                    navigate(`/admin/reservations/${reservations[0].id}/edit`);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit Reservation
+                                </Button>
+
                                 {request.payment_method === "payment_link" && !request.payment_link && request.customer_email && (
                                   <Dialog
                                     open={paymentLinkDialogOpen && selectedRequest?.id === request.id}
