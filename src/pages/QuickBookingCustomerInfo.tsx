@@ -63,19 +63,25 @@ export default function QuickBookingCustomerInfo() {
 
   const fetchReservation = async () => {
     try {
-      const { data, error } = await supabase
-        .from("reservations")
-        .select("pickup, dropoff, pickup_date, pickup_time, vehicle_type, price, price_currency, status")
-        .eq("id", reservationId)
-        .maybeSingle();
+      // Use edge function to bypass RLS (reservation has null customer_id at this point)
+      const { data: result, error } = await supabase.functions.invoke(
+        "get-quick-booking-reservation",
+        {
+          body: { reservationId },
+        }
+      );
 
       if (error) throw error;
-
-      if (!data) {
-        toast.error("Reservation not found");
-        navigate("/");
-        return;
+      if (!result.success) {
+        if (result.error === "Reservation not found") {
+          toast.error("Reservation not found");
+          navigate("/");
+          return;
+        }
+        throw new Error(result.error || "Failed to load reservation");
       }
+
+      const data = result.reservation;
 
       // Check if already filled
       if (data.status !== "pending_customer_info") {
