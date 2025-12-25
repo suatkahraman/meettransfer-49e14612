@@ -215,6 +215,26 @@ export default function QuickBookingConfirm() {
 
       if (error) throw error;
 
+      // Notify admin about the rejection
+      try {
+        await supabase.functions.invoke("notify-admin-quick-booking-rejected", {
+          body: {
+            bookingId: booking.id,
+            pickup: booking.pickup,
+            dropoff: booking.dropoff,
+            pickupDate: booking.pickup_date,
+            pickupTime: booking.pickup_time,
+            vehicleType: booking.vehicle_type,
+            passengers: booking.passengers,
+            price: booking.price,
+            priceCurrency: booking.price_currency,
+          },
+        });
+      } catch (notifyError) {
+        console.error("Failed to notify admin about rejection:", notifyError);
+        // Don't block the flow if notification fails
+      }
+
       setError("You have rejected this price offer. Feel free to request a new quote anytime.");
     } catch (err: any) {
       console.error("Reject error:", err);
