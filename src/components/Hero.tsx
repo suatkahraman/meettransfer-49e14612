@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, Car, Users } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { InstallAppButton } from "@/components/website/InstallAppButton";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
 import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // Generate time options from 00:00 to 23:30 in 30-minute intervals
 const generateTimeOptions = () => {
@@ -34,6 +36,16 @@ const vehicleTypes = [
   { value: 'minibus', label: 'Minibus' },
 ];
 
+// Get or create a session ID for anonymous users
+const getSessionId = () => {
+  let sessionId = localStorage.getItem('quick_booking_session_id');
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    localStorage.setItem('quick_booking_session_id', sessionId);
+  }
+  return sessionId;
+};
+
 export const Hero = () => {
   const { t, getLocalizedPath } = useLanguage();
   const navigate = useNavigate();
@@ -44,17 +56,46 @@ export const Hero = () => {
   const [time, setTime] = useState("");
   const [vehicleType, setVehicleType] = useState("mercedes-vito");
   const [passengers, setPassengers] = useState("1");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [confirmationToken, setConfirmationToken] = useState<string | null>(null);
 
-  const handleRequestPrice = () => {
-    // Navigate to booking form with all params
-    const params = new URLSearchParams();
-    if (pickup) params.set("pickup", pickup);
-    if (dropoff) params.set("dropoff", dropoff);
-    if (date) params.set("date", format(date, "yyyy-MM-dd"));
-    if (time) params.set("time", time);
-    if (vehicleType) params.set("vehicleType", vehicleType);
-    if (passengers) params.set("passengers", passengers);
-    navigate(`${getLocalizedPath("/book")}${params.toString() ? `?${params.toString()}` : ""}`);
+  const handleRequestPrice = async () => {
+    // Validate required fields
+    if (!pickup || !dropoff || !date || !time) {
+      toast.error(t("pleaseFilAllFields") || "Please fill in all required fields");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const sessionId = getSessionId();
+      
+      const { data, error } = await supabase
+        .from("quick_booking_requests")
+        .insert({
+          pickup,
+          dropoff,
+          pickup_date: format(date, "yyyy-MM-dd"),
+          pickup_time: time,
+          vehicle_type: vehicleType,
+          passengers: parseInt(passengers),
+          customer_session_id: sessionId,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setConfirmationToken(data.confirmation_token);
+      setSubmitted(true);
+      toast.success(t("priceRequestSent") || "Your price request has been sent! We will send you a price quote shortly.");
+    } catch (error: any) {
+      console.error("Error submitting request:", error);
+      toast.error(error.message || "Failed to submit request");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handlePickupSelected = (value: string, details?: PlaceDetails) => {
@@ -230,14 +271,41 @@ export const Hero = () => {
               </div>
 
               {/* Request Price Button */}
-              <Button 
-                onClick={handleRequestPrice}
-                size="lg" 
-                variant="accent" 
-                className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                {t("requestPrice")}
-              </Button>
+              {submitted ? (
+                <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4 text-center">
+                  <p className="text-white font-medium mb-2">
+                    ✅ {t("priceRequestSentTitle") || "Request Received!"}
+                  </p>
+                  <p className="text-white/80 text-sm mb-3">
+                    {t("priceRequestSentMessage") || "We will send you a price quote shortly. Check this page for updates."}
+                  </p>
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    className="bg-white/10 text-white border-white/30 hover:bg-white/20"
+                    onClick={() => navigate(`/quick-booking-confirm?token=${confirmationToken}`)}
+                  >
+                    {t("checkPriceStatus") || "Check Price Status"}
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  onClick={handleRequestPrice}
+                  size="lg" 
+                  variant="accent" 
+                  className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      {t("sending") || "Sending..."}
+                    </>
+                  ) : (
+                    t("requestPrice")
+                  )}
+                </Button>
+              )}
             </div>
           </div>
 

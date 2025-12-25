@@ -105,6 +105,14 @@ const ReservationForm = () => {
   const urlDate = searchParams.get('date') || '';
   const urlTime = searchParams.get('time') || '';
   const urlVehicleType = searchParams.get('vehicleType') || '';
+  const urlPrice = searchParams.get('price') || '';
+  const urlCurrency = searchParams.get('currency') || 'EUR';
+  const quickBookingId = searchParams.get('quickBookingId') || '';
+  
+  // Quick booking pre-filled price display
+  const isFromQuickBooking = !!quickBookingId;
+  const prefilledPrice = urlPrice ? parseFloat(urlPrice) : null;
+  const prefilledCurrency = urlCurrency;
   
   const [formData, setFormData] = useState(() => ({
     ...defaultFormData,
@@ -359,7 +367,12 @@ const ReservationForm = () => {
           .eq('id', userId);
       }
 
-      // Create reservation with status 'pending_price'
+      // Determine status and price based on whether coming from quick booking
+      const reservationStatus = isFromQuickBooking && prefilledPrice ? 'customer_approved' : 'pending_price';
+      const reservationPrice = isFromQuickBooking && prefilledPrice ? prefilledPrice : null;
+      const reservationCurrency = isFromQuickBooking ? prefilledCurrency : null;
+
+      // Create reservation
       const { data: reservation, error: reservationError } = await supabase
         .from('reservations')
         .insert({
@@ -374,9 +387,9 @@ const ReservationForm = () => {
           flight_number: formData.flightNumber?.trim() || null,
           vehicle_type: formData.vehicleType,
           payment_type: formData.paymentMethod,
-          status: 'pending_price',
-          price: null,
-          price_currency: null,
+          status: reservationStatus,
+          price: reservationPrice,
+          price_currency: reservationCurrency,
           // Place details
           pickup_place_name: formData.pickup_place_name || null,
           pickup_lat: formData.pickup_lat,
@@ -389,6 +402,14 @@ const ReservationForm = () => {
         .single();
 
       if (reservationError) throw reservationError;
+
+      // Update quick booking request status if coming from quick booking
+      if (quickBookingId) {
+        await supabase
+          .from('quick_booking_requests')
+          .update({ status: 'completed' })
+          .eq('id', quickBookingId);
+      }
 
       // Notify admin about new reservation (in-app notification)
       try {

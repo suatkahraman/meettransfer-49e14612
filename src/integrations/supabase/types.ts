@@ -626,6 +626,75 @@ export type Database = {
         }
         Relationships: []
       }
+      quick_booking_requests: {
+        Row: {
+          admin_message: string | null
+          confirmation_token: string
+          confirmed_at: string | null
+          created_at: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          customer_session_id: string
+          dropoff: string
+          expires_at: string | null
+          id: string
+          passengers: number
+          pickup: string
+          pickup_date: string
+          pickup_time: string
+          price: number | null
+          price_currency: string | null
+          status: string
+          updated_at: string | null
+          vehicle_type: string
+        }
+        Insert: {
+          admin_message?: string | null
+          confirmation_token?: string
+          confirmed_at?: string | null
+          created_at?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          customer_session_id: string
+          dropoff: string
+          expires_at?: string | null
+          id?: string
+          passengers?: number
+          pickup: string
+          pickup_date: string
+          pickup_time: string
+          price?: number | null
+          price_currency?: string | null
+          status?: string
+          updated_at?: string | null
+          vehicle_type: string
+        }
+        Update: {
+          admin_message?: string | null
+          confirmation_token?: string
+          confirmed_at?: string | null
+          created_at?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          customer_session_id?: string
+          dropoff?: string
+          expires_at?: string | null
+          id?: string
+          passengers?: number
+          pickup?: string
+          pickup_date?: string
+          pickup_time?: string
+          price?: number | null
+          price_currency?: string | null
+          status?: string
+          updated_at?: string | null
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       reservation_admin_notes: {
         Row: {
           created_at: string | null
