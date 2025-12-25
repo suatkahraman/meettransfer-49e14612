@@ -350,7 +350,7 @@ const IstanbulTransferPriceGuide = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to={getLocalizedPath("/book")}>
               <Button size="lg" variant="accent" className="gap-2">
-                Request Your Price
+                Request Price
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>

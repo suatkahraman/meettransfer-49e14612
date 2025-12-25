@@ -43,7 +43,7 @@ const translations: Record<Language, Record<string, string>> = {
     login: "Login",
     logout: "Logout",
     myAccount: "My Account",
-    bookNow: "Request Your Price",
+    bookNow: "Request Price",
     installApp: "Install App",
     blog: "Blog",
     enableNotifications: "Enable Notifications",
@@ -63,7 +63,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Booking Process
     howBookingWorks: "How Our Booking Process Works",
     bookingProcessIntro: "Request your price first – then confirm your booking",
-    step1Title: "Request Your Price",
+    step1Title: "Request Price",
     step1Desc: "Fill in the reservation form and send a price request. Our team reviews your transfer details and prepares the best possible price.",
     step2Title: "Receive Your Offer",
     step2Desc: "You will receive your transfer price by email and in your reservation panel.",
