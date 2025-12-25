@@ -764,16 +764,27 @@ const AdminReservations = () => {
                           </div>
                         </div>
 
-                        <Button 
-                          onClick={() => {
-                            setAssignDialog({ open: true, reservationId: reservation.id });
-                            setSelectedDriver('');
-                          }}
-                          className="bg-amber-600 hover:bg-amber-700"
-                        >
-                          <UserCheck className="h-4 w-4 mr-2" />
-                          Şoför Ata
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/admin/reservations/${reservation.id}`)}
+                          >
+                            <Pencil className="h-4 w-4 mr-1" />
+                            Düzenle
+                          </Button>
+
+                          <Button 
+                            onClick={() => {
+                              setAssignDialog({ open: true, reservationId: reservation.id });
+                              setSelectedDriver('');
+                            }}
+                            className="bg-amber-600 hover:bg-amber-700"
+                          >
+                            <UserCheck className="h-4 w-4 mr-2" />
+                            Şoför Ata
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

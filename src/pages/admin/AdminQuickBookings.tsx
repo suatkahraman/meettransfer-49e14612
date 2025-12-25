@@ -469,7 +469,7 @@ export default function AdminQuickBookings() {
                                       return;
                                     }
 
-                                    navigate(`/admin/reservations/${reservations[0].id}/edit`);
+                                    navigate(`/admin/reservations/${reservations[0].id}`);
                                   }}
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
