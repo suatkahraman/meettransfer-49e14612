@@ -640,6 +640,8 @@ export type Database = {
           expires_at: string | null
           id: string
           passengers: number
+          payment_link: string | null
+          payment_method: string | null
           pickup: string
           pickup_date: string
           pickup_time: string
@@ -662,6 +664,8 @@ export type Database = {
           expires_at?: string | null
           id?: string
           passengers?: number
+          payment_link?: string | null
+          payment_method?: string | null
           pickup: string
           pickup_date: string
           pickup_time: string
@@ -684,6 +688,8 @@ export type Database = {
           expires_at?: string | null
           id?: string
           passengers?: number
+          payment_link?: string | null
+          payment_method?: string | null
           pickup?: string
           pickup_date?: string
           pickup_time?: string

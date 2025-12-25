@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.notify-admin-quick-booking-rejected]
 verify_jwt = false
+
+[functions.send-payment-link]
+verify_jwt = true

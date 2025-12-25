@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2 } from "lucide-react";
+import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote } from "lucide-react";
 import { format, parseISO, addDays } from "date-fns";
 import { toast } from "sonner";
 
@@ -22,6 +23,8 @@ interface BookingRequest {
   price: number | null;
   price_currency: string;
   confirmation_token: string;
+  payment_method?: string;
+  payment_link?: string;
 }
 
 const vehicleLabels: Record<string, string> = {
@@ -53,6 +56,9 @@ export default function QuickBookingConfirm() {
   // Promo code state
   const [promoCode, setPromoCode] = useState("");
   const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
+  
+  // Payment method state
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "payment_link">("cash");
 
   const token = searchParams.get("token");
 
@@ -203,12 +209,13 @@ export default function QuickBookingConfirm() {
 
     setConfirming(true);
     try {
-      // Update booking status
+      // Update booking status with payment method
       const { error: updateError } = await supabase
         .from("quick_booking_requests")
         .update({
           status: "confirmed",
           confirmed_at: new Date().toISOString(),
+          payment_method: paymentMethod,
         })
         .eq("id", booking.id);
 
@@ -237,6 +244,7 @@ export default function QuickBookingConfirm() {
             returnPrice,
             totalPrice,
             promoCode: isPromoCodeValid ? promoCode : null,
+            paymentMethod,
           },
         });
       } catch (notifyError) {
@@ -255,6 +263,7 @@ export default function QuickBookingConfirm() {
       params.set("price", booking.price?.toString() || "");
       params.set("currency", booking.price_currency);
       params.set("quickBookingId", booking.id);
+      params.set("paymentMethod", paymentMethod);
       
       // Add return trip info if enabled
       if (hasReturnTrip) {
@@ -672,6 +681,37 @@ export default function QuickBookingConfirm() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Payment Method Selection */}
+          <div className="bg-muted/50 rounded-lg p-4 mb-6">
+            <Label className="text-base font-medium mb-4 block">Payment Method</Label>
+            <RadioGroup
+              value={paymentMethod}
+              onValueChange={(value) => setPaymentMethod(value as "cash" | "payment_link")}
+              className="space-y-3"
+            >
+              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-background hover:bg-muted/50 cursor-pointer">
+                <RadioGroupItem value="cash" id="cash" />
+                <Label htmlFor="cash" className="flex items-center gap-2 cursor-pointer flex-1">
+                  <Banknote className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Pay Cash to Driver</p>
+                    <p className="text-sm text-muted-foreground">Pay in cash when your driver arrives</p>
+                  </div>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-background hover:bg-muted/50 cursor-pointer">
+                <RadioGroupItem value="payment_link" id="payment_link" />
+                <Label htmlFor="payment_link" className="flex items-center gap-2 cursor-pointer flex-1">
+                  <CreditCard className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="font-medium">Pay Online (Card/Bank)</p>
+                    <p className="text-sm text-muted-foreground">Receive a secure payment link via email</p>
+                  </div>
+                </Label>
+              </div>
+            </RadioGroup>
           </div>
 
           {/* Action Buttons */}
