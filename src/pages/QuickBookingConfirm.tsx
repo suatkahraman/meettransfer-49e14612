@@ -211,7 +211,64 @@ export default function QuickBookingConfirm() {
 
     setConfirming(true);
     try {
-      // Update booking status with payment method
+      // Calculate prices
+      const returnPrice = getReturnPrice();
+      const totalPrice = getTotalPrice();
+
+      // Create reservation immediately with pending_customer_info status
+      // This will auto-generate MT code via database trigger
+      const { data: reservation, error: reservationError } = await supabase
+        .from("reservations")
+        .insert({
+          customer_id: "00000000-0000-0000-0000-000000000000", // Placeholder - will be updated
+          customer_name: "Pending",
+          customer_phone: "",
+          pickup: booking.pickup,
+          dropoff: booking.dropoff,
+          pickup_date: booking.pickup_date,
+          pickup_time: booking.pickup_time,
+          vehicle_type: booking.vehicle_type,
+          payment_type: paymentMethod,
+          status: "pending_customer_info",
+          price: booking.price,
+          price_currency: booking.price_currency,
+        })
+        .select()
+        .single();
+
+      if (reservationError) throw reservationError;
+
+      // Create return trip reservation if enabled
+      let returnReservationCode = null;
+      if (hasReturnTrip && returnTripData.date && returnTripData.time) {
+        const { data: returnReservation, error: returnError } = await supabase
+          .from("reservations")
+          .insert({
+            customer_id: "00000000-0000-0000-0000-000000000000", // Placeholder
+            customer_name: "Pending",
+            customer_phone: "",
+            pickup: booking.dropoff, // Swapped
+            dropoff: booking.pickup, // Swapped
+            pickup_date: returnTripData.date,
+            pickup_time: returnTripData.time,
+            vehicle_type: booking.vehicle_type,
+            payment_type: paymentMethod,
+            status: "pending_customer_info",
+            price: returnPrice,
+            price_currency: booking.price_currency,
+            is_return_transfer: true,
+            original_reservation_id: reservation.id,
+            promo_code: isPromoCodeValid ? promoCode : null,
+          })
+          .select()
+          .single();
+
+        if (!returnError && returnReservation) {
+          returnReservationCode = returnReservation.reservation_code;
+        }
+      }
+
+      // Update quick booking status
       const { error: updateError } = await supabase
         .from("quick_booking_requests")
         .update({
@@ -223,15 +280,13 @@ export default function QuickBookingConfirm() {
 
       if (updateError) throw updateError;
 
-      // Calculate prices for notification
-      const returnPrice = getReturnPrice();
-      const totalPrice = getTotalPrice();
-
       // Notify admin about the confirmation
       try {
         await supabase.functions.invoke("notify-admin-quick-booking-confirmed", {
           body: {
             bookingId: booking.id,
+            reservationId: reservation.id,
+            reservationCode: reservation.reservation_code,
             pickup: booking.pickup,
             dropoff: booking.dropoff,
             pickupDate: booking.pickup_date,
@@ -251,11 +306,12 @@ export default function QuickBookingConfirm() {
         });
       } catch (notifyError) {
         console.error("Failed to notify admin:", notifyError);
-        // Don't block the flow if notification fails
       }
 
-      // Navigate to reservation form with pre-filled data
+      // Navigate to reservation form with reservation ID
       const params = new URLSearchParams();
+      params.set("reservationId", reservation.id);
+      params.set("reservationCode", reservation.reservation_code || "");
       params.set("pickup", booking.pickup);
       params.set("dropoff", booking.dropoff);
       params.set("date", booking.pickup_date);
@@ -267,12 +323,12 @@ export default function QuickBookingConfirm() {
       params.set("quickBookingId", booking.id);
       params.set("paymentMethod", paymentMethod);
       
-      // Add return trip info if enabled
       if (hasReturnTrip) {
         params.set("hasReturn", "true");
         params.set("returnDate", returnTripData.date);
         params.set("returnTime", returnTripData.time);
         params.set("returnPrice", returnPrice?.toString() || "");
+        params.set("returnReservationCode", returnReservationCode || "");
         if (isPromoCodeValid) {
           params.set("promoCode", promoCode);
         }

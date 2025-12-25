@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2 } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock } from 'lucide-react';
 import { z } from 'zod';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -99,6 +99,12 @@ const ReservationForm = () => {
   const quickBookingIdParam = searchParams.get('quickBookingId') || '';
   const isFromQuickBookingFlow = !!quickBookingIdParam;
   
+  // Check if there's a pending reservation to update
+  const pendingReservationId = searchParams.get('reservationId') || '';
+  const pendingReservationCode = searchParams.get('reservationCode') || '';
+  const returnReservationCode = searchParams.get('returnReservationCode') || '';
+  const hasPendingReservation = !!pendingReservationId;
+  
   // Redirect non-logged-in users to homepage quick booking form (unless from QuickBooking)
   useEffect(() => {
     if (!authLoading && !user && !isFromQuickBookingFlow) {
@@ -109,15 +115,6 @@ const ReservationForm = () => {
   const [passengerNames, setPassengerNames] = useState<string[]>(() => 
     Array.from({ length: Math.max(1, Math.min(19, urlPassengerCount)) }, () => '')
   );
-  const [hasReturnTrip, setHasReturnTrip] = useState(false);
-  const [promoCode, setPromoCode] = useState('');
-  const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
-  const [returnTripData, setReturnTripData] = useState({
-    date: '',
-    time: '',
-    flightNumber: '',
-  });
-  
   // Get initial values from URL params
   const urlPickup = searchParams.get('pickup') || '';
   const urlDropoff = searchParams.get('dropoff') || '';
@@ -127,11 +124,29 @@ const ReservationForm = () => {
   const urlPrice = searchParams.get('price') || '';
   const urlCurrency = searchParams.get('currency') || 'EUR';
   const quickBookingId = searchParams.get('quickBookingId') || '';
+  const urlPaymentMethod = searchParams.get('paymentMethod') || '';
+  
+  // Return trip URL params
+  const urlHasReturn = searchParams.get('hasReturn') === 'true';
+  const urlReturnDate = searchParams.get('returnDate') || '';
+  const urlReturnTime = searchParams.get('returnTime') || '';
+  const urlReturnPrice = searchParams.get('returnPrice') || '';
+  const urlPromoCode = searchParams.get('promoCode') || '';
+  
+  const [hasReturnTrip, setHasReturnTrip] = useState(urlHasReturn);
+  const [promoCode, setPromoCode] = useState(urlPromoCode);
+  const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(urlPromoCode ? true : null);
+  const [returnTripData, setReturnTripData] = useState({
+    date: urlReturnDate,
+    time: urlReturnTime,
+    flightNumber: '',
+  });
   
   // Quick booking pre-filled price display
   const isFromQuickBooking = !!quickBookingId;
   const prefilledPrice = urlPrice ? parseFloat(urlPrice) : null;
   const prefilledCurrency = urlCurrency;
+  const prefilledReturnPrice = urlReturnPrice ? parseFloat(urlReturnPrice) : null;
   
   const [formData, setFormData] = useState(() => ({
     ...defaultFormData,
@@ -140,10 +155,17 @@ const ReservationForm = () => {
     date: urlDate,
     time: urlTime,
     vehicleType: urlVehicleType || defaultFormData.vehicleType,
+    paymentMethod: (urlPaymentMethod === 'cash' || urlPaymentMethod === 'payment_link') ? urlPaymentMethod : '' as '' | 'cash' | 'payment_link',
   }));
 
-  // Load saved form data on mount
+  // Load saved form data on mount - but DON'T override URL params if coming from QuickBooking
   useEffect(() => {
+    // Skip loading saved data if coming from QuickBooking flow - URL params take priority
+    if (isFromQuickBooking) {
+      localStorage.removeItem(FORM_STORAGE_KEY);
+      return;
+    }
+    
     const savedData = localStorage.getItem(FORM_STORAGE_KEY);
     if (savedData) {
       try {
@@ -160,7 +182,7 @@ const ReservationForm = () => {
         console.error('Failed to parse saved form data:', e);
       }
     }
-  }, []);
+  }, [isFromQuickBooking]);
 
   // Save form data whenever it changes
   useEffect(() => {
@@ -387,40 +409,85 @@ const ReservationForm = () => {
       }
 
       // Determine status and price based on whether coming from quick booking
-      const reservationStatus = isFromQuickBooking && prefilledPrice ? 'customer_approved' : 'pending_price';
+      const reservationStatus = hasPendingReservation ? 'customer_approved' : (isFromQuickBooking && prefilledPrice ? 'customer_approved' : 'pending_price');
       const reservationPrice = isFromQuickBooking && prefilledPrice ? prefilledPrice : null;
       const reservationCurrency = isFromQuickBooking ? prefilledCurrency : null;
 
-      // Create reservation
-      const { data: reservation, error: reservationError } = await supabase
-        .from('reservations')
-        .insert({
-          customer_id: userId,
-          customer_name: primaryPassengerName,
-          customer_phone: formData.phone.trim(),
-          passenger_names: validPassengerNames.map(n => n.trim()),
-          pickup: formData.pickup,
-          dropoff: formData.dropoff.trim(),
-          pickup_date: formData.date,
-          pickup_time: formData.time,
-          flight_number: formData.flightNumber?.trim() || null,
-          vehicle_type: formData.vehicleType,
-          payment_type: formData.paymentMethod,
-          status: reservationStatus,
-          price: reservationPrice,
-          price_currency: reservationCurrency,
-          // Place details
-          pickup_place_name: formData.pickup_place_name || null,
-          pickup_lat: formData.pickup_lat,
-          pickup_lng: formData.pickup_lng,
-          dropoff_place_name: formData.dropoff_place_name || null,
-          dropoff_lat: formData.dropoff_lat,
-          dropoff_lng: formData.dropoff_lng,
-        })
-        .select()
-        .single();
+      let reservation: any;
 
-      if (reservationError) throw reservationError;
+      // If we have a pending reservation, update it instead of creating a new one
+      if (hasPendingReservation) {
+        const { data: updatedReservation, error: updateError } = await supabase
+          .from('reservations')
+          .update({
+            customer_id: userId,
+            customer_name: primaryPassengerName,
+            customer_phone: formData.phone.trim(),
+            passenger_names: validPassengerNames.map(n => n.trim()),
+            flight_number: formData.flightNumber?.trim() || null,
+            status: 'customer_approved',
+            // Place details
+            pickup_place_name: formData.pickup_place_name || null,
+            pickup_lat: formData.pickup_lat,
+            pickup_lng: formData.pickup_lng,
+            dropoff_place_name: formData.dropoff_place_name || null,
+            dropoff_lat: formData.dropoff_lat,
+            dropoff_lng: formData.dropoff_lng,
+          })
+          .eq('id', pendingReservationId)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+        reservation = updatedReservation;
+
+        // Also update return reservation if exists
+        if (returnReservationCode) {
+          await supabase
+            .from('reservations')
+            .update({
+              customer_id: userId,
+              customer_name: primaryPassengerName,
+              customer_phone: formData.phone.trim(),
+              passenger_names: validPassengerNames.map(n => n.trim()),
+              flight_number: returnTripData.flightNumber?.trim() || null,
+              status: 'customer_approved',
+            })
+            .eq('reservation_code', returnReservationCode);
+        }
+      } else {
+        // Create new reservation
+        const { data: newReservation, error: reservationError } = await supabase
+          .from('reservations')
+          .insert({
+            customer_id: userId,
+            customer_name: primaryPassengerName,
+            customer_phone: formData.phone.trim(),
+            passenger_names: validPassengerNames.map(n => n.trim()),
+            pickup: formData.pickup,
+            dropoff: formData.dropoff.trim(),
+            pickup_date: formData.date,
+            pickup_time: formData.time,
+            flight_number: formData.flightNumber?.trim() || null,
+            vehicle_type: formData.vehicleType,
+            payment_type: formData.paymentMethod,
+            status: reservationStatus,
+            price: reservationPrice,
+            price_currency: reservationCurrency,
+            // Place details
+            pickup_place_name: formData.pickup_place_name || null,
+            pickup_lat: formData.pickup_lat,
+            pickup_lng: formData.pickup_lng,
+            dropoff_place_name: formData.dropoff_place_name || null,
+            dropoff_lat: formData.dropoff_lat,
+            dropoff_lng: formData.dropoff_lng,
+          })
+          .select()
+          .single();
+
+        if (reservationError) throw reservationError;
+        reservation = newReservation;
+      }
 
       // Update quick booking request with customer email if coming from quick booking
       if (quickBookingId) {
@@ -640,108 +707,223 @@ const ReservationForm = () => {
     );
   }
 
+  // Calculate missing fields for pending reservation
+  const getMissingFields = () => {
+    const missing: string[] = [];
+    if (!formData.email) missing.push(t('email') || 'Email');
+    if (!formData.phone) missing.push(t('phone') || 'Phone');
+    if (!passengerNames[0]?.trim()) missing.push(t('passengerName') || 'Passenger Name');
+    if (!isLoggedIn && !formData.password) missing.push(t('password') || 'Password');
+    return missing;
+  };
+
+  const missingFields = hasPendingReservation ? getMissingFields() : [];
+  const showPendingBanner = hasPendingReservation && missingFields.length > 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary/80 to-primary/60 py-8 px-4">
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-serif">Meet Transfer</CardTitle>
           <CardDescription>{t('bookingFormSubtitle')}</CardDescription>
+          
+          {/* Pending Reservation Banner with MT Code */}
+          {hasPendingReservation && pendingReservationCode && (
+            <div className="mt-4 p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <p className="font-semibold text-green-700 dark:text-green-300">
+                  {t('reservationCreated') || 'Reservation Created!'}
+                </p>
+              </div>
+              <p className="text-2xl font-bold text-green-800 dark:text-green-200 mb-1">
+                {pendingReservationCode}
+              </p>
+              {returnReservationCode && (
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  {t('returnTrip') || 'Return Trip'}: <span className="font-semibold">{returnReservationCode}</span>
+                </p>
+              )}
+            </div>
+          )}
+          
+          {/* Flashing Missing Fields Warning */}
+          {showPendingBanner && (
+            <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg animate-pulse">
+              <p className="font-semibold text-amber-700 dark:text-amber-300 mb-2">
+                {t('completeYourInfo') || 'Please complete your information'}
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {missingFields.map((field, index) => (
+                  <span 
+                    key={index}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 animate-bounce"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    {field}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Transfer Details Section - Pick-up and Drop-off */}
+            {/* Transfer Details Section - Show as summary if pending reservation */}
             <div className="space-y-4 pb-4 border-b">
               <h3 className="font-semibold text-lg">{t('transferDetails')}</h3>
               
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  {t('pickupPoint')}
-                </Label>
-                <GooglePlacesAutocomplete
-                  onPlaceSelected={(value, details) => setFormData((prev) => ({ 
-                    ...prev, 
-                    pickup: value,
-                    pickup_place_name: details?.placeName || '',
-                    pickup_lat: details?.lat || null,
-                    pickup_lng: details?.lng || null,
-                  }))}
-                  placeholder={t('enterPickupPoint')}
-                  className={errors.pickup ? 'border-destructive' : ''}
-                  maxLength={200}
-                  initialValue={formData.pickup}
-                />
-                {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  {t('dropoffLocation')}
-                </Label>
-                <GooglePlacesAutocomplete
-                  onPlaceSelected={(value, details) => setFormData((prev) => ({ 
-                    ...prev, 
-                    dropoff: value,
-                    dropoff_place_name: details?.placeName || '',
-                    dropoff_lat: details?.lat || null,
-                    dropoff_lng: details?.lng || null,
-                  }))}
-                  placeholder={t('hotelOrAddress')}
-                  className={errors.dropoff ? 'border-destructive' : ''}
-                  maxLength={200}
-                  initialValue={formData.dropoff}
-                />
-                {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
-              </div>
-
-              {/* Route Map Preview */}
-              {formData.pickup && formData.dropoff && (
-                <div className="pt-4">
-                  <GoogleRouteMap
-                    pickup={formData.pickup}
-                    dropoff={formData.dropoff}
-                    showNavigationButtons={false}
-                  />
+              {hasPendingReservation ? (
+                /* Readonly summary for pending reservations */
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t('pickupPoint')}</p>
+                      <p className="font-medium">{formData.pickup}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-accent mt-0.5" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t('dropoffLocation')}</p>
+                      <p className="font-medium">{formData.dropoff}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">{t('date')}</p>
+                        <p className="font-medium">{formData.date}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">{t('time')}</p>
+                        <p className="font-medium">{formData.time}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Car className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">{t('vehicle')}</p>
+                        <p className="font-medium">{vehicleTypes.find(v => v.value === formData.vehicleType)?.label}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Price display for pending reservation */}
+                  {prefilledPrice && (
+                    <div className="mt-4 p-3 bg-primary/10 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{t('price') || 'Price'}:</span>
+                        <span className="text-xl font-bold text-primary">{prefilledPrice} {prefilledCurrency}</span>
+                      </div>
+                      {prefilledReturnPrice && (
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                          <span>{t('returnTrip') || 'Return Trip'}:</span>
+                          <span>{prefilledReturnPrice} {prefilledCurrency}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
+              ) : (
+                /* Editable form for new reservations */
+                <>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      {t('pickupPoint')}
+                    </Label>
+                    <GooglePlacesAutocomplete
+                      onPlaceSelected={(value, details) => setFormData((prev) => ({ 
+                        ...prev, 
+                        pickup: value,
+                        pickup_place_name: details?.placeName || '',
+                        pickup_lat: details?.lat || null,
+                        pickup_lng: details?.lng || null,
+                      }))}
+                      placeholder={t('enterPickupPoint')}
+                      className={errors.pickup ? 'border-destructive' : ''}
+                      maxLength={200}
+                      initialValue={formData.pickup}
+                    />
+                    {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      {t('dropoffLocation')}
+                    </Label>
+                    <GooglePlacesAutocomplete
+                      onPlaceSelected={(value, details) => setFormData((prev) => ({ 
+                        ...prev, 
+                        dropoff: value,
+                        dropoff_place_name: details?.placeName || '',
+                        dropoff_lat: details?.lat || null,
+                        dropoff_lng: details?.lng || null,
+                      }))}
+                      placeholder={t('hotelOrAddress')}
+                      className={errors.dropoff ? 'border-destructive' : ''}
+                      maxLength={200}
+                      initialValue={formData.dropoff}
+                    />
+                    {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
+                  </div>
+
+                  {/* Route Map Preview */}
+                  {formData.pickup && formData.dropoff && (
+                    <div className="pt-4">
+                      <GoogleRouteMap
+                        pickup={formData.pickup}
+                        dropoff={formData.dropoff}
+                        showNavigationButtons={false}
+                      />
+                    </div>
+                  )}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        {t('date')}
+                      </Label>
+                      <Input
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) => setFormData({...formData, date: e.target.value})}
+                        className={errors.date ? 'border-destructive' : ''}
+                      />
+                      {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t('time')}</Label>
+                      <Input
+                        type="time"
+                        value={formData.time}
+                        onChange={(e) => setFormData({...formData, time: e.target.value})}
+                        className={errors.time ? 'border-destructive' : ''}
+                      />
+                      {errors.time && <p className="text-sm text-destructive">{errors.time}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Plane className="h-4 w-4" />
+                        Flight
+                      </Label>
+                      <Input
+                        placeholder="TK1234"
+                        value={formData.flightNumber}
+                        onChange={(e) => setFormData({...formData, flightNumber: e.target.value})}
+                        maxLength={20}
+                      />
+                    </div>
+                  </div>
+                </>
               )}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    {t('date')}
-                  </Label>
-                  <Input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    className={errors.date ? 'border-destructive' : ''}
-                  />
-                  {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('time')}</Label>
-                  <Input
-                    type="time"
-                    value={formData.time}
-                    onChange={(e) => setFormData({...formData, time: e.target.value})}
-                    className={errors.time ? 'border-destructive' : ''}
-                  />
-                  {errors.time && <p className="text-sm text-destructive">{errors.time}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Plane className="h-4 w-4" />
-                    Flight
-                  </Label>
-                  <Input
-                    placeholder="TK1234"
-                    value={formData.flightNumber}
-                    onChange={(e) => setFormData({...formData, flightNumber: e.target.value})}
-                    maxLength={20}
-                  />
-                </div>
-              </div>
 
               {/* Airline Display & Flight Status */}
               {formData.flightNumber && formData.flightNumber.length >= 2 && (
