@@ -45,6 +45,7 @@ import sprinter2 from "@/assets/sprinter-2.jpg";
 import sprinter3 from "@/assets/sprinter-3.jpg";
 import sprinter4 from "@/assets/sprinter-4.jpg";
 import sprinter5 from "@/assets/sprinter-5.jpg";
+import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
 import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
 import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 
@@ -66,7 +67,7 @@ const vehicleData = {
     luggage: 4,
   },
   "Minibus": {
-    images: [sprinter1, meetTransferDubai, sprinter2, sprinter3, meetTransferCyprus, sprinter4, sprinter5],
+    images: [sprinter1, meetTransferDubai, sprinter2, sprinterLuggage, sprinter3, meetTransferCyprus, sprinter4, sprinter5],
     passengers: 16,
     luggage: 16,
   },
