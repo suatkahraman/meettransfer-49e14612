@@ -11,6 +11,16 @@ import vito3 from "@/assets/vito-3.jpg";
 import vito4 from "@/assets/vito-4.jpg";
 import vito5 from "@/assets/vito-5.jpg";
 import vito6 from "@/assets/vito-6.jpg";
+import vitoAirportAnime from "@/assets/vito-airport-anime.jpg";
+import vitoAirportWelcome from "@/assets/vito-airport-welcome.jpg";
+import vitoCappadociaBalloon from "@/assets/vito-cappadocia-balloon.jpg";
+import vitoFamilyInterior from "@/assets/vito-family-interior.jpg";
+import vitoInteriorLeather from "@/assets/vito-interior-leather.jpg";
+import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
+import vitoPassengerOrange from "@/assets/vito-passenger-orange.jpg";
+import vitoExteriorOpendoor from "@/assets/vito-exterior-opendoor.jpg";
+import vitoPassengerNight from "@/assets/vito-passenger-night.jpg";
+import vitoPassengerCouple from "@/assets/vito-passenger-couple.jpg";
 import vitoVip2 from "@/assets/vito-vip-2.jpg";
 import vitoVip3 from "@/assets/vito-vip-3.jpg";
 import vitoVip4 from "@/assets/vito-vip-4.jpg";
@@ -62,7 +72,7 @@ const FleetPage = () => {
       passengers: 7,
       luggage: 7,
       features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-      images: [vito2, meetTransferCyprus, vito3, vito4, meetTransferDubai, vito5, vito6],
+      images: [vito2, vitoAirportAnime, vito3, vitoAirportWelcome, meetTransferCyprus, vitoCappadociaBalloon, vito4, vitoFamilyInterior, vitoInteriorLeather, meetTransferDubai, vitoExteriorBlack, vito5, vitoPassengerOrange, vitoExteriorOpendoor, vitoPassengerNight, vitoPassengerCouple, vito6],
     },
     {
       name: t("maybachName"),
