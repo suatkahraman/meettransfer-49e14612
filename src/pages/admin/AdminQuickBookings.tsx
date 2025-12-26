@@ -384,6 +384,12 @@ export default function AdminQuickBookings() {
                                 <Users className="h-4 w-4" />
                                 {request.passengers} passengers
                               </div>
+                              {!request.price && request.price_currency && (
+                                <div className="flex items-center gap-1 text-primary font-medium">
+                                  <DollarSign className="h-4 w-4" />
+                                  Preferred: {request.price_currency}
+                                </div>
+                              )}
                             </div>
 
                             {request.price && (
@@ -421,9 +427,12 @@ export default function AdminQuickBookings() {
                                   setPriceDialogOpen(open);
                                   if (open) {
                                     setSelectedRequest(request);
-                                    // Pre-fill with previous price if rejected
+                                    // Pre-fill with previous price if rejected, otherwise use customer's preferred currency
                                     if (request.status === "price_rejected" && request.price) {
                                       setPrice(request.price.toString());
+                                      setCurrency(request.price_currency || "EUR");
+                                    } else {
+                                      setPrice("");
                                       setCurrency(request.price_currency || "EUR");
                                     }
                                   }
