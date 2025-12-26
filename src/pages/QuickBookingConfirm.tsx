@@ -259,33 +259,8 @@ export default function QuickBookingConfirm() {
         }
       }
 
-      // Notify admin about the confirmation
-      try {
-        await supabase.functions.invoke("notify-admin-quick-booking-confirmed", {
-          body: {
-            bookingId: booking.id,
-            reservationId: reservation.id,
-            reservationCode: reservation.reservationCode,
-            pickup: booking.pickup,
-            dropoff: booking.dropoff,
-            pickupDate: booking.pickup_date,
-            pickupTime: booking.pickup_time,
-            vehicleType: booking.vehicle_type,
-            passengers: booking.passengers,
-            price: booking.price,
-            priceCurrency: booking.price_currency,
-            hasReturnTrip,
-            returnDate: returnTripData.date,
-            returnTime: returnTripData.time,
-            returnPrice,
-            totalPrice,
-            promoCode: isPromoCodeValid ? promoCode : null,
-            paymentMethod,
-          },
-        });
-      } catch (notifyError) {
-        console.error("Failed to notify admin:", notifyError);
-      }
+      // Admin notification is sent server-side from create-quick-booking-reservation
+      // (avoids missed emails due to client network / navigation issues)
 
       // Navigate to customer info page to collect details
       const params = new URLSearchParams();
