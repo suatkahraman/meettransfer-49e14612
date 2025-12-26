@@ -16,6 +16,7 @@ interface NotifyRequest {
   pickupTime: string;
   vehicleType: string;
   passengers: number;
+  priceCurrency?: string;
 }
 
 serve(async (req) => {
@@ -32,9 +33,11 @@ serve(async (req) => {
       pickupTime,
       vehicleType,
       passengers,
+      priceCurrency,
     }: NotifyRequest = await req.json();
 
     console.log("Notifying admin about new quick booking request:", bookingId);
+    console.log("Request details - passengers:", passengers, "currency:", priceCurrency);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -54,7 +57,7 @@ serve(async (req) => {
     const adminUserIds = adminRoles?.map((r) => r.user_id) || [];
     console.log("Found admin user IDs:", adminUserIds);
 
-    // Create in-app notifications for all admins
+    // Vehicle labels
     const vehicleLabels: Record<string, string> = {
       "mercedes-vito": "Mercedes Vito",
       "mercedes-vclass": "VIP Vito",
@@ -62,11 +65,16 @@ serve(async (req) => {
       minibus: "Minibus",
     };
     
+    // Build notification message with all details
+    const currencyInfo = priceCurrency ? `\n💰 Preferred: ${priceCurrency}` : "";
+    const notificationMessage = `${pickup} → ${dropoff}\n📅 ${pickupDate} ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n👥 ${passengers} passengers${currencyInfo}`;
+
+    // Create in-app notifications for all admins
     for (const userId of adminUserIds) {
       await supabase.from("notifications").insert({
         user_id: userId,
         title: "📥 New Quick Booking Request",
-        message: `${pickup} → ${dropoff}\n📅 ${pickupDate} ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n👥 ${passengers} passengers`,
+        message: notificationMessage,
         type: "quick_booking_new",
       });
       console.log("Created notification for admin:", userId);
@@ -92,7 +100,7 @@ serve(async (req) => {
                 },
               },
               title: "📥 New Quick Booking Request",
-              body: `${pickup} → ${dropoff} on ${pickupDate}`,
+              body: `${pickup} → ${dropoff} | ${passengers} pax | ${pickupDate}`,
               url: "/admin/quick-bookings",
             },
           });
@@ -104,10 +112,23 @@ serve(async (req) => {
 
     // Send email notification to admin
     const adminEmail = Deno.env.get("ADMIN");
-    if (adminEmail && RESEND_API_KEY) {
+    console.log("Admin email from env:", adminEmail);
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isValidEmail = adminEmail && emailRegex.test(adminEmail);
+    
+    if (isValidEmail && RESEND_API_KEY) {
       console.log("Sending email notification to admin:", adminEmail);
 
       try {
+        const currencyHtml = priceCurrency 
+          ? `<div style="margin-bottom: 12px;">
+               <span style="color: #666;">Preferred Currency:</span>
+               <strong style="color: #16a34a; margin-left: 8px;">${priceCurrency}</strong>
+             </div>` 
+          : "";
+
         const emailResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -165,6 +186,8 @@ serve(async (req) => {
                       <span style="color: #666;">Passengers:</span>
                       <strong style="color: #333; margin-left: 8px;">${passengers}</strong>
                     </div>
+                    
+                    ${currencyHtml}
                   </div>
                   
                   <div style="background: #3b82f6; border-radius: 12px; padding: 24px; text-align: center; color: white;">
@@ -195,11 +218,14 @@ serve(async (req) => {
           const errorData = await emailResponse.text();
           console.error("Email send failed:", errorData);
         } else {
-          console.log("Admin email sent successfully");
+          const result = await emailResponse.json();
+          console.log("Admin email sent successfully:", result);
         }
       } catch (emailError) {
         console.error("Email send error:", emailError);
       }
+    } else {
+      console.log("Skipping email - invalid email or missing API key. Email:", adminEmail, "Valid:", isValidEmail, "Has API key:", !!RESEND_API_KEY);
     }
 
     return new Response(

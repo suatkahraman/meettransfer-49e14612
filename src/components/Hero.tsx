@@ -148,6 +148,7 @@ const currencyOptions = [
             pickupTime: time,
             vehicleType,
             passengers: parseInt(passengers),
+            priceCurrency: preferredCurrency,
           },
         });
       } catch (notifyError) {
