@@ -69,8 +69,14 @@ export const Hero = () => {
   const [returnDatePopoverOpen, setReturnDatePopoverOpen] = useState(false);
 
   const handleRequestPrice = async () => {
-    if (!pickup || !dropoff || !date || !time) {
-      toast.error(t("pleaseFilAllFields") || "Please fill in all required fields");
+    const missingFields: string[] = [];
+    if (!pickup) missingFields.push(t("pickupPoint") || "Pickup");
+    if (!dropoff) missingFields.push(t("dropoffLocation") || "Drop-off");
+    if (!date) missingFields.push(t("pickupDate") || "Date");
+    if (!time) missingFields.push(t("pickupTime") || "Time");
+    
+    if (missingFields.length > 0) {
+      toast.error(`${t("pleaseFilAllFields") || "Please fill in"}: ${missingFields.join(", ")}`);
       return;
     }
     
