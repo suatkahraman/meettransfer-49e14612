@@ -233,11 +233,11 @@ Please confirm availability and price.`;
                     <CarouselContent>
                       {vehicleData[formData.vehicleType as keyof typeof vehicleData].images.map((img, idx) => (
                         <CarouselItem key={idx}>
-                          <div className="overflow-hidden rounded-xl aspect-video">
+                          <div className="overflow-hidden rounded-xl aspect-[4/3] bg-muted">
                             <img
                               src={img}
                               alt={`${formData.vehicleType} - ${idx + 1}`}
-                              className="w-full h-full object-cover object-center"
+                              className="w-full h-full object-contain"
                             />
                           </div>
                         </CarouselItem>
