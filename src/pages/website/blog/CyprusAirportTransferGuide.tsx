@@ -77,9 +77,9 @@ const CyprusAirportTransferGuide = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Cyprus Airport Transfer Guide 2025 | Larnaca & Paphos Private Transfers"
-        description="Complete guide to Cyprus airport transfers. Book private transfers from Larnaca Airport to Ayia Napa, Limassol, Paphos. Fixed prices, 24/7 service, reliable drivers."
-        keywords="Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Cyprus taxi"
+        title="Cyprus Airport Transfer Guide 2025 | Larnaca to Ayia Napa, Paphos to Limassol | Meet Transfer"
+        description="Complete Cyprus airport transfer guide. Private VIP transfers from Larnaca (LCA) & Paphos (PFO) airports from €35. Fixed prices to Ayia Napa, Limassol, Protaras, Kyrenia. 24/7 service, Northern Cyprus included."
+        keywords="Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Cyprus taxi, Protaras transfer, Kyrenia transfer, Northern Cyprus transfer, Ercan airport, Famagusta transfer, Troodos transfer"
         canonicalPath="/blog/cyprus-airport-transfer-guide"
       />
       <SchemaOrg
@@ -87,11 +87,11 @@ const CyprusAirportTransferGuide = () => {
           { type: 'LocalBusiness' },
           {
             type: 'Article',
-            headline: 'Cyprus Airport Transfer Guide 2025: Larnaca & Paphos',
-            description: 'Complete guide to Cyprus airport transfers. Book private transfers from Larnaca Airport to Ayia Napa, Limassol, Paphos.',
+            headline: 'Cyprus Airport Transfer Guide 2025: Larnaca & Paphos to Ayia Napa, Limassol, Kyrenia',
+            description: 'Complete guide to Cyprus airport transfers. Private VIP transfers from Larnaca and Paphos airports. Fixed prices from €35, 24/7 service, Northern Cyprus included.',
             image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
             datePublished: '2024-12-26',
-            dateModified: '2024-12-26',
+            dateModified: '2025-01-01',
             author: 'Meet Transfer',
             readingTime: '15',
           },
@@ -101,7 +101,15 @@ const CyprusAirportTransferGuide = () => {
               question: item.question,
               answer: item.answer
             }))
-          }
+          },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Blog', url: '/blog' },
+              { name: 'Cyprus Airport Transfer Guide', url: '/blog/cyprus-airport-transfer-guide' },
+            ],
+          },
         ]}
       />
 

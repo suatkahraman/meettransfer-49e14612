@@ -67,9 +67,9 @@ const DubaiAirportTransferGuide = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Dubai Airport Transfer Guide 2025 | Private VIP Transfers | Meet Transfer"
-        description="Complete guide to Dubai Airport transfers. Book private VIP transfers from DXB to Downtown, Palm Jumeirah, Dubai Marina. Fixed prices, 24/7 service, luxury vehicles."
-        keywords="Dubai airport transfer, DXB private transfer, Dubai Airport to Downtown, Palm Jumeirah transfer, Dubai VIP transfer, Dubai Airport taxi, Dubai luxury transfer"
+        title="Dubai Airport Transfer Guide 2025 | DXB to Downtown, Palm Jumeirah, Marina | Meet Transfer"
+        description="Complete Dubai Airport transfer guide. Private VIP transfers from DXB to Downtown Dubai, Palm Jumeirah, Dubai Marina from $45. Compare private transfer, taxi, metro options. 24/7 meet & greet, luxury Mercedes vehicles."
+        keywords="Dubai airport transfer, DXB private transfer, Dubai Airport to Downtown, Palm Jumeirah transfer, Dubai VIP transfer, Dubai Airport taxi, Dubai luxury transfer, Dubai Marina transfer, Burj Khalifa transfer, JBR transfer, Business Bay transfer, Dubai Airport to hotel, DWC airport transfer, Al Maktoum airport"
         canonicalPath="/blog/dubai-airport-transfer-guide"
       />
       <SchemaOrg
@@ -77,11 +77,11 @@ const DubaiAirportTransferGuide = () => {
           { type: 'LocalBusiness' },
           {
             type: 'Article',
-            headline: 'Dubai Airport Transfer Guide 2025: Best Ways to Get to Your Hotel',
-            description: 'Complete guide to Dubai Airport transfers. Book private VIP transfers from DXB to Downtown, Palm Jumeirah, Dubai Marina.',
+            headline: 'Dubai Airport Transfer Guide 2025: Best Ways to Get to Downtown, Palm Jumeirah & Marina',
+            description: 'Complete guide to Dubai Airport transfers. Compare private VIP transfers, taxis, metro, and ride-hailing. Fixed prices from $45 to Downtown Dubai, 24/7 service.',
             image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
             datePublished: '2024-12-26',
-            dateModified: '2024-12-26',
+            dateModified: '2025-01-01',
             author: 'Meet Transfer',
             readingTime: '14',
           },
@@ -91,7 +91,15 @@ const DubaiAirportTransferGuide = () => {
               question: item.question,
               answer: item.answer
             }))
-          }
+          },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Blog', url: '/blog' },
+              { name: 'Dubai Airport Transfer Guide', url: '/blog/dubai-airport-transfer-guide' },
+            ],
+          },
         ]}
       />
 

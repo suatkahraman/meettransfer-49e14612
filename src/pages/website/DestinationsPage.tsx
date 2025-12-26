@@ -109,14 +109,14 @@ const DestinationsPage = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title={t("seoDestinationsTitle")}
-        description={t("seoDestinationsDesc")}
-        keywords="Turkey airport transfer destinations, Istanbul transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, VIP transfer Turkey"
+        title="Airport Transfer Destinations | Turkey, Dubai & Cyprus VIP Transfers | Meet Transfer"
+        description="Premium airport transfer service across Turkey, Dubai and Cyprus. VIP transfers from Istanbul, Antalya, Bodrum, Dubai, Larnaca, Paphos airports. Mercedes fleet, 24/7 meet & greet service, professional drivers."
+        keywords="airport transfer destinations, Turkey airport transfer, Istanbul transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, Dubai airport transfer, Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, VIP transfer, private chauffeur, Mercedes transfer"
         canonicalPath="/destinations"
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia'] },
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Larnaca', 'Paphos'] },
           {
             type: 'BreadcrumbList',
             items: [
@@ -124,22 +124,23 @@ const DestinationsPage = () => {
               { name: 'Destinations', url: '/destinations' },
             ],
           },
+          { type: 'LocalBusiness' },
         ]}
       />
 
       <PageHeader
-        title={t("destinationsTitle")}
-        subtitle={t("destinationsSubtitle")}
+        title="VIP Destinations Worldwide"
+        subtitle="Premium Airport Transfers in Turkey, Dubai & Cyprus"
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
         {/* Main H1 */}
         <section className="text-center mb-10 md:mb-14">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            {t("destinationsMainTitle")}
+            VIP Airport Transfer Destinations
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            {t("destinationsIntro")}
+            Discover premium airport transfer services across Turkey, Dubai, and Cyprus. From luxury marinas to historic city centers, Meet Transfer provides professional chauffeur service, Mercedes fleet, and 24/7 meet & greet at every major airport. Book your VIP private transfer with flight tracking and door-to-door service.
           </p>
         </section>
 
