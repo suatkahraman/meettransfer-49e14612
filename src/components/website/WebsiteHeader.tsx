@@ -136,9 +136,9 @@ const WebsiteHeader = () => {
           {/* Install App Button (Desktop) - More prominent */}
           <div className="hidden md:block">
             <InstallAppButton 
-              variant="outline" 
-              size="sm" 
-              className="border-accent/50 hover:bg-accent/10 hover:border-accent text-foreground"
+              variant="prominent" 
+              size="sm"
+              animated
             />
           </div>
           <div className="hidden md:block">
