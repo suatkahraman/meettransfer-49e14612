@@ -5,7 +5,6 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
-import vitoVip1 from "@/assets/vito-vip-1.jpg";
 import vito2 from "@/assets/vito-2.jpg";
 import vito3 from "@/assets/vito-3.jpg";
 import vito4 from "@/assets/vito-4.jpg";
@@ -21,12 +20,18 @@ import vitoPassengerOrange from "@/assets/vito-passenger-orange.jpg";
 import vitoExteriorOpendoor from "@/assets/vito-exterior-opendoor.jpg";
 import vitoPassengerNight from "@/assets/vito-passenger-night.jpg";
 import vitoPassengerCouple from "@/assets/vito-passenger-couple.jpg";
+import vitoVip1 from "@/assets/vito-vip-1.jpg";
 import vitoVip2 from "@/assets/vito-vip-2.jpg";
 import vitoVip3 from "@/assets/vito-vip-3.jpg";
 import vitoVip4 from "@/assets/vito-vip-4.jpg";
 import vitoVip5 from "@/assets/vito-vip-5.jpg";
 import vitoVipPassengers1 from "@/assets/vito-vip-passengers-1.jpg";
 import vitoVipPassengers2 from "@/assets/vito-vip-passengers-2.jpg";
+import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
+import vitoVipStarlightRoof from "@/assets/vito-vip-starlight-roof.jpg";
+import vitoVipLuxuryWhite from "@/assets/vito-vip-luxury-white.jpg";
+import vitoVipCoupleStarlight from "@/assets/vito-vip-couple-starlight.jpg";
+import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
 import maybach1 from "@/assets/maybach-1.jpg";
 import maybach2 from "@/assets/maybach-2.jpg";
 import maybach3 from "@/assets/maybach-3.jpg";
@@ -64,7 +69,7 @@ const FleetPage = () => {
       passengers: 6,
       luggage: 6,
       features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
-      images: [vitoVip1, meetTransferDubai, vitoVip2, vitoVipPassengers1, vitoVip3, meetTransferCyprus, vitoVip4, vitoVipPassengers2, vitoVip5],
+      images: [vitoVip1, vitoVipStarlightPurple, meetTransferDubai, vitoVip2, vitoVipStarlightRoof, vitoVipPassengers1, vitoVip3, vitoVipLuxuryWhite, meetTransferCyprus, vitoVip4, vitoVipCoupleStarlight, vitoVipPassengers2, vitoVip5, vitoVipPassengersDay],
     },
     {
       name: t("vitoName"),
