@@ -55,11 +55,18 @@ serve(async (req) => {
     console.log("Found admin user IDs:", adminUserIds);
 
     // Create in-app notifications for all admins
+    const vehicleLabels: Record<string, string> = {
+      "mercedes-vito": "Mercedes Vito",
+      "mercedes-vclass": "VIP Vito",
+      maybach: "Maybach Minivan",
+      minibus: "Minibus",
+    };
+    
     for (const userId of adminUserIds) {
       await supabase.from("notifications").insert({
         user_id: userId,
         title: "📥 New Quick Booking Request",
-        message: `New request: ${pickup} → ${dropoff} on ${pickupDate} at ${pickupTime}`,
+        message: `${pickup} → ${dropoff}\n📅 ${pickupDate} ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n👥 ${passengers} passengers`,
         type: "quick_booking_new",
       });
       console.log("Created notification for admin:", userId);
@@ -99,13 +106,6 @@ serve(async (req) => {
     const adminEmail = Deno.env.get("ADMIN");
     if (adminEmail && RESEND_API_KEY) {
       console.log("Sending email notification to admin:", adminEmail);
-      
-      const vehicleLabels: Record<string, string> = {
-        "mercedes-vito": "Mercedes Vito",
-        "mercedes-vclass": "VIP Vito",
-        maybach: "Maybach Minivan",
-        minibus: "Minibus",
-      };
 
       try {
         const emailResponse = await fetch("https://api.resend.com/emails", {
