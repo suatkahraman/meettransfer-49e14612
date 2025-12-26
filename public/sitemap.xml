@@ -13,18 +13,17 @@
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/"/>
-    <lastmod>2025-12-22</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-  <url><loc>https://meettransfer.app/de</loc><lastmod>2025-12-22</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://meettransfer.app/fr</loc><lastmod>2025-12-22</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://meettransfer.app/ru</loc><lastmod>2025-12-22</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://meettransfer.app/it</loc><lastmod>2025-12-22</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://meettransfer.app/es</loc><lastmod>2025-12-22</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://meettransfer.app/ar</loc><lastmod>2025-12-22</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://meettransfer.app/tr</loc><lastmod>2025-12-22</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-
+  <url><loc>https://meettransfer.app/de</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://meettransfer.app/fr</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://meettransfer.app/ru</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://meettransfer.app/it</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://meettransfer.app/es</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://meettransfer.app/ar</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://meettransfer.app/tr</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
 
   <!-- Services - All Languages -->
   <url>
@@ -170,6 +169,54 @@
   <url><loc>https://meettransfer.app/ar/reviews</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://meettransfer.app/tr/reviews</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
 
+  <!-- Blog - All Languages -->
+  <url>
+    <loc>https://meettransfer.app/blog</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/blog"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/blog"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/blog"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/blog"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/blog"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/blog"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/blog"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/blog"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/blog"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/blog</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/fr/blog</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ru/blog</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/it/blog</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/es/blog</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ar/blog</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/tr/blog</loc><lastmod>2025-12-26</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+
+  <!-- Privacy - All Languages -->
+  <url>
+    <loc>https://meettransfer.app/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/privacy"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/privacy"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/privacy"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/privacy"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/privacy"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/privacy"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/privacy</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/fr/privacy</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/ru/privacy</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/it/privacy</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/es/privacy</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/ar/privacy</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/tr/privacy</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+
   <!-- Istanbul Transfer - All Languages -->
   <url>
     <loc>https://meettransfer.app/istanbul-transfer</loc>
@@ -180,17 +227,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/istanbul-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/istanbul-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/istanbul-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/istanbul-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/istanbul-transfer"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/istanbul-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/istanbul-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/istanbul-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/istanbul-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/istanbul-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/istanbul-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/istanbul-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/istanbul-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/istanbul-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/istanbul-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/istanbul-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/istanbul-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/istanbul-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Antalya Transfer - All Languages -->
   <url>
@@ -202,17 +251,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/antalya-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/antalya-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/antalya-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/antalya-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/antalya-transfer"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/antalya-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/antalya-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/antalya-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/antalya-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/antalya-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/antalya-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/antalya-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/antalya-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/antalya-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/antalya-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/antalya-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/antalya-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/antalya-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Bodrum Transfer - All Languages -->
   <url>
@@ -224,17 +275,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/bodrum-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/bodrum-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/bodrum-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/bodrum-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/bodrum-transfer"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/bodrum-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/bodrum-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/bodrum-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/bodrum-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/bodrum-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/bodrum-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/bodrum-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/bodrum-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/bodrum-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/bodrum-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/bodrum-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/bodrum-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/bodrum-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Dalaman Transfer - All Languages -->
   <url>
@@ -246,17 +299,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/dalaman-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/dalaman-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/dalaman-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/dalaman-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/dalaman-transfer"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/dalaman-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/dalaman-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/dalaman-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/dalaman-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/dalaman-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/dalaman-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/dalaman-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/dalaman-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/dalaman-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/dalaman-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/dalaman-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/dalaman-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/dalaman-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Izmir Transfer - All Languages -->
   <url>
@@ -268,17 +323,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/izmir-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/izmir-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/izmir-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/izmir-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/izmir-transfer"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/izmir-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/izmir-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/izmir-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/izmir-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/izmir-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/izmir-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/izmir-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/izmir-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/izmir-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/izmir-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/izmir-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/izmir-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/izmir-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Cappadocia Transfer - All Languages -->
   <url>
@@ -290,17 +347,91 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/cappadocia-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/cappadocia-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/cappadocia-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/cappadocia-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/cappadocia-transfer"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/cappadocia-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/cappadocia-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/cappadocia-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/cappadocia-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/cappadocia-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/cappadocia-transfer</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/cappadocia-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/cappadocia-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/cappadocia-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/cappadocia-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/cappadocia-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/cappadocia-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/cappadocia-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+
+  <!-- Dubai Transfer - All Languages -->
+  <url>
+    <loc>https://meettransfer.app/dubai-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/dubai-transfer"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/dubai-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/dubai-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/dubai-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/dubai-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/dubai-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/dubai-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/dubai-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+
+  <!-- Cyprus Transfer - All Languages -->
+  <url>
+    <loc>https://meettransfer.app/cyprus-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/cyprus-transfer"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/cyprus-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/cyprus-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/cyprus-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/cyprus-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/cyprus-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/cyprus-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/cyprus-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+
+  <!-- Bursa Transfer - All Languages -->
+  <url>
+    <loc>https://meettransfer.app/bursa-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/bursa-transfer"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Ephesus Pamukkale - All Languages -->
   <url>
@@ -312,17 +443,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/ephesus-pamukkale"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/ephesus-pamukkale"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/ephesus-pamukkale"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/ephesus-pamukkale"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/ephesus-pamukkale"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/ephesus-pamukkale</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/fr/ephesus-pamukkale</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ru/ephesus-pamukkale</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/it/ephesus-pamukkale</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/es/ephesus-pamukkale</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ar/ephesus-pamukkale</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/de/ephesus-pamukkale</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/fr/ephesus-pamukkale</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ru/ephesus-pamukkale</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/it/ephesus-pamukkale</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/es/ephesus-pamukkale</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ar/ephesus-pamukkale</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/tr/ephesus-pamukkale</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
   <!-- Luxury Chauffeur - All Languages -->
   <url>
@@ -334,17 +467,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/luxury-chauffeur"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/luxury-chauffeur"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/luxury-chauffeur"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/luxury-chauffeur"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/luxury-chauffeur"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/luxury-chauffeur</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/fr/luxury-chauffeur</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ru/luxury-chauffeur</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/it/luxury-chauffeur</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/es/luxury-chauffeur</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ar/luxury-chauffeur</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/de/luxury-chauffeur</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/fr/luxury-chauffeur</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ru/luxury-chauffeur</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/it/luxury-chauffeur</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/es/luxury-chauffeur</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ar/luxury-chauffeur</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/tr/luxury-chauffeur</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
   <!-- Terms - All Languages -->
   <url>
@@ -356,17 +491,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/terms"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/terms"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/terms"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/terms"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/terms"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/terms</loc><lastmod>2025-12-17</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://meettransfer.app/fr/terms</loc><lastmod>2025-12-17</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://meettransfer.app/ru/terms</loc><lastmod>2025-12-17</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://meettransfer.app/it/terms</loc><lastmod>2025-12-17</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://meettransfer.app/es/terms</loc><lastmod>2025-12-17</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://meettransfer.app/ar/terms</loc><lastmod>2025-12-17</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/de/terms</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/fr/terms</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/ru/terms</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/it/terms</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/es/terms</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/ar/terms</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://meettransfer.app/tr/terms</loc><lastmod>2025-12-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
 
   <!-- Book - All Languages -->
   <url>
@@ -378,17 +515,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/book"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/book"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/book"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/book"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/book"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/book</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/book</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/book</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/book</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/book</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/book</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/book</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/book</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/book</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/book</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/book</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/book</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/book</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Istanbul Airport Transfer - All Languages -->
   <url>
@@ -400,17 +539,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/istanbul-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/istanbul-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/istanbul-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/istanbul-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/istanbul-airport-transfer"/>
-    <lastmod>2025-12-21</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/istanbul-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/istanbul-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/istanbul-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/istanbul-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/istanbul-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/istanbul-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/istanbul-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/istanbul-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/istanbul-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/istanbul-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/istanbul-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/istanbul-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/istanbul-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Antalya Airport Transfer - All Languages -->
   <url>
@@ -422,17 +563,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/antalya-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/antalya-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/antalya-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/antalya-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/antalya-airport-transfer"/>
-    <lastmod>2025-12-21</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/antalya-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/antalya-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/antalya-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/antalya-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/antalya-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/antalya-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/antalya-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/antalya-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/antalya-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/antalya-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/antalya-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/antalya-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/antalya-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Bodrum Airport Transfer - All Languages -->
   <url>
@@ -444,17 +587,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/bodrum-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/bodrum-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/bodrum-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/bodrum-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/bodrum-airport-transfer"/>
-    <lastmod>2025-12-21</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/bodrum-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/bodrum-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/bodrum-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/bodrum-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/bodrum-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/bodrum-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/bodrum-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/bodrum-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/bodrum-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/bodrum-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/bodrum-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/bodrum-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/bodrum-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Cappadocia Airport Transfer - All Languages -->
   <url>
@@ -466,17 +611,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/cappadocia-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/cappadocia-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/cappadocia-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/cappadocia-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/cappadocia-airport-transfer"/>
-    <lastmod>2025-12-21</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/cappadocia-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/cappadocia-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/cappadocia-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/cappadocia-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/cappadocia-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/cappadocia-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/cappadocia-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/cappadocia-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/cappadocia-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/cappadocia-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/cappadocia-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/cappadocia-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/cappadocia-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Dalaman Airport Transfer - All Languages -->
   <url>
@@ -488,17 +635,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/dalaman-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/dalaman-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/dalaman-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/dalaman-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/dalaman-airport-transfer"/>
-    <lastmod>2025-12-21</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/dalaman-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/dalaman-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/dalaman-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/dalaman-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/dalaman-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/dalaman-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/dalaman-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/dalaman-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/dalaman-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/dalaman-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/dalaman-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/dalaman-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/dalaman-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Izmir Airport Transfer - All Languages -->
   <url>
@@ -510,17 +659,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/izmir-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/izmir-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/izmir-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/izmir-airport-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/izmir-airport-transfer"/>
-    <lastmod>2025-12-21</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/izmir-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/izmir-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/izmir-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/izmir-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/izmir-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/izmir-airport-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/de/izmir-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/izmir-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/izmir-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/izmir-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/izmir-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/izmir-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/izmir-airport-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Istanbul Airport Hotel Transfer - All Languages -->
   <url>
@@ -532,17 +683,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/istanbul-airport-hotel-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/istanbul-airport-hotel-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/istanbul-airport-hotel-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/istanbul-airport-hotel-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/istanbul-airport-hotel-transfer"/>
-    <lastmod>2025-12-21</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/fr/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ru/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/it/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/es/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ar/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/de/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/fr/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ru/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/it/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/es/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ar/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/tr/istanbul-airport-hotel-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
   <!-- IST City Center VIP Transfer - All Languages -->
   <url>
@@ -554,17 +707,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/ist-city-center-vip-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/ist-city-center-vip-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/ist-city-center-vip-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/ist-city-center-vip-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/ist-city-center-vip-transfer"/>
-    <lastmod>2025-12-21</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/ist-city-center-vip-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/fr/ist-city-center-vip-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ru/ist-city-center-vip-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/it/ist-city-center-vip-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/es/ist-city-center-vip-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ar/ist-city-center-vip-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/de/ist-city-center-vip-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/fr/ist-city-center-vip-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ru/ist-city-center-vip-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/it/ist-city-center-vip-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/es/ist-city-center-vip-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ar/ist-city-center-vip-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/tr/ist-city-center-vip-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
   <!-- Sabiha Gokcen Private Transfer - All Languages -->
   <url>
@@ -576,17 +731,139 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/sabiha-gokcen-private-transfer"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/sabiha-gokcen-private-transfer"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/sabiha-gokcen-private-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/sabiha-gokcen-private-transfer"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/sabiha-gokcen-private-transfer"/>
-    <lastmod>2025-12-21</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/fr/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ru/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/it/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/es/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ar/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-21</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/de/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/fr/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ru/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/it/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/es/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ar/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/tr/sabiha-gokcen-private-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+
+  <!-- Blog - Istanbul Airport to City Guide -->
+  <url>
+    <loc>https://meettransfer.app/blog/istanbul-airport-to-city-guide</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/blog/istanbul-airport-to-city-guide"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/blog/istanbul-airport-to-city-guide"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/blog/istanbul-airport-to-city-guide"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/blog/istanbul-airport-to-city-guide"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/blog/istanbul-airport-to-city-guide"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/blog/istanbul-airport-to-city-guide"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/blog/istanbul-airport-to-city-guide"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/blog/istanbul-airport-to-city-guide"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/blog/istanbul-airport-to-city-guide"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/blog/istanbul-airport-to-city-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/fr/blog/istanbul-airport-to-city-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ru/blog/istanbul-airport-to-city-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/it/blog/istanbul-airport-to-city-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/es/blog/istanbul-airport-to-city-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ar/blog/istanbul-airport-to-city-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/tr/blog/istanbul-airport-to-city-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- Blog - Istanbul Transfer Price Guide -->
+  <url>
+    <loc>https://meettransfer.app/blog/istanbul-transfer-price-guide</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/blog/istanbul-transfer-price-guide"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/blog/istanbul-transfer-price-guide"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/blog/istanbul-transfer-price-guide"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/blog/istanbul-transfer-price-guide"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/blog/istanbul-transfer-price-guide"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/blog/istanbul-transfer-price-guide"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/blog/istanbul-transfer-price-guide"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/blog/istanbul-transfer-price-guide"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/blog/istanbul-transfer-price-guide"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/blog/istanbul-transfer-price-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/fr/blog/istanbul-transfer-price-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ru/blog/istanbul-transfer-price-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/it/blog/istanbul-transfer-price-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/es/blog/istanbul-transfer-price-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ar/blog/istanbul-transfer-price-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/tr/blog/istanbul-transfer-price-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- Blog - Antalya Airport Transfer Guide -->
+  <url>
+    <loc>https://meettransfer.app/blog/antalya-airport-transfer-guide</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/blog/antalya-airport-transfer-guide"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/blog/antalya-airport-transfer-guide"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/blog/antalya-airport-transfer-guide"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/blog/antalya-airport-transfer-guide"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/blog/antalya-airport-transfer-guide"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/blog/antalya-airport-transfer-guide"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/blog/antalya-airport-transfer-guide"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/blog/antalya-airport-transfer-guide"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/blog/antalya-airport-transfer-guide"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/blog/antalya-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/fr/blog/antalya-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ru/blog/antalya-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/it/blog/antalya-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/es/blog/antalya-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ar/blog/antalya-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/tr/blog/antalya-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- Blog - Private vs Taxi Turkey -->
+  <url>
+    <loc>https://meettransfer.app/blog/private-vs-taxi-turkey</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/blog/private-vs-taxi-turkey"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/blog/private-vs-taxi-turkey"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/blog/private-vs-taxi-turkey"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/blog/private-vs-taxi-turkey"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/blog/private-vs-taxi-turkey"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/blog/private-vs-taxi-turkey"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/blog/private-vs-taxi-turkey"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/blog/private-vs-taxi-turkey"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/blog/private-vs-taxi-turkey"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/blog/private-vs-taxi-turkey</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/fr/blog/private-vs-taxi-turkey</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ru/blog/private-vs-taxi-turkey</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/it/blog/private-vs-taxi-turkey</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/es/blog/private-vs-taxi-turkey</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ar/blog/private-vs-taxi-turkey</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/tr/blog/private-vs-taxi-turkey</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- Blog - Is Private Transfer Worth It -->
+  <url>
+    <loc>https://meettransfer.app/blog/is-private-transfer-worth-it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/blog/is-private-transfer-worth-it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/blog/is-private-transfer-worth-it"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/blog/is-private-transfer-worth-it"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/blog/is-private-transfer-worth-it"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/blog/is-private-transfer-worth-it"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/blog/is-private-transfer-worth-it"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/blog/is-private-transfer-worth-it"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/blog/is-private-transfer-worth-it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/blog/is-private-transfer-worth-it"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/blog/is-private-transfer-worth-it</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/fr/blog/is-private-transfer-worth-it</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ru/blog/is-private-transfer-worth-it</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/it/blog/is-private-transfer-worth-it</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/es/blog/is-private-transfer-worth-it</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ar/blog/is-private-transfer-worth-it</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/tr/blog/is-private-transfer-worth-it</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
 
   <!-- Blog - Dubai Airport Transfer Guide -->
   <url>
@@ -635,30 +912,6 @@
   <url><loc>https://meettransfer.app/es/blog/cyprus-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://meettransfer.app/ar/blog/cyprus-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://meettransfer.app/tr/blog/cyprus-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-
-  <!-- Bursa Transfer - All Languages -->
-  <url>
-    <loc>https://meettransfer.app/bursa-transfer</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/bursa-transfer"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/bursa-transfer"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/bursa-transfer"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/bursa-transfer"/>
-    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/bursa-transfer"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/bursa-transfer"/>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/bursa-transfer"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/bursa-transfer"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/bursa-transfer"/>
-    <lastmod>2025-12-26</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url><loc>https://meettransfer.app/de/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/fr/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ru/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/it/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/es/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/ar/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://meettransfer.app/tr/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Blog - Istanbul to Bursa Day Tour Guide -->
   <url>
