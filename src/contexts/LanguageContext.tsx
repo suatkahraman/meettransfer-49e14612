@@ -101,6 +101,8 @@ const translations: Record<Language, Record<string, string>> = {
     bodrumDesc: "Premium service to Bodrum Peninsula, Turgutreis, Gümbet and surrounding areas.",
     cappadociaTours: "Cappadocia Tours",
     cappadociaDesc: "Exclusive transfers and tour services throughout the magical Cappadocia region.",
+    bursaTours: "Istanbul ⇄ Bursa Tours",
+    bursaDesc: "Day tours and private transfers to historic Ottoman capital Bursa, Uludağ mountain, and UNESCO villages.",
     
     // Services Page
     servicesTitle: "Premium VIP Airport & Chauffeur Services",
@@ -215,6 +217,7 @@ const translations: Record<Language, Record<string, string>> = {
     caveHotelsBalloon: "Cave Hotels & Balloon Areas",
     luxuryCity: "Luxury City Destination",
     mediterraneanIsland: "Mediterranean Island",
+    historicOttomanCapital: "Historic Ottoman Capital",
     
     // Common
     passengers: "Passengers",
@@ -575,6 +578,8 @@ const translations: Record<Language, Record<string, string>> = {
     bodrumDesc: "Premium-Service zur Halbinsel Bodrum, Turgutreis, Gümbet und Umgebung.",
     cappadociaTours: "Kappadokien Touren",
     cappadociaDesc: "Exklusive Transfers und Touren in der magischen Region Kappadokien.",
+    bursaTours: "Istanbul ⇄ Bursa Touren",
+    bursaDesc: "Tagesausflüge und Privattransfers zur historischen osmanischen Hauptstadt Bursa, Uludağ-Berg und UNESCO-Dörfern.",
     
     // Services Page
     servicesTitle: "Premium VIP Flughafen- & Chauffeurservices",
@@ -689,6 +694,7 @@ const translations: Record<Language, Record<string, string>> = {
     caveHotelsBalloon: "Höhlenhotels & Ballongebiete",
     luxuryCity: "Luxus-Stadtziel",
     mediterraneanIsland: "Mittelmeerinsel",
+    historicOttomanCapital: "Historische Osmanische Hauptstadt",
     
     // Common
     passengers: "Passagiere",
@@ -1045,6 +1051,8 @@ const translations: Record<Language, Record<string, string>> = {
     bodrumDesc: "Service premium vers la péninsule de Bodrum, Turgutreis, Gümbet et les environs.",
     cappadociaTours: "Tours en Cappadoce",
     cappadociaDesc: "Transferts exclusifs et services de visite dans la région magique de la Cappadoce.",
+    bursaTours: "Istanbul ⇄ Tours à Bursa",
+    bursaDesc: "Excursions d'une journée et transferts privés vers l'ancienne capitale ottomane Bursa, le mont Uludağ et les villages UNESCO.",
     
     // Services Page
     servicesTitle: "Services VIP Aéroport & Chauffeur Premium",
@@ -1159,6 +1167,7 @@ const translations: Record<Language, Record<string, string>> = {
     caveHotelsBalloon: "Hôtels Troglodytes & Zones Montgolfières",
     luxuryCity: "Destination Ville de Luxe",
     mediterraneanIsland: "Île Méditerranéenne",
+    historicOttomanCapital: "Capitale Ottomane Historique",
     
     // Common
     passengers: "Passagers",
@@ -1515,6 +1524,8 @@ const translations: Record<Language, Record<string, string>> = {
     bodrumDesc: "Премиум сервис на полуостров Бодрум, Тургутрейс, Гюмбет и окрестности.",
     cappadociaTours: "Туры в Каппадокию",
     cappadociaDesc: "Эксклюзивные трансферы и экскурсии по волшебному региону Каппадокии.",
+    bursaTours: "Стамбул ⇄ Туры в Бурсу",
+    bursaDesc: "Однодневные туры и частные трансферы в историческую османскую столицу Бурсу, гору Улудаг и деревни ЮНЕСКО.",
     
     // Services Page
     servicesTitle: "Премиум VIP Аэропорт и Услуги Водителя",
@@ -1629,6 +1640,7 @@ const translations: Record<Language, Record<string, string>> = {
     caveHotelsBalloon: "Пещерные отели и полёты на шарах",
     luxuryCity: "Роскошный Город",
     mediterraneanIsland: "Средиземноморский Остров",
+    historicOttomanCapital: "Историческая Османская Столица",
     
     // Common
     passengers: "Пассажиры",
@@ -1985,6 +1997,8 @@ const translations: Record<Language, Record<string, string>> = {
     bodrumDesc: "Servizio premium per la penisola di Bodrum, Turgutreis, Gümbet e dintorni.",
     cappadociaTours: "Tour della Cappadocia",
     cappadociaDesc: "Trasferimenti esclusivi e servizi di tour nella magica regione della Cappadocia.",
+    bursaTours: "Istanbul ⇄ Tour a Bursa",
+    bursaDesc: "Tour giornalieri e trasferimenti privati verso l'antica capitale ottomana Bursa, il monte Uludağ e i villaggi UNESCO.",
     
     // Services Page
     servicesTitle: "Servizi VIP Aeroporto e Autista Premium",
@@ -2099,6 +2113,7 @@ const translations: Record<Language, Record<string, string>> = {
     caveHotelsBalloon: "Hotel Rupestri & Zone Mongolfiere",
     luxuryCity: "Destinazione Città di Lusso",
     mediterraneanIsland: "Isola Mediterranea",
+    historicOttomanCapital: "Storica Capitale Ottomana",
     
     // Common
     passengers: "Passeggeri",
@@ -2455,6 +2470,8 @@ const translations: Record<Language, Record<string, string>> = {
     bodrumDesc: "Servicio premium a la península de Bodrum, Turgutreis, Gümbet y alrededores.",
     cappadociaTours: "Tours en Capadocia",
     cappadociaDesc: "Traslados exclusivos y servicios de tour por la mágica región de Capadocia.",
+    bursaTours: "Estambul ⇄ Tours a Bursa",
+    bursaDesc: "Tours de un día y traslados privados a la histórica capital otomana Bursa, el monte Uludağ y los pueblos UNESCO.",
     
     // Services Page
     servicesTitle: "Servicios VIP de Aeropuerto y Chófer Premium",
@@ -2569,6 +2586,7 @@ const translations: Record<Language, Record<string, string>> = {
     caveHotelsBalloon: "Hoteles Cueva y Zonas de Globos",
     luxuryCity: "Destino Ciudad de Lujo",
     mediterraneanIsland: "Isla Mediterránea",
+    historicOttomanCapital: "Histórica Capital Otomana",
     
     // Common
     passengers: "Pasajeros",
@@ -2925,6 +2943,8 @@ const translations: Record<Language, Record<string, string>> = {
     bodrumDesc: "خدمة متميزة إلى شبه جزيرة بودروم، تورغوتريس، جومبيت والمناطق المحيطة.",
     cappadociaTours: "جولات كابادوكيا",
     cappadociaDesc: "نقل حصري وخدمات جولات في جميع أنحاء منطقة كابادوكيا الساحرة.",
+    bursaTours: "إسطنبول ⇄ جولات بورصة",
+    bursaDesc: "جولات يومية وتحويلات خاصة إلى العاصمة العثمانية التاريخية بورصة، جبل أولوداغ وقرى اليونسكو.",
     
     // Services Page
     servicesTitle: "خدمات VIP للمطار والسائق الخاص",
@@ -3039,6 +3059,7 @@ const translations: Record<Language, Record<string, string>> = {
     caveHotelsBalloon: "فنادق الكهوف ومناطق المنطاد",
     luxuryCity: "وجهة المدينة الفاخرة",
     mediterraneanIsland: "جزيرة البحر الأبيض المتوسط",
+    historicOttomanCapital: "العاصمة العثمانية التاريخية",
     
     // Common
     passengers: "الركاب",
@@ -3395,6 +3416,8 @@ const translations: Record<Language, Record<string, string>> = {
     bodrumDesc: "Bodrum Yarımadası, Turgutreis, Gümbet ve çevresine premium hizmet.",
     cappadociaTours: "Kapadokya Turları",
     cappadociaDesc: "Büyülü Kapadokya bölgesinde özel transfer ve tur hizmetleri.",
+    bursaTours: "İstanbul ⇄ Bursa Turları",
+    bursaDesc: "Tarihi Osmanlı başkenti Bursa, Uludağ dağı ve UNESCO köylerine günübirlik turlar ve özel transferler.",
     
     // Services Page
     servicesTitle: "Premium VIP Havalimanı ve Şoför Hizmetleri",
@@ -3509,6 +3532,7 @@ const translations: Record<Language, Record<string, string>> = {
     caveHotelsBalloon: "Mağara Otelleri ve Balon Alanları",
     luxuryCity: "Lüks Şehir Destinasyonu",
     mediterraneanIsland: "Akdeniz Adası",
+    historicOttomanCapital: "Tarihi Osmanlı Başkenti",
     
     // Common
     passengers: "Yolcular",

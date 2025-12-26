@@ -2,7 +2,7 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark, ArrowRight, Palmtree } from "lucide-react";
+import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark, ArrowRight, Palmtree, Trees } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -105,19 +105,33 @@ const DestinationsPage = () => {
       vehicles: "Mercedes Vito VIP",
       link: "/cyprus-transfer",
     },
+    {
+      id: 9,
+      name: "Bursa",
+      airports: "IST & SAW",
+      tagline: t("historicOttomanCapital"),
+      icon: "🏔️",
+      IconComponent: Mountain,
+      locations: ["Bursa City", "Uludağ", "Cumalıkızık", "Grand Mosque", "Mudanya", "Iznik", "Thermal Springs"],
+      vehicles: "Mercedes Vito VIP",
+      link: "/bursa-transfer",
+      extraLinks: [
+        { label: "Day Tours", path: "/bursa-transfer#tours" },
+      ],
+    },
   ];
   
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Airport Transfer Destinations | Turkey, Dubai & Cyprus VIP Transfers | Meet Transfer"
-        description="Premium airport transfer service across Turkey, Dubai and Cyprus. VIP transfers from Istanbul, Antalya, Bodrum, Dubai, Larnaca, Paphos airports. Mercedes fleet, 24/7 meet & greet service, professional drivers."
-        keywords="airport transfer destinations, Turkey airport transfer, Istanbul transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, Dubai airport transfer, Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, VIP transfer, private chauffeur, Mercedes transfer"
+        title="Airport Transfer Destinations | Turkey, Dubai, Cyprus & Bursa VIP Transfers | Meet Transfer"
+        description="Premium airport transfer service across Turkey, Dubai and Cyprus. VIP transfers from Istanbul, Antalya, Bodrum, Dubai, Larnaca, Paphos airports. Istanbul-Bursa day tours. Mercedes fleet, 24/7 meet & greet service, professional drivers."
+        keywords="airport transfer destinations, Turkey airport transfer, Istanbul transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, Dubai airport transfer, Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Istanbul Bursa transfer, Bursa day tour, VIP transfer, private chauffeur, Mercedes transfer"
         canonicalPath="/destinations"
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Larnaca', 'Paphos'] },
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Larnaca', 'Paphos', 'Bursa', 'Uludağ'] },
           {
             type: 'BreadcrumbList',
             items: [
@@ -141,7 +155,9 @@ const DestinationsPage = () => {
             VIP Airport Transfer Destinations
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Discover premium airport transfer services across Turkey, Dubai, and Cyprus. From luxury marinas to historic city centers, Meet Transfer provides professional chauffeur service, Mercedes fleet, and 24/7 meet & greet at every major airport. Book your VIP private transfer with flight tracking and door-to-door service.
+            Discover premium airport transfer services across Turkey, Dubai, and Cyprus. From luxury marinas to historic city centers, 
+            plus exclusive Istanbul-Bursa day tours. Meet Transfer provides professional chauffeur service, Mercedes fleet, 
+            and 24/7 meet & greet at every major airport. Book your VIP private transfer with flight tracking and door-to-door service.
           </p>
         </section>
 

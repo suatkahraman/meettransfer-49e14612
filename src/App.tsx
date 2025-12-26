@@ -76,6 +76,7 @@ const EphesusPamukkale = lazy(() => import("./pages/website/EphesusPamukkale"));
 const LuxuryChauffeur = lazy(() => import("./pages/website/LuxuryChauffeur"));
 const DubaiTransfer = lazy(() => import("./pages/website/DubaiTransfer"));
 const CyprusTransfer = lazy(() => import("./pages/website/CyprusTransfer"));
+const BursaTransfer = lazy(() => import("./pages/website/BursaTransfer"));
 
 // New SEO Landing Pages
 const IstanbulAirportTransfer = lazy(() => import("./pages/website/IstanbulAirportTransfer"));
@@ -174,6 +175,7 @@ const App = () => (
               {localizedRoutes("/luxury-chauffeur", <LuxuryChauffeur />)}
               {localizedRoutes("/dubai-transfer", <DubaiTransfer />)}
               {localizedRoutes("/cyprus-transfer", <CyprusTransfer />)}
+              {localizedRoutes("/bursa-transfer", <BursaTransfer />)}
               {localizedRoutes("/book", <ReservationForm />)}
               
               {/* SEO Landing Pages */}
