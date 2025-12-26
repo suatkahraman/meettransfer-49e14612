@@ -48,6 +48,11 @@ import vitoVip4 from "@/assets/vito-vip-4.jpg";
 import vitoVip5 from "@/assets/vito-vip-5.jpg";
 import vitoVipPassengers1 from "@/assets/vito-vip-passengers-1.jpg";
 import vitoVipPassengers2 from "@/assets/vito-vip-passengers-2.jpg";
+import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
+import vitoVipStarlightRoof from "@/assets/vito-vip-starlight-roof.jpg";
+import vitoVipLuxuryWhite from "@/assets/vito-vip-luxury-white.jpg";
+import vitoVipCoupleStarlight from "@/assets/vito-vip-couple-starlight.jpg";
+import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
 import maybach1 from "@/assets/maybach-1.jpg";
 import maybach2 from "@/assets/maybach-2.jpg";
 import maybach3 from "@/assets/maybach-3.jpg";
@@ -81,7 +86,7 @@ const vehicleImageData: Record<string, { images: string[]; passengers: number; l
     luggage: 7,
   },
   "mercedes-vclass": {
-    images: [vitoVip1, meetTransferDubai, vitoVip2, vitoVipPassengers1, vitoVip3, meetTransferCyprus, vitoVip4, vitoVipPassengers2, vitoVip5],
+    images: [vitoVip1, vitoVipStarlightPurple, meetTransferDubai, vitoVip2, vitoVipStarlightRoof, vitoVipPassengers1, vitoVip3, vitoVipLuxuryWhite, meetTransferCyprus, vitoVip4, vitoVipCoupleStarlight, vitoVipPassengers2, vitoVip5, vitoVipPassengersDay],
     passengers: 6,
     luggage: 6,
   },
