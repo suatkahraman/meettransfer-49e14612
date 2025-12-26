@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { LogIn, LogOut, User, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,16 @@ const WebsiteHeader = () => {
     return '/customer';
   };
 
+  const scrollToBookingForm = useCallback(() => {
+    const bookingForm = document.getElementById('booking-form');
+    if (bookingForm) {
+      bookingForm.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // If not on homepage, navigate there first
+      window.location.href = getLocalizedPath('/') + '#booking-form';
+    }
+  }, [getLocalizedPath]);
+
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -77,20 +87,42 @@ const WebsiteHeader = () => {
         </nav>
 
         {/* Center - Book Button (Mobile) */}
-        <Link to={user ? getLocalizedPath("/book") : getLocalizedPath("/#booking-form")} className="md:hidden">
-          <Button variant="accent" size="sm" className="font-semibold text-xs px-3">
+        {user ? (
+          <Link to={getLocalizedPath("/book")} className="md:hidden">
+            <Button variant="accent" size="sm" className="font-semibold text-xs px-3">
+              {t("bookNow")}
+            </Button>
+          </Link>
+        ) : (
+          <Button 
+            variant="accent" 
+            size="sm" 
+            className="md:hidden font-semibold text-xs px-3"
+            onClick={scrollToBookingForm}
+          >
             {t("bookNow")}
           </Button>
-        </Link>
+        )}
 
         {/* Right - Actions */}
         <div className="flex items-center gap-2">
           {/* Book Button (Desktop) */}
-          <Link to={user ? getLocalizedPath("/book") : getLocalizedPath("/#booking-form")} className="hidden md:block">
-            <Button variant="accent" size="sm" className="font-semibold">
+          {user ? (
+            <Link to={getLocalizedPath("/book")} className="hidden md:block">
+              <Button variant="accent" size="sm" className="font-semibold">
+                {t("bookNow")}
+              </Button>
+            </Link>
+          ) : (
+            <Button 
+              variant="accent" 
+              size="sm" 
+              className="hidden md:block font-semibold"
+              onClick={scrollToBookingForm}
+            >
               {t("bookNow")}
             </Button>
-          </Link>
+          )}
           {/* Install App Button (Desktop) - More prominent */}
           <div className="hidden md:block">
             <InstallAppButton 
@@ -217,11 +249,16 @@ const WebsiteHeader = () => {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <div className="p-2">
-                    <Link to={getLocalizedPath("/#booking-form")}>
-                      <Button variant="accent" className="w-full">
-                        {t("bookNow")}
-                      </Button>
-                    </Link>
+                    <Button 
+                      variant="accent" 
+                      className="w-full"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        scrollToBookingForm();
+                      }}
+                    >
+                      {t("bookNow")}
+                    </Button>
                   </div>
                 </>
               )}
