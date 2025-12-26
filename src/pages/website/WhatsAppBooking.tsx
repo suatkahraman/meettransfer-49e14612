@@ -44,26 +44,28 @@ import sprinter2 from "@/assets/sprinter-2.jpg";
 import sprinter3 from "@/assets/sprinter-3.jpg";
 import sprinter4 from "@/assets/sprinter-4.jpg";
 import sprinter5 from "@/assets/sprinter-5.jpg";
+import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
+import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 
 // Vehicle data with images
 const vehicleData = {
   "Mercedes Vito": {
-    images: [vito2, vito3, vito4, vito5],
+    images: [vito2, meetTransferCyprus, vito3, vito4, meetTransferDubai, vito5],
     passengers: 7,
     luggage: 7,
   },
   "Mercedes Vip Vito": {
-    images: [vitoVip1, vitoVip2, vitoVip3, vitoVip4, vitoVip5],
+    images: [vitoVip1, meetTransferDubai, vitoVip2, vitoVip3, meetTransferCyprus, vitoVip4, vitoVip5],
     passengers: 6,
     luggage: 6,
   },
   "Maybach": {
-    images: [maybach1, maybach2, maybach3, maybach4, maybach5],
+    images: [maybach1, meetTransferCyprus, maybach2, maybach3, meetTransferDubai, maybach4, maybach5],
     passengers: 4,
     luggage: 4,
   },
   "Minibus": {
-    images: [sprinter1, sprinter2, sprinter3, sprinter4, sprinter5],
+    images: [sprinter1, meetTransferDubai, sprinter2, sprinter3, meetTransferCyprus, sprinter4, sprinter5],
     passengers: 16,
     luggage: 16,
   },

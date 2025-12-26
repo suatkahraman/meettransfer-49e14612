@@ -27,6 +27,8 @@ import sprinter3 from "@/assets/sprinter-3.jpg";
 import sprinter4 from "@/assets/sprinter-4.jpg";
 import sprinter5 from "@/assets/sprinter-5.jpg";
 import sprinter6 from "@/assets/sprinter-6.jpg";
+import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
+import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 
 const FleetPage = () => {
   const { t } = useLanguage();
@@ -38,7 +40,7 @@ const FleetPage = () => {
       passengers: 6,
       luggage: 6,
       features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
-      images: [vitoVip1, vitoVip2, vitoVip3, vitoVip4, vitoVip5],
+      images: [vitoVip1, meetTransferDubai, vitoVip2, vitoVip3, meetTransferCyprus, vitoVip4, vitoVip5],
     },
     {
       name: t("vitoName"),
@@ -46,7 +48,7 @@ const FleetPage = () => {
       passengers: 7,
       luggage: 7,
       features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-      images: [vito2, vito3, vito4, vito5, vito6],
+      images: [vito2, meetTransferCyprus, vito3, vito4, meetTransferDubai, vito5, vito6],
     },
     {
       name: t("maybachName"),
@@ -54,7 +56,7 @@ const FleetPage = () => {
       passengers: 4,
       luggage: 4,
       features: ["Leather seats", "Rear entertainment", "Ambient lighting", "Mini bar", "Star ceiling", "TV"],
-      images: [maybach1, maybach2, maybach3, maybach4, maybach5, maybach6],
+      images: [maybach1, meetTransferDubai, maybach2, maybach3, meetTransferCyprus, maybach4, maybach5, maybach6],
     },
     {
       name: t("sprinterName"),
@@ -62,7 +64,7 @@ const FleetPage = () => {
       passengers: 16,
       luggage: 16,
       features: ["Leather Seats", "Large luggage space", "WiFi", "USB"],
-      images: [sprinter1, sprinter2, sprinter3, sprinter4, sprinter5, sprinter6],
+      images: [sprinter1, meetTransferCyprus, sprinter2, sprinter3, meetTransferDubai, sprinter4, sprinter5, sprinter6],
     },
   ];
 
