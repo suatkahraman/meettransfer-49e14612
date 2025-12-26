@@ -10,6 +10,15 @@ import { Badge } from "@/components/ui/badge";
 
 const blogPosts = [
   {
+    id: "istanbul-bursa-day-tour-guide",
+    title: "Istanbul to Bursa Day Tour Guide 2025 | What to See & How to Get There",
+    description: "Complete guide to visiting Bursa from Istanbul. Best attractions, transportation options, tour itineraries, and tips for the perfect day trip to the historic Ottoman capital.",
+    category: "Bursa",
+    readTime: "15 min read",
+    date: "2025-12-26",
+    image: "/images/meet-transfer-vip-mercedes-vito.jpg",
+  },
+  {
     id: "dubai-airport-transfer-guide",
     title: "Dubai Airport Transfer Guide 2025: Best Ways to Get to Your Hotel",
     description: "Complete guide to Dubai Airport transfers. Book private VIP transfers from DXB to Downtown, Palm Jumeirah, Dubai Marina. Fixed prices, 24/7 service, luxury vehicles.",

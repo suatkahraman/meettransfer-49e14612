@@ -106,6 +106,7 @@ const AntalyaAirportTransferGuide = lazy(() => import("./pages/website/blog/Anta
 const IsPrivateTransferWorthIt = lazy(() => import("./pages/website/blog/IsPrivateTransferWorthIt"));
 const DubaiAirportTransferGuide = lazy(() => import("./pages/website/blog/DubaiAirportTransferGuide"));
 const CyprusAirportTransferGuide = lazy(() => import("./pages/website/blog/CyprusAirportTransferGuide"));
+const BursaDayTourGuide = lazy(() => import("./pages/website/blog/BursaDayTourGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 
 const queryClient = new QueryClient();
@@ -198,6 +199,7 @@ const App = () => (
               {localizedRoutes("/blog/is-private-transfer-worth-it-turkey", <IsPrivateTransferWorthIt />)}
               {localizedRoutes("/blog/dubai-airport-transfer-guide", <DubaiAirportTransferGuide />)}
               {localizedRoutes("/blog/cyprus-airport-transfer-guide", <CyprusAirportTransferGuide />)}
+              {localizedRoutes("/blog/istanbul-bursa-day-tour-guide", <BursaDayTourGuide />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}
