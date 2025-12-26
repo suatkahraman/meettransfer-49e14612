@@ -160,7 +160,7 @@ export const GooglePlacesAutocomplete = ({
         {
           types: ['establishment', 'geocode'],
           fields: ['formatted_address', 'name', 'address_components', 'place_id', 'geometry'],
-          componentRestrictions: { country: 'tr' },
+          componentRestrictions: { country: ['tr', 'ae', 'cy'] },
         }
       );
 
