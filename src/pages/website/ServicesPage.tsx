@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plane, Car, Anchor, Waves, Building, Gift } from "lucide-react";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 
 const ServicesPage = () => {
   const { t } = useLanguage();
@@ -178,6 +179,9 @@ const ServicesPage = () => {
             />
           </div>
         </div>
+
+        {/* PWA Install Banner */}
+        <PWAPromoBanner />
       </div>
     </WebsiteLayout>
   );

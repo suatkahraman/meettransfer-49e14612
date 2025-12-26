@@ -5,6 +5,7 @@ import { Check, Award, Users, MapPin, Clock, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 
 const cities = [
   "Istanbul", "Antalya", "Bodrum", "Dalaman", "Izmir",
@@ -164,6 +165,9 @@ const AboutPage = () => {
             message="Hello, I would like to learn more about Meet Transfer services."
           />
         </div>
+
+        {/* PWA Install Banner */}
+        <PWAPromoBanner />
       </div>
     </WebsiteLayout>
   );
