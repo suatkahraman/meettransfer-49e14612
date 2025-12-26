@@ -57,6 +57,9 @@ import maybach3 from "@/assets/maybach-3.jpg";
 import maybach4 from "@/assets/maybach-4.jpg";
 import maybach5 from "@/assets/maybach-5.jpg";
 import maybachInterior from "@/assets/maybach-interior-starlight.jpg";
+import maybachPassengersBlue from "@/assets/maybach-passengers-blue.jpg";
+import maybachInteriorPurple from "@/assets/maybach-interior-purple.jpg";
+import maybachInteriorOrange from "@/assets/maybach-interior-orange.jpg";
 import sprinter1 from "@/assets/sprinter-1.jpg";
 import sprinter2 from "@/assets/sprinter-2.jpg";
 import sprinter3 from "@/assets/sprinter-3.jpg";
@@ -89,7 +92,7 @@ const vehicleData = {
     luggage: 6,
   },
   "Maybach": {
-    images: [maybach1, meetTransferCyprus, maybach2, maybachInterior, maybach3, meetTransferDubai, maybach4, maybach5],
+    images: [maybach1, meetTransferCyprus, maybach2, maybachInterior, maybachPassengersBlue, maybach3, meetTransferDubai, maybachInteriorPurple, maybach4, maybach5, maybachInteriorOrange],
     passengers: 4,
     luggage: 4,
   },
