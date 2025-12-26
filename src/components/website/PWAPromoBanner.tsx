@@ -1,4 +1,4 @@
-import { Smartphone, Download, Zap, Wifi, Bell, X } from "lucide-react";
+import { Smartphone, Download, Zap, Wifi, Bell, X, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -52,6 +52,9 @@ export function PWAPromoBanner() {
         { icon: Bell, text: "Push notifications" },
       ];
 
+  const rating = 4.8;
+  const reviewCount = 2847;
+
   return (
     <>
       <section className="relative py-12 md:py-16 overflow-hidden">
@@ -86,6 +89,30 @@ export function PWAPromoBanner() {
                   <Download className="h-2.5 w-2.5 text-accent-foreground" />
                 </div>
               </div>
+            </div>
+
+            {/* App Store Style Rating */}
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={cn(
+                      "h-5 w-5 transition-all",
+                      star <= Math.floor(rating)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : star === Math.ceil(rating) && rating % 1 !== 0
+                        ? "fill-yellow-400/50 text-yellow-400"
+                        : "fill-muted text-muted"
+                    )}
+                  />
+                ))}
+              </div>
+              <span className="text-lg font-bold text-foreground">{rating}</span>
+              <span className="text-muted-foreground">•</span>
+              <span className="text-muted-foreground">
+                {reviewCount.toLocaleString()} {language === 'TR' ? 'değerlendirme' : 'reviews'}
+              </span>
             </div>
 
             {/* Title */}
