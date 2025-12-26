@@ -54,12 +54,12 @@ export const MonthlyAccountingTable = ({ reservations, showActions, onEdit }: Mo
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Route</TableHead>
-            <TableHead className="text-right">Price</TableHead>
+            <TableHead>Tarih</TableHead>
+            <TableHead>Güzergah</TableHead>
+            <TableHead className="text-right">Bütçe</TableHead>
             <TableHead className="text-right">Yolcu Nakit</TableHead>
-            <TableHead className="text-right">Cash Collected</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Şoför Aldı</TableHead>
+            <TableHead>Durum</TableHead>
             {showActions && <TableHead></TableHead>}
           </TableRow>
         </TableHeader>

@@ -18,9 +18,9 @@ export const MonthlySummaryCard = ({
   const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '₺';
 
   const getBalanceStatus = () => {
-    if (balance > 0) return { text: 'Driver owes company', color: 'text-amber-600' };
-    if (balance < 0) return { text: 'Company owes driver', color: 'text-blue-600' };
-    return { text: 'Settled', color: 'text-green-600' };
+    if (balance > 0) return { text: 'Şoför borçlu', color: 'text-amber-600' };
+    if (balance < 0) return { text: 'Şirkete borçlu', color: 'text-blue-600' };
+    return { text: 'Kapatıldı', color: 'text-green-600' };
   };
 
   const balanceStatus = getBalanceStatus();
@@ -31,7 +31,7 @@ export const MonthlySummaryCard = ({
         <CardHeader className="pb-2">
           <CardTitle className="text-xs text-muted-foreground flex items-center gap-2">
             <Car className="h-4 w-4" />
-            Transfers
+            Transfer
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -43,7 +43,7 @@ export const MonthlySummaryCard = ({
         <CardHeader className="pb-2">
           <CardTitle className="text-xs text-muted-foreground flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
-            Total Price
+            Bütçe
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -57,7 +57,7 @@ export const MonthlySummaryCard = ({
         <CardHeader className="pb-2">
           <CardTitle className="text-xs text-muted-foreground flex items-center gap-2">
             <Banknote className="h-4 w-4" />
-            Cash Received
+            Şoför Nakit Aldı
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -71,7 +71,7 @@ export const MonthlySummaryCard = ({
         <CardHeader className="pb-2">
           <CardTitle className="text-xs text-muted-foreground flex items-center gap-2">
             <Scale className="h-4 w-4" />
-            Balance
+            Bakiye
           </CardTitle>
         </CardHeader>
         <CardContent>
