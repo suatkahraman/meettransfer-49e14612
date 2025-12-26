@@ -98,3 +98,6 @@ verify_jwt = false
 
 [functions.notify-admin-quick-booking-customer-info]
 verify_jwt = false
+
+[functions.send-whatsapp-admin]
+verify_jwt = false

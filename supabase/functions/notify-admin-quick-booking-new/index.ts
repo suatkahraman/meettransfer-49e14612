@@ -110,8 +110,22 @@ serve(async (req) => {
       }
     }
 
+    // Send WhatsApp notification to admin
+    try {
+      const whatsAppMessage = `📥 *Yeni Hızlı Rezervasyon*\n\n📍 ${pickup} → ${dropoff}\n📅 ${pickupDate} saat ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n👥 ${passengers} yolcu${priceCurrency ? `\n💰 Para birimi: ${priceCurrency}` : ""}\n\n⏳ Fiyat belirlemek için panele gidin:\nhttps://meettransfer.app/admin/quick-bookings`;
+
+      await supabase.functions.invoke("send-whatsapp-admin", {
+        body: {
+          title: "Yeni Quick Booking",
+          message: whatsAppMessage,
+        },
+      });
+      console.log("WhatsApp notification sent to admin");
+    } catch (whatsappError) {
+      console.error("WhatsApp notification error:", whatsappError);
+    }
+
     // Send email notification to admin
-    // NOTE: We intentionally do NOT log raw env values here (they may contain sensitive data).
     const adminEmailRaw = Deno.env.get("ADMIN");
     const adminEmails = Array.from(
       new Set(
