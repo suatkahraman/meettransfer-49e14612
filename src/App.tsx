@@ -101,6 +101,8 @@ const IstanbulTransferPriceGuide = lazy(() => import("./pages/website/blog/Istan
 const PrivateVsTaxiTurkey = lazy(() => import("./pages/website/blog/PrivateVsTaxiTurkey"));
 const AntalyaAirportTransferGuide = lazy(() => import("./pages/website/blog/AntalyaAirportTransferGuide"));
 const IsPrivateTransferWorthIt = lazy(() => import("./pages/website/blog/IsPrivateTransferWorthIt"));
+const DubaiAirportTransferGuide = lazy(() => import("./pages/website/blog/DubaiAirportTransferGuide"));
+const CyprusAirportTransferGuide = lazy(() => import("./pages/website/blog/CyprusAirportTransferGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 
 const queryClient = new QueryClient();
@@ -183,11 +185,13 @@ const App = () => (
               {localizedRoutes("/ist-city-center-vip-transfer", <IstCityCenterVipTransfer />)}
               {localizedRoutes("/sabiha-gokcen-private-transfer", <SabihaGokcenPrivateTransfer />)}
               {localizedRoutes("/blog", <BlogPage />)}
-              {localizedRoutes("/blog/istanbul-airport-to-city-guide", <IstanbulAirportToCityGuide />)}
-              {localizedRoutes("/blog/istanbul-transfer-price-guide", <IstanbulTransferPriceGuide />)}
-              {localizedRoutes("/blog/private-vs-taxi-turkey", <PrivateVsTaxiTurkey />)}
-              {localizedRoutes("/blog/antalya-airport-transfer-guide", <AntalyaAirportTransferGuide />)}
-              {localizedRoutes("/blog/is-private-transfer-worth-it", <IsPrivateTransferWorthIt />)}
+              {localizedRoutes("/blog/istanbul-airport-to-city-best-way", <IstanbulAirportToCityGuide />)}
+              {localizedRoutes("/blog/istanbul-airport-transfer-price-guide", <IstanbulTransferPriceGuide />)}
+              {localizedRoutes("/blog/private-vs-taxi-transfer-turkey", <PrivateVsTaxiTurkey />)}
+              {localizedRoutes("/blog/antalya-airport-transfer-to-hotels", <AntalyaAirportTransferGuide />)}
+              {localizedRoutes("/blog/is-private-transfer-worth-it-turkey", <IsPrivateTransferWorthIt />)}
+              {localizedRoutes("/blog/dubai-airport-transfer-guide", <DubaiAirportTransferGuide />)}
+              {localizedRoutes("/blog/cyprus-airport-transfer-guide", <CyprusAirportTransferGuide />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}
