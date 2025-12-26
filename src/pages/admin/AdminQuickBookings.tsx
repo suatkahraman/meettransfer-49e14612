@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -333,7 +333,8 @@ export default function AdminQuickBookings() {
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[600px]">
-              <div className="space-y-4">
+              <div className="min-w-[800px]">
+                <div className="space-y-4">
                 {requests.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     No booking requests yet
@@ -652,7 +653,9 @@ export default function AdminQuickBookings() {
                     </Card>
                   ))
                 )}
+                </div>
               </div>
+              <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </CardContent>
         </Card>
