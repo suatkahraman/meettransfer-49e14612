@@ -12,6 +12,7 @@ import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { trackConversion, CONVERSION_LABELS } from "@/lib/gtag";
+import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 
 const globalOffices = [
   {
@@ -233,6 +234,9 @@ const ContactPage = () => {
             </form>
           </CardContent>
         </Card>
+
+        {/* PWA Install Banner */}
+        <PWAPromoBanner />
       </div>
     </WebsiteLayout>
   );
