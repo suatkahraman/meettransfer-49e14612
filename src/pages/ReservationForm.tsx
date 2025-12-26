@@ -409,7 +409,7 @@ const ReservationForm = () => {
       }
 
       // Determine status and price based on whether coming from quick booking
-      const reservationStatus = hasPendingReservation ? 'customer_approved' : (isFromQuickBooking && prefilledPrice ? 'customer_approved' : 'pending_price');
+      const reservationStatus = hasPendingReservation ? 'customer_approved' : (isFromQuickBooking && prefilledPrice ? 'customer_approved' : 'awaiting-price');
       const reservationPrice = isFromQuickBooking && prefilledPrice ? prefilledPrice : null;
       const reservationCurrency = isFromQuickBooking ? prefilledCurrency : null;
 
