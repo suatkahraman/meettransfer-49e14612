@@ -21,6 +21,7 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 // Vehicle images
 import vito2 from "@/assets/vito-2.jpg";
@@ -182,15 +183,26 @@ Please confirm availability and price.`;
               {/* Vehicle Image Carousel */}
               {formData.vehicleType && vehicleData[formData.vehicleType as keyof typeof vehicleData] && (
                 <div className="space-y-3">
-                  <Carousel className="w-full">
+                  <Carousel 
+                    className="w-full"
+                    plugins={[
+                      Autoplay({
+                        delay: 3000,
+                        stopOnInteraction: true,
+                      }),
+                    ]}
+                    opts={{
+                      loop: true,
+                    }}
+                  >
                     <CarouselContent>
                       {vehicleData[formData.vehicleType as keyof typeof vehicleData].images.map((img, idx) => (
                         <CarouselItem key={idx}>
-                          <div className="overflow-hidden rounded-xl">
+                          <div className="overflow-hidden rounded-xl aspect-video">
                             <img
                               src={img}
                               alt={`${formData.vehicleType} - ${idx + 1}`}
-                              className="w-full h-48 object-cover"
+                              className="w-full h-full object-cover object-center"
                             />
                           </div>
                         </CarouselItem>
