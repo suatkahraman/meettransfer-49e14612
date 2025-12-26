@@ -224,12 +224,14 @@ const WebsiteHeader = () => {
               })}
               
               {/* Install App - Mobile Menu */}
-              <DropdownMenuItem asChild>
-                <Link to="/install" className="w-full cursor-pointer gap-2">
-                  <Download className="h-4 w-4" />
-                  {t("installApp") || "Install App"}
-                </Link>
-              </DropdownMenuItem>
+              <div className="p-2">
+                <InstallAppButton 
+                  variant="prominent" 
+                  size="default"
+                  fullWidth
+                  animated
+                />
+              </div>
               
               <DropdownMenuSeparator />
               
