@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 
 
 const Index = () => {
@@ -33,6 +34,7 @@ const Index = () => {
       <BookingForm />
       <Destinations />
       <Features />
+      <PWAPromoBanner />
       <Footer />
     </WebsiteLayout>
   );
