@@ -36,17 +36,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/services"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/services"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/services"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/services"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/services"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/services</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/fr/services</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ru/services</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/it/services</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/es/services</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ar/services</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/de/services</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/fr/services</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ru/services</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/it/services</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/es/services</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ar/services</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/tr/services</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
   <!-- Destinations - All Languages -->
   <url>
@@ -58,17 +60,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/destinations"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/destinations"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/destinations"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/destinations"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/destinations"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/destinations</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/fr/destinations</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ru/destinations</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/it/destinations</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/es/destinations</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ar/destinations</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/de/destinations</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/fr/destinations</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ru/destinations</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/it/destinations</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/es/destinations</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ar/destinations</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/tr/destinations</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
   <!-- Fleet - All Languages -->
   <url>
@@ -80,17 +84,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/fleet"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/fleet"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/fleet"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/fleet"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/fleet"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/fleet</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/fr/fleet</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ru/fleet</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/it/fleet</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/es/fleet</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ar/fleet</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/de/fleet</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/fr/fleet</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ru/fleet</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/it/fleet</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/es/fleet</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ar/fleet</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/tr/fleet</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
   <!-- About - All Languages -->
   <url>
@@ -102,17 +108,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/about"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/about"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/about"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/about"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/about"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/about</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/fr/about</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ru/about</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/it/about</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/es/about</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/ar/about</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/de/about</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/fr/about</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ru/about</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/it/about</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/es/about</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/ar/about</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://meettransfer.app/tr/about</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
   <!-- Contact - All Languages -->
   <url>
@@ -124,17 +132,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/contact"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/contact"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/contact"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/contact"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/contact"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/contact</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://meettransfer.app/fr/contact</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://meettransfer.app/ru/contact</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://meettransfer.app/it/contact</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://meettransfer.app/es/contact</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://meettransfer.app/ar/contact</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/de/contact</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/fr/contact</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ru/contact</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/it/contact</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/es/contact</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ar/contact</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/tr/contact</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
 
   <!-- Reviews - All Languages -->
   <url>
@@ -146,17 +156,19 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/reviews"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/reviews"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/reviews"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/reviews"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/reviews"/>
-    <lastmod>2025-12-17</lastmod>
+    <lastmod>2025-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-  <url><loc>https://meettransfer.app/de/reviews</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://meettransfer.app/fr/reviews</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://meettransfer.app/ru/reviews</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://meettransfer.app/it/reviews</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://meettransfer.app/es/reviews</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://meettransfer.app/ar/reviews</loc><lastmod>2025-12-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/de/reviews</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/fr/reviews</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ru/reviews</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/it/reviews</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/es/reviews</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/ar/reviews</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://meettransfer.app/tr/reviews</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
 
   <!-- Istanbul Transfer - All Languages -->
   <url>
@@ -623,4 +635,28 @@
   <url><loc>https://meettransfer.app/es/blog/cyprus-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://meettransfer.app/ar/blog/cyprus-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://meettransfer.app/tr/blog/cyprus-airport-transfer-guide</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- Bursa Transfer - All Languages -->
+  <url>
+    <loc>https://meettransfer.app/bursa-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/bursa-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/bursa-transfer"/>
+    <lastmod>2025-12-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/bursa-transfer</loc><lastmod>2025-12-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 </urlset>

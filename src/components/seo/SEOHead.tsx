@@ -66,8 +66,10 @@ const SEOHead = ({
   const basePath = canonicalPath || getBasePath();
   const currentLangFromUrl = getCurrentLanguageFromUrl();
   
-  // SELF-REFERENCING CANONICAL: Always use the exact current URL path
-  const canonicalUrl = `${baseUrl}${location.pathname === "/" ? "" : location.pathname}`;
+  // SELF-REFERENCING CANONICAL: Always use the exact current URL path WITHOUT query strings
+  // This is critical for Google to properly index the page
+  const cleanPathname = location.pathname === "/" ? "" : location.pathname;
+  const canonicalUrl = `${baseUrl}${cleanPathname}`;
   const fullUrl = canonicalUrl;
 
   useEffect(() => {
