@@ -99,9 +99,9 @@ const BlogPage = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Turkey Airport Transfer Blog | Travel Tips & Guides | Meet Transfer"
-        description="Expert travel tips, airport transfer guides, and destination insights for Turkey. Learn about Istanbul, Antalya, Bodrum transfers. Updated pricing and booking advice."
-        keywords="Turkey travel blog, Istanbul airport guide, Antalya transfer tips, Turkey travel advice, airport transfer Turkey, VIP transfer blog"
+        title="Turkey Dubai Cyprus Airports Transfer Blog | Travel Tips & Guides | Meet Transfer"
+        description="Expert travel tips, airport transfer guides for Turkey, Dubai and Cyprus. Learn about Istanbul, Antalya, Dubai, Larnaca transfers. Updated pricing and booking advice."
+        keywords="Turkey travel blog, Dubai airport guide, Cyprus transfer tips, Istanbul airport guide, Antalya transfer tips, Turkey travel advice, airport transfer, VIP transfer blog"
         canonicalPath="/blog"
       />
       <SchemaOrg
@@ -124,11 +124,11 @@ const BlogPage = () => {
             Travel Insights & Tips
           </Badge>
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Turkey Airport Transfer Blog
+            Turkey Dubai ve Cyprus Airports Transfer Blog
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
             Expert guides, pricing tips, and destination insights to help you plan the perfect 
-            airport transfer experience in Turkey. From Istanbul to Antalya and beyond.
+            airport transfer experience in Turkey, Dubai and Cyprus. From Istanbul to Dubai and beyond.
           </p>
         </div>
       </section>
