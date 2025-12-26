@@ -163,6 +163,31 @@ serve(async (req) => {
       // Don't fail the operation
     }
 
+    // Send admin email notification about completed quick booking
+    try {
+      await supabase.functions.invoke("notify-admin-quick-booking-customer-info", {
+        body: {
+          reservationId: updatedReservation.id,
+          reservationCode: updatedReservation.reservation_code,
+          customerName: requestData.customerName,
+          customerEmail: requestData.customerEmail,
+          customerPhone: requestData.customerPhone,
+          pickup: updatedReservation.pickup,
+          dropoff: updatedReservation.dropoff,
+          pickupDate: updatedReservation.pickup_date,
+          pickupTime: updatedReservation.pickup_time,
+          vehicleType: updatedReservation.vehicle_type,
+          price: updatedReservation.price,
+          priceCurrency: updatedReservation.price_currency,
+          paymentMethod: updatedReservation.payment_type,
+        },
+      });
+      console.log("Admin notification sent for completed quick booking");
+    } catch (adminNotifyError) {
+      console.error("Failed to send admin notification:", adminNotifyError);
+      // Don't fail the operation
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

@@ -119,6 +119,24 @@ export const Hero = () => {
 
       if (error) throw error;
 
+      // Notify admin about new quick booking request via email
+      try {
+        await supabase.functions.invoke("notify-admin-quick-booking-new", {
+          body: {
+            bookingId: data.id,
+            pickup,
+            dropoff,
+            pickupDate: format(date, "yyyy-MM-dd"),
+            pickupTime: time,
+            vehicleType,
+            passengers: parseInt(passengers),
+          },
+        });
+      } catch (notifyError) {
+        console.error("Failed to notify admin:", notifyError);
+        // Don't fail the user flow
+      }
+
       let url = `/quick-booking-confirm?token=${data.confirmation_token}`;
       if (hasReturnTrip && returnDate && returnTime) {
         url += `&hasReturn=true&returnDate=${format(returnDate, "yyyy-MM-dd")}&returnTime=${returnTime}`;
