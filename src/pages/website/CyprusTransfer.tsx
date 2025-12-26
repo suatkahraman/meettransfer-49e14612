@@ -84,14 +84,14 @@ const CyprusTransfer = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Cyprus Airport Transfer | VIP Private Transfer Larnaca, Paphos, Ercan | Meet Transfer"
-        description="Premium Cyprus airport transfer service from Larnaca, Paphos, and Ercan airports. Luxury Mercedes fleet, professional drivers, 24/7 availability. Book your VIP transfer to Ayia Napa, Limassol, Kyrenia."
-        keywords="Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ercan airport transfer, Ayia Napa transfer, Limassol transfer, Kyrenia transfer, Northern Cyprus transfer, Cyprus VIP transfer, Cyprus private driver"
+        title="Cyprus Airport Transfer 2025 | VIP Private Transfer Larnaca, Paphos, Ercan to Ayia Napa, Limassol | Meet Transfer"
+        description="Book premium Cyprus airport transfer from Larnaca (LCA), Paphos (PFO) & Ercan (ECN). Luxury Mercedes fleet, professional drivers, 24/7 meet & greet. Fixed prices to Ayia Napa, Limassol, Kyrenia, Nicosia. Northern Cyprus included."
+        keywords="Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ercan airport transfer, Ayia Napa transfer, Limassol transfer, Kyrenia transfer, Northern Cyprus transfer, Cyprus VIP transfer, Cyprus private driver, Protaras transfer, Famagusta transfer, Troodos transfer, Cyprus chauffeur service"
         canonicalPath="/cyprus-transfer"
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Cyprus', 'Larnaca', 'Paphos', 'Ayia Napa', 'Limassol', 'Kyrenia', 'Famagusta', 'Northern Cyprus'] },
+          { type: 'TransportationService', areaServed: ['Cyprus', 'Larnaca', 'Paphos', 'Ayia Napa', 'Limassol', 'Kyrenia', 'Famagusta', 'Northern Cyprus', 'Protaras', 'Nicosia', 'Troodos'] },
           {
             type: 'BreadcrumbList',
             items: [
@@ -101,10 +101,11 @@ const CyprusTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
+          { type: 'LocalBusiness' },
           {
             type: 'Product',
-            name: 'Cyprus Airport Transfer Service',
-            description: 'Premium VIP airport transfer from Larnaca, Paphos, and Ercan airports to all Cyprus destinations',
+            name: 'Cyprus Airport VIP Transfer Service',
+            description: 'Premium VIP airport transfer from Larnaca, Paphos, and Ercan airports to Ayia Napa, Limassol, Kyrenia, and all Cyprus destinations including Northern Cyprus',
             image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
             offers: { price: '35', priceCurrency: 'USD' },
           },

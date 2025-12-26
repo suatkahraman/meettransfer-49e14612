@@ -91,14 +91,14 @@ const DubaiTransfer = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Dubai Airport Transfer | VIP Private Transfer DXB & DWC | Meet Transfer"
-        description="Premium Dubai airport transfer service from DXB and DWC airports. Luxury Mercedes fleet, professional drivers, 24/7 availability. Book your VIP transfer to Palm Jumeirah, Downtown Dubai, Marina."
-        keywords="Dubai airport transfer, DXB airport transfer, DWC airport transfer, Dubai VIP transfer, Palm Jumeirah transfer, Downtown Dubai transfer, Dubai Marina transfer, Al Maktoum airport transfer, Dubai private driver, Dubai luxury transfer"
+        title="Dubai Airport Transfer 2025 | VIP Private Transfer DXB to Palm Jumeirah, Downtown | Meet Transfer"
+        description="Book premium Dubai airport transfer from DXB & DWC. Luxury Mercedes fleet (Vito, V-Class, Maybach), professional drivers, 24/7 meet & greet. Fixed prices to Palm Jumeirah, Downtown Dubai, Marina. Flight tracking included."
+        keywords="Dubai airport transfer, DXB airport transfer, DWC airport transfer, Dubai VIP transfer, Palm Jumeirah transfer, Downtown Dubai transfer, Dubai Marina transfer, Al Maktoum airport transfer, Dubai private driver, Dubai luxury transfer, Dubai chauffeur service, JBR transfer, Business Bay transfer, Burj Khalifa transfer"
         canonicalPath="/dubai-transfer"
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Dubai', 'Palm Jumeirah', 'Downtown Dubai', 'Dubai Marina', 'JBR', 'Business Bay'] },
+          { type: 'TransportationService', areaServed: ['Dubai', 'Palm Jumeirah', 'Downtown Dubai', 'Dubai Marina', 'JBR', 'Business Bay', 'Burj Khalifa', 'Deira', 'DIFC', 'Jumeirah'] },
           {
             type: 'BreadcrumbList',
             items: [
@@ -108,12 +108,13 @@ const DubaiTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
+          { type: 'LocalBusiness' },
           {
             type: 'Product',
-            name: 'Dubai Airport Transfer Service',
-            description: 'Premium VIP airport transfer from Dubai International Airport (DXB) and Al Maktoum Airport (DWC) to all destinations',
+            name: 'Dubai Airport VIP Transfer Service',
+            description: 'Premium VIP airport transfer from Dubai International Airport (DXB) and Al Maktoum Airport (DWC) to Palm Jumeirah, Downtown Dubai, Marina, and all destinations',
             image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
-            offers: { price: '55', priceCurrency: 'USD' },
+            offers: { price: '50', priceCurrency: 'USD' },
           },
         ]}
       />
