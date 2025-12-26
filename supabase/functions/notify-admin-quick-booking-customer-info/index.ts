@@ -108,6 +108,40 @@ serve(async (req) => {
       }
     }
 
+    // Send WhatsApp notification to admin
+    const vehicleLabels: Record<string, string> = {
+      "mercedes-vito": "Mercedes Vito",
+      "mercedes-vclass": "VIP Vito",
+      maybach: "Maybach Minivan",
+      minibus: "Minibus",
+    };
+
+    const currencySymbols: Record<string, string> = {
+      TRY: "₺",
+      EUR: "€",
+      USD: "$",
+      GBP: "£",
+    };
+
+    const paymentLabels: Record<string, string> = {
+      cash: "Nakit",
+      payment_link: "Online Ödeme",
+    };
+
+    try {
+      const whatsAppMessage = `✅ *Rezervasyon Tamamlandı*\n\n📋 Kod: ${reservationCode}\n👤 ${customerName}\n📞 ${customerPhone}\n📧 ${customerEmail}\n\n📍 ${pickup} → ${dropoff}\n📅 ${pickupDate} saat ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n💰 ${currencySymbols[priceCurrency] || priceCurrency}${price}\n💳 ${paymentLabels[paymentMethod] || paymentMethod}\n\n🚀 Şoför atamak için:\nhttps://meettransfer.app/admin/reservations`;
+
+      await supabase.functions.invoke("send-whatsapp-admin", {
+        body: {
+          title: "Rezervasyon Hazır",
+          message: whatsAppMessage,
+        },
+      });
+      console.log("WhatsApp notification sent to admin");
+    } catch (whatsappError) {
+      console.error("WhatsApp notification error:", whatsappError);
+    }
+
     // Send email notification to admin
     // NOTE: We intentionally do NOT log raw env values here (they may contain sensitive data).
     const adminEmailRaw = Deno.env.get("ADMIN");
