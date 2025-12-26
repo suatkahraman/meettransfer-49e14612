@@ -51,7 +51,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Get Best Price Now",
-    heroSubtitle: "✈️ Round-Trip Transfers – 40% OFF! Book your Arrival & Return Airport Transfer Together on Reservations forms and Save 40% instantly 🎁 Use Promo Code on Return: Meet40Return. Best Airport Transfer Company in All Major Airport in Turkey",
+    heroSubtitle: "✈️ Round-Trip Transfers – 30% OFF! Book your Arrival & Return Airport Transfer Together on Reservations forms and Save 30% instantly 🎁 Use Promo Code on Return: Meet40Return. Best Airport Transfer Company in All Major Airport in TURKİYE - DUBAI - CYPRUS",
     bookYourTransfer: "Book Your Transfer",
     requestPrice: "Request Price",
     and: "And",
@@ -60,7 +60,7 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Professional Drivers",
     luxuryFleet: "Luxury Fleet",
     addReturnTrip: "Add Return Trip",
-    returnTripDiscount: "Book return trip and get 40% OFF with code: Meet40Return",
+    returnTripDiscount: "Book return trip and get 30% OFF with code: Meet40Return",
     
     // Booking Process
     howBookingWorks: "How Our Booking Process Works",
@@ -522,7 +522,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Jetzt besten Preis erhalten",
-    heroSubtitle: "✈️ Hin- und Rücktransfers – 40% RABATT! Buchen Sie Ihre Ankunft & Rückreise Flughafentransfer zusammen im Reservierungsformular und sparen Sie sofort 40% 🎁 Promo-Code für Rückreise: Meet40Return. Bestes Flughafentransfer-Unternehmen an allen großen Flughäfen der Türkei",
+    heroSubtitle: "✈️ Hin- und Rücktransfers – 30% RABATT! Buchen Sie Ihre Ankunft & Rückreise Flughafentransfer zusammen im Reservierungsformular und sparen Sie sofort 30% 🎁 Promo-Code für Rückreise: Meet40Return. Bestes Flughafentransfer-Unternehmen an allen großen Flughäfen in TÜRKİYE - DUBAI - ZYPERN",
     bookYourTransfer: "Transfer buchen",
     requestPrice: "Preis anfordern",
     and: "Und",
@@ -531,7 +531,7 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Professionelle Fahrer",
     luxuryFleet: "Luxusflotte",
     addReturnTrip: "Rückfahrt hinzufügen",
-    returnTripDiscount: "Buchen Sie die Rückfahrt und erhalten Sie 40% Rabatt mit Code: Meet40Return",
+    returnTripDiscount: "Buchen Sie die Rückfahrt und erhalten Sie 30% Rabatt mit Code: Meet40Return",
     
     // Booking Process
     howBookingWorks: "So funktioniert unser Buchungsprozess",
@@ -989,7 +989,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Obtenez le Meilleur Prix Maintenant",
-    heroSubtitle: "✈️ Transferts Aller-Retour – 40% DE RÉDUCTION! Réservez votre Transfert Aéroport Aller & Retour ensemble sur les formulaires de réservation et économisez 40% instantanément 🎁 Code Promo pour le Retour: Meet40Return. Meilleure Société de Transfert Aéroport dans tous les Grands Aéroports de Turquie",
+    heroSubtitle: "✈️ Transferts Aller-Retour – 30% DE RÉDUCTION! Réservez votre Transfert Aéroport Aller & Retour ensemble sur les formulaires de réservation et économisez 30% instantanément 🎁 Code Promo pour le Retour: Meet40Return. Meilleure Société de Transfert Aéroport dans tous les Grands Aéroports de TURKİYE - DUBAI - CHYPRE",
     bookYourTransfer: "Réserver votre transfert",
     requestPrice: "Demander le prix",
     and: "Et",
@@ -998,7 +998,7 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Chauffeurs professionnels",
     luxuryFleet: "Flotte de luxe",
     addReturnTrip: "Ajouter un trajet retour",
-    returnTripDiscount: "Réservez le trajet retour et obtenez 40% de réduction avec le code: Meet40Return",
+    returnTripDiscount: "Réservez le trajet retour et obtenez 30% de réduction avec le code: Meet40Return",
     
     // Booking Process
     howBookingWorks: "Comment fonctionne notre processus de réservation",
@@ -1456,7 +1456,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Получите лучшую цену сейчас",
-    heroSubtitle: "✈️ Трансферы Туда-Обратно – СКИДКА 40%! Забронируйте трансфер из/в аэропорт вместе в форме бронирования и сэкономьте 40% мгновенно 🎁 Промокод для обратного трансфера: Meet40Return. Лучшая компания по трансферу во всех крупных аэропортах Турции",
+    heroSubtitle: "✈️ Трансферы Туда-Обратно – СКИДКА 30%! Забронируйте трансфер из/в аэропорт вместе в форме бронирования и сэкономьте 30% мгновенно 🎁 Промокод для обратного трансфера: Meet40Return. Лучшая компания по трансферу во всех крупных аэропортах ТУРЦİИ - ДУБАЙ - КИПР",
     bookYourTransfer: "Забронировать трансфер",
     requestPrice: "Узнать цену",
     and: "И",
@@ -1465,7 +1465,7 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Профессиональные водители",
     luxuryFleet: "Люкс автопарк",
     addReturnTrip: "Добавить обратный трансфер",
-    returnTripDiscount: "Забронируйте обратный трансфер и получите скидку 40% с кодом: Meet40Return",
+    returnTripDiscount: "Забронируйте обратный трансфер и получите скидку 30% с кодом: Meet40Return",
     
     // Booking Process
     howBookingWorks: "Как работает наш процесс бронирования",
@@ -1923,7 +1923,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Ottieni il Miglior Prezzo Ora",
-    heroSubtitle: "✈️ Trasferimenti Andata e Ritorno – 40% DI SCONTO! Prenota il tuo Trasferimento Aeroportuale Andata & Ritorno insieme nei moduli di prenotazione e risparmia subito il 40% 🎁 Codice Promo per il Ritorno: Meet40Return. Migliore Compagnia di Trasferimento in tutti i Principali Aeroporti della Turchia",
+    heroSubtitle: "✈️ Trasferimenti Andata e Ritorno – 30% DI SCONTO! Prenota il tuo Trasferimento Aeroportuale Andata & Ritorno insieme nei moduli di prenotazione e risparmia subito il 30% 🎁 Codice Promo per il Ritorno: Meet40Return. Migliore Compagnia di Trasferimento in tutti i Principali Aeroporti di TURCHİA - DUBAI - CIPRO",
     bookYourTransfer: "Prenota il tuo trasferimento",
     requestPrice: "Richiedi prezzo",
     and: "E",
@@ -1932,7 +1932,7 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Autisti professionisti",
     luxuryFleet: "Flotta di lusso",
     addReturnTrip: "Aggiungi viaggio di ritorno",
-    returnTripDiscount: "Prenota il viaggio di ritorno e ottieni il 40% di sconto con il codice: Meet40Return",
+    returnTripDiscount: "Prenota il viaggio di ritorno e ottieni il 30% di sconto con il codice: Meet40Return",
     
     // Booking Process
     howBookingWorks: "Come funziona il nostro processo di prenotazione",
@@ -2390,7 +2390,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Obtén el Mejor Precio Ahora",
-    heroSubtitle: "✈️ Traslados de Ida y Vuelta – ¡40% DE DESCUENTO! Reserva tu Traslado Aeropuerto de Llegada y Regreso juntos en los formularios de reserva y ahorra 40% al instante 🎁 Código Promocional para Regreso: Meet40Return. Mejor Compañía de Traslados en Todos los Principales Aeropuertos de Turquía",
+    heroSubtitle: "✈️ Traslados de Ida y Vuelta – ¡30% DE DESCUENTO! Reserva tu Traslado Aeropuerto de Llegada y Regreso juntos en los formularios de reserva y ahorra 30% al instante 🎁 Código Promocional para Regreso: Meet40Return. Mejor Compañía de Traslados en Todos los Principales Aeropuertos de TURQUİA - DUBAI - CHIPRE",
     bookYourTransfer: "Reserva tu traslado",
     requestPrice: "Pedir precio",
     and: "Y",
@@ -2399,7 +2399,7 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Conductores profesionales",
     luxuryFleet: "Flota de lujo",
     addReturnTrip: "Añadir viaje de regreso",
-    returnTripDiscount: "Reserva el viaje de regreso y obtén 40% de descuento con el código: Meet40Return",
+    returnTripDiscount: "Reserva el viaje de regreso y obtén 30% de descuento con el código: Meet40Return",
     
     // Booking Process
     howBookingWorks: "Cómo funciona nuestro proceso de reserva",
@@ -2857,7 +2857,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "احصل على أفضل سعر الآن",
-    heroSubtitle: "✈️ نقل ذهاب وإياب – خصم 40%! احجز نقل المطار للوصول والعودة معًا في نماذج الحجز ووفر 40% فورًا 🎁 رمز العرض للعودة: Meet40Return. أفضل شركة نقل في جميع المطارات الرئيسية في تركيا",
+    heroSubtitle: "✈️ نقل ذهاب وإياب – خصم 30%! احجز نقل المطار للوصول والعودة معًا في نماذج الحجز ووفر 30% فورًا 🎁 رمز العرض للعودة: Meet40Return. أفضل شركة نقل في جميع المطارات الرئيسية في تُركِيَا - دبي - قبرص",
     bookYourTransfer: "احجز نقلك",
     requestPrice: "احصل على السعر",
     and: "و",
@@ -2866,7 +2866,7 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "سائقون محترفون",
     luxuryFleet: "أسطول فاخر",
     addReturnTrip: "إضافة رحلة العودة",
-    returnTripDiscount: "احجز رحلة العودة واحصل على خصم 40% مع الكود: Meet40Return",
+    returnTripDiscount: "احجز رحلة العودة واحصل على خصم 30% مع الكود: Meet40Return",
     
     // Booking Process
     howBookingWorks: "كيف تعمل عملية الحجز",
@@ -3324,7 +3324,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "En İyi Fiyatı Şimdi Alın",
-    heroSubtitle: "✈️ Gidiş-Dönüş Transferler – %40 İNDİRİM! Varış ve Dönüş Havalimanı Transferinizi birlikte rezervasyon formlarında ayırtın ve anında %40 tasarruf edin 🎁 Dönüş için Promosyon Kodu: Meet40Return. Türkiye'nin Tüm Büyük Havalimanlarında En İyi Havalimanı Transfer Şirketi",
+    heroSubtitle: "✈️ Gidiş-Dönüş Transferler – %30 İNDİRİM! Varış ve Dönüş Havalimanı Transferinizi birlikte rezervasyon formlarında ayırtın ve anında %30 tasarruf edin 🎁 Dönüş için Promosyon Kodu: Meet40Return. TÜRKİYE - DUBAI - KIBRIS'ın Tüm Büyük Havalimanlarında En İyi Havalimanı Transfer Şirketi",
     bookYourTransfer: "Transferinizi Ayırtın",
     requestPrice: "Fiyat Teklifi Al",
     and: "Ve",
@@ -3333,7 +3333,7 @@ const translations: Record<Language, Record<string, string>> = {
     professionalDrivers: "Profesyonel Şoförler",
     luxuryFleet: "Lüks Filo",
     addReturnTrip: "Dönüş Yolculuğu Ekle",
-    returnTripDiscount: "Dönüş yolculuğu rezervasyonu yapın ve Meet40Return koduyla %40 indirim kazanın",
+    returnTripDiscount: "Dönüş yolculuğu rezervasyonu yapın ve Meet40Return koduyla %30 indirim kazanın",
     
     // Booking Process
     howBookingWorks: "Rezervasyon Sürecimiz Nasıl İşliyor",
