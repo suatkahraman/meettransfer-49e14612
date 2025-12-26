@@ -10,6 +10,7 @@ import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
 import { lazy, Suspense } from "react";
 import FloatingWhatsApp from "./components/website/FloatingWhatsApp";
 import HashScroll from "@/components/HashScroll";
+import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
 
 // Critical pages - lazy loaded with prefetch for better UX
 const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
@@ -150,6 +151,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <HashScroll />
+        <LanguageQueryRedirect />
         <OAuthCallbackHandler>
           <LanguageProvider>
             <AuthProvider>
