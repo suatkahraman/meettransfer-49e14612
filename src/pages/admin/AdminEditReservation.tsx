@@ -35,7 +35,7 @@ const paymentTypes = [
 
 // Status workflow
 const statuses = [
-  'pending_price',
+  'awaiting-price',
   'waiting_for_customer_approval',
   'customer_approved',
   'customer_rejected',
@@ -48,7 +48,7 @@ const statuses = [
 ];
 
 const statusColors: Record<string, string> = {
-  'pending_price': 'bg-orange-500/20 text-orange-700',
+  'awaiting-price': 'bg-orange-500/20 text-orange-700',
   'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700',
   'customer_approved': 'bg-blue-500/20 text-blue-700',
   'customer_rejected': 'bg-destructive/20 text-destructive',
@@ -61,7 +61,7 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  'pending_price': 'Fiyat Bekleniyor',
+  'awaiting-price': 'Fiyat Bekleniyor',
   'waiting_for_customer_approval': 'Müşteri Onayı Bekleniyor',
   'customer_approved': 'Müşteri Onayladı',
   'customer_rejected': 'Müşteri Reddetti',
@@ -828,12 +828,12 @@ const AdminEditReservation = () => {
     
     const statusTranslations: Record<string, Record<string, string>> = {
       TR: statusLabels,
-      EN: { 'pending_price': 'Pending Price', 'waiting_for_customer_approval': 'Waiting Customer Approval', 'customer_approved': 'Customer Approved', 'customer_rejected': 'Customer Rejected', 'confirmed': 'Confirmed', 'sent_to_driver': 'Sent to Driver', 'active': 'Active', 'completed': 'Completed', 'pending_admin_review': 'Pending Review', 'cancelled_by_customer': 'Cancelled by Customer' },
-      DE: { 'pending_price': 'Preis ausstehend', 'waiting_for_customer_approval': 'Wartet auf Genehmigung', 'customer_approved': 'Kunde genehmigt', 'customer_rejected': 'Kunde abgelehnt', 'confirmed': 'Bestätigt', 'sent_to_driver': 'An Fahrer gesendet', 'active': 'Aktiv', 'completed': 'Abgeschlossen', 'pending_admin_review': 'Überprüfung erforderlich', 'cancelled_by_customer': 'Vom Kunden storniert' },
-      FR: { 'pending_price': 'Prix en attente', 'waiting_for_customer_approval': 'En attente d\'approbation', 'customer_approved': 'Client approuvé', 'customer_rejected': 'Client refusé', 'confirmed': 'Confirmé', 'sent_to_driver': 'Envoyé au chauffeur', 'active': 'Actif', 'completed': 'Terminé', 'pending_admin_review': 'En attente de révision', 'cancelled_by_customer': 'Annulé par le client' },
-      RU: { 'pending_price': 'Ожидание цены', 'waiting_for_customer_approval': 'Ожидание одобрения', 'customer_approved': 'Одобрено клиентом', 'customer_rejected': 'Отклонено', 'confirmed': 'Подтверждено', 'sent_to_driver': 'Отправлено водителю', 'active': 'Активно', 'completed': 'Завершено', 'pending_admin_review': 'На рассмотрении', 'cancelled_by_customer': 'Отменено клиентом' },
-      IT: { 'pending_price': 'Prezzo in attesa', 'waiting_for_customer_approval': 'In attesa di approvazione', 'customer_approved': 'Cliente approvato', 'customer_rejected': 'Cliente rifiutato', 'confirmed': 'Confermato', 'sent_to_driver': 'Inviato all\'autista', 'active': 'Attivo', 'completed': 'Completato', 'pending_admin_review': 'In revisione', 'cancelled_by_customer': 'Annullato dal cliente' },
-      ES: { 'pending_price': 'Precio pendiente', 'waiting_for_customer_approval': 'Esperando aprobación', 'customer_approved': 'Cliente aprobado', 'customer_rejected': 'Cliente rechazado', 'confirmed': 'Confirmado', 'sent_to_driver': 'Enviado al conductor', 'active': 'Activo', 'completed': 'Completado', 'pending_admin_review': 'En revisión', 'cancelled_by_customer': 'Cancelado por cliente' },
+      EN: { 'awaiting-price': 'Pending Price', 'waiting_for_customer_approval': 'Waiting Customer Approval', 'customer_approved': 'Customer Approved', 'customer_rejected': 'Customer Rejected', 'confirmed': 'Confirmed', 'sent_to_driver': 'Sent to Driver', 'active': 'Active', 'completed': 'Completed', 'pending_admin_review': 'Pending Review', 'cancelled_by_customer': 'Cancelled by Customer' },
+      DE: { 'awaiting-price': 'Preis ausstehend', 'waiting_for_customer_approval': 'Wartet auf Genehmigung', 'customer_approved': 'Kunde genehmigt', 'customer_rejected': 'Kunde abgelehnt', 'confirmed': 'Bestätigt', 'sent_to_driver': 'An Fahrer gesendet', 'active': 'Aktiv', 'completed': 'Abgeschlossen', 'pending_admin_review': 'Überprüfung erforderlich', 'cancelled_by_customer': 'Vom Kunden storniert' },
+      FR: { 'awaiting-price': 'Prix en attente', 'waiting_for_customer_approval': 'En attente d\'approbation', 'customer_approved': 'Client approuvé', 'customer_rejected': 'Client refusé', 'confirmed': 'Confirmé', 'sent_to_driver': 'Envoyé au chauffeur', 'active': 'Actif', 'completed': 'Terminé', 'pending_admin_review': 'En attente de révision', 'cancelled_by_customer': 'Annulé par le client' },
+      RU: { 'awaiting-price': 'Ожидание цены', 'waiting_for_customer_approval': 'Ожидание одобрения', 'customer_approved': 'Одобрено клиентом', 'customer_rejected': 'Отклонено', 'confirmed': 'Подтверждено', 'sent_to_driver': 'Отправлено водителю', 'active': 'Активно', 'completed': 'Завершено', 'pending_admin_review': 'На рассмотрении', 'cancelled_by_customer': 'Отменено клиентом' },
+      IT: { 'awaiting-price': 'Prezzo in attesa', 'waiting_for_customer_approval': 'In attesa di approvazione', 'customer_approved': 'Cliente approvato', 'customer_rejected': 'Cliente rifiutato', 'confirmed': 'Confermato', 'sent_to_driver': 'Inviato all\'autista', 'active': 'Attivo', 'completed': 'Completato', 'pending_admin_review': 'In revisione', 'cancelled_by_customer': 'Annullato dal cliente' },
+      ES: { 'awaiting-price': 'Precio pendiente', 'waiting_for_customer_approval': 'Esperando aprobación', 'customer_approved': 'Cliente aprobado', 'customer_rejected': 'Cliente rechazado', 'confirmed': 'Confirmado', 'sent_to_driver': 'Enviado al conductor', 'active': 'Activo', 'completed': 'Completado', 'pending_admin_review': 'En revisión', 'cancelled_by_customer': 'Cancelado por cliente' },
     };
     const statusLabel = (statusTranslations[lang] || statusTranslations.TR)[formData.status] || formData.status;
 
@@ -916,8 +916,8 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
       </header>
 
       <main className="container mx-auto py-8 px-4 max-w-2xl space-y-6">
-        {/* Price Entry Card for pending_price status */}
-        {formData.status === 'pending_price' && (
+        {/* Price Entry Card for awaiting-price status */}
+        {formData.status === 'awaiting-price' && (
           <Card className="border-orange-300 bg-orange-50 dark:bg-orange-950/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300">

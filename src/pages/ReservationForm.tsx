@@ -580,7 +580,7 @@ const ReservationForm = () => {
             flight_number: returnTripData.flightNumber?.trim() || null,
             vehicle_type: formData.vehicleType,
             payment_type: formData.paymentMethod,
-            status: 'pending_price',
+            status: 'awaiting-price',
             price: null,
             price_currency: null,
             // Promo code for return trip

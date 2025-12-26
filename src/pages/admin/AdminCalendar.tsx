@@ -34,7 +34,7 @@ interface Driver {
 }
 
 const statusColors: Record<string, string> = {
-  'pending_price': 'bg-orange-500/80 text-white',
+  'awaiting-price': 'bg-orange-500/80 text-white',
   'waiting_for_customer_approval': 'bg-purple-500/80 text-white',
   'customer_approved': 'bg-blue-500/80 text-white',
   'confirmed': 'bg-emerald-500/80 text-white',

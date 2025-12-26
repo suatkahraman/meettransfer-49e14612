@@ -119,7 +119,7 @@ const CustomerHome = () => {
         price: null,
         price_currency: null,
         payment_type: result.data.paymentType,
-        status: 'pending_price',
+        status: 'awaiting-price',
       }).select().single();
 
       if (error) throw error;

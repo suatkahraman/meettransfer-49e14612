@@ -64,7 +64,7 @@ interface AgencyReservationDetail {
 }
 
 const statusColors: Record<string, string> = {
-  'pending_price': 'bg-orange-500/20 text-orange-700',
+  'awaiting-price': 'bg-orange-500/20 text-orange-700',
   'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700',
   'customer_approved': 'bg-blue-500/20 text-blue-700',
   'customer_rejected': 'bg-destructive/20 text-destructive',
@@ -77,7 +77,7 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  'pending_price': 'Fiyat Bekliyor',
+  'awaiting-price': 'Fiyat Bekliyor',
   'waiting_for_customer_approval': 'Onay Bekliyor',
   'customer_approved': 'Onaylandı',
   'customer_rejected': 'Reddedildi',
