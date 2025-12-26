@@ -111,121 +111,143 @@ serve(async (req) => {
     }
 
     // Send email notification to admin
-    const adminEmail = Deno.env.get("ADMIN");
-    console.log("Admin email from env:", adminEmail);
-    
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const isValidEmail = adminEmail && emailRegex.test(adminEmail);
-    
-    if (isValidEmail && RESEND_API_KEY) {
-      console.log("Sending email notification to admin:", adminEmail);
+    // NOTE: We intentionally do NOT log raw env values here (they may contain sensitive data).
+    const adminEmailRaw = Deno.env.get("ADMIN");
+    const adminEmails = Array.from(
+      new Set(
+        (adminEmailRaw?.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) ?? []).map((e) =>
+          e.trim().toLowerCase()
+        )
+      )
+    );
+
+    const maskEmail = (email: string) => {
+      const [local = "", domain = ""] = email.split("@");
+      const maskedLocal = local.length <= 2 ? `${local[0] ?? "*"}*` : `${local.slice(0, 2)}***`;
+      return `${maskedLocal}@${domain}`;
+    };
+
+    if (adminEmails.length > 0 && RESEND_API_KEY) {
+      console.log("Sending email notification to admin:", adminEmails.map(maskEmail));
 
       try {
-        const currencyHtml = priceCurrency 
+        const currencyHtml = priceCurrency
           ? `<div style="margin-bottom: 12px;">
                <span style="color: #666;">Preferred Currency:</span>
                <strong style="color: #16a34a; margin-left: 8px;">${priceCurrency}</strong>
-             </div>` 
+             </div>`
           : "";
 
-        const emailResponse = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-          },
-          body: JSON.stringify({
-            from: "Meet Transfer <noreply@mail.meettransfer.app>",
-            to: [adminEmail],
-            subject: `📥 New Quick Booking Request - ${pickup} → ${dropoff}`,
-            html: `
-              <!DOCTYPE html>
-              <html>
-              <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>New Quick Booking Request</title>
-              </head>
-              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
-                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px;">
-                  <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="color: #3b82f6; margin: 0; font-size: 28px;">📥 New Quick Booking Request</h1>
-                    <p style="color: #666; margin-top: 10px;">A customer has submitted a new quick booking request</p>
-                  </div>
-                  
-                  <div style="background: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-                    <h2 style="color: #333; margin: 0 0 16px 0; font-size: 18px;">Transfer Details</h2>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">From:</span>
-                      <strong style="color: #333; margin-left: 8px;">${pickup}</strong>
+        const primaryFrom = "Meet Transfer <noreply@mail.meettransfer.app>";
+        const fallbackFrom = "Meet Transfer <onboarding@resend.dev>";
+
+        const sendEmail = async (from: string) => {
+          const res = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${RESEND_API_KEY}`,
+            },
+            body: JSON.stringify({
+              from,
+              to: adminEmails,
+              subject: `📥 New Quick Booking Request - ${pickup} → ${dropoff}`,
+              html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset="utf-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>New Quick Booking Request</title>
+                </head>
+                <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
+                  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                      <h1 style="color: #3b82f6; margin: 0; font-size: 28px;">📥 New Quick Booking Request</h1>
+                      <p style="color: #666; margin-top: 10px;">A customer has submitted a new quick booking request</p>
                     </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">To:</span>
-                      <strong style="color: #333; margin-left: 8px;">${dropoff}</strong>
+
+                    <div style="background: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                      <h2 style="color: #333; margin: 0 0 16px 0; font-size: 18px;">Transfer Details</h2>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">From:</span>
+                        <strong style="color: #333; margin-left: 8px;">${pickup}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">To:</span>
+                        <strong style="color: #333; margin-left: 8px;">${dropoff}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Date:</span>
+                        <strong style="color: #333; margin-left: 8px;">${pickupDate}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Time:</span>
+                        <strong style="color: #333; margin-left: 8px;">${pickupTime}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Vehicle:</span>
+                        <strong style="color: #333; margin-left: 8px;">${vehicleLabels[vehicleType] || vehicleType}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Passengers:</span>
+                        <strong style="color: #333; margin-left: 8px;">${passengers}</strong>
+                      </div>
+
+                      ${currencyHtml}
                     </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Date:</span>
-                      <strong style="color: #333; margin-left: 8px;">${pickupDate}</strong>
+
+                    <div style="background: #3b82f6; border-radius: 12px; padding: 24px; text-align: center; color: white;">
+                      <p style="margin: 0; font-size: 16px;">⏳ Awaiting Your Price Quote</p>
+                      <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">
+                        Please set a price for this booking
+                      </p>
                     </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Time:</span>
-                      <strong style="color: #333; margin-left: 8px;">${pickupTime}</strong>
+
+                    <div style="text-align: center; margin-top: 24px;">
+                      <a href="https://meettransfer.app/admin/quick-bookings"
+                         style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500;">
+                        Set Price Now
+                      </a>
                     </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Vehicle:</span>
-                      <strong style="color: #333; margin-left: 8px;">${vehicleLabels[vehicleType] || vehicleType}</strong>
-                    </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Passengers:</span>
-                      <strong style="color: #333; margin-left: 8px;">${passengers}</strong>
-                    </div>
-                    
-                    ${currencyHtml}
-                  </div>
-                  
-                  <div style="background: #3b82f6; border-radius: 12px; padding: 24px; text-align: center; color: white;">
-                    <p style="margin: 0; font-size: 16px;">⏳ Awaiting Your Price Quote</p>
-                    <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">
-                      Please set a price for this booking
+
+                    <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
+                      The customer is waiting for your price quote.
                     </p>
                   </div>
-                  
-                  <div style="text-align: center; margin-top: 24px;">
-                    <a href="https://meettransfer.app/admin/quick-bookings" 
-                       style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-                      Set Price Now
-                    </a>
-                  </div>
-                  
-                  <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
-                    The customer is waiting for your price quote.
-                  </p>
-                </div>
-              </body>
-              </html>
-            `,
-          }),
-        });
-        
-        if (!emailResponse.ok) {
-          const errorData = await emailResponse.text();
-          console.error("Email send failed:", errorData);
+                </body>
+                </html>
+              `,
+            }),
+          });
+
+          const text = await res.text();
+          return { ok: res.ok, status: res.status, text };
+        };
+
+        const primary = await sendEmail(primaryFrom);
+        if (!primary.ok) {
+          console.error("Email send failed (primary from):", primary.status, primary.text);
+          const fallback = await sendEmail(fallbackFrom);
+          if (!fallback.ok) {
+            console.error("Email send failed (fallback from):", fallback.status, fallback.text);
+          } else {
+            console.log("Admin email sent successfully (fallback).");
+          }
         } else {
-          const result = await emailResponse.json();
-          console.log("Admin email sent successfully:", result);
+          console.log("Admin email sent successfully.");
         }
       } catch (emailError) {
         console.error("Email send error:", emailError);
       }
     } else {
-      console.log("Skipping email - invalid email or missing API key. Email:", adminEmail, "Valid:", isValidEmail, "Has API key:", !!RESEND_API_KEY);
+      console.log("Skipping email - missing RESEND_API_KEY or no valid ADMIN email(s).");
     }
 
     return new Response(

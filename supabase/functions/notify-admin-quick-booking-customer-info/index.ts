@@ -109,10 +109,25 @@ serve(async (req) => {
     }
 
     // Send email notification to admin
-    const adminEmail = Deno.env.get("ADMIN");
-    if (adminEmail && RESEND_API_KEY) {
-      console.log("Sending email notification to admin:", adminEmail);
-      
+    // NOTE: We intentionally do NOT log raw env values here (they may contain sensitive data).
+    const adminEmailRaw = Deno.env.get("ADMIN");
+    const adminEmails = Array.from(
+      new Set(
+        (adminEmailRaw?.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) ?? []).map((e) =>
+          e.trim().toLowerCase()
+        )
+      )
+    );
+
+    const maskEmail = (email: string) => {
+      const [local = "", domain = ""] = email.split("@");
+      const maskedLocal = local.length <= 2 ? `${local[0] ?? "*"}*` : `${local.slice(0, 2)}***`;
+      return `${maskedLocal}@${domain}`;
+    };
+
+    if (adminEmails.length > 0 && RESEND_API_KEY) {
+      console.log("Sending email notification to admin:", adminEmails.map(maskEmail));
+
       const vehicleLabels: Record<string, string> = {
         "mercedes-vito": "Mercedes Vito",
         "mercedes-vclass": "VIP Vito",
@@ -133,122 +148,138 @@ serve(async (req) => {
       };
 
       try {
-        const emailResponse = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-          },
-          body: JSON.stringify({
-            from: "Meet Transfer <noreply@mail.meettransfer.app>",
-            to: [adminEmail],
-            subject: `✅ Quick Booking Complete - ${reservationCode} - ${customerName}`,
-            html: `
-              <!DOCTYPE html>
-              <html>
-              <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Quick Booking Complete</title>
-              </head>
-              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
-                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px;">
-                  <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="color: #22c55e; margin: 0; font-size: 28px;">✅ Quick Booking Complete</h1>
-                    <p style="color: #666; margin-top: 10px;">Customer has completed all information - ready for driver assignment</p>
-                  </div>
-                  
-                  <div style="background: #22c55e; border-radius: 12px; padding: 16px; text-align: center; color: white; margin-bottom: 24px;">
-                    <p style="margin: 0; font-size: 14px;">Reservation Code</p>
-                    <p style="margin: 8px 0 0 0; font-size: 28px; font-weight: bold; letter-spacing: 2px;">${reservationCode}</p>
-                  </div>
-                  
-                  <div style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-                    <h2 style="color: #166534; margin: 0 0 16px 0; font-size: 18px;">👤 Customer Information</h2>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Name:</span>
-                      <strong style="color: #333; margin-left: 8px;">${customerName}</strong>
+        const primaryFrom = "Meet Transfer <noreply@mail.meettransfer.app>";
+        const fallbackFrom = "Meet Transfer <onboarding@resend.dev>";
+
+        const sendEmail = async (from: string) => {
+          const res = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${RESEND_API_KEY}`,
+            },
+            body: JSON.stringify({
+              from,
+              to: adminEmails,
+              subject: `✅ Quick Booking Complete - ${reservationCode} - ${customerName}`,
+              html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset="utf-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Quick Booking Complete</title>
+                </head>
+                <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
+                  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                      <h1 style="color: #22c55e; margin: 0; font-size: 28px;">✅ Quick Booking Complete</h1>
+                      <p style="color: #666; margin-top: 10px;">Customer has completed all information - ready for driver assignment</p>
                     </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Email:</span>
-                      <strong style="color: #333; margin-left: 8px;">${customerEmail}</strong>
+
+                    <div style="background: #22c55e; border-radius: 12px; padding: 16px; text-align: center; color: white; margin-bottom: 24px;">
+                      <p style="margin: 0; font-size: 14px;">Reservation Code</p>
+                      <p style="margin: 8px 0 0 0; font-size: 28px; font-weight: bold; letter-spacing: 2px;">${reservationCode}</p>
                     </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Phone:</span>
-                      <strong style="color: #333; margin-left: 8px;">${customerPhone}</strong>
+
+                    <div style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                      <h2 style="color: #166534; margin: 0 0 16px 0; font-size: 18px;">👤 Customer Information</h2>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Name:</span>
+                        <strong style="color: #333; margin-left: 8px;">${customerName}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Email:</span>
+                        <strong style="color: #333; margin-left: 8px;">${customerEmail}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Phone:</span>
+                        <strong style="color: #333; margin-left: 8px;">${customerPhone}</strong>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div style="background: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-                    <h2 style="color: #333; margin: 0 0 16px 0; font-size: 18px;">🚗 Transfer Details</h2>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">From:</span>
-                      <strong style="color: #333; margin-left: 8px;">${pickup}</strong>
+
+                    <div style="background: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                      <h2 style="color: #333; margin: 0 0 16px 0; font-size: 18px;">🚗 Transfer Details</h2>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">From:</span>
+                        <strong style="color: #333; margin-left: 8px;">${pickup}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">To:</span>
+                        <strong style="color: #333; margin-left: 8px;">${dropoff}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Date:</span>
+                        <strong style="color: #333; margin-left: 8px;">${pickupDate}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Time:</span>
+                        <strong style="color: #333; margin-left: 8px;">${pickupTime}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Vehicle:</span>
+                        <strong style="color: #333; margin-left: 8px;">${vehicleLabels[vehicleType] || vehicleType}</strong>
+                      </div>
+
+                      <div style="margin-bottom: 12px;">
+                        <span style="color: #666;">Payment:</span>
+                        <strong style="color: #333; margin-left: 8px;">${paymentLabels[paymentMethod] || paymentMethod}</strong>
+                      </div>
                     </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">To:</span>
-                      <strong style="color: #333; margin-left: 8px;">${dropoff}</strong>
+
+                    <div style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 12px; padding: 24px; text-align: center; color: white;">
+                      <p style="margin: 0; font-size: 16px;">Total Price</p>
+                      <p style="margin: 8px 0 0 0; font-size: 36px; font-weight: bold;">
+                        ${currencySymbols[priceCurrency] || priceCurrency}${price}
+                      </p>
                     </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Date:</span>
-                      <strong style="color: #333; margin-left: 8px;">${pickupDate}</strong>
+
+                    <div style="text-align: center; margin-top: 24px;">
+                      <a href="https://meettransfer.app/admin/reservations"
+                         style="display: inline-block; background: #22c55e; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500; margin-right: 8px;">
+                        Assign Driver
+                      </a>
                     </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Time:</span>
-                      <strong style="color: #333; margin-left: 8px;">${pickupTime}</strong>
-                    </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Vehicle:</span>
-                      <strong style="color: #333; margin-left: 8px;">${vehicleLabels[vehicleType] || vehicleType}</strong>
-                    </div>
-                    
-                    <div style="margin-bottom: 12px;">
-                      <span style="color: #666;">Payment:</span>
-                      <strong style="color: #333; margin-left: 8px;">${paymentLabels[paymentMethod] || paymentMethod}</strong>
-                    </div>
-                  </div>
-                  
-                  <div style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 12px; padding: 24px; text-align: center; color: white;">
-                    <p style="margin: 0; font-size: 16px;">Total Price</p>
-                    <p style="margin: 8px 0 0 0; font-size: 36px; font-weight: bold;">
-                      ${currencySymbols[priceCurrency] || priceCurrency}${price}
+
+                    <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
+                      This reservation is now in your main reservations list and ready for driver assignment.
                     </p>
                   </div>
-                  
-                  <div style="text-align: center; margin-top: 24px;">
-                    <a href="https://meettransfer.app/admin/reservations" 
-                       style="display: inline-block; background: #22c55e; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500; margin-right: 8px;">
-                      Assign Driver
-                    </a>
-                  </div>
-                  
-                  <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
-                    This reservation is now in your main reservations list and ready for driver assignment.
-                  </p>
-                </div>
-              </body>
-              </html>
-            `,
-          }),
-        });
-        
-        if (!emailResponse.ok) {
-          const errorData = await emailResponse.text();
-          console.error("Email send failed:", errorData);
+                </body>
+                </html>
+              `,
+            }),
+          });
+
+          const text = await res.text();
+          return { ok: res.ok, status: res.status, text };
+        };
+
+        const primary = await sendEmail(primaryFrom);
+        if (!primary.ok) {
+          console.error("Email send failed (primary from):", primary.status, primary.text);
+          const fallback = await sendEmail(fallbackFrom);
+          if (!fallback.ok) {
+            console.error("Email send failed (fallback from):", fallback.status, fallback.text);
+          } else {
+            console.log("Admin email sent successfully (fallback).");
+          }
         } else {
-          console.log("Admin email sent successfully");
+          console.log("Admin email sent successfully.");
         }
       } catch (emailError) {
         console.error("Email send error:", emailError);
       }
+    } else {
+      console.log("Skipping email - missing RESEND_API_KEY or no valid ADMIN email(s).");
     }
 
     return new Response(
