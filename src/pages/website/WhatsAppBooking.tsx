@@ -13,16 +13,61 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircle, ArrowRight } from "lucide-react";
+import { MessageCircle, ArrowRight, ChevronLeft, ChevronRight, Users, Briefcase } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 
-// Airports list removed - pickup is now free text
+// Vehicle images
+import vito2 from "@/assets/vito-2.jpg";
+import vito3 from "@/assets/vito-3.jpg";
+import vito4 from "@/assets/vito-4.jpg";
+import vito5 from "@/assets/vito-5.jpg";
+import vitoVip1 from "@/assets/vito-vip-1.jpg";
+import vitoVip2 from "@/assets/vito-vip-2.jpg";
+import vitoVip3 from "@/assets/vito-vip-3.jpg";
+import vitoVip4 from "@/assets/vito-vip-4.jpg";
+import vitoVip5 from "@/assets/vito-vip-5.jpg";
+import maybach1 from "@/assets/maybach-1.jpg";
+import maybach2 from "@/assets/maybach-2.jpg";
+import maybach3 from "@/assets/maybach-3.jpg";
+import maybach4 from "@/assets/maybach-4.jpg";
+import maybach5 from "@/assets/maybach-5.jpg";
+import sprinter1 from "@/assets/sprinter-1.jpg";
+import sprinter2 from "@/assets/sprinter-2.jpg";
+import sprinter3 from "@/assets/sprinter-3.jpg";
+import sprinter4 from "@/assets/sprinter-4.jpg";
+import sprinter5 from "@/assets/sprinter-5.jpg";
 
-const vehicleTypes = [
-  "Mercedes Vito",
-  "Mercedes Vip Vito",
-  "Maybach",
-  "Minibus",
-];
+// Vehicle data with images
+const vehicleData = {
+  "Mercedes Vito": {
+    images: [vito2, vito3, vito4, vito5],
+    passengers: 7,
+    luggage: 7,
+  },
+  "Mercedes Vip Vito": {
+    images: [vitoVip1, vitoVip2, vitoVip3, vitoVip4, vitoVip5],
+    passengers: 6,
+    luggage: 6,
+  },
+  "Maybach": {
+    images: [maybach1, maybach2, maybach3, maybach4, maybach5],
+    passengers: 4,
+    luggage: 4,
+  },
+  "Minibus": {
+    images: [sprinter1, sprinter2, sprinter3, sprinter4, sprinter5],
+    passengers: 16,
+    luggage: 16,
+  },
+};
+
+const vehicleTypes = Object.keys(vehicleData);
 
 const WhatsAppBooking = () => {
   const { t } = useLanguage();
@@ -133,6 +178,41 @@ Please confirm availability and price.`;
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Vehicle Image Carousel */}
+              {formData.vehicleType && vehicleData[formData.vehicleType as keyof typeof vehicleData] && (
+                <div className="space-y-3">
+                  <Carousel className="w-full">
+                    <CarouselContent>
+                      {vehicleData[formData.vehicleType as keyof typeof vehicleData].images.map((img, idx) => (
+                        <CarouselItem key={idx}>
+                          <div className="overflow-hidden rounded-xl">
+                            <img
+                              src={img}
+                              alt={`${formData.vehicleType} - ${idx + 1}`}
+                              className="w-full h-48 object-cover"
+                            />
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="left-2" />
+                    <CarouselNext className="right-2" />
+                  </Carousel>
+                  
+                  {/* Vehicle Info */}
+                  <div className="flex justify-center gap-6 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <Users className="h-4 w-4" />
+                      <span>{vehicleData[formData.vehicleType as keyof typeof vehicleData].passengers} Passengers</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Briefcase className="h-4 w-4" />
+                      <span>{vehicleData[formData.vehicleType as keyof typeof vehicleData].luggage} Luggage</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>{t("passengers")}</Label>
