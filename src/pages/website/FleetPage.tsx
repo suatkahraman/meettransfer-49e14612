@@ -28,6 +28,7 @@ import sprinter3 from "@/assets/sprinter-3.jpg";
 import sprinter4 from "@/assets/sprinter-4.jpg";
 import sprinter5 from "@/assets/sprinter-5.jpg";
 import sprinter6 from "@/assets/sprinter-6.jpg";
+import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
 import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
 import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 
@@ -65,7 +66,7 @@ const FleetPage = () => {
       passengers: 16,
       luggage: 16,
       features: ["Leather Seats", "Large luggage space", "WiFi", "USB"],
-      images: [sprinter1, meetTransferCyprus, sprinter2, sprinter3, meetTransferDubai, sprinter4, sprinter5, sprinter6],
+      images: [sprinter1, meetTransferCyprus, sprinter2, sprinterLuggage, sprinter3, meetTransferDubai, sprinter4, sprinter5, sprinter6],
     },
   ];
 
