@@ -20,6 +20,7 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  CarouselDots,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -210,6 +211,7 @@ Please confirm availability and price.`;
                     </CarouselContent>
                     <CarouselPrevious className="left-2" />
                     <CarouselNext className="right-2" />
+                    <CarouselDots />
                   </Carousel>
                   
                   {/* Vehicle Info */}
