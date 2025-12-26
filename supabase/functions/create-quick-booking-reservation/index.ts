@@ -115,6 +115,29 @@ serve(async (req) => {
       // Don't fail - reservation is already created
     }
 
+    // Notify admin (server-side) so it doesn't depend on the customer's browser/network
+    try {
+      await supabase.functions.invoke("notify-admin-quick-booking-confirmed", {
+        body: {
+          bookingId: requestData.bookingId,
+          pickup: requestData.pickup,
+          dropoff: requestData.dropoff,
+          pickupDate: requestData.pickupDate,
+          pickupTime: requestData.pickupTime,
+          vehicleType: requestData.vehicleType,
+          passengers: requestData.passengers,
+          price: requestData.price,
+          priceCurrency: requestData.priceCurrency,
+          paymentMethod: requestData.paymentMethod,
+          reservationCode: reservation.reservation_code,
+        },
+      });
+      console.log("Admin notified for quick booking confirmation:", requestData.bookingId);
+    } catch (notifyError) {
+      console.error("Failed to notify admin (server-side):", notifyError);
+      // Don't fail - reservation is already created
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -145,3 +168,4 @@ serve(async (req) => {
     );
   }
 });
+
