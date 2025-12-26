@@ -79,7 +79,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Sending email to:", customer_email);
 
       const emailResponse = await resend.emails.send({
-        from: "Meet Transfer <noreply@meettransfer.app>",
+        from: "Meet Transfer <noreply@mail.meettransfer.app>",
         to: [customer_email],
         subject: `Your Transfer Quote: ${currencySymbol}${price} - Meet Transfer`,
         html: `

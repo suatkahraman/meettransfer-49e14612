@@ -229,7 +229,7 @@ serve(async (req) => {
                   'Authorization': `Bearer ${resendApiKey}`
                 },
                 body: JSON.stringify({
-                  from: "Meet Transfer <noreply@meettransfer.app>",
+                  from: "Meet Transfer <noreply@mail.meettransfer.app>",
                   reply_to: "info@meettransfer.app",
                   to: [driverEmail],
                   subject: emailSubject,
@@ -341,7 +341,7 @@ serve(async (req) => {
                   'Authorization': `Bearer ${resendApiKey}`
                 },
                 body: JSON.stringify({
-                  from: "Meet Transfer <noreply@meettransfer.app>",
+                  from: "Meet Transfer <noreply@mail.meettransfer.app>",
                   reply_to: "info@meettransfer.app",
                   to: [customerEmail],
                   subject: customerTitle,
