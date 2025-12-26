@@ -373,11 +373,11 @@ const currencyOptions = [
                     <CarouselContent>
                       {vehicleImageData[vehicleType].images.map((img, idx) => (
                         <CarouselItem key={idx}>
-                          <div className="overflow-hidden rounded-xl aspect-video">
+                          <div className="overflow-hidden rounded-xl aspect-[4/3] bg-black/20">
                             <img
                               src={img}
                               alt={`${vehicleTypes.find(v => v.value === vehicleType)?.label} - ${idx + 1}`}
-                              className="w-full h-full object-cover object-center"
+                              className="w-full h-full object-contain"
                             />
                           </div>
                         </CarouselItem>
