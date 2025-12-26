@@ -9,6 +9,7 @@ import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRo
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
 import { lazy, Suspense } from "react";
 import FloatingWhatsApp from "./components/website/FloatingWhatsApp";
+import HashScroll from "@/components/HashScroll";
 
 // Critical pages - lazy loaded with prefetch for better UX
 const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
@@ -147,6 +148,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <HashScroll />
         <OAuthCallbackHandler>
           <LanguageProvider>
             <AuthProvider>

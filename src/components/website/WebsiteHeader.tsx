@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogIn, LogOut, User, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "./LanguageSelector";
@@ -22,6 +22,7 @@ const WebsiteHeader = () => {
   const { user, signOut } = useAuth();
   const { role } = useUserRole();
   const location = useLocation();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Check if path matches considering language prefix
@@ -47,14 +48,23 @@ const WebsiteHeader = () => {
   };
 
   const scrollToBookingForm = useCallback(() => {
-    const bookingForm = document.getElementById('booking-form');
-    if (bookingForm) {
-      bookingForm.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      // If not on homepage, navigate there first
-      window.location.href = getLocalizedPath('/') + '#booking-form';
+    const home = getLocalizedPath("/");
+
+    // If not on homepage, navigate with hash; HashScroll will handle the actual scroll.
+    if (location.pathname !== home) {
+      navigate(`${home}#booking-form`);
+      return;
     }
-  }, [getLocalizedPath]);
+
+    const bookingForm = document.getElementById("booking-form");
+    if (bookingForm) {
+      bookingForm.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    // Fallback: ensure hash is set so HashScroll can retry after mount.
+    navigate(`${home}#booking-form`);
+  }, [getLocalizedPath, location.pathname, navigate]);
 
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border">
