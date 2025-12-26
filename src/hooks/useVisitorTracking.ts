@@ -61,24 +61,6 @@ function isExcludedDomain(): boolean {
   return EXCLUDED_DOMAINS.some(domain => hostname.includes(domain));
 }
 
-// Check if user has an excluded role (admin, driver, agency)
-async function checkIsExcludedUser(): Promise<boolean> {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
-    
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .in('role', EXCLUDED_ROLES)
-      .maybeSingle();
-    
-    return !!roleData;
-  } catch {
-    return false;
-  }
-}
 
 export function useVisitorTracking() {
   const location = useLocation();
@@ -86,6 +68,7 @@ export function useVisitorTracking() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const presenceRef = useRef<any | null>(null);
   const [isExcludedUser, setIsExcludedUser] = useState<boolean | null>(null);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const ctxRef = useRef<{
     visitorId: string;
     sessionStart: string;
@@ -98,15 +81,45 @@ export function useVisitorTracking() {
   // Check excluded user status on mount and auth changes
   useEffect(() => {
     const checkExcluded = async () => {
-      const excludedStatus = await checkIsExcludedUser();
-      setIsExcludedUser(excludedStatus);
+      // First check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // If no user, they're not excluded (anonymous visitor)
+      if (!user) {
+        setIsExcludedUser(false);
+        setIsAuthChecked(true);
+        return;
+      }
+      
+      // Check if authenticated user has excluded role
+      try {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .in('role', EXCLUDED_ROLES)
+          .maybeSingle();
+        
+        setIsExcludedUser(!!roleData);
+      } catch {
+        // If error checking role, exclude by default for safety
+        setIsExcludedUser(true);
+      }
+      setIsAuthChecked(true);
     };
     
     checkExcluded();
     
     // Re-check on auth state change
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkExcluded();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      // Reset state on auth change
+      setIsAuthChecked(false);
+      setIsExcludedUser(null);
+      
+      // Use setTimeout to avoid Supabase deadlock
+      setTimeout(() => {
+        checkExcluded();
+      }, 0);
     });
     
     return () => {
@@ -114,8 +127,8 @@ export function useVisitorTracking() {
     };
   }, []);
   useEffect(() => {
-    // Wait for excluded user check to complete
-    if (isExcludedUser === null) return;
+    // Wait for auth check to complete
+    if (!isAuthChecked || isExcludedUser === null) return;
     
     // Don't track admin, driver, agency users
     if (isExcludedUser) {
@@ -276,7 +289,7 @@ export function useVisitorTracking() {
         intervalRef.current = null;
       }
     };
-  }, [location.pathname, isExcludedUser]);
+  }, [location.pathname, isExcludedUser, isAuthChecked]);
 
   useEffect(() => {
     return () => {
