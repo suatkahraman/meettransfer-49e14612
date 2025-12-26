@@ -127,8 +127,7 @@ export function InstallAppButton({
     "hover:shadow-xl hover:shadow-primary/30",
     "hover:scale-105 active:scale-100",
     "transition-all duration-300 ease-out",
-    "border-0",
-    animated && !isInstalling && "animate-pulse"
+    "border-0"
   ) : "";
 
   return (
