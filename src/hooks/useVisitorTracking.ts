@@ -67,7 +67,7 @@ export function useVisitorTracking() {
   const visitIdRef = useRef<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const presenceRef = useRef<any | null>(null);
-  const [isExcludedUser, setIsExcludedUser] = useState<boolean | null>(null);
+  const [isExcludedUser, setIsExcludedUser] = useState<boolean>(true); // Default to excluded until proven otherwise
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const ctxRef = useRef<{
     visitorId: string;
@@ -78,60 +78,105 @@ export function useVisitorTracking() {
     geo: { countryCode: string; countryName: string; city: string };
   } | null>(null);
 
+  // Helper function to stop tracking
+  const stopTracking = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (presenceRef.current) {
+      supabase.removeChannel(presenceRef.current);
+      presenceRef.current = null;
+    }
+    visitIdRef.current = null;
+    ctxRef.current = null; // Clear context to prevent stale data
+  };
+
   // Check excluded user status on mount and auth changes
   useEffect(() => {
+    let isMounted = true;
+    
     const checkExcluded = async () => {
-      // First check if user is authenticated
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      // If no user, they're not excluded (anonymous visitor)
-      if (!user) {
-        setIsExcludedUser(false);
-        setIsAuthChecked(true);
-        return;
-      }
-      
-      // Check if authenticated user has excluded role
       try {
-        const { data: roleData } = await supabase
+        // First check if user is authenticated
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!isMounted) return;
+        
+        // If no user, they're not excluded (anonymous visitor)
+        if (!user) {
+          setIsExcludedUser(false);
+          setIsAuthChecked(true);
+          return;
+        }
+        
+        // Check if authenticated user has excluded role
+        const { data: roleData, error } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .in('role', EXCLUDED_ROLES)
-          .maybeSingle();
+          .in('role', EXCLUDED_ROLES);
         
-        setIsExcludedUser(!!roleData);
-      } catch {
-        // If error checking role, exclude by default for safety
-        setIsExcludedUser(true);
+        if (!isMounted) return;
+        
+        if (error) {
+          console.error('[VisitorTracking] Role check error:', error);
+          // If error checking role, exclude by default for safety
+          setIsExcludedUser(true);
+          stopTracking();
+        } else {
+          const hasExcludedRole = roleData && roleData.length > 0;
+          setIsExcludedUser(hasExcludedRole);
+          
+          // If user has excluded role, immediately stop tracking
+          if (hasExcludedRole) {
+            stopTracking();
+          }
+        }
+      } catch (err) {
+        console.error('[VisitorTracking] checkExcluded error:', err);
+        if (isMounted) {
+          setIsExcludedUser(true);
+          stopTracking();
+        }
       }
-      setIsAuthChecked(true);
+      
+      if (isMounted) {
+        setIsAuthChecked(true);
+      }
     };
     
     checkExcluded();
     
     // Re-check on auth state change
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      // Reset state on auth change
-      setIsAuthChecked(false);
-      setIsExcludedUser(null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // Immediately stop tracking on any auth change
+      stopTracking();
       
-      // Use setTimeout to avoid Supabase deadlock
+      // Reset state
+      setIsAuthChecked(false);
+      setIsExcludedUser(true); // Default to excluded until check completes
+      
+      // Re-check after a small delay to ensure auth state is stable
       setTimeout(() => {
-        checkExcluded();
-      }, 0);
+        if (isMounted) {
+          checkExcluded();
+        }
+      }, 100);
     });
     
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
   useEffect(() => {
     // Wait for auth check to complete
-    if (!isAuthChecked || isExcludedUser === null) return;
+    if (!isAuthChecked) return;
     
     // Don't track admin, driver, agency users
     if (isExcludedUser) {
+      stopTracking();
       return;
     }
 
@@ -142,20 +187,8 @@ export function useVisitorTracking() {
     
     const isExcluded = EXCLUDED_ROUTES.some((route) => location.pathname.startsWith(route));
 
-    const stop = () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      if (presenceRef.current) {
-        supabase.removeChannel(presenceRef.current);
-        presenceRef.current = null;
-      }
-      visitIdRef.current = null;
-    };
-
     if (isExcluded) {
-      stop();
+      stopTracking();
       return;
     }
 
