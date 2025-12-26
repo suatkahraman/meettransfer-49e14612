@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 
 interface VehicleCardProps {
   name: string;
@@ -26,7 +27,9 @@ const VehicleCard = ({
   // Support both single image and multiple images
   const images = imagesProp || (image ? [image] : []);
   const { t } = useLanguage();
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
+    Autoplay({ delay: 4000, stopOnInteraction: true }),
+  ]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const onSelect = useCallback(() => {
