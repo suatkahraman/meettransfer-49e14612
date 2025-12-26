@@ -21,6 +21,7 @@ import maybach3 from "@/assets/maybach-3.jpg";
 import maybach4 from "@/assets/maybach-4.jpg";
 import maybach5 from "@/assets/maybach-5.jpg";
 import maybach6 from "@/assets/maybach-6.jpg";
+import maybachInterior from "@/assets/maybach-interior-starlight.jpg";
 import sprinter1 from "@/assets/sprinter-1.jpg";
 import sprinter2 from "@/assets/sprinter-2.jpg";
 import sprinter3 from "@/assets/sprinter-3.jpg";
@@ -56,7 +57,7 @@ const FleetPage = () => {
       passengers: 4,
       luggage: 4,
       features: ["Leather seats", "Rear entertainment", "Ambient lighting", "Mini bar", "Star ceiling", "TV"],
-      images: [maybach1, meetTransferDubai, maybach2, maybach3, meetTransferCyprus, maybach4, maybach5, maybach6],
+      images: [maybach1, meetTransferDubai, maybach2, maybachInterior, maybach3, meetTransferCyprus, maybach4, maybach5, maybach6],
     },
     {
       name: t("sprinterName"),
