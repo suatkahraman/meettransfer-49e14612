@@ -27,8 +27,18 @@ serve(async (req) => {
     const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN")!;
     const twilioWhatsAppNumber = Deno.env.get("TWILIO_WHATSAPP_NUMBER")?.trim();
 
+    if (!twilioWhatsAppNumber) {
+      console.error("TWILIO_WHATSAPP_NUMBER is missing");
+      return new Response(
+        JSON.stringify({ error: "WhatsApp sender number not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Verify admin authorization
     const authHeader = req.headers.get("Authorization");
+    console.log("whatsapp-send-admin called. Has Authorization header:", Boolean(authHeader));
+
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
@@ -38,21 +48,32 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const token = authHeader.replace("Bearer ", "");
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
     if (authError || !user) {
+      console.error("Auth error in whatsapp-send-admin:", authError);
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    console.log("whatsapp-send-admin user:", user.id);
+
     // Check if user is admin
-    const { data: userRole } = await supabase
+    const { data: userRole, error: roleError } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .single();
+
+    if (roleError) {
+      console.error("Error fetching user role:", roleError);
+    }
 
     if (userRole?.role !== "admin") {
       return new Response(
@@ -61,7 +82,14 @@ serve(async (req) => {
       );
     }
 
-    const { conversation_id, message, message_type = "text", price, currency = "EUR", reservation_id }: SendMessageRequest = await req.json();
+    const {
+      conversation_id,
+      message,
+      message_type = "text",
+      price,
+      currency = "EUR",
+      reservation_id,
+    }: SendMessageRequest = await req.json();
 
     // Get conversation
     const { data: conversation, error: convError } = await supabase

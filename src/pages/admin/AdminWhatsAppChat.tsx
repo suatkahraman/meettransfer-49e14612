@@ -244,6 +244,11 @@ export default function AdminWhatsAppChat() {
   const sendMessage = async (messageType: "text" | "price" | "magic_link" = "text") => {
     if (!selectedConversation || (!newMessage.trim() && messageType === "text")) return;
 
+    if (!session?.access_token) {
+      toast.error("Admin oturumu bulunamadı. Lütfen tekrar giriş yapın.");
+      return;
+    }
+
     setSending(true);
     try {
       const payload: any = {
@@ -262,6 +267,9 @@ export default function AdminWhatsAppChat() {
 
       const { data, error } = await supabase.functions.invoke("whatsapp-send-admin", {
         body: payload,
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
 
       if (error) throw error;
@@ -282,6 +290,11 @@ export default function AdminWhatsAppChat() {
   const sendMagicLink = async () => {
     if (!selectedConversation) return;
 
+    if (!session?.access_token) {
+      toast.error("Admin oturumu bulunamadı. Lütfen tekrar giriş yapın.");
+      return;
+    }
+
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("whatsapp-send-admin", {
@@ -289,6 +302,9 @@ export default function AdminWhatsAppChat() {
           conversation_id: selectedConversation.id,
           message: "Access your Meet Transfer account and manage your bookings:",
           message_type: "magic_link",
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
 
