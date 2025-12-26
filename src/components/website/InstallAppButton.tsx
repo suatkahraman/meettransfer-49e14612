@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Smartphone, ExternalLink, Sparkles } from "lucide-react";
+import { Download, Smartphone, ExternalLink, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { useNavigate } from "react-router-dom";
@@ -25,11 +25,12 @@ export function InstallAppButton({
   fullWidth = false,
   animated = false,
 }: InstallAppButtonProps) {
-  const { canInstall, isInstalled, isStandalone, isIOS, isAndroid, promptInstall } = usePWAInstall();
+  const { canInstall, isInstalled, isStandalone, isIOS, isAndroid, promptInstall, deferredPrompt } = usePWAInstall();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const [showIOSModal, setShowIOSModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
 
   // Don't show if already running in standalone mode (app is open)
   if (isStandalone) {
@@ -37,42 +38,83 @@ export function InstallAppButton({
   }
 
   const handleClick = async () => {
-    console.log('[InstallAppButton] Click:', { canInstall, isIOS, isAndroid, isStandalone });
+    console.log('[InstallAppButton] Click:', { canInstall, isIOS, isAndroid, isStandalone, deferredPrompt: !!deferredPrompt });
     
-    if (canInstall) {
-      // Native install prompt available (Android/Desktop Chrome)
-      const installed = await promptInstall();
-      if (installed) {
-        toast.success(
-          language === 'TR' ? 'Uygulama kuruldu!' : 'App installed!',
+    // Show loading state
+    setIsInstalling(true);
+    
+    try {
+      if (canInstall && deferredPrompt) {
+        // Native install prompt available - trigger immediately
+        console.log('[InstallAppButton] Triggering native install prompt...');
+        const installed = await promptInstall();
+        
+        if (installed) {
+          toast.success(
+            language === 'TR' ? 'Uygulama kuruldu!' : 'App installed!',
+            {
+              description: language === 'TR' 
+                ? 'Artık ana ekranınızdan erişebilirsiniz' 
+                : 'You can now access it from your home screen'
+            }
+          );
+        } else {
+          toast.info(
+            language === 'TR' ? 'Yükleme iptal edildi' : 'Installation cancelled',
+            {
+              description: language === 'TR'
+                ? 'İstediğiniz zaman tekrar deneyebilirsiniz'
+                : 'You can try again anytime'
+            }
+          );
+        }
+      } else if (isIOS) {
+        // iOS - show modal with instructions
+        console.log('[InstallAppButton] Opening iOS modal');
+        setShowIOSModal(true);
+      } else if (isAndroid) {
+        // Android - try to trigger install or show toast
+        console.log('[InstallAppButton] Android - showing install instructions');
+        toast.info(
+          language === 'TR' ? 'Uygulamayı Yükle' : 'Install App',
           {
-            description: language === 'TR' 
-              ? 'Artık ana ekranınızdan erişebilirsiniz' 
-              : 'You can now access it from your home screen'
+            description: language === 'TR'
+              ? 'Tarayıcı menüsünden "Ana ekrana ekle" seçeneğini kullanın'
+              : 'Use "Add to Home Screen" from browser menu',
+            duration: 5000,
           }
         );
+        navigate("/install");
+      } else {
+        // Desktop fallback - show helpful toast
+        console.log('[InstallAppButton] Desktop fallback');
+        toast.info(
+          language === 'TR' ? 'Uygulamayı Yükle' : 'Install App',
+          {
+            description: language === 'TR'
+              ? 'Tarayıcı adres çubuğundaki yükleme simgesine tıklayın'
+              : 'Click the install icon in your browser address bar',
+            duration: 5000,
+          }
+        );
+        navigate("/install");
       }
-    } else if (isIOS) {
-      // iOS - show modal with instructions (iOS doesn't support beforeinstallprompt)
-      console.log('[InstallAppButton] Opening iOS modal');
-      setShowIOSModal(true);
-    } else if (isAndroid) {
-      // Android without install prompt - show instructions page
-      console.log('[InstallAppButton] Navigating to /install for Android');
-      navigate("/install");
-    } else {
-      // Desktop fallback
-      navigate("/install");
+    } finally {
+      setIsInstalling(false);
     }
   };
 
-  const buttonLabel = isInstalled 
-    ? (language === 'TR' ? 'Uygulamayı Aç' : 'Open App')
-    : (t("installApp") || "Install App");
+  const buttonLabel = isInstalling
+    ? (language === 'TR' ? 'Yükleniyor...' : 'Installing...')
+    : isInstalled 
+      ? (language === 'TR' ? 'Uygulamayı Aç' : 'Open App')
+      : (t("installApp") || "Install App");
 
-  const icon = isInstalled 
-    ? <ExternalLink className="h-4 w-4" />
-    : (isIOS ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />);
+  const icon = isInstalling
+    ? <Loader2 className="h-4 w-4 animate-spin" />
+    : isInstalled 
+      ? <ExternalLink className="h-4 w-4" />
+      : (isIOS ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />);
 
   // Prominent variant styling
   const isProminent = variant === "prominent";
@@ -86,7 +128,7 @@ export function InstallAppButton({
     "hover:scale-105 active:scale-100",
     "transition-all duration-300 ease-out",
     "border-0",
-    animated && "animate-pulse"
+    animated && !isInstalling && "animate-pulse"
   ) : "";
 
   return (
@@ -95,6 +137,7 @@ export function InstallAppButton({
         variant={isProminent ? "default" : variant}
         size={size}
         onClick={handleClick}
+        disabled={isInstalling}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={cn(
@@ -105,7 +148,7 @@ export function InstallAppButton({
         )}
       >
         {/* Shimmer effect for prominent variant */}
-        {isProminent && (
+        {isProminent && !isInstalling && (
           <span 
             className={cn(
               "absolute inset-0 -translate-x-full",
@@ -119,9 +162,9 @@ export function InstallAppButton({
         {showIcon && (
           <span className={cn(
             "transition-transform duration-300",
-            isProminent && isHovered && "scale-110 -rotate-12"
+            isProminent && isHovered && !isInstalling && "scale-110 -rotate-12"
           )}>
-            {isProminent && !isInstalled ? <Sparkles className="h-4 w-4" /> : icon}
+            {isProminent && !isInstalled && !isInstalling ? <Sparkles className="h-4 w-4" /> : icon}
           </span>
         )}
         <span className="relative z-10">{buttonLabel}</span>
