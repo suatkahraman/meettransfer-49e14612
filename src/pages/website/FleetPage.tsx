@@ -15,6 +15,8 @@ import vitoVip2 from "@/assets/vito-vip-2.jpg";
 import vitoVip3 from "@/assets/vito-vip-3.jpg";
 import vitoVip4 from "@/assets/vito-vip-4.jpg";
 import vitoVip5 from "@/assets/vito-vip-5.jpg";
+import vitoVipPassengers1 from "@/assets/vito-vip-passengers-1.jpg";
+import vitoVipPassengers2 from "@/assets/vito-vip-passengers-2.jpg";
 import maybach1 from "@/assets/maybach-1.jpg";
 import maybach2 from "@/assets/maybach-2.jpg";
 import maybach3 from "@/assets/maybach-3.jpg";
@@ -42,7 +44,7 @@ const FleetPage = () => {
       passengers: 6,
       luggage: 6,
       features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
-      images: [vitoVip1, meetTransferDubai, vitoVip2, vitoVip3, meetTransferCyprus, vitoVip4, vitoVip5],
+      images: [vitoVip1, meetTransferDubai, vitoVip2, vitoVipPassengers1, vitoVip3, meetTransferCyprus, vitoVip4, vitoVipPassengers2, vitoVip5],
     },
     {
       name: t("vitoName"),
