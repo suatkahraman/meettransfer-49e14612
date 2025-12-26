@@ -92,3 +92,9 @@ verify_jwt = false
 
 [functions.get-quick-booking-reservation]
 verify_jwt = false
+
+[functions.notify-admin-quick-booking-new]
+verify_jwt = false
+
+[functions.notify-admin-quick-booking-customer-info]
+verify_jwt = false
