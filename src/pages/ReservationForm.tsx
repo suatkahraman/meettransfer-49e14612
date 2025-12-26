@@ -12,7 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -147,6 +148,17 @@ const ReservationForm = () => {
   const prefilledPrice = urlPrice ? parseFloat(urlPrice) : null;
   const prefilledCurrency = urlCurrency;
   const prefilledReturnPrice = urlReturnPrice ? parseFloat(urlReturnPrice) : null;
+  
+  // Currency selection
+  const [preferredCurrency, setPreferredCurrency] = useState(urlCurrency || 'EUR');
+  
+  const currencyOptions = [
+    { value: 'EUR', label: '€ EUR', flag: '🇪🇺' },
+    { value: 'USD', label: '$ USD', flag: '🇺🇸' },
+    { value: 'GBP', label: '£ GBP', flag: '🇬🇧' },
+    { value: 'TRY', label: '₺ TRY', flag: '🇹🇷' },
+    { value: 'AED', label: 'د.إ AED', flag: '🇦🇪' },
+  ];
   
   const [formData, setFormData] = useState(() => ({
     ...defaultFormData,
@@ -411,7 +423,7 @@ const ReservationForm = () => {
       // Determine status and price based on whether coming from quick booking
       const reservationStatus = hasPendingReservation ? 'customer_approved' : (isFromQuickBooking && prefilledPrice ? 'customer_approved' : 'awaiting-price');
       const reservationPrice = isFromQuickBooking && prefilledPrice ? prefilledPrice : null;
-      const reservationCurrency = isFromQuickBooking ? prefilledCurrency : null;
+      const reservationCurrency = isFromQuickBooking ? prefilledCurrency : preferredCurrency;
 
       let reservation: any;
 
@@ -1288,6 +1300,35 @@ const ReservationForm = () => {
                   rows={3}
                   maxLength={500}
                 />
+              </div>
+            </div>
+
+            {/* Currency Selection */}
+            <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
+              <Label className="flex items-center gap-2 text-base font-semibold">
+                <Coins className="h-4 w-4 text-primary" />
+                {t("preferredCurrency") || "Preferred Currency"}
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {t("currencyHint") || "Select your preferred currency for the price quote"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {currencyOptions.map((currency) => (
+                  <button
+                    key={currency.value}
+                    type="button"
+                    onClick={() => setPreferredCurrency(currency.value)}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 text-sm border",
+                      preferredCurrency === currency.value
+                        ? "bg-primary text-primary-foreground shadow-md scale-105 border-primary"
+                        : "bg-background text-foreground hover:bg-muted border-border"
+                    )}
+                  >
+                    <span>{currency.flag}</span>
+                    <span>{currency.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 

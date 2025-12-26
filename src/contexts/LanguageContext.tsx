@@ -62,6 +62,8 @@ const translations: Record<Language, Record<string, string>> = {
     serviceLocations: "We Serve",
     addReturnTrip: "Add Return Trip",
     returnTripDiscount: "Book return trip and get 30% OFF with code: Meet40Return",
+    preferredCurrency: "Preferred Currency",
+    currencyHint: "Select your preferred currency for the price quote",
     
     // Booking Process
     howBookingWorks: "How Our Booking Process Works",
@@ -534,6 +536,8 @@ const translations: Record<Language, Record<string, string>> = {
     serviceLocations: "Wir bedienen",
     addReturnTrip: "Rückfahrt hinzufügen",
     returnTripDiscount: "Buchen Sie die Rückfahrt und erhalten Sie 30% Rabatt mit Code: Meet40Return",
+    preferredCurrency: "Bevorzugte Währung",
+    currencyHint: "Wählen Sie Ihre bevorzugte Währung für das Preisangebot",
     
     // Booking Process
     howBookingWorks: "So funktioniert unser Buchungsprozess",
@@ -1002,6 +1006,8 @@ const translations: Record<Language, Record<string, string>> = {
     serviceLocations: "Nous desservons",
     addReturnTrip: "Ajouter un trajet retour",
     returnTripDiscount: "Réservez le trajet retour et obtenez 30% de réduction avec le code: Meet40Return",
+    preferredCurrency: "Devise préférée",
+    currencyHint: "Sélectionnez votre devise préférée pour le devis",
     
     // Booking Process
     howBookingWorks: "Comment fonctionne notre processus de réservation",
@@ -1470,6 +1476,8 @@ const translations: Record<Language, Record<string, string>> = {
     serviceLocations: "Мы обслуживаем",
     addReturnTrip: "Добавить обратный трансфер",
     returnTripDiscount: "Забронируйте обратный трансфер и получите скидку 30% с кодом: Meet40Return",
+    preferredCurrency: "Предпочитаемая валюта",
+    currencyHint: "Выберите предпочитаемую валюту для ценового предложения",
     
     // Booking Process
     howBookingWorks: "Как работает наш процесс бронирования",
@@ -1938,6 +1946,8 @@ const translations: Record<Language, Record<string, string>> = {
     serviceLocations: "Serviamo",
     addReturnTrip: "Aggiungi viaggio di ritorno",
     returnTripDiscount: "Prenota il viaggio di ritorno e ottieni il 30% di sconto con il codice: Meet40Return",
+    preferredCurrency: "Valuta preferita",
+    currencyHint: "Seleziona la tua valuta preferita per il preventivo",
     
     // Booking Process
     howBookingWorks: "Come funziona il nostro processo di prenotazione",
@@ -2406,6 +2416,8 @@ const translations: Record<Language, Record<string, string>> = {
     serviceLocations: "Servimos en",
     addReturnTrip: "Añadir viaje de regreso",
     returnTripDiscount: "Reserva el viaje de regreso y obtén 30% de descuento con el código: Meet40Return",
+    preferredCurrency: "Moneda preferida",
+    currencyHint: "Selecciona tu moneda preferida para la cotización",
     
     // Booking Process
     howBookingWorks: "Cómo funciona nuestro proceso de reserva",
@@ -2874,6 +2886,8 @@ const translations: Record<Language, Record<string, string>> = {
     serviceLocations: "نحن نخدم",
     addReturnTrip: "إضافة رحلة العودة",
     returnTripDiscount: "احجز رحلة العودة واحصل على خصم 30% مع الكود: Meet40Return",
+    preferredCurrency: "العملة المفضلة",
+    currencyHint: "اختر العملة المفضلة للحصول على عرض السعر",
     
     // Booking Process
     howBookingWorks: "كيف تعمل عملية الحجز",
@@ -3342,6 +3356,8 @@ const translations: Record<Language, Record<string, string>> = {
     serviceLocations: "Hizmet Verdiğimiz Bölgeler",
     addReturnTrip: "Dönüş Yolculuğu Ekle",
     returnTripDiscount: "Dönüş yolculuğu rezervasyonu yapın ve Meet40Return koduyla %30 indirim kazanın",
+    preferredCurrency: "Tercih Edilen Para Birimi",
+    currencyHint: "Fiyat teklifi için tercih ettiğiniz para birimini seçin",
     
     // Booking Process
     howBookingWorks: "Rezervasyon Sürecimiz Nasıl İşliyor",

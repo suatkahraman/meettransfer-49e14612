@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -58,11 +58,20 @@ export const Hero = () => {
   const [time, setTime] = useState("");
   const [vehicleType, setVehicleType] = useState("mercedes-vito");
   const [passengers, setPassengers] = useState("1");
+  const [preferredCurrency, setPreferredCurrency] = useState("EUR");
   const [submitting, setSubmitting] = useState(false);
   
   const [hasReturnTrip, setHasReturnTrip] = useState(false);
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
   const [returnTime, setReturnTime] = useState("");
+
+const currencyOptions = [
+  { value: 'EUR', label: '€ EUR', flag: '🇪🇺' },
+  { value: 'USD', label: '$ USD', flag: '🇺🇸' },
+  { value: 'GBP', label: '£ GBP', flag: '🇬🇧' },
+  { value: 'TRY', label: '₺ TRY', flag: '🇹🇷' },
+  { value: 'AED', label: 'د.إ AED', flag: '🇦🇪' },
+];
   
   // Popover open states
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
@@ -94,6 +103,7 @@ export const Hero = () => {
       params.set("time", time);
       params.set("vehicleType", vehicleType);
       params.set("passengers", passengers);
+      params.set("currency", preferredCurrency);
       
       if (hasReturnTrip && returnDate && returnTime) {
         params.set("hasReturn", "true");
@@ -120,6 +130,7 @@ export const Hero = () => {
           vehicle_type: vehicleType,
           passengers: parseInt(passengers),
           customer_session_id: sessionId,
+          price_currency: preferredCurrency,
         })
         .select()
         .single();
@@ -304,6 +315,32 @@ export const Hero = () => {
                 )}
                 
                 {hasReturnTrip && <p className="text-accent text-sm font-medium flex items-center gap-2">🎁 {t("returnTripDiscount")}</p>}
+              </div>
+
+              {/* Currency Selection */}
+              <div className="space-y-2">
+                <label className="text-white/90 text-sm font-medium block text-left flex items-center gap-2">
+                  <Coins className="h-4 w-4 text-accent" />
+                  {t("preferredCurrency") || "Preferred Currency"}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {currencyOptions.map((currency) => (
+                    <button
+                      key={currency.value}
+                      type="button"
+                      onClick={() => setPreferredCurrency(currency.value)}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 text-sm",
+                        preferredCurrency === currency.value
+                          ? "bg-accent text-accent-foreground shadow-lg scale-105"
+                          : "bg-white/20 text-white hover:bg-white/30 border border-white/30"
+                      )}
+                    >
+                      <span>{currency.flag}</span>
+                      <span>{currency.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <Button onClick={handleRequestPrice} size="lg" variant="accent" className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300" disabled={submitting}>
