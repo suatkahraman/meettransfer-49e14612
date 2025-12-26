@@ -69,7 +69,7 @@ interface Driver {
 }
 
 const statusColors: Record<string, string> = {
-  'pending_price': 'bg-orange-500/20 text-orange-700',
+  'awaiting-price': 'bg-orange-500/20 text-orange-700',
   'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700',
   'customer_approved': 'bg-blue-500/20 text-blue-700',
   'customer_rejected': 'bg-destructive/20 text-destructive',
@@ -82,7 +82,7 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  'pending_price': 'Fiyat Bekliyor',
+  'awaiting-price': 'Fiyat Bekliyor',
   'waiting_for_customer_approval': 'Müşteri Onayı Bekliyor',
   'customer_approved': 'Onaylandı',
   'customer_rejected': 'Reddedildi',
@@ -542,7 +542,7 @@ const AdminReservations = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tüm Durumlar</SelectItem>
-              <SelectItem value="pending_price">Fiyat Bekliyor</SelectItem>
+              <SelectItem value="awaiting-price">Fiyat Bekliyor</SelectItem>
               <SelectItem value="waiting_for_customer_approval">Müşteri Onayı Bekliyor</SelectItem>
               <SelectItem value="customer_approved">Müşteri Onayladı</SelectItem>
               <SelectItem value="confirmed">Onaylandı</SelectItem>

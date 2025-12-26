@@ -82,7 +82,7 @@ const FlightDelayBadge = ({ flightNumber, date }: { flightNumber: string; date: 
 };
 
 const statusColors: Record<string, string> = {
-  'pending_price': 'bg-orange-500/20 text-orange-700 dark:text-orange-300',
+  'awaiting-price': 'bg-orange-500/20 text-orange-700 dark:text-orange-300',
   'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700 dark:text-purple-300',
   'customer_approved': 'bg-blue-500/20 text-blue-700 dark:text-blue-300',
   'customer_rejected': 'bg-destructive/20 text-destructive',
@@ -94,7 +94,7 @@ const statusColors: Record<string, string> = {
 };
 
 const statusIcons: Record<string, React.ReactNode> = {
-  'pending_price': <Loader2 className="h-3 w-3 animate-spin" />,
+  'awaiting-price': <Loader2 className="h-3 w-3 animate-spin" />,
   'waiting_for_customer_approval': <AlertCircle className="h-3 w-3" />,
   'customer_approved': <CheckCircle className="h-3 w-3" />,
   'customer_rejected': <XCircle className="h-3 w-3" />,
@@ -123,7 +123,7 @@ const CustomerBookings = () => {
 
   const getStatusLabel = (status: string) => {
     const statusLabels: Record<string, string> = {
-      'pending_price': t('statusPendingPrice'),
+      'awaiting-price': t('statusPendingPrice'),
       'waiting_for_customer_approval': t('statusActionRequired'),
       'customer_approved': t('statusConfirmed'),
       'customer_rejected': t('statusCancelled'),
@@ -410,7 +410,7 @@ const CustomerBookings = () => {
                       </div>
 
                       {/* Cash payment amount indicator */}
-                      {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && !['pending_price', 'waiting_for_customer_approval'].includes(reservation.status) && (
+                      {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && !['awaiting-price', 'waiting_for_customer_approval'].includes(reservation.status) && (
                         <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-200 dark:border-amber-800">
                           <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
                             <Banknote className="h-4 w-4" />
@@ -422,7 +422,7 @@ const CustomerBookings = () => {
                         </div>
                       )}
 
-                      {reservation.status === 'pending_price' && (
+                      {reservation.status === 'awaiting-price' && (
                         <div className="bg-orange-50 dark:bg-orange-950/30 p-2 rounded text-center text-sm text-orange-700 dark:text-orange-300">
                           {t('waitingForPrice')}
                         </div>

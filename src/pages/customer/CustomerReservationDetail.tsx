@@ -74,7 +74,7 @@ interface Reservation {
 }
 
 const statusColors: Record<string, string> = {
-  'pending_price': 'bg-orange-500/20 text-orange-700',
+  'awaiting-price': 'bg-orange-500/20 text-orange-700',
   'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700',
   'customer_approved': 'bg-blue-500/20 text-blue-700',
   'customer_rejected': 'bg-destructive/20 text-destructive',
@@ -109,7 +109,7 @@ const CustomerReservationDetail = () => {
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      'pending_price': t('statusPendingPrice'),
+      'awaiting-price': t('statusPendingPrice'),
       'waiting_for_customer_approval': t('statusActionRequired'),
       'customer_approved': t('statusConfirmed'),
       'customer_rejected': t('statusCancelled'),
@@ -688,7 +688,7 @@ const CustomerReservationDetail = () => {
             )}
 
             {/* Yolcudan Alınacak Nakit - bağımsız section */}
-            {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && !['pending_price', 'waiting_for_customer_approval'].includes(reservation.status) && (
+            {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && !['awaiting-price', 'waiting_for_customer_approval'].includes(reservation.status) && (
               <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-lg border-2 border-amber-300 dark:border-amber-700">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -706,7 +706,7 @@ const CustomerReservationDetail = () => {
             )}
 
             {/* Pending Price Message */}
-            {reservation.status === 'pending_price' && (
+            {reservation.status === 'awaiting-price' && (
               <div className="bg-orange-50 dark:bg-orange-950/30 p-4 rounded-lg text-center">
                 <p className="text-orange-700 dark:text-orange-300">
                   Our team is reviewing your request. You will receive a notification when the price is ready.

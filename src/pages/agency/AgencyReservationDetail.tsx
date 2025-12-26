@@ -52,7 +52,7 @@ interface AgencyReservationDetail {
 }
 
 const statusColors: Record<string, string> = {
-  'pending_price': 'bg-gray-500/20 text-gray-700',
+  'awaiting-price': 'bg-gray-500/20 text-gray-700',
   'confirmed': 'bg-green-500/20 text-green-700',
   'sent_to_driver': 'bg-purple-500/20 text-purple-700',
   'assigned': 'bg-purple-500/20 text-purple-700',
@@ -61,7 +61,7 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  'pending_price': 'Pending Price',
+  'awaiting-price': 'Awaiting Price',
   'confirmed': 'Confirmed',
   'sent_to_driver': 'Sent to Driver',
   'assigned': 'Assigned',

@@ -36,7 +36,6 @@ interface Reservation {
 }
 
 const statusColors: Record<string, string> = {
-  'pending_price': 'bg-gray-500/20 text-gray-700',
   'awaiting-price': 'bg-gray-500/20 text-gray-700',
   'waiting_for_customer_approval': 'bg-yellow-500/20 text-yellow-700',
   'customer_approved': 'bg-blue-500/20 text-blue-700',
@@ -49,7 +48,6 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  'pending_price': 'Pending Price',
   'awaiting-price': 'Awaiting Price',
   'waiting_for_customer_approval': 'Awaiting Customer',
   'customer_approved': 'Customer Approved',
