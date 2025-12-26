@@ -183,7 +183,7 @@ export default function QuickBookingConfirm() {
   const getReturnPrice = () => {
     if (!booking?.price) return null;
     if (hasReturnTrip && isPromoCodeValid) {
-      return booking.price * 0.6; // 40% discount
+      return booking.price * 0.7; // 30% discount
     }
     return hasReturnTrip ? booking.price : null;
   };
