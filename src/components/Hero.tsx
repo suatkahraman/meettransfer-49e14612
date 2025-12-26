@@ -41,6 +41,7 @@ import maybach2 from "@/assets/maybach-2.jpg";
 import maybach3 from "@/assets/maybach-3.jpg";
 import maybach4 from "@/assets/maybach-4.jpg";
 import maybach5 from "@/assets/maybach-5.jpg";
+import maybachInterior from "@/assets/maybach-interior-starlight.jpg";
 import sprinter1 from "@/assets/sprinter-1.jpg";
 import sprinter2 from "@/assets/sprinter-2.jpg";
 import sprinter3 from "@/assets/sprinter-3.jpg";
@@ -62,7 +63,7 @@ const vehicleImageData: Record<string, { images: string[]; passengers: number; l
     luggage: 6,
   },
   "maybach": {
-    images: [maybach1, meetTransferCyprus, maybach2, maybach3, meetTransferDubai, maybach4, maybach5],
+    images: [maybach1, meetTransferCyprus, maybach2, maybachInterior, maybach3, meetTransferDubai, maybach4, maybach5],
     passengers: 4,
     luggage: 4,
   },
