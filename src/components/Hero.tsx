@@ -318,7 +318,19 @@ export const Hero = () => {
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-8 pt-8 text-white/80 text-sm font-sans">
+          {/* Service Locations */}
+          <div className="pt-8">
+            <p className="text-white/70 text-sm mb-4">{t("serviceLocations") || "We serve:"}</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {["Istanbul", "Antalya", "Bodrum", "Dalaman", "Izmir", "Cappadocia", "Dubai", "Cyprus"].map((city) => (
+                <span key={city} className="bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full text-white font-semibold text-sm border border-white/20 hover:bg-white/25 transition-colors">
+                  {city}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-8 pt-6 text-white/80 text-sm font-sans">
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-accent"></div><span>{t("service247")}</span></div>
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-accent"></div><span>{t("professionalDrivers")}</span></div>
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-accent"></div><span>{t("luxuryFleet")}</span></div>
