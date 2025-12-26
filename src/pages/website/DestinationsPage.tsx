@@ -6,6 +6,7 @@ import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark, ArrowRight, 
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 
 const DestinationsPage = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -248,6 +249,9 @@ const DestinationsPage = () => {
             </Link>
           </Button>
         </div>
+
+        {/* PWA Install Banner */}
+        <PWAPromoBanner />
       </div>
     </WebsiteLayout>
   );

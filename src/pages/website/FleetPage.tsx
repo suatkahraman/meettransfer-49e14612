@@ -4,6 +4,7 @@ import VehicleCard from "@/components/website/VehicleCard";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 import vitoVip1 from "@/assets/vito-vip-1.jpg";
 import vito2 from "@/assets/vito-2.jpg";
 import vito3 from "@/assets/vito-3.jpg";
@@ -122,6 +123,9 @@ const FleetPage = () => {
             message="Hello, I need help choosing the right vehicle for my transfer."
           />
         </div>
+
+        {/* PWA Install Banner */}
+        <PWAPromoBanner />
       </div>
     </WebsiteLayout>
   );
