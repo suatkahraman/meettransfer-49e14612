@@ -22,6 +22,7 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  CarouselDots,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -350,6 +351,7 @@ const currencyOptions = [
                     </CarouselContent>
                     <CarouselPrevious className="left-2 bg-white/80 hover:bg-white" />
                     <CarouselNext className="right-2 bg-white/80 hover:bg-white" />
+                    <CarouselDots className="[&_button]:bg-white/40 [&_button.bg-primary]:bg-white" />
                   </Carousel>
                   
                   {/* Vehicle Info */}
