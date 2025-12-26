@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
+import CityMarquee from "@/components/website/CityMarquee";
 
 const Index = () => {
   // Auto-redirect first-time visitors based on browser language
@@ -24,11 +25,12 @@ const Index = () => {
       <SchemaOrg
         schemas={[
           { type: 'LocalBusiness' },
-          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia'] },
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus'] },
           { type: 'MerchantProduct' },
         ]}
       />
       <Hero />
+      <CityMarquee />
       <BookingForm />
       <Destinations />
       <Features />
