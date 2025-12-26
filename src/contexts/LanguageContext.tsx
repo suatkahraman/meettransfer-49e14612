@@ -210,6 +210,8 @@ const translations: Record<Language, Record<string, string>> = {
     coastalAreas: "Coastal Areas",
     aegeanCoast: "Aegean Coast",
     caveHotelsBalloon: "Cave Hotels & Balloon Areas",
+    luxuryCity: "Luxury City Destination",
+    mediterraneanIsland: "Mediterranean Island",
     
     // Common
     passengers: "Passengers",
@@ -679,6 +681,8 @@ const translations: Record<Language, Record<string, string>> = {
     coastalAreas: "Küstengebiete",
     aegeanCoast: "Ägäische Küste",
     caveHotelsBalloon: "Höhlenhotels & Ballongebiete",
+    luxuryCity: "Luxus-Stadtziel",
+    mediterraneanIsland: "Mittelmeerinsel",
     
     // Common
     passengers: "Passagiere",
@@ -1144,6 +1148,8 @@ const translations: Record<Language, Record<string, string>> = {
     coastalAreas: "Zones Côtières",
     aegeanCoast: "Côte Égéenne",
     caveHotelsBalloon: "Hôtels Troglodytes & Zones Montgolfières",
+    luxuryCity: "Destination Ville de Luxe",
+    mediterraneanIsland: "Île Méditerranéenne",
     
     // Common
     passengers: "Passagers",
@@ -1609,6 +1615,8 @@ const translations: Record<Language, Record<string, string>> = {
     coastalAreas: "Прибрежные районы",
     aegeanCoast: "Эгейское побережье",
     caveHotelsBalloon: "Пещерные отели и полёты на шарах",
+    luxuryCity: "Роскошный Город",
+    mediterraneanIsland: "Средиземноморский Остров",
     
     // Common
     passengers: "Пассажиры",
@@ -2074,6 +2082,8 @@ const translations: Record<Language, Record<string, string>> = {
     coastalAreas: "Zone Costiere",
     aegeanCoast: "Costa Egea",
     caveHotelsBalloon: "Hotel Rupestri & Zone Mongolfiere",
+    luxuryCity: "Destinazione Città di Lusso",
+    mediterraneanIsland: "Isola Mediterranea",
     
     // Common
     passengers: "Passeggeri",
@@ -2539,6 +2549,8 @@ const translations: Record<Language, Record<string, string>> = {
     coastalAreas: "Zonas Costeras",
     aegeanCoast: "Costa Egea",
     caveHotelsBalloon: "Hoteles Cueva y Zonas de Globos",
+    luxuryCity: "Destino Ciudad de Lujo",
+    mediterraneanIsland: "Isla Mediterránea",
     
     // Common
     passengers: "Pasajeros",
@@ -3004,6 +3016,8 @@ const translations: Record<Language, Record<string, string>> = {
     coastalAreas: "المناطق الساحلية",
     aegeanCoast: "ساحل بحر إيجه",
     caveHotelsBalloon: "فنادق الكهوف ومناطق المنطاد",
+    luxuryCity: "وجهة المدينة الفاخرة",
+    mediterraneanIsland: "جزيرة البحر الأبيض المتوسط",
     
     // Common
     passengers: "الركاب",
@@ -3469,6 +3483,8 @@ const translations: Record<Language, Record<string, string>> = {
     coastalAreas: "Kıyı Bölgeleri",
     aegeanCoast: "Ege Kıyısı",
     caveHotelsBalloon: "Mağara Otelleri ve Balon Alanları",
+    luxuryCity: "Lüks Şehir Destinasyonu",
+    mediterraneanIsland: "Akdeniz Adası",
     
     // Common
     passengers: "Yolcular",

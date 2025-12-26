@@ -2,7 +2,7 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark, ArrowRight } from "lucide-react";
+import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark, ArrowRight, Palmtree } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -81,6 +81,28 @@ const DestinationsPage = () => {
       locations: ["Göreme", "Ürgüp", "Avanos", "Uçhisar", "Airport Transfers"],
       vehicles: "VIP tour chauffeurs",
       link: "/cappadocia-airport-transfer",
+    },
+    {
+      id: 7,
+      name: "Dubai",
+      airports: "DXB & DWC",
+      tagline: t("luxuryCity"),
+      icon: "🌆",
+      IconComponent: Building2,
+      locations: ["Downtown Dubai", "Palm Jumeirah", "Dubai Marina", "JBR Beach", "Business Bay", "Burj Khalifa"],
+      vehicles: "Mercedes Vito, V-Class, Maybach",
+      link: "/dubai-transfer",
+    },
+    {
+      id: 8,
+      name: "Cyprus",
+      airports: "LCA, PFO & ECN",
+      tagline: t("mediterraneanIsland"),
+      icon: "🏖️",
+      IconComponent: Palmtree,
+      locations: ["Larnaca", "Paphos", "Ayia Napa", "Limassol", "Kyrenia", "Famagusta", "Nicosia"],
+      vehicles: "Mercedes Vito VIP",
+      link: "/cyprus-transfer",
     },
   ];
   

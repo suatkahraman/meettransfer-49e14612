@@ -1,0 +1,245 @@
+import WebsiteLayout from "@/components/website/WebsiteLayout";
+import PageHeader from "@/components/website/PageHeader";
+import VehicleCard from "@/components/website/VehicleCard";
+import PriceTable from "@/components/website/PriceTable";
+import FAQSection from "@/components/website/FAQSection";
+import FeatureList from "@/components/website/FeatureList";
+import WhatsAppButton from "@/components/website/WhatsAppButton";
+import { MapPin, ArrowRight, Plane, Building2, Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useLanguage } from "@/contexts/LanguageContext";
+import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
+import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
+import mercedesMaybachInterior from "@/assets/mercedes-maybach-interior.webp";
+
+const destinations = [
+  "Burj Khalifa", "Palm Jumeirah", "Dubai Marina", "Downtown Dubai",
+  "JBR Beach", "Dubai Mall", "Deira", "Business Bay", "DIFC", "Jumeirah"
+];
+
+const airports = [
+  { code: "DXB", name: "Dubai International Airport", description: "World's busiest international airport, main gateway to Dubai" },
+  { code: "DWC", name: "Al Maktoum International (Dubai World Central)", description: "Modern airport serving low-cost carriers and cargo" },
+];
+
+const prices = [
+  { from: "DXB Airport", to: "Downtown Dubai", price: "$55" },
+  { from: "DXB Airport", to: "Palm Jumeirah", price: "$70" },
+  { from: "DXB Airport", to: "Dubai Marina", price: "$65" },
+  { from: "DXB Airport", to: "JBR Beach", price: "$65" },
+  { from: "DXB Airport", to: "Business Bay", price: "$50" },
+  { from: "DWC Airport", to: "Downtown Dubai", price: "$85" },
+  { from: "DWC Airport", to: "Palm Jumeirah", price: "$90" },
+];
+
+const faqItems = [
+  {
+    question: "What is included in the Dubai airport transfer price?",
+    answer: "Our price includes meet & greet service at the airport, flight tracking, professional driver, luxury vehicle, complimentary water, WiFi, and all taxes. No hidden fees.",
+  },
+  {
+    question: "How long is the transfer from Dubai Airport to Downtown Dubai?",
+    answer: "The transfer from Dubai International Airport (DXB) to Downtown Dubai takes approximately 15-25 minutes depending on traffic conditions.",
+  },
+  {
+    question: "Do you offer transfers from Al Maktoum Airport (DWC)?",
+    answer: "Yes, we provide premium transfers from both Dubai International Airport (DXB) and Al Maktoum International Airport (DWC) to all Dubai destinations.",
+  },
+  {
+    question: "Can I book a luxury car like Mercedes Maybach in Dubai?",
+    answer: "Absolutely! We offer a premium fleet including Mercedes Vito VIP, V-Class, and Maybach for the ultimate luxury transfer experience in Dubai.",
+  },
+  {
+    question: "Are your drivers familiar with Dubai hotels and landmarks?",
+    answer: "Yes, all our drivers are experienced professionals who know Dubai thoroughly, including all major hotels, resorts, and landmarks.",
+  },
+];
+
+const vehicles = [
+  {
+    name: "Mercedes Vito VIP",
+    description: "Comfortable 6-seater perfect for families and small groups visiting Dubai",
+    passengers: 6,
+    luggage: 6,
+    features: ["Leather seats", "WiFi", "Water", "USB charger", "Air Condition"],
+    image: mercedesVipImage,
+  },
+  {
+    name: "Mercedes Vito",
+    description: "Spacious family transfer vehicle ideal for Dubai airport transfers",
+    passengers: 7,
+    luggage: 7,
+    features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
+    image: mercedesVitoFamilyImage,
+  },
+  {
+    name: "Mercedes Maybach",
+    description: "Ultimate luxury for VIP guests and business executives in Dubai",
+    passengers: 3,
+    luggage: 3,
+    features: ["Executive seating", "Premium leather", "Privacy glass", "Champagne cooler", "WiFi"],
+    image: mercedesMaybachInterior,
+  },
+];
+
+const DubaiTransfer = () => {
+  const { t } = useLanguage();
+  
+  return (
+    <WebsiteLayout>
+      <SEOHead
+        title="Dubai Airport Transfer | VIP Private Transfer DXB & DWC | Meet Transfer"
+        description="Premium Dubai airport transfer service from DXB and DWC airports. Luxury Mercedes fleet, professional drivers, 24/7 availability. Book your VIP transfer to Palm Jumeirah, Downtown Dubai, Marina."
+        keywords="Dubai airport transfer, DXB airport transfer, DWC airport transfer, Dubai VIP transfer, Palm Jumeirah transfer, Downtown Dubai transfer, Dubai Marina transfer, Al Maktoum airport transfer, Dubai private driver, Dubai luxury transfer"
+        canonicalPath="/dubai-transfer"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'TransportationService', areaServed: ['Dubai', 'Palm Jumeirah', 'Downtown Dubai', 'Dubai Marina', 'JBR', 'Business Bay'] },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Destinations', url: '/destinations' },
+              { name: 'Dubai Airport Transfer', url: '/dubai-transfer' },
+            ],
+          },
+          { type: 'FAQPage', questions: faqItems },
+          {
+            type: 'Product',
+            name: 'Dubai Airport Transfer Service',
+            description: 'Premium VIP airport transfer from Dubai International Airport (DXB) and Al Maktoum Airport (DWC) to all destinations',
+            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
+            offers: { price: '55', priceCurrency: 'USD' },
+          },
+        ]}
+      />
+
+      <PageHeader
+        title="Dubai Airport Transfer"
+        subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
+        backgroundImage="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600"
+      />
+
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
+        {/* Main H1 Content */}
+        <section className="prose max-w-none">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+            Private Airport Transfer in Dubai
+          </h1>
+          <p className="text-muted-foreground leading-relaxed text-lg">
+            Experience seamless Dubai airport transfers with Meet Transfer. Our professional chauffeurs provide door-to-door service from Dubai International Airport (DXB) and Al Maktoum International Airport (DWC) to any destination in the city. Whether you're heading to the iconic Palm Jumeirah, the bustling Downtown Dubai, or the scenic Dubai Marina, our VIP meet & greet service ensures your driver will be waiting with a name board at the arrivals hall. We monitor all flights in real-time to ensure punctual pickup regardless of delays. Available 24/7, our luxury Mercedes vehicles offer premium comfort, WiFi, complimentary water, and professional service for your private Dubai transfer.
+          </p>
+        </section>
+
+        {/* Airports Section */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <Plane className="h-6 w-6 text-primary" />
+            Dubai Airports We Serve
+          </h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {airports.map((airport) => (
+              <div
+                key={airport.code}
+                className="bg-card p-4 rounded-lg shadow-sm border border-border/50"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg font-bold text-primary">{airport.code}</span>
+                  <span className="text-sm font-medium">{airport.name}</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{airport.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <FeatureList />
+
+        {/* Popular Destinations */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">{t("popularTransferDestinations")} Dubai</h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {destinations.map((dest) => (
+              <div
+                key={dest}
+                className="flex items-center gap-2 bg-card p-3 rounded-lg shadow-sm"
+              >
+                <MapPin className="h-4 w-4 text-accent" />
+                <span className="text-sm font-medium">{dest}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Why Dubai Section */}
+        <section className="bg-secondary/50 rounded-2xl p-6">
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <Building2 className="h-6 w-6 text-primary" />
+            Why Choose Our Dubai Transfer Service
+          </h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="bg-card p-4 rounded-lg">
+              <Star className="h-5 w-5 text-yellow-500 mb-2" />
+              <h3 className="font-semibold mb-1">Luxury Fleet</h3>
+              <p className="text-sm text-muted-foreground">Premium Mercedes vehicles including Maybach for VIP guests</p>
+            </div>
+            <div className="bg-card p-4 rounded-lg">
+              <Star className="h-5 w-5 text-yellow-500 mb-2" />
+              <h3 className="font-semibold mb-1">Local Expertise</h3>
+              <p className="text-sm text-muted-foreground">Drivers who know every hotel, resort, and landmark in Dubai</p>
+            </div>
+            <div className="bg-card p-4 rounded-lg">
+              <Star className="h-5 w-5 text-yellow-500 mb-2" />
+              <h3 className="font-semibold mb-1">24/7 Availability</h3>
+              <p className="text-sm text-muted-foreground">Round-the-clock service for all arrivals and departures</p>
+            </div>
+          </div>
+        </section>
+
+        {/* VIP Fleet */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">{t("vipFleetForTransfers")} Dubai</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {vehicles.map((vehicle) => (
+              <VehicleCard key={vehicle.name} {...vehicle} />
+            ))}
+          </div>
+          <Link to="/fleet" className="inline-block mt-4">
+            <Button variant="outline" className="gap-2">
+              {t("viewAllVehicles")} <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </section>
+
+        {/* Prices */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">{t("airportTransferPricesTitle")} Dubai</h2>
+          <PriceTable items={prices} title={t("fixedPriceTransfers")} />
+        </section>
+
+        {/* CTA */}
+        <div className="bg-secondary rounded-2xl p-8 text-center">
+          <h3 className="text-xl font-bold mb-2">{t("bookYourAirportTransfer")} Dubai</h3>
+          <p className="text-muted-foreground mb-4">
+            {t("getWhatsAppConfirmation")}
+          </p>
+          <WhatsAppButton
+            variant="large"
+            message="Hello, I would like to book a transfer from Dubai Airport."
+          />
+        </div>
+
+        {/* FAQ */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">{t("transferFaqTitle")} Dubai</h2>
+          <FAQSection items={faqItems} />
+        </section>
+      </div>
+    </WebsiteLayout>
+  );
+};
+
+export default DubaiTransfer;
