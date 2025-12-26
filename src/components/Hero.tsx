@@ -50,6 +50,16 @@ import sprinter3 from "@/assets/sprinter-3.jpg";
 import sprinter4 from "@/assets/sprinter-4.jpg";
 import sprinter5 from "@/assets/sprinter-5.jpg";
 import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
+import sprinterExteriorVip from "@/assets/sprinter-exterior-vip.jpg";
+import sprinterAirportFront from "@/assets/sprinter-airport-front.jpg";
+import sprinterInteriorGrey from "@/assets/sprinter-interior-grey.jpg";
+import sprinterInteriorTv from "@/assets/sprinter-interior-tv.jpg";
+import sprinterInteriorRed from "@/assets/sprinter-interior-red.jpg";
+import sprinterInteriorStarlight from "@/assets/sprinter-interior-starlight.jpg";
+import sprinterInteriorBlue from "@/assets/sprinter-interior-blue.jpg";
+import sprinterExteriorDark from "@/assets/sprinter-exterior-dark.jpg";
+import sprinterInteriorNeon from "@/assets/sprinter-interior-neon.jpg";
+import sprinterAirportNight from "@/assets/sprinter-airport-night.jpg";
 import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
 import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 
@@ -71,7 +81,7 @@ const vehicleImageData: Record<string, { images: string[]; passengers: number; l
     luggage: 4,
   },
   "minibus": {
-    images: [sprinter1, meetTransferDubai, sprinter2, sprinterLuggage, sprinter3, meetTransferCyprus, sprinter4, sprinter5],
+    images: [sprinter1, sprinterExteriorVip, sprinter2, sprinterInteriorGrey, meetTransferDubai, sprinter3, sprinterInteriorTv, sprinterLuggage, sprinterInteriorRed, sprinter4, sprinterInteriorStarlight, meetTransferCyprus, sprinterInteriorBlue, sprinter5, sprinterExteriorDark, sprinterAirportFront, sprinterInteriorNeon, sprinterAirportNight],
     passengers: 16,
     luggage: 16,
   },
