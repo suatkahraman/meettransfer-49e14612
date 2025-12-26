@@ -115,7 +115,7 @@ serve(async (req) => {
             Authorization: `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
-            from: "Meet Transfer <onboarding@resend.dev>",
+            from: "Meet Transfer <noreply@meettransfer.app>",
             to: [adminEmail],
             subject: `📥 New Quick Booking Request - ${pickup} → ${dropoff}`,
             html: `
