@@ -9,6 +9,7 @@ import cappadociaTransfer from "@/assets/cappadocia-transfer.png";
 import bodrumTransfer from "@/assets/bodrum-transfer.png";
 import istanbulTransfer from "@/assets/istanbul-transfer.png";
 import antalyaTransfer from "@/assets/antalya-transfer.png";
+import bursaTransfer from "@/assets/bursa-transfer-hero.jpg";
 
 interface LazyImageProps {
   src: string;
@@ -83,6 +84,13 @@ export const Destinations = () => {
       descKey: "cappadociaDesc",
       image: cappadociaTransfer,
       link: "/cappadocia-airport-transfer",
+    },
+    {
+      routeKey: "bursaTours",
+      airports: "IST / SAW",
+      descKey: "bursaDesc",
+      image: bursaTransfer,
+      link: "/bursa-transfer",
     },
   ];
 
