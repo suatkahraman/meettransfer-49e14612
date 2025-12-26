@@ -79,25 +79,88 @@ import sprinterAirportNight from "@/assets/sprinter-airport-night.jpg";
 import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
 import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 
-// Vehicle data with images
+// Vehicle data with images and SEO-friendly alt texts
 const vehicleData = {
   "Mercedes Vito": {
-    images: [vito2, vitoAirportAnime, vito3, vitoAirportWelcome, meetTransferCyprus, vitoCappadociaBalloon, vito4, vitoFamilyInterior, vitoInteriorLeather, meetTransferDubai, vitoExteriorBlack, vito5, vitoPassengerOrange, vitoExteriorOpendoor, vitoPassengerNight, vitoPassengerCouple],
+    images: [
+      { src: vito2, alt: "Mercedes Vito VIP airport transfer vehicle exterior" },
+      { src: vitoAirportAnime, alt: "Mercedes Vito private transfer at airport terminal" },
+      { src: vito3, alt: "Mercedes Vito luxury transfer service Turkey" },
+      { src: vitoAirportWelcome, alt: "Mercedes Vito airport pickup with welcome service" },
+      { src: meetTransferCyprus, alt: "Meet Transfer VIP service in Cyprus" },
+      { src: vitoCappadociaBalloon, alt: "Mercedes Vito transfer to Cappadocia hot air balloons" },
+      { src: vito4, alt: "Mercedes Vito comfortable interior for family transfers" },
+      { src: vitoFamilyInterior, alt: "Mercedes Vito spacious family interior with leather seats" },
+      { src: vitoInteriorLeather, alt: "Mercedes Vito premium leather interior detail" },
+      { src: meetTransferDubai, alt: "Meet Transfer luxury service in Dubai" },
+      { src: vitoExteriorBlack, alt: "Mercedes Vito black exterior professional transfer" },
+      { src: vito5, alt: "Mercedes Vito executive airport transfer Istanbul" },
+      { src: vitoPassengerOrange, alt: "Mercedes Vito passengers enjoying comfortable ride" },
+      { src: vitoExteriorOpendoor, alt: "Mercedes Vito with open door welcoming passengers" },
+      { src: vitoPassengerNight, alt: "Mercedes Vito night transfer service with ambient lighting" },
+      { src: vitoPassengerCouple, alt: "Mercedes Vito romantic transfer for couples" },
+    ],
     passengers: 7,
     luggage: 7,
   },
   "Mercedes Vip Vito": {
-    images: [vitoVip1, vitoVipStarlightPurple, meetTransferDubai, vitoVip2, vitoVipStarlightRoof, vitoVipPassengers1, vitoVip3, vitoVipLuxuryWhite, meetTransferCyprus, vitoVip4, vitoVipCoupleStarlight, vitoVipPassengers2, vitoVip5, vitoVipPassengersDay],
+    images: [
+      { src: vitoVip1, alt: "Mercedes VIP Vito luxury transfer with starlight ceiling" },
+      { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple starlight roof interior" },
+      { src: meetTransferDubai, alt: "Meet Transfer VIP service in Dubai UAE" },
+      { src: vitoVip2, alt: "Mercedes VIP Vito executive leather interior" },
+      { src: vitoVipStarlightRoof, alt: "Mercedes VIP Vito starlight ceiling ambient lighting" },
+      { src: vitoVipPassengers1, alt: "VIP passengers enjoying Mercedes Vito luxury transfer" },
+      { src: vitoVip3, alt: "Mercedes VIP Vito premium business class interior" },
+      { src: vitoVipLuxuryWhite, alt: "Mercedes VIP Vito white leather luxury interior" },
+      { src: meetTransferCyprus, alt: "Meet Transfer VIP chauffeur service Cyprus" },
+      { src: vitoVip4, alt: "Mercedes VIP Vito entertainment system and mini bar" },
+      { src: vitoVipCoupleStarlight, alt: "Couple enjoying Mercedes VIP Vito starlight transfer" },
+      { src: vitoVipPassengers2, alt: "Business travelers in Mercedes VIP Vito" },
+      { src: vitoVip5, alt: "Mercedes VIP Vito first class airport transfer" },
+      { src: vitoVipPassengersDay, alt: "Mercedes VIP Vito daytime luxury transfer service" },
+    ],
     passengers: 6,
     luggage: 6,
   },
   "Maybach": {
-    images: [maybach1, meetTransferCyprus, maybach2, maybachInterior, maybachPassengersBlue, maybach3, meetTransferDubai, maybachInteriorPurple, maybach4, maybach5, maybachInteriorOrange],
+    images: [
+      { src: maybach1, alt: "Mercedes Maybach Minivan ultra luxury VIP transfer" },
+      { src: meetTransferCyprus, alt: "Meet Transfer Maybach service in Cyprus" },
+      { src: maybach2, alt: "Mercedes Maybach Minivan executive interior design" },
+      { src: maybachInterior, alt: "Mercedes Maybach starlight ceiling luxury interior" },
+      { src: maybachPassengersBlue, alt: "VIP passengers in Mercedes Maybach blue ambient lighting" },
+      { src: maybach3, alt: "Mercedes Maybach Minivan premium leather seats" },
+      { src: meetTransferDubai, alt: "Meet Transfer Maybach luxury service Dubai" },
+      { src: maybachInteriorPurple, alt: "Mercedes Maybach purple starlight ceiling with TV entertainment" },
+      { src: maybach4, alt: "Mercedes Maybach Minivan first class comfort" },
+      { src: maybach5, alt: "Mercedes Maybach Minivan exclusive VIP transfer Turkey" },
+      { src: maybachInteriorOrange, alt: "Mercedes Maybach orange leather interior with starlight roof" },
+    ],
     passengers: 4,
     luggage: 4,
   },
   "Minibus": {
-    images: [sprinter1, sprinterExteriorVip, sprinter2, sprinterInteriorGrey, meetTransferDubai, sprinter3, sprinterInteriorTv, sprinterLuggage, sprinterInteriorRed, sprinter4, sprinterInteriorStarlight, meetTransferCyprus, sprinterInteriorBlue, sprinter5, sprinterExteriorDark, sprinterAirportFront, sprinterInteriorNeon, sprinterAirportNight],
+    images: [
+      { src: sprinter1, alt: "Mercedes Sprinter VIP minibus group transfer" },
+      { src: sprinterExteriorVip, alt: "Mercedes Sprinter VIP exterior luxury design" },
+      { src: sprinter2, alt: "Mercedes Sprinter minibus comfortable seating" },
+      { src: sprinterInteriorGrey, alt: "Mercedes Sprinter grey leather interior design" },
+      { src: meetTransferDubai, alt: "Meet Transfer Sprinter minibus Dubai" },
+      { src: sprinter3, alt: "Mercedes Sprinter spacious luggage compartment" },
+      { src: sprinterInteriorTv, alt: "Mercedes Sprinter entertainment TV system" },
+      { src: sprinterLuggage, alt: "Mercedes Sprinter large luggage capacity for groups" },
+      { src: sprinterInteriorRed, alt: "Mercedes Sprinter red ambient lighting interior" },
+      { src: sprinter4, alt: "Mercedes Sprinter executive group transfer" },
+      { src: sprinterInteriorStarlight, alt: "Mercedes Sprinter starlight ceiling luxury" },
+      { src: meetTransferCyprus, alt: "Meet Transfer Sprinter minibus Cyprus" },
+      { src: sprinterInteriorBlue, alt: "Mercedes Sprinter blue LED interior lighting" },
+      { src: sprinter5, alt: "Mercedes Sprinter VIP minibus Turkey transfer" },
+      { src: sprinterExteriorDark, alt: "Mercedes Sprinter black exterior professional service" },
+      { src: sprinterAirportFront, alt: "Mercedes Sprinter airport transfer front view" },
+      { src: sprinterInteriorNeon, alt: "Mercedes Sprinter neon interior party atmosphere" },
+      { src: sprinterAirportNight, alt: "Mercedes Sprinter night airport transfer service" },
+    ],
     passengers: 16,
     luggage: 16,
   },
@@ -235,8 +298,8 @@ Please confirm availability and price.`;
                         <CarouselItem key={idx}>
                           <div className="overflow-hidden rounded-xl aspect-[4/3] bg-muted">
                             <img
-                              src={img}
-                              alt={`${formData.vehicleType} - ${idx + 1}`}
+                              src={img.src}
+                              alt={img.alt}
                               className="w-full h-full object-contain"
                             />
                           </div>

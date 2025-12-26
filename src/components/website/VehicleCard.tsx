@@ -5,6 +5,11 @@ import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 
+interface VehicleImage {
+  src: string;
+  alt: string;
+}
+
 interface VehicleCardProps {
   name: string;
   description: string;
@@ -12,7 +17,7 @@ interface VehicleCardProps {
   luggage: number;
   features?: string[];
   image?: string;
-  images?: string[];
+  images?: VehicleImage[];
 }
 
 const VehicleCard = ({
@@ -24,8 +29,8 @@ const VehicleCard = ({
   image,
   images: imagesProp,
 }: VehicleCardProps) => {
-  // Support both single image and multiple images
-  const images = imagesProp || (image ? [image] : []);
+  // Support both single image and multiple images with SEO alt tags
+  const images: VehicleImage[] = imagesProp || (image ? [{ src: image, alt: `${name} transfer vehicle` }] : []);
   const { t } = useLanguage();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
     Autoplay({ delay: 4000, stopOnInteraction: true }),
@@ -59,11 +64,11 @@ const VehicleCard = ({
       <div className="aspect-[4/3] bg-muted relative overflow-hidden group">
         <div className="overflow-hidden h-full" ref={emblaRef}>
           <div className="flex h-full touch-pan-y">
-            {images.map((image, index) => (
+            {images.map((img, index) => (
               <div key={index} className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center bg-secondary/30">
                 <img
-                  src={image}
-                  alt={`${name} - Image ${index + 1}`}
+                  src={img.src}
+                  alt={img.alt}
                   loading="lazy"
                   decoding="async"
                   className="w-full h-full object-contain"
