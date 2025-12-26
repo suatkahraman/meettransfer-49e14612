@@ -48,8 +48,8 @@ const FleetPage = () => {
     {
       name: t("vitoVipName"),
       description: t("vitoVipDesc"),
-      passengers: 6,
-      luggage: 6,
+      passengers: 5,
+      luggage: 5,
       features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
       images: [
         { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple starlight roof interior" },
@@ -66,8 +66,8 @@ const FleetPage = () => {
     {
       name: t("vitoName"),
       description: t("vitoDesc"),
-      passengers: 7,
-      luggage: 7,
+      passengers: 6,
+      luggage: 6,
       features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
       images: [
         { src: vitoAirportAnime, alt: "Mercedes Vito private transfer at airport terminal" },

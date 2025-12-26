@@ -79,8 +79,8 @@ const vehicleImageData: Record<string, { images: { src: string; alt: string }[];
       { src: vitoPassengerNight, alt: "Mercedes Vito night transfer service with ambient lighting" },
       { src: vitoPassengerCouple, alt: "Mercedes Vito romantic transfer for couples" },
     ],
-    passengers: 7,
-    luggage: 7,
+    passengers: 6,
+    luggage: 6,
   },
   "mercedes-vclass": {
     images: [
@@ -94,8 +94,8 @@ const vehicleImageData: Record<string, { images: { src: string; alt: string }[];
       { src: vitoVipPassengers2, alt: "Business travelers in Mercedes VIP Vito" },
       { src: vitoVipPassengersDay, alt: "Mercedes VIP Vito daytime luxury transfer service" },
     ],
-    passengers: 6,
-    luggage: 6,
+    passengers: 5,
+    luggage: 5,
   },
   "maybach": {
     images: [
