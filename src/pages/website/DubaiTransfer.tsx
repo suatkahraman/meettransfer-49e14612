@@ -13,6 +13,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 import mercedesMaybachInterior from "@/assets/mercedes-maybach-interior.webp";
+import dubaiHeroImage from "@/assets/dubai-transfer-hero.jpg";
 
 const destinations = [
   "Burj Khalifa", "Palm Jumeirah", "Dubai Marina", "Downtown Dubai",
@@ -120,7 +121,7 @@ const DubaiTransfer = () => {
       <PageHeader
         title="Dubai Airport Transfer"
         subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
-        backgroundImage="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600"
+        backgroundImage={dubaiHeroImage}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">

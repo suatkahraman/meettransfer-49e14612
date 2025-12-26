@@ -12,6 +12,7 @@ import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
+import cyprusHeroImage from "@/assets/cyprus-transfer-hero.jpg";
 
 const destinations = [
   "Kyrenia (Girne)", "Famagusta (Gazimağusa)", "Nicosia (Lefkoşa)", 
@@ -113,7 +114,7 @@ const CyprusTransfer = () => {
       <PageHeader
         title="Cyprus Airport Transfer"
         subtitle="Mercedes Vito, V-Class | 24/7 Meet & Greet Service"
-        backgroundImage="https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=1600"
+        backgroundImage={cyprusHeroImage}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
