@@ -261,7 +261,7 @@ export const Hero = () => {
                   <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
                     <div className="flex items-center"><Users className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectPassengers")} /></div>
                   </SelectTrigger>
-                  <SelectContent className="bg-white z-50 max-h-[300px]">{Array.from({ length: 19 }, (_, i) => i + 1).map((num) => <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? t("passenger") : t("passengersPlural")}</SelectItem>)}</SelectContent>
+                  <SelectContent className="bg-white z-50 max-h-[300px]">{Array.from({ length: 19 }, (_, i) => i + 1).map((num) => <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? t("passenger") : t("passengers")}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
 
