@@ -10,6 +10,24 @@ import { Badge } from "@/components/ui/badge";
 
 const blogPosts = [
   {
+    id: "dubai-airport-transfer-guide",
+    title: "Dubai Airport Transfer Guide 2025: Best Ways to Get to Your Hotel",
+    description: "Complete guide to Dubai Airport transfers. Book private VIP transfers from DXB to Downtown, Palm Jumeirah, Dubai Marina. Fixed prices, 24/7 service, luxury vehicles.",
+    category: "Dubai",
+    readTime: "14 min read",
+    date: "2024-12-26",
+    image: "/images/meet-transfer-vip-mercedes-vito.jpg",
+  },
+  {
+    id: "cyprus-airport-transfer-guide",
+    title: "Cyprus Airport Transfer Guide 2025: Larnaca & Paphos",
+    description: "Complete guide to Cyprus airport transfers. Book private transfers from Larnaca Airport to Ayia Napa, Limassol, Paphos. Fixed prices, 24/7 service, reliable drivers.",
+    category: "Cyprus",
+    readTime: "15 min read",
+    date: "2024-12-26",
+    image: "/images/meet-transfer-vclass-interior.jpg",
+  },
+  {
     id: "istanbul-airport-to-city-best-way",
     title: "Best Way to Get from Istanbul Airport to City Center",
     description: "Complete guide to Istanbul Airport transportation options. Compare private transfers, taxis, metro, and buses. Find the safest, fastest, and most comfortable way to reach Taksim, Sultanahmet, or your hotel.",
