@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +16,58 @@ import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import CityMarquee from "@/components/website/CityMarquee";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
+
+// Vehicle images
+import vito2 from "@/assets/vito-2.jpg";
+import vito3 from "@/assets/vito-3.jpg";
+import vito4 from "@/assets/vito-4.jpg";
+import vito5 from "@/assets/vito-5.jpg";
+import vitoVip1 from "@/assets/vito-vip-1.jpg";
+import vitoVip2 from "@/assets/vito-vip-2.jpg";
+import vitoVip3 from "@/assets/vito-vip-3.jpg";
+import vitoVip4 from "@/assets/vito-vip-4.jpg";
+import vitoVip5 from "@/assets/vito-vip-5.jpg";
+import maybach1 from "@/assets/maybach-1.jpg";
+import maybach2 from "@/assets/maybach-2.jpg";
+import maybach3 from "@/assets/maybach-3.jpg";
+import maybach4 from "@/assets/maybach-4.jpg";
+import maybach5 from "@/assets/maybach-5.jpg";
+import sprinter1 from "@/assets/sprinter-1.jpg";
+import sprinter2 from "@/assets/sprinter-2.jpg";
+import sprinter3 from "@/assets/sprinter-3.jpg";
+import sprinter4 from "@/assets/sprinter-4.jpg";
+import sprinter5 from "@/assets/sprinter-5.jpg";
+
+// Vehicle data with images
+const vehicleImageData: Record<string, { images: string[]; passengers: number; luggage: number }> = {
+  "mercedes-vito": {
+    images: [vito2, vito3, vito4, vito5],
+    passengers: 7,
+    luggage: 7,
+  },
+  "mercedes-vclass": {
+    images: [vitoVip1, vitoVip2, vitoVip3, vitoVip4, vitoVip5],
+    passengers: 6,
+    luggage: 6,
+  },
+  "maybach": {
+    images: [maybach1, maybach2, maybach3, maybach4, maybach5],
+    passengers: 4,
+    luggage: 4,
+  },
+  "minibus": {
+    images: [sprinter1, sprinter2, sprinter3, sprinter4, sprinter5],
+    passengers: 16,
+    luggage: 16,
+  },
+};
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -266,6 +318,41 @@ const currencyOptions = [
                   <SelectContent className="bg-white z-50">{vehicleTypes.map((v) => <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
+
+              {/* Vehicle Image Carousel */}
+              {vehicleType && vehicleImageData[vehicleType] && (
+                <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Carousel className="w-full">
+                    <CarouselContent>
+                      {vehicleImageData[vehicleType].images.map((img, idx) => (
+                        <CarouselItem key={idx}>
+                          <div className="overflow-hidden rounded-xl">
+                            <img
+                              src={img}
+                              alt={`${vehicleTypes.find(v => v.value === vehicleType)?.label} - ${idx + 1}`}
+                              className="w-full h-40 object-cover"
+                            />
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="left-2 bg-white/80 hover:bg-white" />
+                    <CarouselNext className="right-2 bg-white/80 hover:bg-white" />
+                  </Carousel>
+                  
+                  {/* Vehicle Info */}
+                  <div className="flex justify-center gap-6 text-sm text-white/90">
+                    <div className="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full">
+                      <Users className="h-4 w-4" />
+                      <span>{vehicleImageData[vehicleType].passengers} {t("passengers")}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full">
+                      <Briefcase className="h-4 w-4" />
+                      <span>{vehicleImageData[vehicleType].luggage} {t("luggage") || "Luggage"}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="relative">
                 <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("passengers")}</label>
