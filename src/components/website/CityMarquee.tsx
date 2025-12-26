@@ -23,14 +23,14 @@ const CityMarquee = () => {
   const { t } = useLanguage();
   
   return (
-    <div className="w-full overflow-hidden bg-primary/90 py-4">
+    <div className="w-full overflow-hidden py-4">
       <div className="relative flex">
         {/* First scroll group */}
         <div className="animate-marquee flex shrink-0 items-center gap-8 md:gap-12">
           {cities.map((city, index) => (
             <span
               key={`first-${index}`}
-              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white whitespace-nowrap px-4"
+              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white/90 whitespace-nowrap px-4"
             >
               {city}
             </span>
@@ -42,7 +42,7 @@ const CityMarquee = () => {
           {cities.map((city, index) => (
             <span
               key={`second-${index}`}
-              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white whitespace-nowrap px-4"
+              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white/90 whitespace-nowrap px-4"
             >
               {city}
             </span>
