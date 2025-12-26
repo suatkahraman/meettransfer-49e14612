@@ -59,6 +59,7 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "24/7 Service",
     professionalDrivers: "Professional Drivers",
     luxuryFleet: "Luxury Fleet",
+    serviceLocations: "We Serve",
     addReturnTrip: "Add Return Trip",
     returnTripDiscount: "Book return trip and get 30% OFF with code: Meet40Return",
     
@@ -530,6 +531,7 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "24/7 Service",
     professionalDrivers: "Professionelle Fahrer",
     luxuryFleet: "Luxusflotte",
+    serviceLocations: "Wir bedienen",
     addReturnTrip: "Rückfahrt hinzufügen",
     returnTripDiscount: "Buchen Sie die Rückfahrt und erhalten Sie 30% Rabatt mit Code: Meet40Return",
     
@@ -997,6 +999,7 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "Service 24/7",
     professionalDrivers: "Chauffeurs professionnels",
     luxuryFleet: "Flotte de luxe",
+    serviceLocations: "Nous desservons",
     addReturnTrip: "Ajouter un trajet retour",
     returnTripDiscount: "Réservez le trajet retour et obtenez 30% de réduction avec le code: Meet40Return",
     
@@ -1464,6 +1467,7 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "Сервис 24/7",
     professionalDrivers: "Профессиональные водители",
     luxuryFleet: "Люкс автопарк",
+    serviceLocations: "Мы обслуживаем",
     addReturnTrip: "Добавить обратный трансфер",
     returnTripDiscount: "Забронируйте обратный трансфер и получите скидку 30% с кодом: Meet40Return",
     
@@ -1931,6 +1935,7 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "Servizio 24/7",
     professionalDrivers: "Autisti professionisti",
     luxuryFleet: "Flotta di lusso",
+    serviceLocations: "Serviamo",
     addReturnTrip: "Aggiungi viaggio di ritorno",
     returnTripDiscount: "Prenota il viaggio di ritorno e ottieni il 30% di sconto con il codice: Meet40Return",
     
@@ -2398,6 +2403,7 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "Servicio 24/7",
     professionalDrivers: "Conductores profesionales",
     luxuryFleet: "Flota de lujo",
+    serviceLocations: "Servimos en",
     addReturnTrip: "Añadir viaje de regreso",
     returnTripDiscount: "Reserva el viaje de regreso y obtén 30% de descuento con el código: Meet40Return",
     
@@ -2865,6 +2871,7 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "خدمة 24/7",
     professionalDrivers: "سائقون محترفون",
     luxuryFleet: "أسطول فاخر",
+    serviceLocations: "نحن نخدم",
     addReturnTrip: "إضافة رحلة العودة",
     returnTripDiscount: "احجز رحلة العودة واحصل على خصم 30% مع الكود: Meet40Return",
     
@@ -3332,6 +3339,7 @@ const translations: Record<Language, Record<string, string>> = {
     service247: "7/24 Hizmet",
     professionalDrivers: "Profesyonel Şoförler",
     luxuryFleet: "Lüks Filo",
+    serviceLocations: "Hizmet Verdiğimiz Bölgeler",
     addReturnTrip: "Dönüş Yolculuğu Ekle",
     returnTripDiscount: "Dönüş yolculuğu rezervasyonu yapın ve Meet40Return koduyla %30 indirim kazanın",
     
