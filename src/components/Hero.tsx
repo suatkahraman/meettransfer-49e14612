@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -23,6 +23,7 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 // Vehicle images
 import vito2 from "@/assets/vito-2.jpg";
@@ -322,15 +323,26 @@ const currencyOptions = [
               {/* Vehicle Image Carousel */}
               {vehicleType && vehicleImageData[vehicleType] && (
                 <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <Carousel className="w-full">
+                  <Carousel 
+                    className="w-full"
+                    plugins={[
+                      Autoplay({
+                        delay: 3000,
+                        stopOnInteraction: true,
+                      }),
+                    ]}
+                    opts={{
+                      loop: true,
+                    }}
+                  >
                     <CarouselContent>
                       {vehicleImageData[vehicleType].images.map((img, idx) => (
                         <CarouselItem key={idx}>
-                          <div className="overflow-hidden rounded-xl">
+                          <div className="overflow-hidden rounded-xl aspect-video">
                             <img
                               src={img}
                               alt={`${vehicleTypes.find(v => v.value === vehicleType)?.label} - ${idx + 1}`}
-                              className="w-full h-40 object-cover"
+                              className="w-full h-full object-cover object-center"
                             />
                           </div>
                         </CarouselItem>
