@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import CityMarquee from "@/components/website/CityMarquee";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -176,6 +177,9 @@ export const Hero = () => {
               className="h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 rounded-full object-cover shadow-2xl ring-4 ring-white/20"
             />
           </div>
+          
+          {/* City Marquee Animation */}
+          <CityMarquee />
           
           <div className="space-y-4">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">

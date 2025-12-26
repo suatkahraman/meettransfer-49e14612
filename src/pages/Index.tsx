@@ -7,7 +7,7 @@ import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
-import CityMarquee from "@/components/website/CityMarquee";
+
 
 const Index = () => {
   // Auto-redirect first-time visitors based on browser language
@@ -30,7 +30,6 @@ const Index = () => {
         ]}
       />
       <Hero />
-      <CityMarquee />
       <BookingForm />
       <Destinations />
       <Features />
