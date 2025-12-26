@@ -1748,25 +1748,24 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                 </div>
               </div>
 
-              {/* Agency Selection - Only show when payment type is agency_pay */}
-              {formData.payment_type === 'agency_pay' && (
-                <div className="space-y-2">
-                  <Label>Acenta *</Label>
-                  <Select value={formData.agency_id} onValueChange={(v) => setFormData({...formData, agency_id: v === 'none' ? '' : v})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Acenta seçin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {agencies.map(a => (
-                        <SelectItem key={a.id} value={a.id}>{a.agency_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              {/* Agency Selection - Always visible */}
+              <div className="space-y-2">
+                <Label>Acenta</Label>
+                <Select value={formData.agency_id || 'none'} onValueChange={(v) => setFormData({...formData, agency_id: v === 'none' ? '' : v})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Acenta seçin (opsiyonel)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Acenta Yok</SelectItem>
+                    {agencies.map(a => (
+                      <SelectItem key={a.id} value={a.id}>{a.agency_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              {/* Agency Pricing Section - Only show when payment type is agency_pay */}
-              {formData.payment_type === 'agency_pay' && formData.agency_id && formData.agency_id !== 'none' && (
+              {/* Agency Pricing Section - Show when agency is selected */}
+              {formData.agency_id && formData.agency_id !== 'none' && (
                 <Card className="border-blue-300 bg-blue-50 dark:bg-blue-950/30">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-base">
