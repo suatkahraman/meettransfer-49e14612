@@ -68,7 +68,6 @@ const vehicleData = {
       { src: vitoAirportWelcome, alt: "Mercedes Vito airport pickup with welcome service" },
       { src: meetTransferCyprus, alt: "Meet Transfer VIP service in Cyprus" },
       { src: vitoCappadociaBalloon, alt: "Mercedes Vito transfer to Cappadocia hot air balloons" },
-      { src: vitoFamilyInterior, alt: "Mercedes Vito spacious family interior with leather seats" },
       { src: vitoInteriorLeather, alt: "Mercedes Vito premium leather interior detail" },
       { src: meetTransferDubai, alt: "Meet Transfer luxury service in Dubai" },
       { src: vitoExteriorBlack, alt: "Mercedes Vito black exterior professional transfer" },
@@ -77,8 +76,8 @@ const vehicleData = {
       { src: vitoPassengerNight, alt: "Mercedes Vito night transfer service with ambient lighting" },
       { src: vitoPassengerCouple, alt: "Mercedes Vito romantic transfer for couples" },
     ],
-    passengers: 7,
-    luggage: 7,
+    passengers: 6,
+    luggage: 6,
   },
   "Mercedes Vip Vito": {
     images: [
@@ -92,8 +91,8 @@ const vehicleData = {
       { src: vitoVipPassengers2, alt: "Business travelers in Mercedes VIP Vito" },
       { src: vitoVipPassengersDay, alt: "Mercedes VIP Vito daytime luxury transfer service" },
     ],
-    passengers: 6,
-    luggage: 6,
+    passengers: 5,
+    luggage: 5,
   },
   "Maybach": {
     images: [
