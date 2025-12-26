@@ -15,6 +15,7 @@ import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
+import MissingInfoAlerts from '@/components/customer/MissingInfoAlerts';
 import { format } from 'date-fns';
 import {
   AlertDialog,
@@ -809,6 +810,11 @@ const CustomerReservationDetail = () => {
                   Your changes are being reviewed by our team. We'll notify you once they're confirmed.
                 </p>
               </div>
+            )}
+
+            {/* Missing Information Alerts */}
+            {['customer_approved', 'confirmed', 'sent_to_driver', 'pending_admin_review'].includes(reservation.status) && (
+              <MissingInfoAlerts reservation={reservation} onEdit={() => navigate(`/customer/reservation/${reservation.id}/edit`)} />
             )}
 
             {/* Action Buttons for confirmed reservations */}
