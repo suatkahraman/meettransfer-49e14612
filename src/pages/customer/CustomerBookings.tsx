@@ -14,6 +14,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { getCurrencySymbol } from '@/lib/currency';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -105,12 +106,6 @@ const statusIcons: Record<string, React.ReactNode> = {
   'cancelled_by_customer': <XCircle className="h-3 w-3" />,
 };
 
-const currencySymbols: Record<string, string> = {
-  'TRY': '₺',
-  'EUR': '€',
-  'USD': '$',
-  'GBP': '£',
-};
 
 const CustomerBookings = () => {
   const { user, signOut } = useAuth();
@@ -192,7 +187,7 @@ const CustomerBookings = () => {
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return null;
-    const symbol = currencySymbols[currency || 'TRY'] || currency || '';
+    const symbol = getCurrencySymbol(currency);
     return `${symbol}${price}`;
   };
 
@@ -417,7 +412,7 @@ const CustomerBookings = () => {
                             <span className="text-sm font-medium">{t('cashToDriver')}</span>
                           </div>
                           <span className="font-bold text-amber-700 dark:text-amber-300">
-                            {currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '₺'}{reservation.passenger_cash_amount}
+                            {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
                           </span>
                         </div>
                       )}

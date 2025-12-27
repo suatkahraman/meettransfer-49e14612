@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, ChevronLeft, ChevronRight, MapPin, Clock, User } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, addMonths, subMonths, isSameDay, parseISO } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface Reservation {
   id: string;
@@ -43,9 +44,6 @@ const statusColors: Record<string, string> = {
   'completed': 'bg-green-600/80 text-white',
 };
 
-const currencySymbols: Record<string, string> = {
-  'TRY': '₺', 'EUR': '€', 'USD': '$', 'GBP': '£', 'AED': 'د.إ', 'AUD': 'A$',
-};
 
 const AdminCalendar = () => {
   const navigate = useNavigate();
@@ -58,7 +56,7 @@ const AdminCalendar = () => {
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '';
-    const symbol = currencySymbols[currency || 'TRY'] || '';
+    const symbol = getCurrencySymbol(currency);
     return `${symbol}${price}`;
   };
 

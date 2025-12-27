@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, Clock, MapPin, Phone, User, Car } from 'lucide-react';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface Reservation {
   id: string;
@@ -40,14 +41,6 @@ const statusColors: Record<string, string> = {
   'cancelled': 'bg-red-500',
 };
 
-const currencySymbols: Record<string, string> = {
-  'TRY': '₺',
-  'EUR': '€',
-  'USD': '$',
-  'GBP': '£',
-  'AED': 'د.إ',
-  'AUD': 'A$',
-};
 
 const AdminDriverJobs = () => {
   const navigate = useNavigate();
@@ -192,7 +185,7 @@ const AdminDriverJobs = () => {
                       <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-200 dark:border-amber-800 mt-2">
                         <span className="text-sm text-amber-700 dark:text-amber-300 font-medium">💵 Yolcudan Alınacak Nakit</span>
                         <span className="font-bold text-amber-700 dark:text-amber-300">
-                          {currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '₺'}{reservation.passenger_cash_amount}
+                          {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
                         </span>
                       </div>
                     )}

@@ -14,6 +14,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CURRENCY_OPTIONS } from '@/lib/currency';
 import { z } from 'zod';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -152,14 +153,8 @@ const ReservationForm = () => {
   // Currency selection
   const [preferredCurrency, setPreferredCurrency] = useState(urlCurrency || 'EUR');
   
-  const currencyOptions = [
-    { value: 'EUR', label: '€ EUR', flag: '🇪🇺' },
-    { value: 'USD', label: '$ USD', flag: '🇺🇸' },
-    { value: 'GBP', label: '£ GBP', flag: '🇬🇧' },
-    { value: 'TRY', label: '₺ TRY', flag: '🇹🇷' },
-    { value: 'AED', label: 'د.إ AED', flag: '🇦🇪' },
-    { value: 'AUD', label: '$ AUD', flag: '🇦🇺' },
-  ];
+  const currencyOptions = CURRENCY_OPTIONS;
+
   
   const [formData, setFormData] = useState(() => ({
     ...defaultFormData,

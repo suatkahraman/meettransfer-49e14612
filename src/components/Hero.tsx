@@ -14,6 +14,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
 import { cn } from "@/lib/utils";
+import { CURRENCY_OPTIONS } from "@/lib/currency";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -183,14 +184,8 @@ export const Hero = () => {
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
 
-const currencyOptions = [
-  { value: 'EUR', label: '€ EUR', flag: '🇪🇺' },
-  { value: 'USD', label: '$ USD', flag: '🇺🇸' },
-  { value: 'GBP', label: '£ GBP', flag: '🇬🇧' },
-  { value: 'TRY', label: '₺ TRY', flag: '🇹🇷' },
-  { value: 'AED', label: 'د.إ AED', flag: '🇦🇪' },
-  { value: 'AUD', label: 'A$ AUD', flag: '🇦🇺' },
-];
+const currencyOptions = CURRENCY_OPTIONS;
+
   
   // Popover open states
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);

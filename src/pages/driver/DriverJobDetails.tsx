@@ -21,6 +21,7 @@ import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { getCurrencySymbol } from '@/lib/currency';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -76,14 +77,6 @@ const statusLabels: Record<string, string> = {
   'completed': 'Tamamlandı',
 };
 
-const currencySymbols: Record<string, string> = {
-  'TRY': '₺',
-  'EUR': '€',
-  'USD': '$',
-  'GBP': '£',
-  'AED': 'د.إ',
-  'AUD': 'A$',
-};
 
 const DriverJobDetails = () => {
   const { id } = useParams();
@@ -177,10 +170,6 @@ const DriverJobDetails = () => {
       };
     }
   }, [id, driverId]);
-
-  const getCurrencySymbol = (currency: string | null) => {
-    return currencySymbols[currency || 'TRY'] || currency || '₺';
-  };
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '-';

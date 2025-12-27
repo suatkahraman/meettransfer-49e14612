@@ -10,6 +10,7 @@ import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { toast } from 'sonner';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { getCurrencySymbol, formatCurrency } from '@/lib/currency';
 
 interface Reservation {
   id: string;
@@ -68,12 +69,6 @@ const statusConfig: Record<string, { label: string; color: string; bgColor: stri
   },
 };
 
-const currencySymbols: Record<string, string> = {
-  TRY: '₺',
-  EUR: '€',
-  USD: '$',
-  GBP: '£',
-};
 
 const paymentTypeLabels: Record<string, string> = {
   cash: 'Nakit',
@@ -108,11 +103,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
   const rightIconScale = useTransform(x, [-150, -80], [1.2, 0.8]);
   const leftIconScale = useTransform(x, [80, 150], [0.8, 1.2]);
 
-  const getCurrencySymbol = (currency: string | null) => {
-    return currencySymbols[currency || 'TRY'] || '₺';
-  };
-
-  const formatPrice = (price: number | null, currency: string | null) => {
+  const formatPriceLocal = (price: number | null, currency: string | null) => {
     if (price === null || price === undefined) return 'Belirtilmedi';
     return `${getCurrencySymbol(currency)}${price.toLocaleString('tr-TR')}`;
   };
@@ -337,7 +328,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                 )}
                 {!canSwipeRight && !canSwipeLeft && reservation.status !== 'active' && <span />}
                 <span className="font-bold text-lg text-primary">
-                  {formatPrice(reservation.price, reservation.price_currency)}
+                  {formatPriceLocal(reservation.price, reservation.price_currency)}
                 </span>
               </div>
             </div>

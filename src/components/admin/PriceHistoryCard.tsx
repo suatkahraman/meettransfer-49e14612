@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO } from "date-fns";
 import { tr } from "date-fns/locale";
 import { History, Send, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { getCurrencySymbol } from "@/lib/currency";
 
 interface PriceHistoryItem {
   id: string;
@@ -39,12 +40,6 @@ const actionIcons: Record<string, React.ReactNode> = {
   rejected: <XCircle className="h-3 w-3" />,
 };
 
-const currencySymbols: Record<string, string> = {
-  TRY: "₺",
-  EUR: "€",
-  USD: "$",
-  GBP: "£",
-};
 
 export default function PriceHistoryCard({ reservationId, quickBookingId }: PriceHistoryCardProps) {
   const [history, setHistory] = useState<PriceHistoryItem[]>([]);
@@ -125,7 +120,7 @@ export default function PriceHistoryCard({ reservationId, quickBookingId }: Pric
                     </span>
                   </Badge>
                   <span className="font-bold">
-                    {currencySymbols[item.price_currency] || ""}{item.price}
+                    {getCurrencySymbol(item.price_currency)}{item.price}
                   </span>
                 </div>
                 <div className="text-right">
