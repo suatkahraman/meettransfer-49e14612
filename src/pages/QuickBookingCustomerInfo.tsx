@@ -55,6 +55,9 @@ export default function QuickBookingCustomerInfo() {
     vehicle_type: string;
     price: number | null;
     price_currency: string;
+    prefilled_email?: string | null;
+    prefilled_phone?: string | null;
+    prefilled_name?: string | null;
   } | null>(null);
 
   const [formData, setFormData] = useState({
@@ -112,6 +115,16 @@ export default function QuickBookingCustomerInfo() {
       }
 
       setReservationData(data);
+      
+      // Pre-fill form with customer info from quick booking
+      if (data.prefilled_email || data.prefilled_phone || data.prefilled_name) {
+        setFormData(prev => ({
+          ...prev,
+          name: data.prefilled_name || "",
+          email: data.prefilled_email || "",
+          phone: data.prefilled_phone || "",
+        }));
+      }
     } catch (err: any) {
       console.error("Fetch reservation error:", err);
       toast.error("Failed to load reservation");
