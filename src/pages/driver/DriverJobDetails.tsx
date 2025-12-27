@@ -81,6 +81,8 @@ const currencySymbols: Record<string, string> = {
   'EUR': '€',
   'USD': '$',
   'GBP': '£',
+  'AED': 'د.إ',
+  'AUD': 'A$',
 };
 
 const DriverJobDetails = () => {
