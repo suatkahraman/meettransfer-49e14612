@@ -41,6 +41,7 @@ import {
   Trash2,
   AlertTriangle,
   MessageSquare,
+  Phone,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -410,6 +411,18 @@ export default function AdminQuickBookings() {
                                   <>💵 Cash</>
                                 )}
                               </Badge>
+                            )}
+
+                            {request.customer_phone && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <Phone className="h-4 w-4 text-primary" />
+                                <a 
+                                  href={`tel:${request.customer_phone}`} 
+                                  className="text-primary hover:underline font-medium"
+                                >
+                                  {request.customer_phone}
+                                </a>
+                              </div>
                             )}
 
                             {request.customer_notes && (

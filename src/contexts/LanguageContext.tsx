@@ -68,6 +68,8 @@ const translations: Record<Language, Record<string, string>> = {
     currencyHint: "Select your preferred currency for the price quote",
     specialRequests: "Special Requests / Notes",
     specialRequestsPlaceholder: "Flight number, child seat, special requirements...",
+    phoneNumber: "Phone Number (Optional)",
+    phoneNumberPlaceholder: "+90 555 123 4567",
     
     // Booking Process
     howBookingWorks: "How Our Booking Process Works",
@@ -551,6 +553,8 @@ const translations: Record<Language, Record<string, string>> = {
     currencyHint: "Wählen Sie Ihre bevorzugte Währung für das Preisangebot",
     specialRequests: "Sonderwünsche / Notizen",
     specialRequestsPlaceholder: "Flugnummer, Kindersitz, besondere Anforderungen...",
+    phoneNumber: "Telefonnummer (Optional)",
+    phoneNumberPlaceholder: "+90 555 123 4567",
     
     // Booking Process
     howBookingWorks: "So funktioniert unser Buchungsprozess",
@@ -1030,6 +1034,8 @@ const translations: Record<Language, Record<string, string>> = {
     currencyHint: "Sélectionnez votre devise préférée pour le devis",
     specialRequests: "Demandes spéciales / Notes",
     specialRequestsPlaceholder: "Numéro de vol, siège enfant, exigences spéciales...",
+    phoneNumber: "Numéro de téléphone (Optionnel)",
+    phoneNumberPlaceholder: "+90 555 123 4567",
     
     // Booking Process
     howBookingWorks: "Comment fonctionne notre processus de réservation",
@@ -1509,6 +1515,8 @@ const translations: Record<Language, Record<string, string>> = {
     currencyHint: "Выберите предпочитаемую валюту для ценового предложения",
     specialRequests: "Особые пожелания / Заметки",
     specialRequestsPlaceholder: "Номер рейса, детское кресло, особые требования...",
+    phoneNumber: "Номер телефона (Необязательно)",
+    phoneNumberPlaceholder: "+90 555 123 4567",
     
     // Booking Process
     howBookingWorks: "Как работает наш процесс бронирования",
@@ -1988,6 +1996,8 @@ const translations: Record<Language, Record<string, string>> = {
     currencyHint: "Seleziona la tua valuta preferita per il preventivo",
     specialRequests: "Richieste speciali / Note",
     specialRequestsPlaceholder: "Numero volo, seggiolino bambini, esigenze particolari...",
+    phoneNumber: "Numero di telefono (Opzionale)",
+    phoneNumberPlaceholder: "+90 555 123 4567",
     
     // Booking Process
     howBookingWorks: "Come funziona il nostro processo di prenotazione",
@@ -2467,6 +2477,8 @@ const translations: Record<Language, Record<string, string>> = {
     currencyHint: "Selecciona tu moneda preferida para la cotización",
     specialRequests: "Solicitudes especiales / Notas",
     specialRequestsPlaceholder: "Número de vuelo, silla para niños, requisitos especiales...",
+    phoneNumber: "Número de teléfono (Opcional)",
+    phoneNumberPlaceholder: "+90 555 123 4567",
     
     // Booking Process
     howBookingWorks: "Cómo funciona nuestro proceso de reserva",
@@ -2946,6 +2958,8 @@ const translations: Record<Language, Record<string, string>> = {
     currencyHint: "اختر العملة المفضلة للحصول على عرض السعر",
     specialRequests: "طلبات خاصة / ملاحظات",
     specialRequestsPlaceholder: "رقم الرحلة، مقعد أطفال، متطلبات خاصة...",
+    phoneNumber: "رقم الهاتف (اختياري)",
+    phoneNumberPlaceholder: "+90 555 123 4567",
     
     // Booking Process
     howBookingWorks: "كيف تعمل عملية الحجز",
@@ -3425,6 +3439,8 @@ const translations: Record<Language, Record<string, string>> = {
     currencyHint: "Fiyat teklifi için tercih ettiğiniz para birimini seçin",
     specialRequests: "Özel İstekler / Notlar",
     specialRequestsPlaceholder: "Uçuş numarası, çocuk koltuğu, özel gereksinimler...",
+    phoneNumber: "Telefon Numarası (Opsiyonel)",
+    phoneNumberPlaceholder: "+90 555 123 4567",
     
     // Booking Process
     howBookingWorks: "Rezervasyon Sürecimiz Nasıl İşliyor",
@@ -3909,6 +3925,8 @@ const translations: Record<Language, Record<string, string>> = {
     currencyHint: "Оберіть бажану валюту для цінової пропозиції",
     specialRequests: "Особливі побажання / Примітки",
     specialRequestsPlaceholder: "Номер рейсу, дитяче крісло, особливі вимоги...",
+    phoneNumber: "Номер телефону (Необов'язково)",
+    phoneNumberPlaceholder: "+90 555 123 4567",
     
     // Booking Process
     howBookingWorks: "Як працює наш процес бронювання",

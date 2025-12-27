@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -179,6 +180,7 @@ export const Hero = () => {
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
   const [returnTime, setReturnTime] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
 
 const currencyOptions = [
   { value: 'EUR', label: '€ EUR', flag: '🇪🇺' },
@@ -247,6 +249,7 @@ const currencyOptions = [
           customer_session_id: sessionId,
           price_currency: preferredCurrency,
           customer_notes: customerNotes.trim() || null,
+          customer_phone: customerPhone.trim() || null,
         })
         .select()
         .single();
@@ -505,6 +508,21 @@ const currencyOptions = [
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Phone Number */}
+              <div className="space-y-2">
+                <label className="text-white/90 text-sm font-medium block text-left flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-accent" />
+                  {t("phoneNumber") || "Phone Number"}
+                </label>
+                <Input
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder={t("phoneNumberPlaceholder") || "+90 555 123 4567"}
+                  className="h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md"
+                />
               </div>
 
               {/* Customer Notes */}
