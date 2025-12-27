@@ -189,6 +189,7 @@ const currencyOptions = [
   { value: 'GBP', label: '£ GBP', flag: '🇬🇧' },
   { value: 'TRY', label: '₺ TRY', flag: '🇹🇷' },
   { value: 'AED', label: 'د.إ AED', flag: '🇦🇪' },
+  { value: 'AUD', label: 'A$ AUD', flag: '🇦🇺' },
 ];
   
   // Popover open states
