@@ -41,6 +41,7 @@ const currencySymbols: Record<string, string> = {
   'EUR': '€',
   'USD': '$',
   'GBP': '£',
+  'AED': 'د.إ',
 };
 
 const vehicleTypeLabels: Record<string, string> = {

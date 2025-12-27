@@ -61,7 +61,9 @@ const handler = async (req: Request): Promise<Response> => {
             ? "£"
             : currency === "TRY"
               ? "₺"
-              : currency;
+              : currency === "AED"
+                ? "د.إ"
+                : currency;
 
     // Format date
     const pickupDate = new Date(booking.pickup_date).toLocaleDateString("en-GB", {
