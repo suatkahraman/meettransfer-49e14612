@@ -270,6 +270,9 @@ const currencyOptions = [
             vehicleType,
             passengers: parseInt(passengers),
             priceCurrency: preferredCurrency,
+            customerEmail: customerEmail.trim() || null,
+            customerPhone: customerPhone.trim() || null,
+            customerNotes: customerNotes.trim() || null,
           },
         });
       } catch (notifyError) {
