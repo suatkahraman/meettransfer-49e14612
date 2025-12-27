@@ -88,116 +88,110 @@ const handler = async (req: Request): Promise<Response> => {
     if (toEmail) {
       console.log("Sending email to:", toEmail);
 
-      const primaryFrom = "Meet Transfer <noreply@mail.meettransfer.app>";
-      const fallbackFrom = "Meet Transfer <onboarding@resend.dev>";
-
-      const sendWithFrom = async (from: string) => {
-        const emailResponse = await resend.emails.send({
-          from,
-          to: [toEmail],
-          subject: `Your Transfer Quote: ${currencySymbol}${price} - Meet Transfer`,
-          html: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Your Transfer Quote</title>
-            </head>
-            <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
-              <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-                <div style="background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); padding: 30px 20px; text-align: center;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Meet Transfer</h1>
-                  <p style="color: #cbd5e0; margin: 10px 0 0 0; font-size: 14px;">Premium Airport Transfer Service</p>
-                </div>
-
-                <div style="padding: 30px 20px;">
-                  <h2 style="color: #1a365d; margin: 0 0 20px 0; font-size: 24px;">Your Price Quote</h2>
-
-                  <p style="color: #4a5568; font-size: 16px; line-height: 1.6;">
-                    Thank you for your transfer request! We're pleased to offer you the following quote:
-                  </p>
-
-                  <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); border-radius: 12px; padding: 25px; text-align: center; margin: 25px 0;">
-                    <p style="color: rgba(255,255,255,0.9); margin: 0 0 5px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Your Transfer Price</p>
-                    <p style="color: #ffffff; margin: 0; font-size: 48px; font-weight: bold;">${currencySymbol}${price}</p>
-                  </div>
-
-                  <div style="background-color: #f7fafc; border-radius: 12px; padding: 20px; margin: 25px 0;">
-                    <h3 style="color: #1a365d; margin: 0 0 15px 0; font-size: 18px;">Transfer Details</h3>
-
-                    <table style="width: 100%; border-collapse: collapse;">
-                      <tr>
-                        <td style="padding: 10px 0; color: #718096; font-size: 14px; border-bottom: 1px solid #e2e8f0;">Pick-up</td>
-                        <td style="padding: 10px 0; color: #2d3748; font-size: 14px; font-weight: 500; text-align: right; border-bottom: 1px solid #e2e8f0;">${booking.pickup}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 10px 0; color: #718096; font-size: 14px; border-bottom: 1px solid #e2e8f0;">Drop-off</td>
-                        <td style="padding: 10px 0; color: #2d3748; font-size: 14px; font-weight: 500; text-align: right; border-bottom: 1px solid #e2e8f0;">${booking.dropoff}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 10px 0; color: #718096; font-size: 14px; border-bottom: 1px solid #e2e8f0;">Date</td>
-                        <td style="padding: 10px 0; color: #2d3748; font-size: 14px; font-weight: 500; text-align: right; border-bottom: 1px solid #e2e8f0;">${pickupDate}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 10px 0; color: #718096; font-size: 14px; border-bottom: 1px solid #e2e8f0;">Time</td>
-                        <td style="padding: 10px 0; color: #2d3748; font-size: 14px; font-weight: 500; text-align: right; border-bottom: 1px solid #e2e8f0;">${booking.pickup_time}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 10px 0; color: #718096; font-size: 14px; border-bottom: 1px solid #e2e8f0;">Vehicle</td>
-                        <td style="padding: 10px 0; color: #2d3748; font-size: 14px; font-weight: 500; text-align: right; border-bottom: 1px solid #e2e8f0;">${vehicleName}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 10px 0; color: #718096; font-size: 14px;">Passengers</td>
-                        <td style="padding: 10px 0; color: #2d3748; font-size: 14px; font-weight: 500; text-align: right;">${booking.passengers}</td>
-                      </tr>
-                    </table>
-                  </div>
-
-                  <div style="text-align: center; margin: 30px 0;">
-                    <a href="${confirmUrl}" style="display: inline-block; background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
-                      ✓ Confirm Booking
-                    </a>
-                  </div>
-
-                  <p style="color: #718096; font-size: 14px; text-align: center; margin: 20px 0;">
-                    Or copy this link: <a href="${confirmUrl}" style="color: #2c5282;">${confirmUrl}</a>
-                  </p>
-
-                  <div style="border-top: 1px solid #e2e8f0; margin-top: 30px; padding-top: 20px;">
-                    <p style="color: #4a5568; font-size: 14px; margin: 5px 0;">✓ Professional English-speaking drivers</p>
-                    <p style="color: #4a5568; font-size: 14px; margin: 5px 0;">✓ Flight tracking included</p>
-                    <p style="color: #4a5568; font-size: 14px; margin: 5px 0;">✓ Free waiting time at airport</p>
-                    <p style="color: #4a5568; font-size: 14px; margin: 5px 0;">✓ 24/7 customer support</p>
-                  </div>
-                </div>
-
-                <div style="background-color: #1a365d; padding: 20px; text-align: center;">
-                  <p style="color: #cbd5e0; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} Meet Transfer. All rights reserved.</p>
-                  <p style="color: #cbd5e0; margin: 10px 0 0 0; font-size: 12px;">Questions? Contact us via WhatsApp or email</p>
-                </div>
-              </div>
-            </body>
-            </html>
-          `,
-        });
-
-        // Resend returns { data, error }
-        if ((emailResponse as any)?.error) throw (emailResponse as any).error;
-        return emailResponse;
-      };
+      const fromEmail = "Meet Transfer <info@meettransfer.app>";
 
       try {
-        const r1 = await sendWithFrom(primaryFrom);
-        usedFrom = primaryFrom;
+        const emailResponse = await resend.emails.send({
+          from: fromEmail,
+          to: [toEmail],
+          reply_to: "info@meettransfer.app",
+          subject: `Transfer Quote - ${pickupDate}`,
+          text: `
+Meet Transfer - Your Transfer Quote
+
+Price: ${currencySymbol}${price}
+
+Transfer Details:
+- From: ${booking.pickup}
+- To: ${booking.dropoff}
+- Date: ${pickupDate}
+- Time: ${booking.pickup_time}
+- Vehicle: ${vehicleName}
+- Passengers: ${booking.passengers}
+
+To confirm your booking, please visit:
+${confirmUrl}
+
+What's included:
+- Professional English-speaking driver
+- Flight tracking
+- Free waiting time at airport
+- 24/7 customer support
+
+Questions? Reply to this email or contact us via WhatsApp.
+
+Best regards,
+Meet Transfer Team
+          `.trim(),
+          html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f5f5f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+    <tr>
+      <td style="background-color:#1a365d;padding:20px;text-align:center;">
+        <h1 style="color:#ffffff;margin:0;font-size:24px;">Meet Transfer</h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:30px 20px;">
+        <p style="color:#333;font-size:16px;margin:0 0 20px;">Thank you for your transfer request. Here is your quote:</p>
+        
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#48bb78;border-radius:8px;margin:20px 0;">
+          <tr>
+            <td style="padding:20px;text-align:center;">
+              <p style="color:#fff;margin:0;font-size:14px;">Your Price</p>
+              <p style="color:#fff;margin:5px 0 0;font-size:36px;font-weight:bold;">${currencySymbol}${price}</p>
+            </td>
+          </tr>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7fafc;border-radius:8px;margin:20px 0;">
+          <tr><td style="padding:15px;">
+            <p style="margin:0 0 10px;color:#1a365d;font-weight:bold;">Transfer Details</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>From:</strong> ${booking.pickup}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>To:</strong> ${booking.dropoff}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Date:</strong> ${pickupDate}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Time:</strong> ${booking.pickup_time}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Vehicle:</strong> ${vehicleName}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Passengers:</strong> ${booking.passengers}</p>
+          </td></tr>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="text-align:center;padding:20px 0;">
+              <a href="${confirmUrl}" style="display:inline-block;background-color:#1a365d;color:#ffffff;text-decoration:none;padding:14px 30px;border-radius:6px;font-size:16px;font-weight:bold;">Confirm Booking</a>
+            </td>
+          </tr>
+        </table>
+
+        <p style="color:#666;font-size:13px;margin:20px 0 0;">
+          Professional driver • Flight tracking • Free waiting time • 24/7 support
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="background-color:#f0f0f0;padding:15px;text-align:center;">
+        <p style="color:#666;margin:0;font-size:12px;">Meet Transfer | info@meettransfer.app</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+          `.trim(),
+        });
+
+        if ((emailResponse as any)?.error) throw (emailResponse as any).error;
+        usedFrom = fromEmail;
         emailSent = true;
-        console.log("Email sent successfully (primary from):", r1);
-      } catch (primaryErr) {
-        console.warn("Primary from failed; retrying with fallback from", primaryErr);
-        const r2 = await sendWithFrom(fallbackFrom);
-        usedFrom = fallbackFrom;
-        emailSent = true;
-        console.log("Email sent successfully (fallback from):", r2);
+        console.log("Email sent successfully:", emailResponse);
+      } catch (emailErr) {
+        console.error("Failed to send email:", emailErr);
       }
     } else {
       console.log("No customer email available; skipping email send for quick booking:", quick_booking_id);
