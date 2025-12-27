@@ -53,12 +53,35 @@ serve(async (req) => {
       );
     }
 
+    // Try to find matching quick_booking_request to get pre-filled customer info
+    const { data: quickBooking } = await supabase
+      .from("quick_booking_requests")
+      .select("customer_email, customer_phone, customer_name, customer_notes")
+      .eq("pickup", reservation.pickup)
+      .eq("dropoff", reservation.dropoff)
+      .eq("pickup_date", reservation.pickup_date)
+      .eq("pickup_time", reservation.pickup_time)
+      .eq("status", "confirmed")
+      .order("confirmed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // Merge quick booking customer info into reservation response
+    const reservationWithCustomerInfo = {
+      ...reservation,
+      prefilled_email: quickBooking?.customer_email || null,
+      prefilled_phone: quickBooking?.customer_phone || null,
+      prefilled_name: quickBooking?.customer_name || null,
+    };
+
+    console.log("Quick booking customer info found:", !!quickBooking);
+
     console.log("Reservation found:", reservation.id, "Status:", reservation.status);
 
     return new Response(
       JSON.stringify({
         success: true,
-        reservation,
+        reservation: reservationWithCustomerInfo,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
