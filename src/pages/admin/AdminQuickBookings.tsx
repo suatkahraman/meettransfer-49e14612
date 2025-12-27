@@ -190,24 +190,30 @@ export default function AdminQuickBookings() {
         console.error("Failed to record price history:", e);
       }
 
-      // Send email notification if customer email is available
-      if (selectedRequest.customer_email) {
-        try {
-          await supabase.functions.invoke("send-quick-booking-price", {
+      // Send price email (will fall back to the email stored on the request if body omits it)
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke(
+          "send-quick-booking-price",
+          {
             body: {
               quick_booking_id: selectedRequest.id,
               price: priceValue,
-              currency: currency,
-              customer_email: selectedRequest.customer_email,
+              currency,
+              customer_email: selectedRequest.customer_email ?? undefined,
             },
-          });
+          }
+        );
+
+        if (fnError) throw fnError;
+
+        if ((data as any)?.emailSent) {
           toast.success("Price sent and email notification sent to customer!");
-        } catch (emailError) {
-          console.error("Failed to send price email:", emailError);
-          toast.success("Price sent successfully (email notification failed)");
+        } else {
+          toast.success("Price sent successfully");
         }
-      } else {
-        toast.success("Price sent successfully");
+      } catch (emailError) {
+        console.error("Failed to send price email:", emailError);
+        toast.success("Price sent successfully (email notification failed)");
       }
 
       setPriceDialogOpen(false);
