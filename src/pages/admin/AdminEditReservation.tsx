@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy, ChevronDown, MessageSquare } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -123,6 +123,7 @@ const AdminEditReservation = () => {
   }>({ customer_price: '', agency_price_currency: 'USD', agency_notes: '', payment_status: 'not_paid' });
   const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null);
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
+  const [customerNotes, setCustomerNotes] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     customer_phone: '',
     pickup: '',
@@ -195,6 +196,7 @@ const AdminEditReservation = () => {
       const r = reservationResult.data;
       setCustomerId(r.customer_id);
       setReservationCode(r.reservation_code);
+      setCustomerNotes((r as any).customer_notes || null);
       
       // Load passenger names - use array or fallback to customer_name
       const loadedPassengerNames = r.passenger_names && r.passenger_names.length > 0 
@@ -1884,6 +1886,19 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                     )}
                   </CardContent>
                 </Card>
+              )}
+
+              {/* Customer Notes - Read Only */}
+              {customerNotes && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                    Müşteri Notları
+                  </Label>
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-sm text-amber-800 dark:text-amber-200 whitespace-pre-wrap">
+                    {customerNotes}
+                  </div>
+                </div>
               )}
 
               <div className="space-y-2">
