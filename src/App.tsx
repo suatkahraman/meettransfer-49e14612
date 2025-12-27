@@ -112,7 +112,7 @@ const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransf
 const queryClient = new QueryClient();
 
 // Language prefixes for non-English routes
-const LANG_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar"];
+const LANG_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk"];
 
 // Simple loading fallback
 const PageLoader = () => (
