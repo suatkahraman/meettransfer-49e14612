@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -53,6 +53,7 @@ interface Reservation {
   passenger_names: string[] | null;
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
+  customer_notes: string | null;
   // Place details
   pickup_place_name: string | null;
   pickup_lat: number | null;
@@ -663,6 +664,21 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                       <div className="font-bold text-2xl text-amber-800 dark:text-amber-200">
                         {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Customer Notes - Read Only */}
+              {reservation.customer_notes && (
+                <div className="bg-amber-50 dark:bg-amber-950/50 p-4 rounded-xl border border-amber-200 dark:border-amber-700">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-amber-500 p-2 rounded-full flex-shrink-0">
+                      <MessageSquare className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-amber-800 dark:text-amber-200">Müşteri Özel İstekleri</div>
+                      <div className="text-sm text-amber-700 dark:text-amber-300 mt-1 whitespace-pre-wrap">{reservation.customer_notes}</div>
                     </div>
                   </div>
                 </div>
