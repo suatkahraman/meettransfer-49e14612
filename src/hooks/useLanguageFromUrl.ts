@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useCallback } from "react";
 
-export type Language = "EN" | "DE" | "FR" | "RU" | "IT" | "ES" | "AR" | "TR";
+export type Language = "EN" | "DE" | "FR" | "RU" | "IT" | "ES" | "AR" | "TR" | "UK";
 
 const LANGUAGE_PREFIXES: Record<string, Language> = {
   tr: "TR",
@@ -11,6 +11,7 @@ const LANGUAGE_PREFIXES: Record<string, Language> = {
   it: "IT",
   es: "ES",
   ar: "AR",
+  uk: "UK",
 };
 
 const LANGUAGE_TO_PREFIX: Record<Language, string> = {
@@ -22,9 +23,10 @@ const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   IT: "/it",
   ES: "/es",
   AR: "/ar",
+  UK: "/uk",
 };
 
-export const SUPPORTED_LANGUAGES: Language[] = ["EN", "TR", "DE", "FR", "RU", "IT", "ES", "AR"];
+export const SUPPORTED_LANGUAGES: Language[] = ["EN", "TR", "DE", "FR", "RU", "IT", "ES", "AR", "UK"];
 
 export const useLanguageFromUrl = () => {
   const location = useLocation();

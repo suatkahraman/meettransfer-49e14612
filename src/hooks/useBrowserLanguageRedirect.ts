@@ -13,6 +13,7 @@ const BROWSER_LANG_MAP: Record<string, Language> = {
   es: "ES",
   en: "EN",
   ar: "AR",
+  uk: "UK",
 };
 
 const LANGUAGE_TO_PREFIX: Record<Language, string> = {
@@ -24,6 +25,7 @@ const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   IT: "/it",
   ES: "/es",
   AR: "/ar",
+  UK: "/uk",
 };
 
 export const useBrowserLanguageRedirect = () => {
@@ -39,7 +41,7 @@ export const useBrowserLanguageRedirect = () => {
     // Check if already on a language-prefixed path
     const pathParts = location.pathname.split("/").filter(Boolean);
     const firstPart = pathParts[0]?.toLowerCase();
-    const languagePrefixes = ["tr", "de", "fr", "ru", "it", "es", "ar"];
+    const languagePrefixes = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk"];
     
     if (languagePrefixes.includes(firstPart)) {
       // Already on a language path, mark as detected
