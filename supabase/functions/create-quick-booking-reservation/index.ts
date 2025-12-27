@@ -164,154 +164,162 @@ serve(async (req) => {
           const resend = new Resend(resendApiKey);
 
           const formattedDate = new Date(requestData.pickupDate).toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
             year: 'numeric'
           });
 
-          // Format return date if exists
           const formattedReturnDate = requestData.returnDate 
             ? new Date(requestData.returnDate).toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: '2-digit',
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
                 year: 'numeric'
               })
             : null;
 
-          // Build return trip section if applicable
-          const returnTripHtml = returnReservation ? `
-            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-              <h3 style="color: #2e7d32; margin-top: 0;">🔄 Return Transfer</h3>
-              <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <p style="margin: 5px 0;"><strong>Return Reservation Code:</strong> <span style="color: #2e7d32; font-size: 16px;">${returnReservation.reservation_code}</span></p>
-              </div>
-              <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #c8e6c9;"><strong>📍 Pickup:</strong></td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #c8e6c9;">${requestData.dropoff}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #c8e6c9;"><strong>📍 Dropoff:</strong></td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #c8e6c9;">${requestData.pickup}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #c8e6c9;"><strong>📅 Date:</strong></td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #c8e6c9;">${formattedReturnDate}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #c8e6c9;"><strong>🕐 Time:</strong></td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #c8e6c9;">${requestData.returnTime}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0;"><strong>💰 Price:</strong></td>
-                  <td style="padding: 8px 0; color: #2e7d32; font-weight: bold;">${requestData.returnPrice || requestData.price} ${requestData.priceCurrency}</td>
-                </tr>
-              </table>
-              ${requestData.promoCode ? `
-                <div style="margin-top: 10px; padding: 10px; background: #fff; border-radius: 5px; border: 1px dashed #2e7d32;">
-                  <p style="margin: 0; color: #2e7d32; font-size: 14px;">
-                    🎁 <strong>Promo Code Applied:</strong> ${requestData.promoCode} (30% discount on return)
-                  </p>
-                </div>
-              ` : ''}
-            </div>
-          ` : '';
+          const vehicleLabels: Record<string, string> = {
+            "mercedes-vito": "Mercedes Vito",
+            "mercedes-vclass": "VIP Mercedes V-Class",
+            "maybach": "Maybach Minivan",
+            "minibus": "Mercedes Sprinter Minibus",
+          };
+          const vehicleName = vehicleLabels[requestData.vehicleType] || requestData.vehicleType;
 
-          // Calculate total price for display
+          const currencySymbol = requestData.priceCurrency === "EUR" ? "€" 
+            : requestData.priceCurrency === "USD" ? "$" 
+            : requestData.priceCurrency === "GBP" ? "£" 
+            : requestData.priceCurrency === "TRY" ? "₺" 
+            : requestData.priceCurrency;
+
           const totalPrice = returnReservation 
             ? requestData.price + (requestData.returnPrice || requestData.price)
             : requestData.price;
 
+          // Build return trip section
+          const returnTripText = returnReservation ? `
+Return Transfer:
+- Code: ${returnReservation.reservation_code}
+- From: ${requestData.dropoff}
+- To: ${requestData.pickup}
+- Date: ${formattedReturnDate}
+- Time: ${requestData.returnTime}
+- Price: ${currencySymbol}${requestData.returnPrice || requestData.price}
+${requestData.promoCode ? `- Promo: ${requestData.promoCode} (30% discount)` : ''}
+` : '';
+
+          const returnTripHtml = returnReservation ? `
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#e8f5e9;border-radius:8px;margin:20px 0;">
+          <tr><td style="padding:15px;">
+            <p style="margin:0 0 10px;color:#2e7d32;font-weight:bold;">Return Transfer</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Code:</strong> ${returnReservation.reservation_code}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>From:</strong> ${requestData.dropoff}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>To:</strong> ${requestData.pickup}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Date:</strong> ${formattedReturnDate}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Time:</strong> ${requestData.returnTime}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Price:</strong> ${currencySymbol}${requestData.returnPrice || requestData.price}</p>
+            ${requestData.promoCode ? `<p style="margin:10px 0 0;color:#2e7d32;font-size:13px;">Promo: ${requestData.promoCode} (30% discount)</p>` : ''}
+          </td></tr>
+        </table>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#1a365d;border-radius:8px;margin:20px 0;">
+          <tr><td style="padding:15px;text-align:center;">
+            <p style="margin:0;color:#fff;font-size:18px;"><strong>Total:</strong> ${currencySymbol}${totalPrice}</p>
+          </td></tr>
+        </table>
+          ` : '';
+
+          const plainText = `
+Meet Transfer - Booking Confirmed
+
+Your reservation has been confirmed.
+
+Reservation Code: ${reservation.reservation_code}
+
+Outbound Transfer:
+- From: ${requestData.pickup}
+- To: ${requestData.dropoff}
+- Date: ${formattedDate}
+- Time: ${requestData.pickupTime}
+- Vehicle: ${vehicleName}
+- Price: ${currencySymbol}${requestData.price}
+${returnTripText}
+${returnReservation ? `Total: ${currencySymbol}${totalPrice}` : ''}
+
+Next Step: Please complete your booking by providing your contact details.
+
+Need help? Contact us via WhatsApp or reply to this email.
+
+Best regards,
+Meet Transfer Team
+          `.trim();
+
           const emailHtml = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #D4AF37; margin: 0;">Meet Transfer</h1>
-                <p style="color: #666; margin: 5px 0;">VIP Transfer Service</p>
-              </div>
-              
-              <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 30px; border-radius: 10px; margin-bottom: 20px;">
-                <h2 style="color: #D4AF37; margin-top: 0;">✅ Booking Confirmed!</h2>
-                <p style="margin-bottom: 20px;">Thank you for choosing Meet Transfer. Your reservation${returnReservation ? 's have' : ' has'} been confirmed.</p>
-                
-                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px;">
-                  <p style="margin: 5px 0;"><strong>Main Reservation Code:</strong> <span style="color: #D4AF37; font-size: 18px;">${reservation.reservation_code}</span></p>
-                  ${returnReservation ? `<p style="margin: 5px 0;"><strong>Return Reservation Code:</strong> <span style="color: #81c784; font-size: 18px;">${returnReservation.reservation_code}</span></p>` : ''}
-                </div>
-              </div>
-              
-              <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                <h3 style="color: #1a1a2e; margin-top: 0;">🚗 Outbound Transfer</h3>
-                <table style="width: 100%; border-collapse: collapse;">
-                  <tr>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>📍 Pickup:</strong></td>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${requestData.pickup}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>📍 Dropoff:</strong></td>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${requestData.dropoff}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>📅 Date:</strong></td>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${formattedDate}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>🕐 Time:</strong></td>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${requestData.pickupTime}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>🚗 Vehicle:</strong></td>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${requestData.vehicleType}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0;"><strong>💰 Price:</strong></td>
-                    <td style="padding: 8px 0; color: #D4AF37; font-weight: bold;">${requestData.price} ${requestData.priceCurrency}</td>
-                  </tr>
-                </table>
-              </div>
-              
-              ${returnTripHtml}
-              
-              ${returnReservation ? `
-                <div style="background: #1a1a2e; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-                  <p style="margin: 0; font-size: 18px;">
-                    <strong>Total:</strong> <span style="color: #D4AF37; font-size: 22px;">${totalPrice} ${requestData.priceCurrency}</span>
-                  </p>
-                </div>
-              ` : ''}
-              
-              <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <p style="margin: 0; color: #856404;">
-                  <strong>⚠️ Next Step:</strong> Please complete your booking by providing your contact details. 
-                  Your driver will contact you before pickup.
-                </p>
-              </div>
-              
-              <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                <p style="margin: 0 0 10px 0; color: #666;">Need assistance?</p>
-                <p style="margin: 0;">
-                  <a href="https://wa.me/905321748390" style="color: #25D366; text-decoration: none;">💬 WhatsApp Support</a>
-                </p>
-              </div>
-              
-              <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                <p style="color: #999; font-size: 12px; margin: 0;">
-                  © ${new Date().getFullYear()} Meet Transfer. All rights reserved.
-                </p>
-              </div>
-            </body>
-            </html>
-          `;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f5f5f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+    <tr>
+      <td style="background-color:#1a365d;padding:20px;text-align:center;">
+        <h1 style="color:#ffffff;margin:0;font-size:24px;">Meet Transfer</h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:30px 20px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#48bb78;border-radius:8px;margin:0 0 20px;">
+          <tr>
+            <td style="padding:20px;text-align:center;">
+              <p style="color:#fff;margin:0;font-size:18px;font-weight:bold;">Booking Confirmed</p>
+              <p style="color:#fff;margin:10px 0 0;font-size:24px;font-weight:bold;">${reservation.reservation_code}</p>
+            </td>
+          </tr>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7fafc;border-radius:8px;margin:20px 0;">
+          <tr><td style="padding:15px;">
+            <p style="margin:0 0 10px;color:#1a365d;font-weight:bold;">Outbound Transfer</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>From:</strong> ${requestData.pickup}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>To:</strong> ${requestData.dropoff}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Date:</strong> ${formattedDate}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Time:</strong> ${requestData.pickupTime}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Vehicle:</strong> ${vehicleName}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Price:</strong> ${currencySymbol}${requestData.price}</p>
+          </td></tr>
+        </table>
+
+        ${returnTripHtml}
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff3cd;border-radius:8px;margin:20px 0;">
+          <tr><td style="padding:15px;">
+            <p style="margin:0;color:#856404;font-size:14px;"><strong>Next Step:</strong> Please complete your booking by providing your contact details.</p>
+          </td></tr>
+        </table>
+
+        <p style="color:#666;font-size:13px;margin:20px 0 0;">
+          Professional driver • Flight tracking • Free waiting time • 24/7 support
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="background-color:#f0f0f0;padding:15px;text-align:center;">
+        <p style="color:#666;margin:0;font-size:12px;">Meet Transfer | info@meettransfer.app</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+          `.trim();
 
           await resend.emails.send({
-            from: "Meet Transfer <info@meet-transfer.com>",
+            from: "Meet Transfer <info@meettransfer.app>",
             to: [customerEmail],
-            subject: `✅ Booking Confirmed - ${reservation.reservation_code}`,
+            reply_to: "info@meettransfer.app",
+            subject: `Booking Confirmed - ${reservation.reservation_code}`,
+            text: plainText,
             html: emailHtml,
           });
 
