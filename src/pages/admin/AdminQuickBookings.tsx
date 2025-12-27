@@ -42,6 +42,8 @@ import {
   AlertTriangle,
   MessageSquare,
   Phone,
+  Mail,
+  MailCheck,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -442,6 +444,36 @@ export default function AdminQuickBookings() {
                                 </a>
                               </div>
                             )}
+
+                            {/* Email Display with Status */}
+                            <div className="flex items-center gap-2 text-sm">
+                              {request.customer_email ? (
+                                <>
+                                  {request.status === "price_sent" || request.status === "confirmed" ? (
+                                    <MailCheck className="h-4 w-4 text-green-600" />
+                                  ) : (
+                                    <Mail className="h-4 w-4 text-primary" />
+                                  )}
+                                  <a 
+                                    href={`mailto:${request.customer_email}`} 
+                                    className="text-primary hover:underline"
+                                  >
+                                    {request.customer_email}
+                                  </a>
+                                  {(request.status === "price_sent" || request.status === "confirmed") && (
+                                    <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
+                                      <MailCheck className="h-3 w-3 mr-1" />
+                                      Email Gönderildi
+                                    </Badge>
+                                  )}
+                                </>
+                              ) : (
+                                <span className="text-muted-foreground flex items-center gap-1">
+                                  <Mail className="h-4 w-4" />
+                                  Email yok
+                                </span>
+                              )}
+                            </div>
 
                             {request.customer_notes && (
                               <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 p-2 rounded-lg text-sm mt-2">
