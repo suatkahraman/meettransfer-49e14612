@@ -47,6 +47,7 @@ const currencies = [
   { value: 'GBP', label: '£ GBP', symbol: '£' },
   { value: 'TRY', label: '₺ TRY', symbol: '₺' },
   { value: 'AED', label: 'د.إ AED', symbol: 'د.إ' },
+  { value: 'AUD', label: '$ AUD', symbol: '$' },
 ];
 
 interface Driver {

@@ -122,6 +122,7 @@ serve(async (req) => {
       USD: "$",
       GBP: "£",
       AED: "د.إ",
+      AUD: "A$",
     };
 
     const paymentLabels: Record<string, string> = {
@@ -176,6 +177,7 @@ serve(async (req) => {
         USD: "$",
         GBP: "£",
         AED: "د.إ",
+        AUD: "A$",
       };
 
       const paymentLabels: Record<string, string> = {
