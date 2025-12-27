@@ -70,6 +70,9 @@ const translations: Record<Language, Record<string, string>> = {
     specialRequestsPlaceholder: "Flight number, child seat, special requirements...",
     phoneNumber: "Phone Number (Optional)",
     phoneNumberPlaceholder: "+90 555 123 4567",
+    emailOptional: "Email (Optional)",
+    emailPlaceholder: "email@example.com",
+    emailPriceNotification: "Your price quote will also be sent to you via email.",
     
     // Booking Process
     howBookingWorks: "How Our Booking Process Works",
@@ -555,6 +558,9 @@ const translations: Record<Language, Record<string, string>> = {
     specialRequestsPlaceholder: "Flugnummer, Kindersitz, besondere Anforderungen...",
     phoneNumber: "Telefonnummer (Optional)",
     phoneNumberPlaceholder: "+90 555 123 4567",
+    emailOptional: "E-Mail (Optional)",
+    emailPlaceholder: "email@beispiel.de",
+    emailPriceNotification: "Ihr Preisangebot wird Ihnen auch per E-Mail zugesandt.",
     
     // Booking Process
     howBookingWorks: "So funktioniert unser Buchungsprozess",
@@ -1036,6 +1042,9 @@ const translations: Record<Language, Record<string, string>> = {
     specialRequestsPlaceholder: "Numéro de vol, siège enfant, exigences spéciales...",
     phoneNumber: "Numéro de téléphone (Optionnel)",
     phoneNumberPlaceholder: "+90 555 123 4567",
+    emailOptional: "Email (Optionnel)",
+    emailPlaceholder: "email@exemple.fr",
+    emailPriceNotification: "Votre devis vous sera également envoyé par email.",
     
     // Booking Process
     howBookingWorks: "Comment fonctionne notre processus de réservation",
@@ -1517,6 +1526,9 @@ const translations: Record<Language, Record<string, string>> = {
     specialRequestsPlaceholder: "Номер рейса, детское кресло, особые требования...",
     phoneNumber: "Номер телефона (Необязательно)",
     phoneNumberPlaceholder: "+90 555 123 4567",
+    emailOptional: "Email (Необязательно)",
+    emailPlaceholder: "email@example.com",
+    emailPriceNotification: "Ваше ценовое предложение также будет отправлено на вашу электронную почту.",
     
     // Booking Process
     howBookingWorks: "Как работает наш процесс бронирования",
@@ -1998,6 +2010,9 @@ const translations: Record<Language, Record<string, string>> = {
     specialRequestsPlaceholder: "Numero volo, seggiolino bambini, esigenze particolari...",
     phoneNumber: "Numero di telefono (Opzionale)",
     phoneNumberPlaceholder: "+90 555 123 4567",
+    emailOptional: "Email (Opzionale)",
+    emailPlaceholder: "email@esempio.it",
+    emailPriceNotification: "Il tuo preventivo ti sarà inviato anche via email.",
     
     // Booking Process
     howBookingWorks: "Come funziona il nostro processo di prenotazione",
@@ -2479,6 +2494,9 @@ const translations: Record<Language, Record<string, string>> = {
     specialRequestsPlaceholder: "Número de vuelo, silla para niños, requisitos especiales...",
     phoneNumber: "Número de teléfono (Opcional)",
     phoneNumberPlaceholder: "+90 555 123 4567",
+    emailOptional: "Correo electrónico (Opcional)",
+    emailPlaceholder: "email@ejemplo.es",
+    emailPriceNotification: "Su cotización también le será enviada por correo electrónico.",
     
     // Booking Process
     howBookingWorks: "Cómo funciona nuestro proceso de reserva",
@@ -2960,6 +2978,9 @@ const translations: Record<Language, Record<string, string>> = {
     specialRequestsPlaceholder: "رقم الرحلة، مقعد أطفال، متطلبات خاصة...",
     phoneNumber: "رقم الهاتف (اختياري)",
     phoneNumberPlaceholder: "+90 555 123 4567",
+    emailOptional: "البريد الإلكتروني (اختياري)",
+    emailPlaceholder: "email@example.com",
+    emailPriceNotification: "سيتم إرسال عرض السعر الخاص بك أيضًا عبر البريد الإلكتروني.",
     
     // Booking Process
     howBookingWorks: "كيف تعمل عملية الحجز",
@@ -3441,6 +3462,9 @@ const translations: Record<Language, Record<string, string>> = {
     specialRequestsPlaceholder: "Uçuş numarası, çocuk koltuğu, özel gereksinimler...",
     phoneNumber: "Telefon Numarası (Opsiyonel)",
     phoneNumberPlaceholder: "+90 555 123 4567",
+    emailOptional: "E-posta (Opsiyonel)",
+    emailPlaceholder: "email@ornek.com",
+    emailPriceNotification: "Fiyat teklifiniz size e-posta ile de gönderilecektir.",
     
     // Booking Process
     howBookingWorks: "Rezervasyon Sürecimiz Nasıl İşliyor",
@@ -3927,6 +3951,9 @@ const translations: Record<Language, Record<string, string>> = {
     specialRequestsPlaceholder: "Номер рейсу, дитяче крісло, особливі вимоги...",
     phoneNumber: "Номер телефону (Необов'язково)",
     phoneNumberPlaceholder: "+90 555 123 4567",
+    emailOptional: "Електронна пошта (Необов'язково)",
+    emailPlaceholder: "email@example.com",
+    emailPriceNotification: "Ваша цінова пропозиція також буде надіслана на вашу електронну пошту.",
     
     // Booking Process
     howBookingWorks: "Як працює наш процес бронювання",
