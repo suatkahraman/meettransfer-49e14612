@@ -14,12 +14,13 @@ const languages = [
   { code: "DE" as Language, label: "Deutsch", flag: "🇩🇪", prefix: "/de" },
   { code: "FR" as Language, label: "Français", flag: "🇫🇷", prefix: "/fr" },
   { code: "RU" as Language, label: "Русский", flag: "🇷🇺", prefix: "/ru" },
+  { code: "UK" as Language, label: "Українська", flag: "🇺🇦", prefix: "/uk" },
   { code: "IT" as Language, label: "Italiano", flag: "🇮🇹", prefix: "/it" },
   { code: "ES" as Language, label: "Español", flag: "🇪🇸", prefix: "/es" },
   { code: "AR" as Language, label: "العربية", flag: "🇸🇦", prefix: "/ar" },
 ] as const;
 
-const LANGUAGE_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar"];
+const LANGUAGE_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk"];
 
 const LanguageSelector = () => {
   const { language } = useLanguage();

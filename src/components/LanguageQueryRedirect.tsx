@@ -14,7 +14,7 @@ const LanguageQueryRedirect = () => {
     const langParam = searchParams.get("lang");
 
     if (langParam) {
-      const supportedLangs = ["de", "fr", "ru", "it", "es", "ar", "tr"];
+      const supportedLangs = ["de", "fr", "ru", "it", "es", "ar", "tr", "uk"];
       const normalizedLang = langParam.toLowerCase();
 
       if (supportedLangs.includes(normalizedLang)) {
