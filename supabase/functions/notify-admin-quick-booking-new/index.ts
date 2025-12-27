@@ -17,6 +17,9 @@ interface NotifyRequest {
   vehicleType: string;
   passengers: number;
   priceCurrency?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  customerNotes?: string;
 }
 
 serve(async (req) => {
@@ -34,10 +37,13 @@ serve(async (req) => {
       vehicleType,
       passengers,
       priceCurrency,
+      customerEmail,
+      customerPhone,
+      customerNotes,
     }: NotifyRequest = await req.json();
 
     console.log("Notifying admin about new quick booking request:", bookingId);
-    console.log("Request details - passengers:", passengers, "currency:", priceCurrency);
+    console.log("Request details - passengers:", passengers, "currency:", priceCurrency, "email:", customerEmail, "phone:", customerPhone);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -67,7 +73,12 @@ serve(async (req) => {
     
     // Build notification message with all details
     const currencyInfo = priceCurrency ? `\n💰 Preferred: ${priceCurrency}` : "";
-    const notificationMessage = `${pickup} → ${dropoff}\n📅 ${pickupDate} ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n👥 ${passengers} passengers${currencyInfo}`;
+    const customerInfo = [
+      customerEmail ? `📧 ${customerEmail}` : null,
+      customerPhone ? `📞 ${customerPhone}` : null,
+      customerNotes ? `📝 ${customerNotes}` : null,
+    ].filter(Boolean).join("\n");
+    const notificationMessage = `${pickup} → ${dropoff}\n📅 ${pickupDate} ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n👥 ${passengers} passengers${currencyInfo}${customerInfo ? `\n\n${customerInfo}` : ""}`;
 
     // Create in-app notifications for all admins
     for (const userId of adminUserIds) {
@@ -112,7 +123,12 @@ serve(async (req) => {
 
     // Send WhatsApp notification to admin
     try {
-      const whatsAppMessage = `📥 *Yeni Hızlı Rezervasyon*\n\n📍 ${pickup} → ${dropoff}\n📅 ${pickupDate} saat ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n👥 ${passengers} yolcu${priceCurrency ? `\n💰 Para birimi: ${priceCurrency}` : ""}\n\n⏳ Fiyat belirlemek için panele gidin:\nhttps://meettransfer.app/admin/quick-bookings`;
+      const customerInfoWA = [
+        customerEmail ? `📧 ${customerEmail}` : null,
+        customerPhone ? `📞 ${customerPhone}` : null,
+        customerNotes ? `📝 Not: ${customerNotes}` : null,
+      ].filter(Boolean).join("\n");
+      const whatsAppMessage = `📥 *Yeni Hızlı Rezervasyon*\n\n📍 ${pickup} → ${dropoff}\n📅 ${pickupDate} saat ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n👥 ${passengers} yolcu${priceCurrency ? `\n💰 Para birimi: ${priceCurrency}` : ""}${customerInfoWA ? `\n\n*Müşteri Bilgileri:*\n${customerInfoWA}` : ""}\n\n⏳ Fiyat belirlemek için panele gidin:\nhttps://meettransfer.app/admin/quick-bookings`;
 
       await supabase.functions.invoke("send-whatsapp-admin", {
         body: {
@@ -149,6 +165,24 @@ serve(async (req) => {
           ? `<div style="margin-bottom: 12px;">
                <span style="color: #666;">Preferred Currency:</span>
                <strong style="color: #16a34a; margin-left: 8px;">${priceCurrency}</strong>
+             </div>`
+          : "";
+        
+        const customerHtml = (customerEmail || customerPhone || customerNotes)
+          ? `<div style="background: #fef3c7; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+               <h2 style="color: #92400e; margin: 0 0 16px 0; font-size: 18px;">📋 Customer Information</h2>
+               ${customerEmail ? `<div style="margin-bottom: 12px;">
+                 <span style="color: #92400e;">Email:</span>
+                 <strong style="color: #333; margin-left: 8px;"><a href="mailto:${customerEmail}" style="color: #2563eb;">${customerEmail}</a></strong>
+               </div>` : ""}
+               ${customerPhone ? `<div style="margin-bottom: 12px;">
+                 <span style="color: #92400e;">Phone:</span>
+                 <strong style="color: #333; margin-left: 8px;"><a href="tel:${customerPhone}" style="color: #2563eb;">${customerPhone}</a></strong>
+               </div>` : ""}
+               ${customerNotes ? `<div style="margin-bottom: 0;">
+                 <span style="color: #92400e;">Notes:</span>
+                 <p style="color: #333; margin: 8px 0 0 0; white-space: pre-wrap;">${customerNotes}</p>
+               </div>` : ""}
              </div>`
           : "";
 
@@ -216,6 +250,8 @@ serve(async (req) => {
 
                       ${currencyHtml}
                     </div>
+
+                    ${customerHtml}
 
                     <div style="background: #3b82f6; border-radius: 12px; padding: 24px; text-align: center; color: white;">
                       <p style="margin: 0; font-size: 16px;">⏳ Awaiting Your Price Quote</p>
