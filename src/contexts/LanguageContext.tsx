@@ -66,6 +66,8 @@ const translations: Record<Language, Record<string, string>> = {
     returnTripDiscount: "Book return trip and get 30% OFF with code: Meet40Return",
     preferredCurrency: "Preferred Currency",
     currencyHint: "Select your preferred currency for the price quote",
+    specialRequests: "Special Requests / Notes",
+    specialRequestsPlaceholder: "Flight number, child seat, special requirements...",
     
     // Booking Process
     howBookingWorks: "How Our Booking Process Works",
@@ -547,6 +549,8 @@ const translations: Record<Language, Record<string, string>> = {
     returnTripDiscount: "Buchen Sie die Rückfahrt und erhalten Sie 30% Rabatt mit Code: Meet40Return",
     preferredCurrency: "Bevorzugte Währung",
     currencyHint: "Wählen Sie Ihre bevorzugte Währung für das Preisangebot",
+    specialRequests: "Sonderwünsche / Notizen",
+    specialRequestsPlaceholder: "Flugnummer, Kindersitz, besondere Anforderungen...",
     
     // Booking Process
     howBookingWorks: "So funktioniert unser Buchungsprozess",
@@ -1024,6 +1028,8 @@ const translations: Record<Language, Record<string, string>> = {
     returnTripDiscount: "Réservez le trajet retour et obtenez 30% de réduction avec le code: Meet40Return",
     preferredCurrency: "Devise préférée",
     currencyHint: "Sélectionnez votre devise préférée pour le devis",
+    specialRequests: "Demandes spéciales / Notes",
+    specialRequestsPlaceholder: "Numéro de vol, siège enfant, exigences spéciales...",
     
     // Booking Process
     howBookingWorks: "Comment fonctionne notre processus de réservation",
@@ -1501,6 +1507,8 @@ const translations: Record<Language, Record<string, string>> = {
     returnTripDiscount: "Забронируйте обратный трансфер и получите скидку 30% с кодом: Meet40Return",
     preferredCurrency: "Предпочитаемая валюта",
     currencyHint: "Выберите предпочитаемую валюту для ценового предложения",
+    specialRequests: "Особые пожелания / Заметки",
+    specialRequestsPlaceholder: "Номер рейса, детское кресло, особые требования...",
     
     // Booking Process
     howBookingWorks: "Как работает наш процесс бронирования",
@@ -1978,6 +1986,8 @@ const translations: Record<Language, Record<string, string>> = {
     returnTripDiscount: "Prenota il viaggio di ritorno e ottieni il 30% di sconto con il codice: Meet40Return",
     preferredCurrency: "Valuta preferita",
     currencyHint: "Seleziona la tua valuta preferita per il preventivo",
+    specialRequests: "Richieste speciali / Note",
+    specialRequestsPlaceholder: "Numero volo, seggiolino bambini, esigenze particolari...",
     
     // Booking Process
     howBookingWorks: "Come funziona il nostro processo di prenotazione",
@@ -2455,6 +2465,8 @@ const translations: Record<Language, Record<string, string>> = {
     returnTripDiscount: "Reserva el viaje de regreso y obtén 30% de descuento con el código: Meet40Return",
     preferredCurrency: "Moneda preferida",
     currencyHint: "Selecciona tu moneda preferida para la cotización",
+    specialRequests: "Solicitudes especiales / Notas",
+    specialRequestsPlaceholder: "Número de vuelo, silla para niños, requisitos especiales...",
     
     // Booking Process
     howBookingWorks: "Cómo funciona nuestro proceso de reserva",
@@ -2932,6 +2944,8 @@ const translations: Record<Language, Record<string, string>> = {
     returnTripDiscount: "احجز رحلة العودة واحصل على خصم 30% مع الكود: Meet40Return",
     preferredCurrency: "العملة المفضلة",
     currencyHint: "اختر العملة المفضلة للحصول على عرض السعر",
+    specialRequests: "طلبات خاصة / ملاحظات",
+    specialRequestsPlaceholder: "رقم الرحلة، مقعد أطفال، متطلبات خاصة...",
     
     // Booking Process
     howBookingWorks: "كيف تعمل عملية الحجز",
@@ -3409,6 +3423,8 @@ const translations: Record<Language, Record<string, string>> = {
     returnTripDiscount: "Dönüş yolculuğu rezervasyonu yapın ve Meet40Return koduyla %30 indirim kazanın",
     preferredCurrency: "Tercih Edilen Para Birimi",
     currencyHint: "Fiyat teklifi için tercih ettiğiniz para birimini seçin",
+    specialRequests: "Özel İstekler / Notlar",
+    specialRequestsPlaceholder: "Uçuş numarası, çocuk koltuğu, özel gereksinimler...",
     
     // Booking Process
     howBookingWorks: "Rezervasyon Sürecimiz Nasıl İşliyor",
@@ -3891,6 +3907,8 @@ const translations: Record<Language, Record<string, string>> = {
     returnTripDiscount: "Забронюйте зворотню поїздку та отримайте знижку 30% з кодом: Meet40Return",
     preferredCurrency: "Бажана валюта",
     currencyHint: "Оберіть бажану валюту для цінової пропозиції",
+    specialRequests: "Особливі побажання / Примітки",
+    specialRequestsPlaceholder: "Номер рейсу, дитяче крісло, особливі вимоги...",
     
     // Booking Process
     howBookingWorks: "Як працює наш процес бронювання",
