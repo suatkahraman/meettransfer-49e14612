@@ -105,7 +105,7 @@ export const useNotifications = () => {
     price: number, 
     currency: string
   ) => {
-    const symbols: Record<string, string> = { TRY: '₺', EUR: '€', USD: '$', GBP: '£' };
+    const symbols: Record<string, string> = { TRY: '₺', EUR: '€', USD: '$', GBP: '£', AED: 'د.إ', AUD: 'A$' };
     const symbol = symbols[currency] || currency;
     
     return sendNotification({
@@ -213,7 +213,7 @@ export const useNotifications = () => {
     price?: number,
     currency?: string
   ) => {
-    const symbols: Record<string, string> = { TRY: '₺', EUR: '€', USD: '$', GBP: '£' };
+    const symbols: Record<string, string> = { TRY: '₺', EUR: '€', USD: '$', GBP: '£', AED: 'د.إ', AUD: 'A$' };
     const symbol = currency ? (symbols[currency] || currency) : '';
     const priceText = price ? ` Price: ${symbol}${price}` : '';
     

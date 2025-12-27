@@ -15,7 +15,7 @@ export const MonthlySummaryCard = ({
   currency = 'TRY'
 }: MonthlySummaryCardProps) => {
   const balance = totalPrice - totalCashCollected;
-  const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '₺';
+  const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency === 'AED' ? 'د.إ' : currency === 'AUD' ? 'A$' : '₺';
 
   const getBalanceStatus = () => {
     if (balance > 0) return { text: 'Şoför borçlu', color: 'text-amber-600' };

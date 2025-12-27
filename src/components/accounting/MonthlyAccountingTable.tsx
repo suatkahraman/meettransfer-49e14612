@@ -36,7 +36,7 @@ const getStatusColor = (status: string) => {
 
 const formatCurrency = (amount: number | null, currency: string | null) => {
   if (amount === null) return '-';
-  const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '₺';
+  const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency === 'AED' ? 'د.إ' : currency === 'AUD' ? 'A$' : '₺';
   return `${symbol}${amount.toFixed(2)}`;
 };
 

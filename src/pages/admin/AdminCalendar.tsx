@@ -44,7 +44,7 @@ const statusColors: Record<string, string> = {
 };
 
 const currencySymbols: Record<string, string> = {
-  'TRY': '₺', 'EUR': '€', 'USD': '$', 'GBP': '£',
+  'TRY': '₺', 'EUR': '€', 'USD': '$', 'GBP': '£', 'AED': 'د.إ', 'AUD': 'A$',
 };
 
 const AdminCalendar = () => {

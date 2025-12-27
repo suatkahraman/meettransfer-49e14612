@@ -226,12 +226,12 @@ export default function CustomerPortal() {
                         <div className="text-right">
                           {reservation.discount_amount > 0 && (
                             <p className="text-sm text-muted-foreground line-through">
-                              {reservation.price_currency === "EUR" ? "€" : reservation.price_currency}
+                              {reservation.price_currency === "EUR" ? "€" : reservation.price_currency === "USD" ? "$" : reservation.price_currency === "GBP" ? "£" : reservation.price_currency === "AED" ? "د.إ" : reservation.price_currency === "AUD" ? "A$" : "₺"}
                               {(reservation.price + reservation.discount_amount).toFixed(2)}
                             </p>
                           )}
                           <p className="text-xl font-bold text-primary">
-                            {reservation.price_currency === "EUR" ? "€" : reservation.price_currency}
+                            {reservation.price_currency === "EUR" ? "€" : reservation.price_currency === "USD" ? "$" : reservation.price_currency === "GBP" ? "£" : reservation.price_currency === "AED" ? "د.إ" : reservation.price_currency === "AUD" ? "A$" : "₺"}
                             {reservation.price}
                           </p>
                         </div>

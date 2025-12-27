@@ -638,6 +638,8 @@ export default function QuickBookingConfirm() {
                   {booking.price_currency === "USD" && "$"}
                   {booking.price_currency === "GBP" && "£"}
                   {booking.price_currency === "TRY" && "₺"}
+                  {booking.price_currency === "AED" && "د.إ"}
+                  {booking.price_currency === "AUD" && "A$"}
                   {booking.price}
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
@@ -653,6 +655,8 @@ export default function QuickBookingConfirm() {
                     {booking.price_currency === "USD" && "$"}
                     {booking.price_currency === "GBP" && "£"}
                     {booking.price_currency === "TRY" && "₺"}
+                    {booking.price_currency === "AED" && "د.إ"}
+                    {booking.price_currency === "AUD" && "A$"}
                     {booking.price}
                   </span>
                 </div>
@@ -672,6 +676,8 @@ export default function QuickBookingConfirm() {
                         {booking.price_currency === "USD" && "$"}
                         {booking.price_currency === "GBP" && "£"}
                         {booking.price_currency === "TRY" && "₺"}
+                        {booking.price_currency === "AED" && "د.إ"}
+                        {booking.price_currency === "AUD" && "A$"}
                         {booking.price}
                       </span>
                     )}
@@ -679,6 +685,8 @@ export default function QuickBookingConfirm() {
                     {booking.price_currency === "USD" && "$"}
                     {booking.price_currency === "GBP" && "£"}
                     {booking.price_currency === "TRY" && "₺"}
+                    {booking.price_currency === "AED" && "د.إ"}
+                    {booking.price_currency === "AUD" && "A$"}
                     {getReturnPrice()?.toFixed(0)}
                   </span>
                 </div>
@@ -690,6 +698,8 @@ export default function QuickBookingConfirm() {
                       {booking.price_currency === "USD" && "$"}
                       {booking.price_currency === "GBP" && "£"}
                       {booking.price_currency === "TRY" && "₺"}
+                      {booking.price_currency === "AED" && "د.إ"}
+                      {booking.price_currency === "AUD" && "A$"}
                       {getTotalPrice()?.toFixed(0)}
                     </span>
                   </div>
