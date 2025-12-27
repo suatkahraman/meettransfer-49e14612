@@ -39,13 +39,27 @@ serve(async (req) => {
 
     console.log("Creating reservation for quick booking:", requestData.bookingId);
 
+    // Fetch the quick booking request to get customer_notes and customer_phone
+    const { data: quickBooking, error: fetchError } = await supabase
+      .from("quick_booking_requests")
+      .select("customer_notes, customer_phone")
+      .eq("id", requestData.bookingId)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error("Error fetching quick booking:", fetchError);
+    }
+
+    const customerNotes = quickBooking?.customer_notes || null;
+    const customerPhone = quickBooking?.customer_phone || "";
+
     // Create main reservation WITHOUT customer_id (will be set later when customer registers)
     const { data: reservation, error: reservationError } = await supabase
       .from("reservations")
       .insert({
         customer_id: null, // Will be filled when customer completes the form
         customer_name: "Pending Customer Info",
-        customer_phone: "",
+        customer_phone: customerPhone,
         pickup: requestData.pickup,
         dropoff: requestData.dropoff,
         pickup_date: requestData.pickupDate,
@@ -55,6 +69,7 @@ serve(async (req) => {
         status: "pending_customer_info",
         price: requestData.price,
         price_currency: requestData.priceCurrency,
+        customer_notes: customerNotes,
       })
       .select()
       .single();
@@ -74,7 +89,7 @@ serve(async (req) => {
         .insert({
           customer_id: null, // Will be filled when customer completes the form
           customer_name: "Pending Customer Info",
-          customer_phone: "",
+          customer_phone: customerPhone,
           pickup: requestData.dropoff, // Swapped for return
           dropoff: requestData.pickup, // Swapped for return
           pickup_date: requestData.returnDate,
@@ -87,6 +102,7 @@ serve(async (req) => {
           is_return_transfer: true,
           original_reservation_id: reservation.id,
           promo_code: requestData.promoCode || null,
+          customer_notes: customerNotes,
         })
         .select()
         .single();
