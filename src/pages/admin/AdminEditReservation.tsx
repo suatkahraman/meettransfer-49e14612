@@ -75,10 +75,11 @@ const statusLabels: Record<string, string> = {
 
 // Currency options
 const currencies = [
-  { value: 'TRY', label: '₺ TRY', symbol: '₺' },
   { value: 'EUR', label: '€ EUR', symbol: '€' },
   { value: 'USD', label: '$ USD', symbol: '$' },
   { value: 'GBP', label: '£ GBP', symbol: '£' },
+  { value: 'TRY', label: '₺ TRY', symbol: '₺' },
+  { value: 'AED', label: 'د.إ AED', symbol: 'د.إ' },
 ];
 
 interface Driver {

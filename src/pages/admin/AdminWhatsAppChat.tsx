@@ -664,10 +664,11 @@ export default function AdminWhatsAppChat() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="EUR">EUR (€)</SelectItem>
-                                <SelectItem value="USD">USD ($)</SelectItem>
-                                <SelectItem value="TRY">TRY (₺)</SelectItem>
-                                <SelectItem value="GBP">GBP (£)</SelectItem>
+                                <SelectItem value="EUR">€ EUR</SelectItem>
+                                <SelectItem value="USD">$ USD</SelectItem>
+                                <SelectItem value="GBP">£ GBP</SelectItem>
+                                <SelectItem value="TRY">₺ TRY</SelectItem>
+                                <SelectItem value="AED">د.إ AED</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
