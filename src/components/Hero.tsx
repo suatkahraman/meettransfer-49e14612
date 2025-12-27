@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare, Phone } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare, Phone, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -181,6 +181,7 @@ export const Hero = () => {
   const [returnTime, setReturnTime] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
 
 const currencyOptions = [
   { value: 'EUR', label: '€ EUR', flag: '🇪🇺' },
@@ -250,6 +251,7 @@ const currencyOptions = [
           price_currency: preferredCurrency,
           customer_notes: customerNotes.trim() || null,
           customer_phone: customerPhone.trim() || null,
+          customer_email: customerEmail.trim() || null,
         })
         .select()
         .single();
@@ -523,6 +525,24 @@ const currencyOptions = [
                   placeholder={t("phoneNumberPlaceholder") || "+90 555 123 4567"}
                   className="h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md"
                 />
+              </div>
+
+              {/* Email (Optional) */}
+              <div className="space-y-2">
+                <label className="text-white/90 text-sm font-medium block text-left flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-accent" />
+                  {t("emailOptional") || "Email (Optional)"}
+                </label>
+                <Input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder={t("emailPlaceholder") || "email@example.com"}
+                  className="h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md"
+                />
+                <p className="text-white/70 text-xs">
+                  {t("emailPriceNotification") || "Your price quote will also be sent to you via email."}
+                </p>
               </div>
 
               {/* Customer Notes */}
