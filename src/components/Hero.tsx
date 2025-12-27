@@ -6,7 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -177,6 +178,7 @@ export const Hero = () => {
   const [hasReturnTrip, setHasReturnTrip] = useState(false);
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
   const [returnTime, setReturnTime] = useState("");
+  const [customerNotes, setCustomerNotes] = useState("");
 
 const currencyOptions = [
   { value: 'EUR', label: '€ EUR', flag: '🇪🇺' },
@@ -244,6 +246,7 @@ const currencyOptions = [
           passengers: parseInt(passengers),
           customer_session_id: sessionId,
           price_currency: preferredCurrency,
+          customer_notes: customerNotes.trim() || null,
         })
         .select()
         .single();
@@ -502,6 +505,21 @@ const currencyOptions = [
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Customer Notes */}
+              <div className="space-y-2">
+                <label className="text-white/90 text-sm font-medium block text-left flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-accent" />
+                  {t("specialRequests") || "Special Requests / Notes"}
+                </label>
+                <Textarea
+                  value={customerNotes}
+                  onChange={(e) => setCustomerNotes(e.target.value)}
+                  placeholder={t("specialRequestsPlaceholder") || "Flight number, child seat, special requirements..."}
+                  className="bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md resize-none min-h-[80px]"
+                  maxLength={500}
+                />
               </div>
 
               <Button onClick={handleRequestPrice} size="lg" variant="accent" className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300" disabled={submitting}>

@@ -40,6 +40,7 @@ import {
   Edit,
   Trash2,
   AlertTriangle,
+  MessageSquare,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -67,6 +68,7 @@ interface QuickBookingRequest {
   expires_at: string;
   payment_method: string | null;
   payment_link: string | null;
+  customer_notes: string | null;
 }
 
 const vehicleLabels: Record<string, string> = {
@@ -408,6 +410,13 @@ export default function AdminQuickBookings() {
                                   <>💵 Cash</>
                                 )}
                               </Badge>
+                            )}
+
+                            {request.customer_notes && (
+                              <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 p-2 rounded-lg text-sm mt-2">
+                                <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                <span className="whitespace-pre-wrap">{request.customer_notes}</span>
+                              </div>
                             )}
                           </div>
 
