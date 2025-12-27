@@ -193,7 +193,7 @@ serve(async (req) => {
                     <div style="background: #ef4444; border-radius: 12px; padding: 24px; text-align: center; color: white;">
                       <p style="margin: 0; font-size: 16px;">Rejected Price</p>
                       <p style="margin: 8px 0 0 0; font-size: 36px; font-weight: bold; text-decoration: line-through;">
-                        ${priceCurrency === "EUR" ? "€" : priceCurrency === "USD" ? "$" : priceCurrency === "GBP" ? "£" : priceCurrency === "AED" ? "د.إ" : "₺"}${price}
+                        ${priceCurrency === "EUR" ? "€" : priceCurrency === "USD" ? "$" : priceCurrency === "GBP" ? "£" : priceCurrency === "AED" ? "د.إ" : priceCurrency === "AUD" ? "A$" : "₺"}${price}
                       </p>
                     </div>
 

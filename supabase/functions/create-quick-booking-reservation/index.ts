@@ -192,6 +192,7 @@ serve(async (req) => {
             : requestData.priceCurrency === "GBP" ? "£" 
             : requestData.priceCurrency === "TRY" ? "₺" 
             : requestData.priceCurrency === "AED" ? "د.إ"
+            : requestData.priceCurrency === "AUD" ? "A$"
             : requestData.priceCurrency;
 
           const totalPrice = returnReservation 

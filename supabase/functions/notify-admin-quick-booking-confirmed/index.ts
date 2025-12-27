@@ -202,7 +202,7 @@ serve(async (req) => {
                     <div style="background: #22c55e; border-radius: 12px; padding: 24px; text-align: center; color: white;">
                       <p style="margin: 0; font-size: 16px;">Confirmed Price</p>
                       <p style="margin: 8px 0 0 0; font-size: 36px; font-weight: bold;">
-                        ${priceCurrency === "EUR" ? "€" : priceCurrency === "USD" ? "$" : priceCurrency === "GBP" ? "£" : priceCurrency === "AED" ? "د.إ" : "₺"}${price}
+                        ${priceCurrency === "EUR" ? "€" : priceCurrency === "USD" ? "$" : priceCurrency === "GBP" ? "£" : priceCurrency === "AED" ? "د.إ" : priceCurrency === "AUD" ? "A$" : "₺"}${price}
                       </p>
                     </div>
 

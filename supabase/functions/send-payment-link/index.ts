@@ -87,7 +87,8 @@ serve(async (req) => {
       priceCurrency === "EUR" ? "€" :
       priceCurrency === "USD" ? "$" :
       priceCurrency === "GBP" ? "£" :
-      priceCurrency === "AED" ? "د.إ" : "₺";
+      priceCurrency === "AED" ? "د.إ" :
+      priceCurrency === "AUD" ? "A$" : "₺";
 
     // Send email to customer with payment link
     const emailResponse = await fetch("https://api.resend.com/emails", {

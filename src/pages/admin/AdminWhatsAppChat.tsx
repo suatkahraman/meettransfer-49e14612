@@ -669,6 +669,7 @@ export default function AdminWhatsAppChat() {
                                 <SelectItem value="GBP">£ GBP</SelectItem>
                                 <SelectItem value="TRY">₺ TRY</SelectItem>
                                 <SelectItem value="AED">د.إ AED</SelectItem>
+                                <SelectItem value="AUD">$ AUD</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>

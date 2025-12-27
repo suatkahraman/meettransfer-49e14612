@@ -158,6 +158,7 @@ const ReservationForm = () => {
     { value: 'GBP', label: '£ GBP', flag: '🇬🇧' },
     { value: 'TRY', label: '₺ TRY', flag: '🇹🇷' },
     { value: 'AED', label: 'د.إ AED', flag: '🇦🇪' },
+    { value: 'AUD', label: '$ AUD', flag: '🇦🇺' },
   ];
   
   const [formData, setFormData] = useState(() => ({
