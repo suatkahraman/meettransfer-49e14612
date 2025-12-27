@@ -11,11 +11,19 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { z } from "zod";
 
+// Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
+const passwordSchema = z.string()
+  .min(6, 'Password must be at least 6 characters')
+  .max(100)
+  .regex(/[A-Z]/, 'Password must contain at least 1 uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least 1 lowercase letter')
+  .regex(/\d.*\d.*\d.*\d/, 'Password must contain at least 4 digits');
+
 const customerInfoSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
   email: z.string().trim().email("Invalid email address").max(255),
-  password: z.string().min(6, "Password must be at least 6 characters").max(100),
+  password: passwordSchema,
 });
 
 const vehicleLabels: Record<string, string> = {
@@ -371,7 +379,7 @@ export default function QuickBookingCustomerInfo() {
               </div>
               {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               <p className="text-xs text-muted-foreground">
-                This password will be used to access your reservations. You can view and manage all your bookings after logging in.
+                1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
               </p>
             </div>
 
