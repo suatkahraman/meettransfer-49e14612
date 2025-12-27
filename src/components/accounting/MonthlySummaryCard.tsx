@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Banknote, Scale, Car } from 'lucide-react';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface MonthlySummaryCardProps {
   totalTransfers: number;
@@ -15,7 +16,7 @@ export const MonthlySummaryCard = ({
   currency = 'TRY'
 }: MonthlySummaryCardProps) => {
   const balance = totalPrice - totalCashCollected;
-  const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency === 'AED' ? 'د.إ' : currency === 'AUD' ? 'A$' : '₺';
+  const symbol = getCurrencySymbol(currency);
 
   const getBalanceStatus = () => {
     if (balance > 0) return { text: 'Şoför borçlu', color: 'text-amber-600' };

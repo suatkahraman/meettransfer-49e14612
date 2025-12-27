@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getCurrencySymbol, CURRENCY_SYMBOLS } from '@/lib/currency';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
@@ -85,12 +86,6 @@ const statusColors: Record<string, string> = {
   'cancelled_by_customer': 'bg-destructive/20 text-destructive',
 };
 
-const currencySymbols: Record<string, string> = {
-  'TRY': '₺',
-  'EUR': '€',
-  'USD': '$',
-  'GBP': '£',
-};
 
 const CustomerReservationDetail = () => {
   const { id } = useParams();
@@ -185,7 +180,7 @@ const CustomerReservationDetail = () => {
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return null;
-    const symbol = currencySymbols[currency || 'TRY'] || currency || '';
+    const symbol = getCurrencySymbol(currency);
     return `${symbol}${price}`;
   };
 
@@ -696,7 +691,7 @@ const CustomerReservationDetail = () => {
                     <span className="font-medium text-amber-700 dark:text-amber-300">Cash Payment to Driver</span>
                   </div>
                   <span className="font-bold text-amber-700 dark:text-amber-300 text-2xl">
-                    {currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '₺'}{reservation.passenger_cash_amount}
+                    {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
                   </span>
                 </div>
                 <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">

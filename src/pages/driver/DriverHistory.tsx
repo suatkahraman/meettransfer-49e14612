@@ -13,6 +13,7 @@ import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { getCurrencySymbol } from '@/lib/currency';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -39,14 +40,6 @@ interface Reservation {
   driver_cash_amount: number | null;
 }
 
-const currencySymbols: Record<string, string> = {
-  TRY: '₺',
-  EUR: '€',
-  USD: '$',
-  GBP: '£',
-  AED: 'د.إ',
-  AUD: 'A$',
-};
 
 const paymentTypeLabels: Record<string, string> = {
   cash: 'Nakit',
@@ -63,10 +56,6 @@ const DriverHistory = () => {
   const [dateFrom, setDateFrom] = useState<Date | undefined>(startOfMonth(subMonths(new Date(), 1)));
   const [dateTo, setDateTo] = useState<Date | undefined>(endOfMonth(new Date()));
   const [showFilters, setShowFilters] = useState(false);
-
-  const getCurrencySymbol = (currency: string | null) => {
-    return currencySymbols[currency || 'TRY'] || '₺';
-  };
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null || price === undefined) return '-';

@@ -18,6 +18,7 @@ import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface Reservation {
   id: string;
@@ -94,14 +95,6 @@ const statusLabels: Record<string, string> = {
   'cancelled_by_customer': 'Müşteri İptal Etti',
 };
 
-const currencySymbols: Record<string, string> = {
-  'TRY': '₺',
-  'EUR': '€',
-  'USD': '$',
-  'GBP': '£',
-  'AED': 'د.إ',
-  'AUD': 'A$',
-};
 
 const AdminReservations = () => {
   const { signOut } = useAuth();
@@ -134,7 +127,7 @@ const AdminReservations = () => {
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '-';
-    const symbol = currencySymbols[currency || 'TRY'] || currency || '';
+    const symbol = getCurrencySymbol(currency);
     return `${symbol}${price}`;
   };
 
@@ -765,7 +758,7 @@ const AdminReservations = () => {
                               {/* Yolcudan Alınacak Nakit */}
                               {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
                                 <span className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                                  💵 {currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '₺'}{reservation.passenger_cash_amount}
+                                  💵 {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
                                 </span>
                               )}
                               {reservation.agencies && (
@@ -915,7 +908,7 @@ const AdminReservations = () => {
                         {/* Yolcudan Alınacak Nakit */}
                         {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
                           <span className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                            💵 {currencySymbols[reservation.passenger_cash_currency || 'TRY'] || '₺'}{reservation.passenger_cash_amount}
+                            💵 {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
                           </span>
                         )}
                         {reservation.drivers && (

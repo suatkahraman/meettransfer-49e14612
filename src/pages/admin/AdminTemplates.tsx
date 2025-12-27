@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus, Pencil, Trash2, MapPin, FileText } from 'lucide-react';
+import { CURRENCY_OPTIONS, getCurrencySymbol } from '@/lib/currency';
 import NotificationBell from '@/components/NotificationBell';
 
 const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
@@ -24,14 +25,8 @@ const paymentTypes = [
   { value: 'online', label: 'Online' },
   { value: 'none', label: 'Yok' },
 ];
-const currencies = [
-  { value: 'EUR', label: '€ EUR', symbol: '€' },
-  { value: 'USD', label: '$ USD', symbol: '$' },
-  { value: 'GBP', label: '£ GBP', symbol: '£' },
-  { value: 'TRY', label: '₺ TRY', symbol: '₺' },
-  { value: 'AED', label: 'د.إ AED', symbol: 'د.إ' },
-  { value: 'AUD', label: '$ AUD', symbol: '$' },
-];
+const currencies = CURRENCY_OPTIONS;
+
 
 interface Template {
   id: string;
@@ -63,10 +58,6 @@ const AdminTemplates = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
-
-  const getCurrencySymbol = (currency: string | null) => {
-    return currencies.find(c => c.value === currency)?.symbol || currency || '';
-  };
 
   const fetchTemplates = async () => {
     const { data, error } = await supabase
