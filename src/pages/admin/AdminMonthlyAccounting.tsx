@@ -54,6 +54,7 @@ interface DriverPayment {
   notes: string | null;
   created_at: string;
   driver_name?: string;
+  payment_type: string;
 }
 
 interface DriverBalance {
@@ -190,7 +191,15 @@ const AdminMonthlyAccounting = () => {
 
   const totalPrice = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
   const totalCash = reservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
-  const totalPaymentsThisMonth = driverPayments.reduce((sum, p) => sum + p.amount, 0);
+  
+  // Separate payments by type
+  const totalPaymentsToDriver = driverPayments
+    .filter(p => p.payment_type === 'to_driver')
+    .reduce((sum, p) => sum + p.amount, 0);
+  const totalPaymentsFromDriver = driverPayments
+    .filter(p => p.payment_type === 'from_driver')
+    .reduce((sum, p) => sum + p.amount, 0);
+  const netPaymentsBalance = totalPaymentsToDriver - totalPaymentsFromDriver;
 
   const handleEditReservation = (reservation: Reservation) => {
     navigate(`/admin/reservations/${reservation.id}`);
@@ -378,22 +387,46 @@ const AdminMonthlyAccounting = () => {
             ) : (
               <>
                 {/* Payments Summary */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Wallet className="h-5 w-5" />
-                      Bu Ay Yapılan Ödemeler
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-green-600">
-                      ₺{totalPaymentsThisMonth.toFixed(2)}
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {driverPayments.length} ödeme kaydı
-                    </p>
-                  </CardContent>
-                </Card>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-sm text-muted-foreground mb-1">Yapılan Ödeme</div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        ₺{totalPaymentsToDriver.toFixed(2)}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Şoföre yapılan</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-sm text-muted-foreground mb-1">Alınan Ödeme</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        ₺{totalPaymentsFromDriver.toFixed(2)}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Şoförden alınan</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-sm text-muted-foreground mb-1">Net Bakiye</div>
+                      <div className={`text-2xl font-bold ${netPaymentsBalance > 0 ? 'text-blue-600' : netPaymentsBalance < 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                        ₺{Math.abs(netPaymentsBalance).toFixed(2)}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {netPaymentsBalance > 0 ? 'Şirket fazla ödedi' : netPaymentsBalance < 0 ? 'Şoför fazla ödedi' : 'Eşit'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-sm text-muted-foreground mb-1">Toplam İşlem</div>
+                      <div className="text-2xl font-bold">
+                        {driverPayments.length}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">ödeme kaydı</p>
+                    </CardContent>
+                  </Card>
+                </div>
 
                 {/* Driver Balances */}
                 {selectedDriver === 'all' && (
