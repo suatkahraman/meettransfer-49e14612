@@ -180,6 +180,33 @@ export type Database = {
           },
         ]
       }
+      app_installations: {
+        Row: {
+          browser: string | null
+          device: string | null
+          id: string
+          installed_at: string
+          platform: string | null
+          visitor_id: string
+        }
+        Insert: {
+          browser?: string | null
+          device?: string | null
+          id?: string
+          installed_at?: string
+          platform?: string | null
+          visitor_id: string
+        }
+        Update: {
+          browser?: string | null
+          device?: string | null
+          id?: string
+          installed_at?: string
+          platform?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string

@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2, Plane, MessageCircle, BarChart3, Inbox } from 'lucide-react';
+import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2, Plane, MessageCircle, BarChart3, Inbox, Download } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfDay, endOfDay, format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
@@ -31,6 +31,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [unreadWhatsApp, setUnreadWhatsApp] = useState(0);
   const [pendingQuickBookings, setPendingQuickBookings] = useState(0);
+  const [appInstallCount, setAppInstallCount] = useState(0);
 
   useEffect(() => {
     const fetchKPIs = async () => {
@@ -146,6 +147,33 @@ const AdminDashboard = () => {
     };
   }, []);
 
+  // Fetch app installation count
+  useEffect(() => {
+    const fetchInstallCount = async () => {
+      const { count } = await supabase
+        .from('app_installations')
+        .select('*', { count: 'exact', head: true });
+      
+      setAppInstallCount(count || 0);
+    };
+
+    fetchInstallCount();
+
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel('app-installations-count')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'app_installations' },
+        () => fetchInstallCount()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const menuItems = [
     { icon: Inbox, label: 'Quick Bookings', path: '/admin/quick-bookings', badge: pendingQuickBookings },
     { icon: MessageCircle, label: 'WhatsApp Chat', path: '/admin/whatsapp', badge: unreadWhatsApp },
@@ -174,7 +202,7 @@ const AdminDashboard = () => {
 
       <main className="container mx-auto py-8 px-4">
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
@@ -232,6 +260,18 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">₺{loading ? '-' : kpis.monthlyRevenue.toFixed(0)}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-purple-500/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Uygulama İndirme
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">{appInstallCount}</div>
             </CardContent>
           </Card>
         </div>
