@@ -6,19 +6,36 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { HandCoins } from 'lucide-react';
+import { HandCoins, Wallet } from 'lucide-react';
+
+type PaymentType = 'to_driver' | 'from_driver';
 
 interface DriverQuickPaymentDialogProps {
   driverId: string;
   driverName: string;
+  paymentType: PaymentType;
   onPaymentAdded: () => void;
 }
 
-export const DriverQuickPaymentDialog = ({ driverId, driverName, onPaymentAdded }: DriverQuickPaymentDialogProps) => {
+export const DriverQuickPaymentDialog = ({ 
+  driverId, 
+  driverName, 
+  paymentType,
+  onPaymentAdded 
+}: DriverQuickPaymentDialogProps) => {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const isReceiving = paymentType === 'from_driver';
+  const title = isReceiving ? 'Ödeme Al' : 'Ödeme Yap';
+  const dialogTitle = isReceiving 
+    ? `${driverName} - Ödeme Al (Şoförden)` 
+    : `${driverName} - Ödeme Yap (Şoföre)`;
+  const successMessage = isReceiving 
+    ? `${driverName}'den ödeme alındı` 
+    : `${driverName}'e ödeme yapıldı`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,13 +60,14 @@ export const DriverQuickPaymentDialog = ({ driverId, driverName, onPaymentAdded 
         .insert({
           driver_id: driverId,
           amount: numAmount,
+          payment_type: paymentType,
           notes: notes || null,
           created_by: user?.id
         });
 
       if (error) throw error;
 
-      toast.success(`${driverName} için ödeme kaydedildi`);
+      toast.success(successMessage);
       setOpen(false);
       setAmount('');
       setNotes('');
@@ -64,14 +82,22 @@ export const DriverQuickPaymentDialog = ({ driverId, driverName, onPaymentAdded 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <HandCoins className="h-3.5 w-3.5" />
-          Ödeme Al
+        <Button 
+          variant={isReceiving ? "outline" : "default"} 
+          size="sm" 
+          className="gap-1.5"
+        >
+          {isReceiving ? (
+            <HandCoins className="h-3.5 w-3.5" />
+          ) : (
+            <Wallet className="h-3.5 w-3.5" />
+          )}
+          {title}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{driverName} - Ödeme Al</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

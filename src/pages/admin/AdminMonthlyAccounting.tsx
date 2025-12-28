@@ -317,11 +317,20 @@ const AdminMonthlyAccounting = () => {
                                     {netBalance > 0 ? ' (alacak)' : netBalance < 0 ? ' (verecek)' : ' (kapalı)'}
                                   </div>
                                 </div>
-                                <DriverQuickPaymentDialog
-                                  driverId={summary.driver.id}
-                                  driverName={summary.driver.name}
-                                  onPaymentAdded={handlePaymentAdded}
-                                />
+                                <div className="flex gap-2">
+                                  <DriverQuickPaymentDialog
+                                    driverId={summary.driver.id}
+                                    driverName={summary.driver.name}
+                                    paymentType="from_driver"
+                                    onPaymentAdded={handlePaymentAdded}
+                                  />
+                                  <DriverQuickPaymentDialog
+                                    driverId={summary.driver.id}
+                                    driverName={summary.driver.name}
+                                    paymentType="to_driver"
+                                    onPaymentAdded={handlePaymentAdded}
+                                  />
+                                </div>
                               </div>
                             </div>
                           );
@@ -410,11 +419,20 @@ const AdminMonthlyAccounting = () => {
                                 <div className="font-semibold text-green-600">
                                   ₺{balance.toFixed(2)} ödendi
                                 </div>
-                                <DriverQuickPaymentDialog
-                                  driverId={driver.id}
-                                  driverName={driver.name}
-                                  onPaymentAdded={handlePaymentAdded}
-                                />
+                                <div className="flex gap-2">
+                                  <DriverQuickPaymentDialog
+                                    driverId={driver.id}
+                                    driverName={driver.name}
+                                    paymentType="from_driver"
+                                    onPaymentAdded={handlePaymentAdded}
+                                  />
+                                  <DriverQuickPaymentDialog
+                                    driverId={driver.id}
+                                    driverName={driver.name}
+                                    paymentType="to_driver"
+                                    onPaymentAdded={handlePaymentAdded}
+                                  />
+                                </div>
                               </div>
                             </div>
                           );
