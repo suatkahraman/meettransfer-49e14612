@@ -12,6 +12,7 @@ import { MonthlyAccountingTable } from '@/components/accounting/MonthlyAccountin
 import { DriverPaymentDialog } from '@/components/accounting/DriverPaymentDialog';
 import { DriverPaymentsTable } from '@/components/accounting/DriverPaymentsTable';
 import { DriverBalanceCard } from '@/components/accounting/DriverBalanceCard';
+import { DriverQuickPaymentDialog } from '@/components/accounting/DriverQuickPaymentDialog';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 
 interface Driver {
@@ -298,7 +299,7 @@ const AdminMonthlyAccounting = () => {
                           return (
                             <div 
                               key={summary.driver.id}
-                              className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                              className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg bg-muted/50 gap-3"
                             >
                               <div>
                                 <div className="font-medium">{summary.driver.name}</div>
@@ -306,14 +307,21 @@ const AdminMonthlyAccounting = () => {
                                   {summary.transferCount} transfer | Ödenen: ₺{driverBalance.toFixed(2)}
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <div className="text-sm">
-                                  Fiyat: ₺{summary.totalPrice.toFixed(2)} | Nakit: ₺{summary.totalCash.toFixed(2)}
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                <div className="text-right">
+                                  <div className="text-sm">
+                                    Fiyat: ₺{summary.totalPrice.toFixed(2)} | Nakit: ₺{summary.totalCash.toFixed(2)}
+                                  </div>
+                                  <div className={`font-semibold ${balanceColor}`}>
+                                    Bakiye: ₺{Math.abs(netBalance).toFixed(2)}
+                                    {netBalance > 0 ? ' (alacak)' : netBalance < 0 ? ' (verecek)' : ' (kapalı)'}
+                                  </div>
                                 </div>
-                                <div className={`font-semibold ${balanceColor}`}>
-                                  Bakiye: ₺{Math.abs(netBalance).toFixed(2)}
-                                  {netBalance > 0 ? ' (alacak)' : netBalance < 0 ? ' (verecek)' : ' (kapalı)'}
-                                </div>
+                                <DriverQuickPaymentDialog
+                                  driverId={summary.driver.id}
+                                  driverName={summary.driver.name}
+                                  onPaymentAdded={handlePaymentAdded}
+                                />
                               </div>
                             </div>
                           );
