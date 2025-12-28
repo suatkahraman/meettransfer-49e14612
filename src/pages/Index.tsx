@@ -8,6 +8,7 @@ import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
+import TrustedPartners from "@/components/website/TrustedPartners";
 
 
 const Index = () => {
@@ -34,6 +35,7 @@ const Index = () => {
       <BookingForm />
       <Destinations />
       <Features />
+      <TrustedPartners />
       <PWAPromoBanner />
       <Footer />
     </WebsiteLayout>
