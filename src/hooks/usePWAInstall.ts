@@ -44,12 +44,15 @@ export function usePWAInstall() {
     setIsIOS(isIOSDevice);
     setIsAndroid(isAndroidDevice);
 
-    const trackInstallation = async () => {
+      const trackInstallation = async () => {
       if (localStorage.getItem(INSTALL_TRACK_KEY) === '1') return;
 
       try {
         const visitorId = localStorage.getItem('visitor_id') || crypto.randomUUID();
         localStorage.setItem('visitor_id', visitorId);
+
+        // Get current user if logged in
+        const { data: { user } } = await supabase.auth.getUser();
 
         // Fetch country info
         let countryCode: string | null = null;
@@ -70,6 +73,7 @@ export function usePWAInstall() {
 
         const { error } = await supabase.from('app_installations').insert({
           visitor_id: visitorId,
+          user_id: user?.id || null,
           device: /mobile/i.test(userAgent) ? 'mobile' : 'desktop',
           browser: /chrome/i.test(userAgent)
             ? 'Chrome'

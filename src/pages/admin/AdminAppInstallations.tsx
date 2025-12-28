@@ -12,6 +12,7 @@ import { tr } from 'date-fns/locale';
 interface AppInstallation {
   id: string;
   visitor_id: string;
+  user_id: string | null;
   installed_at: string;
   device: string | null;
   browser: string | null;
@@ -35,20 +36,31 @@ const AdminAppInstallations = () => {
 
   useEffect(() => {
     const fetchInstallations = async () => {
+      // First get admin user IDs to exclude them
+      const { data: adminRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+      
+      const adminUserIds = adminRoles?.map(r => r.user_id) || [];
+
       const { data, error } = await supabase
         .from('app_installations')
         .select('*')
         .order('installed_at', { ascending: false });
 
       if (!error && data) {
-        setInstallations(data);
+        // Filter out admin installations
+        const filteredData = data.filter(i => !i.user_id || !adminUserIds.includes(i.user_id));
         
-        // Calculate stats
-        const total = data.length;
-        const mobile = data.filter(i => i.device === 'mobile').length;
-        const desktop = data.filter(i => i.device === 'desktop').length;
-        const ios = data.filter(i => i.platform === 'iOS').length;
-        const android = data.filter(i => i.platform === 'Android').length;
+        setInstallations(filteredData);
+        
+        // Calculate stats from filtered data
+        const total = filteredData.length;
+        const mobile = filteredData.filter(i => i.device === 'mobile').length;
+        const desktop = filteredData.filter(i => i.device === 'desktop').length;
+        const ios = filteredData.filter(i => i.platform === 'iOS').length;
+        const android = filteredData.filter(i => i.platform === 'Android').length;
         
         setStats({ total, mobile, desktop, ios, android });
       }
