@@ -6,8 +6,6 @@ import bookingLogo from "@/assets/partners/booking-logo.png";
 import tripadvisorLogo from "@/assets/partners/tripadvisor-logo.png";
 import trustpilotLogo from "@/assets/partners/trustpilot-logo.png";
 import expediaLogo from "@/assets/partners/expedia-logo.png";
-import getyourguideLogo from "@/assets/partners/getyourguide-logo.svg";
-import klookLogo from "@/assets/partners/klook-logo.png";
 import tiqetsLogo from "@/assets/partners/tiqets-logo.png";
 import aaaLogo from "@/assets/partners/aaa-logo.png";
 import hotelsLogo from "@/assets/partners/hotels-logo.png";
@@ -18,8 +16,6 @@ const partners = [
   { name: "TripAdvisor", logo: tripadvisorLogo },
   { name: "Trustpilot", logo: trustpilotLogo },
   { name: "Expedia", logo: expediaLogo },
-  { name: "GetYourGuide", logo: getyourguideLogo },
-  { name: "Klook", logo: klookLogo },
   { name: "Tiqets", logo: tiqetsLogo },
   { name: "AAA Travel", logo: aaaLogo },
   { name: "Hotels.com", logo: hotelsLogo },
