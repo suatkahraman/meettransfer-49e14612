@@ -25,30 +25,62 @@ export function usePWAInstall() {
   const [canInstall, setCanInstall] = useState(false);
 
   useEffect(() => {
-    // Check if running in standalone mode (already installed) - iOS specific check
-    const isIOSStandalone = (window.navigator as any).standalone === true;
-    const isDisplayStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    const standalone = isIOSStandalone || isDisplayStandalone;
-    setIsStandalone(standalone);
-    setIsInstalled(standalone);
+    const INSTALL_TRACK_KEY = 'app_install_tracked_v1';
 
     // Detect platform - more robust iOS detection
     const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIOSDevice = (/iphone|ipad|ipod/.test(userAgent) || 
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && 
+    const isIOSDevice = (/iphone|ipad|ipod/.test(userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
       !(window as any).MSStream;
     const isAndroidDevice = /android/.test(userAgent);
+
+    // Check if running in standalone mode (already installed)
+    const isIOSStandalone = (window.navigator as any).standalone === true;
+    const isDisplayStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const standalone = isIOSStandalone || isDisplayStandalone;
+
+    setIsStandalone(standalone);
+    setIsInstalled(standalone);
     setIsIOS(isIOSDevice);
     setIsAndroid(isAndroidDevice);
-    
-    console.log('[PWA] Platform detection:', { 
-      isIOSDevice, 
-      isAndroidDevice, 
-      standalone,
-      isIOSStandalone,
-      isDisplayStandalone,
-      userAgent: userAgent.substring(0, 100)
-    });
+
+    const trackInstallation = async () => {
+      if (localStorage.getItem(INSTALL_TRACK_KEY) === '1') return;
+
+      try {
+        const visitorId = localStorage.getItem('visitor_id') || crypto.randomUUID();
+        localStorage.setItem('visitor_id', visitorId);
+
+        const { error } = await supabase.from('app_installations').insert({
+          visitor_id: visitorId,
+          device: /mobile/i.test(userAgent) ? 'mobile' : 'desktop',
+          browser: /chrome/i.test(userAgent)
+            ? 'Chrome'
+            : /safari/i.test(userAgent)
+              ? 'Safari'
+              : /firefox/i.test(userAgent)
+                ? 'Firefox'
+                : 'Other',
+          platform: isIOSDevice ? 'iOS' : isAndroidDevice ? 'Android' : 'Desktop',
+        });
+
+        if (error) {
+          console.error('[PWA] Error tracking installation:', error);
+          return;
+        }
+
+        localStorage.setItem(INSTALL_TRACK_KEY, '1');
+        console.log('[PWA] Installation tracked successfully');
+      } catch (error) {
+        console.error('[PWA] Error tracking installation:', error);
+      }
+    };
+
+    // iOS (Add to Home Screen) doesn't reliably fire `appinstalled`.
+    // If we detect standalone mode, we record it once.
+    if (standalone) {
+      void trackInstallation();
+    }
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
@@ -62,24 +94,9 @@ export function usePWAInstall() {
       setIsInstalled(true);
       setDeferredPrompt(null);
       setCanInstall(false);
-      
-      // Track app installation
-      try {
-        const visitorId = localStorage.getItem('visitor_id') || crypto.randomUUID();
-        localStorage.setItem('visitor_id', visitorId);
-        
-        await supabase.from('app_installations').upsert({
-          visitor_id: visitorId,
-          device: /mobile/i.test(userAgent) ? 'mobile' : 'desktop',
-          browser: /chrome/i.test(userAgent) ? 'Chrome' : /safari/i.test(userAgent) ? 'Safari' : /firefox/i.test(userAgent) ? 'Firefox' : 'Other',
-          platform: isIOSDevice ? 'iOS' : isAndroidDevice ? 'Android' : 'Desktop'
-        }, { onConflict: 'visitor_id' });
-        
-        console.log('[PWA] Installation tracked successfully');
-      } catch (error) {
-        console.error('[PWA] Error tracking installation:', error);
-      }
-      
+
+      await trackInstallation();
+
       // Try to open the installed app after a short delay
       setTimeout(() => {
         // Redirect to home to trigger standalone mode
