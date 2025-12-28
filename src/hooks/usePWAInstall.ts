@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -57,10 +58,27 @@ export function usePWAInstall() {
     };
 
     // Listen for appinstalled event
-    const handleAppInstalled = () => {
+    const handleAppInstalled = async () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
       setCanInstall(false);
+      
+      // Track app installation
+      try {
+        const visitorId = localStorage.getItem('visitor_id') || crypto.randomUUID();
+        localStorage.setItem('visitor_id', visitorId);
+        
+        await supabase.from('app_installations').upsert({
+          visitor_id: visitorId,
+          device: /mobile/i.test(userAgent) ? 'mobile' : 'desktop',
+          browser: /chrome/i.test(userAgent) ? 'Chrome' : /safari/i.test(userAgent) ? 'Safari' : /firefox/i.test(userAgent) ? 'Firefox' : 'Other',
+          platform: isIOSDevice ? 'iOS' : isAndroidDevice ? 'Android' : 'Desktop'
+        }, { onConflict: 'visitor_id' });
+        
+        console.log('[PWA] Installation tracked successfully');
+      } catch (error) {
+        console.error('[PWA] Error tracking installation:', error);
+      }
       
       // Try to open the installed app after a short delay
       setTimeout(() => {
