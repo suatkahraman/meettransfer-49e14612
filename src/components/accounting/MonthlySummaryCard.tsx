@@ -27,8 +27,8 @@ export const MonthlySummaryCard = ({
   const symbol = getCurrencySymbol(currency);
 
   const getBalanceStatus = () => {
-    if (balance > 0) return { text: 'Şoför borçlu', color: 'text-amber-600' };
-    if (balance < 0) return { text: 'Şirkete borçlu', color: 'text-blue-600' };
+    if (balance > 0) return { text: 'Şoföre Ödenecek', color: 'text-amber-600' };
+    if (balance < 0) return { text: 'Şirkete Ödenecek', color: 'text-blue-600' };
     return { text: 'Kapatıldı', color: 'text-green-600' };
   };
 
