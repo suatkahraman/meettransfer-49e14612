@@ -56,6 +56,7 @@ const AdminFlightMonitor = lazy(() => import("./pages/admin/AdminFlightMonitor")
 const AdminAgencyBalance = lazy(() => import("./pages/admin/AdminAgencyBalance"));
 const AdminWhatsAppChat = lazy(() => import("./pages/admin/AdminWhatsAppChat"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
+const AdminAppInstallations = lazy(() => import("./pages/admin/AdminAppInstallations"));
 
 // Customer Portal Pages
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
@@ -243,6 +244,7 @@ const App = () => (
               <Route path="/admin/whatsapp" element={<AdminRoute><LazyRoute><AdminWhatsAppChat /></LazyRoute></AdminRoute>} />
               <Route path="/admin/analytics" element={<AdminRoute><LazyRoute><AdminAnalytics /></LazyRoute></AdminRoute>} />
               <Route path="/admin/quick-bookings" element={<AdminRoute><LazyRoute><AdminQuickBookings /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/app-installations" element={<AdminRoute><LazyRoute><AdminAppInstallations /></LazyRoute></AdminRoute>} />
               
               {/* Customer Portal & Booking Confirmation - Public */}
               <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />

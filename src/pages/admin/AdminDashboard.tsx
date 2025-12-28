@@ -263,7 +263,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-purple-500/50">
+          <Card className="border-purple-500/50 cursor-pointer hover:shadow-lg transition-shadow hover:border-purple-400" onClick={() => navigate('/admin/app-installations')}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                 <Download className="h-4 w-4" />
