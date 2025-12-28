@@ -403,11 +403,18 @@ const AdminMonthlyAccounting = () => {
                           return (
                             <div 
                               key={driver.id}
-                              className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                              className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg bg-muted/50 gap-3"
                             >
                               <div className="font-medium">{driver.name}</div>
-                              <div className="font-semibold text-green-600">
-                                ₺{balance.toFixed(2)} ödendi
+                              <div className="flex items-center gap-3">
+                                <div className="font-semibold text-green-600">
+                                  ₺{balance.toFixed(2)} ödendi
+                                </div>
+                                <DriverQuickPaymentDialog
+                                  driverId={driver.id}
+                                  driverName={driver.name}
+                                  onPaymentAdded={handlePaymentAdded}
+                                />
                               </div>
                             </div>
                           );
