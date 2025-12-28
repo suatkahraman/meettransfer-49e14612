@@ -1,14 +1,28 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 
+// Import partner logos
+import viatorLogo from "@/assets/partners/viator-logo.png";
+import bookingLogo from "@/assets/partners/booking-logo.png";
+import tripadvisorLogo from "@/assets/partners/tripadvisor-logo.png";
+import trustpilotLogo from "@/assets/partners/trustpilot-logo.png";
+import expediaLogo from "@/assets/partners/expedia-logo.png";
+import getyourguideLogo from "@/assets/partners/getyourguide-logo.svg";
+import klookLogo from "@/assets/partners/klook-logo.png";
+import tiqetsLogo from "@/assets/partners/tiqets-logo.png";
+import aaaLogo from "@/assets/partners/aaa-logo.png";
+import hotelsLogo from "@/assets/partners/hotels-logo.png";
+
 const partners = [
-  { name: "Viator", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Viator_2022_logo.svg/200px-Viator_2022_logo.svg.png" },
-  { name: "Booking.com", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Booking.com_logo.svg/200px-Booking.com_logo.svg.png" },
-  { name: "TripAdvisor", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Tripadvisor_Logo_2020.svg/200px-Tripadvisor_Logo_2020.svg.png" },
-  { name: "Trustpilot", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Trustpilot_Logo_%282022%29.svg/200px-Trustpilot_Logo_%282022%29.svg.png" },
-  { name: "Expedia", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Expedia_2012_logo.svg/200px-Expedia_2012_logo.svg.png" },
-  { name: "GetYourGuide", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/GetYourGuide_logo.svg/200px-GetYourGuide_logo.svg.png" },
-  { name: "Klook", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Klook_logo.svg/200px-Klook_logo.svg.png" },
-  { name: "Tiqets", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Tiqets_logo.svg/200px-Tiqets_logo.svg.png" },
+  { name: "Viator", logo: viatorLogo },
+  { name: "Booking.com", logo: bookingLogo },
+  { name: "TripAdvisor", logo: tripadvisorLogo },
+  { name: "Trustpilot", logo: trustpilotLogo },
+  { name: "Expedia", logo: expediaLogo },
+  { name: "GetYourGuide", logo: getyourguideLogo },
+  { name: "Klook", logo: klookLogo },
+  { name: "Tiqets", logo: tiqetsLogo },
+  { name: "AAA Travel", logo: aaaLogo },
+  { name: "Hotels.com", logo: hotelsLogo },
 ];
 
 const TrustedPartners = () => {
@@ -38,7 +52,7 @@ const TrustedPartners = () => {
               <img
                 src={partner.logo}
                 alt={partner.name}
-                className="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                className="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100"
                 loading="lazy"
               />
             </div>
@@ -52,7 +66,7 @@ const TrustedPartners = () => {
               <img
                 src={partner.logo}
                 alt={partner.name}
-                className="h-8 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                className="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100"
                 loading="lazy"
               />
             </div>
