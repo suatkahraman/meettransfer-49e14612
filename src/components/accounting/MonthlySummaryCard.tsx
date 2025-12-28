@@ -7,15 +7,23 @@ interface MonthlySummaryCardProps {
   totalPrice: number;
   totalCashCollected: number;
   currency?: string;
+  paymentsToDriver?: number;
+  paymentsFromDriver?: number;
 }
 
 export const MonthlySummaryCard = ({
   totalTransfers,
   totalPrice,
   totalCashCollected,
-  currency = 'TRY'
+  currency = 'TRY',
+  paymentsToDriver = 0,
+  paymentsFromDriver = 0
 }: MonthlySummaryCardProps) => {
-  const balance = totalPrice - totalCashCollected;
+  // Balance calculation: (Price - Cash) represents what driver owes
+  // Then subtract payments made TO driver (reduces what driver owes)
+  // Then add payments received FROM driver (reduces what driver owes)
+  const rawBalance = totalPrice - totalCashCollected;
+  const balance = rawBalance - paymentsToDriver + paymentsFromDriver;
   const symbol = getCurrencySymbol(currency);
 
   const getBalanceStatus = () => {

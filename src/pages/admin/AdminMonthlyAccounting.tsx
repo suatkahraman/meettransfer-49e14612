@@ -288,6 +288,8 @@ const AdminMonthlyAccounting = () => {
                   totalTransfers={reservations.length}
                   totalPrice={totalPrice}
                   totalCashCollected={totalCash}
+                  paymentsToDriver={totalPaymentsToDriver}
+                  paymentsFromDriver={totalPaymentsFromDriver}
                 />
 
                 {/* Driver Breakdown */}
