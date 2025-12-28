@@ -1,0 +1,228 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Download, Smartphone, Monitor, Apple, Chrome } from 'lucide-react';
+import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
+
+interface AppInstallation {
+  id: string;
+  visitor_id: string;
+  installed_at: string;
+  device: string | null;
+  browser: string | null;
+  platform: string | null;
+}
+
+const AdminAppInstallations = () => {
+  const navigate = useNavigate();
+  const [installations, setInstallations] = useState<AppInstallation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    total: 0,
+    mobile: 0,
+    desktop: 0,
+    ios: 0,
+    android: 0,
+  });
+
+  useEffect(() => {
+    const fetchInstallations = async () => {
+      const { data, error } = await supabase
+        .from('app_installations')
+        .select('*')
+        .order('installed_at', { ascending: false });
+
+      if (!error && data) {
+        setInstallations(data);
+        
+        // Calculate stats
+        const total = data.length;
+        const mobile = data.filter(i => i.device === 'mobile').length;
+        const desktop = data.filter(i => i.device === 'desktop').length;
+        const ios = data.filter(i => i.platform === 'iOS').length;
+        const android = data.filter(i => i.platform === 'Android').length;
+        
+        setStats({ total, mobile, desktop, ios, android });
+      }
+      setLoading(false);
+    };
+
+    fetchInstallations();
+
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel('app-installations-list')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'app_installations' },
+        () => fetchInstallations()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const getPlatformIcon = (platform: string | null) => {
+    switch (platform) {
+      case 'iOS':
+        return <Apple className="h-4 w-4" />;
+      case 'Android':
+        return <Smartphone className="h-4 w-4 text-green-600" />;
+      default:
+        return <Monitor className="h-4 w-4" />;
+    }
+  };
+
+  const getBrowserBadge = (browser: string | null) => {
+    switch (browser) {
+      case 'Chrome':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200"><Chrome className="h-3 w-3 mr-1" />Chrome</Badge>;
+      case 'Safari':
+        return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Safari</Badge>;
+      case 'Firefox':
+        return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">Firefox</Badge>;
+      default:
+        return <Badge variant="outline">{browser || 'Bilinmiyor'}</Badge>;
+    }
+  };
+
+  const getDeviceBadge = (device: string | null) => {
+    if (device === 'mobile') {
+      return <Badge className="bg-purple-100 text-purple-700 border-purple-200"><Smartphone className="h-3 w-3 mr-1" />Mobil</Badge>;
+    }
+    return <Badge variant="secondary"><Monitor className="h-3 w-3 mr-1" />Masaüstü</Badge>;
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-serif">Uygulama İndirmeleri</h1>
+      </header>
+
+      <main className="container mx-auto py-8 px-4">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Toplam
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{stats.total}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                <Smartphone className="h-4 w-4" />
+                Mobil
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">{stats.mobile}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                <Monitor className="h-4 w-4" />
+                Masaüstü
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{stats.desktop}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                <Apple className="h-4 w-4" />
+                iOS
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-600">{stats.ios}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                <Smartphone className="h-4 w-4 text-green-600" />
+                Android
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{stats.android}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Installations Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>İndirme Geçmişi</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+            ) : installations.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Henüz uygulama indirmesi yok
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tarih</TableHead>
+                    <TableHead>Cihaz</TableHead>
+                    <TableHead>Platform</TableHead>
+                    <TableHead>Tarayıcı</TableHead>
+                    <TableHead className="text-right">Visitor ID</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {installations.map((install) => (
+                    <TableRow key={install.id}>
+                      <TableCell>
+                        {format(new Date(install.installed_at), 'dd MMM yyyy HH:mm', { locale: tr })}
+                      </TableCell>
+                      <TableCell>{getDeviceBadge(install.device)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getPlatformIcon(install.platform)}
+                          <span>{install.platform || 'Bilinmiyor'}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getBrowserBadge(install.browser)}</TableCell>
+                      <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                        {install.visitor_id.substring(0, 8)}...
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  );
+};
+
+export default AdminAppInstallations;
