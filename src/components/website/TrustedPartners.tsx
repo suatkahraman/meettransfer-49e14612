@@ -52,7 +52,7 @@ const TrustedPartners = () => {
               <img
                 src={partner.logo}
                 alt={partner.name}
-                className="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100"
+                className="h-10 md:h-14 w-auto object-contain transition-all duration-300 hover:scale-110"
                 loading="lazy"
               />
             </div>
@@ -66,7 +66,7 @@ const TrustedPartners = () => {
               <img
                 src={partner.logo}
                 alt={partner.name}
-                className="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100"
+                className="h-10 md:h-14 w-auto object-contain transition-all duration-300 hover:scale-110"
                 loading="lazy"
               />
             </div>
