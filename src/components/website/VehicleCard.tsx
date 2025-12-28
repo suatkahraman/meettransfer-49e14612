@@ -65,7 +65,7 @@ const VehicleCard = ({
         <div className="overflow-hidden h-full" ref={emblaRef}>
           <div className="flex h-full touch-pan-y">
             {images.map((img, index) => (
-              <div key={index} className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center bg-secondary/30">
+              <div key={index} className="flex-[0_0_100%] min-w-0 h-full flex flex-col items-center justify-center bg-secondary/30">
                 <img
                   src={img.src}
                   alt={img.alt}
@@ -77,6 +77,12 @@ const VehicleCard = ({
             ))}
           </div>
         </div>
+        {/* Image caption/label */}
+        {images.length > 0 && selectedIndex < images.length && (
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 pointer-events-none">
+            <p className="text-white text-xs text-center truncate">{images[selectedIndex]?.alt}</p>
+          </div>
+        )}
         {images.length > 1 && (
           <>
             <button
