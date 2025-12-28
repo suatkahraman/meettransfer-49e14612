@@ -31,7 +31,7 @@ const TrustedPartners = () => {
   return (
     <section className="py-12 bg-muted/30 overflow-hidden">
       <div className="container mx-auto px-4 mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground">
+        <h2 className="text-2xl md:text-3xl font-serif font-bold text-center text-foreground">
           {t("trustedPartnersTitle") || "Trusted Partners"}
         </h2>
       </div>
