@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Download, Smartphone, Monitor, Apple, Chrome } from 'lucide-react';
+import { ArrowLeft, Download, Smartphone, Monitor, Apple, Chrome, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -16,6 +16,9 @@ interface AppInstallation {
   device: string | null;
   browser: string | null;
   platform: string | null;
+  country_code: string | null;
+  country_name: string | null;
+  city: string | null;
 }
 
 const AdminAppInstallations = () => {
@@ -100,6 +103,26 @@ const AdminAppInstallations = () => {
     return <Badge variant="secondary"><Monitor className="h-3 w-3 mr-1" />Masaüstü</Badge>;
   };
 
+  const getFlagEmoji = (countryCode: string | null) => {
+    if (!countryCode) return '🌍';
+    const codePoints = countryCode
+      .toUpperCase()
+      .split('')
+      .map((char) => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  };
+
+  // Calculate country stats
+  const countryStats = installations.reduce((acc, inst) => {
+    const country = inst.country_name || 'Bilinmiyor';
+    acc[country] = (acc[country] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const sortedCountries = Object.entries(countryStats)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4">
@@ -173,6 +196,44 @@ const AdminAppInstallations = () => {
           </Card>
         </div>
 
+        {/* Country Stats */}
+        {sortedCountries.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Ülkelere Göre İndirmeler
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {sortedCountries.map(([country, count]) => {
+                  const inst = installations.find(i => i.country_name === country);
+                  const percentage = Math.round((count / stats.total) * 100);
+                  return (
+                    <div key={country} className="flex items-center gap-3">
+                      <span className="text-xl">{getFlagEmoji(inst?.country_code || null)}</span>
+                      <div className="flex-1">
+                        <div className="flex justify-between mb-1">
+                          <span className="font-medium">{country}</span>
+                          <span className="text-muted-foreground">{count} indirme</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary rounded-full transition-all"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-sm font-medium w-12 text-right">{percentage}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Installations Table */}
         <Card>
           <CardHeader>
@@ -190,6 +251,7 @@ const AdminAppInstallations = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Tarih</TableHead>
+                    <TableHead>Ülke</TableHead>
                     <TableHead>Cihaz</TableHead>
                     <TableHead>Platform</TableHead>
                     <TableHead>Tarayıcı</TableHead>
@@ -201,6 +263,15 @@ const AdminAppInstallations = () => {
                     <TableRow key={install.id}>
                       <TableCell>
                         {format(new Date(install.installed_at), 'dd MMM yyyy HH:mm', { locale: tr })}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span>{getFlagEmoji(install.country_code)}</span>
+                          <span>{install.country_name || 'Bilinmiyor'}</span>
+                          {install.city && (
+                            <span className="text-muted-foreground text-sm">({install.city})</span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>{getDeviceBadge(install.device)}</TableCell>
                       <TableCell>

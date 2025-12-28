@@ -51,6 +51,23 @@ export function usePWAInstall() {
         const visitorId = localStorage.getItem('visitor_id') || crypto.randomUUID();
         localStorage.setItem('visitor_id', visitorId);
 
+        // Fetch country info
+        let countryCode: string | null = null;
+        let countryName: string | null = null;
+        let city: string | null = null;
+        
+        try {
+          const geoRes = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
+          if (geoRes.ok) {
+            const geoData = await geoRes.json();
+            countryCode = geoData.country_code || null;
+            countryName = geoData.country_name || null;
+            city = geoData.city || null;
+          }
+        } catch {
+          console.log('[PWA] Could not fetch geo info');
+        }
+
         const { error } = await supabase.from('app_installations').insert({
           visitor_id: visitorId,
           device: /mobile/i.test(userAgent) ? 'mobile' : 'desktop',
@@ -62,6 +79,9 @@ export function usePWAInstall() {
                 ? 'Firefox'
                 : 'Other',
           platform: isIOSDevice ? 'iOS' : isAndroidDevice ? 'Android' : 'Desktop',
+          country_code: countryCode,
+          country_name: countryName,
+          city: city,
         });
 
         if (error) {

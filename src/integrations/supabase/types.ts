@@ -183,6 +183,9 @@ export type Database = {
       app_installations: {
         Row: {
           browser: string | null
+          city: string | null
+          country_code: string | null
+          country_name: string | null
           device: string | null
           id: string
           installed_at: string
@@ -191,6 +194,9 @@ export type Database = {
         }
         Insert: {
           browser?: string | null
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
           device?: string | null
           id?: string
           installed_at?: string
@@ -199,6 +205,9 @@ export type Database = {
         }
         Update: {
           browser?: string | null
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
           device?: string | null
           id?: string
           installed_at?: string
