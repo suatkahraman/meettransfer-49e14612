@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Wallet } from 'lucide-react';
@@ -19,11 +20,14 @@ interface DriverPaymentDialogProps {
   onPaymentAdded: () => void;
 }
 
+type PaymentType = 'to_driver' | 'from_driver';
+
 export const DriverPaymentDialog = ({ drivers, onPaymentAdded }: DriverPaymentDialogProps) => {
   const [open, setOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [notes, setNotes] = useState('');
+  const [paymentType, setPaymentType] = useState<PaymentType>('to_driver');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,17 +53,24 @@ export const DriverPaymentDialog = ({ drivers, onPaymentAdded }: DriverPaymentDi
         .insert({
           driver_id: selectedDriver,
           amount: numAmount,
+          payment_type: paymentType,
           notes: notes || null,
           created_by: user?.id
         });
 
       if (error) throw error;
 
-      toast.success('Ödeme kaydedildi');
+      const driverName = drivers.find(d => d.id === selectedDriver)?.name;
+      const successMessage = paymentType === 'to_driver' 
+        ? `${driverName}'e ödeme yapıldı` 
+        : `${driverName}'den ödeme alındı`;
+      
+      toast.success(successMessage);
       setOpen(false);
       setSelectedDriver('');
       setAmount('');
       setNotes('');
+      setPaymentType('to_driver');
       onPaymentAdded();
     } catch (error: any) {
       toast.error('Hata: ' + error.message);
@@ -73,14 +84,36 @@ export const DriverPaymentDialog = ({ drivers, onPaymentAdded }: DriverPaymentDi
       <DialogTrigger asChild>
         <Button variant="default" className="gap-2">
           <Wallet className="h-4 w-4" />
-          Şoföre Ödeme Yap
+          Ödeme İşlemi
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Şoföre Ödeme Yap</DialogTitle>
+          <DialogTitle>Şoför Ödeme İşlemi</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>İşlem Türü</Label>
+            <RadioGroup 
+              value={paymentType} 
+              onValueChange={(value) => setPaymentType(value as PaymentType)}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="to_driver" id="to_driver" />
+                <Label htmlFor="to_driver" className="font-normal cursor-pointer">
+                  Ödeme Yap (Şoföre)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="from_driver" id="from_driver" />
+                <Label htmlFor="from_driver" className="font-normal cursor-pointer">
+                  Ödeme Al (Şoförden)
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           <div className="space-y-2">
             <Label>Şoför Seçin</Label>
             <Select value={selectedDriver} onValueChange={setSelectedDriver}>
