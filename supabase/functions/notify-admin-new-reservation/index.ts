@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { Resend } from 'https://esm.sh/resend@2.0.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -337,10 +338,146 @@ Deno.serve(async (req) => {
       console.warn('Failed to write audit log for WhatsApp attempt:', String(e))
     }
 
+    // Send email notification to admin
+    let emailSent = false
+    let emailError: string | null = null
+    
+    try {
+      const resendApiKey = Deno.env.get('RESEND_API_KEY')
+      const adminEmail = Deno.env.get('ADMIN') || 'sautkahraman@gmail.com'
+      
+      if (resendApiKey) {
+        const resend = new Resend(resendApiKey)
+        
+        const vehicleLabels: Record<string, string> = {
+          'mercedes-vito': 'Mercedes Vito',
+          'mercedes-vclass': 'Mercedes Vip Vito',
+          'maybach': 'Maybach',
+          'minibus': 'Minibus',
+        }
+        
+        // Fetch full reservation details for email
+        const { data: fullReservation } = await supabaseAdmin
+          .from('reservations')
+          .select('*')
+          .eq('id', reservation_id)
+          .single()
+        
+        const vehicleType = fullReservation?.vehicle_type || 'Unknown'
+        const vehicleLabel = vehicleLabels[vehicleType] || vehicleType
+        const flightNumber = fullReservation?.flight_number || '-'
+        const passengerPhone = fullReservation?.customer_phone || '-'
+        const paymentType = fullReservation?.payment_type === 'cash' ? 'Cash to Driver' : 'Online Payment'
+        const passengerNames = fullReservation?.passenger_names?.join(', ') || customer_name
+        
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background-color: #1a365d; color: white; padding: 20px; text-align: center;">
+              <h1 style="margin: 0;">🚗 New Price Request</h1>
+              <p style="margin: 10px 0 0 0;">Customer Reservation Request</p>
+            </div>
+            
+            <div style="padding: 20px; background-color: #f8f9fa;">
+              <div style="background-color: white; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                <h2 style="color: #1a365d; margin-top: 0;">📍 Transfer Details</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Reservation Code:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${reservation?.reservation_code || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Pickup:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${pickup}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Dropoff:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${dropoff}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Date:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${pickup_date}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Time:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${fullReservation?.pickup_time || '-'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Vehicle:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${vehicleLabel}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Flight Number:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${flightNumber}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Payment Type:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${paymentType}</td>
+                  </tr>
+                </table>
+              </div>
+              
+              <div style="background-color: white; border-radius: 8px; padding: 20px;">
+                <h2 style="color: #1a365d; margin-top: 0;">👤 Customer Information</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Name:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${customer_name}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">All Passengers:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${passengerNames}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Phone:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${passengerPhone}</td>
+                  </tr>
+                </table>
+              </div>
+              
+              <div style="text-align: center; margin-top: 20px;">
+                <p style="color: #666; font-size: 14px;">
+                  Please set a price for this reservation in the admin panel.
+                </p>
+              </div>
+            </div>
+            
+            <div style="background-color: #1a365d; color: white; padding: 15px; text-align: center; font-size: 12px;">
+              <p style="margin: 0;">Meet Transfer - Customer Price Request Notification</p>
+            </div>
+          </div>
+        `
+        
+        const { error: sendError } = await resend.emails.send({
+          from: 'Meet Transfer <onboarding@resend.dev>',
+          to: [adminEmail],
+          subject: `🚗 New Price Request - ${customer_name} (${pickup_date})`,
+          html: emailHtml,
+        })
+        
+        if (sendError) {
+          console.error('Email send error:', sendError)
+          emailError = sendError.message || 'Failed to send email'
+        } else {
+          emailSent = true
+          console.log('Email notification sent to:', adminEmail)
+        }
+      } else {
+        console.warn('RESEND_API_KEY not configured, skipping email notification')
+        emailError = 'RESEND_API_KEY not configured'
+      }
+    } catch (e) {
+      console.error('Email notification error:', e)
+      emailError = String(e)
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         admins_notified: adminRoles.length,
+        email: {
+          sent: emailSent,
+          error: emailError,
+        },
         whatsapp: {
           enabled: shouldSendWhatsApp,
           attempted: whatsappAttempted,
