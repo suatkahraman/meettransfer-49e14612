@@ -997,7 +997,7 @@ const handler = async (req: Request): Promise<Response> => {
       case 'trip_completed_admin':
       case 'reservation_edited_admin':
       case 'reservation_cancelled_admin':
-        recipient = "info@meettransfer.app";
+        recipient = ADMIN_EMAIL;
         break;
       case 'price_set_customer':
       case 'payment_request_customer':
