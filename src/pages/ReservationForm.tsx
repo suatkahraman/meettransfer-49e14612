@@ -524,45 +524,11 @@ const ReservationForm = () => {
 
         if (notifyResponse.error) {
           console.error('Admin notification error:', notifyResponse.error);
-          toast.error('Admin bildirimi gönderilemedi (backend).');
-        } else {
-          const whatsapp = (notifyResponse.data as any)?.whatsapp;
-          const sid = Array.isArray(whatsapp?.results) ? whatsapp.results[0]?.sid : null;
-
-          if (whatsapp?.enabled && whatsapp?.failed > 0) {
-            const firstErr = Array.isArray(whatsapp?.errors) ? whatsapp.errors[0] : null;
-            toast.error(
-              `WhatsApp gönderilemedi (Twilio). ` +
-                (firstErr?.message ? `Hata: ${firstErr.message}` : 'Lütfen Twilio ayarlarını kontrol edin.')
-            );
-          }
-
-          // Background delivery check
-          if (sid) {
-            setTimeout(async () => {
-              try {
-                const statusRes = await supabase.functions.invoke('whatsapp-status', {
-                  body: {
-                    reservation_id: reservation.id,
-                    message_sid: sid,
-                  },
-                });
-
-                if (statusRes?.data?.status && ['failed', 'undelivered'].includes(statusRes.data.status)) {
-                  toast.error(
-                    `WhatsApp teslim edilemedi: ${statusRes.data.status}` +
-                      (statusRes.data.error_message ? ` (${statusRes.data.error_message})` : '')
-                  );
-                }
-              } catch (e) {
-                console.error('WhatsApp status check failed:', e);
-              }
-            }, 15000);
-          }
+          // Don't show error to customer, just log it
         }
       } catch (notifyError) {
         console.error('Failed to notify admin:', notifyError);
-        toast.error('Admin bildirimi gönderilemedi (backend).');
+        // Don't block the user - reservation was created successfully
       }
 
       // Send email notification to admin
