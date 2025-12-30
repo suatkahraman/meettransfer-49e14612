@@ -678,6 +678,9 @@ const DriverHome = () => {
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                     </div>
                     <span className="font-semibold">Tamamlanan</span>
+                    <Badge variant="outline" className="text-xs text-muted-foreground border-muted-foreground/30">
+                      Bu ay
+                    </Badge>
                     <Badge variant="secondary" className="bg-green-500/20 text-green-700">
                       {completedJobs.length}
                     </Badge>
