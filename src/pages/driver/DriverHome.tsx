@@ -362,7 +362,19 @@ const DriverHome = () => {
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Mobile-optimized sticky header */}
       <header className="bg-primary text-primary-foreground py-3 px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg">
-        <h1 className="text-lg font-serif font-bold">Şoför Paneli</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-lg font-serif font-bold">Şoför Paneli</h1>
+          {activeJobs.length > 0 && (
+            <Badge variant="secondary" className="bg-green-500 text-white hover:bg-green-600">
+              {activeJobs.length} Aktif
+            </Badge>
+          )}
+          {pendingJobs.length > 0 && (
+            <Badge variant="secondary" className="bg-amber-500 text-white hover:bg-amber-600">
+              {pendingJobs.length} Bekleyen
+            </Badge>
+          )}
+        </div>
         <div className="flex items-center gap-1">
           <PushNotificationToggle />
           <NotificationBell />
