@@ -429,7 +429,7 @@ const DriverHome = () => {
           )}
         </div>
         <div className="flex items-center gap-1">
-          <PushNotificationToggle />
+          <PushNotificationToggle compact />
           <NotificationBell />
           <Button 
             variant="ghost" 
