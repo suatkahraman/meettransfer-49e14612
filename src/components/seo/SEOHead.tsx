@@ -13,10 +13,10 @@ interface SEOHeadProps {
 }
 
 // All supported language prefixes in URL paths
-const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es", "ar", "tr", "uk"];
+const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es", "ar", "tr", "uk", "ja"];
 
 // Language code mapping for hreflang attributes
-const LANGUAGE_CODES: Record<Language | "TR" | "UK", string> = {
+const LANGUAGE_CODES: Record<Language, string> = {
   EN: "en",
   DE: "de",
   FR: "fr",
@@ -26,6 +26,7 @@ const LANGUAGE_CODES: Record<Language | "TR" | "UK", string> = {
   AR: "ar",
   TR: "tr",
   UK: "uk",
+  JA: "ja",
 };
 
 const SEOHead = ({
@@ -122,6 +123,7 @@ const SEOHead = ({
       ar: 'ar_SA',
       tr: 'tr_TR',
       uk: 'uk_UA',
+      ja: 'ja_JP',
     };
     updateMeta('og:locale', localeMap[currentLangFromUrl] || 'en_US', true);
 
@@ -148,7 +150,7 @@ const SEOHead = ({
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
 
     // All languages for hreflang (including Turkish and Ukrainian)
-    const allLanguages = ["en", "de", "fr", "ru", "it", "es", "ar", "tr", "uk"];
+    const allLanguages = ["en", "de", "fr", "ru", "it", "es", "ar", "tr", "uk", "ja"];
     
     // Add hreflang tags for all languages
     allLanguages.forEach(lang => {
