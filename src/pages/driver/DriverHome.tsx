@@ -376,11 +376,11 @@ const DriverHome = () => {
           </Button>
           <Button 
             variant="ghost" 
-            size="icon" 
             onClick={() => navigate('/driver/monthly-accounting')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2 gap-1"
           >
             <Calculator className="h-5 w-5" />
+            <span className="text-xs">Aylık Hesap</span>
           </Button>
           <Button 
             variant="ghost" 
