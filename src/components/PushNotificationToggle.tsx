@@ -2,8 +2,13 @@ import { Bell, BellOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
 
-export const PushNotificationToggle = () => {
+interface PushNotificationToggleProps {
+  compact?: boolean;
+}
+
+export const PushNotificationToggle = ({ compact = false }: PushNotificationToggleProps) => {
   const { isSupported, isSubscribed, isLoading, permission, subscribe, unsubscribe } = usePushNotifications();
   const { t } = useLanguage();
 
@@ -18,6 +23,27 @@ export const PushNotificationToggle = () => {
       await subscribe();
     }
   };
+
+  if (compact) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleToggle}
+        disabled={isLoading || permission === 'denied'}
+        className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10"
+        title={isSubscribed ? (t("notificationsOn") || 'Notifications On') : (t("enableNotifications") || 'Enable Notifications')}
+      >
+        {isLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : isSubscribed ? (
+          <Bell className="h-4 w-4" />
+        ) : (
+          <BellOff className="h-4 w-4" />
+        )}
+      </Button>
+    );
+  }
 
   return (
     <Button
