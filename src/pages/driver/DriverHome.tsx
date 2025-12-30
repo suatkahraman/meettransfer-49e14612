@@ -61,6 +61,13 @@ const DriverHome = () => {
     balance: 0,
     totalPaymentsToDriver: 0,
     totalPaymentsFromDriver: 0,
+    recentPayments: [] as Array<{
+      id: string;
+      amount: number;
+      payment_type: string;
+      payment_date: string;
+      notes: string | null;
+    }>,
   });
 
   const pullY = useMotionValue(0);
@@ -132,11 +139,12 @@ const DriverHome = () => {
       .eq('driver_id', driverId)
       .maybeSingle();
     
-    // Fetch payments
+    // Fetch all payments for totals
     const { data: payments } = await supabase
       .from('driver_payments')
-      .select('amount, payment_type')
-      .eq('driver_id', driverId);
+      .select('id, amount, payment_type, payment_date, notes')
+      .eq('driver_id', driverId)
+      .order('payment_date', { ascending: false });
     
     let toDriver = 0;
     let fromDriver = 0;
@@ -153,6 +161,7 @@ const DriverHome = () => {
       balance: balanceRow?.balance || 0,
       totalPaymentsToDriver: toDriver,
       totalPaymentsFromDriver: fromDriver,
+      recentPayments: (payments || []).slice(0, 5),
     });
   }, [driverId]);
 
@@ -524,6 +533,31 @@ const DriverHome = () => {
                       </div>
                     );
                   })()}</div>
+                
+                {/* Recent Payments List */}
+                {balanceData.recentPayments.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <div className="text-xs font-medium text-muted-foreground mb-2">Son Ödemeler</div>
+                    <div className="space-y-1.5">
+                      {balanceData.recentPayments.map((payment) => (
+                        <div key={payment.id} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-1.5 h-1.5 rounded-full ${payment.payment_type === 'to_driver' ? 'bg-green-500' : 'bg-blue-500'}`} />
+                            <span className="text-muted-foreground">
+                              {new Date(payment.payment_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                            </span>
+                            {payment.notes && (
+                              <span className="text-muted-foreground truncate max-w-[100px]">{payment.notes}</span>
+                            )}
+                          </div>
+                          <span className={`font-medium ${payment.payment_type === 'to_driver' ? 'text-green-600' : 'text-blue-600'}`}>
+                            {payment.payment_type === 'to_driver' ? '+' : '-'}₺{Number(payment.amount).toFixed(0)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
             {/* Pending Jobs Section */}
