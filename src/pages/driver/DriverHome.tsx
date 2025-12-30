@@ -403,13 +403,19 @@ const DriverHome = () => {
 
   // Get current date/time for separating upcoming vs past
   const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
 
   // Separate reservations by status and time
   const pendingJobs = reservations.filter(r => r.status === 'sent_to_driver' || r.status === 'assigned');
   const activeJobs = reservations.filter(r => r.status === 'active');
   
-  // Separate completed into recent (today) and past
-  const completedJobs = reservations.filter(r => r.status === 'completed');
+  // Only show completed jobs from current month (older ones go to history)
+  const completedJobs = reservations.filter(r => {
+    if (r.status !== 'completed') return false;
+    const pickupDate = new Date(r.pickup_date);
+    return pickupDate.getMonth() === currentMonth && pickupDate.getFullYear() === currentYear;
+  });
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
