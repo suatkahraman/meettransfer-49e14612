@@ -366,7 +366,7 @@ const AgencyHome = () => {
       {agency && agency.balance < 0 && (
         <div className="bg-destructive/10 border-l-4 border-destructive p-4">
           <p className="text-destructive font-medium">
-            ⚠️ {t('insufficientBalance')} ({agency.balance.toFixed(2)} TRY)
+            ⚠️ {t('insufficientBalance')} ({currencySymbol}{Math.abs(agency.balance).toFixed(2)})
           </p>
         </div>
       )}

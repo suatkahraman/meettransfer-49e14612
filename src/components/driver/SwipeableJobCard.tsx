@@ -4,13 +4,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { toast } from 'sonner';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol, formatCurrency } from '@/lib/currency';
+import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 
 interface Reservation {
   id: string;
@@ -48,52 +48,46 @@ interface SwipeableJobCardProps {
   onClick?: () => void;
 }
 
-const statusConfig: Record<string, { label: string; color: string; bgColor: string; icon: React.ReactNode }> = {
-  sent_to_driver: { 
-    label: 'Yeni İş', 
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-500',
-    icon: <AlertCircle className="h-4 w-4" />
-  },
-  assigned: { 
-    label: 'Atandı', 
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-500',
-    icon: <AlertCircle className="h-4 w-4" />
-  },
-  active: { 
-    label: 'Devam Ediyor', 
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-500',
-    icon: <Loader2 className="h-4 w-4" />
-  },
-  completed: { 
-    label: 'Tamamlandı', 
-    color: 'text-green-600',
-    bgColor: 'bg-green-500',
-    icon: <CheckCircle className="h-4 w-4" />
-  },
-};
-
-
-const paymentTypeLabels: Record<string, string> = {
-  cash: 'Nakit',
-  card: 'Kart',
-  online: 'Online',
-  none: 'Yok',
-  agency_pay: 'Acenta Öder',
-  payment_link: 'Online Ödeme',
-};
-
 const SWIPE_THRESHOLD = 100;
 
 export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete, onClick }: SwipeableJobCardProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [flightDelay, setFlightDelay] = useState<number | null>(null);
   const [flightStatusValue, setFlightStatusValue] = useState<string | null>(null);
+  const { t, getPaymentTypeLabel } = useDriverTranslations();
   const x = useMotionValue(0);
   
-  const config = statusConfig[reservation.status] || statusConfig.sent_to_driver;
+  const getStatusConfig = (status: string) => {
+    const configs: Record<string, { label: string; color: string; bgColor: string; icon: React.ReactNode }> = {
+      sent_to_driver: { 
+        label: t('pending'), 
+        color: 'text-orange-600',
+        bgColor: 'bg-orange-500',
+        icon: <AlertCircle className="h-4 w-4" />
+      },
+      assigned: { 
+        label: t('assigned'), 
+        color: 'text-orange-600',
+        bgColor: 'bg-orange-500',
+        icon: <AlertCircle className="h-4 w-4" />
+      },
+      active: { 
+        label: t('inProgress'), 
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-500',
+        icon: <Loader2 className="h-4 w-4" />
+      },
+      completed: { 
+        label: t('completed'), 
+        color: 'text-green-600',
+        bgColor: 'bg-green-500',
+        icon: <CheckCircle className="h-4 w-4" />
+      },
+    };
+    return configs[status] || configs.sent_to_driver;
+  };
+  
+  const config = getStatusConfig(reservation.status);
   
   // Validate completion eligibility for active jobs
   const completionValidation = useMemo(() => {
@@ -110,7 +104,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
   const leftIconScale = useTransform(x, [80, 150], [0.8, 1.2]);
 
   const formatPriceLocal = (price: number | null, currency: string | null) => {
-    if (price === null || price === undefined) return 'Belirtilmedi';
+    if (price === null || price === undefined) return t('none');
     return `${getCurrencySymbol(currency)}${price.toLocaleString('tr-TR')}`;
   };
 
@@ -121,9 +115,9 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
       // Validate before completing
       if (!completionValidation.canComplete) {
         if (completionValidation.isCompleted) {
-          toast.error('Bu transfer zaten tamamlanmış');
+          toast.error(t('alreadyCompleted'));
         } else {
-          toast.error(completionValidation.reason || 'Bu transfer şu anda tamamlanamaz');
+          toast.error(completionValidation.reason || t('cannotCompleteNow'));
         }
         return;
       }
@@ -154,7 +148,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
             style={{ scale: leftIconScale }}
           >
             <Play className="h-6 w-6" />
-            <span>Kabul Et</span>
+            <span>{t('accept')}</span>
           </motion.div>
         </motion.div>
       )}
@@ -169,7 +163,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
             className="flex items-center gap-2 text-primary-foreground font-semibold"
             style={{ scale: rightIconScale }}
           >
-            <span>Tamamla</span>
+            <span>{t('complete')}</span>
             <CheckCircle className="h-6 w-6" />
           </motion.div>
         </motion.div>
@@ -199,7 +193,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{format(new Date(reservation.pickup_date), 'EEE, d MMM', { locale: tr })}</span>
+                  <span>{format(new Date(reservation.pickup_date), 'EEE, d MMM')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-lg font-bold">
                   <Clock className="h-4 w-4 text-primary" />
@@ -222,7 +216,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
               <div className="flex items-center gap-2 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg px-3 py-2">
                 <Building2 className="h-4 w-4 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                 <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                  Acenta: {reservation.agencies.agency_name}
+                  {t('agencyReservation')}: {reservation.agencies.agency_name}
                 </span>
               </div>
             )}
@@ -262,13 +256,13 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                   {flightDelay && flightDelay > 0 && (
                     <div className="flex items-center gap-1 bg-amber-500/20 border border-amber-500/50 px-2 py-1 rounded text-xs text-amber-700">
                       <AlertTriangle className="h-3 w-3" />
-                      <span>+{flightDelay} dk rötar</span>
+                      <span>+{flightDelay} min</span>
                     </div>
                   )}
                   {flightStatusValue === 'cancelled' && (
                     <div className="flex items-center gap-1 bg-destructive/20 border border-destructive/50 px-2 py-1 rounded text-xs text-destructive">
                       <AlertTriangle className="h-3 w-3" />
-                      <span>İptal</span>
+                      <span>{t('cancel')}</span>
                     </div>
                   )}
                   {/* Hidden FlightStatus for fetching data */}
@@ -292,7 +286,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
               </div>
               <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs text-red-600">
                 <CreditCard className="h-3 w-3" />
-                <span>{paymentTypeLabels[reservation.payment_type] || reservation.payment_type}</span>
+                <span>{getPaymentTypeLabel(reservation.payment_type)}</span>
               </div>
             </div>
 
@@ -300,7 +294,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
             {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
               <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">💵 Yolcudan Alınacak Nakit</span>
+                  <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">💵 {t('cashToCollect')}</span>
                   <span className="font-bold text-lg text-amber-700 dark:text-amber-400">
                     {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR')}
                   </span>
@@ -314,7 +308,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                 <div className="flex items-start gap-2">
                   <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-blue-700 dark:text-blue-400 font-medium block">Admin Notları</span>
+                    <span className="text-xs text-blue-700 dark:text-blue-400 font-medium block">{t('adminNotes')}</span>
                     <span className="text-xs text-blue-600 dark:text-blue-300 line-clamp-2">{adminNotes}</span>
                   </div>
                 </div>
@@ -327,18 +321,18 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                 {canSwipeRight && (
                   <span className="text-xs text-green-600 flex items-center gap-1">
                     <Play className="h-3 w-3" />
-                    Kabul etmek için sağa kaydır
+                    {t('accept')} →
                   </span>
                 )}
                 {reservation.status === 'active' && onComplete && !completionValidation.canComplete && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Ban className="h-3 w-3" />
-                    Transfer saati bekleniyor
+                    {t('cannotCompleteNow')}
                   </span>
                 )}
                 {canSwipeLeft && (
                   <span className="text-xs text-primary flex items-center gap-1">
-                    Tamamlamak için sola kaydır
+                    ← {t('complete')}
                     <CheckCircle className="h-3 w-3" />
                   </span>
                 )}
