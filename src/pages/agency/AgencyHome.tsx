@@ -20,6 +20,7 @@ interface Driver {
   id: string;
   name: string;
   plate_number: string | null;
+  phone: string;
 }
 
 interface Reservation {
@@ -58,7 +59,7 @@ const statusLabels: Record<string, string> = {
   'pending_admin_review': 'Pending Admin Review',
   'waiting_for_agency_approval': 'Awaiting Your Approval',
   'waiting_for_customer_approval': 'Awaiting Customer',
-  'customer_approved': 'Meet Transfer Approved - Driver bilgisi bekleniyor',
+  'customer_approved': 'Meet Transfer Approved',
   'confirmed': 'Confirmed',
   'sent_to_driver': 'Sent to Driver',
   'assigned': 'Assigned',
@@ -159,7 +160,7 @@ const AgencyHome = () => {
         id, reservation_code, customer_name, pickup, dropoff,
         pickup_place_name, dropoff_place_name,
         pickup_date, pickup_time, vehicle_type, status, driver_id,
-        drivers:driver_id (id, name, plate_number)
+        drivers:driver_id (id, name, plate_number, phone)
       `)
       .eq('agency_id', agencyId)
       .order('pickup_date', { ascending: true })
@@ -242,9 +243,16 @@ const AgencyHome = () => {
               <span className="font-medium">{reservation.customer_name}</span>
             </div>
           </div>
-          <Badge className={statusColors[reservation.status] || 'bg-muted'}>
-            {statusLabels[reservation.status] || reservation.status}
-          </Badge>
+          <div className="flex flex-col gap-1">
+            <Badge className={statusColors[reservation.status] || 'bg-muted'}>
+              {statusLabels[reservation.status] || reservation.status}
+            </Badge>
+            {reservation.status === 'customer_approved' && !reservation.driver_id && (
+              <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50 text-xs">
+                {t('awaitingDriverInfo')}
+              </Badge>
+            )}
+          </div>
         </div>
 
         <div className="space-y-2 text-sm">
@@ -269,11 +277,22 @@ const AgencyHome = () => {
           />
 
           {reservation.drivers && (
-            <div className="flex items-center gap-2 pt-2 border-t">
-              <Car className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{reservation.drivers.name}</span>
+            <div className="pt-2 border-t space-y-1">
+              <div className="flex items-center gap-2">
+                <Car className="h-4 w-4 text-green-600" />
+                <span className="font-medium text-green-700">{reservation.drivers.name}</span>
+              </div>
               {reservation.drivers.plate_number && (
-                <span className="text-muted-foreground">({reservation.drivers.plate_number})</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span className="text-xs">{t('plate')}:</span>
+                  <span className="font-mono text-xs">{reservation.drivers.plate_number}</span>
+                </div>
+              )}
+              {reservation.drivers.phone && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span className="text-xs">{t('phone')}:</span>
+                  <span className="text-xs">{reservation.drivers.phone}</span>
+                </div>
               )}
             </div>
           )}

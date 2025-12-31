@@ -22,6 +22,7 @@ interface Driver {
   name: string;
   plate_number: string | null;
   vehicle_model: string | null;
+  phone: string;
 }
 
 interface Reservation {
@@ -72,7 +73,7 @@ const statusLabels: Record<string, string> = {
   'awaiting-price': 'Awaiting Price',
   'pending_admin_review': 'Pending Admin Review',
   'waiting_for_agency_approval': 'Waiting for Your Approval',
-  'customer_approved': 'Meet Transfer Approved - Driver bilgisi bekleniyor',
+  'customer_approved': 'Meet Transfer Approved',
   'confirmed': 'Confirmed',
   'sent_to_driver': 'Sent to Driver',
   'assigned': 'Assigned',
@@ -119,7 +120,7 @@ const AgencyReservationDetail = () => {
           pickup_place_name, dropoff_place_name,
           pickup_date, pickup_time, flight_number, vehicle_type, status,
           passenger_names, driver_id, price, price_currency,
-          drivers:driver_id (id, name, plate_number, vehicle_model)
+          drivers:driver_id (id, name, plate_number, vehicle_model, phone)
         `)
         .eq('id', id)
         .single();
@@ -403,9 +404,16 @@ const AgencyReservationDetail = () => {
           </Button>
           <h1 className="text-xl font-serif">{t('reservationDetails')}</h1>
         </div>
-        <Badge className={statusColors[reservation.status] || 'bg-muted'}>
-          {statusLabels[reservation.status] || reservation.status}
-        </Badge>
+        <div className="flex flex-col items-end gap-1">
+          <Badge className={statusColors[reservation.status] || 'bg-muted'}>
+            {statusLabels[reservation.status] || reservation.status}
+          </Badge>
+          {reservation.status === 'customer_approved' && !reservation.driver_id && (
+            <Badge variant="outline" className="text-amber-200 border-amber-300/50 bg-amber-500/20 text-xs">
+              {t('awaitingDriverInfo')}
+            </Badge>
+          )}
+        </div>
       </header>
 
       <main className="container mx-auto py-6 px-4 max-w-2xl space-y-6">
