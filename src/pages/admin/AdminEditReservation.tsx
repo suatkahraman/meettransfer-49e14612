@@ -101,7 +101,7 @@ const AdminEditReservation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
-  const { emailCustomerPriceSet, emailDriverAssigned, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed, emailAgencyApproved, emailAgencyRejected } = useEmailNotifications();
+  const { emailCustomerPriceSet, emailDriverAssigned, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed, emailAgencyApproved, emailAgencyRejected, emailAgencyPriceSet } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sendingPrice, setSendingPrice] = useState(false);
@@ -1103,7 +1103,20 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                         console.error('Failed to record price history:', e);
                       }
 
-                      // Notify agency user
+                      // Send email to agency
+                      try {
+                        console.log('Sending agency price set email for reservation:', id);
+                        const emailResult = await emailAgencyPriceSet(id!, priceValue, formData.price_currency);
+                        if (!emailResult.success) {
+                          console.error('Agency price email failed:', emailResult.error);
+                        } else {
+                          console.log('Agency price email sent successfully');
+                        }
+                      } catch (e) {
+                        console.error('Failed to send agency price email:', e);
+                      }
+
+                      // Notify agency user in-app
                       const { data: agencyData } = await supabase
                         .from('agencies')
                         .select('user_id')
