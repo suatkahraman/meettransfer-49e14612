@@ -23,11 +23,7 @@ const vehicleTypes = [
   { value: 'minibus', label: 'Minibus' },
 ];
 
-const paymentTypes = [
-  { value: 'cash', label: 'Nakit' },
-  { value: 'payment_link', label: 'Online Ödeme' },
-  { value: 'agency_pay', label: 'Acenta Ödemesi' },
-];
+// Payment types will use translations
 
 // Currencies removed - agency no longer sets price
 
@@ -411,9 +407,9 @@ const AgencyCreateReservation = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {paymentTypes.map(p => (
-                        <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-                      ))}
+                      <SelectItem value="cash">{t('cash')}</SelectItem>
+                      <SelectItem value="payment_link">{t('onlinePayment')}</SelectItem>
+                      <SelectItem value="agency_pay">{t('agencyPayment')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-sm text-muted-foreground mt-1">
