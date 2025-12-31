@@ -58,7 +58,7 @@ const statusLabels: Record<string, string> = {
   'pending_admin_review': 'Pending Admin Review',
   'waiting_for_agency_approval': 'Awaiting Your Approval',
   'waiting_for_customer_approval': 'Awaiting Customer',
-  'customer_approved': 'Customer Approved',
+  'customer_approved': 'Meet Transfer Approved - Driver bilgisi bekleniyor',
   'confirmed': 'Confirmed',
   'sent_to_driver': 'Sent to Driver',
   'assigned': 'Assigned',
