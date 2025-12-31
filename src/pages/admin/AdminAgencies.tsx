@@ -37,6 +37,8 @@ const AdminAgencies = () => {
   const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState({
     agency_name: '',
+    email: '',
+    phone: '',
     comments: '',
   });
 
@@ -117,7 +119,7 @@ const AdminAgencies = () => {
 
   const openCreateDialog = () => {
     setSelectedAgency(null);
-    setFormData({ agency_name: '', comments: '' });
+    setFormData({ agency_name: '', email: '', phone: '', comments: '' });
     setDialogOpen(true);
   };
 
@@ -125,6 +127,8 @@ const AdminAgencies = () => {
     setSelectedAgency(agency);
     setFormData({
       agency_name: agency.agency_name,
+      email: '',
+      phone: '',
       comments: agency.comments || '',
     });
     setDialogOpen(true);
@@ -139,6 +143,24 @@ const AdminAgencies = () => {
     if (!formData.agency_name.trim()) {
       toast.error('Acenta adı gereklidir');
       return;
+    }
+
+    // Validate email and phone for new agency creation
+    if (!selectedAgency) {
+      if (!formData.email.trim()) {
+        toast.error('E-posta adresi gereklidir');
+        return;
+      }
+      if (!formData.phone.trim()) {
+        toast.error('Telefon numarası gereklidir');
+        return;
+      }
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        toast.error('Geçerli bir e-posta adresi girin');
+        return;
+      }
     }
 
     setSaving(true);
@@ -166,27 +188,33 @@ const AdminAgencies = () => {
 
         toast.success('Acenta başarıyla güncellendi');
       } else {
-        // Create new
-        const { data, error } = await supabase
-          .from('agencies')
-          .insert({
+        // Create new agency with user account
+        const { data: session } = await supabase.auth.getSession();
+        
+        const response = await supabase.functions.invoke('create-user-account', {
+          body: {
+            email: formData.email.trim(),
+            password: Math.random().toString(36).slice(-12) + 'A1!', // Random password
+            full_name: formData.agency_name.trim(),
+            phone: formData.phone.trim(),
+            role: 'agency',
             agency_name: formData.agency_name.trim(),
-            comments: formData.comments.trim() || null,
-            balance: 0,
-          })
-          .select()
-          .single();
+            agency_comments: formData.comments.trim() || null,
+          },
+        });
 
-        if (error) throw error;
+        if (response.error) {
+          throw new Error(response.error.message || 'Acenta hesabı oluşturulamadı');
+        }
 
         await logAction({
           action: 'CREATE',
           table_name: 'agencies',
-          record_id: data.id,
-          new_data: { agency_name: formData.agency_name, comments: formData.comments },
+          record_id: response.data?.agency_id || 'unknown',
+          new_data: { agency_name: formData.agency_name, email: formData.email },
         });
 
-        toast.success('Acenta başarıyla oluşturuldu');
+        toast.success('Acenta ve hesabı başarıyla oluşturuldu. Şifre sıfırlama e-postası gönderildi.');
       }
 
       setDialogOpen(false);
@@ -350,6 +378,28 @@ const AdminAgencies = () => {
                 placeholder="Acenta adını girin"
               />
             </div>
+            {!selectedAgency && (
+              <>
+                <div className="space-y-2">
+                  <Label>E-posta Adresi *</Label>
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="acenta@example.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Telefon Numarası *</Label>
+                  <Input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+90 5XX XXX XX XX"
+                  />
+                </div>
+              </>
+            )}
             <div className="space-y-2">
               <Label>Notlar / Yorumlar</Label>
               <Textarea
