@@ -1021,8 +1021,106 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
           </Card>
         )}
 
-        {/* Customer Edit Review Card */}
-        {formData.status === 'pending_admin_review' && (
+        {/* Agency Request Review Card */}
+        {formData.status === 'pending_admin_review' && formData.agency_id && formData.agency_id !== 'none' && (
+          <Card className="border-purple-300 bg-purple-50 dark:bg-purple-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+                <Building2 className="h-5 w-5" />
+                Acenta Rezervasyon Talebi
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-purple-700 dark:text-purple-300">
+                {agencyName || 'Acenta'} tarafından bir rezervasyon talebi gönderildi. Lütfen inceleyin ve onaylayın veya reddedin.
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  onClick={async () => {
+                    setSaving(true);
+                    try {
+                      // Approve agency request - set to customer_approved
+                      const { error } = await supabase
+                        .from('reservations')
+                        .update({ status: 'customer_approved' })
+                        .eq('id', id);
+                      if (error) throw error;
+
+                      // Send approval email to agency
+                      try {
+                        console.log('Sending agency approval email for reservation:', id);
+                        const emailResult = await emailAgencyApproved(id!);
+                        if (!emailResult.success) {
+                          console.error('Agency approval email failed:', emailResult.error);
+                          toast.error('Onay emaili gönderilemedi');
+                        } else {
+                          console.log('Agency approval email sent successfully');
+                        }
+                      } catch (e) {
+                        console.error('Failed to send agency approval email:', e);
+                      }
+
+                      toast.success('Acenta talebi onaylandı!');
+                      setFormData({ ...formData, status: 'customer_approved' });
+                    } catch (error: any) {
+                      toast.error(error.message || 'Talep onaylanamadı');
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  disabled={saving}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Talebi Onayla
+                </Button>
+                <Button
+                  onClick={async () => {
+                    setSaving(true);
+                    try {
+                      // Reject agency request
+                      const { error } = await supabase
+                        .from('reservations')
+                        .update({ status: 'customer_rejected' })
+                        .eq('id', id);
+                      if (error) throw error;
+
+                      // Send rejection email to agency
+                      try {
+                        console.log('Sending agency rejection email for reservation:', id);
+                        const emailResult = await emailAgencyRejected(id!);
+                        if (!emailResult.success) {
+                          console.error('Agency rejection email failed:', emailResult.error);
+                          toast.error('Red emaili gönderilemedi');
+                        } else {
+                          console.log('Agency rejection email sent successfully');
+                        }
+                      } catch (e) {
+                        console.error('Failed to send agency rejection email:', e);
+                      }
+
+                      toast.success('Acenta talebi reddedildi');
+                      navigate('/admin/reservations');
+                    } catch (error: any) {
+                      toast.error(error.message || 'Talep reddedilemedi');
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  disabled={saving}
+                  variant="outline"
+                  className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Talebi Reddet
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Customer Edit Review Card - Only show for non-agency reservations */}
+        {formData.status === 'pending_admin_review' && (!formData.agency_id || formData.agency_id === 'none') && (
           <Card className="border-amber-300 bg-amber-50 dark:bg-amber-950/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
