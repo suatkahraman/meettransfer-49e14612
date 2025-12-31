@@ -454,6 +454,19 @@ const translations: Record<Language, Record<string, string>> = {
     bookingFailed: "Failed to create booking",
     submitTransferDetails: "Submit your transfer details and we'll send you a price for approval",
     
+    // Edit Reservation Page
+    updateYourReservation: "Update Your Reservation",
+    changesWillBeSentToAdmin: "Changes will be sent to admin for review",
+    saveChanges: "Save Changes",
+    savingChanges: "Saving...",
+    reservationCannotBeEdited: "This reservation cannot be edited",
+    reservationUpdatedSuccess: "Reservation updated! Awaiting admin review.",
+    failedToUpdateReservation: "Failed to update reservation",
+    notesForDriver: "Notes for Driver (optional)",
+    anySpecialRequests: "Any special requests or information...",
+    enterDestination: "Enter destination",
+    selectVehicle: "Select vehicle",
+    
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Premium VIP Airport Transfer & Chauffeur Service in Turkey",
     seoHomeDesc: "Luxury VIP airport transfer and private chauffeur service in Turkey. Professional drivers, Mercedes fleet, 24/7 service. Istanbul, Antalya, Bodrum, Dalaman, Cappadocia transfers.",
@@ -870,6 +883,19 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "Bitte beheben Sie die Validierungsfehler",
     bookingFailed: "Buchung fehlgeschlagen",
     submitTransferDetails: "Geben Sie Ihre Transferdetails ein und wir senden Ihnen den Preis zur Genehmigung",
+    
+    // Edit Reservation Page
+    updateYourReservation: "Aktualisieren Sie Ihre Reservierung",
+    changesWillBeSentToAdmin: "Änderungen werden zur Überprüfung an den Admin gesendet",
+    saveChanges: "Änderungen Speichern",
+    savingChanges: "Speichern...",
+    reservationCannotBeEdited: "Diese Reservierung kann nicht bearbeitet werden",
+    reservationUpdatedSuccess: "Reservierung aktualisiert! Warten auf Admin-Überprüfung.",
+    failedToUpdateReservation: "Reservierung konnte nicht aktualisiert werden",
+    notesForDriver: "Notizen für den Fahrer (optional)",
+    anySpecialRequests: "Sonderwünsche oder Informationen...",
+    enterDestination: "Ziel eingeben",
+    selectVehicle: "Fahrzeug auswählen",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Premium VIP Flughafentransfer & Chauffeurservice in der Türkei",
@@ -1355,6 +1381,19 @@ const translations: Record<Language, Record<string, string>> = {
     bookingFailed: "Échec de la réservation",
     submitTransferDetails: "Soumettez vos détails de transfert et nous vous enverrons le prix pour approbation",
     
+    // Edit Reservation Page
+    updateYourReservation: "Mettre à jour votre réservation",
+    changesWillBeSentToAdmin: "Les modifications seront envoyées à l'admin pour examen",
+    saveChanges: "Enregistrer les modifications",
+    savingChanges: "Enregistrement...",
+    reservationCannotBeEdited: "Cette réservation ne peut pas être modifiée",
+    reservationUpdatedSuccess: "Réservation mise à jour! En attente d'examen par l'admin.",
+    failedToUpdateReservation: "Échec de la mise à jour de la réservation",
+    notesForDriver: "Notes pour le chauffeur (optionnel)",
+    anySpecialRequests: "Demandes spéciales ou informations...",
+    enterDestination: "Entrez la destination",
+    selectVehicle: "Sélectionner le véhicule",
+    
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Service VIP de Transfert Aéroport & Chauffeur en Turquie",
     seoHomeDesc: "Transfert VIP aéroport de luxe et service de chauffeur privé en Turquie. Chauffeurs professionnels, flotte Mercedes, service 24/7. Istanbul, Antalya, Bodrum, Dalaman, Cappadoce.",
@@ -1838,6 +1877,19 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "Пожалуйста, исправьте ошибки валидации",
     bookingFailed: "Не удалось создать бронирование",
     submitTransferDetails: "Отправьте данные трансфера, и мы пришлем вам цену для подтверждения",
+    
+    // Edit Reservation Page
+    updateYourReservation: "Обновите вашу бронь",
+    changesWillBeSentToAdmin: "Изменения будут отправлены админу на проверку",
+    saveChanges: "Сохранить изменения",
+    savingChanges: "Сохранение...",
+    reservationCannotBeEdited: "Эту бронь нельзя редактировать",
+    reservationUpdatedSuccess: "Бронирование обновлено! Ожидается проверка админом.",
+    failedToUpdateReservation: "Не удалось обновить бронирование",
+    notesForDriver: "Заметки для водителя (опционально)",
+    anySpecialRequests: "Любые особые пожелания или информация...",
+    enterDestination: "Введите место назначения",
+    selectVehicle: "Выберите транспорт",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - VIP Трансфер из Аэропорта и Услуги Шофера в Турции",
@@ -2323,6 +2375,19 @@ const translations: Record<Language, Record<string, string>> = {
     bookingFailed: "Prenotazione fallita",
     submitTransferDetails: "Invia i dettagli del trasferimento e ti invieremo il prezzo per l'approvazione",
     
+    // Edit Reservation Page
+    updateYourReservation: "Aggiorna la tua prenotazione",
+    changesWillBeSentToAdmin: "Le modifiche verranno inviate all'admin per la revisione",
+    saveChanges: "Salva modifiche",
+    savingChanges: "Salvataggio...",
+    reservationCannotBeEdited: "Questa prenotazione non può essere modificata",
+    reservationUpdatedSuccess: "Prenotazione aggiornata! In attesa di revisione admin.",
+    failedToUpdateReservation: "Impossibile aggiornare la prenotazione",
+    notesForDriver: "Note per l'autista (opzionale)",
+    anySpecialRequests: "Richieste speciali o informazioni...",
+    enterDestination: "Inserisci la destinazione",
+    selectVehicle: "Seleziona veicolo",
+    
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Servizio VIP Trasferimento Aeroporto & Autista in Turchia",
     seoHomeDesc: "Trasferimento VIP aeroporto di lusso e servizio autista privato in Turchia. Autisti professionisti, flotta Mercedes, servizio 24/7. Istanbul, Antalya, Bodrum, Dalaman, Cappadocia.",
@@ -2807,6 +2872,19 @@ const translations: Record<Language, Record<string, string>> = {
     bookingFailed: "Error al crear la reserva",
     submitTransferDetails: "Envía los detalles de tu traslado y te enviaremos el precio para aprobación",
     
+    // Edit Reservation Page
+    updateYourReservation: "Actualiza Tu Reserva",
+    changesWillBeSentToAdmin: "Los cambios se enviarán al administrador para revisión",
+    saveChanges: "Guardar Cambios",
+    savingChanges: "Guardando...",
+    reservationCannotBeEdited: "Esta reserva no se puede editar",
+    reservationUpdatedSuccess: "¡Reserva actualizada! Esperando revisión del administrador.",
+    failedToUpdateReservation: "Error al actualizar la reserva",
+    notesForDriver: "Notas para el Conductor (opcional)",
+    anySpecialRequests: "Cualquier solicitud especial o información...",
+    enterDestination: "Ingresa el destino",
+    selectVehicle: "Seleccionar vehículo",
+    
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Servicio VIP de Traslado Aeropuerto y Chófer en Turquía",
     seoHomeDesc: "Traslado VIP aeropuerto de lujo y servicio de chófer privado en Turquía. Conductores profesionales, flota Mercedes, servicio 24/7. Estambul, Antalya, Bodrum, Dalaman, Capadocia.",
@@ -3290,6 +3368,19 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "يرجى إصلاح أخطاء التحقق",
     bookingFailed: "فشل في إنشاء الحجز",
     submitTransferDetails: "أرسل تفاصيل نقلك وسنرسل لك السعر للموافقة",
+    
+    // Edit Reservation Page
+    updateYourReservation: "تحديث حجزك",
+    changesWillBeSentToAdmin: "سيتم إرسال التغييرات للمسؤول للمراجعة",
+    saveChanges: "حفظ التغييرات",
+    savingChanges: "جاري الحفظ...",
+    reservationCannotBeEdited: "لا يمكن تعديل هذا الحجز",
+    reservationUpdatedSuccess: "تم تحديث الحجز! في انتظار مراجعة المسؤول.",
+    failedToUpdateReservation: "فشل في تحديث الحجز",
+    notesForDriver: "ملاحظات للسائق (اختياري)",
+    anySpecialRequests: "أي طلبات خاصة أو معلومات...",
+    enterDestination: "أدخل الوجهة",
+    selectVehicle: "اختر المركبة",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - خدمة نقل VIP من المطار وسائق خاص في تركيا",
@@ -3847,6 +3938,19 @@ const translations: Record<Language, Record<string, string>> = {
     submitTransferDetails: "Transfer detaylarınızı gönderin, size onay için fiyat gönderelim",
     notes: "Notlar",
     
+    // Edit Reservation Page
+    updateYourReservation: "Rezervasyonunuzu Güncelleyin",
+    changesWillBeSentToAdmin: "Değişiklikler admin onayına gönderilecek",
+    saveChanges: "Değişiklikleri Kaydet",
+    savingChanges: "Kaydediliyor...",
+    reservationCannotBeEdited: "Bu rezervasyon düzenlenemez",
+    reservationUpdatedSuccess: "Rezervasyon güncellendi! Admin onayı bekleniyor.",
+    failedToUpdateReservation: "Rezervasyon güncellenemedi",
+    notesForDriver: "Şoför için Notlar (isteğe bağlı)",
+    anySpecialRequests: "Özel istekler veya bilgi...",
+    enterDestination: "Varış noktasını girin",
+    selectVehicle: "Araç seçin",
+    
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Türkiye'de Premium VIP Havalimanı Transfer ve Şoför Hizmeti",
     seoHomeDesc: "Türkiye'de lüks VIP havalimanı transferi ve özel şoför hizmeti. Profesyonel şoförler, Mercedes filo, 7/24 hizmet. İstanbul, Antalya, Bodrum, Dalaman, Kapadokya transferleri.",
@@ -4263,6 +4367,19 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "Будь ласка, виправте помилки валідації",
     bookingFailed: "Не вдалося створити бронювання",
     submitTransferDetails: "Надішліть деталі трансферу, і ми надішлемо вам ціну для підтвердження",
+    
+    // Edit Reservation Page
+    updateYourReservation: "Оновіть ваше бронювання",
+    changesWillBeSentToAdmin: "Зміни будуть надіслані адміну на перевірку",
+    saveChanges: "Зберегти зміни",
+    savingChanges: "Збереження...",
+    reservationCannotBeEdited: "Це бронювання не можна редагувати",
+    reservationUpdatedSuccess: "Бронювання оновлено! Очікується перевірка адміном.",
+    failedToUpdateReservation: "Не вдалося оновити бронювання",
+    notesForDriver: "Нотатки для водія (необов'язково)",
+    anySpecialRequests: "Будь-які спеціальні побажання або інформація...",
+    enterDestination: "Введіть місце призначення",
+    selectVehicle: "Виберіть транспорт",
     
     // Transfer Page Common
     transferSubtitle: "Mercedes Vito, V-Class, Maybach | Цілодобовий сервіс зустрічі",
@@ -4818,6 +4935,19 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "検証エラーを修正してください",
     bookingFailed: "予約の作成に失敗しました",
     submitTransferDetails: "送迎の詳細を送信すると、確認のための料金をお送りします",
+    
+    // Edit Reservation Page
+    updateYourReservation: "予約を更新する",
+    changesWillBeSentToAdmin: "変更は管理者の確認のために送信されます",
+    saveChanges: "変更を保存",
+    savingChanges: "保存中...",
+    reservationCannotBeEdited: "この予約は編集できません",
+    reservationUpdatedSuccess: "予約が更新されました！管理者の確認待ちです。",
+    failedToUpdateReservation: "予約の更新に失敗しました",
+    notesForDriver: "ドライバーへのメモ（任意）",
+    anySpecialRequests: "特別なリクエストや情報...",
+    enterDestination: "目的地を入力",
+    selectVehicle: "車両を選択",
     
     // SEO Meta Tags
     seoHomeTitle: "ミートトランスファー - トルコのプレミアムVIP空港送迎・シャトルサービス",
