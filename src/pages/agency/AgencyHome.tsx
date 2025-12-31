@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -70,6 +71,7 @@ interface AccountingSummary {
 const AgencyHome = () => {
   const { signOut } = useAuth();
   const { agencyId } = useUserRole();
+  const { t } = useAgencyTranslations();
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -276,7 +278,7 @@ const AgencyHome = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-4 px-4 flex justify-between items-center sticky top-0 z-10">
         <div>
-          <h1 className="text-xl font-serif font-bold">Agency Panel</h1>
+          <h1 className="text-xl font-serif font-bold">{t('agencyPanel')}</h1>
           {agency && (
             <p className="text-sm opacity-80">{agency.agency_name}</p>
           )}
@@ -314,7 +316,7 @@ const AgencyHome = () => {
       {agency && agency.balance < 0 && (
         <div className="bg-destructive/10 border-l-4 border-destructive p-4">
           <p className="text-destructive font-medium">
-            ⚠️ Your balance is insufficient ({agency.balance.toFixed(2)} TRY). Please make a payment.
+            ⚠️ {t('insufficientBalance')} ({agency.balance.toFixed(2)} TRY)
           </p>
         </div>
       )}
@@ -332,7 +334,7 @@ const AgencyHome = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Wallet className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">Bakiye</span>
+                    <span className="text-xs text-muted-foreground">{t('balance')}</span>
                   </div>
                   <p className={cn(
                     "text-xl font-bold",
@@ -347,7 +349,7 @@ const AgencyHome = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <TrendingUp className="h-4 w-4 text-green-600" />
-                    <span className="text-xs text-muted-foreground">Toplam Ciro</span>
+                    <span className="text-xs text-muted-foreground">{t('totalRevenue')}</span>
                   </div>
                   <p className="text-xl font-bold text-green-600">
                     ₺{accountingSummary.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
@@ -359,7 +361,7 @@ const AgencyHome = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <CreditCard className="h-4 w-4 text-blue-600" />
-                    <span className="text-xs text-muted-foreground">Ödenen</span>
+                    <span className="text-xs text-muted-foreground">{t('paid')}</span>
                   </div>
                   <p className="text-xl font-bold text-blue-600">
                     ₺{accountingSummary.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
@@ -371,10 +373,10 @@ const AgencyHome = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle className="h-4 w-4 text-purple-600" />
-                    <span className="text-xs text-muted-foreground">Bu Ay</span>
+                    <span className="text-xs text-muted-foreground">{t('thisMonth')}</span>
                   </div>
                   <p className="text-xl font-bold text-purple-600">
-                    {accountingSummary.monthlyReservations} <span className="text-sm font-normal">transfer</span>
+                    {accountingSummary.monthlyReservations} <span className="text-sm font-normal">{t('transfer')}</span>
                   </p>
                 </CardContent>
               </Card>
@@ -392,8 +394,8 @@ const AgencyHome = () => {
                       <Plus className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium">Yeni Rezervasyon</p>
-                      <p className="text-sm text-muted-foreground">Transfer talebi oluştur</p>
+                      <p className="font-medium">{t('newReservation')}</p>
+                      <p className="text-sm text-muted-foreground">{t('createTransferRequest')}</p>
                     </div>
                   </div>
                   <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
@@ -410,8 +412,8 @@ const AgencyHome = () => {
                       <BarChart3 className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium">Muhasebe Detayları</p>
-                      <p className="text-sm text-muted-foreground">Tüm işlemleri görüntüle</p>
+                      <p className="font-medium">{t('accountingDetails')}</p>
+                      <p className="text-sm text-muted-foreground">{t('viewAllTransactions')}</p>
                     </div>
                   </div>
                   <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
@@ -422,7 +424,7 @@ const AgencyHome = () => {
             {reservations.length === 0 ? (
               <div className="text-center py-12">
                 <Calendar className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <p className="text-lg text-muted-foreground">Henüz rezervasyon yok</p>
+                <p className="text-lg text-muted-foreground">{t('noReservationsYet')}</p>
               </div>
             ) : (
               <>
@@ -434,7 +436,7 @@ const AgencyHome = () => {
                   className="flex items-center justify-between w-full py-2 mb-3"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">Upcoming Transfers</span>
+                    <span className="font-semibold">{t('upcomingTransfers')}</span>
                     <Badge variant="secondary">{upcomingJobs.length}</Badge>
                   </div>
                   <ChevronDown className={cn(
