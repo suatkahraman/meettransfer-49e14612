@@ -112,8 +112,9 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     paymentsThisMonth: 'Bu Ay Alınan Ödemeler',
     paymentRecords: 'ödeme kaydı',
     totalCurrentBalance: 'Toplam Cari Bakiye',
-    allTimeTotal: 'Tüm zamanlar toplam ödeme',
+    allTimeTotal: 'Tüm zamanlar toplamı',
     paymentHistory: 'Ödeme Geçmişi',
+    carryOverBalance: 'Devir Bakiye',
     
     // Balance
     balance: 'Bakiye',
@@ -276,8 +277,9 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     paymentsThisMonth: 'Payments This Month',
     paymentRecords: 'payment records',
     totalCurrentBalance: 'Total Current Balance',
-    allTimeTotal: 'All time total payment',
+    allTimeTotal: 'All time total',
     paymentHistory: 'Payment History',
+    carryOverBalance: 'Carry-over Balance',
     
     balance: 'Balance',
     yourBalance: 'Your Balance',
@@ -432,8 +434,9 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     paymentsThisMonth: 'Zahlungen diesen Monat',
     paymentRecords: 'Zahlungsaufzeichnungen',
     totalCurrentBalance: 'Aktueller Gesamtsaldo',
-    allTimeTotal: 'Gesamtzahlung aller Zeiten',
+    allTimeTotal: 'Gesamtbetrag aller Zeiten',
     paymentHistory: 'Zahlungsverlauf',
+    carryOverBalance: 'Übertragssaldo',
     
     balance: 'Saldo',
     yourBalance: 'Ihr Saldo',
@@ -590,6 +593,7 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     totalCurrentBalance: 'Solde actuel total',
     allTimeTotal: 'Total de tous les temps',
     paymentHistory: 'Historique des paiements',
+    carryOverBalance: 'Solde reporté',
     
     balance: 'Solde',
     yourBalance: 'Votre solde',
@@ -746,6 +750,7 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     totalCurrentBalance: 'Общий текущий баланс',
     allTimeTotal: 'Общая сумма за все время',
     paymentHistory: 'История платежей',
+    carryOverBalance: 'Переходящий баланс',
     
     balance: 'Баланс',
     yourBalance: 'Ваш баланс',
@@ -900,8 +905,9 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     paymentsThisMonth: 'مدفوعات هذا الشهر',
     paymentRecords: 'سجلات الدفع',
     totalCurrentBalance: 'الرصيد الحالي الإجمالي',
-    allTimeTotal: 'إجمالي المدفوعات',
+    allTimeTotal: 'الإجمالي الكلي',
     paymentHistory: 'سجل المدفوعات',
+    carryOverBalance: 'الرصيد المرحل',
     
     balance: 'الرصيد',
     yourBalance: 'رصيدك',
