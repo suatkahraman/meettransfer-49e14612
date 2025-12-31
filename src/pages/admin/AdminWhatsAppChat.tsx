@@ -769,6 +769,7 @@ export default function AdminWhatsAppChat() {
                                   type="date"
                                   value={quickReservation.pickup_date}
                                   onChange={(e) => setQuickReservation({...quickReservation, pickup_date: e.target.value})}
+                                  min={new Date().toISOString().split('T')[0]}
                                 />
                               </div>
                               <div className="space-y-2">

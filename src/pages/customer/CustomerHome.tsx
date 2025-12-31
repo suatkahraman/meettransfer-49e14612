@@ -224,6 +224,7 @@ const CustomerHome = () => {
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({...formData, date: e.target.value})}
+                    min={new Date().toISOString().split('T')[0]}
                     className={errors.date ? 'border-destructive' : ''}
                   />
                   {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
