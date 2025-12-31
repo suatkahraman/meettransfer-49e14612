@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, Clock, MapPin, Phone, User, Car } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, Phone, User, Car, Building2 } from 'lucide-react';
 import { getCurrencySymbol } from '@/lib/currency';
 
 interface Reservation {
@@ -22,6 +22,11 @@ interface Reservation {
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
   driver_earning: number | null;
+  agency_id: string | null;
+  agencies?: {
+    id: string;
+    agency_name: string;
+  } | null;
 }
 
 interface Driver {
@@ -67,7 +72,7 @@ const AdminDriverJobs = () => {
       // Fetch reservations for this driver
       const { data: reservationsData, error } = await supabase
         .from('reservations')
-        .select('*')
+        .select('*, agencies (id, agency_name)')
         .eq('driver_id', driverId)
         .order('pickup_date', { ascending: false });
 
@@ -133,13 +138,19 @@ const AdminDriverJobs = () => {
               >
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
                       <Badge className={`${statusColors[reservation.status] || 'bg-gray-500'} text-white`}>
                         {reservation.status}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
                         {formatDate(reservation.pickup_date)}
                       </span>
+                      {reservation.agencies && (
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                          <Building2 className="h-3 w-3 mr-1" />
+                          {reservation.agencies.agency_name}
+                        </Badge>
+                      )}
                     </div>
                     {reservation.price && (
                       <span className="font-semibold text-lg">${reservation.price}</span>

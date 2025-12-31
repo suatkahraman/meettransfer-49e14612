@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -55,6 +55,7 @@ interface Reservation {
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
   customer_notes: string | null;
+  agency_id: string | null;
   // Place details
   pickup_place_name: string | null;
   pickup_lat: number | null;
@@ -62,6 +63,11 @@ interface Reservation {
   dropoff_place_name: string | null;
   dropoff_lat: number | null;
   dropoff_lng: number | null;
+  // Agency details
+  agencies?: {
+    id: string;
+    agency_name: string;
+  } | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -100,10 +106,10 @@ const DriverJobDetails = () => {
     const fetchData = async () => {
       if (!id) return;
 
-      // Fetch reservation
+      // Fetch reservation with agency
       const { data: resData, error: resError } = await supabase
         .from('reservations')
-        .select('*')
+        .select('*, agencies (id, agency_name)')
         .eq('id', id)
         .maybeSingle();
 
@@ -483,6 +489,17 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Agency Badge */}
+            {reservation.agencies && (
+              <div className="flex items-center gap-2 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg px-4 py-3">
+                <Building2 className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
+                <div>
+                  <div className="text-xs text-purple-600 dark:text-purple-400">Acenta İşi</div>
+                  <div className="font-semibold text-purple-700 dark:text-purple-300">{reservation.agencies.agency_name}</div>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 text-lg">
               <Clock className="h-5 w-5 text-muted-foreground" />
               <span className="font-semibold">{reservation.pickup_time}</span>

@@ -35,9 +35,15 @@ interface Reservation {
   passenger_cash_currency: string | null;
   status: string;
   driver_confirmed: boolean | null;
+  agency_id: string | null;
   // Place details
   pickup_place_name: string | null;
   dropoff_place_name: string | null;
+  // Agency details
+  agencies?: {
+    id: string;
+    agency_name: string;
+  } | null;
 }
 
 const PULL_THRESHOLD = 80;
@@ -81,7 +87,7 @@ const DriverHome = () => {
 
     const { data, error } = await supabase
       .from('reservations')
-      .select('*')
+      .select('*, agencies (id, agency_name)')
       .eq('driver_id', driverId)
       .in('status', ['sent_to_driver', 'assigned', 'active', 'completed'])
       .order('pickup_date', { ascending: true })
