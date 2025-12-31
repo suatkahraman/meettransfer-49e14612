@@ -10,13 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Wallet } from 'lucide-react';
+import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Wallet, Key } from 'lucide-react';
 
 interface Agency {
   id: string;
   agency_name: string;
   comments: string | null;
   balance: number | null;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -32,9 +33,12 @@ const AdminAgencies = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
   const [formData, setFormData] = useState({
     agency_name: '',
     email: '',
@@ -139,6 +143,59 @@ const AdminAgencies = () => {
   const openDeleteDialog = (agency: Agency) => {
     setSelectedAgency(agency);
     setDeleteDialogOpen(true);
+  };
+
+  const openPasswordDialog = (agency: Agency) => {
+    if (!agency.user_id) {
+      toast.error('Bu acentanın hesabı bulunamadı');
+      return;
+    }
+    setSelectedAgency(agency);
+    setNewPassword('');
+    setPasswordDialogOpen(true);
+  };
+
+  const handlePasswordUpdate = async () => {
+    if (!selectedAgency?.user_id) return;
+
+    if (!newPassword.trim()) {
+      toast.error('Yeni şifre gereklidir');
+      return;
+    }
+    if (newPassword.trim().length < 6) {
+      toast.error('Şifre en az 6 karakter olmalıdır');
+      return;
+    }
+
+    setUpdatingPassword(true);
+
+    try {
+      const response = await supabase.functions.invoke('update-user-password', {
+        body: {
+          user_id: selectedAgency.user_id,
+          new_password: newPassword.trim(),
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Şifre güncellenemedi');
+      }
+
+      await logAction({
+        action: 'UPDATE_PASSWORD',
+        table_name: 'agencies',
+        record_id: selectedAgency.id,
+        new_data: { password_changed: true },
+      });
+
+      toast.success('Şifre başarıyla güncellendi');
+      setPasswordDialogOpen(false);
+      setNewPassword('');
+    } catch (error: any) {
+      toast.error(error.message || 'Şifre güncellenemedi');
+    } finally {
+      setUpdatingPassword(false);
+    }
   };
 
   const handleSave = async () => {
@@ -340,6 +397,16 @@ const AdminAgencies = () => {
                       >
                         <DollarSign className="h-4 w-4" />
                       </Button>
+                      {agency.user_id && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => openPasswordDialog(agency)}
+                          title="Şifre Değiştir"
+                        >
+                          <Key className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button variant="ghost" size="icon" onClick={() => openEditDialog(agency)}>
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -463,6 +530,37 @@ const AdminAgencies = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Password Update Dialog */}
+      <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Şifre Değiştir</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              <strong>{selectedAgency?.agency_name}</strong> için yeni şifre belirleyin.
+            </p>
+            <div className="space-y-2">
+              <Label>Yeni Şifre *</Label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="En az 6 karakter"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPasswordDialogOpen(false)}>
+              İptal
+            </Button>
+            <Button onClick={handlePasswordUpdate} disabled={updatingPassword}>
+              {updatingPassword ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
