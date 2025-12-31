@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -9,7 +9,7 @@ import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { MoneyInput } from '@/components/ui/money-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -23,6 +23,7 @@ import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
+import { parseMoneyInput } from '@/lib/money';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -90,6 +91,19 @@ const DriverJobDetails = () => {
   const [driverNotes, setDriverNotes] = useState('');
   const [savingFinancials, setSavingFinancials] = useState(false);
 
+  // Keep latest translation function without re-triggering data effects
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
+
+  const reservationRef = useRef<Reservation | null>(null);
+  useEffect(() => {
+    reservationRef.current = reservation;
+  }, [reservation]);
+
+  const initializedFinancialsForIdRef = useRef<string | null>(null);
+
   const statusColors: Record<string, string> = {
     'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
     'active': 'bg-blue-500/20 text-blue-700',
@@ -119,24 +133,29 @@ const DriverJobDetails = () => {
 
       if (resError) {
         console.error('Error:', resError);
-        toast.error(t('failedToSave'));
+        toast.error(tRef.current('failedToSave'));
         setLoading(false);
         return;
       }
-      
+
       if (resData) {
         setReservation(resData);
-        setDriverPrice(resData.price?.toString() || '');
-        setDriverCashAmount(resData.driver_cash_amount?.toString() || '');
-        setDriverNotes(resData.driver_notes || '');
-        
+
+        // Initialize editable financial fields only once per reservation
+        if (initializedFinancialsForIdRef.current !== resData.id) {
+          initializedFinancialsForIdRef.current = resData.id;
+          setDriverPrice(resData.price?.toString() || '');
+          setDriverCashAmount(resData.driver_cash_amount?.toString() || '');
+          setDriverNotes(resData.driver_notes || '');
+        }
+
         // Fetch admin notes
         const { data: notesData } = await supabase
           .from('reservation_admin_notes')
           .select('notes')
           .eq('reservation_id', resData.id)
           .maybeSingle();
-        
+
         if (notesData?.notes) {
           setAdminNotes(notesData.notes);
         }
@@ -161,17 +180,20 @@ const DriverJobDetails = () => {
           (payload) => {
             console.log('[DriverJobDetails] Real-time update received:', payload);
             const newData = payload.new as Reservation;
-            
+
+            const prev = reservationRef.current;
             // Check if flight data changed
-            if (newData.flight_arrival_time !== reservation?.flight_arrival_time ||
-                newData.flight_status !== reservation?.flight_status) {
-              toast.info(t('flightUpdated'), {
+            if (
+              newData.flight_arrival_time !== prev?.flight_arrival_time ||
+              newData.flight_status !== prev?.flight_status
+            ) {
+              toast.info(tRef.current('flightUpdated'), {
                 icon: <Plane className="h-4 w-4" />,
               });
             }
-            
+
             setReservation(newData);
-          }
+          },
         )
         .subscribe();
 
@@ -179,7 +201,7 @@ const DriverJobDetails = () => {
         supabase.removeChannel(channel);
       };
     }
-  }, [id, driverId, t]);
+  }, [id]);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '-';
@@ -212,15 +234,8 @@ const DriverJobDetails = () => {
     if (!id) return;
     setSavingFinancials(true);
 
-    const normalizeDecimal = (value: string) => value.replace(',', '.');
-
-    // Safely parse numeric values - handle empty strings and invalid numbers
-    const parsedPrice = driverPrice && driverPrice.trim() !== '' ? parseFloat(normalizeDecimal(driverPrice.trim())) : null;
-    const parsedCashAmount = driverCashAmount && driverCashAmount.trim() !== '' ? parseFloat(normalizeDecimal(driverCashAmount.trim())) : null;
-
-    // Validate parsed values - NaN check
-    const finalPrice = parsedPrice !== null && !isNaN(parsedPrice) ? parsedPrice : null;
-    const finalCashAmount = parsedCashAmount !== null && !isNaN(parsedCashAmount) ? parsedCashAmount : null;
+    const finalPrice = parseMoneyInput(driverPrice);
+    const finalCashAmount = parseMoneyInput(driverCashAmount);
 
     // Driver can update price, cash amount, and notes
     const { error } = await supabase
@@ -747,37 +762,30 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="driver_price">{t('transferPrice')} ({currencySymbol})</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">{currencySymbol}</span>
-                <Input
-                  id="driver_price"
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  placeholder={t('enterFinalPrice')}
-                  value={driverPrice}
-                  onChange={(e) => setDriverPrice(e.target.value.replace(/[^\d.,]/g, ''))}
-                  className="pl-8 text-lg font-semibold"
-                />
-              </div>
+              <MoneyInput
+                id="driver_price"
+                currencySymbol={currencySymbol}
+                placeholder={t('enterFinalPrice')}
+                value={driverPrice}
+                onValueChange={setDriverPrice}
+                aria-label={`${t('transferPrice')} (${currencySymbol})`}
+                className="text-lg font-semibold"
+                maxLength={16}
+              />
               <p className="text-xs text-muted-foreground">{t('updateFinalPrice')}</p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="driver_cash">{t('cashCollectedLabel')} ({currencySymbol})</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">{currencySymbol}</span>
-                <Input
-                  id="driver_cash"
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  placeholder={t('enterCashAmount')}
-                  value={driverCashAmount}
-                  onChange={(e) => setDriverCashAmount(e.target.value.replace(/[^\d.,]/g, ''))}
-                  className="pl-8"
-                />
-              </div>
+              <MoneyInput
+                id="driver_cash"
+                currencySymbol={currencySymbol}
+                placeholder={t('enterCashAmount')}
+                value={driverCashAmount}
+                onValueChange={setDriverCashAmount}
+                aria-label={`${t('cashCollectedLabel')} (${currencySymbol})`}
+                maxLength={16}
+              />
             </div>
 
             <div className="space-y-2">
