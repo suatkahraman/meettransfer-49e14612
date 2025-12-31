@@ -1,6 +1,7 @@
 import { useState } from "react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
+import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -160,6 +161,24 @@ Please confirm availability and price.`;
 
   return (
     <WebsiteLayout>
+      <SEOHead
+        title="WhatsApp Quick Booking - Instant Airport Transfer Reservation | Meet Transfer"
+        description="Book your airport transfer instantly via WhatsApp. Quick and easy booking for VIP transfers in Turkey, Dubai, and Cyprus. Get instant price quotes and confirmation."
+        keywords="WhatsApp booking, quick transfer booking, instant airport transfer, WhatsApp transfer reservation, Meet Transfer WhatsApp, book transfer online"
+        canonicalPath="/whatsapp-booking"
+      />
+      <SchemaOrg
+        schemas={[
+          { type: 'LocalBusiness' },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'WhatsApp Booking', url: '/whatsapp-booking' },
+            ],
+          },
+        ]}
+      />
       <PageHeader
         title="WhatsApp Quick Booking"
         subtitle="Book Your Transfer in Seconds"

@@ -117,6 +117,13 @@ const BlogPage = () => {
         schemas={[
           { type: 'LocalBusiness' },
           {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Blog', url: '/blog' },
+            ],
+          },
+          {
             type: 'FAQPage',
             questions: faqItems.map(item => ({
               question: item.question,
