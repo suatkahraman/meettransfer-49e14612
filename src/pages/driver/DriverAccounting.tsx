@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +18,7 @@ const DriverAccounting = () => {
   const { signOut } = useAuth();
   const { driverId } = useUserRole();
   const navigate = useNavigate();
+  const { t } = useDriverTranslations();
   const [data, setData] = useState<AccountingData>({
     totalJobs: 0,
     totalRevenue: 0,
@@ -61,7 +63,7 @@ const DriverAccounting = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/driver')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">Accounting</h1>
+          <h1 className="text-2xl font-serif">{t('accounting')}</h1>
         </div>
         <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
           <LogOut className="h-5 w-5" />
@@ -70,14 +72,14 @@ const DriverAccounting = () => {
 
       <main className="container mx-auto py-8 px-4 max-w-2xl">
         {loading ? (
-          <div className="text-center py-12">Loading...</div>
+          <div className="text-center py-12">{t('loading')}</div>
         ) : (
           <div className="grid gap-4">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                   <Briefcase className="h-4 w-4" />
-                  Total Jobs Completed
+                  {t('totalJobsCompleted')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -89,12 +91,12 @@ const DriverAccounting = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
-                  Total Revenue
+                  {t('totalRevenue')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">₺{data.totalRevenue.toFixed(2)}</div>
-                <p className="text-sm text-muted-foreground mt-1">Total value of completed jobs</p>
+                <p className="text-sm text-muted-foreground mt-1">{t('valueOfCompletedJobs')}</p>
               </CardContent>
             </Card>
 
@@ -102,7 +104,7 @@ const DriverAccounting = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                   <Banknote className="h-4 w-4" />
-                  Total Cash Collected
+                  {t('totalCashCollected')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
