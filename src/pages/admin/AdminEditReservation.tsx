@@ -115,6 +115,7 @@ const AdminEditReservation = () => {
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [reservationCode, setReservationCode] = useState<string | null>(null);
+  const [agencyName, setAgencyName] = useState<string | null>(null);
   const [driverEmail, setDriverEmail] = useState<string | null>(null);
   const [loadingDriverEmail, setLoadingDriverEmail] = useState(false);
   const [agencyDetails, setAgencyDetails] = useState<{
@@ -255,6 +256,15 @@ const AdminEditReservation = () => {
 
       setDrivers(driversResult.data || []);
       setAgencies(agenciesResult.data || []);
+      
+      // Set agency name if agency_id exists
+      if (r.agency_id && agenciesResult.data) {
+        const agency = agenciesResult.data.find((a: Agency) => a.id === r.agency_id);
+        if (agency) {
+          setAgencyName(agency.agency_name);
+        }
+      }
+      
       setLoading(false);
 
       // Fetch driver email if driver is assigned
@@ -918,6 +928,17 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
           {statusLabels[formData.status] || formData.status}
         </Badge>
       </header>
+
+      {/* Agency Request Banner */}
+      {agencyName && (
+        <div className="bg-amber-500/20 border-l-4 border-amber-500 px-6 py-3 flex items-center gap-3">
+          <Building2 className="h-5 w-5 text-amber-700" />
+          <div>
+            <span className="font-semibold text-amber-800">Acenta İsteği</span>
+            <span className="text-amber-700 ml-2">({agencyName})</span>
+          </div>
+        </div>
+      )}
 
       <main className="container mx-auto py-8 px-4 max-w-2xl space-y-6">
         {/* Price Entry Card for awaiting-price status */}

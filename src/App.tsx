@@ -71,6 +71,7 @@ const AdminQuickBookings = lazy(() => import("./pages/admin/AdminQuickBookings")
 const AgencyHome = lazy(() => import("./pages/agency/AgencyHome"));
 const AgencyReports = lazy(() => import("./pages/agency/AgencyReports"));
 const AgencyReservationDetail = lazy(() => import("./pages/agency/AgencyReservationDetail"));
+const AgencyCreateReservation = lazy(() => import("./pages/agency/AgencyCreateReservation"));
 
 // Website Pages - lazy loaded
 const IstanbulTransfer = lazy(() => import("./pages/website/IstanbulTransfer"));
@@ -253,6 +254,7 @@ const App = () => (
               
               {/* Agency Routes - Protected */}
               <Route path="/agency" element={<AgencyRoute><LazyRoute><AgencyHome /></LazyRoute></AgencyRoute>} />
+              <Route path="/agency/create-reservation" element={<AgencyRoute><LazyRoute><AgencyCreateReservation /></LazyRoute></AgencyRoute>} />
               <Route path="/agency/reports" element={<AgencyRoute><LazyRoute><AgencyReports /></LazyRoute></AgencyRoute>} />
               <Route path="/agency/reservation/:id" element={<AgencyRoute><LazyRoute><AgencyReservationDetail /></LazyRoute></AgencyRoute>} />
               
