@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { AdminRoute, DriverRoute, CustomerRoute } from "./components/ProtectedRoute";
+import { AdminRoute, DriverRoute, CustomerRoute, AgencyRoute } from "./components/ProtectedRoute";
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
 import { lazy, Suspense } from "react";
 import FloatingWhatsApp from "./components/website/FloatingWhatsApp";
@@ -66,6 +66,11 @@ const QuickBookingCustomerInfo = lazy(() => import("./pages/QuickBookingCustomer
 
 // Admin Quick Bookings
 const AdminQuickBookings = lazy(() => import("./pages/admin/AdminQuickBookings"));
+
+// Agency Pages - lazy loaded
+const AgencyHome = lazy(() => import("./pages/agency/AgencyHome"));
+const AgencyReports = lazy(() => import("./pages/agency/AgencyReports"));
+const AgencyReservationDetail = lazy(() => import("./pages/agency/AgencyReservationDetail"));
 
 // Website Pages - lazy loaded
 const IstanbulTransfer = lazy(() => import("./pages/website/IstanbulTransfer"));
@@ -245,6 +250,11 @@ const App = () => (
               <Route path="/admin/analytics" element={<AdminRoute><LazyRoute><AdminAnalytics /></LazyRoute></AdminRoute>} />
               <Route path="/admin/quick-bookings" element={<AdminRoute><LazyRoute><AdminQuickBookings /></LazyRoute></AdminRoute>} />
               <Route path="/admin/app-installations" element={<AdminRoute><LazyRoute><AdminAppInstallations /></LazyRoute></AdminRoute>} />
+              
+              {/* Agency Routes - Protected */}
+              <Route path="/agency" element={<AgencyRoute><LazyRoute><AgencyHome /></LazyRoute></AgencyRoute>} />
+              <Route path="/agency/reports" element={<AgencyRoute><LazyRoute><AgencyReports /></LazyRoute></AgencyRoute>} />
+              <Route path="/agency/reservation/:id" element={<AgencyRoute><LazyRoute><AgencyReservationDetail /></LazyRoute></AgencyRoute>} />
               
               {/* Customer Portal & Booking Confirmation - Public */}
               <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />
