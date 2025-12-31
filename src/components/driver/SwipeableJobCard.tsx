@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText } from 'lucide-react';
+import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -29,9 +29,15 @@ interface Reservation {
   passenger_cash_currency: string | null;
   status: string;
   driver_confirmed: boolean | null;
+  agency_id?: string | null;
   // Place details
   pickup_place_name?: string | null;
   dropoff_place_name?: string | null;
+  // Agency details
+  agencies?: {
+    id: string;
+    agency_name: string;
+  } | null;
 }
 
 interface SwipeableJobCardProps {
@@ -210,6 +216,16 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                 <span className="ml-1">{config.label}</span>
               </Badge>
             </div>
+
+            {/* Agency Badge */}
+            {reservation.agencies && (
+              <div className="flex items-center gap-2 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg px-3 py-2">
+                <Building2 className="h-4 w-4 text-purple-600 dark:text-purple-400 flex-shrink-0" />
+                <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                  Acenta: {reservation.agencies.agency_name}
+                </span>
+              </div>
+            )}
 
             {/* Customer Info */}
             <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2">
