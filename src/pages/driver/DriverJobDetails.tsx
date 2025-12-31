@@ -212,10 +212,12 @@ const DriverJobDetails = () => {
     if (!id) return;
     setSavingFinancials(true);
 
+    const normalizeDecimal = (value: string) => value.replace(',', '.');
+
     // Safely parse numeric values - handle empty strings and invalid numbers
-    const parsedPrice = driverPrice && driverPrice.trim() !== '' ? parseFloat(driverPrice) : null;
-    const parsedCashAmount = driverCashAmount && driverCashAmount.trim() !== '' ? parseFloat(driverCashAmount) : null;
-    
+    const parsedPrice = driverPrice && driverPrice.trim() !== '' ? parseFloat(normalizeDecimal(driverPrice.trim())) : null;
+    const parsedCashAmount = driverCashAmount && driverCashAmount.trim() !== '' ? parseFloat(normalizeDecimal(driverCashAmount.trim())) : null;
+
     // Validate parsed values - NaN check
     const finalPrice = parsedPrice !== null && !isNaN(parsedPrice) ? parsedPrice : null;
     const finalCashAmount = parsedCashAmount !== null && !isNaN(parsedCashAmount) ? parsedCashAmount : null;
@@ -746,15 +748,15 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
             <div className="space-y-2">
               <Label htmlFor="driver_price">{t('transferPrice')} ({currencySymbol})</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">{currencySymbol}</span>
                 <Input
                   id="driver_price"
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
                   placeholder={t('enterFinalPrice')}
                   value={driverPrice}
-                  onChange={(e) => setDriverPrice(e.target.value)}
+                  onChange={(e) => setDriverPrice(e.target.value.replace(/[^\d.,]/g, ''))}
                   className="pl-8 text-lg font-semibold"
                 />
               </div>
@@ -764,15 +766,15 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
             <div className="space-y-2">
               <Label htmlFor="driver_cash">{t('cashCollectedLabel')} ({currencySymbol})</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">{currencySymbol}</span>
                 <Input
                   id="driver_cash"
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
                   placeholder={t('enterCashAmount')}
                   value={driverCashAmount}
-                  onChange={(e) => setDriverCashAmount(e.target.value)}
+                  onChange={(e) => setDriverCashAmount(e.target.value.replace(/[^\d.,]/g, ''))}
                   className="pl-8"
                 />
               </div>
