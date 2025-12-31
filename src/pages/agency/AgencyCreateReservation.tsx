@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,6 +40,7 @@ const AgencyCreateReservation = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { agencyId } = useUserRole();
+  const { emailAdminAgencyRequest } = useEmailNotifications();
   const [saving, setSaving] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -172,7 +174,7 @@ const AgencyCreateReservation = () => {
         });
       }
 
-      // Notify admins about new agency request
+      // Notify admins about new agency request (in-app notification)
       try {
         const { data: adminUsers } = await supabase
           .from('user_roles')
@@ -194,6 +196,16 @@ const AgencyCreateReservation = () => {
         }
       } catch (err) {
         console.error('Failed to notify admins:', err);
+      }
+
+      // Send email notification to admin
+      if (reservation?.id) {
+        try {
+          await emailAdminAgencyRequest(reservation.id);
+          console.log('Agency request email sent to admin');
+        } catch (err) {
+          console.error('Failed to send agency request email:', err);
+        }
       }
 
       toast.success('Rezervasyon talebi gönderildi. Admin onayı bekleniyor.');

@@ -12,7 +12,8 @@ type EmailType =
   | 'payment_confirmed_customer'
   | 'trip_completed_admin'
   | 'reservation_edited_admin'
-  | 'reservation_cancelled_admin';
+  | 'reservation_cancelled_admin'
+  | 'agency_request_admin';
 
 interface EmailOptions {
   type: EmailType;
@@ -178,6 +179,14 @@ export const useEmailNotifications = () => {
     });
   }, [sendEmail]);
 
+  // 11. When agency creates reservation request → Email to admin
+  const emailAdminAgencyRequest = useCallback(async (reservationId: string) => {
+    return sendEmail({
+      type: 'agency_request_admin',
+      reservation_id: reservationId,
+    });
+  }, [sendEmail]);
+
   return {
     sendEmail,
     emailAdminNewReservation,
@@ -191,5 +200,6 @@ export const useEmailNotifications = () => {
     emailAdminTripCompleted,
     emailAdminReservationEdited,
     emailAdminReservationCancelled,
+    emailAdminAgencyRequest,
   };
 };
