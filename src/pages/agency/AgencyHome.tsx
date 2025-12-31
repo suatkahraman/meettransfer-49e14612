@@ -7,8 +7,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus } from 'lucide-react';
+import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff } from 'lucide-react';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import AgencyLanguageSelector from '@/components/agency/AgencyLanguageSelector';
+import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
 import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -81,6 +83,8 @@ const AgencyHome = () => {
   const { signOut } = useAuth();
   const { agencyId } = useUserRole();
   const { t } = useAgencyTranslations();
+  const { currencySymbol } = useAgencyLanguage();
+  const { isSupported, isSubscribed, isLoading: pushLoading, permission, subscribe, unsubscribe } = usePushNotifications();
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -310,32 +314,50 @@ const AgencyHome = () => {
             <p className="text-sm opacity-80">{agency.agency_name}</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <AgencyLanguageSelector />
+          {isSupported && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={isSubscribed ? unsubscribe : subscribe}
+              disabled={pushLoading || permission === 'denied'}
+              className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
+              title={isSubscribed ? t('notificationsOn') : t('enableNotifications')}
+            >
+              {pushLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isSubscribed ? (
+                <Bell className="h-4 w-4" />
+              ) : (
+                <BellOff className="h-4 w-4" />
+              )}
+            </Button>
+          )}
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={handleRefresh}
             disabled={refreshing}
-            className="text-primary-foreground hover:bg-primary-foreground/10"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
           >
-            <RefreshCw className={cn("h-5 w-5", refreshing && "animate-spin")} />
+            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
           </Button>
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={() => navigate('/agency/reports')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
           >
-            <BarChart3 className="h-5 w-5" />
+            <BarChart3 className="h-4 w-4" />
           </Button>
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={signOut} 
-            className="text-primary-foreground hover:bg-primary-foreground/10"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </header>
@@ -376,7 +398,7 @@ const AgencyHome = () => {
                     "text-xl font-bold",
                     accountingSummary.balance > 0 ? "text-green-600" : accountingSummary.balance < 0 ? "text-destructive" : ""
                   )}>
-                    ₺{accountingSummary.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    {currencySymbol}{accountingSummary.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                   </p>
                 </CardContent>
               </Card>
@@ -388,7 +410,7 @@ const AgencyHome = () => {
                     <span className="text-xs text-muted-foreground">{t('totalRevenue')}</span>
                   </div>
                   <p className="text-xl font-bold text-green-600">
-                    ₺{accountingSummary.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    {currencySymbol}{accountingSummary.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                   </p>
                 </CardContent>
               </Card>
@@ -400,7 +422,7 @@ const AgencyHome = () => {
                     <span className="text-xs text-muted-foreground">{t('paid')}</span>
                   </div>
                   <p className="text-xl font-bold text-blue-600">
-                    ₺{accountingSummary.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    {currencySymbol}{accountingSummary.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                   </p>
                 </CardContent>
               </Card>
