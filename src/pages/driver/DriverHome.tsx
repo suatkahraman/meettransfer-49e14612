@@ -15,6 +15,7 @@ import SwipeableJobCard from '@/components/driver/SwipeableJobCard';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ReservationSearch from '@/components/ReservationSearch';
 
 interface Reservation {
   id: string;
@@ -494,6 +495,14 @@ const DriverHome = () => {
           </motion.div>
         ) : (
           <div className="space-y-4 pt-4">
+            {/* Reservation Code Search */}
+            <Card className="mb-2">
+              <CardContent className="p-3">
+                <p className="text-xs text-muted-foreground mb-2">Kod ile Ara</p>
+                <ReservationSearch userType="driver" driverId={driverId || undefined} placeholder="MT123456" />
+              </CardContent>
+            </Card>
+
             {/* Balance Summary Card */}
             <Card className="mb-4">
               <CardHeader className="pb-2">
