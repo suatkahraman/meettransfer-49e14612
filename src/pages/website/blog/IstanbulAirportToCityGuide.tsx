@@ -98,7 +98,7 @@ const IstanbulAirportToCityGuide = () => {
             description: 'Complete guide to Istanbul Airport transportation. Compare private transfers, taxis, metro & buses. Find the safest, fastest way to reach Taksim, Sultanahmet.',
             image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
             datePublished: '2024-12-15',
-            dateModified: '2024-12-15',
+            dateModified: '2025-12-31',
             author: 'Meet Transfer',
             readingTime: '12',
           },
