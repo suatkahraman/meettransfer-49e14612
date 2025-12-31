@@ -52,6 +52,7 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     completed: 'Completed',
     cancelled: 'Cancelled',
     pendingAdminReview: 'Pending Admin Review',
+    waitingForAgencyApproval: 'Waiting for Your Approval',
     
     // Create Reservation Page
     newReservationRequest: 'New Reservation Request',
@@ -118,6 +119,18 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     saveFailed: 'Failed to save',
     detailsCopied: 'Reservation details copied',
     
+    // Approval Flow
+    priceWillBeSetByAdmin: 'Price will be determined by admin',
+    waitingForPriceFromAdmin: 'Waiting for price from admin',
+    adminSetPrice: 'Admin has set the price',
+    approvePrice: 'Approve Price',
+    rejectPrice: 'Reject Price',
+    priceApproved: 'Price approved. Reservation confirmed.',
+    priceRejected: 'Price rejected. Request cancelled.',
+    proposedPrice: 'Proposed Price',
+    confirmApproval: 'Are you sure you want to approve this price?',
+    confirmRejection: 'Are you sure you want to reject this price?',
+    
     // Reports Page
     agencyReports: 'Agency Reports',
     currentBalance: 'Current Balance',
@@ -167,6 +180,7 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     completed: 'Tamamlandı',
     cancelled: 'İptal Edildi',
     pendingAdminReview: 'Admin Onayı Bekliyor',
+    waitingForAgencyApproval: 'Onayınız Bekleniyor',
     
     // Create Reservation Page
     newReservationRequest: 'Yeni Rezervasyon Talebi',
@@ -232,6 +246,18 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     changesSaved: 'Değişiklikler kaydedildi',
     saveFailed: 'Kaydetme başarısız',
     detailsCopied: 'Rezervasyon detayları kopyalandı',
+    
+    // Approval Flow
+    priceWillBeSetByAdmin: 'Fiyat admin tarafından belirlenecektir',
+    waitingForPriceFromAdmin: 'Admin fiyat belirlemesini bekliyor',
+    adminSetPrice: 'Admin fiyat belirledi',
+    approvePrice: 'Fiyatı Onayla',
+    rejectPrice: 'Fiyatı Reddet',
+    priceApproved: 'Fiyat onaylandı. Rezervasyon onaylandı.',
+    priceRejected: 'Fiyat reddedildi. Talep iptal edildi.',
+    proposedPrice: 'Önerilen Fiyat',
+    confirmApproval: 'Bu fiyatı onaylamak istediğinizden emin misiniz?',
+    confirmRejection: 'Bu fiyatı reddetmek istediğinizden emin misiniz?',
     
     // Reports Page
     agencyReports: 'Acenta Raporları',

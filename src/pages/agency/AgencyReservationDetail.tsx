@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy, MessageCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy, MessageCircle, CheckCircle, XCircle, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { LocationDisplay } from '@/components/ui/location-display';
@@ -39,6 +39,8 @@ interface Reservation {
   status: string;
   passenger_names: string[] | null;
   driver_id: string | null;
+  price: number | null;
+  price_currency: string | null;
   drivers?: Driver | null;
 }
 
@@ -54,20 +56,28 @@ interface AgencyReservationDetail {
 
 const statusColors: Record<string, string> = {
   'awaiting-price': 'bg-gray-500/20 text-gray-700',
+  'pending_admin_review': 'bg-amber-500/20 text-amber-700',
+  'waiting_for_agency_approval': 'bg-purple-500/20 text-purple-700',
+  'customer_approved': 'bg-blue-500/20 text-blue-700',
   'confirmed': 'bg-green-500/20 text-green-700',
   'sent_to_driver': 'bg-purple-500/20 text-purple-700',
   'assigned': 'bg-purple-500/20 text-purple-700',
   'active': 'bg-blue-500/20 text-blue-700',
   'completed': 'bg-green-500/20 text-green-700',
+  'customer_rejected': 'bg-red-500/20 text-red-700',
 };
 
 const statusLabels: Record<string, string> = {
   'awaiting-price': 'Awaiting Price',
+  'pending_admin_review': 'Pending Admin Review',
+  'waiting_for_agency_approval': 'Waiting for Your Approval',
+  'customer_approved': 'Approved',
   'confirmed': 'Confirmed',
   'sent_to_driver': 'Sent to Driver',
   'assigned': 'Assigned',
   'active': 'Active',
   'completed': 'Completed',
+  'customer_rejected': 'Rejected',
 };
 
 const paymentStatusLabels: Record<string, string> = {
@@ -86,6 +96,8 @@ const AgencyReservationDetail = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [approving, setApproving] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
 
   // Editable fields
   const [customerPrice, setCustomerPrice] = useState('');
@@ -97,14 +109,14 @@ const AgencyReservationDetail = () => {
     const fetchData = async () => {
       if (!id) return;
 
-      // Fetch reservation with driver info
+      // Fetch reservation with driver info and price
       const { data: resData, error: resError } = await supabase
         .from('reservations')
         .select(`
           id, reservation_code, customer_name, customer_phone, pickup, dropoff,
           pickup_place_name, dropoff_place_name,
           pickup_date, pickup_time, flight_number, vehicle_type, status,
-          passenger_names, driver_id,
+          passenger_names, driver_id, price, price_currency,
           drivers:driver_id (id, name, plate_number, vehicle_model)
         `)
         .eq('id', id)
@@ -187,6 +199,102 @@ const AgencyReservationDetail = () => {
       toast.error(error.message || 'Failed to save');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Handle agency price approval
+  const handleApprovePrice = async () => {
+    if (!id) return;
+    
+    if (!window.confirm(t('confirmApproval'))) return;
+    
+    setApproving(true);
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'customer_approved' })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Notify admins
+      try {
+        const { data: adminUsers } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'admin');
+
+        if (adminUsers && adminUsers.length > 0) {
+          for (const admin of adminUsers) {
+            await supabase.functions.invoke('create-notification', {
+              body: {
+                user_id: admin.user_id,
+                reservation_id: id,
+                title: 'Acenta Fiyatı Onayladı',
+                message: `Acenta fiyatı onayladı. Rezervasyon onaylandı.`,
+                type: 'agency_price_approved'
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Failed to notify admins:', e);
+      }
+
+      toast.success(t('priceApproved'));
+      setReservation(prev => prev ? { ...prev, status: 'customer_approved' } : null);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to approve');
+    } finally {
+      setApproving(false);
+    }
+  };
+
+  // Handle agency price rejection
+  const handleRejectPrice = async () => {
+    if (!id) return;
+    
+    if (!window.confirm(t('confirmRejection'))) return;
+    
+    setRejecting(true);
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'customer_rejected' })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Notify admins
+      try {
+        const { data: adminUsers } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'admin');
+
+        if (adminUsers && adminUsers.length > 0) {
+          for (const admin of adminUsers) {
+            await supabase.functions.invoke('create-notification', {
+              body: {
+                user_id: admin.user_id,
+                reservation_id: id,
+                title: 'Acenta Fiyatı Reddetti',
+                message: `Acenta belirlenen fiyatı reddetti.`,
+                type: 'agency_price_rejected'
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Failed to notify admins:', e);
+      }
+
+      toast.success(t('priceRejected'));
+      setReservation(prev => prev ? { ...prev, status: 'customer_rejected' } : null);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reject');
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -273,6 +381,75 @@ const AgencyReservationDetail = () => {
       </header>
 
       <main className="container mx-auto py-6 px-4 max-w-2xl space-y-6">
+        {/* Price Approval Card - Only show when status is waiting_for_agency_approval */}
+        {reservation.status === 'waiting_for_agency_approval' && reservation.price && (
+          <Card className="border-purple-300 bg-purple-50 dark:bg-purple-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+                <DollarSign className="h-5 w-5" />
+                {t('adminSetPrice')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center py-4">
+                <p className="text-sm text-purple-600 dark:text-purple-400 mb-2">{t('proposedPrice')}</p>
+                <p className="text-4xl font-bold text-purple-700 dark:text-purple-300">
+                  {reservation.price_currency === 'EUR' && '€'}
+                  {reservation.price_currency === 'USD' && '$'}
+                  {reservation.price_currency === 'GBP' && '£'}
+                  {reservation.price_currency === 'TRY' && '₺'}
+                  {reservation.price_currency === 'AED' && 'د.إ'}
+                  {!['EUR', 'USD', 'GBP', 'TRY', 'AED'].includes(reservation.price_currency || '') && (reservation.price_currency || '₺')}
+                  {reservation.price}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={handleApprovePrice}
+                  disabled={approving || rejecting}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  {approving ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                  )}
+                  {t('approvePrice')}
+                </Button>
+                <Button
+                  onClick={handleRejectPrice}
+                  disabled={approving || rejecting}
+                  variant="destructive"
+                >
+                  {rejecting ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <XCircle className="h-4 w-4 mr-2" />
+                  )}
+                  {t('rejectPrice')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Pending Admin Review Info */}
+        {reservation.status === 'pending_admin_review' && (
+          <Card className="border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+            <CardContent className="py-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-amber-700 dark:text-amber-300">{t('pendingAdminReview')}</p>
+                  <p className="text-sm text-amber-600 dark:text-amber-400">{t('waitingForPriceFromAdmin')}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Basic Info Card */}
         <Card>
           <CardHeader>

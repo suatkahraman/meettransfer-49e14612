@@ -29,13 +29,7 @@ const paymentTypes = [
   { value: 'agency_pay', label: 'Acenta Ödemesi' },
 ];
 
-const currencies = [
-  { value: 'EUR', label: '€ EUR', symbol: '€' },
-  { value: 'USD', label: '$ USD', symbol: '$' },
-  { value: 'GBP', label: '£ GBP', symbol: '£' },
-  { value: 'TRY', label: '₺ TRY', symbol: '₺' },
-  { value: 'AED', label: 'د.إ AED', symbol: 'د.إ' },
-];
+// Currencies removed - agency no longer sets price
 
 const AgencyCreateReservation = () => {
   const navigate = useNavigate();
@@ -55,8 +49,6 @@ const AgencyCreateReservation = () => {
     flight_number: '',
     vehicle_type: 'mercedes-vito',
     payment_type: 'agency_pay',
-    suggested_price: '',
-    price_currency: 'EUR',
     customer_notes: '',
     // Place details
     pickup_place_name: '',
@@ -146,9 +138,9 @@ const AgencyCreateReservation = () => {
           flight_number: formData.flight_number || null,
           vehicle_type: formData.vehicle_type,
           payment_type: formData.payment_type,
-          price: formData.suggested_price ? parseFloat(formData.suggested_price) : null,
-          price_currency: formData.price_currency,
-          status: 'pending_admin_review', // Admin onayı bekliyor
+          price: null, // Admin will set the price
+          price_currency: 'EUR', // Default, admin will update
+          status: 'pending_admin_review', // Admin onayı ve fiyat belirleme bekliyor
           agency_id: agencyId,
           passenger_names: validPassengerNames,
           customer_notes: formData.customer_notes || null,
@@ -170,8 +162,8 @@ const AgencyCreateReservation = () => {
         await supabase.from('agency_reservation_details').insert({
           reservation_id: reservation.id,
           agency_user_id: user?.id,
-          customer_price: formData.suggested_price ? parseFloat(formData.suggested_price) : 0,
-          agency_price_currency: formData.price_currency,
+          customer_price: 0, // Admin will set
+          agency_price_currency: 'EUR',
           agency_notes: formData.customer_notes || null,
         });
       }
@@ -219,12 +211,6 @@ const AgencyCreateReservation = () => {
       setSaving(false);
     }
   };
-
-  const getCurrencySymbol = (currency: string) => {
-    return currencies.find(c => c.value === currency)?.symbol || currency;
-  };
-
-  const currencySymbol = getCurrencySymbol(formData.price_currency);
 
   return (
     <div className="min-h-screen bg-background">
@@ -411,7 +397,7 @@ const AgencyCreateReservation = () => {
                 </div>
               </div>
 
-              {/* Payment */}
+              {/* Payment Type Only */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg border-b pb-2">{t('payment')}</h3>
 
@@ -430,42 +416,9 @@ const AgencyCreateReservation = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="suggested_price">{t('suggestedPrice')}</Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        {currencySymbol}
-                      </span>
-                      <Input
-                        id="suggested_price"
-                        type="number"
-                        step="0.01"
-                        value={formData.suggested_price}
-                        onChange={(e) => setFormData({ ...formData, suggested_price: e.target.value })}
-                        className="pl-8"
-                        placeholder="0.00"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="price_currency">{t('currency')}</Label>
-                    <Select
-                      value={formData.price_currency}
-                      onValueChange={(value) => setFormData({ ...formData, price_currency: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {currencies.map(c => (
-                          <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t('priceWillBeSetByAdmin')}
+                  </p>
                 </div>
               </div>
 

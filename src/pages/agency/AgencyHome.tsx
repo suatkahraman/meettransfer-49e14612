@@ -40,6 +40,8 @@ interface Reservation {
 
 const statusColors: Record<string, string> = {
   'awaiting-price': 'bg-gray-500/20 text-gray-700',
+  'pending_admin_review': 'bg-amber-500/20 text-amber-700',
+  'waiting_for_agency_approval': 'bg-purple-500/20 text-purple-700',
   'waiting_for_customer_approval': 'bg-yellow-500/20 text-yellow-700',
   'customer_approved': 'bg-blue-500/20 text-blue-700',
   'confirmed': 'bg-green-500/20 text-green-700',
@@ -48,10 +50,13 @@ const statusColors: Record<string, string> = {
   'active': 'bg-blue-500/20 text-blue-700',
   'completed': 'bg-green-500/20 text-green-700',
   'cancelled': 'bg-red-500/20 text-red-700',
+  'customer_rejected': 'bg-red-500/20 text-red-700',
 };
 
 const statusLabels: Record<string, string> = {
   'awaiting-price': 'Awaiting Price',
+  'pending_admin_review': 'Pending Admin Review',
+  'waiting_for_agency_approval': 'Awaiting Your Approval',
   'waiting_for_customer_approval': 'Awaiting Customer',
   'customer_approved': 'Customer Approved',
   'confirmed': 'Confirmed',
@@ -60,6 +65,7 @@ const statusLabels: Record<string, string> = {
   'active': 'Active',
   'completed': 'Completed',
   'cancelled': 'Cancelled',
+  'customer_rejected': 'Rejected',
 };
 
 interface AccountingSummary {
