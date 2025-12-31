@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,6 +37,7 @@ interface AgencyTransaction {
 
 const AgencyReports = () => {
   const { agencyId } = useUserRole();
+  const { t } = useAgencyTranslations();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -131,7 +133,7 @@ const AgencyReports = () => {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-xl font-serif">Agency Reports</h1>
+          <h1 className="text-xl font-serif">{t('agencyReports')}</h1>
           {agency && <p className="text-sm opacity-80">{agency.agency_name}</p>}
         </div>
       </header>
@@ -146,14 +148,14 @@ const AgencyReports = () => {
                   <Wallet className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Current Balance</p>
+                  <p className="text-sm text-muted-foreground">{t('currentBalance')}</p>
                   <p className={`text-3xl font-bold ${agency && agency.balance < 0 ? 'text-destructive' : 'text-primary'}`}>
                     ₺{agency?.balance?.toFixed(2) || '0.00'}
                   </p>
                 </div>
               </div>
               {agency && agency.balance < 0 && (
-                <Badge variant="destructive">Insufficient Balance</Badge>
+                <Badge variant="destructive">{t('insufficientBalance')}</Badge>
               )}
             </div>
           </CardContent>
@@ -172,7 +174,7 @@ const AgencyReports = () => {
             <CardContent className="pt-6 text-center">
               <Calendar className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
               <p className="text-2xl font-bold">{totalReservations}</p>
-              <p className="text-sm text-muted-foreground">Total Reservations</p>
+              <p className="text-sm text-muted-foreground">{t('totalReservations')}</p>
             </CardContent>
           </Card>
 
@@ -180,7 +182,7 @@ const AgencyReports = () => {
             <CardContent className="pt-6 text-center">
               <CheckCircle className="h-8 w-8 mx-auto text-green-500 mb-2" />
               <p className="text-2xl font-bold">{completedReservations}</p>
-              <p className="text-sm text-muted-foreground">Completed</p>
+              <p className="text-sm text-muted-foreground">{t('completed')}</p>
             </CardContent>
           </Card>
 
@@ -188,7 +190,7 @@ const AgencyReports = () => {
             <CardContent className="pt-6 text-center">
               <DollarSign className="h-8 w-8 mx-auto text-blue-500 mb-2" />
               <p className="text-2xl font-bold">₺{totalCustomerRevenue.toFixed(0)}</p>
-              <p className="text-sm text-muted-foreground">Customer Revenue</p>
+              <p className="text-sm text-muted-foreground">{t('customerRevenue')}</p>
             </CardContent>
           </Card>
 
@@ -198,7 +200,7 @@ const AgencyReports = () => {
               <p className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 ₺{totalProfit.toFixed(0)}
               </p>
-              <p className="text-sm text-muted-foreground">Agency Profit</p>
+              <p className="text-sm text-muted-foreground">{t('agencyProfit')}</p>
             </CardContent>
           </Card>
         </div>
@@ -206,25 +208,25 @@ const AgencyReports = () => {
         {/* Financial Summary */}
         <Card>
           <CardHeader>
-            <CardTitle>Financial Summary</CardTitle>
+            <CardTitle>{t('financialSummary')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">Total Customer Revenue</span>
+              <span className="text-muted-foreground">{t('customerRevenue')}</span>
               <span className="font-semibold">₺{totalCustomerRevenue.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">Amount Owed to Company</span>
+              <span className="text-muted-foreground">{t('amountOwedToCompany')}</span>
               <span className="font-semibold text-orange-600">₺{totalCompanyAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">Agency Profit</span>
+              <span className="text-muted-foreground">{t('agencyProfit')}</span>
               <span className={`font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 ₺{totalProfit.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between py-2">
-              <span className="text-muted-foreground">Pending Payments</span>
+              <span className="text-muted-foreground">{t('pendingPayments')}</span>
               <div className="flex items-center gap-2">
                 <span className="font-semibold">{pendingPayments}</span>
                 <span className="text-muted-foreground">/ {agencyDetails.length}</span>
@@ -238,12 +240,12 @@ const AgencyReports = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="h-5 w-5" />
-              Recent Balance Transactions
+              {t('recentBalanceTransactions')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {transactions.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No transactions yet</p>
+              <p className="text-center text-muted-foreground py-8">{t('noTransactionsYet')}</p>
             ) : (
               <div className="space-y-3">
                 {transactions.map((tx) => (
@@ -263,7 +265,7 @@ const AgencyReports = () => {
                       </div>
                       <div>
                         <p className="font-medium">
-                          {tx.type === 'top_up' ? 'Balance Top-Up' : 'Deduction'}
+                          {tx.type === 'top_up' ? t('balanceTopUp') : t('deduction')}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {tx.description || format(new Date(tx.created_at), 'dd MMM yyyy HH:mm')}
@@ -275,7 +277,7 @@ const AgencyReports = () => {
                         {tx.type === 'top_up' ? '+' : '-'}₺{Math.abs(tx.amount).toFixed(2)}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Balance: ₺{tx.balance_after.toFixed(2)}
+                        {t('balance')}: ₺{tx.balance_after.toFixed(2)}
                       </p>
                     </div>
                   </div>
