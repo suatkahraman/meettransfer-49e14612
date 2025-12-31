@@ -5,6 +5,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
+import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History, Wallet, TrendingUp, TrendingDown, Scale } from 'lucide-react';
@@ -52,6 +53,7 @@ const DriverHome = () => {
   const { signOut } = useAuth();
   const { driverId } = useUserRole();
   const navigate = useNavigate();
+  const { t } = useDriverTranslations();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -95,7 +97,7 @@ const DriverHome = () => {
 
     if (error) {
       console.error('Error:', error);
-      if (showToast) toast.error('Failed to refresh');
+      if (showToast) toast.error(t('failedToRefresh'));
     } else {
       // Sort by combined date and time for accurate ordering
       const sortedData = (data || []).sort((a, b) => {
@@ -122,7 +124,7 @@ const DriverHome = () => {
         }
       }
       
-      if (showToast) toast.success('Jobs refreshed');
+      if (showToast) toast.success(t('jobsRefreshed'));
     }
     setLoading(false);
     setRefreshing(false);
@@ -209,7 +211,7 @@ const DriverHome = () => {
                 });
               });
               playSound();
-              toast.success('New job assigned!', {
+              toast.success(t('newJobAssigned'), {
                 description: `${newReservation.pickup} → ${newReservation.dropoff}`,
                 icon: <Bell className="h-4 w-4" />
               });
@@ -253,11 +255,11 @@ const DriverHome = () => {
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to accept job');
+      toast.error(t('failedToAccept'));
       return;
     }
 
-    toast.success('Job accepted! Passenger pickup confirmed.');
+    toast.success(t('jobAccepted'));
     setReservations(prev => 
       prev.map(r => r.id === id ? { ...r, driver_confirmed: true, status: 'active' } : r)
     );
@@ -325,7 +327,7 @@ const DriverHome = () => {
   const handleCompleteJob = async (id: string) => {
     const reservation = reservations.find(r => r.id === id);
     if (!reservation) {
-      toast.error('Rezervasyon bulunamadı');
+      toast.error(t('reservationNotFound'));
       return;
     }
 
@@ -333,9 +335,9 @@ const DriverHome = () => {
     const validation = checkCompletionEligibility(reservation);
     if (!validation.canComplete) {
       if (validation.isCompleted) {
-        toast.error('Bu transfer zaten tamamlanmış');
+        toast.error(t('alreadyCompleted'));
       } else {
-        toast.error(validation.reason || 'Bu transfer şu anda tamamlanamaz');
+        toast.error(validation.reason || t('cannotCompleteNow'));
       }
       return;
     }
@@ -349,9 +351,9 @@ const DriverHome = () => {
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to complete job');
+      toast.error(t('failedToComplete'));
     } else {
-      toast.success('Trip completed successfully!');
+      toast.success(t('jobCompleted'));
       setReservations(prev => 
         prev.map(r => r.id === id ? { ...r, status: 'completed' } : r)
       );
@@ -429,15 +431,15 @@ const DriverHome = () => {
       {/* Mobile-optimized sticky header */}
       <header className="bg-primary text-primary-foreground py-3 px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg">
         <div className="flex items-center gap-2">
-          <h1 className="text-lg font-serif font-bold">Şoför Paneli</h1>
+          <h1 className="text-lg font-serif font-bold">{t('driverPanel')}</h1>
           {activeJobs.length > 0 && (
             <Badge variant="secondary" className="bg-green-500 text-white hover:bg-green-600">
-              {activeJobs.length} Aktif
+              {activeJobs.length} {t('active')}
             </Badge>
           )}
           {pendingJobs.length > 0 && (
             <Badge variant="secondary" className="bg-amber-500 text-white hover:bg-amber-600">
-              {pendingJobs.length} Bekleyen
+              {pendingJobs.length} {t('pending')}
             </Badge>
           )}
         </div>
@@ -450,7 +452,7 @@ const DriverHome = () => {
             className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2 gap-1"
           >
             <History className="h-5 w-5" />
-            <span className="text-xs">Geçmiş</span>
+            <span className="text-xs">{t('history')}</span>
           </Button>
           <Button 
             variant="ghost" 
@@ -458,7 +460,7 @@ const DriverHome = () => {
             className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2 gap-1"
           >
             <Calculator className="h-5 w-5" />
-            <span className="text-xs">Aylık Hesap</span>
+            <span className="text-xs">{t('monthlyAccounting')}</span>
           </Button>
           <Button 
             variant="ghost" 
@@ -466,7 +468,7 @@ const DriverHome = () => {
             className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2 gap-1"
           >
             <LogOut className="h-5 w-5" />
-            <span className="text-xs">Çıkış</span>
+            <span className="text-xs">{t('logout')}</span>
           </Button>
         </div>
       </header>
@@ -482,7 +484,7 @@ const DriverHome = () => {
             <RefreshCw className={cn("h-6 w-6 text-primary", refreshing && "animate-spin")} />
           </motion.div>
           <span className="text-xs text-muted-foreground">
-            {refreshing ? 'Yenileniyor...' : 'Yenilemek için çekin'}
+            {refreshing ? t('loading') : t('refresh')}
           </span>
         </motion.div>
         {loading ? (
@@ -496,8 +498,8 @@ const DriverHome = () => {
             className="text-center py-16"
           >
             <Car className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <p className="text-lg text-muted-foreground">Henüz atanmış iş yok</p>
-            <p className="text-sm text-muted-foreground mt-2">Yeni işler burada görünecek</p>
+            <p className="text-lg text-muted-foreground">{t('noJobsAssigned')}</p>
+            <p className="text-sm text-muted-foreground mt-2">{t('completedTransfersWillAppear')}</p>
           </motion.div>
         ) : (
           <div className="space-y-4 pt-4">
@@ -514,7 +516,7 @@ const DriverHome = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Wallet className="h-4 w-4" />
-                  Cari Hesap Özeti
+                  {t('yourBalance')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
@@ -522,7 +524,7 @@ const DriverHome = () => {
                   <div className="p-2 rounded-lg bg-muted/50 text-center">
                     <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs mb-1">
                       <TrendingUp className="h-3 w-3" />
-                      <span>Aldığım</span>
+                      <span>{t('receivedFromCompany')}</span>
                     </div>
                     <div className="text-sm font-bold text-green-600">₺{balanceData.totalPaymentsToDriver.toFixed(0)}</div>
                   </div>
@@ -530,7 +532,7 @@ const DriverHome = () => {
                   <div className="p-2 rounded-lg bg-muted/50 text-center">
                     <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs mb-1">
                       <TrendingDown className="h-3 w-3" />
-                      <span>Verdiğim</span>
+                      <span>{t('paidToCompany')}</span>
                     </div>
                     <div className="text-sm font-bold text-blue-600">₺{balanceData.totalPaymentsFromDriver.toFixed(0)}</div>
                   </div>
@@ -543,7 +545,7 @@ const DriverHome = () => {
                       <div className={`p-2 rounded-lg text-center ${isPositive ? 'bg-amber-100 dark:bg-amber-950' : isNegative ? 'bg-blue-100 dark:bg-blue-950' : 'bg-green-100 dark:bg-green-950'}`}>
                         <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs mb-1">
                           <Scale className="h-3 w-3" />
-                          <span>Bakiye</span>
+                          <span>{t('balance')}</span>
                         </div>
                         <div className={`text-sm font-bold ${isPositive ? 'text-amber-600' : isNegative ? 'text-blue-600' : 'text-green-600'}`}>
                           ₺{Math.abs(netBalance).toFixed(0)}
@@ -558,7 +560,7 @@ const DriverHome = () => {
                 {/* Recent Payments List */}
                 {balanceData.recentPayments.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-border">
-                    <div className="text-xs font-medium text-muted-foreground mb-2">Son Ödemeler</div>
+                    <div className="text-xs font-medium text-muted-foreground mb-2">{t('paymentHistory')}</div>
                     <div className="space-y-1.5">
                       {balanceData.recentPayments.map((payment) => (
                         <div key={payment.id} className="flex items-center justify-between text-xs">
@@ -592,7 +594,7 @@ const DriverHome = () => {
                     <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
                       <AlertCircle className="h-4 w-4 text-orange-600" />
                     </div>
-                    <span className="font-semibold">Yeni İşler</span>
+                    <span className="font-semibold">{t('pendingJobs')}</span>
                     <Badge variant="secondary" className="bg-orange-500/20 text-orange-700">
                       {pendingJobs.length}
                     </Badge>
@@ -642,7 +644,7 @@ const DriverHome = () => {
                     <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
                       <Loader2 className="h-4 w-4 text-blue-600" />
                     </div>
-                    <span className="font-semibold">Devam Ediyor</span>
+                    <span className="font-semibold">{t('activeJobs')}</span>
                     <Badge variant="secondary" className="bg-blue-500/20 text-blue-700">
                       {activeJobs.length}
                     </Badge>
@@ -692,9 +694,9 @@ const DriverHome = () => {
                     <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                     </div>
-                    <span className="font-semibold">Tamamlanan</span>
+                    <span className="font-semibold">{t('completedJobs')}</span>
                     <Badge variant="outline" className="text-xs text-muted-foreground border-muted-foreground/30">
-                      Bu ay
+                      {t('transfers')}
                     </Badge>
                     <Badge variant="secondary" className="bg-green-500/20 text-green-700">
                       {completedJobs.length}

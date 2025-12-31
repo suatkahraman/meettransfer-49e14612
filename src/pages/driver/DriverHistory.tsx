@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -51,6 +52,7 @@ const paymentTypeLabels: Record<string, string> = {
 const DriverHistory = () => {
   const navigate = useNavigate();
   const { driverId } = useUserRole();
+  const { t, getPaymentTypeLabel } = useDriverTranslations();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(startOfMonth(subMonths(new Date(), 1)));
@@ -119,7 +121,7 @@ const DriverHistory = () => {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-lg font-serif font-bold flex-1">Transfer Geçmişi</h1>
+        <h1 className="text-lg font-serif font-bold flex-1">{t('transferHistory')}</h1>
         <Button
           variant="ghost"
           size="icon"
@@ -144,11 +146,11 @@ const DriverHistory = () => {
           >
             <div className="p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Tarih Aralığına Göre Filtrele</span>
+                <span className="text-sm font-medium">{t('filterByDate')}</span>
                 {(dateFrom || dateTo) && (
                   <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-xs">
                     <X className="h-3 w-3 mr-1" />
-                    Temizle
+                    {t('clear')}
                   </Button>
                 )}
               </div>
@@ -164,7 +166,7 @@ const DriverHistory = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateFrom ? format(dateFrom, 'PP', { locale: tr }) : 'Başlangıç'}
+                      {dateFrom ? format(dateFrom, 'PP', { locale: tr }) : t('startDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -189,7 +191,7 @@ const DriverHistory = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateTo ? format(dateTo, 'PP', { locale: tr }) : 'Bitiş'}
+                      {dateTo ? format(dateTo, 'PP', { locale: tr }) : t('endDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="end">
@@ -213,19 +215,19 @@ const DriverHistory = () => {
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="p-3 text-center">
             <p className="text-2xl font-bold text-primary">{totalTrips}</p>
-            <p className="text-xs text-muted-foreground">Toplam Transfer</p>
+            <p className="text-xs text-muted-foreground">{t('totalTransfers')}</p>
           </CardContent>
         </Card>
         <Card className="bg-green-500/5 border-green-500/20">
           <CardContent className="p-3 text-center">
             <p className="text-2xl font-bold text-green-600">₺{totalEarnings.toLocaleString('tr-TR')}</p>
-            <p className="text-xs text-muted-foreground">Kazanç</p>
+            <p className="text-xs text-muted-foreground">{t('earnings')}</p>
           </CardContent>
         </Card>
         <Card className="bg-blue-500/5 border-blue-500/20">
           <CardContent className="p-3 text-center">
             <p className="text-2xl font-bold text-blue-600">₺{totalCashCollected.toLocaleString('tr-TR')}</p>
-            <p className="text-xs text-muted-foreground">Nakit</p>
+            <p className="text-xs text-muted-foreground">{t('cashCollected')}</p>
           </CardContent>
         </Card>
       </div>
@@ -239,9 +241,9 @@ const DriverHistory = () => {
         ) : reservations.length === 0 ? (
           <div className="text-center py-12">
             <CheckCircle2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Tamamlanmış transfer bulunamadı</p>
+            <p className="text-muted-foreground">{t('noCompletedTransfers')}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              {dateFrom || dateTo ? 'Tarih filtrelerini değiştirmeyi deneyin' : 'Tamamlanan transferler burada görünecek'}
+              {dateFrom || dateTo ? t('tryChangingFilters') : t('completedTransfersWillAppear')}
             </p>
           </div>
         ) : (
@@ -303,7 +305,7 @@ const DriverHistory = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <CreditCard className="h-3 w-3" />
-                          <span>{paymentTypeLabels[reservation.payment_type] || reservation.payment_type}</span>
+                          <span>{getPaymentTypeLabel(reservation.payment_type)}</span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -312,7 +314,7 @@ const DriverHistory = () => {
                         </p>
                         {reservation.driver_cash_amount && (
                           <p className="text-xs text-muted-foreground">
-                            Nakit: {formatPrice(reservation.driver_cash_amount, reservation.price_currency)}
+                            {t('cash')}: {formatPrice(reservation.driver_cash_amount, reservation.price_currency)}
                           </p>
                         )}
                       </div>
