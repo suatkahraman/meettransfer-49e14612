@@ -5,6 +5,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompletionValidation } from '@/hooks/useCompletionValidation';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -70,26 +71,13 @@ interface Reservation {
   } | null;
 }
 
-const statusColors: Record<string, string> = {
-  'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
-  'active': 'bg-blue-500/20 text-blue-700',
-  'completed': 'bg-green-500/20 text-green-700',
-};
-
-const statusLabels: Record<string, string> = {
-  'sent_to_driver': 'Atandı',
-  'assigned': 'Atandı',
-  'active': 'Devam Ediyor',
-  'completed': 'Tamamlandı',
-};
-
-
 const DriverJobDetails = () => {
   const { id } = useParams();
   const { user, signOut } = useAuth();
   const { driverId } = useUserRole();
   const navigate = useNavigate();
   const { emailAdminTripCompleted } = useEmailNotifications();
+  const { t, getPaymentTypeLabel } = useDriverTranslations();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -101,6 +89,22 @@ const DriverJobDetails = () => {
   const [driverCashAmount, setDriverCashAmount] = useState('');
   const [driverNotes, setDriverNotes] = useState('');
   const [savingFinancials, setSavingFinancials] = useState(false);
+
+  const statusColors: Record<string, string> = {
+    'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
+    'active': 'bg-blue-500/20 text-blue-700',
+    'completed': 'bg-green-500/20 text-green-700',
+  };
+
+  const getStatusLabel = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      'sent_to_driver': t('assigned'),
+      'assigned': t('assigned'),
+      'active': t('inProgress'),
+      'completed': t('completed'),
+    };
+    return statusMap[status] || status;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -115,7 +119,7 @@ const DriverJobDetails = () => {
 
       if (resError) {
         console.error('Error:', resError);
-        toast.error('Failed to load job details');
+        toast.error(t('failedToSave'));
         setLoading(false);
         return;
       }
@@ -161,7 +165,7 @@ const DriverJobDetails = () => {
             // Check if flight data changed
             if (newData.flight_arrival_time !== reservation?.flight_arrival_time ||
                 newData.flight_status !== reservation?.flight_status) {
-              toast.info('Uçuş bilgisi güncellendi!', {
+              toast.info(t('flightUpdated'), {
                 icon: <Plane className="h-4 w-4" />,
               });
             }
@@ -175,7 +179,7 @@ const DriverJobDetails = () => {
         supabase.removeChannel(channel);
       };
     }
-  }, [id, driverId]);
+  }, [id, driverId, t]);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '-';
@@ -196,9 +200,9 @@ const DriverJobDetails = () => {
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to confirm job');
+      toast.error(t('failedToAccept'));
     } else {
-      toast.success('Job confirmed successfully!');
+      toast.success(t('jobAccepted'));
       setReservation(prev => prev ? { ...prev, driver_confirmed: true, status: 'active' } : null);
     }
     setUpdating(false);
@@ -219,9 +223,9 @@ const DriverJobDetails = () => {
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to save changes');
+      toast.error(t('failedToSave'));
     } else {
-      toast.success('Changes saved successfully!');
+      toast.success(t('changesSaved'));
       setReservation(prev => prev ? {
         ...prev,
         price: driverPrice ? parseFloat(driverPrice) : null,
@@ -242,9 +246,9 @@ const DriverJobDetails = () => {
     if (newStatus === 'completed') {
       if (!completionValidation.canComplete) {
         if (completionValidation.isCompleted) {
-          toast.error('Bu transfer zaten tamamlanmış');
+          toast.error(t('alreadyCompleted'));
         } else {
-          toast.error(completionValidation.reason || 'Bu transfer şu anda tamamlanamaz');
+          toast.error(completionValidation.reason || t('cannotCompleteNow'));
         }
         return;
       }
@@ -266,9 +270,9 @@ const DriverJobDetails = () => {
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to update status');
+      toast.error(t('failedToComplete'));
     } else {
-      toast.success(`Status updated to ${statusLabels[newStatus] || newStatus}`);
+      toast.success(`${t('statusUpdated')}: ${getStatusLabel(newStatus)}`);
       setReservation(prev => prev ? { ...prev, status: newStatus } : null);
       setShowCashDialog(false);
 
@@ -411,32 +415,32 @@ const DriverJobDetails = () => {
     const dropoffFormatted = formatLocation(reservation.dropoff_place_name, reservation.dropoff);
     
     const text = `---------------------------------
-Rezervasyon Kodu: ${reservation.reservation_code || reservation.id.slice(0, 8)}
-Tarih & Saat: ${formattedDate} – ${reservation.pickup_time}
+${t('reservationCode')}: ${reservation.reservation_code || reservation.id.slice(0, 8)}
+${t('date')} & ${t('time')}: ${formattedDate} – ${reservation.pickup_time}
 
-Yolcular:
+${t('passengers')}:
 ${passengerList}
 
-Alış Noktası:
+${t('pickupPoint')}:
 ${pickupFormatted}
 
-Bırakış Noktası:
+${t('dropoffPoint')}:
 ${dropoffFormatted}
 
-${reservation.flight_number ? `Uçuş No: ${reservation.flight_number}\n` : ''}
-Araç: ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}
-Ücret: ${reservation.price ? `${currencySymbol}${reservation.price}` : '—'}
-Toplanan Nakit: ${reservation.driver_cash_amount ? `${currencySymbol}${reservation.driver_cash_amount}` : '—'}
+${reservation.flight_number ? `${t('flightNumber')}: ${reservation.flight_number}\n` : ''}
+${t('vehicle')}: ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}
+${t('price')}: ${reservation.price ? `${currencySymbol}${reservation.price}` : '—'}
+${t('cashCollectedLabel')}: ${reservation.driver_cash_amount ? `${currencySymbol}${reservation.driver_cash_amount}` : '—'}
 
-Müşteri Telefon: ${reservation.customer_phone}
-${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driver_notes || '—'}
+${t('phone')}: ${reservation.customer_phone}
+${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reservation.driver_notes || '—'}
 ---------------------------------`;
 
     try {
       await navigator.clipboard.writeText(text);
-      toast.success('Rezervasyon detayları kopyalandı.');
+      toast.success(t('detailsCopied'));
     } catch (err) {
-      toast.error('Kopyalama başarısız oldu.');
+      toast.error(t('copyFailed'));
     }
   };
 
@@ -451,7 +455,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
   if (!reservation) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Job not found</p>
+        <p>{t('reservationNotFound')}</p>
       </div>
     );
   }
@@ -465,12 +469,12 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
           <Button variant="ghost" size="icon" onClick={() => navigate('/driver')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">İş Detayı</h1>
+          <h1 className="text-2xl font-serif">{t('jobDetails')}</h1>
         </div>
         <div className="flex items-center gap-2">
           <NotificationBell />
           <Badge className={statusColors[reservation.status] || 'bg-muted'}>
-            {statusLabels[reservation.status] || reservation.status}
+            {getStatusLabel(reservation.status)}
           </Badge>
         </div>
       </header>
@@ -494,7 +498,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
               <div className="flex items-center gap-2 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg px-4 py-3">
                 <Building2 className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                 <div>
-                  <div className="text-xs text-purple-600 dark:text-purple-400">Acenta İşi</div>
+                  <div className="text-xs text-purple-600 dark:text-purple-400">{t('agencyReservation')}</div>
                   <div className="font-semibold text-purple-700 dark:text-purple-300">{reservation.agencies.agency_name}</div>
                 </div>
               </div>
@@ -509,7 +513,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
               <div className="flex items-start gap-3">
                 <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Ana Müşteri</div>
+                  <div className="text-sm text-muted-foreground">{t('mainCustomer')}</div>
                   <div className="font-medium">{reservation.customer_name}</div>
                 </div>
               </div>
@@ -518,7 +522,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                 <div className="flex items-start gap-3">
                   <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <div className="text-sm text-muted-foreground">Tüm Yolcular ({reservation.passenger_names.length})</div>
+                    <div className="text-sm text-muted-foreground">{t('allPassengers')} ({reservation.passenger_names.length})</div>
                     <div className="space-y-1 mt-1">
                       {reservation.passenger_names.map((name, index) => (
                         <div key={index} className="font-medium text-sm">
@@ -533,7 +537,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Telefon</div>
+                  <div className="text-sm text-muted-foreground">{t('phone')}</div>
                   <a href={`tel:${reservation.customer_phone}`} className="font-medium text-primary">
                     {reservation.customer_phone}
                   </a>
@@ -542,7 +546,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
 
               <div className="space-y-4">
                 <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-3 border border-green-200 dark:border-green-800">
-                  <div className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">Alış Noktası</div>
+                  <div className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">{t('pickupPoint')}</div>
                   <LocationDisplay
                     placeName={reservation.pickup_place_name}
                     address={reservation.pickup}
@@ -553,7 +557,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                 </div>
 
                 <div className="bg-red-50 dark:bg-red-950/30 rounded-lg p-3 border border-red-200 dark:border-red-800">
-                  <div className="text-xs text-red-600 dark:text-red-400 font-medium mb-1">Bırakış Noktası</div>
+                  <div className="text-xs text-red-600 dark:text-red-400 font-medium mb-1">{t('dropoffPoint')}</div>
                   <LocationDisplay
                     placeName={reservation.dropoff_place_name}
                     address={reservation.dropoff}
@@ -569,13 +573,13 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                   <div className="flex items-start gap-3">
                     <Plane className="h-5 w-5 text-muted-foreground mt-0.5" />
                     <div className="flex-1">
-                      <div className="text-sm text-muted-foreground">Uçuş</div>
+                      <div className="text-sm text-muted-foreground">{t('flight')}</div>
                       <AirlineDisplay flightNumber={reservation.flight_number} size="md" />
                       {reservation.flight_arrival_time && (
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant="outline" className="text-xs bg-primary/10">
                             <Clock className="h-3 w-3 mr-1" />
-                            Varış: {reservation.flight_arrival_time}
+                            {t('arrival')}: {reservation.flight_arrival_time}
                           </Badge>
                           {reservation.flight_status && (
                             <Badge variant="outline" className="text-xs capitalize">
@@ -603,7 +607,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
               <div className="flex items-start gap-3">
                 <Car className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Araç</div>
+                  <div className="text-sm text-muted-foreground">{t('vehicle')}</div>
                   <div className="font-medium">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</div>
                 </div>
               </div>
@@ -611,36 +615,36 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
               <div className="flex items-start gap-3">
                 <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Ödeme Yöntemi</div>
+                  <div className="text-sm text-muted-foreground">{t('paymentMethod')}</div>
                   {reservation.payment_type === 'payment_link' ? (
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 mt-1">
                       <CreditCard className="h-3 w-3 mr-1" />
-                      Payment Link
+                      {t('paymentLink')}
                     </Badge>
                   ) : reservation.payment_type === 'agency_pay' ? (
                     <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 mt-1">
                       <CreditCard className="h-3 w-3 mr-1" />
-                      Acente Ödemesi
+                      {t('agencyPayment')}
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 mt-1">
                       <Banknote className="h-3 w-3 mr-1" />
-                      Nakit Ödeme
+                      {t('cash')}
                     </Badge>
                   )}
                   {reservation.payment_type === 'cash' && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      Müşteri transferin sonunda size nakit ödeme yapacak
+                      {t('customerWillPayCash')}
                     </p>
                   )}
                   {reservation.payment_type === 'payment_link' && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      Müşteri online ödeme yaptı - nakit almayın
+                      {t('customerPaidOnline')}
                     </p>
                   )}
                   {reservation.payment_type === 'agency_pay' && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      Ödeme acente tarafından yapılacak - nakit almayın
+                      {t('agencyWillPay')}
                     </p>
                   )}
                 </div>
@@ -650,7 +654,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
               <div className="flex items-start gap-3">
                 <DollarSign className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Bütçe</div>
+                  <div className="text-sm text-muted-foreground">{t('budget')}</div>
                   <div className="font-bold text-lg">{formatPrice(reservation.price, reservation.price_currency)}</div>
                 </div>
               </div>
@@ -664,8 +668,8 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                         <Banknote className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-amber-800 dark:text-amber-200">Yolcudan Alınacak Nakit</div>
-                        <div className="text-xs text-amber-600 dark:text-amber-400">Transfer sonunda tahsil edilecek</div>
+                        <div className="text-sm font-medium text-amber-800 dark:text-amber-200">{t('cashToCollect')}</div>
+                        <div className="text-xs text-amber-600 dark:text-amber-400">{t('collectAtEnd')}</div>
                       </div>
                     </div>
                     <div className="text-right">
@@ -685,7 +689,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                       <MessageSquare className="h-4 w-4 text-white" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-amber-800 dark:text-amber-200">Müşteri Özel İstekleri</div>
+                      <div className="text-sm font-medium text-amber-800 dark:text-amber-200">{t('customerSpecialRequests')}</div>
                       <div className="text-sm text-amber-700 dark:text-amber-300 mt-1 whitespace-pre-wrap">{reservation.customer_notes}</div>
                     </div>
                   </div>
@@ -700,7 +704,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                       <ClipboardCopy className="h-4 w-4 text-white" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-blue-800 dark:text-blue-200">Admin Notları</div>
+                      <div className="text-sm font-medium text-blue-800 dark:text-blue-200">{t('adminNotes')}</div>
                       <div className="text-sm text-blue-700 dark:text-blue-300 mt-1 whitespace-pre-wrap">{adminNotes}</div>
                     </div>
                   </div>
@@ -711,11 +715,11 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
             {/* Currency Display - READ ONLY */}
             <div className="bg-muted/50 p-3 rounded-lg">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Para Birimi</span>
+                <span className="text-sm text-muted-foreground">{t('currency')}</span>
                 <span className="font-medium">{reservation.price_currency || 'TRY'} ({currencySymbol})</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Para birimi admin tarafından belirlenir - düzenlenemez
+                {t('currencySetByAdmin')}
               </p>
             </div>
           </CardContent>
@@ -726,12 +730,12 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              Transfer Ücreti & Nakit
+              {t('transferPriceAndCash')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="driver_price">Transfer Ücreti ({currencySymbol})</Label>
+              <Label htmlFor="driver_price">{t('transferPrice')} ({currencySymbol})</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                 <Input
@@ -739,17 +743,17 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                   type="number"
                   step="0.01"
                   min="0"
-                  placeholder="Son transfer ücretini girin"
+                  placeholder={t('enterFinalPrice')}
                   value={driverPrice}
                   onChange={(e) => setDriverPrice(e.target.value)}
                   className="pl-8 text-lg font-semibold"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">Bu transfer için son ücreti güncelleyebilirsiniz</p>
+              <p className="text-xs text-muted-foreground">{t('updateFinalPrice')}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="driver_cash">Toplanan Nakit ({currencySymbol})</Label>
+              <Label htmlFor="driver_cash">{t('cashCollectedLabel')} ({currencySymbol})</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
                 <Input
@@ -757,7 +761,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                   type="number"
                   step="0.01"
                   min="0"
-                  placeholder="Toplanan nakit tutarını girin"
+                  placeholder={t('enterCashAmount')}
                   value={driverCashAmount}
                   onChange={(e) => setDriverCashAmount(e.target.value)}
                   className="pl-8"
@@ -766,10 +770,10 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="driver_notes">Notlar / Ek Bilgi</Label>
+              <Label htmlFor="driver_notes">{t('notesAdditional')}</Label>
               <Textarea
                 id="driver_notes"
-                placeholder="Gecikmeler, ekstra duraklar, özel durumlar..."
+                placeholder={t('notesPlaceholder')}
                 value={driverNotes}
                 onChange={(e) => setDriverNotes(e.target.value)}
                 rows={3}
@@ -785,12 +789,12 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
             {savingFinancials ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Kaydediliyor...
+                  {t('saving')}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Değişiklikleri Kaydet
+                  {t('saveChanges')}
                 </>
               )}
             </Button>
@@ -802,7 +806,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Map className="h-5 w-5" />
-              Güzergah Haritası
+              {t('routeMap')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -822,7 +826,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
           onClick={copyReservationDetails}
         >
           <ClipboardCopy className="h-5 w-5 mr-2" />
-          Rezervasyon Detaylarını Kopyala
+          {t('copyReservationDetails')}
         </Button>
 
         {/* Action Buttons Card */}
@@ -840,7 +844,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                 ) : (
                   <CheckCircle className="h-5 w-5 mr-2" />
                 )}
-                İşi Onayla
+                {t('confirmJob')}
               </Button>
             )}
 
@@ -852,7 +856,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                 disabled={updating}
               >
                 <CheckCircle className="h-5 w-5 mr-2" />
-                Yolcu Alındı
+                {t('passengerPickedUp')}
               </Button>
             )}
             
@@ -874,7 +878,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
                   disabled={updating || !completionValidation.canComplete}
                 >
                   <CheckCircle className="h-5 w-5 mr-2" />
-                  Transfer Tamamlandı
+                  {t('transferCompleted')}
                 </Button>
               </>
             )}
@@ -882,7 +886,7 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
             {reservation.status === 'completed' && (
               <div className="text-center py-4">
                 <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
-                <p className="text-lg font-medium text-green-600">Transfer Tamamlandı</p>
+                <p className="text-lg font-medium text-green-600">{t('transferCompleted')}</p>
               </div>
             )}
           </CardContent>
@@ -893,17 +897,17 @@ ${adminNotes ? `Admin Notları: ${adminNotes}\n` : ''}Notlar: ${reservation.driv
       <Dialog open={showCashDialog} onOpenChange={setShowCashDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nakit Tahsilat</DialogTitle>
+            <DialogTitle>{t('cashCollection')}</DialogTitle>
           </DialogHeader>
           <p className="py-4">
-            Müşteriden {formatPrice(reservation.price, reservation.price_currency)} nakit ödeme aldınız mı?
+            {formatPrice(reservation.price, reservation.price_currency)} {t('didYouCollectCash')}
           </p>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => updateStatus('completed', false)} disabled={updating}>
-              Hayır, Almadım
+              {t('noDidNotCollect')}
             </Button>
             <Button onClick={() => updateStatus('completed', true)} disabled={updating}>
-              Evet, Aldım
+              {t('yesCollectedCash')}
             </Button>
           </DialogFooter>
         </DialogContent>

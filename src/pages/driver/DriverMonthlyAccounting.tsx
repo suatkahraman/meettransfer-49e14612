@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -42,6 +43,7 @@ const DriverMonthlyAccounting = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { driverId } = useUserRole();
+  const { t } = useDriverTranslations();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [payments, setPayments] = useState<DriverPayment[]>([]);
@@ -156,7 +158,7 @@ const DriverMonthlyAccounting = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">Aylık Kazanç</h1>
+          <h1 className="text-2xl font-serif">{t('monthlyEarnings')}</h1>
         </div>
         <Button 
           variant="ghost" 
@@ -177,7 +179,7 @@ const DriverMonthlyAccounting = () => {
         />
 
         {loading ? (
-          <div className="text-center py-12">Yükleniyor...</div>
+          <div className="text-center py-12">{t('loading')}</div>
         ) : (
           <>
             {/* Driver Balance Card */}
@@ -192,11 +194,11 @@ const DriverMonthlyAccounting = () => {
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="reservations" className="gap-2">
                   <FileText className="h-4 w-4" />
-                  Transferler
+                  {t('transfers')}
                 </TabsTrigger>
                 <TabsTrigger value="payments" className="gap-2">
                   <Wallet className="h-4 w-4" />
-                  Ödemeler
+                  {t('payments')}
                 </TabsTrigger>
               </TabsList>
 
@@ -211,7 +213,7 @@ const DriverMonthlyAccounting = () => {
                 {/* Reservations Table */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Transferler</CardTitle>
+                    <CardTitle className="text-lg">{t('transfers')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <MonthlyAccountingTable
@@ -229,7 +231,7 @@ const DriverMonthlyAccounting = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Wallet className="h-5 w-5" />
-                      Bu Ay Alınan Ödemeler
+                      {t('paymentsThisMonth')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -237,7 +239,7 @@ const DriverMonthlyAccounting = () => {
                       ₺{totalPaymentsThisMonth.toFixed(2)}
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {payments.length} ödeme kaydı
+                      {payments.length} {t('paymentRecords')}
                     </p>
                   </CardContent>
                 </Card>
@@ -245,14 +247,14 @@ const DriverMonthlyAccounting = () => {
                 {/* Total Balance */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Toplam Cari Bakiye</CardTitle>
+                    <CardTitle className="text-lg">{t('totalCurrentBalance')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold text-blue-600">
                       ₺{totalBalance.toFixed(2)}
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Tüm zamanlar toplam ödeme
+                      {t('allTimeTotal')}
                     </p>
                   </CardContent>
                 </Card>
@@ -260,7 +262,7 @@ const DriverMonthlyAccounting = () => {
                 {/* Payments Table */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Ödeme Geçmişi</CardTitle>
+                    <CardTitle className="text-lg">{t('paymentHistory')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <DriverPaymentsTable payments={payments} />

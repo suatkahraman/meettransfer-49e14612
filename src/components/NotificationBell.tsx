@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Bell, Check, Trash2 } from 'lucide-react';
 import {
@@ -55,6 +56,7 @@ export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) =
   const { role } = useUserRole();
   const navigate = useNavigate();
   const { playSound } = useNotificationSound();
+  const { t } = useDriverTranslations();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -263,7 +265,7 @@ export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) =
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 bg-background z-50 max-h-[70vh] overflow-y-auto">
         <div className="p-3 font-semibold border-b flex items-center justify-between sticky top-0 bg-background">
-          <span>Notifications {unreadCount > 0 && `(${unreadCount})`}</span>
+          <span>{t('notifications')} {unreadCount > 0 && `(${unreadCount})`}</span>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
@@ -272,14 +274,14 @@ export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) =
               className="h-7 text-xs"
             >
               <Check className="h-3 w-3 mr-1" />
-              Mark all read
+              {t('markAllRead')}
             </Button>
           )}
         </div>
         {notifications.length === 0 ? (
           <div className="p-6 text-center text-muted-foreground text-sm">
             <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            No notifications yet
+            {t('noNotifications')}
           </div>
         ) : (
           notifications.map((notification) => (
@@ -323,7 +325,7 @@ export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) =
             <DropdownMenuSeparator />
             <div className="p-2 text-center">
               <Button variant="ghost" size="sm" className="text-xs text-muted-foreground w-full">
-                View all notifications
+                {t('viewAll')}
               </Button>
             </div>
           </>
