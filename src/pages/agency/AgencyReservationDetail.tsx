@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -78,6 +79,7 @@ const paymentStatusLabels: Record<string, string> = {
 const AgencyReservationDetail = () => {
   const { id } = useParams();
   const { agencyId } = useUserRole();
+  const { t } = useAgencyTranslations();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [agencyDetails, setAgencyDetails] = useState<AgencyReservationDetail | null>(null);
@@ -246,7 +248,7 @@ const AgencyReservationDetail = () => {
   if (!reservation) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Reservation not found</p>
+        <p>{t('reservationNotFound')}</p>
       </div>
     );
   }
@@ -263,7 +265,7 @@ const AgencyReservationDetail = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-serif">Reservation Details</h1>
+          <h1 className="text-xl font-serif">{t('reservationDetails')}</h1>
         </div>
         <Badge className={statusColors[reservation.status] || 'bg-muted'}>
           {statusLabels[reservation.status] || reservation.status}
@@ -296,7 +298,7 @@ const AgencyReservationDetail = () => {
               <div className="flex items-start gap-3">
                 <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Customer</div>
+                  <div className="text-sm text-muted-foreground">{t('customer')}</div>
                   <div className="font-medium">{reservation.customer_name}</div>
                 </div>
               </div>
@@ -306,7 +308,7 @@ const AgencyReservationDetail = () => {
                   <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <div className="text-sm text-muted-foreground">
-                      All Passengers ({reservation.passenger_names.length})
+                      {t('allPassengers')} ({reservation.passenger_names.length})
                     </div>
                     <div className="space-y-1 mt-1">
                       {reservation.passenger_names.map((name, index) => (
@@ -336,7 +338,7 @@ const AgencyReservationDetail = () => {
                 <div className="flex items-start gap-3">
                   <Plane className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <div className="text-sm text-muted-foreground">Flight</div>
+                    <div className="text-sm text-muted-foreground">{t('flight')}</div>
                     <AirlineDisplay flightNumber={reservation.flight_number} size="md" />
                   </div>
                 </div>
@@ -345,7 +347,7 @@ const AgencyReservationDetail = () => {
               <div className="flex items-start gap-3">
                 <Car className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Vehicle</div>
+                  <div className="text-sm text-muted-foreground">{t('vehicle')}</div>
                   <div className="font-medium capitalize">{reservation.vehicle_type.replace('-', ' ')}</div>
                 </div>
               </div>
@@ -354,7 +356,7 @@ const AgencyReservationDetail = () => {
             {/* Driver Info */}
             {reservation.drivers && (
               <div className="pt-4 border-t">
-                <h3 className="font-semibold mb-2">Assigned Driver</h3>
+                <h3 className="font-semibold mb-2">{t('assignedDriver')}</h3>
                 <div className="bg-muted/50 p-3 rounded-lg space-y-1">
                   <p className="font-medium">{reservation.drivers.name}</p>
                   {reservation.drivers.vehicle_model && (
@@ -375,7 +377,7 @@ const AgencyReservationDetail = () => {
                 onClick={handleCopyDetails}
               >
                 <Copy className="h-4 w-4 mr-2" />
-                Copy Reservation Details
+                {t('copyReservationDetails')}
               </Button>
               <Button 
                 className="w-full bg-[#25D366] hover:bg-[#22c55e] text-white"
@@ -420,7 +422,7 @@ const AgencyReservationDetail = () => {
                 }}
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
-                Share via WhatsApp
+                {t('shareViaWhatsApp')}
               </Button>
             </div>
           </CardContent>
@@ -429,11 +431,11 @@ const AgencyReservationDetail = () => {
         {/* Agency Pricing Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Agency Pricing & Notes</CardTitle>
+            <CardTitle>{t('agencyPricingNotes')}</CardTitle>
             {!isEditing && (
               <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                 <Edit className="h-4 w-4 mr-2" />
-                Edit
+                {t('edit')}
               </Button>
             )}
           </CardHeader>
@@ -442,7 +444,7 @@ const AgencyReservationDetail = () => {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Customer Price (₺)</Label>
+                    <Label>{t('customerPrice')} (₺)</Label>
                     <Input
                       type="number"
                       value={customerPrice}
@@ -451,7 +453,7 @@ const AgencyReservationDetail = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Company Amount (₺)</Label>
+                    <Label>{t('companyAmount')} (₺)</Label>
                     <Input
                       type="number"
                       value={companyAmount}
@@ -463,7 +465,7 @@ const AgencyReservationDetail = () => {
 
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Agency Profit:</span>
+                    <span className="text-muted-foreground">{t('agencyProfit')}:</span>
                     <span className={`font-bold ${calculatedProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       ₺{calculatedProfit.toFixed(2)}
                     </span>
@@ -471,7 +473,7 @@ const AgencyReservationDetail = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Payment Status</Label>
+                  <Label>{t('paymentStatus')}</Label>
                   <Select value={paymentStatus} onValueChange={setPaymentStatus}>
                     <SelectTrigger>
                       <SelectValue />

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,6 +42,7 @@ const AgencyCreateReservation = () => {
   const { user } = useAuth();
   const { agencyId } = useUserRole();
   const { emailAdminAgencyRequest } = useEmailNotifications();
+  const { t } = useAgencyTranslations();
   const [saving, setSaving] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -112,17 +114,17 @@ const AgencyCreateReservation = () => {
     
     const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
     if (validPassengerNames.length === 0) {
-      toast.error('En az bir yolcu ismi gereklidir');
+      toast.error(t('atLeastOnePassenger'));
       return;
     }
     
     if (!formData.customer_phone || !formData.pickup || !formData.dropoff || !formData.pickup_date || !formData.pickup_time) {
-      toast.error('Lütfen tüm gerekli alanları doldurun');
+      toast.error(t('fillAllRequired'));
       return;
     }
 
     if (!agencyId) {
-      toast.error('Acenta bilgisi bulunamadı');
+      toast.error(t('agencyNotFound'));
       return;
     }
 
@@ -208,11 +210,11 @@ const AgencyCreateReservation = () => {
         }
       }
 
-      toast.success('Rezervasyon talebi gönderildi. Admin onayı bekleniyor.');
+      toast.success(t('reservationSent'));
       navigate('/agency');
     } catch (error: any) {
       console.error('Error creating reservation:', error);
-      toast.error(error.message || 'Rezervasyon oluşturulamadı');
+      toast.error(error.message || t('reservationFailed'));
     } finally {
       setSaving(false);
     }
@@ -230,7 +232,7 @@ const AgencyCreateReservation = () => {
         <Button variant="ghost" size="icon" onClick={() => navigate('/agency')} className="text-primary-foreground hover:bg-primary-foreground/10">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-serif">Yeni Rezervasyon Talebi</h1>
+        <h1 className="text-2xl font-serif">{t('newReservationRequest')}</h1>
       </header>
 
       <main className="container mx-auto py-8 px-4 max-w-2xl">
@@ -238,21 +240,21 @@ const AgencyCreateReservation = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Rezervasyon Oluştur
+              {t('createReservationTitle')}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Rezervasyon talebiniz admin onayına gönderilecektir.
+              {t('reservationWillBeSent')}
             </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Customer Information */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Müşteri Bilgileri</h3>
+                <h3 className="font-semibold text-lg border-b pb-2">{t('customerInfo')}</h3>
                 
                 {/* Passenger Names */}
                 <div className="space-y-3">
-                  <Label>Yolcu İsimleri * <span className="text-muted-foreground text-sm">({passengerNames.length}/{MAX_PASSENGERS})</span></Label>
+                  <Label>{t('passengerNames')} * <span className="text-muted-foreground text-sm">({passengerNames.length}/{MAX_PASSENGERS})</span></Label>
                   {passengerNames.map((name, index) => (
                     <div key={index} className="flex gap-2 items-center">
                       <div className="flex-1">
@@ -260,7 +262,7 @@ const AgencyCreateReservation = () => {
                           <Input
                             value={name}
                             onChange={(e) => updatePassenger(index, e.target.value)}
-                            placeholder={index === 0 ? "Ana Yolcu Adı *" : `Yolcu ${index + 1}`}
+                            placeholder={index === 0 ? t('mainPassenger') : `${t('passenger')} ${index + 1}`}
                             className="pr-20"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
@@ -291,13 +293,13 @@ const AgencyCreateReservation = () => {
                       className="w-full"
                     >
                       <UserPlus className="h-4 w-4 mr-2" />
-                      Yolcu Ekle
+                      {t('addPassenger')}
                     </Button>
                   )}
                 </div>
                 
                 <div>
-                  <Label htmlFor="customer_phone">Telefon *</Label>
+                  <Label htmlFor="customer_phone">{t('phone')} *</Label>
                   <Input
                     id="customer_phone"
                     value={formData.customer_phone}
@@ -310,14 +312,14 @@ const AgencyCreateReservation = () => {
 
               {/* Trip Details */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Transfer Detayları</h3>
+                <h3 className="font-semibold text-lg border-b pb-2">{t('transferDetails')}</h3>
                 
                 <div>
-                  <Label>Alış Noktası *</Label>
+                  <Label>{t('pickupPoint')} *</Label>
                   <GooglePlacesAutocomplete
                     initialValue={formData.pickup}
                     onPlaceSelect={handlePickupSelect}
-                    placeholder="Alış noktası yazın"
+                    placeholder={t('enterPickupPoint')}
                   />
                   {formData.pickup_place_name && formData.pickup_place_name !== formData.pickup && (
                     <LocationDisplay 
@@ -331,11 +333,11 @@ const AgencyCreateReservation = () => {
                 </div>
                 
                 <div>
-                  <Label>Varış Noktası *</Label>
+                  <Label>{t('dropoffPoint')} *</Label>
                   <GooglePlacesAutocomplete
                     initialValue={formData.dropoff}
                     onPlaceSelect={handleDropoffSelect}
-                    placeholder="Varış noktası yazın"
+                    placeholder={t('enterDropoffPoint')}
                   />
                   {formData.dropoff_place_name && formData.dropoff_place_name !== formData.dropoff && (
                     <LocationDisplay 
@@ -352,14 +354,14 @@ const AgencyCreateReservation = () => {
                 {formData.pickup_lat && formData.pickup_lng && formData.dropoff_lat && formData.dropoff_lng && (
                   <div className="rounded-lg border p-3 bg-muted/50">
                     <p className="text-sm text-muted-foreground text-center">
-                      📍 Konum bilgileri alındı
+                      📍 {t('locationReceived')}
                     </p>
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="pickup_date">Tarih *</Label>
+                    <Label htmlFor="pickup_date">{t('date')} *</Label>
                     <Input
                       id="pickup_date"
                       type="date"
@@ -369,7 +371,7 @@ const AgencyCreateReservation = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="pickup_time">Saat *</Label>
+                    <Label htmlFor="pickup_time">{t('time')} *</Label>
                     <Input
                       id="pickup_time"
                       type="time"
@@ -381,7 +383,7 @@ const AgencyCreateReservation = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="flight_number">Uçuş Numarası</Label>
+                  <Label htmlFor="flight_number">{t('flightNumber')}</Label>
                   <Input
                     id="flight_number"
                     value={formData.flight_number}
@@ -391,7 +393,7 @@ const AgencyCreateReservation = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="vehicle_type">Araç Tipi</Label>
+                  <Label htmlFor="vehicle_type">{t('vehicleType')}</Label>
                   <Select
                     value={formData.vehicle_type}
                     onValueChange={(value) => setFormData({ ...formData, vehicle_type: value })}
@@ -410,10 +412,10 @@ const AgencyCreateReservation = () => {
 
               {/* Payment */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Ödeme</h3>
+                <h3 className="font-semibold text-lg border-b pb-2">{t('payment')}</h3>
 
                 <div>
-                  <Label htmlFor="payment_type">Ödeme Tipi</Label>
+                  <Label htmlFor="payment_type">{t('paymentType')}</Label>
                   <Select
                     value={formData.payment_type}
                     onValueChange={(value) => setFormData({ ...formData, payment_type: value })}
@@ -431,7 +433,7 @@ const AgencyCreateReservation = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="suggested_price">Önerilen Fiyat</Label>
+                    <Label htmlFor="suggested_price">{t('suggestedPrice')}</Label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                         {currencySymbol}
@@ -448,7 +450,7 @@ const AgencyCreateReservation = () => {
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="price_currency">Para Birimi</Label>
+                    <Label htmlFor="price_currency">{t('currency')}</Label>
                     <Select
                       value={formData.price_currency}
                       onValueChange={(value) => setFormData({ ...formData, price_currency: value })}
@@ -468,14 +470,14 @@ const AgencyCreateReservation = () => {
 
               {/* Notes */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Notlar</h3>
+                <h3 className="font-semibold text-lg border-b pb-2">{t('notes')}</h3>
                 <div>
-                  <Label htmlFor="customer_notes">Müşteri Notları / Özel İstekler</Label>
+                  <Label htmlFor="customer_notes">{t('notes')}</Label>
                   <Textarea
                     id="customer_notes"
                     value={formData.customer_notes}
                     onChange={(e) => setFormData({ ...formData, customer_notes: e.target.value })}
-                    placeholder="Varsa özel istekler..."
+                    placeholder={t('notesPlaceholder')}
                     rows={3}
                   />
                 </div>
@@ -483,11 +485,11 @@ const AgencyCreateReservation = () => {
 
               <Button type="submit" className="w-full" disabled={saving}>
                 {saving ? (
-                  <>Gönderiliyor...</>
+                  <>{t('saving')}</>
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />
-                    Rezervasyon Talebi Gönder
+                    {t('save')}
                   </>
                 )}
               </Button>
