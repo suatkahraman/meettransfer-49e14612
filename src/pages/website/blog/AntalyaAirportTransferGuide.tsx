@@ -74,7 +74,7 @@ const AntalyaAirportTransferGuide = () => {
             description: 'Everything about Antalya Airport transfers. Prices to Lara, Belek, Side, Kemer, Alanya. Booking tips, journey times, and what to expect.',
             image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
             datePublished: '2024-11-28',
-            dateModified: '2024-11-28',
+            dateModified: '2025-12-31',
             author: 'Meet Transfer',
             readingTime: '13',
           },

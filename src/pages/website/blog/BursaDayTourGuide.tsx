@@ -61,8 +61,9 @@ const BursaDayTourGuide = () => {
             description: 'Complete guide to visiting Bursa from Istanbul with transportation options, must-see attractions, and tour itineraries.',
             image: 'https://meettransfer.app/images/bursa-transfer-hero.jpg',
             datePublished: '2025-12-26',
-            dateModified: '2025-12-26',
+            dateModified: '2025-12-31',
             author: 'Meet Transfer',
+            readingTime: '15',
           },
           {
             type: 'BreadcrumbList',

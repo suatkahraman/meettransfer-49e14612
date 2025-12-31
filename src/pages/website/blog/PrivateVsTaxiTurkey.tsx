@@ -55,7 +55,7 @@ const PrivateVsTaxiTurkey = () => {
             description: 'Detailed comparison of private airport transfers and taxis in Turkey. We analyze safety, comfort, pricing, and reliability.',
             image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
             datePublished: '2024-12-05',
-            dateModified: '2024-12-05',
+            dateModified: '2025-12-31',
             author: 'Meet Transfer',
             readingTime: '11',
           },
