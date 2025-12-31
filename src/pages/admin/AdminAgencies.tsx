@@ -38,6 +38,7 @@ const AdminAgencies = () => {
   const [formData, setFormData] = useState({
     agency_name: '',
     email: '',
+    password: '',
     phone: '',
     comments: '',
   });
@@ -119,7 +120,7 @@ const AdminAgencies = () => {
 
   const openCreateDialog = () => {
     setSelectedAgency(null);
-    setFormData({ agency_name: '', email: '', phone: '', comments: '' });
+    setFormData({ agency_name: '', email: '', password: '', phone: '', comments: '' });
     setDialogOpen(true);
   };
 
@@ -128,6 +129,7 @@ const AdminAgencies = () => {
     setFormData({
       agency_name: agency.agency_name,
       email: '',
+      password: '',
       phone: '',
       comments: agency.comments || '',
     });
@@ -145,20 +147,28 @@ const AdminAgencies = () => {
       return;
     }
 
-    // Validate email and phone for new agency creation
+    // Validate email, password and phone for new agency creation
     if (!selectedAgency) {
       if (!formData.email.trim()) {
         toast.error('E-posta adresi gereklidir');
+        return;
+      }
+      if (!formData.password.trim()) {
+        toast.error('Şifre gereklidir');
+        return;
+      }
+      if (formData.password.trim().length < 6) {
+        toast.error('Şifre en az 6 karakter olmalıdır');
         return;
       }
       if (!formData.phone.trim()) {
         toast.error('Telefon numarası gereklidir');
         return;
       }
-      // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      // Basic email validation - only ASCII characters allowed
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(formData.email.trim())) {
-        toast.error('Geçerli bir e-posta adresi girin');
+        toast.error('Geçerli bir e-posta adresi girin (Türkçe karakter kullanmayın)');
         return;
       }
     }
@@ -193,8 +203,8 @@ const AdminAgencies = () => {
         
         const response = await supabase.functions.invoke('create-user-account', {
           body: {
-            email: formData.email.trim(),
-            password: Math.random().toString(36).slice(-12) + 'A1!', // Random password
+            email: formData.email.trim().toLowerCase(),
+            password: formData.password.trim(),
             full_name: formData.agency_name.trim(),
             phone: formData.phone.trim(),
             role: 'agency',
@@ -214,7 +224,7 @@ const AdminAgencies = () => {
           new_data: { agency_name: formData.agency_name, email: formData.email },
         });
 
-        toast.success('Acenta ve hesabı başarıyla oluşturuldu. Şifre sıfırlama e-postası gönderildi.');
+        toast.success('Acenta ve hesabı başarıyla oluşturuldu');
       }
 
       setDialogOpen(false);
@@ -381,12 +391,22 @@ const AdminAgencies = () => {
             {!selectedAgency && (
               <>
                 <div className="space-y-2">
-                  <Label>E-posta Adresi *</Label>
+                  <Label>E-posta Adresi (Kullanıcı Adı) *</Label>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="acenta@example.com"
+                  />
+                  <p className="text-xs text-muted-foreground">Türkçe karakter kullanmayın</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Şifre *</Label>
+                  <Input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder="En az 6 karakter"
                   />
                 </div>
                 <div className="space-y-2">
