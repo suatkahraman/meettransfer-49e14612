@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -90,6 +91,7 @@ const AgencyReservationDetail = () => {
   const { id } = useParams();
   const { agencyId } = useUserRole();
   const { t } = useAgencyTranslations();
+  const { emailAdminAgencyPriceApproved, emailAdminAgencyPriceRejected } = useEmailNotifications();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [agencyDetails, setAgencyDetails] = useState<AgencyReservationDetail | null>(null);
@@ -217,7 +219,20 @@ const AgencyReservationDetail = () => {
 
       if (error) throw error;
 
-      // Notify admins
+      // Send email to admin
+      try {
+        console.log('Sending agency price approved email for reservation:', id);
+        const emailResult = await emailAdminAgencyPriceApproved(id);
+        if (!emailResult.success) {
+          console.error('Agency price approved email failed:', emailResult.error);
+        } else {
+          console.log('Agency price approved email sent successfully');
+        }
+      } catch (e) {
+        console.error('Failed to send agency price approved email:', e);
+      }
+
+      // Notify admins in-app
       try {
         const { data: adminUsers } = await supabase
           .from('user_roles')
@@ -265,7 +280,20 @@ const AgencyReservationDetail = () => {
 
       if (error) throw error;
 
-      // Notify admins
+      // Send email to admin
+      try {
+        console.log('Sending agency price rejected email for reservation:', id);
+        const emailResult = await emailAdminAgencyPriceRejected(id);
+        if (!emailResult.success) {
+          console.error('Agency price rejected email failed:', emailResult.error);
+        } else {
+          console.log('Agency price rejected email sent successfully');
+        }
+      } catch (e) {
+        console.error('Failed to send agency price rejected email:', e);
+      }
+
+      // Notify admins in-app
       try {
         const { data: adminUsers } = await supabase
           .from('user_roles')

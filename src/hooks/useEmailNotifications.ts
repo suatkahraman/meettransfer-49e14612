@@ -15,7 +15,10 @@ type EmailType =
   | 'reservation_cancelled_admin'
   | 'agency_request_admin'
   | 'agency_approved_agency'
-  | 'agency_rejected_agency';
+  | 'agency_rejected_agency'
+  | 'agency_price_set_agency'
+  | 'agency_price_approved_admin'
+  | 'agency_price_rejected_admin';
 
 interface EmailOptions {
   type: EmailType;
@@ -209,6 +212,35 @@ export const useEmailNotifications = () => {
     });
   }, [sendEmail]);
 
+  // 14. When admin sets price for agency request → Email to agency
+  const emailAgencyPriceSet = useCallback(async (
+    reservationId: string,
+    price?: number,
+    currency?: string
+  ) => {
+    return sendEmail({
+      type: 'agency_price_set_agency',
+      reservation_id: reservationId,
+      additional_data: { price, currency },
+    });
+  }, [sendEmail]);
+
+  // 15. When agency approves price → Email to admin
+  const emailAdminAgencyPriceApproved = useCallback(async (reservationId: string) => {
+    return sendEmail({
+      type: 'agency_price_approved_admin',
+      reservation_id: reservationId,
+    });
+  }, [sendEmail]);
+
+  // 16. When agency rejects price → Email to admin
+  const emailAdminAgencyPriceRejected = useCallback(async (reservationId: string) => {
+    return sendEmail({
+      type: 'agency_price_rejected_admin',
+      reservation_id: reservationId,
+    });
+  }, [sendEmail]);
+
   return {
     sendEmail,
     emailAdminNewReservation,
@@ -225,5 +257,8 @@ export const useEmailNotifications = () => {
     emailAdminAgencyRequest,
     emailAgencyApproved,
     emailAgencyRejected,
+    emailAgencyPriceSet,
+    emailAdminAgencyPriceApproved,
+    emailAdminAgencyPriceRejected,
   };
 };

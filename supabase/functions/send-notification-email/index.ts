@@ -24,7 +24,10 @@ type EmailType =
   | 'reservation_cancelled_admin' // Customer cancels reservation → Admin
   | 'agency_request_admin'       // Agency creates reservation request → Admin
   | 'agency_approved_agency'     // Admin approves agency request → Agency
-  | 'agency_rejected_agency';    // Admin rejects agency request → Agency
+  | 'agency_rejected_agency'     // Admin rejects agency request → Agency
+  | 'agency_price_set_agency'    // Admin sets price for agency → Agency
+  | 'agency_price_approved_admin' // Agency approves price → Admin
+  | 'agency_price_rejected_admin'; // Agency rejects price → Admin
 
 interface EmailRequest {
   type: EmailType;
@@ -1066,6 +1069,205 @@ const getEmailTemplate = (type: EmailType, data: any) => {
         `,
       };
 
+    case 'agency_price_set_agency':
+      return {
+        subject: `💰 Price Ready for Approval - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">💰 Price Ready for Approval</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">Please review and approve the transfer price</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #7c3aed; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <div style="background: #f3e8ff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #7c3aed;">
+                <p style="margin: 0; color: #5b21b6; font-size: 14px;">Transfer Price</p>
+                <p style="margin: 10px 0 0; font-size: 36px; font-weight: bold; color: #7c3aed;">${data.price_display}</p>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Customer Name</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.customer_name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Date & Time</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${getVehicleLabel(data.vehicle_type)}</td>
+                </tr>
+              </table>
+
+              <div style="background: #fef3c7; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #f59e0b;">
+                <p style="margin: 0; color: #92400e; font-weight: bold;">⏳ Please approve or reject this price</p>
+              </div>
+
+              <div style="text-align: center;">
+                <a href="https://meettransfer.app/agency/reservation/${data.reservation_id}" style="display: inline-block; background: #7c3aed; color: #fff; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Review & Approve</a>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+    case 'agency_price_approved_admin':
+      return {
+        subject: `✅ Agency Approved Price - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">✅ Agency Approved Price</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">Agency has confirmed the transfer price</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #7c3aed; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <p style="margin: 0; color: #fff; font-weight: bold; font-size: 14px;">📍 Agency: ${data.agency_name || 'Unknown Agency'}</p>
+              </div>
+
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #4caf50; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Customer Name</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.customer_name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Approved Price</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #4caf50; font-size: 18px;">${data.price_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Date & Time</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff_display}</td>
+                </tr>
+              </table>
+
+              <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px;">
+                <p style="margin: 0; color: #2e7d32; font-weight: bold;">Ready to assign a driver!</p>
+              </div>
+
+              <div style="text-align: center;">
+                <a href="https://meettransfer.app/admin/reservation/${data.reservation_id}/edit" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Assign Driver</a>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+    case 'agency_price_rejected_admin':
+      return {
+        subject: `❌ Agency Rejected Price - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #f44336 0%, #c62828 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">❌ Agency Rejected Price</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">Agency has rejected the proposed price</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #7c3aed; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <p style="margin: 0; color: #fff; font-weight: bold; font-size: 14px;">📍 Agency: ${data.agency_name || 'Unknown Agency'}</p>
+              </div>
+
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #f44336; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Customer Name</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.customer_name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Rejected Price</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #f44336; font-size: 18px;">${data.price_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Date & Time</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff_display}</td>
+                </tr>
+              </table>
+
+              <div style="background: #ffebee; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #ffcdd2;">
+                <p style="margin: 0; color: #c62828; font-weight: bold;">Agency has rejected this price. Consider offering a new price.</p>
+              </div>
+
+              <div style="text-align: center;">
+                <a href="https://meettransfer.app/admin/reservation/${data.reservation_id}/edit" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Review & Update Price</a>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
     default:
       throw new Error(`Unknown email type: ${type}`);
   }
@@ -1211,7 +1413,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get agency user email if needed
     let agencyEmail = "";
-    if (type === 'agency_approved_agency' || type === 'agency_rejected_agency') {
+    if (type === 'agency_approved_agency' || type === 'agency_rejected_agency' || type === 'agency_price_set_agency') {
       if (additional_data?.agency_email) {
         agencyEmail = additional_data.agency_email;
       } else if (reservation.agency_user_id) {
@@ -1234,6 +1436,8 @@ const handler = async (req: Request): Promise<Response> => {
       case 'reservation_edited_admin':
       case 'reservation_cancelled_admin':
       case 'agency_request_admin':
+      case 'agency_price_approved_admin':
+      case 'agency_price_rejected_admin':
         recipient = ADMIN_EMAIL;
         break;
       case 'price_set_customer':
@@ -1247,6 +1451,7 @@ const handler = async (req: Request): Promise<Response> => {
         break;
       case 'agency_approved_agency':
       case 'agency_rejected_agency':
+      case 'agency_price_set_agency':
         recipient = agencyEmail;
         break;
     }
