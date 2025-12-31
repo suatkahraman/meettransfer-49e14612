@@ -112,6 +112,7 @@ const BlogPage = () => {
         description="Expert travel tips, airport transfer guides for Turkey, Dubai and Cyprus. Learn about Istanbul, Antalya, Dubai, Larnaca transfers. Updated pricing and booking advice."
         keywords="Turkey travel blog, Dubai airport guide, Cyprus transfer tips, Istanbul airport guide, Antalya transfer tips, Turkey travel advice, airport transfer, VIP transfer blog"
         canonicalPath="/blog"
+        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
       />
       <SchemaOrg
         schemas={[

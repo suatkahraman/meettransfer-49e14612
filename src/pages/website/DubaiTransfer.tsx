@@ -95,6 +95,7 @@ const DubaiTransfer = () => {
         description="Book premium Dubai airport transfer from DXB & DWC. Luxury Mercedes fleet (Vito, V-Class, Maybach), professional drivers, 24/7 meet & greet. Fixed prices to Palm Jumeirah, Downtown Dubai, Marina. Flight tracking included."
         keywords="Dubai airport transfer, DXB airport transfer, DWC airport transfer, Dubai VIP transfer, Palm Jumeirah transfer, Downtown Dubai transfer, Dubai Marina transfer, Al Maktoum airport transfer, Dubai private driver, Dubai luxury transfer, Dubai chauffeur service, JBR transfer, Business Bay transfer, Burj Khalifa transfer"
         canonicalPath="/dubai-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

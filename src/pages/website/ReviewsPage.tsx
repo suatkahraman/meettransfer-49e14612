@@ -128,6 +128,7 @@ const ReviewsPage = () => {
         description="Read reviews from 2,500+ satisfied customers. 4.9/5 rating for Meet Transfer's VIP airport transfer service in Turkey. Trusted by travelers worldwide."
         keywords="Meet Transfer reviews, airport transfer reviews Turkey, VIP transfer testimonials, customer reviews Turkey transfer, trusted transfer service"
         canonicalPath="/reviews"
+        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
       />
       <SchemaOrg
         schemas={[

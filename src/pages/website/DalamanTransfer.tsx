@@ -76,6 +76,7 @@ const DalamanTransfer = () => {
         description={t("seoDalamanDesc")}
         keywords="Dalaman airport transfer, DLM airport transfer, Fethiye airport transfer, Ölüdeniz transfer, Marmaris transfer, Göcek transfer, Dalaman VIP transfer, Dalaman private driver, Turquoise Coast transfer"
         canonicalPath="/dalaman-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

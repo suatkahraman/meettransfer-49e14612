@@ -77,6 +77,7 @@ const CappadociaTransfer = () => {
         description={t("seoCappadociaDesc")}
         keywords="Cappadocia airport transfer, Nevşehir airport transfer, Kayseri airport transfer, Göreme transfer, Ürgüp transfer, Cappadocia VIP transfer, Cappadocia private driver, balloon flight transfer, cave hotel transfer"
         canonicalPath="/cappadocia-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
       />
       <SchemaOrg
         schemas={[

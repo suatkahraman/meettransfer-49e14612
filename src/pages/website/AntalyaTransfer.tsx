@@ -76,6 +76,7 @@ const AntalyaTransfer = () => {
         description={t("seoAntalyaDesc")}
         keywords="Antalya airport transfer, AYT airport transfer, Belek airport transfer, Side airport transfer, Alanya airport transfer, Kemer transfer, Antalya VIP transfer, Antalya private driver, Turkey Riviera transfer"
         canonicalPath="/antalya-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

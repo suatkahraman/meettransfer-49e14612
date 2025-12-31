@@ -122,6 +122,7 @@ const BursaTransfer = () => {
         description="Premium private transfers from Istanbul to Bursa. Book VIP day tours to Uludağ, Cumalıkızık, Grand Mosque & thermal springs. Professional drivers, Mercedes fleet, fixed prices. Ferry & bridge routes available."
         keywords="Istanbul Bursa transfer, Istanbul to Bursa private transfer, Bursa day tour from Istanbul, Uludağ transfer, Cumalıkızık tour, Bursa VIP transfer, Istanbul Bursa tour, Osmangazi bridge transfer, Mudanya ferry transfer, Bursa airport transfer, Green Bursa tour"
         canonicalPath="/bursa-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[
