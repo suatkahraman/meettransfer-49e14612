@@ -58,8 +58,8 @@ const companyInfo = {
   legalName: 'Meet Transfer Ltd.',
   url: baseUrl,
   logo: `${baseUrl}/favicon.png`,
-  description: 'Premium VIP airport transfer and chauffeur service in Turkey. Luxury Mercedes fleet with professional drivers.',
-  telephone: '+15558051101',
+  description: 'Premium VIP airport transfer and chauffeur service in Turkey, Dubai and Cyprus. Luxury Mercedes fleet with professional drivers.',
+  telephone: '+905321748390',
   email: 'info@meettransfer.app',
   address: {
     '@type': 'PostalAddress',
@@ -92,7 +92,17 @@ const companyInfo = {
     { '@type': 'City', name: 'Dalaman' },
     { '@type': 'City', name: 'Izmir' },
     { '@type': 'City', name: 'Cappadocia' },
+    { '@type': 'City', name: 'Dubai' },
+    { '@type': 'City', name: 'Cyprus' },
+    { '@type': 'City', name: 'Bursa' },
   ],
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '4.9',
+    reviewCount: '1250',
+    bestRating: '5',
+    worstRating: '1',
+  },
 };
 
 const generateLocalBusinessSchema = () => ({
