@@ -160,6 +160,13 @@ const AdminEditReservation = () => {
     return currencies.find(c => c.value === currency)?.symbol || currency;
   };
 
+  // Safe number parsing that handles empty strings and NaN
+  const safeParseFloat = (value: string | undefined | null): number | null => {
+    if (!value || value.trim() === '') return null;
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? null : parsed;
+  };
+
   const addPassenger = () => {
     if (passengerNames.length < MAX_PASSENGERS) {
       setPassengerNames([...passengerNames, '']);
@@ -645,10 +652,10 @@ const AdminEditReservation = () => {
         flight_number: formData.flight_number || null,
         vehicle_type: formData.vehicle_type,
         payment_type: formData.payment_type,
-        price: parseFloat(formData.price) || null,
+        price: safeParseFloat(formData.price),
         price_currency: formData.price_currency,
-        driver_cash_amount: formData.driver_cash_amount ? parseFloat(formData.driver_cash_amount) : null,
-        passenger_cash_amount: formData.passenger_cash_amount ? parseFloat(formData.passenger_cash_amount) : null,
+        driver_cash_amount: safeParseFloat(formData.driver_cash_amount),
+        passenger_cash_amount: safeParseFloat(formData.passenger_cash_amount),
         passenger_cash_currency: formData.passenger_cash_currency || 'TRY',
         status: formData.status,
         driver_id: formData.driver_id || null,
