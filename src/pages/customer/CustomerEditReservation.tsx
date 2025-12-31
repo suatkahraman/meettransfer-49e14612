@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,7 @@ interface Reservation {
 const CustomerEditReservation = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { emailAdminReservationEdited } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
@@ -82,7 +84,7 @@ const CustomerEditReservation = () => {
         .single();
 
       if (error) {
-        toast.error('Reservation not found');
+        toast.error(t('reservationNotFound'));
         navigate('/customer/bookings');
         return;
       }
@@ -90,7 +92,7 @@ const CustomerEditReservation = () => {
       // Only allow editing confirmed reservations
       const editableStatuses = ['customer_approved', 'confirmed', 'sent_to_driver'];
       if (!editableStatuses.includes(data.status)) {
-        toast.error('This reservation cannot be edited');
+        toast.error(t('reservationCannotBeEdited'));
         navigate(`/customer/reservation/${id}`);
         return;
       }
@@ -148,7 +150,7 @@ const CustomerEditReservation = () => {
     
     const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
     if (validPassengerNames.length === 0) {
-      toast.error('At least one passenger name is required');
+      toast.error(t('passengerRequired'));
       return;
     }
 
@@ -241,10 +243,10 @@ const CustomerEditReservation = () => {
         }
       }
 
-      toast.success('Reservation updated! Awaiting admin review.');
+      toast.success(t('reservationUpdatedSuccess'));
       navigate('/customer/bookings');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update reservation');
+      toast.error(error.message || t('failedToUpdateReservation'));
     } finally {
       setSaving(false);
     }
@@ -269,24 +271,24 @@ const CustomerEditReservation = () => {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-serif">Edit Reservation</h1>
+        <h1 className="text-2xl font-serif">{t('editReservation')}</h1>
       </header>
 
       <main className="container mx-auto py-8 px-4 max-w-2xl">
         <Card>
           <CardHeader>
-            <CardTitle>Update Your Reservation</CardTitle>
+            <CardTitle>{t('updateYourReservation')}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Changes will be sent to admin for review
+              {t('changesWillBeSentToAdmin')}
             </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Pick-up Point */}
               <div className="space-y-2">
-                <Label>Pick-up Point *</Label>
+                <Label>{t('pickupPoint')} *</Label>
                 <GooglePlacesAutocomplete
-                  placeholder="Enter Pick-up Point"
+                  placeholder={t('enterPickupPoint')}
                   initialValue={formData.pickup_place_name || formData.pickup}
                   onPlaceSelect={(place) => {
                     setFormData({
@@ -302,9 +304,9 @@ const CustomerEditReservation = () => {
 
               {/* Drop-off */}
               <div className="space-y-2">
-                <Label>Drop-off Location *</Label>
+                <Label>{t('dropoffLocation')} *</Label>
                 <GooglePlacesAutocomplete
-                  placeholder="Enter destination"
+                  placeholder={t('enterDestination')}
                   initialValue={formData.dropoff_place_name || formData.dropoff}
                   onPlaceSelect={(place) => {
                     setFormData({
@@ -330,7 +332,7 @@ const CustomerEditReservation = () => {
               {/* Date & Time */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Date *</Label>
+                  <Label htmlFor="date">{t('date')} *</Label>
                   <Input
                     id="date"
                     type="date"
@@ -341,7 +343,7 @@ const CustomerEditReservation = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="time">Time *</Label>
+                  <Label htmlFor="time">{t('time')} *</Label>
                   <Input
                     id="time"
                     type="time"
@@ -354,10 +356,10 @@ const CustomerEditReservation = () => {
 
               {/* Vehicle Type */}
               <div className="space-y-2">
-                <Label>Vehicle Type *</Label>
+                <Label>{t('vehicleType')} *</Label>
                 <Select value={formData.vehicle_type} onValueChange={(v) => setFormData({ ...formData, vehicle_type: v })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select vehicle" />
+                    <SelectValue placeholder={t('selectVehicle')} />
                   </SelectTrigger>
                   <SelectContent>
                     {vehicleTypes.map((v) => (
@@ -369,24 +371,24 @@ const CustomerEditReservation = () => {
 
               {/* Flight Number */}
               <div className="space-y-2">
-                <Label htmlFor="flight">Flight Number (optional)</Label>
+                <Label htmlFor="flight">{t('flightNumberOptional')}</Label>
                 <Input
                   id="flight"
                   value={formData.flight_number}
                   onChange={(e) => setFormData({ ...formData, flight_number: e.target.value })}
-                  placeholder="e.g., TK123"
+                  placeholder={t('flightExample')}
                 />
               </div>
 
               {/* Passenger Names */}
               <div className="space-y-4">
-                <Label>Passenger Names *</Label>
+                <Label>{t('passengers')} *</Label>
                 {passengerNames.map((name, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
                       value={name}
                       onChange={(e) => updatePassenger(index, e.target.value)}
-                      placeholder={index === 0 ? 'Primary Passenger Name' : `Passenger ${index + 1}`}
+                      placeholder={index === 0 ? t('primaryPassenger') : `${t('passenger')} ${index + 1}`}
                     />
                     {passengerNames.length > 1 && (
                       <Button 
@@ -402,14 +404,14 @@ const CustomerEditReservation = () => {
                 ))}
                 {passengerNames.length < 15 && (
                   <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
-                    + Add Passenger
+                    + {t('addPassenger')}
                   </Button>
                 )}
               </div>
 
               {/* Phone */}
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone *</Label>
+                <Label htmlFor="phone">{t('phone')} *</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -421,12 +423,12 @@ const CustomerEditReservation = () => {
 
               {/* Notes */}
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes for Driver (optional)</Label>
+                <Label htmlFor="notes">{t('notesForDriver')}</Label>
                 <Textarea
                   id="notes"
                   value={formData.driver_notes}
                   onChange={(e) => setFormData({ ...formData, driver_notes: e.target.value })}
-                  placeholder="Any special requests or information..."
+                  placeholder={t('anySpecialRequests')}
                   rows={3}
                 />
               </div>
@@ -439,18 +441,18 @@ const CustomerEditReservation = () => {
                   onClick={() => navigate(`/customer/reservation/${id}`)}
                   className="flex-1"
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button type="submit" disabled={saving} className="flex-1">
                   {saving ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
+                      {t('savingChanges')}
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4 mr-2" />
-                      Save Changes
+                      {t('saveChanges')}
                     </>
                   )}
                 </Button>
