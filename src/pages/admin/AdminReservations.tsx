@@ -584,9 +584,90 @@ const AdminReservations = () => {
           </div>
         )}
 
-        {/* Needs Admin Review Section */}
+        {/* Agency Requests Section */}
         {!loading && (() => {
-          const needsReview = reservations.filter(r => r.status === 'pending_admin_review');
+          const agencyRequests = reservations.filter(r => r.agency_id && r.status === 'pending_admin_review');
+          if (agencyRequests.length === 0) return null;
+          return (
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-3 w-3 rounded-full bg-purple-500 animate-pulse" />
+                <h3 className="text-lg font-semibold text-purple-700">
+                  Acenta İstekleri ({agencyRequests.length})
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {agencyRequests.map((reservation) => (
+                  <Card 
+                    key={reservation.id} 
+                    className="border-purple-300 bg-purple-50/50 cursor-pointer hover:shadow-md"
+                    onClick={() => navigate(`/admin/reservations/${reservation.id}`)}
+                  >
+                    <CardContent className="py-4">
+                      <div className="flex flex-wrap justify-between items-start gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <Badge className="bg-purple-500/20 text-purple-700">
+                              <Building2 className="h-3 w-3 mr-1" />
+                              {reservation.agencies?.agency_name || 'Acenta'}
+                            </Badge>
+                            <span className="flex items-center gap-1 text-sm">
+                              <Calendar className="h-4 w-4" />
+                              {format(new Date(reservation.pickup_date), 'PPP', { locale: tr })}
+                            </span>
+                            <span className="flex items-center gap-1 text-sm">
+                              <Clock className="h-4 w-4" />
+                              {reservation.pickup_time}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{reservation.customer_name}</span>
+                            <span className="text-muted-foreground">·</span>
+                            <span className="text-sm text-muted-foreground">{reservation.customer_phone}</span>
+                          </div>
+
+                          <div className="space-y-1">
+                            <LocationDisplay
+                              placeName={reservation.pickup_place_name}
+                              address={reservation.pickup}
+                              type="pickup"
+                              size="sm"
+                            />
+                            <LocationDisplay
+                              placeName={reservation.dropoff_place_name}
+                              address={reservation.dropoff}
+                              type="dropoff"
+                              size="sm"
+                            />
+                          </div>
+
+                          {reservation.price && (
+                            <div className="text-sm">
+                              <span className="text-muted-foreground">Önerilen Fiyat: </span>
+                              <span className="font-bold text-purple-700">
+                                {formatPrice(reservation.price, reservation.price_currency)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                          İncele ve Onayla
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Needs Admin Review Section (non-agency customer edits) */}
+        {!loading && (() => {
+          const needsReview = reservations.filter(r => r.status === 'pending_admin_review' && !r.agency_id);
           if (needsReview.length === 0) return null;
           return (
             <div className="mb-8">

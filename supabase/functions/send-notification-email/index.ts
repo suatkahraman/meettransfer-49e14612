@@ -21,7 +21,8 @@ type EmailType =
   | 'payment_confirmed_customer' // Admin confirms payment → Customer
   | 'trip_completed_admin'       // Driver completes trip → Admin
   | 'reservation_edited_admin'   // Customer edits reservation → Admin
-  | 'reservation_cancelled_admin'; // Customer cancels reservation → Admin
+  | 'reservation_cancelled_admin' // Customer cancels reservation → Admin
+  | 'agency_request_admin';      // Agency creates reservation request → Admin
 
 interface EmailRequest {
   type: EmailType;
@@ -848,6 +849,82 @@ const getEmailTemplate = (type: EmailType, data: any) => {
         `,
       };
 
+    case 'agency_request_admin':
+      return {
+        subject: `🏢 New Agency Request - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">🏢 New Agency Request</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">An agency has submitted a new transfer request</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #7c3aed; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <p style="margin: 0; color: #fff; font-weight: bold; font-size: 14px;">📍 Agency: ${data.agency_name || 'Unknown Agency'}</p>
+              </div>
+
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #7c3aed; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Customer Name</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.customer_name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Phone</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.customer_phone}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Date & Time</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle Type</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${getVehicleLabel(data.vehicle_type)}</td>
+                </tr>
+                ${data.price_display !== '-' ? `
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Suggested Price</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #7c3aed;">${data.price_display}</td>
+                </tr>
+                ` : ''}
+              </table>
+
+              <div style="background: #f3e8ff; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #c4b5fd;">
+                <p style="margin: 0; color: #6b21a8; font-weight: bold;">⏳ Awaiting your review and approval</p>
+              </div>
+
+              <div style="text-align: center;">
+                <a href="${baseUrl}/admin/reservation/${data.reservation_id}/edit" style="display: inline-block; background: #7c3aed; color: #fff; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Review Request</a>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
     default:
       throw new Error(`Unknown email type: ${type}`);
   }
@@ -886,12 +963,13 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch reservation details including place names
+    // Fetch reservation details including place names and agency
     const { data: reservation, error: fetchError } = await supabase
       .from("reservations")
       .select(`
         *,
-        drivers (id, name, phone, plate_number, vehicle_model, user_id)
+        drivers (id, name, phone, plate_number, vehicle_model, user_id),
+        agencies (id, agency_name)
       `)
       .eq("id", reservation_id)
       .single();
@@ -984,6 +1062,7 @@ const handler = async (req: Request): Promise<Response> => {
       passenger_cash_display: passengerCashDisplay,
       driver_name: reservation.drivers?.name || additional_data?.driver_name || null,
       driver_plate: reservation.drivers?.plate_number || additional_data?.driver_plate || null,
+      agency_name: (reservation as any).agencies?.agency_name || null,
     };
 
     const template = getEmailTemplate(type, templateData);
@@ -997,6 +1076,7 @@ const handler = async (req: Request): Promise<Response> => {
       case 'trip_completed_admin':
       case 'reservation_edited_admin':
       case 'reservation_cancelled_admin':
+      case 'agency_request_admin':
         recipient = ADMIN_EMAIL;
         break;
       case 'price_set_customer':
