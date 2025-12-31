@@ -19,6 +19,7 @@ import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
+import ReservationSearch from '@/components/ReservationSearch';
 
 interface Reservation {
   id: string;
@@ -515,6 +516,13 @@ const AdminReservations = () => {
             <Plus className="h-4 w-4 mr-2" />
             Rezervasyon Oluştur
           </Button>
+        </div>
+
+        {/* Reservation Code Search */}
+        <div className="mb-4">
+          <div className="max-w-xs">
+            <ReservationSearch userType="admin" placeholder="Kod ile ara (MT123456)" />
+          </div>
         </div>
 
         {/* Filters */}

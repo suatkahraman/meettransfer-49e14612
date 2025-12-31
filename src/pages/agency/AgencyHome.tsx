@@ -14,6 +14,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LocationDisplay } from '@/components/ui/location-display';
+import ReservationSearch from '@/components/ReservationSearch';
 
 interface Driver {
   id: string;
@@ -330,6 +331,14 @@ const AgencyHome = () => {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Reservation Code Search */}
+            <Card>
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground mb-2">{t('searchReservation') || 'Rezervasyon Ara'}</p>
+                <ReservationSearch userType="agency" agencyId={agencyId || undefined} placeholder="MT123456" />
+              </CardContent>
+            </Card>
+
             {/* Accounting Summary Cards */}
             <div className="grid grid-cols-2 gap-3">
               <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
