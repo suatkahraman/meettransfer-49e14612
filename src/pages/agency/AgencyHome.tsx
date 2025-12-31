@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus } from 'lucide-react';
+import AgencyLanguageSelector from '@/components/agency/AgencyLanguageSelector';
 import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -284,6 +285,7 @@ const AgencyHome = () => {
           )}
         </div>
         <div className="flex items-center gap-2">
+          <AgencyLanguageSelector />
           <Button 
             variant="ghost" 
             size="icon" 
