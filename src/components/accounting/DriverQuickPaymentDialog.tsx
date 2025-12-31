@@ -40,7 +40,7 @@ export const DriverQuickPaymentDialog = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!amount) {
+    if (!amount || amount.trim() === '') {
       toast.error('Lütfen tutar giriniz');
       return;
     }

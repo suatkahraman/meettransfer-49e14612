@@ -212,25 +212,34 @@ const DriverJobDetails = () => {
     if (!id) return;
     setSavingFinancials(true);
 
+    // Safely parse numeric values - handle empty strings and invalid numbers
+    const parsedPrice = driverPrice && driverPrice.trim() !== '' ? parseFloat(driverPrice) : null;
+    const parsedCashAmount = driverCashAmount && driverCashAmount.trim() !== '' ? parseFloat(driverCashAmount) : null;
+    
+    // Validate parsed values - NaN check
+    const finalPrice = parsedPrice !== null && !isNaN(parsedPrice) ? parsedPrice : null;
+    const finalCashAmount = parsedCashAmount !== null && !isNaN(parsedCashAmount) ? parsedCashAmount : null;
+
     // Driver can update price, cash amount, and notes
     const { error } = await supabase
       .from('reservations')
       .update({
-        price: driverPrice ? parseFloat(driverPrice) : null,
-        driver_cash_amount: driverCashAmount ? parseFloat(driverCashAmount) : null,
-        driver_notes: driverNotes || null
+        price: finalPrice,
+        driver_cash_amount: finalCashAmount,
+        driver_notes: driverNotes?.trim() || null
       })
       .eq('id', id);
 
     if (error) {
-      toast.error(t('failedToSave'));
+      console.error('Failed to save financials:', error);
+      toast.error(t('failedToSave') + ': ' + (error.message || 'Unknown error'));
     } else {
       toast.success(t('changesSaved'));
       setReservation(prev => prev ? {
         ...prev,
-        price: driverPrice ? parseFloat(driverPrice) : null,
-        driver_cash_amount: driverCashAmount ? parseFloat(driverCashAmount) : null,
-        driver_notes: driverNotes || null
+        price: finalPrice,
+        driver_cash_amount: finalCashAmount,
+        driver_notes: driverNotes?.trim() || null
       } : null);
     }
     setSavingFinancials(false);

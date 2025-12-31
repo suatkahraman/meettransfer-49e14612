@@ -33,7 +33,7 @@ export const DriverPaymentDialog = ({ drivers, onPaymentAdded }: DriverPaymentDi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedDriver || !amount) {
+    if (!selectedDriver || !amount || amount.trim() === '') {
       toast.error('Lütfen şoför ve tutar giriniz');
       return;
     }
