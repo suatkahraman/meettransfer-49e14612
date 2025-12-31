@@ -101,7 +101,7 @@ const AdminEditReservation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
-  const { emailCustomerPriceSet, emailDriverAssigned, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed } = useEmailNotifications();
+  const { emailCustomerPriceSet, emailDriverAssigned, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed, emailAgencyApproved, emailAgencyRejected } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sendingPrice, setSendingPrice] = useState(false);
@@ -812,6 +812,31 @@ const AdminEditReservation = () => {
     } catch (e) {
       console.error('Failed to send driver email (save flow):', e);
       toast.error('Şoför mail hatası');
+    }
+
+    // Send agency approval/rejection email if status changed from pending_admin_review
+    try {
+      const prevStatus = (originalData?.status as string | undefined) || '';
+      const prevAgencyId = (originalData?.agency_id as string | undefined) || '';
+      const newStatus = formData.status;
+
+      // Check if this is an agency reservation that was pending and status changed
+      if (prevStatus === 'pending_admin_review' && prevAgencyId && prevAgencyId !== 'none') {
+        // Approved: status changed to confirmed, sent_to_driver, or customer_approved
+        const approvedStatuses = ['confirmed', 'sent_to_driver', 'customer_approved'];
+        if (approvedStatuses.includes(newStatus)) {
+          console.log('Sending agency approval email for reservation:', id);
+          await emailAgencyApproved(id!);
+        }
+        // Rejected: status changed to customer_rejected or cancelled_by_customer
+        const rejectedStatuses = ['customer_rejected', 'cancelled_by_customer'];
+        if (rejectedStatuses.includes(newStatus)) {
+          console.log('Sending agency rejection email for reservation:', id);
+          await emailAgencyRejected(id!);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to send agency email:', e);
     }
 
     toast.success('Reservation updated');

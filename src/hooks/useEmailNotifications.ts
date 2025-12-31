@@ -13,7 +13,9 @@ type EmailType =
   | 'trip_completed_admin'
   | 'reservation_edited_admin'
   | 'reservation_cancelled_admin'
-  | 'agency_request_admin';
+  | 'agency_request_admin'
+  | 'agency_approved_agency'
+  | 'agency_rejected_agency';
 
 interface EmailOptions {
   type: EmailType;
@@ -25,6 +27,8 @@ interface EmailOptions {
     driver_name?: string;
     driver_plate?: string;
     payment_link?: string;
+    agency_email?: string;
+    rejection_reason?: string;
   };
 }
 
@@ -187,6 +191,24 @@ export const useEmailNotifications = () => {
     });
   }, [sendEmail]);
 
+  // 12. When admin approves agency request → Email to agency
+  const emailAgencyApproved = useCallback(async (reservationId: string, agencyEmail?: string) => {
+    return sendEmail({
+      type: 'agency_approved_agency',
+      reservation_id: reservationId,
+      additional_data: { agency_email: agencyEmail },
+    });
+  }, [sendEmail]);
+
+  // 13. When admin rejects agency request → Email to agency
+  const emailAgencyRejected = useCallback(async (reservationId: string, agencyEmail?: string, rejectionReason?: string) => {
+    return sendEmail({
+      type: 'agency_rejected_agency',
+      reservation_id: reservationId,
+      additional_data: { agency_email: agencyEmail, rejection_reason: rejectionReason },
+    });
+  }, [sendEmail]);
+
   return {
     sendEmail,
     emailAdminNewReservation,
@@ -201,5 +223,7 @@ export const useEmailNotifications = () => {
     emailAdminReservationEdited,
     emailAdminReservationCancelled,
     emailAdminAgencyRequest,
+    emailAgencyApproved,
+    emailAgencyRejected,
   };
 };
