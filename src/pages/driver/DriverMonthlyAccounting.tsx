@@ -35,6 +35,7 @@ interface DriverPayment {
   driver_id: string;
   amount: number;
   payment_date: string;
+  payment_type: string;
   notes: string | null;
   created_at: string;
 }
@@ -47,7 +48,8 @@ const DriverMonthlyAccounting = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [payments, setPayments] = useState<DriverPayment[]>([]);
-  const [totalBalance, setTotalBalance] = useState(0);
+  const [allPayments, setAllPayments] = useState<DriverPayment[]>([]);
+  const [previousMonthsEarnings, setPreviousMonthsEarnings] = useState(0);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('reservations');
 
@@ -85,16 +87,30 @@ const DriverMonthlyAccounting = () => {
         setPayments(paymentsData);
       }
 
-      // Fetch total balance
-      const { data: balanceData } = await supabase
-        .from('driver_balances')
-        .select('balance')
+      // Fetch ALL payments for carry-over calculation
+      const { data: allPaymentsData } = await supabase
+        .from('driver_payments')
+        .select('*')
         .eq('driver_id', driverId)
-        .maybeSingle();
+        .order('payment_date', { ascending: false });
 
-      if (balanceData) {
-        setTotalBalance(balanceData.balance);
+      if (allPaymentsData) {
+        setAllPayments(allPaymentsData);
       }
+
+      // Fetch all reservations BEFORE current month for carry-over
+      const { data: previousReservations } = await supabase
+        .from('reservations')
+        .select('price, driver_cash_amount, pickup_date')
+        .eq('driver_id', driverId)
+        .lt('pickup_date', monthStart);
+
+      // Calculate previous months earnings (price - cash collected)
+      let prevEarnings = 0;
+      previousReservations?.forEach(r => {
+        prevEarnings += (r.price || 0) - (r.driver_cash_amount || 0);
+      });
+      setPreviousMonthsEarnings(prevEarnings);
 
       setLoading(false);
     };
@@ -139,8 +155,33 @@ const DriverMonthlyAccounting = () => {
 
   const totalPrice = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
   const totalCash = reservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
-  const totalPaymentsThisMonth = payments.reduce((sum, p) => sum + p.amount, 0);
+  
+  // Calculate payments by type
+  const paymentsToDriver = allPayments
+    .filter(p => p.payment_type === 'to_driver')
+    .reduce((sum, p) => sum + Number(p.amount), 0);
+  const paymentsFromDriver = allPayments
+    .filter(p => p.payment_type === 'from_driver')
+    .reduce((sum, p) => sum + Number(p.amount), 0);
+  
+  // This month's payments
+  const thisMonthPaymentsToDriver = payments
+    .filter(p => p.payment_type === 'to_driver')
+    .reduce((sum, p) => sum + Number(p.amount), 0);
+  const thisMonthPaymentsFromDriver = payments
+    .filter(p => p.payment_type === 'from_driver')
+    .reduce((sum, p) => sum + Number(p.amount), 0);
+  
+  // Monthly earnings = price - cash (what driver should receive)
   const monthlyEarnings = totalPrice - totalCash;
+  
+  // Total all-time earnings
+  const totalAllTimeEarnings = previousMonthsEarnings + monthlyEarnings;
+  
+  // Net balance = Total earnings - payments received + payments given
+  // If positive = company owes driver (alacak)
+  // If negative = driver owes company (verecek)
+  const netBalance = totalAllTimeEarnings - paymentsToDriver + paymentsFromDriver;
 
   const handleViewDetails = (reservation: Reservation) => {
     navigate(`/driver/job/${reservation.id}`);
@@ -182,11 +223,11 @@ const DriverMonthlyAccounting = () => {
           <div className="text-center py-12">{t('loading')}</div>
         ) : (
           <>
-            {/* Driver Balance Card */}
+            {/* Driver Balance Card - now with correct carry-over calculation */}
             <DriverBalanceCard
-              balance={totalBalance}
-              totalPayments={totalBalance}
-              totalEarnings={monthlyEarnings}
+              balance={netBalance}
+              totalPayments={paymentsToDriver}
+              totalEarnings={totalAllTimeEarnings}
             />
 
             {/* Tabs */}
@@ -235,23 +276,37 @@ const DriverMonthlyAccounting = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold text-green-600">
-                      ₺{totalPaymentsThisMonth.toFixed(2)}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-muted-foreground">{t('receivedFromCompany')}</div>
+                        <div className="text-2xl font-bold text-green-600">
+                          ₺{thisMonthPaymentsToDriver.toFixed(2)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">{t('paidToCompany')}</div>
+                        <div className="text-2xl font-bold text-blue-600">
+                          ₺{thisMonthPaymentsFromDriver.toFixed(2)}
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-muted-foreground mt-2">
                       {payments.length} {t('paymentRecords')}
                     </p>
                   </CardContent>
                 </Card>
 
-                {/* Total Balance */}
+                {/* Carry-over Balance */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">{t('totalCurrentBalance')}</CardTitle>
+                    <CardTitle className="text-lg">{t('carryOverBalance')}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold text-blue-600">
-                      ₺{totalBalance.toFixed(2)}
+                    <div className={`text-3xl font-bold ${netBalance > 0 ? 'text-amber-600' : netBalance < 0 ? 'text-blue-600' : 'text-green-600'}`}>
+                      ₺{Math.abs(netBalance).toFixed(2)}
+                      <span className="text-sm font-normal ml-2">
+                        {netBalance > 0 ? '(alacak)' : netBalance < 0 ? '(verecek)' : '(kapalı)'}
+                      </span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
                       {t('allTimeTotal')}

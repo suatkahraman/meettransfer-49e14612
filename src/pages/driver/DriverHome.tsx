@@ -8,7 +8,7 @@ import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History, Wallet, TrendingUp, TrendingDown, Scale } from 'lucide-react';
+import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { toast } from 'sonner';
@@ -65,20 +65,6 @@ const DriverHome = () => {
     completed: false
   });
   
-  // Balance state
-  const [balanceData, setBalanceData] = useState({
-    balance: 0,
-    totalPaymentsToDriver: 0,
-    totalPaymentsFromDriver: 0,
-    recentPayments: [] as Array<{
-      id: string;
-      amount: number;
-      payment_type: string;
-      payment_date: string;
-      notes: string | null;
-    }>,
-  });
-
   const pullY = useMotionValue(0);
   const pullProgress = useTransform(pullY, [0, PULL_THRESHOLD], [0, 1]);
   const pullRotation = useTransform(pullY, [0, PULL_THRESHOLD], [0, 180]);
@@ -137,47 +123,9 @@ const DriverHome = () => {
     }
   };
 
-  // Fetch balance data
-  const fetchBalanceData = useCallback(async () => {
-    if (!driverId) return;
-    
-    // Fetch driver balance
-    const { data: balanceRow } = await supabase
-      .from('driver_balances')
-      .select('balance')
-      .eq('driver_id', driverId)
-      .maybeSingle();
-    
-    // Fetch all payments for totals
-    const { data: payments } = await supabase
-      .from('driver_payments')
-      .select('id, amount, payment_type, payment_date, notes')
-      .eq('driver_id', driverId)
-      .order('payment_date', { ascending: false });
-    
-    let toDriver = 0;
-    let fromDriver = 0;
-    
-    payments?.forEach(p => {
-      if (p.payment_type === 'to_driver') {
-        toDriver += Number(p.amount);
-      } else if (p.payment_type === 'from_driver') {
-        fromDriver += Number(p.amount);
-      }
-    });
-    
-    setBalanceData({
-      balance: balanceRow?.balance || 0,
-      totalPaymentsToDriver: toDriver,
-      totalPaymentsFromDriver: fromDriver,
-      recentPayments: (payments || []).slice(0, 5),
-    });
-  }, [driverId]);
-
   useEffect(() => {
     if (driverId) {
       fetchReservations();
-      fetchBalanceData();
     }
   }, [driverId]);
 
@@ -511,78 +459,15 @@ const DriverHome = () => {
               </CardContent>
             </Card>
 
-            {/* Balance Summary Card */}
-            <Card className="mb-4">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Wallet className="h-4 w-4" />
-                  {t('yourBalance')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="p-2 rounded-lg bg-muted/50 text-center">
-                    <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs mb-1">
-                      <TrendingUp className="h-3 w-3" />
-                      <span>{t('receivedFromCompany')}</span>
-                    </div>
-                    <div className="text-sm font-bold text-green-600">₺{balanceData.totalPaymentsToDriver.toFixed(0)}</div>
-                  </div>
-                  
-                  <div className="p-2 rounded-lg bg-muted/50 text-center">
-                    <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs mb-1">
-                      <TrendingDown className="h-3 w-3" />
-                      <span>{t('paidToCompany')}</span>
-                    </div>
-                    <div className="text-sm font-bold text-blue-600">₺{balanceData.totalPaymentsFromDriver.toFixed(0)}</div>
-                  </div>
-                  
-                  {(() => {
-                    const netBalance = balanceData.totalPaymentsToDriver - balanceData.totalPaymentsFromDriver;
-                    const isPositive = netBalance > 0;
-                    const isNegative = netBalance < 0;
-                    return (
-                      <div className={`p-2 rounded-lg text-center ${isPositive ? 'bg-amber-100 dark:bg-amber-950' : isNegative ? 'bg-blue-100 dark:bg-blue-950' : 'bg-green-100 dark:bg-green-950'}`}>
-                        <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs mb-1">
-                          <Scale className="h-3 w-3" />
-                          <span>{t('balance')}</span>
-                        </div>
-                        <div className={`text-sm font-bold ${isPositive ? 'text-amber-600' : isNegative ? 'text-blue-600' : 'text-green-600'}`}>
-                          ₺{Math.abs(netBalance).toFixed(0)}
-                          <span className="text-[10px] font-normal block">
-                            {isPositive ? '(alacak)' : isNegative ? '(verecek)' : '(kapalı)'}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })()}</div>
-                
-                {/* Recent Payments List */}
-                {balanceData.recentPayments.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-border">
-                    <div className="text-xs font-medium text-muted-foreground mb-2">{t('paymentHistory')}</div>
-                    <div className="space-y-1.5">
-                      {balanceData.recentPayments.map((payment) => (
-                        <div key={payment.id} className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-1.5 h-1.5 rounded-full ${payment.payment_type === 'to_driver' ? 'bg-green-500' : 'bg-blue-500'}`} />
-                            <span className="text-muted-foreground">
-                              {new Date(payment.payment_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
-                            </span>
-                            {payment.notes && (
-                              <span className="text-muted-foreground truncate max-w-[100px]">{payment.notes}</span>
-                            )}
-                          </div>
-                          <span className={`font-medium ${payment.payment_type === 'to_driver' ? 'text-green-600' : 'text-blue-600'}`}>
-                            {payment.payment_type === 'to_driver' ? '+' : '-'}₺{Number(payment.amount).toFixed(0)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Monthly Accounting Button */}
+            <Button
+              variant="outline"
+              className="w-full mb-4 h-12 gap-2"
+              onClick={() => navigate('/driver/monthly-accounting')}
+            >
+              <Calculator className="h-5 w-5" />
+              {t('monthlyAccounting')}
+            </Button>
             {/* Pending Jobs Section */}
             {pendingJobs.length > 0 && (
               <section>
