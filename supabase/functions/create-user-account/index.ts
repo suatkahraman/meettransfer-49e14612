@@ -9,13 +9,16 @@ interface CreateUserRequest {
   email: string
   password: string
   role: 'admin' | 'driver' | 'customer' | 'agency'
-  name: string
+  name?: string
+  full_name?: string
   phone: string
   plate_number?: string
   vehicle_model?: string
   region?: string
   commission_rate?: number
-  agency_id?: string // For linking agency user to agency record
+  agency_id?: string // For linking agency user to existing agency record
+  agency_name?: string // For creating new agency with user
+  agency_comments?: string // For creating new agency with user
 }
 
 Deno.serve(async (req) => {
@@ -77,14 +80,17 @@ Deno.serve(async (req) => {
     }
 
     const body: CreateUserRequest = await req.json()
-    const { email, password, role, name, phone, plate_number, vehicle_model, region, commission_rate, agency_id } = body
+    const { email, password, role, name, full_name, phone, plate_number, vehicle_model, region, commission_rate, agency_id, agency_name, agency_comments } = body
+    
+    // Use full_name or name
+    const userName = full_name || name || agency_name || 'User'
 
     console.log(`Creating ${role} account for: ${email}`)
 
     // Validate required fields
-    if (!email || !password || !role || !name || !phone) {
+    if (!email || !password || !role || !phone) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: email, password, role, name, phone' }),
+        JSON.stringify({ error: 'Missing required fields: email, password, role, phone' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -97,10 +103,10 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Validate agency_id for agency role
-    if (role === 'agency' && !agency_id) {
+    // Validate agency requirements
+    if (role === 'agency' && !agency_id && !agency_name) {
       return new Response(
-        JSON.stringify({ error: 'agency_id is required for agency role' }),
+        JSON.stringify({ error: 'agency_id or agency_name is required for agency role' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -111,7 +117,7 @@ Deno.serve(async (req) => {
       password,
       email_confirm: true, // Auto-confirm the email
       user_metadata: {
-        full_name: name
+        full_name: userName
       }
     })
 
@@ -129,7 +135,7 @@ Deno.serve(async (req) => {
     // Update profile with phone
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
-      .update({ full_name: name, phone })
+      .update({ full_name: userName, phone })
       .eq('id', newUserId)
 
     if (profileError) {
@@ -165,7 +171,7 @@ Deno.serve(async (req) => {
         .from('drivers')
         .insert({
           user_id: newUserId,
-          name,
+          name: userName,
           phone,
           plate_number: plate_number || null,
           vehicle_model: vehicle_model || null,
@@ -185,22 +191,52 @@ Deno.serve(async (req) => {
       console.log('Driver record created successfully')
     }
 
-    // If agency, link user to agency record
-    if (role === 'agency' && agency_id) {
-      const { error: agencyError } = await supabaseAdmin
-        .from('agencies')
-        .update({ user_id: newUserId })
-        .eq('id', agency_id)
+    // Variable to store agency_id for response
+    let createdAgencyId: string | null = null
 
-      if (agencyError) {
-        console.error('Error linking agency user:', agencyError)
-        return new Response(
-          JSON.stringify({ error: 'User created but failed to link to agency: ' + agencyError.message }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+    // If agency, create or link agency record
+    if (role === 'agency') {
+      if (agency_name) {
+        // Create new agency record
+        const { data: newAgency, error: createAgencyError } = await supabaseAdmin
+          .from('agencies')
+          .insert({
+            agency_name,
+            comments: agency_comments || null,
+            balance: 0,
+            user_id: newUserId
+          })
+          .select('id')
+          .single()
+
+        if (createAgencyError) {
+          console.error('Error creating agency record:', createAgencyError)
+          return new Response(
+            JSON.stringify({ error: 'User created but failed to create agency: ' + createAgencyError.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        createdAgencyId = newAgency.id
+        console.log('Agency record created successfully with ID:', createdAgencyId)
+      } else if (agency_id) {
+        // Link user to existing agency
+        const { error: agencyError } = await supabaseAdmin
+          .from('agencies')
+          .update({ user_id: newUserId })
+          .eq('id', agency_id)
+
+        if (agencyError) {
+          console.error('Error linking agency user:', agencyError)
+          return new Response(
+            JSON.stringify({ error: 'User created but failed to link to agency: ' + agencyError.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        createdAgencyId = agency_id
+        console.log('Agency user linked successfully')
       }
-
-      console.log('Agency user linked successfully')
     }
 
     // Server-side audit log for user creation
@@ -213,17 +249,19 @@ Deno.serve(async (req) => {
         user_id: user.id,
         user_email: user.email,
         action: 'CREATE_USER',
-        table_name: role === 'driver' ? 'drivers' : 'user_roles',
+        table_name: role === 'driver' ? 'drivers' : role === 'agency' ? 'agencies' : 'user_roles',
         record_id: newUserId,
         new_data: {
           email,
-          name,
+          name: userName,
           phone,
           role,
           plate_number: plate_number || null,
           vehicle_model: vehicle_model || null,
           region: region || null,
           commission_rate: commission_rate || null,
+          agency_id: createdAgencyId || agency_id || null,
+          agency_name: agency_name || null,
         },
         ip_address,
         user_agent,
@@ -236,7 +274,8 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: `${role.charAt(0).toUpperCase() + role.slice(1)} account created successfully`,
-        user_id: newUserId 
+        user_id: newUserId,
+        agency_id: createdAgencyId || agency_id || null
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
