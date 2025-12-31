@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard } from 'lucide-react';
+import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -381,23 +381,43 @@ const AgencyHome = () => {
             </div>
 
             {/* Quick Actions */}
-            <Card 
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate('/agency/reports')}
-            >
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-primary/10">
-                    <BarChart3 className="h-5 w-5 text-primary" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Card 
+                className="cursor-pointer hover:shadow-md transition-shadow border-primary/30 bg-primary/5"
+                onClick={() => navigate('/agency/create-reservation')}
+              >
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-primary/20">
+                      <Plus className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Yeni Rezervasyon</p>
+                      <p className="text-sm text-muted-foreground">Transfer talebi oluştur</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">Muhasebe Detayları</p>
-                    <p className="text-sm text-muted-foreground">Tüm işlemleri görüntüle</p>
+                  <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate('/agency/reports')}
+              >
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-primary/10">
+                      <BarChart3 className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Muhasebe Detayları</p>
+                      <p className="text-sm text-muted-foreground">Tüm işlemleri görüntüle</p>
+                    </div>
                   </div>
-                </div>
-                <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
-              </CardContent>
-            </Card>
+                  <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
+                </CardContent>
+              </Card>
+            </div>
 
             {reservations.length === 0 ? (
               <div className="text-center py-12">
