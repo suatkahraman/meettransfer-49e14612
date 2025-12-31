@@ -4,11 +4,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw } from 'lucide-react';
+import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LocationDisplay } from '@/components/ui/location-display';
@@ -59,6 +59,14 @@ const statusLabels: Record<string, string> = {
   'cancelled': 'Cancelled',
 };
 
+interface AccountingSummary {
+  totalRevenue: number;
+  totalPaid: number;
+  balance: number;
+  monthlyReservations: number;
+  completedReservations: number;
+}
+
 const AgencyHome = () => {
   const { signOut } = useAuth();
   const { agencyId } = useUserRole();
@@ -67,6 +75,13 @@ const AgencyHome = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [agency, setAgency] = useState<{ agency_name: string; balance: number } | null>(null);
+  const [accountingSummary, setAccountingSummary] = useState<AccountingSummary>({
+    totalRevenue: 0,
+    totalPaid: 0,
+    balance: 0,
+    monthlyReservations: 0,
+    completedReservations: 0
+  });
   const [expandedSections, setExpandedSections] = useState({
     upcoming: true,
     active: true,
@@ -86,6 +101,46 @@ const AgencyHome = () => {
     if (agencyData) {
       setAgency(agencyData);
     }
+
+    // Fetch accounting summary
+    const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+    const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+
+    // Get completed reservations with agency details
+    const { data: completedRes } = await supabase
+      .from('reservations')
+      .select('id, status, agency_reservation_details!inner(customer_price)')
+      .eq('agency_id', agencyId)
+      .eq('status', 'completed');
+
+    // Get monthly reservations
+    const { data: monthlyRes } = await supabase
+      .from('reservations')
+      .select('id')
+      .eq('agency_id', agencyId)
+      .gte('pickup_date', monthStart)
+      .lte('pickup_date', monthEnd);
+
+    // Get payments
+    const { data: payments } = await supabase
+      .from('agency_payments')
+      .select('amount')
+      .eq('agency_id', agencyId);
+
+    const totalRevenue = completedRes?.reduce((sum, r) => {
+      const detail = r.agency_reservation_details as unknown as { customer_price: number };
+      return sum + (detail?.customer_price || 0);
+    }, 0) || 0;
+
+    const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+
+    setAccountingSummary({
+      totalRevenue,
+      totalPaid,
+      balance: totalRevenue - totalPaid,
+      monthlyReservations: monthlyRes?.length || 0,
+      completedReservations: completedRes?.length || 0
+    });
 
     // Fetch reservations with driver info
     const { data, error } = await supabase
@@ -269,13 +324,88 @@ const AgencyHome = () => {
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : reservations.length === 0 ? (
-          <div className="text-center py-16">
-            <Calendar className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <p className="text-lg text-muted-foreground">No reservations yet</p>
-          </div>
         ) : (
           <div className="space-y-6">
+            {/* Accounting Summary Cards */}
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Wallet className="h-4 w-4 text-primary" />
+                    <span className="text-xs text-muted-foreground">Bakiye</span>
+                  </div>
+                  <p className={cn(
+                    "text-xl font-bold",
+                    accountingSummary.balance > 0 ? "text-green-600" : accountingSummary.balance < 0 ? "text-destructive" : ""
+                  )}>
+                    ₺{accountingSummary.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                    <span className="text-xs text-muted-foreground">Toplam Ciro</span>
+                  </div>
+                  <p className="text-xl font-bold text-green-600">
+                    ₺{accountingSummary.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CreditCard className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs text-muted-foreground">Ödenen</span>
+                  </div>
+                  <p className="text-xl font-bold text-blue-600">
+                    ₺{accountingSummary.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="h-4 w-4 text-purple-600" />
+                    <span className="text-xs text-muted-foreground">Bu Ay</span>
+                  </div>
+                  <p className="text-xl font-bold text-purple-600">
+                    {accountingSummary.monthlyReservations} <span className="text-sm font-normal">transfer</span>
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Quick Actions */}
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => navigate('/agency/reports')}
+            >
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Muhasebe Detayları</p>
+                    <p className="text-sm text-muted-foreground">Tüm işlemleri görüntüle</p>
+                  </div>
+                </div>
+                <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
+              </CardContent>
+            </Card>
+
+            {reservations.length === 0 ? (
+              <div className="text-center py-12">
+                <Calendar className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                <p className="text-lg text-muted-foreground">Henüz rezervasyon yok</p>
+              </div>
+            ) : (
+              <>
             {/* Upcoming Section */}
             {upcomingJobs.length > 0 && (
               <section>
@@ -373,6 +503,8 @@ const AgencyHome = () => {
                   )}
                 </AnimatePresence>
               </section>
+            )}
+              </>
             )}
           </div>
         )}
