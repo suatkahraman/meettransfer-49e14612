@@ -1021,7 +1021,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
           </Card>
         )}
 
-        {/* Agency Request Review Card */}
+        {/* Agency Request Review Card - Set Price and Send for Agency Approval */}
         {formData.status === 'pending_admin_review' && formData.agency_id && formData.agency_id !== 'none' && (
           <Card className="border-purple-300 bg-purple-50 dark:bg-purple-950/30">
             <CardHeader>
@@ -1032,47 +1032,113 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-purple-700 dark:text-purple-300">
-                {agencyName || 'Acenta'} tarafından bir rezervasyon talebi gönderildi. Lütfen inceleyin ve onaylayın veya reddedin.
+                {agencyName || 'Acenta'} tarafından bir rezervasyon talebi gönderildi. Fiyat belirleyip acentanın onayına gönderin veya talebi reddedin.
               </p>
+              
+              {/* Price Input for Agency */}
+              <div className="grid grid-cols-2 gap-4 bg-white dark:bg-background p-4 rounded-lg border">
+                <div className="space-y-2">
+                  <Label>Para Birimi</Label>
+                  <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map(c => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Fiyat</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.price}
+                      onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      placeholder="Fiyat girin"
+                      className="text-lg pl-8"
+                    />
+                  </div>
+                </div>
+              </div>
+              
               <div className="flex gap-3">
                 <Button
                   onClick={async () => {
+                    if (!formData.price || parseFloat(formData.price) <= 0) {
+                      toast.error('Lütfen geçerli bir fiyat girin');
+                      return;
+                    }
+                    
                     setSaving(true);
                     try {
-                      // Approve agency request - set to customer_approved
+                      const priceValue = parseFloat(formData.price);
+                      
+                      // Set price and change status to waiting_for_agency_approval
                       const { error } = await supabase
                         .from('reservations')
-                        .update({ status: 'customer_approved' })
+                        .update({ 
+                          price: priceValue,
+                          price_currency: formData.price_currency,
+                          admin_set_price: priceValue,
+                          status: 'waiting_for_agency_approval' 
+                        })
                         .eq('id', id);
                       if (error) throw error;
 
-                      // Send approval email to agency
+                      // Record price in history
                       try {
-                        console.log('Sending agency approval email for reservation:', id);
-                        const emailResult = await emailAgencyApproved(id!);
-                        if (!emailResult.success) {
-                          console.error('Agency approval email failed:', emailResult.error);
-                          toast.error('Onay emaili gönderilemedi');
-                        } else {
-                          console.log('Agency approval email sent successfully');
-                        }
+                        await supabase.from('price_history').insert({
+                          reservation_id: id,
+                          price: priceValue,
+                          price_currency: formData.price_currency,
+                          action: 'sent_to_agency',
+                        });
                       } catch (e) {
-                        console.error('Failed to send agency approval email:', e);
+                        console.error('Failed to record price history:', e);
                       }
 
-                      toast.success('Acenta talebi onaylandı!');
-                      setFormData({ ...formData, status: 'customer_approved' });
+                      // Notify agency user
+                      const { data: agencyData } = await supabase
+                        .from('agencies')
+                        .select('user_id')
+                        .eq('id', formData.agency_id)
+                        .maybeSingle();
+                      
+                      if (agencyData?.user_id) {
+                        try {
+                          await supabase.functions.invoke('create-notification', {
+                            body: {
+                              user_id: agencyData.user_id,
+                              reservation_id: id,
+                              title: 'Fiyat Belirlendi',
+                              message: `Rezervasyon için fiyat belirlendi: ${currencySymbol}${priceValue}. Lütfen onaylayın veya reddedin.`,
+                              type: 'price_ready'
+                            }
+                          });
+                        } catch (e) {
+                          console.error('Failed to notify agency:', e);
+                        }
+                      }
+
+                      toast.success('Fiyat acentaya gönderildi!');
+                      setFormData({ ...formData, status: 'waiting_for_agency_approval' });
                     } catch (error: any) {
-                      toast.error(error.message || 'Talep onaylanamadı');
+                      toast.error(error.message || 'Fiyat gönderilemedi');
                     } finally {
                       setSaving(false);
                     }
                   }}
-                  disabled={saving}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  disabled={saving || !formData.price}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Talebi Onayla
+                  <Send className="h-4 w-4 mr-2" />
+                  Fiyatı Acentaya Gönder
                 </Button>
                 <Button
                   onClick={async () => {
@@ -1109,10 +1175,10 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                   }}
                   disabled={saving}
                   variant="outline"
-                  className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                  className="border-destructive text-destructive hover:bg-destructive/10"
                 >
                   <X className="h-4 w-4 mr-2" />
-                  Talebi Reddet
+                  Reddet
                 </Button>
               </div>
             </CardContent>
