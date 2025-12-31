@@ -77,6 +77,7 @@ const BodrumTransfer = () => {
         description={t("seoBodrumDesc")}
         keywords="Bodrum airport transfer, BJV airport transfer, Yalıkavak transfer, Türkbükü transfer, Gümüşlük transfer, Bodrum VIP transfer, Bodrum private driver, Bodrum marina transfer, Bodrum Peninsula transfer"
         canonicalPath="/bodrum-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

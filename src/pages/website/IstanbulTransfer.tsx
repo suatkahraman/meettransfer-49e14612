@@ -82,6 +82,7 @@ const IstanbulTransfer = () => {
         description={t("seoIstanbulDesc")}
         keywords="Istanbul airport transfer, IST airport transfer, Sabiha Gökçen transfer, Istanbul private driver, Istanbul VIP transfer, Istanbul chauffeur service, Taksim airport transfer, Sultanahmet airport transfer"
         canonicalPath="/istanbul-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

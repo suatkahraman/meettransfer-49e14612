@@ -128,6 +128,7 @@ const DestinationsPage = () => {
         description="Premium airport transfer service across Turkey, Dubai and Cyprus. VIP transfers from Istanbul, Antalya, Bodrum, Dubai, Larnaca, Paphos airports. Istanbul-Bursa day tours. Mercedes fleet, 24/7 meet & greet service, professional drivers."
         keywords="airport transfer destinations, Turkey airport transfer, Istanbul transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, Dubai airport transfer, Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Istanbul Bursa transfer, Bursa day tour, VIP transfer, private chauffeur, Mercedes transfer"
         canonicalPath="/destinations"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

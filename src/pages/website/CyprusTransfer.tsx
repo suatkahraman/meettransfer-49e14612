@@ -88,6 +88,7 @@ const CyprusTransfer = () => {
         description="Book premium Cyprus airport transfer from Larnaca (LCA), Paphos (PFO) & Ercan (ECN). Luxury Mercedes fleet, professional drivers, 24/7 meet & greet. Fixed prices to Ayia Napa, Limassol, Kyrenia, Nicosia. Northern Cyprus included."
         keywords="Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ercan airport transfer, Ayia Napa transfer, Limassol transfer, Kyrenia transfer, Northern Cyprus transfer, Cyprus VIP transfer, Cyprus private driver, Protaras transfer, Famagusta transfer, Troodos transfer, Cyprus chauffeur service"
         canonicalPath="/cyprus-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
       />
       <SchemaOrg
         schemas={[

@@ -75,6 +75,7 @@ const IzmirTransfer = () => {
         description={t("seoIzmirDesc")}
         keywords="Izmir airport transfer, ADB airport transfer, Çeşme airport transfer, Alaçatı transfer, Kuşadası transfer, Ephesus transfer, Izmir VIP transfer, Izmir private driver, Aegean Coast transfer"
         canonicalPath="/izmir-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[
