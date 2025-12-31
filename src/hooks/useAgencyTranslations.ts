@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useAgencyLanguage, AgencyLanguage } from '@/contexts/AgencyLanguageContext';
 
-export type AgencyLanguage = 'EN' | 'TR' | 'DE' | 'FR' | 'RU' | 'IT' | 'ES' | 'AR' | 'UK' | 'JA';
+export type { AgencyLanguage } from '@/contexts/AgencyLanguageContext';
 
 const BROWSER_LANG_MAP: Record<string, AgencyLanguage> = {
   tr: 'TR',
@@ -1055,11 +1055,7 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
 };
 
 export const useAgencyTranslations = () => {
-  const language = useMemo(() => {
-    const browserLang = navigator.language || (navigator as any).userLanguage || 'en';
-    const primaryLang = browserLang.split('-')[0].toLowerCase();
-    return BROWSER_LANG_MAP[primaryLang] || 'EN';
-  }, []);
+  const { language } = useAgencyLanguage();
 
   const t = (key: string): string => {
     return agencyTranslations[language][key] || agencyTranslations['EN'][key] || key;

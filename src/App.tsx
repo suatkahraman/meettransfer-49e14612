@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { AgencyLanguageProvider } from "./contexts/AgencyLanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute, AgencyRoute } from "./components/ProtectedRoute";
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
 import { lazy, Suspense } from "react";
@@ -253,10 +254,10 @@ const App = () => (
               <Route path="/admin/app-installations" element={<AdminRoute><LazyRoute><AdminAppInstallations /></LazyRoute></AdminRoute>} />
               
               {/* Agency Routes - Protected */}
-              <Route path="/agency" element={<AgencyRoute><LazyRoute><AgencyHome /></LazyRoute></AgencyRoute>} />
-              <Route path="/agency/create-reservation" element={<AgencyRoute><LazyRoute><AgencyCreateReservation /></LazyRoute></AgencyRoute>} />
-              <Route path="/agency/reports" element={<AgencyRoute><LazyRoute><AgencyReports /></LazyRoute></AgencyRoute>} />
-              <Route path="/agency/reservation/:id" element={<AgencyRoute><LazyRoute><AgencyReservationDetail /></LazyRoute></AgencyRoute>} />
+              <Route path="/agency" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyHome /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
+              <Route path="/agency/create-reservation" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyCreateReservation /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
+              <Route path="/agency/reports" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReports /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
+              <Route path="/agency/reservation/:id" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReservationDetail /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               
               {/* Customer Portal & Booking Confirmation - Public */}
               <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />
