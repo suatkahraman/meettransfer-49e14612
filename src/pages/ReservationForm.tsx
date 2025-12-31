@@ -869,6 +869,7 @@ const ReservationForm = () => {
                         type="date"
                         value={formData.date}
                         onChange={(e) => setFormData({...formData, date: e.target.value})}
+                        min={new Date().toISOString().split('T')[0]}
                         className={errors.date ? 'border-destructive' : ''}
                       />
                       {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
@@ -964,6 +965,7 @@ const ReservationForm = () => {
                         type="date"
                         value={returnTripData.date}
                         onChange={(e) => setReturnTripData(prev => ({ ...prev, date: e.target.value }))}
+                        min={formData.date || new Date().toISOString().split('T')[0]}
                         className={errors.returnDate ? 'border-destructive' : ''}
                       />
                       {errors.returnDate && <p className="text-sm text-destructive">{errors.returnDate}</p>}

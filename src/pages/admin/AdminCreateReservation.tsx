@@ -546,6 +546,7 @@ const AdminCreateReservation = () => {
                       type="date"
                       value={formData.pickup_date}
                       onChange={(e) => setFormData({...formData, pickup_date: e.target.value})}
+                      min={new Date().toISOString().split('T')[0]}
                       required
                     />
                   </div>
