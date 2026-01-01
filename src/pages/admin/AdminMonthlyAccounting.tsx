@@ -62,6 +62,14 @@ interface DriverBalance {
   balance: number;
 }
 
+// Store all-time data for carry-over calculation
+interface AllTimeDriverData {
+  driverId: string;
+  totalEarnings: number;  // All-time earnings (price - cash collected)
+  totalPaymentsToDriver: number;  // All payments made to driver
+  totalPaymentsFromDriver: number;  // All payments received from driver
+}
+
 const AdminMonthlyAccounting = () => {
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -72,6 +80,7 @@ const AdminMonthlyAccounting = () => {
   const [driverSummaries, setDriverSummaries] = useState<DriverSummary[]>([]);
   const [driverPayments, setDriverPayments] = useState<DriverPayment[]>([]);
   const [driverBalances, setDriverBalances] = useState<DriverBalance[]>([]);
+  const [allTimeDriverData, setAllTimeDriverData] = useState<AllTimeDriverData[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('reservations');
 
@@ -112,7 +121,57 @@ const AdminMonthlyAccounting = () => {
       setDriverPayments(paymentsWithDriverNames);
     }
 
-    // Fetch all driver balances
+    // Fetch ALL payments for carry-over calculation
+    const { data: allPaymentsData } = await supabase
+      .from('driver_payments')
+      .select('*');
+
+    // Fetch ALL completed reservations for carry-over calculation
+    const { data: allReservationsData } = await supabase
+      .from('reservations')
+      .select('driver_id, price, driver_cash_amount')
+      .not('driver_id', 'is', null)
+      .in('status', ['completed', 'active', 'assigned', 'sent_to_driver']);
+
+    // Calculate all-time data per driver
+    const allTimeMap = new Map<string, AllTimeDriverData>();
+
+    // Sum up all reservations earnings
+    if (allReservationsData) {
+      allReservationsData.forEach(res => {
+        if (!res.driver_id) return;
+        const existing = allTimeMap.get(res.driver_id) || {
+          driverId: res.driver_id,
+          totalEarnings: 0,
+          totalPaymentsToDriver: 0,
+          totalPaymentsFromDriver: 0
+        };
+        existing.totalEarnings += (res.price || 0) - (res.driver_cash_amount || 0);
+        allTimeMap.set(res.driver_id, existing);
+      });
+    }
+
+    // Sum up all payments
+    if (allPaymentsData) {
+      allPaymentsData.forEach(payment => {
+        const existing = allTimeMap.get(payment.driver_id) || {
+          driverId: payment.driver_id,
+          totalEarnings: 0,
+          totalPaymentsToDriver: 0,
+          totalPaymentsFromDriver: 0
+        };
+        if (payment.payment_type === 'to_driver') {
+          existing.totalPaymentsToDriver += payment.amount;
+        } else {
+          existing.totalPaymentsFromDriver += payment.amount;
+        }
+        allTimeMap.set(payment.driver_id, existing);
+      });
+    }
+
+    setAllTimeDriverData(Array.from(allTimeMap.values()));
+
+    // Fetch all driver balances (legacy, for reference)
     const { data: balancesData } = await supabase
       .from('driver_balances')
       .select('*');
@@ -304,8 +363,14 @@ const AdminMonthlyAccounting = () => {
                     <CardContent>
                       <div className="space-y-3">
                         {driverSummaries.map(summary => {
-                          const driverBalance = driverBalances.find(b => b.driver_id === summary.driver.id)?.balance || 0;
-                          const netBalance = summary.balance - driverBalance;
+                          // Get all-time data for this driver
+                          const allTimeData = allTimeDriverData.find(d => d.driverId === summary.driver.id);
+                          const totalAllTimeEarnings = allTimeData?.totalEarnings || 0;
+                          const totalPaymentsToDriver = allTimeData?.totalPaymentsToDriver || 0;
+                          const totalPaymentsFromDriver = allTimeData?.totalPaymentsFromDriver || 0;
+                          
+                          // Net balance = earnings - payments to driver + payments from driver
+                          const netBalance = totalAllTimeEarnings - totalPaymentsToDriver + totalPaymentsFromDriver;
                           const balanceColor = netBalance > 0 ? 'text-amber-600' : netBalance < 0 ? 'text-blue-600' : 'text-green-600';
                           return (
                             <div 
@@ -315,16 +380,16 @@ const AdminMonthlyAccounting = () => {
                               <div>
                                 <div className="font-medium">{summary.driver.name}</div>
                                 <div className="text-sm text-muted-foreground">
-                                  {summary.transferCount} transfer | Ödenen: ₺{driverBalance.toFixed(2)}
+                                  {summary.transferCount} transfer | Ödenen: ₺{totalPaymentsToDriver.toFixed(2)}
                                 </div>
                               </div>
                               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                                 <div className="text-right">
                                   <div className="text-sm">
-                                    Fiyat: ₺{summary.totalPrice.toFixed(2)} | Nakit: ₺{summary.totalCash.toFixed(2)}
+                                    Bu ay: ₺{summary.totalPrice.toFixed(2)} | Nakit: ₺{summary.totalCash.toFixed(2)}
                                   </div>
                                   <div className={`font-semibold ${balanceColor}`}>
-                                    Bakiye: ₺{Math.abs(netBalance).toFixed(2)}
+                                    Devir: ₺{Math.abs(netBalance).toFixed(2)}
                                     {netBalance > 0 ? ' (alacak)' : netBalance < 0 ? ' (verecek)' : ' (kapalı)'}
                                   </div>
                                 </div>
