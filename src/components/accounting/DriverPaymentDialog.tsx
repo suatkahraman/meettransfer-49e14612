@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { MoneyInput } from '@/components/ui/money-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Wallet } from 'lucide-react';
+import { parseMoneyInput } from '@/lib/money';
 
 interface Driver {
   id: string;
@@ -33,14 +34,9 @@ export const DriverPaymentDialog = ({ drivers, onPaymentAdded }: DriverPaymentDi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedDriver || !amount || amount.trim() === '') {
-      toast.error('Lütfen şoför ve tutar giriniz');
-      return;
-    }
-
-    const numAmount = parseFloat(amount);
-    if (isNaN(numAmount) || numAmount <= 0) {
-      toast.error('Geçerli bir tutar giriniz');
+    const numAmount = parseMoneyInput(amount);
+    if (!selectedDriver || numAmount === null || numAmount <= 0) {
+      toast.error('Lütfen şoför ve geçerli tutar giriniz');
       return;
     }
 
@@ -129,13 +125,11 @@ export const DriverPaymentDialog = ({ drivers, onPaymentAdded }: DriverPaymentDi
           </div>
           
           <div className="space-y-2">
-            <Label>Ödeme Tutarı (₺)</Label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
+            <Label>Ödeme Tutarı</Label>
+            <MoneyInput
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onValueChange={setAmount}
+              currencySymbol="₺"
               placeholder="0.00"
             />
           </div>

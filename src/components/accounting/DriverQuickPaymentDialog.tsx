@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { MoneyInput } from '@/components/ui/money-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { HandCoins, Wallet } from 'lucide-react';
+import { parseMoneyInput } from '@/lib/money';
 
 type PaymentType = 'to_driver' | 'from_driver';
 
@@ -40,13 +41,8 @@ export const DriverQuickPaymentDialog = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!amount || amount.trim() === '') {
-      toast.error('Lütfen tutar giriniz');
-      return;
-    }
-
-    const numAmount = parseFloat(amount);
-    if (isNaN(numAmount) || numAmount <= 0) {
+    const numAmount = parseMoneyInput(amount);
+    if (numAmount === null || numAmount <= 0) {
       toast.error('Geçerli bir tutar giriniz');
       return;
     }
@@ -101,13 +97,11 @@ export const DriverQuickPaymentDialog = ({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Ödeme Tutarı (₺)</Label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
+            <Label>Ödeme Tutarı</Label>
+            <MoneyInput
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onValueChange={setAmount}
+              currencySymbol="₺"
               placeholder="0.00"
               autoFocus
             />
