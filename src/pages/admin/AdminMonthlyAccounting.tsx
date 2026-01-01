@@ -555,7 +555,9 @@ const AdminMonthlyAccounting = () => {
                   <CardContent>
                     <DriverPaymentsTable 
                       payments={driverPayments} 
-                      showDriver={selectedDriver === 'all'} 
+                      showDriver={selectedDriver === 'all'}
+                      onPaymentDeleted={handlePaymentAdded}
+                      onPaymentUpdated={handlePaymentAdded}
                     />
                   </CardContent>
                 </Card>
