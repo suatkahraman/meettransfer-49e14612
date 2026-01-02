@@ -99,8 +99,9 @@ const AgencySignupScreen = () => {
       });
 
       // Create agency application - admin will need to approve
+      // Use rpc or direct insert since table may not be in generated types yet
       const { error: insertError } = await supabase
-        .from('agency_applications')
+        .from('agency_applications' as any)
         .insert({
           agency_name: validation.agencyName,
           contact_name: validation.contactName,
@@ -110,7 +111,7 @@ const AgencySignupScreen = () => {
           comments: validation.comments || null,
           password_hash: validation.password, // Will be used when approved
           status: 'pending',
-        });
+        } as any);
 
       if (insertError) {
         if (insertError.message.includes('duplicate') || insertError.message.includes('already exists')) {
