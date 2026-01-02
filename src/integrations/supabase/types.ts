@@ -47,6 +47,54 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_applications: {
+        Row: {
+          agency_name: string
+          comments: string | null
+          contact_name: string
+          created_at: string
+          currency: string
+          email: string
+          id: string
+          password_hash: string
+          phone: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agency_name: string
+          comments?: string | null
+          contact_name: string
+          created_at?: string
+          currency?: string
+          email: string
+          id?: string
+          password_hash: string
+          phone: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_name?: string
+          comments?: string | null
+          contact_name?: string
+          created_at?: string
+          currency?: string
+          email?: string
+          id?: string
+          password_hash?: string
+          phone?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agency_payments: {
         Row: {
           agency_id: string
