@@ -7,6 +7,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import WhatsAppButton from "./WhatsAppButton";
 
 interface PriceItem {
@@ -53,10 +59,21 @@ const PriceTable = ({ items, title }: PriceTableProps) => {
                 {getDisplayPrice(item.price)}
               </TableCell>
               <TableCell className="text-right">
-                <WhatsAppButton
-                  variant="small"
-                  message={`Hi, I'd like to request a price for transfer from ${item.from} to ${item.to}.`}
-                />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <WhatsAppButton
+                          variant="small"
+                          message={`Hi, I'd like to request a price for transfer from ${item.from} to ${item.to}.`}
+                        />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t("getPriceViaWhatsApp")}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </TableCell>
             </TableRow>
           ))}
