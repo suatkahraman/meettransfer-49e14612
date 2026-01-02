@@ -18,13 +18,13 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "Izmir Airport", to: "Izmir Center", price: "$35" },
-  { from: "Izmir Airport", to: "Alsancak", price: "$35" },
-  { from: "Izmir Airport", to: "Çeşme", price: "$55" },
-  { from: "Izmir Airport", to: "Alaçatı", price: "$50" },
-  { from: "Izmir Airport", to: "Kuşadası", price: "$60" },
-  { from: "Izmir Airport", to: "Selçuk/Ephesus", price: "$45" },
-  { from: "Izmir Airport", to: "Foça", price: "$45" },
+  { from: "Izmir Airport", to: "Izmir Center", price: "Request Price" },
+  { from: "Izmir Airport", to: "Alsancak", price: "Request Price" },
+  { from: "Izmir Airport", to: "Çeşme", price: "Request Price" },
+  { from: "Izmir Airport", to: "Alaçatı", price: "Request Price" },
+  { from: "Izmir Airport", to: "Kuşadası", price: "Request Price" },
+  { from: "Izmir Airport", to: "Selçuk/Ephesus", price: "Request Price" },
+  { from: "Izmir Airport", to: "Foça", price: "Request Price" },
 ];
 
 const faqItems = [

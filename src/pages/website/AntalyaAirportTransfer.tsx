@@ -18,13 +18,13 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "Antalya Airport", to: "Lara Beach", price: "$25" },
-  { from: "Antalya Airport", to: "Konyaaltı", price: "$25" },
-  { from: "Antalya Airport", to: "Belek", price: "$40" },
-  { from: "Antalya Airport", to: "Side", price: "$55" },
-  { from: "Antalya Airport", to: "Alanya", price: "$85" },
-  { from: "Antalya Airport", to: "Kemer", price: "$55" },
-  { from: "Antalya Airport", to: "Kaş", price: "$120" },
+  { from: "Antalya Airport", to: "Lara Beach", price: "Request Price" },
+  { from: "Antalya Airport", to: "Konyaaltı", price: "Request Price" },
+  { from: "Antalya Airport", to: "Belek", price: "Request Price" },
+  { from: "Antalya Airport", to: "Side", price: "Request Price" },
+  { from: "Antalya Airport", to: "Alanya", price: "Request Price" },
+  { from: "Antalya Airport", to: "Kemer", price: "Request Price" },
+  { from: "Antalya Airport", to: "Kaş", price: "Request Price" },
 ];
 
 const faqItems = [

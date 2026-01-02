@@ -18,13 +18,13 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "Bodrum Airport", to: "Bodrum Center", price: "$45" },
-  { from: "Bodrum Airport", to: "Gümbet", price: "$45" },
-  { from: "Bodrum Airport", to: "Bitez", price: "$50" },
-  { from: "Bodrum Airport", to: "Yalıkavak", price: "$55" },
-  { from: "Bodrum Airport", to: "Türkbükü", price: "$55" },
-  { from: "Bodrum Airport", to: "Torba", price: "$50" },
-  { from: "Bodrum Airport", to: "Turgutreis", price: "$60" },
+  { from: "Bodrum Airport", to: "Bodrum Center", price: "Request Price" },
+  { from: "Bodrum Airport", to: "Gümbet", price: "Request Price" },
+  { from: "Bodrum Airport", to: "Bitez", price: "Request Price" },
+  { from: "Bodrum Airport", to: "Yalıkavak", price: "Request Price" },
+  { from: "Bodrum Airport", to: "Türkbükü", price: "Request Price" },
+  { from: "Bodrum Airport", to: "Torba", price: "Request Price" },
+  { from: "Bodrum Airport", to: "Turgutreis", price: "Request Price" },
 ];
 
 const faqItems = [

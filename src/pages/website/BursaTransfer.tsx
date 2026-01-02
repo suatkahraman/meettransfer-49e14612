@@ -24,14 +24,14 @@ const destinations = [
 
 // Istanbul-Bursa transfer and tour prices
 const prices = [
-  { from: "Istanbul Airport (IST)", to: "Bursa City Center", price: "$150" },
-  { from: "Sabiha Gökçen (SAW)", to: "Bursa City Center", price: "$140" },
-  { from: "Istanbul Hotels", to: "Bursa City Center", price: "$160" },
-  { from: "Bursa", to: "Uludağ Ski Resort", price: "$60" },
-  { from: "Bursa", to: "Cumalıkızık Village", price: "$40" },
-  { from: "Bursa", to: "Iznik", price: "$80" },
-  { from: "Bursa", to: "Trilye & Gölyazı", price: "$70" },
-  { from: "Istanbul", to: "Bursa Day Tour", price: "$200" },
+  { from: "Istanbul Airport (IST)", to: "Bursa City Center", price: "Request Price" },
+  { from: "Sabiha Gökçen (SAW)", to: "Bursa City Center", price: "Request Price" },
+  { from: "Istanbul Hotels", to: "Bursa City Center", price: "Request Price" },
+  { from: "Bursa", to: "Uludağ Ski Resort", price: "Request Price" },
+  { from: "Bursa", to: "Cumalıkızık Village", price: "Request Price" },
+  { from: "Bursa", to: "Iznik", price: "Request Price" },
+  { from: "Bursa", to: "Trilye & Gölyazı", price: "Request Price" },
+  { from: "Istanbul", to: "Bursa Day Tour", price: "Request Price" },
 ];
 
 // Day tour packages

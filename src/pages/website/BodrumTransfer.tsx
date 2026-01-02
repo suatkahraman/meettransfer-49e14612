@@ -20,13 +20,13 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "BJV Airport", to: "Bodrum Center", price: "$45" },
-  { from: "BJV Airport", to: "Torba", price: "$40" },
-  { from: "BJV Airport", to: "Yalıkavak", price: "$60" },
-  { from: "BJV Airport", to: "Türkbükü", price: "$60" },
-  { from: "BJV Airport", to: "Gündoğan", price: "$65" },
-  { from: "BJV Airport", to: "Turgutreis", price: "$60" },
-  { from: "BJV Airport", to: "Akyarlar", price: "$70" },
+  { from: "BJV Airport", to: "Bodrum Center", price: "Request Price" },
+  { from: "BJV Airport", to: "Torba", price: "Request Price" },
+  { from: "BJV Airport", to: "Yalıkavak", price: "Request Price" },
+  { from: "BJV Airport", to: "Türkbükü", price: "Request Price" },
+  { from: "BJV Airport", to: "Gündoğan", price: "Request Price" },
+  { from: "BJV Airport", to: "Turgutreis", price: "Request Price" },
+  { from: "BJV Airport", to: "Akyarlar", price: "Request Price" },
 ];
 
 const faqItems = [
