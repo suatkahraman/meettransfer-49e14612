@@ -110,3 +110,6 @@ verify_jwt = true
 
 [functions.reject-agency-application]
 verify_jwt = true
+
+[functions.notify-admin-agency-application]
+verify_jwt = false
