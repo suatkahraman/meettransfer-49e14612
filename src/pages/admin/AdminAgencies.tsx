@@ -45,6 +45,7 @@ const AdminAgencies = () => {
     password: '',
     phone: '',
     comments: '',
+    currency: 'EUR',
   });
 
   const fetchAgencies = async () => {
@@ -124,11 +125,11 @@ const AdminAgencies = () => {
 
   const openCreateDialog = () => {
     setSelectedAgency(null);
-    setFormData({ agency_name: '', email: '', password: '', phone: '', comments: '' });
+    setFormData({ agency_name: '', email: '', password: '', phone: '', comments: '', currency: 'EUR' });
     setDialogOpen(true);
   };
 
-  const openEditDialog = (agency: Agency) => {
+  const openEditDialog = (agency: AgencyWithCalculatedBalance) => {
     setSelectedAgency(agency);
     setFormData({
       agency_name: agency.agency_name,
@@ -136,6 +137,7 @@ const AdminAgencies = () => {
       password: '',
       phone: '',
       comments: agency.comments || '',
+      currency: (agency as any).currency || 'EUR',
     });
     setDialogOpen(true);
   };
@@ -240,6 +242,7 @@ const AdminAgencies = () => {
           .update({
             agency_name: formData.agency_name.trim(),
             comments: formData.comments.trim() || null,
+            currency: formData.currency,
           })
           .eq('id', selectedAgency.id);
 
@@ -267,6 +270,7 @@ const AdminAgencies = () => {
             role: 'agency',
             agency_name: formData.agency_name.trim(),
             agency_comments: formData.comments.trim() || null,
+            agency_currency: formData.currency,
           },
         });
 
@@ -484,6 +488,22 @@ const AdminAgencies = () => {
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+90 5XX XXX XX XX"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Para Birimi *</Label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    value={formData.currency}
+                    onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                  >
+                    <option value="EUR">€ Euro (EUR)</option>
+                    <option value="USD">$ Dollar (USD)</option>
+                    <option value="GBP">£ Pound (GBP)</option>
+                    <option value="TRY">₺ Türk Lirası (TRY)</option>
+                    <option value="AED">د.إ Dirham (AED)</option>
+                    <option value="AUD">A$ Australian Dollar (AUD)</option>
+                  </select>
+                  <p className="text-xs text-muted-foreground">Acenta panelinde kullanılacak para birimi</p>
                 </div>
               </>
             )}

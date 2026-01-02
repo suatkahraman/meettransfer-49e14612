@@ -11,7 +11,7 @@ interface WhatsAppAdminRequest {
   phoneNumber?: string; // Optional override, defaults to admin phone
 }
 
-const ADMIN_PHONE = "+905321748390";
+const ADMIN_PHONE = "+15558051101";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {

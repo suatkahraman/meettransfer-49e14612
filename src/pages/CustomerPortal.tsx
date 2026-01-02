@@ -106,7 +106,7 @@ export default function CustomerPortal() {
       dropoff: originalReservation.pickup,
       original_reservation_id: originalReservation.id,
       is_return_transfer: true,
-      discount_percentage: 40,
+      discount_percentage: 30,
     };
     
     navigate(`/book?return=true&original=${originalReservation.id}`);

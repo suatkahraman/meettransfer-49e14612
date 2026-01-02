@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export type AgencyLanguage = 'EN' | 'TR' | 'DE' | 'FR' | 'RU' | 'IT' | 'ES' | 'AR' | 'UK' | 'JA';
-export type AgencyCurrency = 'TRY' | 'EUR' | 'GBP' | 'USD' | 'RUB' | 'UAH' | 'AED' | 'JPY';
+export type AgencyCurrency = 'TRY' | 'EUR' | 'GBP' | 'USD' | 'RUB' | 'UAH' | 'AED' | 'JPY' | 'AUD';
 
 export interface LanguageConfig {
   code: AgencyLanguage;
@@ -37,6 +39,7 @@ export const AGENCY_CURRENCIES: CurrencyConfig[] = [
   { code: 'UAH', symbol: '₴', label: 'Ukrainian Hryvnia' },
   { code: 'AED', symbol: 'د.إ', label: 'UAE Dirham' },
   { code: 'JPY', symbol: '¥', label: 'Japanese Yen' },
+  { code: 'AUD', symbol: 'A$', label: 'Australian Dollar' },
 ];
 
 const BROWSER_LANG_MAP: Record<string, AgencyLanguage> = {
@@ -53,7 +56,6 @@ const BROWSER_LANG_MAP: Record<string, AgencyLanguage> = {
 };
 
 const LANGUAGE_STORAGE_KEY = 'agency_language';
-const CURRENCY_STORAGE_KEY = 'agency_currency';
 
 const getBrowserLanguage = (): AgencyLanguage => {
   const browserLang = navigator.language || (navigator as any).userLanguage || 'en';
@@ -65,7 +67,6 @@ interface AgencyLanguageContextType {
   language: AgencyLanguage;
   setLanguage: (lang: AgencyLanguage) => void;
   currency: AgencyCurrency;
-  setCurrency: (curr: AgencyCurrency) => void;
   currencySymbol: string;
   currencyCode: string;
   languageConfig: LanguageConfig;
@@ -75,6 +76,8 @@ interface AgencyLanguageContextType {
 const AgencyLanguageContext = createContext<AgencyLanguageContextType | undefined>(undefined);
 
 export const AgencyLanguageProvider = ({ children }: { children: ReactNode }) => {
+  const { agencyId } = useUserRole();
+  
   const [language, setLanguageState] = useState<AgencyLanguage>(() => {
     const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (saved && Object.values(BROWSER_LANG_MAP).includes(saved as AgencyLanguage)) {
@@ -83,25 +86,36 @@ export const AgencyLanguageProvider = ({ children }: { children: ReactNode }) =>
     return getBrowserLanguage();
   });
 
-  const [currency, setCurrencyState] = useState<AgencyCurrency>(() => {
-    const saved = localStorage.getItem(CURRENCY_STORAGE_KEY);
-    if (saved && AGENCY_CURRENCIES.some(c => c.code === saved)) {
-      return saved as AgencyCurrency;
-    }
-    return 'EUR'; // Default to EUR
-  });
+  const [currency, setCurrency] = useState<AgencyCurrency>('EUR');
+
+  // Fetch currency from database when agencyId is available
+  useEffect(() => {
+    const fetchAgencyCurrency = async () => {
+      if (!agencyId) return;
+      
+      const { data, error } = await supabase
+        .from('agencies')
+        .select('currency')
+        .eq('id', agencyId)
+        .single();
+      
+      if (!error && data?.currency) {
+        const currencyCode = data.currency as AgencyCurrency;
+        if (AGENCY_CURRENCIES.some(c => c.code === currencyCode)) {
+          setCurrency(currencyCode);
+        }
+      }
+    };
+
+    fetchAgencyCurrency();
+  }, [agencyId]);
 
   const languageConfig = AGENCY_LANGUAGES.find(l => l.code === language) || AGENCY_LANGUAGES[0];
-  const currencyConfig = AGENCY_CURRENCIES.find(c => c.code === currency) || AGENCY_CURRENCIES[0];
+  const currencyConfig = AGENCY_CURRENCIES.find(c => c.code === currency) || AGENCY_CURRENCIES[1]; // Default EUR
 
   const setLanguage = (lang: AgencyLanguage) => {
     setLanguageState(lang);
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
-  };
-
-  const setCurrency = (curr: AgencyCurrency) => {
-    setCurrencyState(curr);
-    localStorage.setItem(CURRENCY_STORAGE_KEY, curr);
   };
 
   return (
@@ -109,7 +123,6 @@ export const AgencyLanguageProvider = ({ children }: { children: ReactNode }) =>
       language, 
       setLanguage, 
       currency,
-      setCurrency,
       currencySymbol: currencyConfig.symbol,
       currencyCode: currencyConfig.code,
       languageConfig,

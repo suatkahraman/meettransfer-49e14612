@@ -13,6 +13,7 @@ interface DailyProfit {
   agencyIncome: number;
   driverExpense: number;
   netProfit: number;
+  transferCount: number;
 }
 
 interface MonthlyTotals {
@@ -91,6 +92,7 @@ export const MonthlyProfitCard = () => {
           agencyIncome: 0,
           driverExpense: 0,
           netProfit: 0,
+          transferCount: 0,
         });
       });
 
@@ -102,6 +104,9 @@ export const MonthlyProfitCard = () => {
         const dayData = dailyMap.get(dateStr);
         
         if (dayData) {
+          // Increment transfer count
+          dayData.transferCount += 1;
+          
           // Agency Income (Acenta Fiyatı - customer_price from agency_reservation_details)
           const agencyIncome = agencyDetails[res.id] || 0;
           dayData.agencyIncome += agencyIncome;
@@ -238,8 +243,9 @@ export const MonthlyProfitCard = () => {
 
             {/* Daily Breakdown */}
             <div className="border rounded-lg">
-              <div className="grid grid-cols-4 gap-2 p-3 bg-muted/50 text-xs font-medium text-muted-foreground border-b">
+              <div className="grid grid-cols-5 gap-2 p-3 bg-muted/50 text-xs font-medium text-muted-foreground border-b">
                 <div>Tarih</div>
+                <div className="text-center">Transfer</div>
                 <div className="text-right">Acenta Geliri</div>
                 <div className="text-right">Şöför Gideri</div>
                 <div className="text-right">Net Kâr</div>
@@ -252,8 +258,11 @@ export const MonthlyProfitCard = () => {
                 ) : (
                   <div className="divide-y">
                     {dailyData.map(day => (
-                      <div key={day.date} className="grid grid-cols-4 gap-2 p-3 text-sm hover:bg-muted/30">
+                      <div key={day.date} className="grid grid-cols-5 gap-2 p-3 text-sm hover:bg-muted/30">
                         <div className="font-medium">{formatDate(day.date)}</div>
+                        <div className="text-center font-medium text-primary">
+                          {day.transferCount}
+                        </div>
                         <div className="text-right text-blue-600 dark:text-blue-400">
                           {day.agencyIncome > 0 ? formatCurrency(day.agencyIncome) : "-"}
                         </div>

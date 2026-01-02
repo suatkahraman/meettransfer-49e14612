@@ -147,14 +147,12 @@ const AboutPage = () => {
           </p>
         </section>
 
-        {/* Leadership */}
+        {/* Mission Statement */}
         <section className="bg-secondary rounded-xl p-8 text-center">
           <div className="max-w-md mx-auto">
             <blockquote className="text-lg italic mb-4">
               "{t("ourMission")}"
             </blockquote>
-            <div className="font-bold">Suat Kahraman</div>
-            <div className="text-sm text-muted-foreground">{t("generalManager")}</div>
           </div>
         </section>
 

@@ -222,7 +222,7 @@ const BlogPage = () => {
               </Button>
             </Link>
             <a 
-              href="https://wa.me/905321748390?text=Hello, I would like to book a transfer."
+              href="https://wa.me/15558051101?text=Hello, I would like to book a transfer."
               target="_blank"
               rel="noopener noreferrer"
             >
