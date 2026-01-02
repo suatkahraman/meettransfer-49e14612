@@ -557,6 +557,10 @@ const translations: Record<Language, Record<string, string>> = {
     blog: "Blog",
     enableNotifications: "Benachrichtigungen aktivieren",
     notificationsOn: "Benachrichtigungen an",
+    guestLogin: "Gast-Login",
+    guestRegistration: "Gast-Registrierung",
+    agencyLogin: "Agentur",
+    agencyRegistration: "Agentur-Registrierung",
     
     // Hero Section
     heroTitle: "Jetzt besten Preis erhalten",
@@ -1054,6 +1058,10 @@ const translations: Record<Language, Record<string, string>> = {
     blog: "Blog",
     enableNotifications: "Activer les notifications",
     notificationsOn: "Notifications activées",
+    guestLogin: "Connexion Invité",
+    guestRegistration: "Inscription Invité",
+    agencyLogin: "Agence",
+    agencyRegistration: "Inscription Agence",
     
     // Hero Section
     heroTitle: "Obtenez le Meilleur Prix Maintenant",
@@ -1551,6 +1559,10 @@ const translations: Record<Language, Record<string, string>> = {
     blog: "Блог",
     enableNotifications: "Включить уведомления",
     notificationsOn: "Уведомления включены",
+    guestLogin: "Вход для гостей",
+    guestRegistration: "Регистрация гостя",
+    agencyLogin: "Агентство",
+    agencyRegistration: "Регистрация агентства",
     
     // Hero Section
     heroTitle: "Получите лучшую цену сейчас",
@@ -2048,6 +2060,10 @@ const translations: Record<Language, Record<string, string>> = {
     blog: "Blog",
     enableNotifications: "Abilita notifiche",
     notificationsOn: "Notifiche attive",
+    guestLogin: "Accesso Ospite",
+    guestRegistration: "Registrazione Ospite",
+    agencyLogin: "Agenzia",
+    agencyRegistration: "Registrazione Agenzia",
     
     // Hero Section
     heroTitle: "Ottieni il Miglior Prezzo Ora",
@@ -2545,6 +2561,10 @@ const translations: Record<Language, Record<string, string>> = {
     blog: "Blog",
     enableNotifications: "Activar notificaciones",
     notificationsOn: "Notificaciones activas",
+    guestLogin: "Acceso Invitado",
+    guestRegistration: "Registro Invitado",
+    agencyLogin: "Agencia",
+    agencyRegistration: "Registro de Agencia",
     
     // Hero Section
     heroTitle: "Obtén el Mejor Precio Ahora",
@@ -3042,6 +3062,10 @@ const translations: Record<Language, Record<string, string>> = {
     blog: "المدونة",
     enableNotifications: "تفعيل الإشعارات",
     notificationsOn: "الإشعارات مفعلة",
+    guestLogin: "تسجيل دخول الضيف",
+    guestRegistration: "تسجيل الضيف",
+    agencyLogin: "الوكالة",
+    agencyRegistration: "تسجيل الوكالة",
     
     // Hero Section
     heroTitle: "احصل على أفضل سعر الآن",
@@ -4045,6 +4069,10 @@ const translations: Record<Language, Record<string, string>> = {
     blog: "Блог",
     enableNotifications: "Увімкнути сповіщення",
     notificationsOn: "Сповіщення увімкнено",
+    guestLogin: "Вхід для гостей",
+    guestRegistration: "Реєстрація гостя",
+    agencyLogin: "Агентство",
+    agencyRegistration: "Реєстрація агентства",
     
     // Hero Section
     heroTitle: "Отримайте найкращу ціну зараз",
@@ -4542,6 +4570,10 @@ const translations: Record<Language, Record<string, string>> = {
     blog: "ブログ",
     enableNotifications: "通知を有効にする",
     notificationsOn: "通知オン",
+    guestLogin: "ゲストログイン",
+    guestRegistration: "ゲスト登録",
+    agencyLogin: "代理店",
+    agencyRegistration: "代理店登録",
     
     // Hero Section
     heroTitle: "今すぐ最高の価格を取得",
