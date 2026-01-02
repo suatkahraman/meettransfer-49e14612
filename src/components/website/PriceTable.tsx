@@ -12,7 +12,7 @@ import WhatsAppButton from "./WhatsAppButton";
 interface PriceItem {
   from: string;
   to: string;
-  price: string;
+  price?: string;
 }
 
 interface PriceTableProps {
@@ -22,6 +22,15 @@ interface PriceTableProps {
 
 const PriceTable = ({ items, title }: PriceTableProps) => {
   const { t } = useLanguage();
+
+  // Helper function to get translated price
+  const getDisplayPrice = (price?: string) => {
+    // If no price or it's a request price indicator, return translated version
+    if (!price || price === "Request Price" || price === "Fiyat Talep Et") {
+      return t("requestPrice");
+    }
+    return price;
+  };
 
   return (
     <div className="bg-card rounded-xl p-6 shadow-sm">
@@ -40,7 +49,7 @@ const PriceTable = ({ items, title }: PriceTableProps) => {
               <TableCell className="font-medium">{item.from}</TableCell>
               <TableCell>{item.to}</TableCell>
               <TableCell className="text-right text-accent font-bold">
-                {item.price}
+                {getDisplayPrice(item.price)}
               </TableCell>
             </TableRow>
           ))}

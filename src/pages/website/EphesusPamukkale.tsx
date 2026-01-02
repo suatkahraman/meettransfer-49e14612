@@ -19,11 +19,11 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "ADB Airport", to: "Ephesus", price: "€50" },
-  { from: "Selçuk", to: "Pamukkale", price: "€120" },
-  { from: "Kuşadası", to: "Ephesus", price: "€30" },
-  { from: "Izmir", to: "Pamukkale", price: "€150" },
-  { from: "Denizli Airport", to: "Pamukkale", price: "€40" },
+  { from: "ADB Airport", to: "Ephesus" },
+  { from: "Selçuk", to: "Pamukkale" },
+  { from: "Kuşadası", to: "Ephesus" },
+  { from: "Izmir", to: "Pamukkale" },
+  { from: "Denizli Airport", to: "Pamukkale" },
 ];
 
 const faqItems = [
