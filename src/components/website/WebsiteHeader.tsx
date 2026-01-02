@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LogIn, LogOut, User, Download } from "lucide-react";
+import { LogIn, LogOut, User, Download, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "./LanguageSelector";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
@@ -170,7 +170,13 @@ const WebsiteHeader = () => {
               <Link to="/login">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <LogIn className="h-4 w-4" />
-                  {t("login")}
+                  {t("guestLogin") || "Guest Login"}
+                </Button>
+              </Link>
+              <Link to="/signup/agency">
+                <Button variant="secondary" size="sm" className="gap-2">
+                  <Building2 className="h-4 w-4" />
+                  {t("agencyLogin") || "Agency"}
                 </Button>
               </Link>
             </div>
@@ -256,11 +262,26 @@ const WebsiteHeader = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/login" className="w-full cursor-pointer gap-2">
                       <LogIn className="h-4 w-4" />
-                      {t("login")}
+                      {t("guestLogin") || "Guest Login"}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/signup/agency" className="w-full cursor-pointer gap-2">
+                      <Building2 className="h-4 w-4" />
+                      {t("agencyLogin") || "Agency"}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <div className="p-2">
+                  <div className="p-2 space-y-2">
+                    <Link to="/signup/customer" className="block">
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        {t("guestRegistration") || "Guest Registration"}
+                      </Button>
+                    </Link>
                     <Button 
                       variant="accent" 
                       className="w-full"

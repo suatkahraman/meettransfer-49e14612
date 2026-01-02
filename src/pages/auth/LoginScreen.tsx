@@ -545,11 +545,18 @@ const LoginScreen = () => {
               <div className="text-center text-sm text-muted-foreground">
                 Don't have an account?
               </div>
-              <Link to="/signup" className="w-full">
-                <Button variant="outline" className="w-full h-12 rounded-xl">
-                  Create Account
-                </Button>
-              </Link>
+              <div className="flex gap-2 w-full">
+                <Link to="/signup/customer" className="flex-1">
+                  <Button variant="outline" className="w-full h-12 rounded-xl">
+                    Guest Registration
+                  </Button>
+                </Link>
+                <Link to="/signup/agency" className="flex-1">
+                  <Button variant="secondary" className="w-full h-12 rounded-xl">
+                    Agency Registration
+                  </Button>
+                </Link>
+              </div>
             </CardFooter>
           </Card>
         );
