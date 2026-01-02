@@ -123,6 +123,23 @@ const AgencySignupScreen = () => {
         return;
       }
 
+      // Notify admin about new agency application
+      try {
+        await supabase.functions.invoke('notify-admin-agency-application', {
+          body: {
+            agency_name: validation.agencyName,
+            contact_name: validation.contactName,
+            email: validation.email,
+            phone: validation.phone,
+            currency: validation.currency,
+            comments: validation.comments || null,
+          }
+        });
+      } catch (notifyError) {
+        console.error('Failed to notify admin:', notifyError);
+        // Don't block the user from completing the application
+      }
+
       toast.success('Agency application submitted! We will review and contact you shortly.');
       navigate('/', { replace: true });
     } catch (error) {

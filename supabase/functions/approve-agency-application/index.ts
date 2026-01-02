@@ -104,25 +104,48 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Create auth user using admin client
-    const { data: authData, error: createError } = await supabaseAdmin.auth.admin.createUser({
-      email: application.email,
-      password: application.password_hash, // Using the plain password stored temporarily
-      email_confirm: true,
-      user_metadata: {
-        full_name: application.agency_name
+    // Check if user already exists
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+    const existingUser = existingUsers?.users?.find(u => u.email === application.email)
+    
+    let newUserId: string
+    
+    if (existingUser) {
+      console.log(`User already exists with email: ${application.email}, using existing user ID: ${existingUser.id}`)
+      newUserId = existingUser.id
+      
+      // Update the user's password to the one from the application
+      const { error: updatePwError } = await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+        password: application.password_hash,
+        user_metadata: {
+          full_name: application.agency_name
+        }
+      })
+      
+      if (updatePwError) {
+        console.error('Error updating user password:', updatePwError)
       }
-    })
+    } else {
+      // Create auth user using admin client
+      const { data: authData, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: application.email,
+        password: application.password_hash,
+        email_confirm: true,
+        user_metadata: {
+          full_name: application.agency_name
+        }
+      })
 
-    if (createError) {
-      console.error('Error creating auth user:', createError)
-      return new Response(
-        JSON.stringify({ error: createError.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      if (createError) {
+        console.error('Error creating auth user:', createError)
+        return new Response(
+          JSON.stringify({ error: createError.message }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      newUserId = authData.user.id
     }
-
-    const newUserId = authData.user.id
     console.log(`Auth user created with ID: ${newUserId}`)
 
     // Update profile with phone
