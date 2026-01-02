@@ -9,11 +9,11 @@ import { Link } from "react-router-dom";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const prices = [
-  { from: "Sabiha Gökçen", to: "Taksim", price: "$60" },
-  { from: "Sabiha Gökçen", to: "Sultanahmet", price: "$55" },
-  { from: "Sabiha Gökçen", to: "Kadıköy", price: "$35" },
-  { from: "Sabiha Gökçen", to: "Üsküdar", price: "$40" },
-  { from: "Sabiha Gökçen", to: "Beşiktaş", price: "$55" },
+  { from: "Sabiha Gökçen", to: "Taksim", price: "Request Price" },
+  { from: "Sabiha Gökçen", to: "Sultanahmet", price: "Request Price" },
+  { from: "Sabiha Gökçen", to: "Kadıköy", price: "Request Price" },
+  { from: "Sabiha Gökçen", to: "Üsküdar", price: "Request Price" },
+  { from: "Sabiha Gökçen", to: "Beşiktaş", price: "Request Price" },
 ];
 
 const faqItems = [
@@ -68,7 +68,7 @@ const SabihaGokcenPrivateTransfer = () => {
         
         <section>
           <h2 className="text-2xl font-bold mb-4">Sabiha Gökçen Transfer Prices</h2>
-          <PriceTable items={prices} title="Fixed Price SAW Transfers" />
+          <PriceTable items={prices} title="Transfer Routes from SAW" />
         </section>
 
         <div className="bg-primary rounded-2xl p-8 text-center text-primary-foreground">

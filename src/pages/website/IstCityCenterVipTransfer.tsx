@@ -9,11 +9,11 @@ import { Link } from "react-router-dom";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const prices = [
-  { from: "IST Airport", to: "Taksim VIP", price: "$55" },
-  { from: "IST Airport", to: "Sultanahmet VIP", price: "$55" },
-  { from: "IST Airport", to: "Nişantaşı VIP", price: "$55" },
-  { from: "IST Airport", to: "Levent VIP", price: "$50" },
-  { from: "IST Airport", to: "Maslak VIP", price: "$50" },
+  { from: "IST Airport", to: "Taksim VIP", price: "Request Price" },
+  { from: "IST Airport", to: "Sultanahmet VIP", price: "Request Price" },
+  { from: "IST Airport", to: "Nişantaşı VIP", price: "Request Price" },
+  { from: "IST Airport", to: "Levent VIP", price: "Request Price" },
+  { from: "IST Airport", to: "Maslak VIP", price: "Request Price" },
 ];
 
 const faqItems = [
@@ -68,7 +68,7 @@ const IstCityCenterVipTransfer = () => {
         
         <section>
           <h2 className="text-2xl font-bold mb-4">IST VIP Transfer Prices</h2>
-          <PriceTable items={prices} title="VIP Transfer Rates" />
+          <PriceTable items={prices} title="VIP Transfer Routes" />
         </section>
 
         <div className="bg-primary rounded-2xl p-8 text-center text-primary-foreground">

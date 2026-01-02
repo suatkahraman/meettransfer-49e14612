@@ -14,27 +14,27 @@ import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 import { Footer } from "@/components/Footer";
 
 const destinations = [
-  { name: "Taksim", price: "45€", time: "45 dk" },
-  { name: "Sultanahmet", price: "45€", time: "50 dk" },
-  { name: "Beşiktaş", price: "45€", time: "40 dk" },
-  { name: "Kadıköy", price: "60€", time: "60 dk" },
-  { name: "Şişli", price: "45€", time: "45 dk" },
-  { name: "Nişantaşı", price: "45€", time: "45 dk" },
-  { name: "Maslak", price: "50€", time: "35 dk" },
-  { name: "Levent", price: "45€", time: "40 dk" },
-  { name: "Bakırköy", price: "40€", time: "30 dk" },
-  { name: "Galataport", price: "50€", time: "50 dk" },
+  { name: "Taksim", price: "Fiyat Talep Et", time: "45 dk" },
+  { name: "Sultanahmet", price: "Fiyat Talep Et", time: "50 dk" },
+  { name: "Beşiktaş", price: "Fiyat Talep Et", time: "40 dk" },
+  { name: "Kadıköy", price: "Fiyat Talep Et", time: "60 dk" },
+  { name: "Şişli", price: "Fiyat Talep Et", time: "45 dk" },
+  { name: "Nişantaşı", price: "Fiyat Talep Et", time: "45 dk" },
+  { name: "Maslak", price: "Fiyat Talep Et", time: "35 dk" },
+  { name: "Levent", price: "Fiyat Talep Et", time: "40 dk" },
+  { name: "Bakırköy", price: "Fiyat Talep Et", time: "30 dk" },
+  { name: "Galataport", price: "Fiyat Talep Et", time: "50 dk" },
 ];
 
 const prices = [
-  { from: "İstanbul Havalimanı", to: "Taksim", price: "45€" },
-  { from: "İstanbul Havalimanı", to: "Sultanahmet", price: "45€" },
-  { from: "İstanbul Havalimanı", to: "Beşiktaş", price: "45€" },
-  { from: "İstanbul Havalimanı", to: "Kadıköy", price: "60€" },
-  { from: "İstanbul Havalimanı", to: "Şişli / Levent", price: "45€" },
-  { from: "İstanbul Havalimanı", to: "Bakırköy", price: "40€" },
-  { from: "İstanbul Havalimanı", to: "Galataport", price: "50€" },
-  { from: "İstanbul Havalimanı", to: "Sabiha Gökçen", price: "120€" },
+  { from: "İstanbul Havalimanı", to: "Taksim", price: "Fiyat Talep Et" },
+  { from: "İstanbul Havalimanı", to: "Sultanahmet", price: "Fiyat Talep Et" },
+  { from: "İstanbul Havalimanı", to: "Beşiktaş", price: "Fiyat Talep Et" },
+  { from: "İstanbul Havalimanı", to: "Kadıköy", price: "Fiyat Talep Et" },
+  { from: "İstanbul Havalimanı", to: "Şişli / Levent", price: "Fiyat Talep Et" },
+  { from: "İstanbul Havalimanı", to: "Bakırköy", price: "Fiyat Talep Et" },
+  { from: "İstanbul Havalimanı", to: "Galataport", price: "Fiyat Talep Et" },
+  { from: "İstanbul Havalimanı", to: "Sabiha Gökçen", price: "Fiyat Talep Et" },
 ];
 
 const faqItems = [
