@@ -104,3 +104,9 @@ verify_jwt = false
 
 [functions.update-user-password]
 verify_jwt = true
+
+[functions.approve-agency-application]
+verify_jwt = true
+
+[functions.reject-agency-application]
+verify_jwt = true
