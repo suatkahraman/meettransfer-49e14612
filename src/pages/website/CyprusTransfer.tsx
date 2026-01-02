@@ -27,13 +27,13 @@ const airports = [
 ];
 
 const prices = [
-  { from: "Larnaca Airport", to: "Ayia Napa", price: "$45" },
-  { from: "Larnaca Airport", to: "Limassol", price: "$55" },
-  { from: "Larnaca Airport", to: "Paphos", price: "$95" },
-  { from: "Larnaca Airport", to: "Nicosia", price: "$50" },
-  { from: "Paphos Airport", to: "Limassol", price: "$60" },
-  { from: "Ercan Airport", to: "Kyrenia", price: "$35" },
-  { from: "Ercan Airport", to: "Famagusta", price: "$45" },
+  { from: "Larnaca Airport", to: "Ayia Napa", price: "Request Price" },
+  { from: "Larnaca Airport", to: "Limassol", price: "Request Price" },
+  { from: "Larnaca Airport", to: "Paphos", price: "Request Price" },
+  { from: "Larnaca Airport", to: "Nicosia", price: "Request Price" },
+  { from: "Paphos Airport", to: "Limassol", price: "Request Price" },
+  { from: "Ercan Airport", to: "Kyrenia", price: "Request Price" },
+  { from: "Ercan Airport", to: "Famagusta", price: "Request Price" },
 ];
 
 const faqItems = [

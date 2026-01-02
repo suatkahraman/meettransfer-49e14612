@@ -18,13 +18,13 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "Dalaman Airport", to: "Fethiye", price: "$45" },
-  { from: "Dalaman Airport", to: "Ölüdeniz", price: "$50" },
-  { from: "Dalaman Airport", to: "Marmaris", price: "$75" },
-  { from: "Dalaman Airport", to: "Dalyan", price: "$35" },
-  { from: "Dalaman Airport", to: "Göcek", price: "$40" },
-  { from: "Dalaman Airport", to: "Kalkan", price: "$85" },
-  { from: "Dalaman Airport", to: "Kaş", price: "$95" },
+  { from: "Dalaman Airport", to: "Fethiye", price: "Request Price" },
+  { from: "Dalaman Airport", to: "Ölüdeniz", price: "Request Price" },
+  { from: "Dalaman Airport", to: "Marmaris", price: "Request Price" },
+  { from: "Dalaman Airport", to: "Dalyan", price: "Request Price" },
+  { from: "Dalaman Airport", to: "Göcek", price: "Request Price" },
+  { from: "Dalaman Airport", to: "Kalkan", price: "Request Price" },
+  { from: "Dalaman Airport", to: "Kaş", price: "Request Price" },
 ];
 
 const faqItems = [
