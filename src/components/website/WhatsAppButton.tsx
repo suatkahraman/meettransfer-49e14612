@@ -7,7 +7,8 @@ interface WhatsAppButtonProps {
   phone?: string;
   message?: string;
   className?: string;
-  variant?: "default" | "large" | "floating";
+  variant?: "default" | "large" | "floating" | "small";
+  size?: "default" | "sm";
 }
 
 const WhatsAppButton = ({
@@ -15,6 +16,7 @@ const WhatsAppButton = ({
   message = "Hello, I would like to book a transfer.",
   className = "",
   variant = "default",
+  size = "default",
 }: WhatsAppButtonProps) => {
   const { t } = useLanguage();
 
@@ -50,6 +52,18 @@ const WhatsAppButton = ({
           <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white animate-pulse" />
         </span>
         {t("whatsappBooking")}
+      </Button>
+    );
+  }
+
+  if (variant === "small" || size === "sm") {
+    return (
+      <Button
+        onClick={handleClick}
+        size="sm"
+        className={`bg-[#25D366] hover:bg-[#22c55e] text-white rounded-lg relative ${className}`}
+      >
+        <MessageCircle className="h-4 w-4" />
       </Button>
     );
   }
