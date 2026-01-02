@@ -18,13 +18,13 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "Kayseri Airport", to: "Göreme", price: "$45" },
-  { from: "Kayseri Airport", to: "Ürgüp", price: "$50" },
-  { from: "Kayseri Airport", to: "Uçhisar", price: "$45" },
-  { from: "Kayseri Airport", to: "Nevşehir", price: "$40" },
-  { from: "Nevşehir Airport", to: "Göreme", price: "$35" },
-  { from: "Nevşehir Airport", to: "Ürgüp", price: "$40" },
-  { from: "Nevşehir Airport", to: "Uçhisar", price: "$35" },
+  { from: "Kayseri Airport", to: "Göreme", price: "Request Price" },
+  { from: "Kayseri Airport", to: "Ürgüp", price: "Request Price" },
+  { from: "Kayseri Airport", to: "Uçhisar", price: "Request Price" },
+  { from: "Kayseri Airport", to: "Nevşehir", price: "Request Price" },
+  { from: "Nevşehir Airport", to: "Göreme", price: "Request Price" },
+  { from: "Nevşehir Airport", to: "Ürgüp", price: "Request Price" },
+  { from: "Nevşehir Airport", to: "Uçhisar", price: "Request Price" },
 ];
 
 const faqItems = [
@@ -211,7 +211,7 @@ const CappadociaAirportTransfer = () => {
         <section>
           <h2 className="text-2xl font-bold mb-4">Cappadocia Airport Transfer Prices</h2>
           <p className="text-muted-foreground mb-6">Fixed prices from both Kayseri and Nevşehir airports:</p>
-          <PriceTable items={prices} title="Fixed Price Transfers to Cappadocia" />
+          <PriceTable items={prices} title="Transfer Routes to Cappadocia" />
         </section>
 
         {/* Booking CTA */}

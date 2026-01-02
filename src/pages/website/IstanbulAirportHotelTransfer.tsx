@@ -9,12 +9,12 @@ import { Link } from "react-router-dom";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const prices = [
-  { from: "Istanbul Airport", to: "Taksim Hotels", price: "$45" },
-  { from: "Istanbul Airport", to: "Sultanahmet Hotels", price: "$45" },
-  { from: "Istanbul Airport", to: "Beşiktaş Hotels", price: "$45" },
-  { from: "Istanbul Airport", to: "Galataport Hotels", price: "$50" },
-  { from: "Istanbul Airport", to: "Kadıköy Hotels", price: "$60" },
-  { from: "Istanbul Airport", to: "Sisli Hotels", price: "$45" },
+  { from: "Istanbul Airport", to: "Taksim Hotels", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Sultanahmet Hotels", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Beşiktaş Hotels", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Galataport Hotels", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Kadıköy Hotels", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Sisli Hotels", price: "Request Price" },
 ];
 
 const faqItems = [
@@ -69,7 +69,7 @@ const IstanbulAirportHotelTransfer = () => {
         
         <section>
           <h2 className="text-2xl font-bold mb-4">Istanbul Airport to Hotel Prices</h2>
-          <PriceTable items={prices} title="Fixed Price Hotel Transfers" />
+          <PriceTable items={prices} title="Transfer Routes to Hotels" />
         </section>
 
         <div className="bg-primary rounded-2xl p-8 text-center text-primary-foreground">

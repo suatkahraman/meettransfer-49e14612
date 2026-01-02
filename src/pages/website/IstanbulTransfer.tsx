@@ -19,19 +19,19 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "IST Airport", to: "Taksim", price: "$45" },
-  { from: "IST Airport", to: "Sultanahmet", price: "$45" },
-  { from: "IST Airport", to: "Beşiktaş", price: "$45" },
-  { from: "IST Airport", to: "Levent", price: "$45" },
-  { from: "IST Airport", to: "Kadıköy", price: "$60" },
-  { from: "IST Airport", to: "Üsküdar", price: "$60" },
-  { from: "IST Airport", to: "Galataport", price: "$50" },
-  { from: "SAW Airport", to: "Taksim", price: "$60" },
-  { from: "SAW Airport", to: "Sultanahmet", price: "$55" },
-  { from: "SAW Airport", to: "Beşiktaş", price: "$55" },
-  { from: "SAW Airport", to: "Kadıköy", price: "$35" },
-  { from: "SAW Airport", to: "Üsküdar", price: "$40" },
-  { from: "SAW Airport", to: "Galataport", price: "$60" },
+  { from: "IST Airport", to: "Taksim", price: "Request Price" },
+  { from: "IST Airport", to: "Sultanahmet", price: "Request Price" },
+  { from: "IST Airport", to: "Beşiktaş", price: "Request Price" },
+  { from: "IST Airport", to: "Levent", price: "Request Price" },
+  { from: "IST Airport", to: "Kadıköy", price: "Request Price" },
+  { from: "IST Airport", to: "Üsküdar", price: "Request Price" },
+  { from: "IST Airport", to: "Galataport", price: "Request Price" },
+  { from: "SAW Airport", to: "Taksim", price: "Request Price" },
+  { from: "SAW Airport", to: "Sultanahmet", price: "Request Price" },
+  { from: "SAW Airport", to: "Beşiktaş", price: "Request Price" },
+  { from: "SAW Airport", to: "Kadıköy", price: "Request Price" },
+  { from: "SAW Airport", to: "Üsküdar", price: "Request Price" },
+  { from: "SAW Airport", to: "Galataport", price: "Request Price" },
 ];
 
 const faqItems = [

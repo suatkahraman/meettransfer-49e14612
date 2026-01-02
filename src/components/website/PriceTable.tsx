@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import WhatsAppButton from "./WhatsAppButton";
 
 interface PriceItem {
   from: string;
@@ -45,6 +46,12 @@ const PriceTable = ({ items, title }: PriceTableProps) => {
           ))}
         </TableBody>
       </Table>
+      <div className="mt-4 pt-4 border-t border-border">
+        <WhatsAppButton
+          variant="default"
+          message={`Hi, I'd like to request a price for transfer.`}
+        />
+      </div>
     </div>
   );
 };

@@ -18,13 +18,13 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "Istanbul Airport", to: "Taksim", price: "$45" },
-  { from: "Istanbul Airport", to: "Sultanahmet", price: "$45" },
-  { from: "Istanbul Airport", to: "Beşiktaş", price: "$45" },
-  { from: "Istanbul Airport", to: "Levent", price: "$45" },
-  { from: "Istanbul Airport", to: "Kadıköy", price: "$60" },
-  { from: "Istanbul Airport", to: "Üsküdar", price: "$60" },
-  { from: "Istanbul Airport", to: "Galataport", price: "$50" },
+  { from: "Istanbul Airport", to: "Taksim", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Sultanahmet", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Beşiktaş", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Levent", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Kadıköy", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Üsküdar", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Galataport", price: "Request Price" },
 ];
 
 const faqItems = [
@@ -211,7 +211,7 @@ const IstanbulAirportTransfer = () => {
         <section>
           <h2 className="text-2xl font-bold mb-4">Istanbul Airport Transfer Prices</h2>
           <p className="text-muted-foreground mb-6">All prices are fixed and include meet & greet, flight tracking, tolls, and taxes:</p>
-          <PriceTable items={prices} title="Fixed Price Transfers from Istanbul Airport" />
+          <PriceTable items={prices} title="Transfer Routes from Istanbul Airport" />
         </section>
 
         {/* Booking CTA */}
