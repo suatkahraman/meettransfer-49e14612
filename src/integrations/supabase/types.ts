@@ -20,6 +20,7 @@ export type Database = {
           balance: number | null
           comments: string | null
           created_at: string
+          currency: string
           id: string
           updated_at: string
           user_id: string | null
@@ -29,6 +30,7 @@ export type Database = {
           balance?: number | null
           comments?: string | null
           created_at?: string
+          currency?: string
           id?: string
           updated_at?: string
           user_id?: string | null
@@ -38,6 +40,7 @@ export type Database = {
           balance?: number | null
           comments?: string | null
           created_at?: string
+          currency?: string
           id?: string
           updated_at?: string
           user_id?: string | null

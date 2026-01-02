@@ -390,7 +390,7 @@ const CyprusAirportTransferGuide = () => {
               </Button>
             </Link>
             <a 
-              href="https://wa.me/905321748390?text=Hello, I need a transfer from Cyprus Airport."
+              href="https://wa.me/15558051101?text=Hello, I need a transfer from Cyprus Airport."
               target="_blank"
               rel="noopener noreferrer"
             >
