@@ -41,6 +41,7 @@ const PriceTable = ({ items, title }: PriceTableProps) => {
             <TableHead>{t("from")}</TableHead>
             <TableHead>{t("to")}</TableHead>
             <TableHead className="text-right">{t("price")}</TableHead>
+            <TableHead className="w-[100px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -51,16 +52,16 @@ const PriceTable = ({ items, title }: PriceTableProps) => {
               <TableCell className="text-right text-accent font-bold">
                 {getDisplayPrice(item.price)}
               </TableCell>
+              <TableCell className="text-right">
+                <WhatsAppButton
+                  variant="small"
+                  message={`Hi, I'd like to request a price for transfer from ${item.from} to ${item.to}.`}
+                />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-      <div className="mt-4 pt-4 border-t border-border">
-        <WhatsAppButton
-          variant="default"
-          message={`Hi, I'd like to request a price for transfer.`}
-        />
-      </div>
     </div>
   );
 };
