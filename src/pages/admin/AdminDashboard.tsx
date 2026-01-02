@@ -174,6 +174,35 @@ const AdminDashboard = () => {
     };
   }, []);
 
+  // Fetch pending agency applications count
+  const [pendingAgencyApps, setPendingAgencyApps] = useState(0);
+  
+  useEffect(() => {
+    const fetchPendingAgencyApps = async () => {
+      const { count } = await supabase
+        .from('agency_applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      
+      setPendingAgencyApps(count || 0);
+    };
+
+    fetchPendingAgencyApps();
+
+    const channel = supabase
+      .channel('agency-apps-count')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'agency_applications' },
+        () => fetchPendingAgencyApps()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const menuItems = [
     { icon: Inbox, label: 'Quick Bookings', path: '/admin/quick-bookings', badge: pendingQuickBookings },
     { icon: MessageCircle, label: 'WhatsApp Chat', path: '/admin/whatsapp', badge: unreadWhatsApp },
@@ -182,6 +211,7 @@ const AdminDashboard = () => {
     { icon: Plane, label: 'Uçuş Takip', path: '/admin/flight-monitor' },
     { icon: Users, label: 'Şoförler', path: '/admin/drivers' },
     { icon: Building2, label: 'Acenteler', path: '/admin/agencies' },
+    { icon: ClipboardList, label: 'Acenta Başvuruları', path: '/admin/agency-applications', badge: pendingAgencyApps },
     { icon: FileText, label: 'Şablonlar', path: '/admin/templates' },
     { icon: DollarSign, label: 'Aylık Muhasebe', path: '/admin/monthly-accounting' },
     { icon: BarChart3, label: 'Ziyaretçi Analizi', path: '/admin/analytics' },

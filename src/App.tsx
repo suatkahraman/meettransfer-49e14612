@@ -23,6 +23,7 @@ const LoginScreen = lazy(() => import("./pages/auth/LoginScreen"));
 const SignupScreen = lazy(() => import("./pages/auth/SignupScreen"));
 const SignupChoicePage = lazy(() => import("./pages/auth/SignupChoicePage"));
 const AgencySignupScreen = lazy(() => import("./pages/auth/AgencySignupScreen"));
+const AgencyLoginScreen = lazy(() => import("./pages/auth/AgencyLoginScreen"));
 const ReservationForm = lazy(() => import("./pages/ReservationForm"));
 const InstallApp = lazy(() => import("./pages/InstallApp"));
 
@@ -219,6 +220,7 @@ const App = () => (
               <Route path="/signup" element={<LazyRoute><SignupChoicePage /></LazyRoute>} />
               <Route path="/signup/customer" element={<LazyRoute><SignupScreen /></LazyRoute>} />
               <Route path="/signup/agency" element={<LazyRoute><AgencySignupScreen /></LazyRoute>} />
+              <Route path="/login/agency" element={<LazyRoute><AgencyLoginScreen /></LazyRoute>} />
               <Route path="/install" element={<LazyRoute><InstallApp /></LazyRoute>} />
               
               {/* Customer Routes - Protected */}

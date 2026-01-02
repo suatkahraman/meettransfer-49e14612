@@ -52,6 +52,10 @@ const translations: Record<Language, Record<string, string>> = {
     blog: "Blog",
     enableNotifications: "Enable Notifications",
     notificationsOn: "Notifications On",
+    guestLogin: "Guest Login",
+    guestRegistration: "Guest Registration",
+    agencyLogin: "Agency",
+    agencyRegistration: "Agency Registration",
     
     // Hero Section
     heroTitle: "Get Best Price Now",
@@ -3535,6 +3539,10 @@ const translations: Record<Language, Record<string, string>> = {
     blog: "Blog",
     enableNotifications: "Bildirimleri Etkinleştir",
     notificationsOn: "Bildirimler Açık",
+    guestLogin: "Misafir Girişi",
+    guestRegistration: "Misafir Kayıt",
+    agencyLogin: "Acenta",
+    agencyRegistration: "Acenta Kayıt",
     
     // Hero Section
     heroTitle: "En İyi Fiyatı Şimdi Alın",

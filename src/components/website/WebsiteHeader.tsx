@@ -173,7 +173,7 @@ const WebsiteHeader = () => {
                   {t("guestLogin") || "Guest Login"}
                 </Button>
               </Link>
-              <Link to="/signup/agency">
+              <Link to="/login/agency">
                 <Button variant="secondary" size="sm" className="gap-2">
                   <Building2 className="h-4 w-4" />
                   {t("agencyLogin") || "Agency"}
@@ -266,7 +266,7 @@ const WebsiteHeader = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/signup/agency" className="w-full cursor-pointer gap-2">
+                    <Link to="/login/agency" className="w-full cursor-pointer gap-2">
                       <Building2 className="h-4 w-4" />
                       {t("agencyLogin") || "Agency"}
                     </Link>

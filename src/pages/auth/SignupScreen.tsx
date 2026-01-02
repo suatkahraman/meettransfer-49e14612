@@ -317,6 +317,24 @@ const SignupScreen = () => {
                 </p>
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
+
+              {/* KVKK Checkbox */}
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="kvkk"
+                  name="kvkk"
+                  required
+                  className="mt-1 h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                />
+                <Label htmlFor="kvkk" className="text-sm text-muted-foreground leading-tight">
+                  <Link to="/privacy" target="_blank" className="text-accent hover:underline">
+                    KVKK Aydınlatma Metni
+                  </Link>
+                  'ni okudum ve kabul ediyorum. Kişisel verilerimin işlenmesine onay veriyorum.
+                </Label>
+              </div>
+              {errors.kvkk && <p className="text-sm text-destructive">{errors.kvkk}</p>}
               
               <Button 
                 type="submit" 
@@ -327,10 +345,10 @@ const SignupScreen = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
+                    Hesap oluşturuluyor...
                   </>
                 ) : (
-                  'Create Account'
+                  'Hesap Oluştur'
                 )}
               </Button>
             </form>
