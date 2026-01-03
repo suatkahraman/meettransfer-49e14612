@@ -151,6 +151,10 @@ const AdminAgencyAccounting = () => {
     }
   }, [agencyId, allAgencies]);
 
+  // State for carryover balance from previous months
+  const [carryoverBalance, setCarryoverBalance] = useState(0);
+  const [carryoverPayments, setCarryoverPayments] = useState(0);
+
   // Fetch reservations, agency details, and payments
   const fetchData = async () => {
     if (!agencyId) {
@@ -175,30 +179,73 @@ const AdminAgencyAccounting = () => {
       query = query.eq('status', selectedStatus);
     }
 
-    const [reservationsRes, paymentsRes] = await Promise.all([
+    // Fetch current month data + all payments + previous months completed reservations for carryover
+    const [reservationsRes, allPaymentsRes, prevMonthsReservationsRes] = await Promise.all([
       query,
       supabase
         .from('agency_payments')
         .select('*')
         .eq('agency_id', agencyId)
         .order('payment_date', { ascending: false }),
+      // Fetch all completed reservations before this month for carryover calculation
+      supabase
+        .from('reservations')
+        .select('id, price, price_currency, passenger_cash_amount, passenger_cash_currency, status, pickup_date')
+        .eq('agency_id', agencyId)
+        .eq('status', 'completed')
+        .lt('pickup_date', monthStart),
     ]);
 
     const reservationsData = reservationsRes.data || [];
-    setReservations(reservationsData);
-    setPayments(paymentsRes.data || []);
+    const allPayments = allPaymentsRes.data || [];
+    const prevMonthsReservations = prevMonthsReservationsRes.data || [];
 
-    // Fetch agency reservation details for price info
+    setReservations(reservationsData);
+    setPayments(allPayments);
+
+    // Fetch agency reservation details for current month
+    let currentMonthDetails: AgencyReservationDetail[] = [];
     if (reservationsData.length > 0) {
       const reservationIds = reservationsData.map(r => r.id);
       const { data: detailsData } = await supabase
         .from('agency_reservation_details')
         .select('reservation_id, customer_price, company_amount, agency_price_currency')
         .in('reservation_id', reservationIds);
-      setAgencyDetails(detailsData || []);
+      currentMonthDetails = detailsData || [];
+      setAgencyDetails(currentMonthDetails);
     } else {
       setAgencyDetails([]);
     }
+
+    // Fetch agency reservation details for previous months completed reservations
+    let prevMonthsCarryoverDebt = 0;
+    if (prevMonthsReservations.length > 0) {
+      const prevReservationIds = prevMonthsReservations.map(r => r.id);
+      const { data: prevDetailsData } = await supabase
+        .from('agency_reservation_details')
+        .select('reservation_id, customer_price, company_amount, agency_price_currency')
+        .in('reservation_id', prevReservationIds);
+      
+      const prevDetails = prevDetailsData || [];
+      
+      // Calculate total debt from previous months completed reservations
+      // Debt = company_amount (admin price) - passenger_cash_amount
+      prevMonthsReservations.forEach(r => {
+        const detail = prevDetails.find(d => d.reservation_id === r.id);
+        const companyAmount = detail?.company_amount || r.price || 0;
+        const passengerCash = r.passenger_cash_amount || 0;
+        prevMonthsCarryoverDebt += (companyAmount - passengerCash);
+      });
+    }
+
+    // Calculate payments before this month
+    const prevMonthsPayments = allPayments
+      .filter(p => p.payment_date < monthStart)
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    // Carryover = Previous months debt - Previous months payments
+    setCarryoverBalance(prevMonthsCarryoverDebt - prevMonthsPayments);
+    setCarryoverPayments(prevMonthsPayments);
 
     setLoading(false);
   };
@@ -298,12 +345,22 @@ const AdminAgencyAccounting = () => {
   const totalAgencyPrice = reservations.reduce((sum, r) => sum + getAgencyPrice(r.id), 0);
   // Toplam Yolcu Nakit = Yolcudan alınacak nakit tutarı (acenta borcundan düşülür)
   const totalPassengerCash = reservations.reduce((sum, r) => sum + (r.passenger_cash_amount || 0), 0);
-  // Alınan Ödemeler = agency_payments tablosundaki ödemelerin toplamı
-  const totalPaymentsReceived = payments.reduce((sum, p) => sum + p.amount, 0);
-  // Net Acenta Borcu = Toplam Acenta Fiyatı - Yolcu Nakit
-  const netAgencyDebt = totalAgencyPrice - totalPassengerCash;
-  // Bakiye = Net Borç - Ödenen Tutar
-  const remainingBalance = netAgencyDebt - totalPaymentsReceived;
+  
+  // Current month payments only
+  const monthStart = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
+  const monthEnd = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
+  const currentMonthPayments = payments
+    .filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd)
+    .reduce((sum, p) => sum + p.amount, 0);
+  
+  // Alınan Ödemeler = Sadece bu ayki ödemeler
+  const totalPaymentsReceived = currentMonthPayments;
+  
+  // Net Acenta Borcu bu ay = Toplam Acenta Fiyatı - Yolcu Nakit
+  const currentMonthDebt = totalAgencyPrice - totalPassengerCash;
+  
+  // Devir Bakiye dahil güncel bakiye = Önceki aylardan devir + Bu ayki borç - Bu ayki ödemeler
+  const totalBalance = carryoverBalance + currentMonthDebt - currentMonthPayments;
 
   const handleAgencyChange = (newAgencyId: string) => {
     navigate(`/admin/agency-accounting/${newAgencyId}`);
@@ -556,16 +613,41 @@ const AdminAgencyAccounting = () => {
               ) : (
                 <>
                   {/* Summary Cards */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {/* Devir Bakiye Card */}
+                    {carryoverBalance !== 0 && (
+                      <Card className={carryoverBalance > 0 ? 'border-blue-500/50' : 'border-green-500/50'}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                            <History className="h-4 w-4" />
+                            Devir Bakiye
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className={`text-2xl font-bold ${carryoverBalance > 0 ? 'text-blue-600' : 'text-green-600'}`}>
+                            ₺{carryoverBalance.toFixed(2)}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Önceki aylardan devir
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+
                     <Card>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                           <Receipt className="h-4 w-4" />
-                          Toplam Rezervasyon
+                          Bu Ay Rezervasyon
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold">{totalReservations}</div>
+                        {currentMonthDebt > 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Bu ay borç: ₺{currentMonthDebt.toFixed(2)}
+                          </p>
+                        )}
                       </CardContent>
                     </Card>
 
@@ -573,7 +655,7 @@ const AdminAgencyAccounting = () => {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                           <CreditCard className="h-4 w-4" />
-                          Alınan Ödemeler
+                          Bu Ay Ödemeler
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -581,19 +663,19 @@ const AdminAgencyAccounting = () => {
                       </CardContent>
                     </Card>
 
-                    <Card className={remainingBalance > 0 ? 'border-amber-500' : remainingBalance < 0 ? 'border-green-500' : ''}>
+                    <Card className={totalBalance > 0 ? 'border-amber-500 border-2' : totalBalance < 0 ? 'border-green-500 border-2' : ''}>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                           <Banknote className="h-4 w-4" />
-                          Toplam Bakiye
+                          Güncel Bakiye
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className={`text-2xl font-bold ${remainingBalance > 0 ? 'text-amber-600' : remainingBalance < 0 ? 'text-green-600' : ''}`}>
-                          ₺{remainingBalance.toFixed(2)}
+                        <div className={`text-2xl font-bold ${totalBalance > 0 ? 'text-amber-600' : totalBalance < 0 ? 'text-green-600' : ''}`}>
+                          ₺{totalBalance.toFixed(2)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {remainingBalance > 0 ? 'Acenta borçlu' : remainingBalance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
+                          {totalBalance > 0 ? 'Acenta borçlu' : totalBalance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
                         </p>
                       </CardContent>
                     </Card>
