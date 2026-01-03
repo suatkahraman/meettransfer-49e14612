@@ -1,17 +1,10 @@
-import { useState } from "react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
-import { toast } from "sonner";
+import { Phone, Mail, MapPin } from "lucide-react";
 import { SEOHead, SchemaOrg } from "@/components/seo";
-import { trackConversion, CONVERSION_LABELS } from "@/lib/gtag";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 
 const globalOffices = [
@@ -55,27 +48,6 @@ const globalOffices = [
 
 const ContactPage = () => {
   const { t } = useLanguage();
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    message: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Track contact form conversion
-    trackConversion(CONVERSION_LABELS.CONTACT_FORM_SUBMIT);
-
-    toast.success(t("messageSent"));
-    setFormData({ name: "", phone: "", message: "" });
-    setIsSubmitting(false);
-  };
 
   return (
     <WebsiteLayout>
@@ -177,63 +149,6 @@ const ContactPage = () => {
           </p>
           <WhatsAppButton variant="large" />
         </div>
-
-        {/* Contact Form */}
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-4">{t("sendMessage")}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">{t("name")}</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    required
-                    placeholder={t("yourName")}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">{t("phone")}</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    required
-                    placeholder="+90 5XX XXX XXXX"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="message">{t("message")}</Label>
-                <Textarea
-                  id="message"
-                  value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
-                  required
-                  placeholder={t("howCanWeHelp")}
-                  rows={5}
-                />
-              </div>
-              <Button
-                type="submit"
-                variant="accent"
-                className="w-full h-12 rounded-xl"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? t("sending") : t("send")}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
 
         {/* PWA Install Banner */}
         <PWAPromoBanner />
