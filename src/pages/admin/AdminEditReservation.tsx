@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
@@ -100,6 +100,8 @@ const MAX_PASSENGERS = 15;
 const AdminEditReservation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo') || '/admin/reservations';
   const { logAction } = useAuditLog();
   const { emailCustomerPriceSet, emailDriverAssigned, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed, emailAgencyApproved, emailAgencyRejected, emailAgencyPriceSet } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
@@ -199,7 +201,7 @@ const AdminEditReservation = () => {
 
       if (reservationResult.error) {
         toast.error('Failed to load reservation');
-        navigate('/admin/reservations');
+        navigate(returnTo);
         return;
       }
 
@@ -881,7 +883,7 @@ const AdminEditReservation = () => {
     }
 
     toast.success('Reservation updated');
-    navigate('/admin/reservations');
+    navigate(returnTo);
     setSaving(false);
   };
 
@@ -981,7 +983,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '‚
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/reservations')} className="text-primary-foreground hover:bg-primary-foreground/10">
+        <Button variant="ghost" size="icon" onClick={() => navigate(returnTo)} className="text-primary-foreground hover:bg-primary-foreground/10">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex flex-col">
@@ -1220,7 +1222,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '‚
                       }
 
                       toast.success('Acenta talebi reddedildi');
-                      navigate('/admin/reservations');
+                      navigate(returnTo);
                     } catch (error: any) {
                       toast.error(error.message || 'Talep reddedilemedi');
                     } finally {
@@ -1334,7 +1336,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '‚
                         }
 
                         toast.success('Deƒüi≈üiklikler reddedildi, orijinal detaylar geri y√ºklendi');
-                        navigate('/admin/reservations');
+                        navigate(returnTo);
                       }
                     } catch (error: any) {
                       toast.error(error.message || 'Deƒüi≈üiklikler reddedilemedi');

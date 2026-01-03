@@ -245,7 +245,10 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-yellow-500/50">
+          <Card 
+            className="border-yellow-500/50 cursor-pointer hover:shadow-lg transition-shadow hover:border-yellow-400"
+            onClick={() => navigate('/admin/filtered-reservations?filter=new')}
+          >
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                 <Users className="h-4 w-4" />
@@ -257,7 +260,10 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-blue-500/50">
+          <Card 
+            className="border-blue-500/50 cursor-pointer hover:shadow-lg transition-shadow hover:border-blue-400"
+            onClick={() => navigate('/admin/filtered-reservations?filter=active')}
+          >
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                 <Car className="h-4 w-4" />
@@ -269,7 +275,10 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-green-500/50">
+          <Card 
+            className="border-green-500/50 cursor-pointer hover:shadow-lg transition-shadow hover:border-green-400"
+            onClick={() => navigate('/admin/filtered-reservations?filter=completed')}
+          >
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />

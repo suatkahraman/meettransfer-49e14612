@@ -62,6 +62,7 @@ const AdminWhatsAppChat = lazy(() => import("./pages/admin/AdminWhatsAppChat"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminAppInstallations = lazy(() => import("./pages/admin/AdminAppInstallations"));
 const AdminAgencyApplications = lazy(() => import("./pages/admin/AdminAgencyApplications"));
+const AdminFilteredReservations = lazy(() => import("./pages/admin/AdminFilteredReservations"));
 
 // Customer Portal Pages
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
@@ -261,6 +262,7 @@ const App = () => (
               <Route path="/admin/quick-bookings" element={<AdminRoute><LazyRoute><AdminQuickBookings /></LazyRoute></AdminRoute>} />
               <Route path="/admin/app-installations" element={<AdminRoute><LazyRoute><AdminAppInstallations /></LazyRoute></AdminRoute>} />
               <Route path="/admin/agency-applications" element={<AdminRoute><LazyRoute><AdminAgencyApplications /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/filtered-reservations" element={<AdminRoute><LazyRoute><AdminFilteredReservations /></LazyRoute></AdminRoute>} />
               
               {/* Agency Routes - Protected */}
               <Route path="/agency" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyHome /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
