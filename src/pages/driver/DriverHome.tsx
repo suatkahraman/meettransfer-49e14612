@@ -394,6 +394,17 @@ const DriverHome = () => {
           )}
         </div>
         <div className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            onClick={() => {
+              setRefreshing(true);
+              fetchReservations(true);
+            }}
+            disabled={refreshing}
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2"
+          >
+            <RefreshCw className={cn("h-5 w-5", refreshing && "animate-spin")} />
+          </Button>
           <PushNotificationToggle compact />
           <NotificationBell />
           <Button 
