@@ -4,11 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2, Plane, MessageCircle, BarChart3, Inbox, Download } from 'lucide-react';
-import { startOfMonth, endOfMonth, startOfDay, endOfDay, format } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2, Plane, MessageCircle, BarChart3, Inbox, Download, Calculator } from 'lucide-react';
+import { startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
-import { MonthlyProfitCard } from '@/components/admin/MonthlyProfitCard';
 import { Badge } from '@/components/ui/badge';
 interface KPIs {
   newToday: number;
@@ -214,6 +212,7 @@ const AdminDashboard = () => {
     { icon: ClipboardList, label: 'Acenta Başvuruları', path: '/admin/agency-applications', badge: pendingAgencyApps },
     { icon: FileText, label: 'Şablonlar', path: '/admin/templates' },
     { icon: DollarSign, label: 'Aylık Muhasebe', path: '/admin/monthly-accounting' },
+    { icon: Calculator, label: 'Aylık Kâr', path: '/admin/monthly-profit' },
     { icon: BarChart3, label: 'Ziyaretçi Analizi', path: '/admin/analytics' },
     { icon: Settings, label: 'Ayarlar', path: '/admin/settings' },
   ];
@@ -313,11 +312,6 @@ const AdminDashboard = () => {
               <div className="text-2xl font-bold text-purple-600">{appInstallCount}</div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Monthly Profit Card */}
-        <div className="mb-8">
-          <MonthlyProfitCard />
         </div>
 
         {/* Navigation Menu */}
