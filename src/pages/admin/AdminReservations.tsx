@@ -52,6 +52,7 @@ interface Reservation {
   agencies?: {
     id: string;
     agency_name: string;
+    currency: string;
   } | null;
   agency_reservation_details?: {
     customer_price: number | null;
@@ -143,7 +144,7 @@ const AdminReservations = () => {
       .select(`
         *,
         drivers (id, name),
-        agencies (id, agency_name),
+        agencies (id, agency_name, currency),
         agency_reservation_details (customer_price, company_amount, agency_profit, agency_price_currency, payment_status)
       `)
       .order('pickup_date', { ascending: false });
@@ -618,6 +619,9 @@ const AdminReservations = () => {
                             <Badge className="bg-purple-500/20 text-purple-700">
                               <Building2 className="h-3 w-3 mr-1" />
                               {reservation.agencies?.agency_name || 'Acenta'}
+                              {reservation.agencies?.currency && (
+                                <span className="ml-1 text-xs opacity-75">({reservation.agencies.currency})</span>
+                              )}
                             </Badge>
                             <span className="flex items-center gap-1 text-sm">
                               <Calendar className="h-4 w-4" />

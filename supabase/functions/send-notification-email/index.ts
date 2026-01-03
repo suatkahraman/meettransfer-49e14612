@@ -1312,7 +1312,7 @@ const handler = async (req: Request): Promise<Response> => {
       .select(`
         *,
         drivers (id, name, phone, plate_number, vehicle_model, user_id),
-        agencies (id, agency_name)
+        agencies (id, agency_name, user_id)
       `)
       .eq("id", reservation_id)
       .single();
@@ -1416,12 +1416,26 @@ const handler = async (req: Request): Promise<Response> => {
     if (type === 'agency_approved_agency' || type === 'agency_rejected_agency' || type === 'agency_price_set_agency') {
       if (additional_data?.agency_email) {
         agencyEmail = additional_data.agency_email;
-      } else if (reservation.agency_user_id) {
-        try {
-          const { data: userData } = await supabase.auth.admin.getUserById(reservation.agency_user_id);
-          agencyEmail = userData?.user?.email || "";
-        } catch (e) {
-          console.error('Failed to fetch agency user email:', e);
+        console.log('Using agency email from additional_data:', agencyEmail);
+      } else {
+        // First try agency_user_id from reservation, then try agencies.user_id
+        const agencyUserId = reservation.agency_user_id || (reservation as any).agencies?.user_id;
+        console.log('Looking for agency user_id. reservation.agency_user_id:', reservation.agency_user_id, 'agencies.user_id:', (reservation as any).agencies?.user_id);
+        
+        if (agencyUserId) {
+          try {
+            const { data: userData, error: userError } = await supabase.auth.admin.getUserById(agencyUserId);
+            if (userError) {
+              console.error('Error fetching agency user:', userError);
+            } else {
+              agencyEmail = userData?.user?.email || "";
+              console.log('Found agency email from auth:', agencyEmail);
+            }
+          } catch (e) {
+            console.error('Failed to fetch agency user email:', e);
+          }
+        } else {
+          console.warn('No agency user_id found for reservation:', reservation_id);
         }
       }
     }

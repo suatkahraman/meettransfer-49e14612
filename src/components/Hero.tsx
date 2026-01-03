@@ -198,6 +198,15 @@ const currencyOptions = CURRENCY_OPTIONS;
     if (!date) missingFields.push(t("pickupDate") || "Date");
     if (!time) missingFields.push(t("pickupTime") || "Time");
     
+    // Validate email - now required
+    const emailTrimmed = customerEmail.trim();
+    if (!emailTrimmed) {
+      missingFields.push(t("email") || "Email");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      toast.error(t("invalidEmail") || "Please enter a valid email address");
+      return;
+    }
+    
     if (missingFields.length > 0) {
       toast.error(`${t("pleaseFilAllFields") || "Please fill in"}: ${missingFields.join(", ")}`);
       return;
@@ -526,11 +535,11 @@ const currencyOptions = CURRENCY_OPTIONS;
                 />
               </div>
 
-              {/* Email (Optional) */}
+              {/* Email (Required) */}
               <div className="space-y-2">
                 <label className="text-white/90 text-sm font-medium block text-left flex items-center gap-2">
                   <Mail className="h-4 w-4 text-accent" />
-                  {t("emailOptional") || "Email (Optional)"}
+                  {t("email") || "Email"} <span className="text-accent">*</span>
                 </label>
                 <Input
                   type="email"
@@ -538,6 +547,7 @@ const currencyOptions = CURRENCY_OPTIONS;
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   placeholder={t("emailPlaceholder") || "email@example.com"}
                   className="h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md"
+                  required
                 />
                 <p className="text-white/70 text-xs">
                   {t("emailPriceNotification") || "Your price quote will also be sent to you via email."}
