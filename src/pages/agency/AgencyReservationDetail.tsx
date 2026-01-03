@@ -805,23 +805,60 @@ const AgencyReservationDetail = () => {
               )}
             </div>
 
-            {/* Driver Info */}
+            {/* Driver Info - Enhanced Card */}
             {reservation.drivers && (
               <div className="pt-4 border-t">
-                <h3 className="font-semibold mb-2">{t('assignedDriver')}</h3>
-                <div className="bg-muted/50 p-3 rounded-lg space-y-1">
-                  <p className="font-medium">{reservation.drivers.name}</p>
-                  {reservation.drivers.vehicle_model && (
-                    <p className="text-sm text-muted-foreground">{reservation.drivers.vehicle_model}</p>
-                  )}
-                  {reservation.drivers.plate_number && (
-                    <p className="text-sm font-mono">
-                      {reservation.drivers.plate_number}
-                      {reservation.drivers.vehicle_color && (
-                        <span className="text-muted-foreground font-normal ml-2">• {reservation.drivers.vehicle_color}</span>
+                <div className="relative overflow-hidden rounded-xl border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 via-emerald-500/10 to-emerald-500/5">
+                  {/* Header */}
+                  <div className="bg-emerald-500/10 px-4 py-3 border-b border-emerald-500/20">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                        <Car className="h-4 w-4 text-emerald-600" />
+                      </div>
+                      <span className="font-semibold text-emerald-700 dark:text-emerald-400">{t('assignedDriver')}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="p-4 space-y-4">
+                    {/* Driver Name */}
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                        <User className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground uppercase tracking-wide">{t('driverName') || 'Driver'}</div>
+                        <div className="text-lg font-bold">{reservation.drivers.name}</div>
+                      </div>
+                    </div>
+                    
+                    {/* Vehicle Details Grid */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Plate Number */}
+                      {reservation.drivers.plate_number && (
+                        <div className="bg-background/80 rounded-lg p-3 border border-emerald-500/10">
+                          <div className="text-xs text-muted-foreground mb-1">{t('plateNumber') || 'Plate'}</div>
+                          <div className="font-mono font-bold text-sm">{reservation.drivers.plate_number}</div>
+                        </div>
                       )}
-                    </p>
-                  )}
+                      
+                      {/* Color */}
+                      {reservation.drivers.vehicle_color && (
+                        <div className="bg-background/80 rounded-lg p-3 border border-emerald-500/10">
+                          <div className="text-xs text-muted-foreground mb-1">{t('vehicleColor') || 'Color'}</div>
+                          <div className="font-medium text-sm">{reservation.drivers.vehicle_color}</div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Vehicle Model */}
+                    {reservation.drivers.vehicle_model && (
+                      <div className="bg-background/80 rounded-lg p-3 border border-emerald-500/10">
+                        <div className="text-xs text-muted-foreground mb-1">{t('vehicleModel') || 'Vehicle'}</div>
+                        <div className="font-medium">{reservation.drivers.vehicle_model}</div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

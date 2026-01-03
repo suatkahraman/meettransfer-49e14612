@@ -759,42 +759,75 @@ const CustomerReservationDetail = () => {
               </div>
             )}
 
-            {/* Driver Info */}
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="text-sm font-medium mb-3">{t('driverInformation')}</div>
-              {reservation.drivers ? (
-                <div className="space-y-3">
+            {/* Driver Info - Enhanced Card */}
+            {reservation.drivers ? (
+              <div className="relative overflow-hidden rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5">
+                {/* Header */}
+                <div className="bg-primary/10 px-4 py-3 border-b border-primary/20">
                   <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{reservation.drivers.name}</span>
+                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Car className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="font-semibold text-primary">{t('driverInformation')}</span>
                   </div>
-                  {reservation.drivers.plate_number && (
-                    <div className="flex items-center gap-2">
-                      <Car className="h-4 w-4 text-muted-foreground" />
-                      <span>{reservation.drivers.plate_number}</span>
-                      {reservation.drivers.vehicle_color && (
-                        <span className="text-muted-foreground">• {reservation.drivers.vehicle_color}</span>
-                      )}
+                </div>
+                
+                {/* Content */}
+                <div className="p-4 space-y-4">
+                  {/* Driver Name */}
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <User className="h-6 w-6 text-primary" />
                     </div>
-                  )}
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Driver</div>
+                      <div className="text-lg font-bold">{reservation.drivers.name}</div>
+                    </div>
+                  </div>
+                  
+                  {/* Vehicle Details */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Plate Number */}
+                    {reservation.drivers.plate_number && (
+                      <div className="bg-background/80 rounded-lg p-3 border border-primary/10">
+                        <div className="text-xs text-muted-foreground mb-1">Plate</div>
+                        <div className="font-mono font-bold text-sm">{reservation.drivers.plate_number}</div>
+                      </div>
+                    )}
+                    
+                    {/* Color */}
+                    {reservation.drivers.vehicle_color && (
+                      <div className="bg-background/80 rounded-lg p-3 border border-primary/10">
+                        <div className="text-xs text-muted-foreground mb-1">Color</div>
+                        <div className="font-medium text-sm">{reservation.drivers.vehicle_color}</div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Vehicle Model */}
                   {reservation.drivers.vehicle_model && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>{reservation.drivers.vehicle_model}</span>
+                    <div className="bg-background/80 rounded-lg p-3 border border-primary/10">
+                      <div className="text-xs text-muted-foreground mb-1">Vehicle</div>
+                      <div className="font-medium">{reservation.drivers.vehicle_model}</div>
                     </div>
                   )}
+                  
                   {/* WhatsApp Support Button */}
                   <Button
                     onClick={() => window.open('https://wa.me/905321748390', '_blank')}
-                    className="w-full mt-3 bg-[#25D366] hover:bg-[#22c55e] text-white"
+                    className="w-full bg-[#25D366] hover:bg-[#22c55e] text-white"
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     WhatsApp Support
                   </Button>
                 </div>
-              ) : (
+              </div>
+            ) : (
+              <div className="bg-muted/50 border border-dashed border-muted-foreground/30 p-4 rounded-lg text-center">
+                <Car className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
                 <p className="text-muted-foreground text-sm">{t('driverAssignedSoonMessage')}</p>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Confirmed Message */}
             {reservation.status === 'customer_approved' && !reservation.drivers && (
