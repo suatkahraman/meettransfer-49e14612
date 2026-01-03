@@ -232,7 +232,7 @@ const translations: Record<Language, Record<string, string>> = {
     // About Page
     aboutTitle: "About Meet Transfer",
     aboutSubtitle: "Your Trusted Partner for Premium Airport Transfers",
-    whoWeAre: "Who We Are - Turkey's Leading Airport Transfer Service",
+    whoWeAre: "Who We Are - International Leading Airport Transfer Service",
     aboutIntro1: "Meet Transfer is Turkey's leading premium airport transfer service, providing luxury transportation across the country's most popular tourist destinations. Founded with a vision to offer travelers a seamless and comfortable journey, we have grown to become the trusted choice for discerning travelers, families, and business executives alike.",
     aboutIntro2: "Our commitment to excellence is reflected in every aspect of our service – from our immaculately maintained Mercedes fleet to our professional, English-speaking drivers who undergo rigorous training. We believe that your journey should be as enjoyable as your destination.",
     yearsExperience: "Years Experience",
@@ -874,7 +874,7 @@ const translations: Record<Language, Record<string, string>> = {
     // About Page
     aboutTitle: "Über Meet Transfer",
     aboutSubtitle: "Ihr vertrauenswürdiger Partner für Premium-Flughafentransfers",
-    whoWeAre: "Wer wir sind - Türkeis führender Flughafentransfer-Service",
+    whoWeAre: "Wer wir sind - Internationaler führender Flughafentransfer-Service",
     aboutIntro1: "Meet Transfer ist der führende Premium-Flughafentransfer-Service der Türkei und bietet Luxustransport zu den beliebtesten Touristenzielen des Landes. Gegründet mit der Vision, Reisenden eine nahtlose und komfortable Reise zu bieten, sind wir zur vertrauenswürdigen Wahl für anspruchsvolle Reisende, Familien und Geschäftsführer geworden.",
     aboutIntro2: "Unser Engagement für Exzellenz spiegelt sich in jedem Aspekt unseres Services wider – von unserer makellos gewarteten Mercedes-Flotte bis zu unseren professionellen, englischsprachigen Fahrern, die eine strenge Ausbildung durchlaufen. Wir glauben, dass Ihre Reise genauso angenehm sein sollte wie Ihr Reiseziel.",
     yearsExperience: "Jahre Erfahrung",
@@ -1484,7 +1484,7 @@ const translations: Record<Language, Record<string, string>> = {
     // About Page
     aboutTitle: "À propos de Meet Transfer",
     aboutSubtitle: "Votre partenaire de confiance pour les transferts aéroport premium",
-    whoWeAre: "Qui nous sommes - Le principal service de transfert aéroport de Turquie",
+    whoWeAre: "Qui nous sommes - Le service de transfert aéroport leader international",
     aboutIntro1: "Meet Transfer est le principal service de transfert aéroport premium de Turquie, offrant un transport de luxe vers les destinations touristiques les plus populaires du pays. Fondé avec la vision d'offrir aux voyageurs un voyage fluide et confortable, nous sommes devenus le choix de confiance des voyageurs exigeants, des familles et des cadres d'entreprise.",
     aboutIntro2: "Notre engagement envers l'excellence se reflète dans chaque aspect de notre service – de notre flotte Mercedes impeccablement entretenue à nos chauffeurs professionnels anglophones qui suivent une formation rigoureuse. Nous croyons que votre voyage doit être aussi agréable que votre destination.",
     yearsExperience: "Années d'expérience",
@@ -2122,7 +2122,7 @@ const translations: Record<Language, Record<string, string>> = {
     // About Page
     aboutTitle: "О Meet Transfer",
     aboutSubtitle: "Ваш надежный партнер для премиум трансферов из аэропорта",
-    whoWeAre: "Кто мы - Ведущий сервис трансфера из аэропорта в Турции",
+    whoWeAre: "Кто мы - Международный ведущий сервис трансфера из аэропорта",
     aboutIntro1: "Meet Transfer - ведущий премиум сервис трансфера из аэропорта в Турции, предоставляющий люкс транспорт по самым популярным туристическим направлениям страны. Основанный с видением предложить путешественникам беспроблемную и комфортную поездку, мы стали надежным выбором для взыскательных путешественников, семей и бизнес-руководителей.",
     aboutIntro2: "Наша приверженность совершенству отражается в каждом аспекте нашего сервиса – от нашего безупречно обслуживаемого автопарка Mercedes до наших профессиональных англоговорящих водителей, проходящих строгое обучение. Мы верим, что ваше путешествие должно быть таким же приятным, как и ваш пункт назначения.",
     yearsExperience: "Лет опыта",
@@ -2760,7 +2760,7 @@ const translations: Record<Language, Record<string, string>> = {
     // About Page
     aboutTitle: "Chi è Meet Transfer",
     aboutSubtitle: "Il tuo partner di fiducia per trasferimenti aeroportuali premium",
-    whoWeAre: "Chi siamo - Il principale servizio di trasferimento aeroportuale della Turchia",
+    whoWeAre: "Chi siamo - Il principale servizio di trasferimento aeroportuale internazionale",
     aboutIntro1: "Meet Transfer è il principale servizio di trasferimento aeroportuale premium della Turchia, che offre trasporto di lusso verso le destinazioni turistiche più popolari del paese. Fondato con la visione di offrire ai viaggiatori un viaggio senza problemi e confortevole, siamo diventati la scelta di fiducia per viaggiatori esigenti, famiglie e dirigenti aziendali.",
     aboutIntro2: "Il nostro impegno per l'eccellenza si riflette in ogni aspetto del nostro servizio - dalla nostra flotta Mercedes perfettamente mantenuta ai nostri autisti professionisti anglofoni che seguono una formazione rigorosa. Crediamo che il tuo viaggio debba essere piacevole quanto la tua destinazione.",
     yearsExperience: "Anni di esperienza",
@@ -3398,7 +3398,7 @@ const translations: Record<Language, Record<string, string>> = {
     // About Page
     aboutTitle: "Sobre Meet Transfer",
     aboutSubtitle: "Tu socio de confianza para traslados premium desde el aeropuerto",
-    whoWeAre: "Quiénes somos - El servicio líder de traslados desde el aeropuerto en Turquía",
+    whoWeAre: "Quiénes somos - El servicio líder internacional de traslados desde el aeropuerto",
     aboutIntro1: "Meet Transfer es el servicio líder de traslados premium desde el aeropuerto en Turquía, proporcionando transporte de lujo a los destinos turísticos más populares del país. Fundado con la visión de ofrecer a los viajeros un viaje fluido y cómodo, nos hemos convertido en la opción de confianza para viajeros exigentes, familias y ejecutivos de negocios.",
     aboutIntro2: "Nuestro compromiso con la excelencia se refleja en cada aspecto de nuestro servicio – desde nuestra flota Mercedes impecablemente mantenida hasta nuestros conductores profesionales de habla inglesa que reciben una formación rigurosa. Creemos que tu viaje debe ser tan agradable como tu destino.",
     yearsExperience: "Años de experiencia",
@@ -4064,7 +4064,7 @@ const translations: Record<Language, Record<string, string>> = {
     // About Page
     aboutTitle: "عن Meet Transfer",
     aboutSubtitle: "شريكك الموثوق لنقل المطار الفاخر",
-    whoWeAre: "من نحن - خدمة نقل المطار الرائدة في تركيا",
+    whoWeAre: "من نحن - خدمة نقل المطار الرائدة عالمياً",
     aboutIntro1: "Meet Transfer هي خدمة نقل المطار الفاخرة الرائدة في تركيا، تقدم نقل فاخر عبر أشهر الوجهات السياحية في البلاد. تأسست برؤية لتقديم رحلة سلسة ومريحة للمسافرين، وقد نمت لتصبح الخيار الموثوق للمسافرين المميزين والعائلات ورجال الأعمال.",
     aboutIntro2: "ينعكس التزامنا بالتميز في كل جانب من جوانب خدمتنا - من أسطول مرسيدس المحافظ عليه بدقة إلى سائقينا المحترفين الناطقين بالإنجليزية الذين يخضعون لتدريب صارم. نؤمن بأن رحلتك يجب أن تكون ممتعة مثل وجهتك.",
     yearsExperience: "سنوات الخبرة",
@@ -4702,7 +4702,7 @@ const translations: Record<Language, Record<string, string>> = {
     // About Page
     aboutTitle: "Meet Transfer Hakkında",
     aboutSubtitle: "Premium Havalimanı Transferleri İçin Güvenilir Ortağınız",
-    whoWeAre: "Biz Kimiz - Türkiye'nin Lider Havalimanı Transfer Hizmeti",
+    whoWeAre: "Biz Kimiz - Uluslararası Lider Havalimanı Transfer Hizmeti",
     aboutIntro1: "Meet Transfer, Türkiye'nin lider premium havalimanı transfer hizmetidir ve ülkenin en popüler turistik destinasyonlarına lüks ulaşım sağlamaktadır. Yolculara sorunsuz ve konforlu bir yolculuk sunma vizyonuyla kurulan firmamız, seçici gezginler, aileler ve iş dünyası yöneticileri için güvenilir tercih haline gelmiştir.",
     aboutIntro2: "Mükemmelliğe olan bağlılığımız, hizmetimizin her yönüne yansır – kusursuz bakımlı Mercedes filomuzdan, titiz eğitim alan profesyonel, İngilizce konuşan şoförlerimize kadar. Yolculuğunuzun, varış noktanız kadar keyifli olması gerektiğine inanıyoruz.",
     yearsExperience: "Yıllık Deneyim",
@@ -5417,7 +5417,7 @@ const translations: Record<Language, Record<string, string>> = {
     // About Page
     aboutTitle: "Про Meet Transfer",
     aboutSubtitle: "Ваш надійний партнер для преміум трансферів з аеропорту",
-    whoWeAre: "Хто ми - Провідний сервіс трансферів з аеропорту в Туреччині",
+    whoWeAre: "Хто ми - Міжнародний провідний сервіс трансферів з аеропорту",
     aboutIntro1: "Meet Transfer — провідний преміум сервіс трансферів з аеропорту в Туреччині, що забезпечує люксові перевезення до найпопулярніших туристичних напрямків країни.",
     aboutIntro2: "Наша відданість досконалості відображається в кожному аспекті нашого сервісу – від бездоганно доглянутого автопарку Mercedes до професійних водіїв.",
     yearsExperience: "Років досвіду",
@@ -5983,7 +5983,7 @@ const translations: Record<Language, Record<string, string>> = {
     // About Page
     aboutTitle: "ミートトランスファーについて",
     aboutSubtitle: "プレミアム空港送迎の信頼できるパートナー",
-    whoWeAre: "私たちについて - トルコをリードする空港送迎サービス",
+    whoWeAre: "私たちについて - 国際的リーダーの空港送迎サービス",
     aboutIntro1: "ミートトランスファーは、トルコの人気観光地への高級輸送を提供する、トルコをリードするプレミアム空港送迎サービスです。シームレスで快適な旅を提供するというビジョンを持って設立され、目の肥えた旅行者、家族、ビジネスエグゼクティブに信頼される選択肢に成長しました。",
     aboutIntro2: "卓越性へのコミットメントは、完璧に整備されたメルセデスフリートから、厳格なトレーニングを受けたプロの英語を話すドライバーまで、サービスのあらゆる面に反映されています。目的地と同様に旅も楽しいものであるべきだと考えています。",
     yearsExperience: "年の経験",
