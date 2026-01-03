@@ -78,6 +78,7 @@ const AdminQuickBookings = lazy(() => import("./pages/admin/AdminQuickBookings")
 const AgencyHome = lazy(() => import("./pages/agency/AgencyHome"));
 const AgencyReports = lazy(() => import("./pages/agency/AgencyReports"));
 const AgencyReservationDetail = lazy(() => import("./pages/agency/AgencyReservationDetail"));
+const AgencyEditReservation = lazy(() => import("./pages/agency/AgencyEditReservation"));
 const AgencyCreateReservation = lazy(() => import("./pages/agency/AgencyCreateReservation"));
 const AgencyTransactionHistory = lazy(() => import("./pages/agency/AgencyTransactionHistory"));
 
@@ -272,6 +273,7 @@ const App = () => (
               <Route path="/agency/reports" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReports /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               <Route path="/agency/transactions" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyTransactionHistory /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               <Route path="/agency/reservation/:id" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReservationDetail /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
+              <Route path="/agency/reservation/:id/edit" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyEditReservation /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               
               {/* Customer Portal & Booking Confirmation - Public */}
               <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />

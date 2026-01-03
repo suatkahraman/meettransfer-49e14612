@@ -12,8 +12,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy, MessageCircle, CheckCircle, XCircle, DollarSign } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy, MessageCircle, CheckCircle, XCircle, DollarSign, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { LocationDisplay } from '@/components/ui/location-display';
@@ -96,7 +97,7 @@ const AgencyReservationDetail = () => {
   const { agencyId } = useUserRole();
   const { t } = useAgencyTranslations();
   const { currencySymbol } = useAgencyLanguage();
-  const { emailAdminAgencyPriceApproved, emailAdminAgencyPriceRejected } = useEmailNotifications();
+  const { emailAdminAgencyPriceApproved, emailAdminAgencyPriceRejected, emailAdminReservationCancelled } = useEmailNotifications();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [agencyDetails, setAgencyDetails] = useState<AgencyReservationDetail | null>(null);
@@ -105,6 +106,7 @@ const AgencyReservationDetail = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   // Editable fields
   const [customerPrice, setCustomerPrice] = useState('');
@@ -332,6 +334,105 @@ const AgencyReservationDetail = () => {
     }
   };
 
+  // Handle cancel reservation
+  const handleCancelReservation = async () => {
+    if (!id || !reservation) return;
+
+    setCancelling(true);
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'cancelled_by_customer' })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Notify admins (in-app + push)
+      try {
+        await supabase.functions.invoke('create-notification', {
+          body: {
+            type: 'agency_reservation_cancelled',
+            title: 'Acenta Rezervasyonu İptal Etti',
+            message: `Acenta rezervasyonu iptal etti. Kod: ${reservation.reservation_code}`,
+            notify_admins: true,
+            reservation_id: id,
+            send_push: true,
+          }
+        });
+      } catch (e) {
+        console.error('Failed to notify admins:', e);
+      }
+
+      // Send email to admin
+      try {
+        await emailAdminReservationCancelled(id);
+      } catch (e) {
+        console.error('Failed to send admin email:', e);
+      }
+
+      // If driver was assigned, notify them too
+      if (reservation.driver_id) {
+        try {
+          const { data: driver } = await supabase
+            .from('drivers')
+            .select('user_id')
+            .eq('id', reservation.driver_id)
+            .single();
+
+          if (driver?.user_id) {
+            await supabase.functions.invoke('create-notification', {
+              body: {
+                user_id: driver.user_id,
+                reservation_id: id,
+                title: 'Rezervasyon İptal Edildi',
+                message: `Rezervasyon ${reservation.reservation_code} acenta tarafından iptal edildi.`,
+                type: 'reservation_cancelled',
+                send_push: true,
+              }
+            });
+          }
+        } catch (e) {
+          console.error('Failed to notify driver:', e);
+        }
+      }
+
+      toast.success(t('reservationCancelled'));
+      navigate('/agency');
+    } catch (error: any) {
+      toast.error(error.message || t('failedToCancelReservation'));
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  // Check if reservation can be edited
+  const canEditReservation = () => {
+    if (!reservation) return false;
+    const editableStatuses = [
+      'awaiting-price',
+      'pending_admin_review',
+      'waiting_for_agency_approval',
+      'customer_approved',
+      'confirmed',
+      'sent_to_driver'
+    ];
+    return editableStatuses.includes(reservation.status);
+  };
+
+  // Check if reservation can be cancelled
+  const canCancelReservation = () => {
+    if (!reservation) return false;
+    const cancellableStatuses = [
+      'awaiting-price',
+      'pending_admin_review',
+      'waiting_for_agency_approval',
+      'customer_approved',
+      'confirmed',
+      'sent_to_driver'
+    ];
+    return cancellableStatuses.includes(reservation.status);
+  };
+
   const handleCopyDetails = () => {
     if (!reservation) return;
 
@@ -486,6 +587,61 @@ const AgencyReservationDetail = () => {
                   <p className="font-medium text-amber-700 dark:text-amber-300">{t('pendingAdminReview')}</p>
                   <p className="text-sm text-amber-600 dark:text-amber-400">{t('waitingForPriceFromAdmin')}</p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Edit and Cancel Actions - Show when reservation is editable */}
+        {(canEditReservation() || canCancelReservation()) && (
+          <Card>
+            <CardContent className="py-4">
+              <div className="flex gap-3">
+                {canEditReservation() && (
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => navigate(`/agency/reservation/${id}/edit`)}
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    {t('editReservation')}
+                  </Button>
+                )}
+                {canCancelReservation() && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                        disabled={cancelling}
+                      >
+                        {cancelling ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4 mr-2" />
+                        )}
+                        {t('cancelReservation')}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>{t('confirmCancellation')}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {t('cancelReservationWarning')}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleCancelReservation}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          {t('confirmCancel')}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </CardContent>
           </Card>
