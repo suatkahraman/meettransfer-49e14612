@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Building2, User, KeyRound } from 'lucide-react';
+import { ArrowLeft, Loader2, Building2, User, KeyRound, Share2, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
@@ -30,10 +30,40 @@ const AgencyLoginScreen = () => {
     return localStorage.getItem('agencySavedEmail') || '';
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [copied, setCopied] = useState(false);
   const { signIn, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { t } = useLanguage();
   const navigate = useNavigate();
+
+  const handleShare = async () => {
+    const shareUrl = window.location.origin + '/login/agency';
+    const shareText = t('agencyLoginShareText') || 'Join Meet Transfer as an agency partner!';
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Meet Transfer - Agency Login',
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (error) {
+        // User cancelled or error
+        if ((error as Error).name !== 'AbortError') {
+          handleCopyLink(shareUrl);
+        }
+      }
+    } else {
+      handleCopyLink(shareUrl);
+    }
+  };
+
+  const handleCopyLink = (url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    toast.success(t('linkCopied') || 'Link copied to clipboard!');
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Role-based redirect after login
   useEffect(() => {
@@ -219,11 +249,23 @@ const AgencyLoginScreen = () => {
     <div className="min-h-screen flex flex-col bg-secondary">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="flex items-center h-14 px-4">
+        <div className="flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2 text-foreground">
             <ArrowLeft className="h-5 w-5" />
             <span className="text-sm">{t("back") || "Back"}</span>
           </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleShare}
+            className="h-9 w-9"
+          >
+            {copied ? (
+              <Check className="h-5 w-5 text-green-500" />
+            ) : (
+              <Share2 className="h-5 w-5" />
+            )}
+          </Button>
         </div>
       </header>
 
