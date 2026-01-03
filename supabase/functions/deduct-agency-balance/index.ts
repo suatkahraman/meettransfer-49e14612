@@ -26,7 +26,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Processing deduction for reservation:', reservation_id);
+    console.log('Processing agency balance update for reservation:', reservation_id);
 
     // Get reservation with agency info
     const { data: reservation, error: resError } = await supabase
@@ -45,34 +45,35 @@ serve(async (req) => {
 
     // Skip if no agency linked
     if (!reservation.agency_id) {
-      console.log('No agency linked, skipping deduction');
+      console.log('No agency linked, skipping balance update');
       return new Response(
         JSON.stringify({ message: 'No agency linked to this reservation' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Get agency details
+    // Get agency reservation details with amount and currency
     const { data: agencyDetail, error: detailError } = await supabase
       .from('agency_reservation_details')
-      .select('company_amount')
+      .select('company_amount, agency_price_currency')
       .eq('reservation_id', reservation_id)
       .maybeSingle();
 
     const companyAmount = agencyDetail?.company_amount || 0;
+    const agencyCurrency = agencyDetail?.agency_price_currency || 'TRY';
 
     if (companyAmount <= 0) {
-      console.log('No company amount to deduct');
+      console.log('No company amount to add');
       return new Response(
-        JSON.stringify({ message: 'No company amount to deduct' }),
+        JSON.stringify({ message: 'No company amount to add' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Get current agency balance
+    // Get current agency with balance and currency
     const { data: agency, error: agencyError } = await supabase
       .from('agencies')
-      .select('id, agency_name, balance')
+      .select('id, agency_name, balance, currency')
       .eq('id', reservation.agency_id)
       .single();
 
@@ -84,7 +85,8 @@ serve(async (req) => {
       );
     }
 
-    const newBalance = (agency.balance || 0) - companyAmount;
+    // Add the company_amount to agency balance (in agency's currency)
+    const newBalance = (agency.balance || 0) + companyAmount;
 
     // Update agency balance
     const { error: updateError } = await supabase
@@ -100,14 +102,23 @@ serve(async (req) => {
       );
     }
 
+    // Get currency symbol for description
+    const currencySymbols: Record<string, string> = {
+      'TRY': '₺',
+      'EUR': '€',
+      'USD': '$',
+      'GBP': '£'
+    };
+    const currencySymbol = currencySymbols[agencyCurrency] || agencyCurrency;
+
     // Create transaction record
     const { error: txError } = await supabase
       .from('agency_transactions')
       .insert({
         agency_id: agency.id,
         amount: companyAmount,
-        type: 'deduction',
-        description: `Transfer completed - Reservation ${reservation_id.slice(0, 8)}`,
+        type: 'reservation_completed',
+        description: `Transfer tamamlandı - ${currencySymbol}${companyAmount.toFixed(2)}`,
         balance_after: newBalance,
         reservation_id: reservation_id,
       });
@@ -116,12 +127,13 @@ serve(async (req) => {
       console.error('Failed to create transaction:', txError);
     }
 
-    console.log(`Deducted ₺${companyAmount} from ${agency.agency_name}. New balance: ₺${newBalance}`);
+    console.log(`Added ${currencySymbol}${companyAmount} to ${agency.agency_name}. New balance: ${currencySymbol}${newBalance}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        deducted: companyAmount,
+        added_amount: companyAmount,
+        currency: agencyCurrency,
         new_balance: newBalance,
         agency_name: agency.agency_name 
       }),
