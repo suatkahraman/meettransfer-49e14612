@@ -8,48 +8,31 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   Clock, MapPin, Car, Mountain, Landmark, Camera, 
   Utensils, ArrowRight, CheckCircle2, Calendar,
-  Snowflake, Sun, TreeDeciduous
+  Snowflake, Sun, TreeDeciduous, ArrowLeft
 } from "lucide-react";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
+import { Badge } from "@/components/ui/badge";
 import bursaHeroImage from "@/assets/bursa-transfer-hero.jpg";
 import cumalikizikImage from "@/assets/cumalikizik-village.jpg";
 import uludagImage from "@/assets/uludag-cable-car.jpg";
 
-const faqItems = [
-  {
-    question: "How long does it take to get from Istanbul to Bursa?",
-    answer: "By private transfer, the journey takes approximately 2.5-3 hours depending on the route. The Osmangazi Bridge route is faster (2.5 hours), while the scenic Mudanya ferry route takes about 3 hours including the ferry crossing."
-  },
-  {
-    question: "Is a day trip from Istanbul to Bursa worth it?",
-    answer: "Absolutely! Bursa offers a completely different experience from Istanbul - historic Ottoman architecture, the majestic Uludağ mountain, UNESCO-listed Cumalıkızık village, famous İskender kebab, and thermal springs. It's one of the most rewarding day trips from Istanbul."
-  },
-  {
-    question: "What is Bursa famous for?",
-    answer: "Bursa is famous for being the first capital of the Ottoman Empire, the birthplace of İskender kebab, silk production, thermal baths, the UNESCO World Heritage site Cumalıkızık village, and the Uludağ ski resort - Turkey's most popular winter destination."
-  },
-  {
-    question: "What is included in a private Bursa day tour?",
-    answer: "Our tours include hotel pickup and drop-off in Istanbul, luxury Mercedes vehicle with professional driver, all tolls and fees, visit to major attractions (Grand Mosque, Green Mosque, Cumalıkızık, cable car), and flexible itinerary. Lunch is optional but highly recommended at a traditional İskender restaurant."
-  },
-  {
-    question: "When is the best time to visit Bursa?",
-    answer: "Bursa is beautiful year-round. Spring (April-May) and autumn (September-October) offer pleasant weather for sightseeing. Winter (December-March) is perfect for skiing at Uludağ. Summer can be hot but the mountain provides a cool escape."
-  },
-  {
-    question: "Can you customize the Bursa tour itinerary?",
-    answer: "Yes! All our tours are fully customizable. Whether you want to focus on history, nature, food, thermal baths, or a mix of everything, we'll create a personalized itinerary based on your interests and time."
-  }
-];
-
 const BursaDayTourGuide = () => {
-  const { getLocalizedPath } = useLanguage();
+  const { getLocalizedPath, t } = useLanguage();
+
+  const faqItems = [
+    { question: t("blogBursaFaq1Q"), answer: t("blogBursaFaq1A") },
+    { question: t("blogBursaFaq2Q"), answer: t("blogBursaFaq2A") },
+    { question: t("blogBursaFaq3Q"), answer: t("blogBursaFaq3A") },
+    { question: t("blogBursaFaq4Q"), answer: t("blogBursaFaq4A") },
+    { question: t("blogBursaFaq5Q"), answer: t("blogBursaFaq5A") },
+    { question: t("blogBursaFaq6Q"), answer: t("blogBursaFaq6A") },
+  ];
 
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Istanbul to Bursa Day Tour Guide 2025 | What to See & How to Get There"
-        description="Complete guide to visiting Bursa from Istanbul. Learn about the best attractions, transportation options, tour itineraries, and tips for the perfect day trip to the historic Ottoman capital."
+        title={t("blogBursaSeoTitle")}
+        description={t("blogBursaSeoDesc")}
         keywords="Istanbul to Bursa day trip, Bursa day tour, Bursa from Istanbul, Cumalıkızık village, Uludağ cable car, Green Mosque Bursa, Grand Mosque Bursa, İskender kebab Bursa, Bursa thermal baths, Ottoman capital Bursa, Bursa private transfer"
         canonicalPath="/blog/istanbul-bursa-day-tour-guide"
       />
@@ -57,8 +40,8 @@ const BursaDayTourGuide = () => {
         schemas={[
           {
             type: 'Article',
-            headline: 'Istanbul to Bursa Day Tour Guide 2025 | What to See & How to Get There',
-            description: 'Complete guide to visiting Bursa from Istanbul with transportation options, must-see attractions, and tour itineraries.',
+            headline: t("blogBursaH1"),
+            description: t("blogBursaSeoDesc"),
             image: 'https://meettransfer.app/images/bursa-transfer-hero.jpg',
             datePublished: '2025-12-26',
             dateModified: '2025-12-31',
@@ -86,65 +69,68 @@ const BursaDayTourGuide = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
           <span className="inline-block bg-primary/90 text-primary-foreground px-4 py-1 rounded-full text-sm font-medium mb-4">
-            Day Trip Guide
+            {t("dayTripGuide")}
           </span>
           <h1 className="text-3xl md:text-5xl font-bold mb-4">
-            Istanbul to Bursa Day Tour Guide 2025
+            {t("blogBursaH1")}
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-            Discover the ancient Ottoman capital - just 2.5 hours from Istanbul
+            {t("blogBursaIntro")}
           </p>
         </div>
       </div>
 
       <article className="max-w-4xl mx-auto px-4 py-10 md:py-16">
+        {/* Back to Blog */}
+        <Link 
+          to={getLocalizedPath("/blog")} 
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t("backToBlog")}
+        </Link>
+
         {/* Quick Info */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <Card className="text-center p-4">
             <Clock className="h-6 w-6 mx-auto text-primary mb-2" />
-            <p className="text-sm text-muted-foreground">Travel Time</p>
-            <p className="font-bold">2.5-3 hours</p>
+            <p className="text-sm text-muted-foreground">{t("blogBursaTravelTime")}</p>
+            <p className="font-bold">2.5-3 {t("blogBursaHours")}</p>
           </Card>
           <Card className="text-center p-4">
             <MapPin className="h-6 w-6 mx-auto text-primary mb-2" />
-            <p className="text-sm text-muted-foreground">Distance</p>
+            <p className="text-sm text-muted-foreground">{t("blogBursaDistance")}</p>
             <p className="font-bold">~150 km</p>
           </Card>
           <Card className="text-center p-4">
             <Car className="h-6 w-6 mx-auto text-primary mb-2" />
-            <p className="text-sm text-muted-foreground">Best Way</p>
-            <p className="font-bold">Private Transfer</p>
+            <p className="text-sm text-muted-foreground">{t("blogBursaBestWay")}</p>
+            <p className="font-bold">{t("blogBursaPrivateTransfer")}</p>
           </Card>
           <Card className="text-center p-4">
             <Calendar className="h-6 w-6 mx-auto text-primary mb-2" />
-            <p className="text-sm text-muted-foreground">Tour Duration</p>
-            <p className="font-bold">10-12 hours</p>
+            <p className="text-sm text-muted-foreground">{t("blogBursaTourDuration")}</p>
+            <p className="font-bold">10-12 {t("blogBursaHours")}</p>
           </Card>
         </div>
 
         {/* Introduction */}
         <section className="prose prose-lg max-w-none mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-            Why Visit Bursa from Istanbul?
+            {t("blogBursaSection1Title")}
           </h2>
           <p className="text-muted-foreground leading-relaxed">
-            Bursa, known as <strong>"Green Bursa" (Yeşil Bursa)</strong>, is one of Turkey's most historically 
-            significant cities and makes for a perfect day trip from Istanbul. As the <strong>first capital of 
-            the Ottoman Empire</strong> (1335-1363), Bursa is home to stunning Ottoman architecture, the famous 
-            Grand Mosque (Ulu Cami), the UNESCO-listed Cumalıkızık village, and Turkey's most popular ski resort, 
-            Uludağ.
+            {t("blogBursaSection1P1")}
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            Unlike the crowded streets of Istanbul, Bursa offers a more relaxed pace with equally impressive 
-            historical sites. Plus, it's the birthplace of the legendary <strong>İskender kebab</strong> - 
-            reason enough to make the trip!
+            {t("blogBursaSection1P2")}
           </p>
         </section>
 
         {/* How to Get There */}
         <section className="mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-            How to Get from Istanbul to Bursa
+            {t("blogBursaSection2Title")}
           </h2>
           
           <div className="space-y-6">
@@ -157,33 +143,31 @@ const BursaDayTourGuide = () => {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-bold">Private Transfer (Recommended)</h3>
-                      <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">Best Choice</span>
+                      <h3 className="text-lg font-bold">{t("blogBursaPrivateTransferTitle")}</h3>
+                      <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">{t("blogBursaBestChoice")}</span>
                     </div>
                     <p className="text-muted-foreground mb-4">
-                      The most comfortable and flexible option. Door-to-door service with a professional driver 
-                      in a luxury Mercedes vehicle. You can stop anywhere, customize your route, and travel at 
-                      your own pace.
+                      {t("blogBursaPrivateTransferDesc")}
                     </p>
                     <div className="grid md:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="font-medium mb-2">Osmangazi Bridge Route:</p>
+                        <p className="font-medium mb-2">{t("blogBursaOsmangaziRoute")}:</p>
                         <ul className="space-y-1 text-muted-foreground">
-                          <li>• Duration: ~2.5 hours</li>
-                          <li>• All-weather reliable</li>
-                          <li>• Direct highway</li>
+                          <li>• {t("blogBursaDuration")}: ~2.5 {t("blogBursaHours")}</li>
+                          <li>• {t("blogBursaAllWeather")}</li>
+                          <li>• {t("blogBursaDirectHighway")}</li>
                         </ul>
                       </div>
                       <div>
-                        <p className="font-medium mb-2">Mudanya Ferry Route:</p>
+                        <p className="font-medium mb-2">{t("blogBursaMudanyaRoute")}:</p>
                         <ul className="space-y-1 text-muted-foreground">
-                          <li>• Duration: ~3 hours</li>
-                          <li>• Scenic sea crossing</li>
-                          <li>• More memorable experience</li>
+                          <li>• {t("blogBursaDuration")}: ~3 {t("blogBursaHours")}</li>
+                          <li>• {t("blogBursaScenic")}</li>
+                          <li>• {t("blogBursaMoreMemorable")}</li>
                         </ul>
                       </div>
                     </div>
-                    <p className="text-lg font-bold text-primary mt-4">From $150 one-way | From $200 day tour</p>
+                    <p className="text-lg font-bold text-primary mt-4">{t("blogBursaPrice")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -197,19 +181,19 @@ const BursaDayTourGuide = () => {
                     <MapPin className="h-6 w-6 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold mb-2">Public Transport Options</h3>
+                    <h3 className="text-lg font-bold mb-2">{t("blogBursaPublicTransportTitle")}</h3>
                     <div className="space-y-3 text-sm text-muted-foreground">
                       <div>
-                        <p className="font-medium text-foreground">IDO Fast Ferry + Bus:</p>
-                        <p>Ferry from Yenikapı to Mudanya (1.5 hours) + bus to Bursa center (45 min). Total: ~2.5 hours, ~$15/person</p>
+                        <p className="font-medium text-foreground">{t("blogBursaIdoFerry")}:</p>
+                        <p>{t("blogBursaIdoFerryDesc")}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">Bus (BUDO):</p>
-                        <p>Direct bus from Istanbul Esenler to Bursa. Duration: 3-4 hours depending on traffic. ~$10/person</p>
+                        <p className="font-medium text-foreground">{t("blogBursaBus")}:</p>
+                        <p>{t("blogBursaBusDesc")}</p>
                       </div>
                     </div>
                     <p className="text-sm text-amber-600 mt-3">
-                      ⚠️ Note: Public transport limits your flexibility and doesn't include transportation between attractions in Bursa
+                      ⚠️ {t("blogBursaPublicNote")}
                     </p>
                   </div>
                 </div>
@@ -221,7 +205,7 @@ const BursaDayTourGuide = () => {
         {/* Must-See Attractions */}
         <section className="mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-            Must-See Attractions in Bursa
+            {t("blogBursaSection3Title")}
           </h2>
 
           {/* Cumalıkızık Image */}
@@ -232,8 +216,8 @@ const BursaDayTourGuide = () => {
               className="w-full h-[300px] md:h-[400px] object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-              <h3 className="text-white font-bold text-xl mb-1">Cumalıkızık Village</h3>
-              <p className="text-white/80 text-sm">UNESCO World Heritage Site - 700-year-old Ottoman village</p>
+              <h3 className="text-white font-bold text-xl mb-1">{t("blogBursaCumalikizikTitle")}</h3>
+              <p className="text-white/80 text-sm">{t("blogBursaCumalikizikSubtitle")}</p>
             </div>
           </div>
 
@@ -242,11 +226,10 @@ const BursaDayTourGuide = () => {
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <Landmark className="h-5 w-5 text-primary" />
-                  <h3 className="font-bold">Grand Mosque (Ulu Cami)</h3>
+                  <h3 className="font-bold">{t("blogBursaGrandMosqueTitle")}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  The iconic 20-domed mosque built in 1399. One of the finest examples of early Ottoman architecture 
-                  with beautiful calligraphy on its interior walls. A must-see landmark of Bursa.
+                  {t("blogBursaGrandMosqueDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -255,11 +238,10 @@ const BursaDayTourGuide = () => {
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <Landmark className="h-5 w-5 text-primary" />
-                  <h3 className="font-bold">Green Mosque & Tomb (Yeşil Cami)</h3>
+                  <h3 className="font-bold">{t("blogBursaGreenMosqueTitle")}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Named for its stunning green-blue Iznik tiles, this 15th-century mosque complex showcases 
-                  the peak of Ottoman artistry. The adjacent Green Tomb houses Sultan Mehmed I.
+                  {t("blogBursaGreenMosqueDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -268,11 +250,10 @@ const BursaDayTourGuide = () => {
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <Camera className="h-5 w-5 text-primary" />
-                  <h3 className="font-bold">Cumalıkızık Village</h3>
+                  <h3 className="font-bold">{t("blogBursaCumalikizikCardTitle")}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  This 700-year-old UNESCO village has preserved its original Ottoman character with colorful 
-                  wooden houses and cobblestone streets. Perfect for traditional breakfast and photography.
+                  {t("blogBursaCumalikizikCardDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -281,11 +262,10 @@ const BursaDayTourGuide = () => {
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <Mountain className="h-5 w-5 text-primary" />
-                  <h3 className="font-bold">Uludağ Mountain & Cable Car</h3>
+                  <h3 className="font-bold">{t("blogBursaUludagTitle")}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Take the world's longest cable car (teleferik) to Uludağ National Park. In winter, it's Turkey's 
-                  premier ski resort; in summer, enjoy hiking and stunning panoramic views.
+                  {t("blogBursaUludagDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -294,11 +274,10 @@ const BursaDayTourGuide = () => {
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <Utensils className="h-5 w-5 text-primary" />
-                  <h3 className="font-bold">Koza Han (Silk Bazaar)</h3>
+                  <h3 className="font-bold">{t("blogBursaKozaHanTitle")}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Historic covered marketplace from 1491, center of Bursa's famous silk trade. Browse silk 
-                  products, enjoy Turkish coffee in the courtyard cafe, and soak in the atmosphere.
+                  {t("blogBursaKozaHanDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -307,11 +286,10 @@ const BursaDayTourGuide = () => {
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <Sun className="h-5 w-5 text-primary" />
-                  <h3 className="font-bold">Çekirge Thermal Baths</h3>
+                  <h3 className="font-bold">{t("blogBursaThermalTitle")}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Bursa has been famous for its thermal springs since Roman times. The Çekirge district offers 
-                  historic hamams with naturally hot mineral waters - perfect for relaxation.
+                  {t("blogBursaThermalDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -325,8 +303,8 @@ const BursaDayTourGuide = () => {
               className="w-full h-[300px] md:h-[400px] object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-              <h3 className="text-white font-bold text-xl mb-1">Uludağ Cable Car (Teleferik)</h3>
-              <p className="text-white/80 text-sm">World's longest cable car ride with spectacular mountain views</p>
+              <h3 className="text-white font-bold text-xl mb-1">{t("blogBursaCableCarTitle")}</h3>
+              <p className="text-white/80 text-sm">{t("blogBursaCableCarSubtitle")}</p>
             </div>
           </div>
         </section>
@@ -334,7 +312,7 @@ const BursaDayTourGuide = () => {
         {/* Sample Itinerary */}
         <section className="mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-            Sample Day Tour Itinerary
+            {t("blogBursaSection4Title")}
           </h2>
           
           <div className="relative">
@@ -342,22 +320,23 @@ const BursaDayTourGuide = () => {
             
             <div className="space-y-6">
               {[
-                { time: "07:00", title: "Hotel Pickup in Istanbul", desc: "Your driver picks you up from your hotel in a luxury Mercedes" },
-                { time: "09:30", title: "Arrive in Bursa", desc: "Via Osmangazi Bridge or scenic Mudanya ferry" },
-                { time: "10:00", title: "Cumalıkızık Village", desc: "Traditional breakfast and explore the UNESCO heritage village" },
-                { time: "12:00", title: "Grand Mosque & Green Mosque", desc: "Visit Bursa's most iconic Ottoman landmarks" },
-                { time: "13:30", title: "İskender Kebab Lunch", desc: "Authentic İskender at a famous local restaurant" },
-                { time: "14:30", title: "Koza Han & Silk Bazaar", desc: "Shopping and Turkish coffee break" },
-                { time: "15:30", title: "Uludağ Cable Car", desc: "Scenic ride to the mountain with panoramic views" },
-                { time: "17:30", title: "Depart for Istanbul", desc: "Relax on the journey back to your hotel" },
-                { time: "20:00", title: "Arrive Istanbul", desc: "Drop-off at your hotel" },
-              ].map((item, idx) => (
-                <div key={idx} className="relative pl-10 md:pl-14">
-                  <div className="absolute left-2 md:left-4 w-4 h-4 rounded-full bg-primary border-2 border-background" />
-                  <div className="bg-card rounded-lg p-4 border border-border/50">
-                    <span className="text-xs font-medium text-primary">{item.time}</span>
-                    <h4 className="font-bold mt-1">{item.title}</h4>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
+                { time: "07:00", title: t("blogBursaItinerary1Title"), desc: t("blogBursaItinerary1Desc") },
+                { time: "09:30", title: t("blogBursaItinerary2Title"), desc: t("blogBursaItinerary2Desc") },
+                { time: "10:00", title: t("blogBursaItinerary3Title"), desc: t("blogBursaItinerary3Desc") },
+                { time: "12:00", title: t("blogBursaItinerary4Title"), desc: t("blogBursaItinerary4Desc") },
+                { time: "13:30", title: t("blogBursaItinerary5Title"), desc: t("blogBursaItinerary5Desc") },
+                { time: "15:00", title: t("blogBursaItinerary6Title"), desc: t("blogBursaItinerary6Desc") },
+                { time: "17:00", title: t("blogBursaItinerary7Title"), desc: t("blogBursaItinerary7Desc") },
+                { time: "19:30", title: t("blogBursaItinerary8Title"), desc: t("blogBursaItinerary8Desc") },
+              ].map((item, index) => (
+                <div key={index} className="relative pl-10 md:pl-16">
+                  <div className="absolute left-0 md:left-2 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="w-3 h-3 rounded-full bg-primary" />
+                  </div>
+                  <div className="bg-card border rounded-lg p-4">
+                    <span className="text-sm font-bold text-primary">{item.time}</span>
+                    <h4 className="font-semibold mt-1">{item.title}</h4>
+                    <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -368,39 +347,34 @@ const BursaDayTourGuide = () => {
         {/* Best Time to Visit */}
         <section className="mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-            Best Time to Visit Bursa
+            {t("blogBursaSection5Title")}
           </h2>
           
           <div className="grid md:grid-cols-3 gap-4">
             <Card>
               <CardContent className="p-5 text-center">
-                <Sun className="h-8 w-8 mx-auto text-amber-500 mb-3" />
-                <h3 className="font-bold mb-2">Spring & Autumn</h3>
-                <p className="text-sm text-muted-foreground">
-                  April-May & September-October. Perfect weather for sightseeing, comfortable temperatures, 
-                  beautiful foliage in autumn.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-5 text-center">
-                <Snowflake className="h-8 w-8 mx-auto text-blue-400 mb-3" />
-                <h3 className="font-bold mb-2">Winter</h3>
-                <p className="text-sm text-muted-foreground">
-                  December-March. Best for skiing at Uludağ, snow activities, and thermal bath experiences. 
-                  Magical winter scenery.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-5 text-center">
                 <TreeDeciduous className="h-8 w-8 mx-auto text-green-500 mb-3" />
-                <h3 className="font-bold mb-2">Summer</h3>
+                <h3 className="font-bold mb-2">{t("blogBursaSpringAutumn")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  June-August. Can be hot in the city, but Uludağ offers a cool mountain escape. 
-                  Great for hiking and nature.
+                  {t("blogBursaSpringAutumnDesc")}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5 text-center">
+                <Snowflake className="h-8 w-8 mx-auto text-blue-500 mb-3" />
+                <h3 className="font-bold mb-2">{t("blogBursaWinter")}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {t("blogBursaWinterDesc")}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5 text-center">
+                <Sun className="h-8 w-8 mx-auto text-amber-500 mb-3" />
+                <h3 className="font-bold mb-2">{t("blogBursaSummer")}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {t("blogBursaSummerDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -410,86 +384,86 @@ const BursaDayTourGuide = () => {
         {/* What's Included */}
         <section className="mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-            What's Included in Our Bursa Tours
+            {t("blogBursaSection6Title")}
           </h2>
           
           <div className="grid md:grid-cols-2 gap-4">
             {[
-              "Hotel pickup & drop-off in Istanbul",
-              "Luxury Mercedes vehicle (Vito/V-Class)",
-              "Professional English-speaking driver",
-              "All tolls, bridge fees & parking",
-              "Ferry tickets (if Mudanya route)",
-              "Flexible itinerary customization",
-              "Complimentary water & WiFi",
-              "Child seats available on request",
-            ].map((item, idx) => (
-              <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-sm">{item}</span>
+              t("blogBursaInclude1"),
+              t("blogBursaInclude2"),
+              t("blogBursaInclude3"),
+              t("blogBursaInclude4"),
+              t("blogBursaInclude5"),
+              t("blogBursaInclude6"),
+            ].map((item, index) => (
+              <div key={index} className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                <span className="text-muted-foreground">{item}</span>
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground mt-4">
-            * Entry fees, cable car tickets, and meals are not included but can be arranged
-          </p>
         </section>
 
         {/* CTA Section */}
-        <section className="bg-primary/10 rounded-2xl p-6 md:p-10 text-center mb-12">
-          <h2 className="text-2xl font-bold mb-3">Ready to Explore Bursa?</h2>
+        <section className="bg-primary/5 rounded-2xl p-8 text-center mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+            {t("blogBursaCtaTitle")}
+          </h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            Book your private Istanbul to Bursa day tour and discover the ancient Ottoman capital 
-            with comfort and flexibility.
+            {t("blogBursaCtaDesc")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <WhatsAppButton
-              variant="large"
-              message="Hi! I'd like to book a day tour from Istanbul to Bursa. Can you help me plan the itinerary?"
-            />
-            <Button asChild variant="outline" size="lg">
-              <Link to={getLocalizedPath("/bursa-transfer")}>
-                View All Bursa Options <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <a 
+              href="https://wa.me/905321748390?text=Hello, I'm interested in a Bursa day tour from Istanbul."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button size="lg" variant="accent" className="gap-2 w-full sm:w-auto">
+                {t("whatsappBooking")}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </a>
+            <Link to={getLocalizedPath("/book")}>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                {t("requestPrice")}
+              </Button>
+            </Link>
           </div>
         </section>
 
         {/* FAQ Section */}
         <section className="mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-            Frequently Asked Questions
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8">
+            {t("frequentlyAskedQuestions")}
           </h2>
           
-          <div className="space-y-4">
-            {faqItems.map((faq, idx) => (
-              <Card key={idx}>
-                <CardContent className="p-5">
-                  <h3 className="font-bold mb-2">{faq.question}</h3>
-                  <p className="text-sm text-muted-foreground">{faq.answer}</p>
-                </CardContent>
-              </Card>
+          <div className="space-y-6">
+            {faqItems.map((item, index) => (
+              <div key={index} className="border-b border-border pb-6 last:border-0">
+                <h3 className="font-semibold text-lg mb-2">{item.question}</h3>
+                <p className="text-muted-foreground">{item.answer}</p>
+              </div>
             ))}
           </div>
         </section>
 
         {/* Related Articles */}
-        <section>
-          <h2 className="text-xl font-bold mb-4">Related Articles</h2>
+        <section className="pt-8 border-t border-border">
+          <h2 className="font-serif text-xl font-bold mb-6">{t("relatedArticles")}</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <Link 
-              to={getLocalizedPath("/blog/istanbul-airport-to-city-best-way")} 
-              className="block p-4 rounded-lg border border-border hover:border-primary/50 transition-colors"
+              to={getLocalizedPath("/blog/istanbul-airport-to-city-guide")}
+              className="group p-4 border border-border rounded-lg hover:border-primary transition-colors"
             >
-              <h3 className="font-medium mb-1">Istanbul Airport to City Guide</h3>
-              <p className="text-sm text-muted-foreground">Best ways to get from Istanbul Airport to city center</p>
+              <Badge variant="outline" className="mb-2">Istanbul</Badge>
+              <h3 className="font-semibold group-hover:text-primary transition-colors">{t("blogIstanbul1Title")}</h3>
             </Link>
             <Link 
-              to={getLocalizedPath("/blog/private-vs-taxi-transfer-turkey")} 
-              className="block p-4 rounded-lg border border-border hover:border-primary/50 transition-colors"
+              to={getLocalizedPath("/blog/is-private-transfer-worth-it")}
+              className="group p-4 border border-border rounded-lg hover:border-primary transition-colors"
             >
-              <h3 className="font-medium mb-1">Private Transfer vs Taxi in Turkey</h3>
-              <p className="text-sm text-muted-foreground">Compare costs, comfort, and convenience</p>
+              <Badge variant="outline" className="mb-2">{t("travelTips")}</Badge>
+              <h3 className="font-semibold group-hover:text-primary transition-colors">{t("blogWorthItTitle")}</h3>
             </Link>
           </div>
         </section>
