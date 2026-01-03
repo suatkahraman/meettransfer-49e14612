@@ -120,7 +120,7 @@ const AdminMonthlyProfit = () => {
       }
 
       // Fetch agency reservation details with TRY converted amount
-      // company_amount_try = Acenta Geliri (what agency pays to company in TRY)
+      // customer_price = Acentadan Alınacak Tutar (what agency pays to company)
       let agencyDetails: Record<string, { 
         agencyIncome: number;
         originalAmount: number; 
@@ -135,29 +135,33 @@ const AdminMonthlyProfit = () => {
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
           .from("agency_reservation_details")
-          .select("reservation_id, customer_price, company_amount, company_amount_try, agency_price_currency, exchange_rate_used")
+          .select("reservation_id, customer_price, agency_price_currency, exchange_rate_used")
           .in("reservation_id", reservationIds);
 
         if (!agencyError && agencyData) {
           agencyDetails = agencyData.reduce((acc, item) => {
             let agencyIncome = 0;
             let needsConversion = false;
+            const customerPrice = item.customer_price || 0;
             
-            // Agency Income = company_amount_try (Acenta fiyatı TRY'ye çevrilmiş)
-            if (item.company_amount_try) {
-              agencyIncome = item.company_amount_try;
-            } else if (item.agency_price_currency === 'TRY') {
-              agencyIncome = item.company_amount || 0;
+            // Acenta Geliri = customer_price (Acentadan Alınacak Tutar)
+            // Eğer TRY ise direkt customer_price kullan
+            // Eğer döviz ise ve kur varsa çevir, yoksa çeviri gerekli
+            if (item.agency_price_currency === 'TRY') {
+              agencyIncome = customerPrice;
+            } else if (item.exchange_rate_used && customerPrice > 0) {
+              // Döviz ve kur varsa çevir
+              agencyIncome = customerPrice * item.exchange_rate_used;
             } else {
-              // Needs conversion - foreign currency without TRY conversion
-              needsConversion = item.company_amount && item.company_amount > 0 ? true : false;
+              // Needs conversion - foreign currency without exchange rate
+              needsConversion = customerPrice > 0;
               agencyIncome = 0; // Will be converted
               if (needsConversion) conversionsNeeded++;
             }
             
             acc[item.reservation_id] = { 
               agencyIncome,
-              originalAmount: item.company_amount || 0,
+              originalAmount: customerPrice,
               currency: item.agency_price_currency || 'TRY',
               exchangeRate: item.exchange_rate_used || null,
               needsConversion,
@@ -470,10 +474,10 @@ const AdminMonthlyProfit = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 mb-1">
                     <Banknote className="h-4 w-4" />
-                    <span className="text-xs font-medium">Bütçe</span>
+                    <span className="text-xs font-medium">Şoför Gideri</span>
                   </div>
                   <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-                    {formatCurrency(totals.totalBudget)}
+                    {formatCurrency(totals.totalDriverExpense)}
                   </p>
                 </CardContent>
               </Card>
@@ -638,9 +642,9 @@ const AdminMonthlyProfit = () => {
                   <div className="flex justify-between items-center py-2 border-b">
                     <div className="flex items-center gap-2">
                       <Banknote className="h-5 w-5 text-orange-500" />
-                      <span className="font-medium">Bütçe</span>
+                      <span className="font-medium">Şoför Gideri</span>
                     </div>
-                    <span className="text-xl font-bold text-orange-600">- {formatCurrency(totals.totalBudget)}</span>
+                    <span className="text-xl font-bold text-orange-600">- {formatCurrency(totals.totalDriverExpense)}</span>
                   </div>
                   
                   <div className="flex justify-between items-center py-3 bg-muted/50 rounded-lg px-3 -mx-3">
