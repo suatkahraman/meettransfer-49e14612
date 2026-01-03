@@ -44,6 +44,8 @@ interface Reservation {
   driver_id: string | null;
   price: number | null;
   price_currency: string | null;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   drivers?: Driver | null;
 }
 
@@ -122,6 +124,7 @@ const AgencyReservationDetail = () => {
           pickup_place_name, dropoff_place_name,
           pickup_date, pickup_time, flight_number, vehicle_type, status,
           passenger_names, driver_id, price, price_currency,
+          passenger_cash_amount, passenger_cash_currency,
           drivers:driver_id (id, name, plate_number, vehicle_model, phone)
         `)
         .eq('id', id)
@@ -566,6 +569,25 @@ const AgencyReservationDetail = () => {
                   <div className="font-medium capitalize">{reservation.vehicle_type.replace('-', ' ')}</div>
                 </div>
               </div>
+
+              {/* Passenger Cash Amount */}
+              {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
+                <div className="flex items-start gap-3">
+                  <DollarSign className="h-5 w-5 text-green-600 mt-0.5" />
+                  <div>
+                    <div className="text-sm text-muted-foreground">{t('passengerCash')}</div>
+                    <div className="font-medium text-green-600">
+                      {reservation.passenger_cash_currency === 'EUR' && '€'}
+                      {reservation.passenger_cash_currency === 'USD' && '$'}
+                      {reservation.passenger_cash_currency === 'GBP' && '£'}
+                      {reservation.passenger_cash_currency === 'TRY' && '₺'}
+                      {reservation.passenger_cash_currency === 'AED' && 'د.إ'}
+                      {!['EUR', 'USD', 'GBP', 'TRY', 'AED'].includes(reservation.passenger_cash_currency || '') && (reservation.passenger_cash_currency || '')}
+                      {reservation.passenger_cash_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Driver Info */}
