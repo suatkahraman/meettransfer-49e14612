@@ -39,10 +39,10 @@ serve(async (req) => {
 
     console.log("Creating reservation for quick booking:", requestData.bookingId);
 
-    // Fetch the quick booking request to get customer info
+    // Fetch the quick booking request to get customer info and agency info
     const { data: quickBooking, error: fetchError } = await supabase
       .from("quick_booking_requests")
-      .select("customer_notes, customer_phone, customer_email, customer_name")
+      .select("customer_notes, customer_phone, customer_email, customer_name, agency_id, agency_user_id")
       .eq("id", requestData.bookingId)
       .maybeSingle();
 
@@ -54,8 +54,11 @@ serve(async (req) => {
     const customerPhone = quickBooking?.customer_phone || "";
     const customerEmail = quickBooking?.customer_email || null;
     const customerName = quickBooking?.customer_name || null;
+    const agencyId = quickBooking?.agency_id || null;
+    const agencyUserId = quickBooking?.agency_user_id || null;
 
     // Create main reservation WITHOUT customer_id (will be set later when customer registers)
+    // If from agency, link to agency
     const { data: reservation, error: reservationError } = await supabase
       .from("reservations")
       .insert({
@@ -72,6 +75,8 @@ serve(async (req) => {
         price: requestData.price,
         price_currency: requestData.priceCurrency,
         customer_notes: customerNotes,
+        agency_id: agencyId,
+        agency_user_id: agencyUserId,
       })
       .select()
       .single();
@@ -105,6 +110,8 @@ serve(async (req) => {
           original_reservation_id: reservation.id,
           promo_code: requestData.promoCode || null,
           customer_notes: customerNotes,
+          agency_id: agencyId,
+          agency_user_id: agencyUserId,
         })
         .select()
         .single();

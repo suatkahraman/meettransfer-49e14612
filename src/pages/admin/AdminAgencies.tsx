@@ -24,6 +24,16 @@ interface Agency {
   currency: string;
 }
 
+// Currency balances interface for multi-currency support
+interface CurrencyBalance {
+  currency: string;
+  totalAgencyPrice: number;
+  totalPassengerCash: number;
+  netAgencyDebt: number;
+  totalPayments: number;
+  calculatedBalance: number;
+}
+
 interface AgencyWithCalculatedBalance extends Agency {
   calculatedBalance: number;
   totalAgencyPrice: number;
@@ -33,6 +43,8 @@ interface AgencyWithCalculatedBalance extends Agency {
   contactEmail: string | null;
   contactPhone: string | null;
   contactName: string | null;
+  // Multi-currency balances
+  currencyBalances: CurrencyBalance[];
 }
 
 const AdminAgencies = () => {
@@ -75,36 +87,69 @@ const AdminAgencies = () => {
         // Get all completed reservations for this agency with their agency_reservation_details
         const { data: reservations } = await supabase
           .from('reservations')
-          .select('id, status, passenger_cash_amount')
+          .select('id, status, passenger_cash_amount, passenger_cash_currency')
           .eq('agency_id', agency.id)
           .eq('status', 'completed');
 
-        let totalAgencyPrice = 0;
-        let totalPassengerCash = 0;
+        // Group totals by currency
+        const currencyTotals: Record<string, { agencyPrice: number; passengerCash: number }> = {};
 
         if (reservations && reservations.length > 0) {
           // Get agency_reservation_details for these reservations
           const reservationIds = reservations.map(r => r.id);
           const { data: details } = await supabase
             .from('agency_reservation_details')
-            .select('customer_price')
+            .select('reservation_id, customer_price, agency_price_currency')
             .in('reservation_id', reservationIds);
 
           if (details) {
-            totalAgencyPrice = details.reduce((sum, d) => sum + (parseFloat(String(d.customer_price)) || 0), 0);
+            details.forEach(d => {
+              const currency = d.agency_price_currency || 'TRY';
+              if (!currencyTotals[currency]) {
+                currencyTotals[currency] = { agencyPrice: 0, passengerCash: 0 };
+              }
+              currencyTotals[currency].agencyPrice += parseFloat(String(d.customer_price)) || 0;
+            });
           }
 
-          // Calculate total passenger cash
-          totalPassengerCash = reservations.reduce((sum, r) => sum + (parseFloat(String(r.passenger_cash_amount)) || 0), 0);
+          // Add passenger cash by currency
+          reservations.forEach(r => {
+            const currency = r.passenger_cash_currency || 'TRY';
+            if (!currencyTotals[currency]) {
+              currencyTotals[currency] = { agencyPrice: 0, passengerCash: 0 };
+            }
+            currencyTotals[currency].passengerCash += parseFloat(String(r.passenger_cash_amount)) || 0;
+          });
         }
 
-        // Get total payments received for this agency
+        // Get total payments received for this agency (TODO: add currency to payments table for full support)
         const { data: payments } = await supabase
           .from('agency_payments')
           .select('amount')
           .eq('agency_id', agency.id);
 
         const totalPayments = payments?.reduce((sum, p) => sum + (parseFloat(String(p.amount)) || 0), 0) || 0;
+
+        // Calculate currency balances
+        const currencyBalances: CurrencyBalance[] = Object.entries(currencyTotals).map(([currency, totals]) => {
+          const netDebt = totals.agencyPrice - totals.passengerCash;
+          return {
+            currency,
+            totalAgencyPrice: totals.agencyPrice,
+            totalPassengerCash: totals.passengerCash,
+            netAgencyDebt: netDebt,
+            totalPayments: 0, // Payments will be shown separately for now
+            calculatedBalance: netDebt,
+          };
+        });
+
+        // Calculate total amounts (legacy - for backward compatibility)
+        let totalAgencyPrice = 0;
+        let totalPassengerCash = 0;
+        Object.values(currencyTotals).forEach(totals => {
+          totalAgencyPrice += totals.agencyPrice;
+          totalPassengerCash += totals.passengerCash;
+        });
 
         // Calculate net agency debt: total agency prices - passenger cash
         const netAgencyDebt = totalAgencyPrice - totalPassengerCash;
@@ -151,6 +196,7 @@ const AdminAgencies = () => {
           contactEmail,
           contactPhone,
           contactName,
+          currencyBalances,
         };
       })
     );
@@ -503,37 +549,51 @@ const AdminAgencies = () => {
 
                   {/* Currency Display */}
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>Para Birimi:</span>
+                    <span>Varsayılan Para Birimi:</span>
                     <Badge variant="outline" className="font-mono">{agency.currency || 'EUR'}</Badge>
                   </div>
 
-                  {/* Net Debt Display */}
-                  <div className="space-y-2 p-3 bg-muted rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Toplam Acenta Fiyatı</span>
-                      <span className="font-medium">₺{agency.totalAgencyPrice.toFixed(2)}</span>
+                  {/* Multi-Currency Balances */}
+                  {agency.currencyBalances && agency.currencyBalances.length > 0 && (
+                    <div className="space-y-3">
+                      {agency.currencyBalances.map((cb) => {
+                        const symbol = cb.currency === 'EUR' ? '€' : cb.currency === 'USD' ? '$' : cb.currency === 'GBP' ? '£' : cb.currency === 'AED' ? 'د.إ' : cb.currency === 'AUD' ? 'A$' : '₺';
+                        return (
+                          <div key={cb.currency} className="space-y-2 p-3 bg-muted rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="secondary" className="font-mono">{cb.currency}</Badge>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">Acenta Fiyatı</span>
+                              <span className="font-medium">{symbol}{cb.totalAgencyPrice.toFixed(2)}</span>
+                            </div>
+                            {cb.totalPassengerCash > 0 && (
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground">Yolcu Nakit</span>
+                                <span className="font-medium text-orange-600">-{symbol}{cb.totalPassengerCash.toFixed(2)}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center justify-between border-t pt-2">
+                              <span className="text-sm font-medium">Net Borç</span>
+                              <span className={`font-bold ${cb.netAgencyDebt > 0 ? 'text-primary' : cb.netAgencyDebt < 0 ? 'text-green-600' : ''}`}>
+                                {symbol}{cb.netAgencyDebt.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                    {agency.totalPassengerCash > 0 && (
+                  )}
+
+                  {/* Total Summary with Payments */}
+                  {agency.totalPayments > 0 && (
+                    <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Yolcu Nakit</span>
-                        <span className="font-medium text-orange-600">-₺{agency.totalPassengerCash.toFixed(2)}</span>
+                        <span className="text-sm text-muted-foreground">Toplam Alınan Ödemeler</span>
+                        <span className="font-medium text-green-600">₺{agency.totalPayments.toFixed(2)}</span>
                       </div>
-                    )}
-                    <div className="flex items-center justify-between border-t pt-2">
-                      <span className="text-sm font-medium">Net Borç</span>
-                      <span className="font-bold text-primary">₺{agency.netAgencyDebt.toFixed(2)}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Alınan Ödemeler</span>
-                      <span className="font-medium text-green-600">-₺{agency.totalPayments.toFixed(2)}</span>
-                    </div>
-                    <div className="flex items-center justify-between border-t pt-2">
-                      <span className="text-sm font-medium">Kalan Bakiye</span>
-                      <span className={`font-bold ${agency.calculatedBalance > 0 ? 'text-destructive' : agency.calculatedBalance < 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
-                        ₺{agency.calculatedBalance.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
+                  )}
 
                   {agency.comments && (
                     <p className="text-sm text-muted-foreground">{agency.comments}</p>

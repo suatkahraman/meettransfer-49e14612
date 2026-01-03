@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -169,6 +169,10 @@ export const Hero = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
+  // Check if user is an agency
+  const [isAgency, setIsAgency] = useState(false);
+  const [agencyId, setAgencyId] = useState<string | null>(null);
+  
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -186,8 +190,44 @@ export const Hero = () => {
   const [customerEmail, setCustomerEmail] = useState("");
   const [phoneError, setPhoneError] = useState(false);
 
-const currencyOptions = CURRENCY_OPTIONS;
+  const currencyOptions = CURRENCY_OPTIONS;
 
+  // Check if logged in user is an agency
+  useEffect(() => {
+    const checkAgencyRole = async () => {
+      if (!user) {
+        setIsAgency(false);
+        setAgencyId(null);
+        return;
+      }
+      
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (roleData?.role === 'agency') {
+        setIsAgency(true);
+        // Fetch agency ID
+        const { data: agencyData } = await supabase
+          .from('agencies')
+          .select('id, currency')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (agencyData) {
+          setAgencyId(agencyData.id);
+          // Set default currency from agency profile
+          if (agencyData.currency) {
+            setPreferredCurrency(agencyData.currency);
+          }
+        }
+      }
+    };
+    
+    checkAgencyRole();
+  }, [user]);
   
   // Popover open states
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
@@ -200,9 +240,9 @@ const currencyOptions = CURRENCY_OPTIONS;
     if (!date) missingFields.push(t("pickupDate") || "Date");
     if (!time) missingFields.push(t("pickupTime") || "Time");
     
-    // Validate phone - required
+    // Phone validation - required for non-agency users
     const phoneTrimmed = customerPhone.trim();
-    if (!phoneTrimmed || phoneTrimmed.length < 8) {
+    if (!isAgency && (!phoneTrimmed || phoneTrimmed.length < 8)) {
       setPhoneError(true);
       setTimeout(() => setPhoneError(false), 1000);
       toast.error(t("phoneRequired") || "Phone number is required");
@@ -226,8 +266,8 @@ const currencyOptions = CURRENCY_OPTIONS;
       return;
     }
 
-    // If user is logged in, redirect to reservation form
-    if (user) {
+    // If user is logged in (but not agency), redirect to reservation form
+    if (user && !isAgency) {
       const params = new URLSearchParams();
       params.set("pickup", pickup);
       params.set("dropoff", dropoff);
@@ -247,26 +287,34 @@ const currencyOptions = CURRENCY_OPTIONS;
       return;
     }
 
-    // For anonymous users, use QuickBookingConfirm flow
+    // For anonymous users or agency users, use QuickBookingConfirm flow
     setSubmitting(true);
     try {
       const sessionId = getSessionId();
       
+      const insertData: any = {
+        pickup,
+        dropoff,
+        pickup_date: format(date, "yyyy-MM-dd"),
+        pickup_time: time,
+        vehicle_type: vehicleType,
+        passengers: parseInt(passengers),
+        customer_session_id: sessionId,
+        price_currency: preferredCurrency,
+        customer_notes: customerNotes.trim() || null,
+        customer_phone: customerPhone.trim() || null,
+        customer_email: customerEmail.trim() || null,
+      };
+      
+      // If user is an agency, link the request to the agency
+      if (isAgency && agencyId && user) {
+        insertData.agency_id = agencyId;
+        insertData.agency_user_id = user.id;
+      }
+      
       const { data, error } = await supabase
         .from("quick_booking_requests")
-        .insert({
-          pickup,
-          dropoff,
-          pickup_date: format(date, "yyyy-MM-dd"),
-          pickup_time: time,
-          vehicle_type: vehicleType,
-          passengers: parseInt(passengers),
-          customer_session_id: sessionId,
-          price_currency: preferredCurrency,
-          customer_notes: customerNotes.trim() || null,
-          customer_phone: customerPhone.trim() || null,
-          customer_email: customerEmail.trim() || null,
-        })
+        .insert(insertData)
         .select()
         .single();
 
