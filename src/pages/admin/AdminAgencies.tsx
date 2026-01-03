@@ -7,10 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Wallet, Key } from 'lucide-react';
+import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Wallet, Key, Mail, Phone } from 'lucide-react';
 
 interface Agency {
   id: string;
@@ -20,10 +21,14 @@ interface Agency {
   user_id: string | null;
   created_at: string;
   updated_at: string;
+  currency: string;
 }
 
 interface AgencyWithCalculatedBalance extends Agency {
   calculatedBalance: number;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  contactName: string | null;
 }
 
 const AdminAgencies = () => {
@@ -96,9 +101,42 @@ const AdminAgencies = () => {
         // Calculate remaining balance: total agency prices - payments received
         const calculatedBalance = totalAgencyPrice - totalPayments;
 
+        // Fetch contact info from profile if user_id exists
+        let contactEmail: string | null = null;
+        let contactPhone: string | null = null;
+        let contactName: string | null = null;
+        
+        if (agency.user_id) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, phone')
+            .eq('id', agency.user_id)
+            .single();
+          
+          if (profile) {
+            contactPhone = profile.phone;
+            contactName = profile.full_name;
+          }
+          
+          // Get email from auth (we'll use a function call for this)
+          try {
+            const { data: emailData } = await supabase.functions.invoke('get-driver-email', {
+              body: { user_id: agency.user_id },
+            });
+            if (emailData?.email) {
+              contactEmail = emailData.email;
+            }
+          } catch (e) {
+            console.error('Failed to fetch agency email:', e);
+          }
+        }
+
         return {
           ...agency,
           calculatedBalance,
+          contactEmail,
+          contactPhone,
+          contactName,
         };
       })
     );
@@ -426,6 +464,35 @@ const AdminAgencies = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  {/* Contact Info Display */}
+                  {(agency.contactEmail || agency.contactPhone) && (
+                    <div className="space-y-1.5 text-sm">
+                      {agency.contactName && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span className="font-medium">{agency.contactName}</span>
+                        </div>
+                      )}
+                      {agency.contactEmail && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Mail className="h-3.5 w-3.5" />
+                          <span className="truncate">{agency.contactEmail}</span>
+                        </div>
+                      )}
+                      {agency.contactPhone && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="h-3.5 w-3.5" />
+                          <span>{agency.contactPhone}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Currency Display */}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>Para Birimi:</span>
+                    <Badge variant="outline" className="font-mono">{agency.currency || 'EUR'}</Badge>
+                  </div>
+
                   {/* Balance Display */}
                   <div className="flex items-center justify-between p-2 bg-muted rounded-lg">
                     <span className="text-sm text-muted-foreground">Bakiye</span>
