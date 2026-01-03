@@ -1,5 +1,6 @@
-import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Linkedin, Youtube, Star } from "lucide-react";
+import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Youtube, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TripAdvisorBadge = () => (
   <a
@@ -42,6 +43,8 @@ const socialLinks = [
 ];
 
 export const Footer = () => {
+  const { t, getLocalizedPath } = useLanguage();
+  
   return (
     <footer className="bg-primary text-primary-foreground py-12 px-4">
       <div className="container max-w-7xl mx-auto">
@@ -50,8 +53,7 @@ export const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-2xl font-bold">Meet Transfer</h3>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
-              Premium VIP transfer services from all major international airports across Turkey. 
-              Experience luxury travel with our professional chauffeurs and premium fleet.
+              {t('footerDescription')}
             </p>
             {/* Social Media Links */}
             <div className="flex items-center gap-3 pt-2">
@@ -79,56 +81,60 @@ export const Footer = () => {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Quick Links</h4>
+            <h4 className="font-semibold text-lg">{t('footerQuickLinks')}</h4>
             <ul className="space-y-2 text-primary-foreground/80 text-sm">
-              <li><Link to="/" className="hover:text-primary-foreground transition-colors">Home</Link></li>
-              <li><Link to="/services" className="hover:text-primary-foreground transition-colors">Services</Link></li>
-              <li><Link to="/destinations" className="hover:text-primary-foreground transition-colors">Destinations</Link></li>
-              <li><Link to="/about" className="hover:text-primary-foreground transition-colors">About Us</Link></li>
-              <li><Link to="/contact" className="hover:text-primary-foreground transition-colors">Contact</Link></li>
-              <li><Link to="/terms" className="hover:text-primary-foreground transition-colors">Terms & Conditions</Link></li>
-              <li><Link to="/privacy" className="hover:text-primary-foreground transition-colors">Privacy Policy</Link></li>
+              <li><Link to={getLocalizedPath("/")} className="hover:text-primary-foreground transition-colors">{t('home')}</Link></li>
+              <li><Link to={getLocalizedPath("/services")} className="hover:text-primary-foreground transition-colors">{t('services')}</Link></li>
+              <li><Link to={getLocalizedPath("/destinations")} className="hover:text-primary-foreground transition-colors">{t('footerDestinations')}</Link></li>
+              <li><Link to={getLocalizedPath("/about")} className="hover:text-primary-foreground transition-colors">{t('about')}</Link></li>
+              <li><Link to={getLocalizedPath("/contact")} className="hover:text-primary-foreground transition-colors">{t('contact')}</Link></li>
+              <li><Link to={getLocalizedPath("/terms")} className="hover:text-primary-foreground transition-colors">{t('footerTerms')}</Link></li>
+              <li><Link to={getLocalizedPath("/privacy")} className="hover:text-primary-foreground transition-colors">{t('footerPrivacy')}</Link></li>
             </ul>
           </div>
 
           {/* Services */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Services</h4>
+            <h4 className="font-semibold text-lg">{t('services')}</h4>
             <ul className="space-y-2 text-primary-foreground/80 text-sm">
-              <li><Link to="/istanbul-transfer" className="hover:text-primary-foreground transition-colors">Istanbul Transfer</Link></li>
-              <li><Link to="/antalya-transfer" className="hover:text-primary-foreground transition-colors">Antalya Transfer</Link></li>
-              <li><Link to="/bodrum-transfer" className="hover:text-primary-foreground transition-colors">Bodrum Transfer</Link></li>
-              <li><Link to="/dalaman-transfer" className="hover:text-primary-foreground transition-colors">Dalaman Transfer</Link></li>
-              <li><Link to="/fleet" className="hover:text-primary-foreground transition-colors">Our Fleet</Link></li>
+              <li><Link to={getLocalizedPath("/istanbul-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerIstanbul')}</Link></li>
+              <li><Link to={getLocalizedPath("/antalya-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerAntalya')}</Link></li>
+              <li><Link to={getLocalizedPath("/bodrum-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerBodrum')}</Link></li>
+              <li><Link to={getLocalizedPath("/dalaman-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerDalaman')}</Link></li>
+              <li><Link to={getLocalizedPath("/izmir-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerIzmir')}</Link></li>
+              <li><Link to={getLocalizedPath("/cappadocia-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerCappadocia')}</Link></li>
+              <li><Link to={getLocalizedPath("/dubai-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerDubai')}</Link></li>
+              <li><Link to={getLocalizedPath("/cyprus-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerCyprus')}</Link></li>
+              <li><Link to={getLocalizedPath("/fleet")} className="hover:text-primary-foreground transition-colors">{t('footerFleet')}</Link></li>
             </ul>
           </div>
 
           {/* Contact */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Contact</h4>
+            <h4 className="font-semibold text-lg">{t('contact')}</h4>
             <ul className="space-y-3 text-primary-foreground/80 text-sm">
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 flex-shrink-0" />
-                <a href="tel:+15558051101" className="hover:text-primary-foreground transition-colors">
-                  +1 (555) 805-1101
+                <a href="https://wa.me/905528989898" target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors">
+                  +90 552 898 98 98 <span className="text-xs opacity-70">({t('footerOnlyWhatsApp')})</span>
                 </a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 flex-shrink-0" />
-                <a href="mailto:info@meettransfer.com" className="hover:text-primary-foreground transition-colors">
-                  info@meettransfer.com
+                <a href="mailto:info@meettransfer.app" className="hover:text-primary-foreground transition-colors">
+                  info@meettransfer.app
                 </a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                <span>Istanbul Airport (IST)<br />VIP Terminal Office</span>
+                <span>{t('footerAddress')}</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-primary-foreground/20 pt-8 text-center text-primary-foreground/60 text-sm">
-          <p>© 2001 Meet Transfer. All rights reserved.</p>
+          <p>© 2001 Meet Transfer. {t('footerRights')}</p>
         </div>
       </div>
     </footer>
