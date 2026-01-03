@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,8 +13,8 @@ import { ArrowLeft, Loader2, Building2, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
-  email: z.string().trim().email('Geçersiz e-posta adresi').max(255),
-  password: z.string().min(6, 'Şifre en az 6 karakter olmalıdır').max(100),
+  email: z.string().trim().email().max(255),
+  password: z.string().min(6).max(100),
 });
 
 const AgencyLoginScreen = () => {
@@ -21,6 +22,7 @@ const AgencyLoginScreen = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { signIn, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   // Role-based redirect after login
@@ -85,7 +87,7 @@ const AgencyLoginScreen = () => {
         <div className="flex items-center h-14 px-4">
           <Link to="/" className="flex items-center gap-2 text-foreground">
             <ArrowLeft className="h-5 w-5" />
-            <span className="text-sm">Geri</span>
+            <span className="text-sm">{t("back") || "Back"}</span>
           </Link>
         </div>
       </header>
@@ -97,28 +99,28 @@ const AgencyLoginScreen = () => {
             <div className="mx-auto w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-2">
               <Building2 className="h-6 w-6 text-accent" />
             </div>
-            <CardTitle className="text-2xl md:text-3xl font-serif">Acenta Girişi</CardTitle>
-            <CardDescription>Acenta hesabınızla giriş yapın</CardDescription>
+            <CardTitle className="text-2xl md:text-3xl font-serif">{t("agencyLogin") || "Agency Login"}</CardTitle>
+            <CardDescription>{t("agencyLoginDescription") || "Sign in with your agency account"}</CardDescription>
           </CardHeader>
           
           <CardContent className="space-y-4">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">E-posta</Label>
+                <Label htmlFor="email">{t("email") || "Email"}</Label>
                 <Input 
                   id="email" 
                   name="email" 
                   type="email" 
-                  placeholder="acenta@email.com" 
+                  placeholder="agency@email.com" 
                   required 
                   className="h-12"
                   autoComplete="email"
                 />
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                {errors.email && <p className="text-sm text-destructive">{t("invalidEmail") || errors.email}</p>}
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Şifre</Label>
+                <Label htmlFor="password">{t("password") || "Password"}</Label>
                 <Input 
                   id="password" 
                   name="password" 
@@ -128,7 +130,7 @@ const AgencyLoginScreen = () => {
                   className="h-12"
                   autoComplete="current-password"
                 />
-                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                {errors.password && <p className="text-sm text-destructive">{t("passwordMinLength") || errors.password}</p>}
               </div>
               
               <Button 
@@ -140,10 +142,10 @@ const AgencyLoginScreen = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Giriş yapılıyor...
+                    {t("loggingIn") || "Logging in..."}
                   </>
                 ) : (
-                  'Giriş Yap'
+                  t("login") || "Login"
                 )}
               </Button>
             </form>
@@ -151,18 +153,18 @@ const AgencyLoginScreen = () => {
           
           <CardFooter className="flex flex-col gap-4 pb-8">
             <div className="text-center text-sm text-muted-foreground">
-              Henüz acenta hesabınız yok mu?
+              {t("noAgencyAccount") || "Don't have an agency account?"}
             </div>
             <Link to="/signup/agency" className="w-full">
               <Button variant="outline" className="w-full h-12 rounded-xl">
-                Acenta Başvurusu Yap
+                {t("applyAsAgency") || "Apply as Agency"}
               </Button>
             </Link>
             <div className="text-center text-sm text-muted-foreground">
-              Misafir misiniz?{' '}
-              <Link to="/login" className="text-accent hover:underline flex items-center justify-center gap-1">
+              {t("areYouGuest") || "Are you a guest?"}{' '}
+              <Link to="/login" className="text-accent hover:underline inline-flex items-center gap-1">
                 <User className="h-3 w-3" />
-                Misafir Girişi
+                {t("guestLogin") || "Guest Login"}
               </Link>
             </div>
           </CardFooter>
