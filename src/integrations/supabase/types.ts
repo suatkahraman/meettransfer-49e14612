@@ -201,6 +201,7 @@ export type Database = {
           amount: number
           balance_after: number
           created_at: string | null
+          currency: string
           description: string | null
           id: string
           reservation_id: string | null
@@ -211,6 +212,7 @@ export type Database = {
           amount: number
           balance_after: number
           created_at?: string | null
+          currency?: string
           description?: string | null
           id?: string
           reservation_id?: string | null
@@ -221,6 +223,7 @@ export type Database = {
           amount?: number
           balance_after?: number
           created_at?: string | null
+          currency?: string
           description?: string | null
           id?: string
           reservation_id?: string | null

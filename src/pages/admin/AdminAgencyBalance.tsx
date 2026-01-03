@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -7,15 +7,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { ArrowLeft, Loader2, Plus, Wallet, TrendingUp, Clock, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface Agency {
   id: string;
   agency_name: string;
   balance: number;
+  currency: string;
 }
 
 interface Transaction {
@@ -26,7 +29,15 @@ interface Transaction {
   balance_after: number;
   created_at: string;
   reservation_id: string | null;
+  currency: string;
 }
+
+interface CurrencyBalance {
+  currency: string;
+  balance: number;
+}
+
+const CURRENCIES = ['EUR', 'USD', 'GBP', 'TRY'];
 
 const AdminAgencyBalance = () => {
   const { agencyId } = useParams();
@@ -39,6 +50,7 @@ const AdminAgencyBalance = () => {
   const [saving, setSaving] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [topUpNote, setTopUpNote] = useState('');
+  const [topUpCurrency, setTopUpCurrency] = useState('EUR');
 
   const fetchData = async () => {
     if (!agencyId) return;
@@ -46,7 +58,7 @@ const AdminAgencyBalance = () => {
     // Fetch agency
     const { data: agencyData, error: agencyError } = await supabase
       .from('agencies')
-      .select('id, agency_name, balance')
+      .select('id, agency_name, balance, currency')
       .eq('id', agencyId)
       .single();
 
@@ -56,6 +68,7 @@ const AdminAgencyBalance = () => {
     }
 
     setAgency(agencyData);
+    setTopUpCurrency(agencyData.currency || 'EUR');
 
     // Fetch transactions
     const { data: txData } = await supabase
@@ -67,6 +80,28 @@ const AdminAgencyBalance = () => {
     setTransactions(txData || []);
     setLoading(false);
   };
+
+  // Calculate balances per currency from transactions
+  const currencyBalances = useMemo(() => {
+    const balances: Record<string, number> = {};
+    
+    transactions.forEach(tx => {
+      const currency = tx.currency || 'EUR';
+      if (!balances[currency]) {
+        balances[currency] = 0;
+      }
+      if (tx.type === 'top_up') {
+        balances[currency] += tx.amount;
+      } else {
+        balances[currency] -= Math.abs(tx.amount);
+      }
+    });
+
+    return Object.entries(balances).map(([currency, balance]) => ({
+      currency,
+      balance
+    })).sort((a, b) => a.currency.localeCompare(b.currency));
+  }, [transactions]);
 
   useEffect(() => {
     fetchData();
@@ -99,38 +134,32 @@ const AdminAgencyBalance = () => {
     setSaving(true);
 
     try {
-      const newBalance = (agency.balance || 0) + amount;
+      // Find current balance for this currency
+      const currentCurrencyBalance = currencyBalances.find(b => b.currency === topUpCurrency);
+      const newCurrencyBalance = (currentCurrencyBalance?.balance || 0) + amount;
 
-      // Update agency balance
-      const { error: updateError } = await supabase
-        .from('agencies')
-        .update({ balance: newBalance })
-        .eq('id', agency.id);
-
-      if (updateError) throw updateError;
-
-      // Create transaction record
+      // Create transaction record with currency
       const { error: txError } = await supabase
         .from('agency_transactions')
         .insert({
           agency_id: agency.id,
           amount: amount,
           type: 'top_up',
-          description: topUpNote || `Balance top-up by admin`,
-          balance_after: newBalance,
+          description: topUpNote || `Balance top-up by admin (${topUpCurrency})`,
+          balance_after: newCurrencyBalance,
+          currency: topUpCurrency,
         });
 
       if (txError) throw txError;
 
       await logAction({
-        action: 'UPDATE',
-        table_name: 'agencies',
+        action: 'INSERT',
+        table_name: 'agency_transactions',
         record_id: agency.id,
-        old_data: { balance: agency.balance },
-        new_data: { balance: newBalance, top_up_amount: amount },
+        new_data: { amount, currency: topUpCurrency, type: 'top_up' },
       });
 
-      toast.success(`Added ₺${amount.toFixed(2)} to ${agency.agency_name}'s balance`);
+      toast.success(`Added ${getCurrencySymbol(topUpCurrency)}${amount.toFixed(2)} to ${agency.agency_name}'s balance`);
       setDialogOpen(false);
       setTopUpAmount('');
       setTopUpNote('');
@@ -185,27 +214,39 @@ const AdminAgencyBalance = () => {
       </header>
 
       <main className="container mx-auto py-8 px-4 max-w-3xl space-y-6">
-        {/* Current Balance Card */}
-        <Card className={agency.balance < 0 ? 'border-destructive' : 'border-primary'}>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                agency.balance < 0 ? 'bg-destructive/10' : 'bg-primary/10'
-              }`}>
-                <Wallet className={`h-8 w-8 ${agency.balance < 0 ? 'text-destructive' : 'text-primary'}`} />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Current Balance</p>
-                <p className={`text-4xl font-bold ${agency.balance < 0 ? 'text-destructive' : 'text-primary'}`}>
-                  ₺{agency.balance.toFixed(2)}
-                </p>
-                {agency.balance < 0 && (
-                  <p className="text-sm text-destructive mt-1">⚠️ Insufficient balance</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Currency Balances Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {currencyBalances.length === 0 ? (
+            <Card className="col-span-full">
+              <CardContent className="pt-6 text-center text-muted-foreground">
+                No transactions yet
+              </CardContent>
+            </Card>
+          ) : (
+            currencyBalances.map(({ currency, balance }) => (
+              <Card key={currency} className={balance < 0 ? 'border-destructive' : 'border-primary'}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      balance < 0 ? 'bg-destructive/10' : 'bg-primary/10'
+                    }`}>
+                      <Wallet className={`h-6 w-6 ${balance < 0 ? 'text-destructive' : 'text-primary'}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{currency} Balance</p>
+                      <p className={`text-2xl font-bold ${balance < 0 ? 'text-destructive' : 'text-primary'}`}>
+                        {getCurrencySymbol(currency)}{balance.toFixed(2)}
+                      </p>
+                      {balance < 0 && (
+                        <p className="text-xs text-destructive">⚠️ Negative balance</p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
 
         {/* Transaction History */}
         <Card>
@@ -220,40 +261,45 @@ const AdminAgencyBalance = () => {
               <p className="text-center text-muted-foreground py-8">No transactions yet</p>
             ) : (
               <div className="space-y-3">
-                {transactions.map((tx) => (
-                  <div 
-                    key={tx.id} 
-                    className="flex items-center justify-between py-3 border-b last:border-0"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        tx.type === 'top_up' ? 'bg-green-100' : 'bg-red-100'
-                      }`}>
-                        {tx.type === 'top_up' ? (
-                          <TrendingUp className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <Clock className="h-5 w-5 text-red-600" />
-                        )}
+                {transactions.map((tx) => {
+                  const currency = tx.currency || 'EUR';
+                  const symbol = getCurrencySymbol(currency);
+                  return (
+                    <div 
+                      key={tx.id} 
+                      className="flex items-center justify-between py-3 border-b last:border-0"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          tx.type === 'top_up' ? 'bg-green-100' : 'bg-red-100'
+                        }`}>
+                          {tx.type === 'top_up' ? (
+                            <TrendingUp className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <Clock className="h-5 w-5 text-red-600" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium">
+                            {tx.type === 'top_up' ? 'Balance Top-Up' : 'Auto Deduction'}
+                            <span className="ml-2 text-xs bg-muted px-1.5 py-0.5 rounded">{currency}</span>
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {tx.description || format(new Date(tx.created_at), 'dd MMM yyyy HH:mm')}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">
-                          {tx.type === 'top_up' ? 'Balance Top-Up' : 'Auto Deduction'}
+                      <div className="text-right">
+                        <p className={`font-bold ${tx.type === 'top_up' ? 'text-green-600' : 'text-red-600'}`}>
+                          {tx.type === 'top_up' ? '+' : '-'}{symbol}{Math.abs(tx.amount).toFixed(2)}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {tx.description || format(new Date(tx.created_at), 'dd MMM yyyy HH:mm')}
+                          Balance: {symbol}{tx.balance_after.toFixed(2)}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className={`font-bold ${tx.type === 'top_up' ? 'text-green-600' : 'text-red-600'}`}>
-                        {tx.type === 'top_up' ? '+' : '-'}₺{Math.abs(tx.amount).toFixed(2)}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Balance: ₺{tx.balance_after.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -268,7 +314,22 @@ const AdminAgencyBalance = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Amount (₺) *</Label>
+              <Label>Currency *</Label>
+              <Select value={topUpCurrency} onValueChange={setTopUpCurrency}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map(cur => (
+                    <SelectItem key={cur} value={cur}>
+                      {getCurrencySymbol(cur)} {cur}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Amount ({getCurrencySymbol(topUpCurrency)}) *</Label>
               <Input
                 type="number"
                 min="0"

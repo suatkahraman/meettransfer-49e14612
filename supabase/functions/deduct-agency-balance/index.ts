@@ -67,7 +67,7 @@ serve(async (req) => {
       .single();
 
     const companyAmount = agencyDetail?.company_amount || 0;
-    const agencyCurrency = agencyDetail?.agency_price_currency || 'TRY';
+    const agencyCurrency = agencyDetail?.agency_price_currency || 'EUR';
     const passengerCashAmount = reservationDetails?.passenger_cash_amount || 0;
     const passengerCashCurrency = reservationDetails?.passenger_cash_currency || agencyCurrency;
 
@@ -75,7 +75,7 @@ serve(async (req) => {
     // (passenger pays cash directly to driver, so agency owes less)
     const netAmountToAdd = companyAmount - passengerCashAmount;
 
-    console.log(`Company amount: ${companyAmount}, Passenger cash: ${passengerCashAmount}, Net to add: ${netAmountToAdd}`);
+    console.log(`Company amount: ${companyAmount} ${agencyCurrency}, Passenger cash: ${passengerCashAmount}, Net to add: ${netAmountToAdd}`);
 
     if (netAmountToAdd <= 0 && companyAmount <= 0) {
       console.log('No amount to add to agency balance');
@@ -85,10 +85,10 @@ serve(async (req) => {
       );
     }
 
-    // Get current agency with balance and currency
+    // Get agency info
     const { data: agency, error: agencyError } = await supabase
       .from('agencies')
-      .select('id, agency_name, balance, currency')
+      .select('id, agency_name')
       .eq('id', reservation.agency_id)
       .single();
 
@@ -100,23 +100,26 @@ serve(async (req) => {
       );
     }
 
-    // Add the net amount to agency balance (in agency's currency)
-    // Net = company_amount - passenger_cash_amount
-    const newBalance = (agency.balance || 0) + netAmountToAdd;
+    // Calculate current balance for this specific currency from transactions
+    const { data: existingTransactions } = await supabase
+      .from('agency_transactions')
+      .select('amount, type, currency')
+      .eq('agency_id', agency.id)
+      .eq('currency', agencyCurrency);
 
-    // Update agency balance
-    const { error: updateError } = await supabase
-      .from('agencies')
-      .update({ balance: newBalance })
-      .eq('id', agency.id);
-
-    if (updateError) {
-      console.error('Failed to update balance:', updateError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to update balance' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    let currentCurrencyBalance = 0;
+    if (existingTransactions) {
+      existingTransactions.forEach(tx => {
+        if (tx.type === 'top_up') {
+          currentCurrencyBalance += tx.amount;
+        } else {
+          currentCurrencyBalance -= Math.abs(tx.amount);
+        }
+      });
     }
+
+    // New balance for this currency after adding the net amount
+    const newCurrencyBalance = currentCurrencyBalance + netAmountToAdd;
 
     // Get currency symbol for description
     const currencySymbols: Record<string, string> = {
@@ -128,7 +131,7 @@ serve(async (req) => {
     const currencySymbol = currencySymbols[agencyCurrency] || agencyCurrency;
     const passengerCashSymbol = currencySymbols[passengerCashCurrency] || passengerCashCurrency;
 
-    // Create transaction record with detailed description
+    // Create transaction record with detailed description and currency
     let description = `Transfer tamamlandı - ${currencySymbol}${companyAmount.toFixed(2)}`;
     if (passengerCashAmount > 0) {
       description += ` (Yolcu nakit: ${passengerCashSymbol}${passengerCashAmount.toFixed(2)} düşüldü)`;
@@ -141,15 +144,16 @@ serve(async (req) => {
         amount: netAmountToAdd,
         type: 'reservation_completed',
         description: description,
-        balance_after: newBalance,
+        balance_after: newCurrencyBalance,
         reservation_id: reservation_id,
+        currency: agencyCurrency,
       });
 
     if (txError) {
       console.error('Failed to create transaction:', txError);
     }
 
-    console.log(`Added net ${currencySymbol}${netAmountToAdd} to ${agency.agency_name}. Company: ${companyAmount}, Passenger cash: ${passengerCashAmount}, New balance: ${currencySymbol}${newBalance}`);
+    console.log(`Added net ${currencySymbol}${netAmountToAdd} (${agencyCurrency}) to ${agency.agency_name}. Company: ${companyAmount}, Passenger cash: ${passengerCashAmount}, New ${agencyCurrency} balance: ${newCurrencyBalance}`);
 
     return new Response(
       JSON.stringify({ 
@@ -158,7 +162,7 @@ serve(async (req) => {
         passenger_cash_amount: passengerCashAmount,
         net_added_amount: netAmountToAdd,
         currency: agencyCurrency,
-        new_balance: newBalance,
+        new_currency_balance: newCurrencyBalance,
         agency_name: agency.agency_name 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
