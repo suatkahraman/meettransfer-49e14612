@@ -145,20 +145,18 @@ const DestinationsPage = () => {
       />
 
       <PageHeader
-        title="VIP Destinations Worldwide"
-        subtitle="Premium Airport Transfers in Turkey, Dubai & Cyprus"
+        title={t("vipDestinationsWorldwide")}
+        subtitle={t("premiumAirportTransfersGlobal")}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
         {/* Main H1 */}
         <section className="text-center mb-10 md:mb-14">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            VIP Airport Transfer Destinations
+            {t("vipAirportTransferDestinations")}
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Discover premium airport transfer services across Turkey, Dubai, and Cyprus. From luxury marinas to historic city centers, 
-            plus exclusive Istanbul-Bursa day tours. Meet Transfer provides professional chauffeur service, Mercedes fleet, 
-            and 24/7 meet & greet at every major airport. Book your VIP private transfer with flight tracking and door-to-door service.
+            {t("destinationsPageDescription")}
           </p>
         </section>
 
