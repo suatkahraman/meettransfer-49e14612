@@ -108,6 +108,9 @@ const DriverJobDetails = () => {
     'sent_to_driver': 'bg-yellow-500/20 text-yellow-700',
     'active': 'bg-blue-500/20 text-blue-700',
     'completed': 'bg-green-500/20 text-green-700',
+    'cancelled': 'bg-red-500/20 text-red-700',
+    'cancelled_by_customer': 'bg-red-500/20 text-red-700',
+    'customer_rejected': 'bg-red-500/20 text-red-700',
   };
 
   const getStatusLabel = (status: string): string => {

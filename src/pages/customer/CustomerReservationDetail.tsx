@@ -85,6 +85,7 @@ const statusColors: Record<string, string> = {
   'completed': 'bg-green-500/20 text-green-700',
   'pending_admin_review': 'bg-amber-500/20 text-amber-700',
   'cancelled_by_customer': 'bg-destructive/20 text-destructive',
+  'cancelled': 'bg-destructive/20 text-destructive',
 };
 
 

@@ -44,6 +44,8 @@ const statusColors: Record<string, string> = {
   'active': 'bg-green-500',
   'completed': 'bg-gray-500',
   'cancelled': 'bg-red-500',
+  'cancelled_by_customer': 'bg-red-500',
+  'customer_rejected': 'bg-red-500',
 };
 
 
