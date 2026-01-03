@@ -68,7 +68,6 @@ interface Reservation {
   dropoff_lng: number | null;
   drivers?: {
     name: string;
-    phone: string;
     plate_number: string | null;
     vehicle_model: string | null;
     vehicle_color: string | null;
@@ -129,7 +128,7 @@ const CustomerReservationDetail = () => {
       .from('reservations')
       .select(`
         *,
-        drivers (name, phone, plate_number, vehicle_model, vehicle_color)
+        drivers (name, plate_number, vehicle_model, vehicle_color)
       `)
       .eq('id', id)
       .eq('customer_id', user.id)

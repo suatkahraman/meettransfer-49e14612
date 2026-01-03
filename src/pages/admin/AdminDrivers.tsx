@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2, Star, Mail } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2, Star, Mail, Palette } from 'lucide-react';
 
 const regions = [
   { value: 'Istanbul', label: 'İstanbul' },
@@ -29,6 +29,7 @@ interface Driver {
   phone: string;
   plate_number: string | null;
   vehicle_model: string | null;
+  vehicle_color: string | null;
   region: string | null;
   active: boolean;
   average_rating: number | null;
@@ -55,6 +56,7 @@ const AdminDrivers = () => {
     phone: '',
     plate_number: '',
     vehicle_model: '',
+    vehicle_color: '',
     region: '',
     email: '',
     password: '',
@@ -85,6 +87,7 @@ const AdminDrivers = () => {
       phone: '',
       plate_number: '',
       vehicle_model: '',
+      vehicle_color: '',
       region: '',
       email: '',
       password: '',
@@ -99,6 +102,7 @@ const AdminDrivers = () => {
       phone: driver.phone,
       plate_number: driver.plate_number || '',
       vehicle_model: driver.vehicle_model || '',
+      vehicle_color: driver.vehicle_color || '',
       region: driver.region || '',
       email: '',
       password: '',
@@ -117,6 +121,7 @@ const AdminDrivers = () => {
           phone: editingDriver.phone,
           plate_number: editingDriver.plate_number,
           vehicle_model: editingDriver.vehicle_model,
+          vehicle_color: editingDriver.vehicle_color,
           region: editingDriver.region,
         };
 
@@ -128,6 +133,7 @@ const AdminDrivers = () => {
             phone: formData.phone,
             plate_number: formData.plate_number || null,
             vehicle_model: formData.vehicle_model || null,
+            vehicle_color: formData.vehicle_color || null,
             region: formData.region || null,
           })
           .eq('id', editingDriver.id);
@@ -146,6 +152,7 @@ const AdminDrivers = () => {
               phone: formData.phone,
               plate_number: formData.plate_number || null,
               vehicle_model: formData.vehicle_model || null,
+              vehicle_color: formData.vehicle_color || null,
               region: formData.region || null,
             },
           });
@@ -180,6 +187,7 @@ const AdminDrivers = () => {
             phone: formData.phone,
             plate_number: formData.plate_number,
             vehicle_model: formData.vehicle_model,
+            vehicle_color: formData.vehicle_color,
             region: formData.region,
           },
         });
@@ -204,6 +212,7 @@ const AdminDrivers = () => {
             phone: formData.phone,
             plate_number: formData.plate_number,
             vehicle_model: formData.vehicle_model,
+            vehicle_color: formData.vehicle_color,
             region: formData.region,
             email: formData.email,
           },
@@ -391,13 +400,26 @@ const AdminDrivers = () => {
                     {driver.plate_number && (
                       <div className="flex items-center gap-2">
                         <Car className="h-4 w-4 text-muted-foreground" />
-                        <span>{driver.plate_number}{driver.vehicle_model ? ` - ${driver.vehicle_model}` : ''}</span>
+                        <span>
+                          {driver.plate_number}
+                          {driver.vehicle_model ? ` - ${driver.vehicle_model}` : ''}
+                          {driver.vehicle_color ? ` (${driver.vehicle_color})` : ''}
+                        </span>
                       </div>
                     )}
                     {!driver.plate_number && driver.vehicle_model && (
                       <div className="flex items-center gap-2">
                         <Car className="h-4 w-4 text-muted-foreground" />
-                        <span>{driver.vehicle_model}</span>
+                        <span>
+                          {driver.vehicle_model}
+                          {driver.vehicle_color ? ` (${driver.vehicle_color})` : ''}
+                        </span>
+                      </div>
+                    )}
+                    {!driver.plate_number && !driver.vehicle_model && driver.vehicle_color && (
+                      <div className="flex items-center gap-2">
+                        <Palette className="h-4 w-4 text-muted-foreground" />
+                        <span>{driver.vehicle_color}</span>
                       </div>
                     )}
                     {driver.region && (
@@ -465,6 +487,14 @@ const AdminDrivers = () => {
                 value={formData.vehicle_model}
                 onChange={(e) => setFormData({...formData, vehicle_model: e.target.value})}
                 placeholder="örn. Mercedes Vito"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Araç Rengi</Label>
+              <Input
+                value={formData.vehicle_color}
+                onChange={(e) => setFormData({...formData, vehicle_color: e.target.value})}
+                placeholder="örn. Siyah"
               />
             </div>
             <div className="space-y-2">
@@ -565,6 +595,12 @@ const AdminDrivers = () => {
                     <Car className="h-4 w-4" /> Araç Modeli
                   </span>
                   <span className="font-medium">{viewingDriver.vehicle_model || 'Belirtilmedi'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Palette className="h-4 w-4" /> Araç Rengi
+                  </span>
+                  <span className="font-medium">{viewingDriver.vehicle_color || 'Belirtilmedi'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">

@@ -95,6 +95,8 @@ interface Driver {
   name: string;
   user_id: string;
   plate_number: string | null;
+  vehicle_model: string | null;
+  vehicle_color: string | null;
 }
 
 interface Agency {
@@ -308,7 +310,7 @@ const AdminEditReservation = () => {
 
       const [reservationResult, driversResult, adminNotesResult, agenciesResult, agencyDetailsResult] = await Promise.all([
         supabase.from('reservations').select('*').eq('id', id).single(),
-        supabase.from('drivers').select('id, name, user_id, plate_number').eq('active', true),
+        supabase.from('drivers').select('id, name, user_id, plate_number, vehicle_model, vehicle_color').eq('active', true),
         supabase.from('reservation_admin_notes').select('notes').eq('reservation_id', id).maybeSingle(),
         supabase.from('agencies').select('id, agency_name').order('agency_name'),
         supabase.from('agency_reservation_details').select('*').eq('reservation_id', id).maybeSingle(),
@@ -1693,12 +1695,26 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '‚
                       </div>
                     </div>
                     
+                    {(assignedDriver?.vehicle_model || assignedDriver?.vehicle_color) && (
+                      <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                        <Car className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Ara√ß</p>
+                          <p className="font-semibold">
+                            {assignedDriver?.vehicle_model || ''}
+                            {assignedDriver?.vehicle_model && assignedDriver?.vehicle_color ? ' - ' : ''}
+                            {assignedDriver?.vehicle_color || ''}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
                     {assignedDriver?.plate_number && (
                       <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
                         <Car className="h-5 w-5 text-muted-foreground" />
                         <div>
                           <p className="text-xs text-muted-foreground">Plaka</p>
-                          <p className="font-semibold">{assignedDriver.plate_number}</p>
+                          <p className="font-semibold font-mono">{assignedDriver.plate_number}</p>
                         </div>
                       </div>
                     )}

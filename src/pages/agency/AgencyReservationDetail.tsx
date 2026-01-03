@@ -25,7 +25,6 @@ interface Driver {
   plate_number: string | null;
   vehicle_model: string | null;
   vehicle_color: string | null;
-  phone: string;
 }
 
 interface Reservation {
@@ -132,7 +131,7 @@ const AgencyReservationDetail = () => {
           pickup_date, pickup_time, flight_number, vehicle_type, status,
           passenger_names, driver_id, price, price_currency,
           passenger_cash_amount, passenger_cash_currency,
-          drivers:driver_id (id, name, plate_number, vehicle_model, vehicle_color, phone)
+          drivers:driver_id (id, name, plate_number, vehicle_model, vehicle_color)
         `)
         .eq('id', id)
         .single();
