@@ -38,6 +38,7 @@ interface Reservation {
   price: number | null;
   price_currency: string | null;
   driver_cash_amount: number | null;
+  passenger_cash_amount: number | null;
   status: string;
   customer_name: string;
   driver_id: string | null;
@@ -265,10 +266,14 @@ const AdminAgencyAccounting = () => {
   const totalReservations = reservations.length;
   // Toplam Acenta Fiyatı = Tüm rezervasyonların customer_price toplamı (TEK KAYNAK)
   const totalAgencyPrice = reservations.reduce((sum, r) => sum + getAgencyPrice(r.id), 0);
+  // Toplam Yolcu Nakit = Yolcudan alınacak nakit tutarı (acenta borcundan düşülür)
+  const totalPassengerCash = reservations.reduce((sum, r) => sum + (r.passenger_cash_amount || 0), 0);
   // Alınan Ödemeler = agency_payments tablosundaki ödemelerin toplamı
   const totalPaymentsReceived = payments.reduce((sum, p) => sum + p.amount, 0);
-  // Acenta Bakiyesi = Toplam Acenta Fiyatı - Toplam Ödenen Tutar
-  const remainingBalance = totalAgencyPrice - totalPaymentsReceived;
+  // Net Acenta Borcu = Toplam Acenta Fiyatı - Yolcu Nakit
+  const netAgencyDebt = totalAgencyPrice - totalPassengerCash;
+  // Bakiye = Net Borç - Ödenen Tutar
+  const remainingBalance = netAgencyDebt - totalPaymentsReceived;
 
   const handleAgencyChange = (newAgencyId: string) => {
     navigate(`/admin/agency-accounting/${newAgencyId}`);
@@ -538,11 +543,16 @@ const AdminAgencyAccounting = () => {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                           <TrendingUp className="h-4 w-4" />
-                          Toplam Acenta Fiyatı
+                          Acenta Borç
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold text-primary">₺{totalAgencyPrice.toFixed(2)}</div>
+                        <div className="text-2xl font-bold text-primary">₺{netAgencyDebt.toFixed(2)}</div>
+                        {totalPassengerCash > 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            ₺{totalAgencyPrice.toFixed(2)} - ₺{totalPassengerCash.toFixed(2)} yolcu nakit
+                          </p>
+                        )}
                       </CardContent>
                     </Card>
 
