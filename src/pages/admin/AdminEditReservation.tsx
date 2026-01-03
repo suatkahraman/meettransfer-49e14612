@@ -854,7 +854,9 @@ const AdminEditReservation = () => {
 
       // If status changed to completed and this is an agency reservation
       if (newStatus === 'completed' && prevStatus !== 'completed' && hasAgency) {
-        console.log('Converting agency price to TRY for reservation:', id);
+        console.log('Processing agency accounting for reservation:', id);
+        
+        // Convert agency price to TRY for admin accounting
         const { error: convertError } = await supabase.functions.invoke('convert-agency-price-to-try', {
           body: { reservation_id: id },
         });
@@ -862,6 +864,16 @@ const AdminEditReservation = () => {
           console.error('Failed to convert agency price to TRY:', convertError);
         } else {
           console.log('Agency price converted to TRY successfully');
+        }
+        
+        // Add amount to agency balance in agency's currency
+        const { error: balanceError } = await supabase.functions.invoke('deduct-agency-balance', {
+          body: { reservation_id: id },
+        });
+        if (balanceError) {
+          console.error('Failed to update agency balance:', balanceError);
+        } else {
+          console.log('Agency balance updated successfully');
         }
       }
     } catch (e) {
