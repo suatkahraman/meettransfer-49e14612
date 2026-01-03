@@ -191,6 +191,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     credit: 'alacak',
     debit: 'verecek',
     closed: 'kapalı',
+    
+    // Update Info
+    updateInfo: 'Bilgilerini Güncelle',
+    name: 'Ad Soyad',
+    email: 'E-posta',
+    vehicleType: 'Araç Tipi',
+    selectVehicle: 'Araç seçin',
+    plateNumber: 'Plaka',
+    vehicleColor: 'Araç Rengi',
+    vehicleColorPlaceholder: 'Örn: Siyah, Beyaz, Gri',
+    failedToLoad: 'Bilgiler yüklenemedi',
+    emailUpdateFailed: 'E-posta güncellenemedi',
   },
   EN: {
     driverPanel: 'Driver Panel',
@@ -348,6 +360,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     credit: 'credit',
     debit: 'debit',
     closed: 'closed',
+    
+    // Update Info
+    updateInfo: 'Update Your Info',
+    name: 'Full Name',
+    email: 'Email',
+    vehicleType: 'Vehicle Type',
+    selectVehicle: 'Select vehicle',
+    plateNumber: 'Plate Number',
+    vehicleColor: 'Vehicle Color',
+    vehicleColorPlaceholder: 'E.g: Black, White, Grey',
+    failedToLoad: 'Failed to load info',
+    emailUpdateFailed: 'Failed to update email',
   },
   DE: {
     driverPanel: 'Fahrer-Panel',
@@ -505,6 +529,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     credit: 'Guthaben',
     debit: 'Schulden',
     closed: 'geschlossen',
+    
+    // Update Info
+    updateInfo: 'Informationen Aktualisieren',
+    name: 'Vollständiger Name',
+    email: 'E-Mail',
+    vehicleType: 'Fahrzeugtyp',
+    selectVehicle: 'Fahrzeug auswählen',
+    plateNumber: 'Kennzeichen',
+    vehicleColor: 'Fahrzeugfarbe',
+    vehicleColorPlaceholder: 'Z.B: Schwarz, Weiß, Grau',
+    failedToLoad: 'Laden fehlgeschlagen',
+    emailUpdateFailed: 'E-Mail-Aktualisierung fehlgeschlagen',
   },
   FR: {
     driverPanel: 'Panneau Chauffeur',
@@ -662,6 +698,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     credit: 'crédit',
     debit: 'débit',
     closed: 'fermé',
+    
+    // Update Info
+    updateInfo: 'Mettre à Jour Vos Infos',
+    name: 'Nom Complet',
+    email: 'E-mail',
+    vehicleType: 'Type de Véhicule',
+    selectVehicle: 'Sélectionner le véhicule',
+    plateNumber: 'Numéro de Plaque',
+    vehicleColor: 'Couleur du Véhicule',
+    vehicleColorPlaceholder: 'Ex: Noir, Blanc, Gris',
+    failedToLoad: 'Échec du chargement',
+    emailUpdateFailed: 'Échec de la mise à jour de l\'e-mail',
   },
   RU: {
     driverPanel: 'Панель Водителя',
@@ -819,6 +867,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     credit: 'кредит',
     debit: 'дебет',
     closed: 'закрыт',
+    
+    // Update Info
+    updateInfo: 'Обновить Информацию',
+    name: 'Полное Имя',
+    email: 'Электронная почта',
+    vehicleType: 'Тип Транспорта',
+    selectVehicle: 'Выберите транспорт',
+    plateNumber: 'Номерной Знак',
+    vehicleColor: 'Цвет Автомобиля',
+    vehicleColorPlaceholder: 'Напр: Черный, Белый, Серый',
+    failedToLoad: 'Ошибка загрузки',
+    emailUpdateFailed: 'Ошибка обновления email',
   },
   AR: {
     driverPanel: 'لوحة السائق',
@@ -976,6 +1036,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     credit: 'دائن',
     debit: 'مدين',
     closed: 'مغلق',
+    
+    // Update Info
+    updateInfo: 'تحديث المعلومات',
+    name: 'الاسم الكامل',
+    email: 'البريد الإلكتروني',
+    vehicleType: 'نوع المركبة',
+    selectVehicle: 'اختر المركبة',
+    plateNumber: 'رقم اللوحة',
+    vehicleColor: 'لون المركبة',
+    vehicleColorPlaceholder: 'مثال: أسود، أبيض، رمادي',
+    failedToLoad: 'فشل التحميل',
+    emailUpdateFailed: 'فشل تحديث البريد الإلكتروني',
   },
 };
 

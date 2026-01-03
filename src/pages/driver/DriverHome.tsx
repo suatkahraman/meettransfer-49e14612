@@ -8,7 +8,7 @@ import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History } from 'lucide-react';
+import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History, Settings } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { toast } from 'sonner';
@@ -17,6 +17,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from '
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ReservationSearch from '@/components/ReservationSearch';
+import DriverInfoEditor from '@/components/driver/DriverInfoEditor';
 
 interface Reservation {
   id: string;
@@ -62,7 +63,8 @@ const DriverHome = () => {
   const [expandedSections, setExpandedSections] = useState({
     pending: true,
     active: true,
-    completed: false
+    completed: false,
+    settings: false
   });
   
   const pullY = useMotionValue(0);
@@ -354,7 +356,7 @@ const DriverHome = () => {
     }
   };
 
-  const toggleSection = (section: 'pending' | 'active' | 'completed') => {
+  const toggleSection = (section: 'pending' | 'active' | 'completed' | 'settings') => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -468,6 +470,37 @@ const DriverHome = () => {
               <Calculator className="h-5 w-5" />
               {t('monthlyAccounting')}
             </Button>
+
+            {/* Update Info Section */}
+            <section className="mb-4">
+              <button 
+                onClick={() => toggleSection('settings')}
+                className="flex items-center justify-between w-full py-2 mb-2"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                    <Settings className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="font-semibold">{t('updateInfo')}</span>
+                </div>
+                <ChevronDown className={cn(
+                  "h-5 w-5 text-muted-foreground transition-transform",
+                  expandedSections.settings && "rotate-180"
+                )} />
+              </button>
+              <AnimatePresence>
+                {expandedSections.settings && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <DriverInfoEditor onClose={() => toggleSection('settings')} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </section>
             {/* Pending Jobs Section */}
             {pendingJobs.length > 0 && (
               <section>
