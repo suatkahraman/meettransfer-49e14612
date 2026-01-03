@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2, Banknote, CheckCircle2, Clock3 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2, Banknote, CheckCircle2, Clock3, RefreshCw } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -130,6 +130,15 @@ const AdminReservations = () => {
     reservationName: '',
   });
   const [deleting, setDeleting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchReservations();
+    await fetchDrivers();
+    setRefreshing(false);
+    toast.success('Liste güncellendi');
+  };
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '-';
@@ -509,7 +518,18 @@ const AdminReservations = () => {
           </Button>
           <h1 className="text-2xl font-serif">Rezervasyonlar</h1>
         </div>
-        <NotificationBell />
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="text-primary-foreground hover:bg-primary-foreground/10"
+          >
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
+          <NotificationBell />
+        </div>
       </header>
 
       <main className="flex-1 overflow-y-auto">
