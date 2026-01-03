@@ -62,21 +62,24 @@ export const MonthlyProfitCard = () => {
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
           .from("agency_reservation_details")
-          .select("reservation_id, company_amount, company_amount_try, agency_price_currency")
+          .select("reservation_id, customer_price, agency_price_currency, exchange_rate_used")
           .in("reservation_id", reservationIds);
 
         if (!agencyError && agencyData) {
           const agencyMap = agencyData.reduce((acc, item) => {
             let tryAmount = 0;
-            // Acenta Geliri = company_amount_try (TRY'ye çevrilmiş tutar)
-            // Eğer TRY ise direkt company_amount kullan
-            // Eğer döviz ise ve çevrilmemişse 0 say (çeviri gerekiyor)
-            if (item.company_amount_try) {
-              tryAmount = item.company_amount_try;
-            } else if (item.agency_price_currency === 'TRY') {
-              tryAmount = item.company_amount || 0;
+            const customerPrice = item.customer_price || 0;
+            
+            // Acenta Geliri = customer_price (Acentadan Alınacak Tutar)
+            // Eğer TRY ise direkt customer_price kullan
+            // Eğer döviz ise ve kur varsa çevir, yoksa 0 say
+            if (item.agency_price_currency === 'TRY') {
+              tryAmount = customerPrice;
+            } else if (item.exchange_rate_used && customerPrice > 0) {
+              // Döviz ve kur varsa çevir
+              tryAmount = customerPrice * item.exchange_rate_used;
             } else {
-              // Döviz çevrilmemiş - 0 olarak say
+              // Döviz çevrilmemiş veya customer_price 0 - 0 olarak say
               tryAmount = 0;
             }
             acc[item.reservation_id] = tryAmount;
