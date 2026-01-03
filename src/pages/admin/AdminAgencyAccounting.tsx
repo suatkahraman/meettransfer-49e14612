@@ -265,6 +265,35 @@ const AdminAgencyAccounting = () => {
   // HESAPLAMA: Tüm hesaplamalar SADECE agency_price (customer_price) üzerinden yapılmalı
   // Hiçbir eski hesaplama mantığı veya eski alan kullanılmamalı
   const totalReservations = reservations.length;
+  
+  // Calculate currency-wise totals
+  const currencyTotals: Record<string, { agencyPrice: number; passengerCash: number }> = {};
+  reservations.forEach(r => {
+    const currency = getAgencyPriceCurrency(r.id);
+    if (!currencyTotals[currency]) {
+      currencyTotals[currency] = { agencyPrice: 0, passengerCash: 0 };
+    }
+    currencyTotals[currency].agencyPrice += getAgencyPrice(r.id);
+  });
+  
+  // Add passenger cash by currency
+  reservations.forEach(r => {
+    const currency = r.passenger_cash_currency || 'TRY';
+    if (!currencyTotals[currency]) {
+      currencyTotals[currency] = { agencyPrice: 0, passengerCash: 0 };
+    }
+    currencyTotals[currency].passengerCash += r.passenger_cash_amount || 0;
+  });
+  
+  // Calculate currency balances array
+  const currencyBalances = Object.entries(currencyTotals).map(([currency, totals]) => ({
+    currency,
+    agencyPrice: totals.agencyPrice,
+    passengerCash: totals.passengerCash,
+    netDebt: totals.agencyPrice - totals.passengerCash,
+  }));
+  
+  // Legacy totals for backward compatibility
   // Toplam Acenta Fiyatı = Tüm rezervasyonların customer_price toplamı (TEK KAYNAK)
   const totalAgencyPrice = reservations.reduce((sum, r) => sum + getAgencyPrice(r.id), 0);
   // Toplam Yolcu Nakit = Yolcudan alınacak nakit tutarı (acenta borcundan düşülür)
@@ -543,23 +572,6 @@ const AdminAgencyAccounting = () => {
                     <Card>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                          <TrendingUp className="h-4 w-4" />
-                          Acenta Borç
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold text-primary">₺{netAgencyDebt.toFixed(2)}</div>
-                        {totalPassengerCash > 0 && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            ₺{totalAgencyPrice.toFixed(2)} - ₺{totalPassengerCash.toFixed(2)} yolcu nakit
-                          </p>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                           <CreditCard className="h-4 w-4" />
                           Alınan Ödemeler
                         </CardTitle>
@@ -573,7 +585,7 @@ const AdminAgencyAccounting = () => {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                           <Banknote className="h-4 w-4" />
-                          Bakiye
+                          Toplam Bakiye
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -586,6 +598,43 @@ const AdminAgencyAccounting = () => {
                       </CardContent>
                     </Card>
                   </div>
+                  
+                  {/* Multi-Currency Balances */}
+                  {currencyBalances.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {currencyBalances.map((cb) => {
+                        const symbol = getCurrencySymbol(cb.currency);
+                        return (
+                          <Card key={cb.currency} className="border-primary/20">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <Badge variant="outline" className="font-mono">{cb.currency}</Badge>
+                                Para Birimi Bakiyesi
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Acenta Fiyatı</span>
+                                <span className="font-medium">{symbol}{cb.agencyPrice.toFixed(2)}</span>
+                              </div>
+                              {cb.passengerCash > 0 && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Yolcu Nakit</span>
+                                  <span className="font-medium text-orange-600">-{symbol}{cb.passengerCash.toFixed(2)}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between border-t pt-2">
+                                <span className="font-medium">Net Borç</span>
+                                <span className={`font-bold ${cb.netDebt > 0 ? 'text-primary' : cb.netDebt < 0 ? 'text-green-600' : ''}`}>
+                                  {symbol}{cb.netDebt.toFixed(2)}
+                                </span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   {/* Reservations List */}
                   <Card>

@@ -72,6 +72,9 @@ interface QuickBookingRequest {
   payment_method: string | null;
   payment_link: string | null;
   customer_notes: string | null;
+  agency_id: string | null;
+  agency_user_id: string | null;
+  agency?: { agency_name: string } | null;
 }
 
 const vehicleLabels: Record<string, string> = {
@@ -142,7 +145,10 @@ export default function AdminQuickBookings() {
     try {
       const { data, error } = await supabase
         .from("quick_booking_requests")
-        .select("*")
+        .select(`
+          *,
+          agency:agency_id (agency_name)
+        `)
         .neq("status", "completed")
         .order("created_at", { ascending: false });
 
@@ -381,6 +387,11 @@ export default function AdminQuickBookings() {
                               <Badge className={statusColors[request.status]}>
                                 {statusLabels[request.status]}
                               </Badge>
+                              {request.agency && (
+                                <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-300">
+                                  🏢 {request.agency.agency_name}
+                                </Badge>
+                              )}
                               <span className="text-sm text-muted-foreground">
                                 {format(parseISO(request.created_at), "dd/MM/yyyy HH:mm")}
                               </span>

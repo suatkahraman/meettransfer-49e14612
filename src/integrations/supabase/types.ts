@@ -782,6 +782,8 @@ export type Database = {
       quick_booking_requests: {
         Row: {
           admin_message: string | null
+          agency_id: string | null
+          agency_user_id: string | null
           confirmation_token: string
           confirmed_at: string | null
           created_at: string | null
@@ -807,6 +809,8 @@ export type Database = {
         }
         Insert: {
           admin_message?: string | null
+          agency_id?: string | null
+          agency_user_id?: string | null
           confirmation_token?: string
           confirmed_at?: string | null
           created_at?: string | null
@@ -832,6 +836,8 @@ export type Database = {
         }
         Update: {
           admin_message?: string | null
+          agency_id?: string | null
+          agency_user_id?: string | null
           confirmation_token?: string
           confirmed_at?: string | null
           created_at?: string | null
@@ -855,7 +861,15 @@ export type Database = {
           updated_at?: string | null
           vehicle_type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quick_booking_requests_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reservation_admin_notes: {
         Row: {
