@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
+import { useAgencyLanguage, AGENCY_CURRENCIES } from '@/contexts/AgencyLanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,6 +39,7 @@ interface AgencyTransaction {
 const AgencyReports = () => {
   const { agencyId } = useUserRole();
   const { t } = useAgencyTranslations();
+  const { currencySymbol } = useAgencyLanguage();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -150,7 +152,7 @@ const AgencyReports = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">{t('currentBalance')}</p>
                   <p className={`text-3xl font-bold ${agency && agency.balance < 0 ? 'text-destructive' : 'text-primary'}`}>
-                    ₺{agency?.balance?.toFixed(2) || '0.00'}
+                    {currencySymbol}{agency?.balance?.toFixed(2) || '0.00'}
                   </p>
                 </div>
               </div>
@@ -189,7 +191,7 @@ const AgencyReports = () => {
           <Card>
             <CardContent className="pt-6 text-center">
               <DollarSign className="h-8 w-8 mx-auto text-blue-500 mb-2" />
-              <p className="text-2xl font-bold">₺{totalCustomerRevenue.toFixed(0)}</p>
+              <p className="text-2xl font-bold">{currencySymbol}{totalCustomerRevenue.toFixed(0)}</p>
               <p className="text-sm text-muted-foreground">{t('customerRevenue')}</p>
             </CardContent>
           </Card>
@@ -198,7 +200,7 @@ const AgencyReports = () => {
             <CardContent className="pt-6 text-center">
               <TrendingUp className="h-8 w-8 mx-auto text-primary mb-2" />
               <p className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                ₺{totalProfit.toFixed(0)}
+                {currencySymbol}{totalProfit.toFixed(0)}
               </p>
               <p className="text-sm text-muted-foreground">{t('agencyProfit')}</p>
             </CardContent>
@@ -213,16 +215,16 @@ const AgencyReports = () => {
           <CardContent className="space-y-4">
             <div className="flex justify-between py-2 border-b">
               <span className="text-muted-foreground">{t('customerRevenue')}</span>
-              <span className="font-semibold">₺{totalCustomerRevenue.toFixed(2)}</span>
+              <span className="font-semibold">{currencySymbol}{totalCustomerRevenue.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="text-muted-foreground">{t('amountOwedToCompany')}</span>
-              <span className="font-semibold text-orange-600">₺{totalCompanyAmount.toFixed(2)}</span>
+              <span className="font-semibold text-orange-600">{currencySymbol}{totalCompanyAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="text-muted-foreground">{t('agencyProfit')}</span>
               <span className={`font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                ₺{totalProfit.toFixed(2)}
+                {currencySymbol}{totalProfit.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between py-2">
@@ -274,10 +276,10 @@ const AgencyReports = () => {
                     </div>
                     <div className="text-right">
                       <p className={`font-bold ${tx.type === 'top_up' ? 'text-green-600' : 'text-red-600'}`}>
-                        {tx.type === 'top_up' ? '+' : '-'}₺{Math.abs(tx.amount).toFixed(2)}
+                        {tx.type === 'top_up' ? '+' : '-'}{currencySymbol}{Math.abs(tx.amount).toFixed(2)}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {t('balance')}: ₺{tx.balance_after.toFixed(2)}
+                        {t('balance')}: {currencySymbol}{tx.balance_after.toFixed(2)}
                       </p>
                     </div>
                   </div>
