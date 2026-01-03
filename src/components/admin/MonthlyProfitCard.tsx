@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface DailyProfit {
   date: string;
-  agencyIncome: number;
+  agencyIncome: number; // TRY cinsinden
   driverExpense: number;
   netProfit: number;
   transferCount: number;
@@ -20,6 +20,13 @@ interface MonthlyTotals {
   totalAgencyIncome: number;
   totalDriverExpense: number;
   totalNetProfit: number;
+}
+
+interface AgencyDetailData {
+  reservation_id: string;
+  company_amount: number | null;
+  company_amount_try: number | null;
+  agency_price_currency: string | null;
 }
 
 export const MonthlyProfitCard = () => {
@@ -64,19 +71,30 @@ export const MonthlyProfitCard = () => {
       // Get all reservation IDs (all have agency since we filtered above)
       const reservationIds = reservations?.map(r => r.id) || [];
 
-      // Fetch agency reservation details for customer_price (Acenta Fiyatı - Admin yazdığı)
-      let agencyDetails: Record<string, number> = {};
+      // Fetch agency reservation details with TRY converted amount
+      let agencyDetails: Record<string, { tryAmount: number }> = {};
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
           .from("agency_reservation_details")
-          .select("reservation_id, customer_price")
+          .select("reservation_id, company_amount, company_amount_try, agency_price_currency")
           .in("reservation_id", reservationIds);
 
         if (!agencyError && agencyData) {
-          agencyDetails = agencyData.reduce((acc, item) => {
-            acc[item.reservation_id] = item.customer_price || 0;
+          agencyDetails = (agencyData as AgencyDetailData[]).reduce((acc, item) => {
+            // Use TRY converted amount if available, otherwise use original amount
+            // If currency is already TRY, use company_amount directly
+            let tryAmount = 0;
+            if (item.company_amount_try) {
+              tryAmount = item.company_amount_try;
+            } else if (item.agency_price_currency === 'TRY') {
+              tryAmount = item.company_amount || 0;
+            } else {
+              // No conversion available yet, use 0 (will need to be converted)
+              tryAmount = item.company_amount || 0;
+            }
+            acc[item.reservation_id] = { tryAmount };
             return acc;
-          }, {} as Record<string, number>);
+          }, {} as Record<string, { tryAmount: number }>);
         }
       }
 
@@ -107,11 +125,11 @@ export const MonthlyProfitCard = () => {
           // Increment transfer count
           dayData.transferCount += 1;
           
-          // Agency Income (Acenta Fiyatı - customer_price from agency_reservation_details)
-          const agencyIncome = agencyDetails[res.id] || 0;
+          // Agency Income in TRY (from company_amount_try or company_amount if TRY)
+          const agencyIncome = agencyDetails[res.id]?.tryAmount || 0;
           dayData.agencyIncome += agencyIncome;
           
-          // Driver Expense (Bütçe - price from reservations)
+          // Driver Expense (Bütçe - price from reservations, already in TRY)
           const driverExpense = res.price || 0;
           dayData.driverExpense += driverExpense;
           

@@ -846,6 +846,28 @@ const AdminEditReservation = () => {
       console.error('Failed to send agency email:', e);
     }
 
+    // Convert agency price to TRY when reservation is completed with an agency
+    try {
+      const prevStatus = (originalData?.status as string | undefined) || '';
+      const newStatus = formData.status;
+      const hasAgency = formData.agency_id && formData.agency_id !== 'none';
+
+      // If status changed to completed and this is an agency reservation
+      if (newStatus === 'completed' && prevStatus !== 'completed' && hasAgency) {
+        console.log('Converting agency price to TRY for reservation:', id);
+        const { error: convertError } = await supabase.functions.invoke('convert-agency-price-to-try', {
+          body: { reservation_id: id },
+        });
+        if (convertError) {
+          console.error('Failed to convert agency price to TRY:', convertError);
+        } else {
+          console.log('Agency price converted to TRY successfully');
+        }
+      }
+    } catch (e) {
+      console.error('Failed to convert agency price to TRY:', e);
+    }
+
     toast.success('Reservation updated');
     navigate('/admin/reservations');
     setSaving(false);
