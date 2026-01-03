@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Building2, User } from 'lucide-react';
+import { ArrowLeft, Loader2, Building2, User, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
@@ -19,6 +20,15 @@ const loginSchema = z.object({
 
 const AgencyLoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isResetLoading, setIsResetLoading] = useState(false);
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [rememberMe, setRememberMe] = useState(() => {
+    return localStorage.getItem('agencyRememberMe') === 'true';
+  });
+  const [savedEmail, setSavedEmail] = useState(() => {
+    return localStorage.getItem('agencySavedEmail') || '';
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { signIn, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
@@ -65,6 +75,15 @@ const AgencyLoginScreen = () => {
     try {
       const validation = loginSchema.parse({ email: email.trim(), password });
       
+      // Save or clear email based on remember me
+      if (rememberMe) {
+        localStorage.setItem('agencyRememberMe', 'true');
+        localStorage.setItem('agencySavedEmail', validation.email);
+      } else {
+        localStorage.removeItem('agencyRememberMe');
+        localStorage.removeItem('agencySavedEmail');
+      }
+      
       const { error } = await signIn(validation.email, validation.password);
       
       if (error) {
@@ -96,6 +115,105 @@ const AgencyLoginScreen = () => {
       setIsLoading(false);
     }
   };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!resetEmail.trim()) {
+      toast.error(t('emailRequired') || 'Email is required');
+      return;
+    }
+
+    setIsResetLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
+        redirectTo: `${window.location.origin}/auth?type=recovery`,
+      });
+      
+      if (error) {
+        toast.error(error.message || t('resetFailed') || 'Failed to send reset email');
+      } else {
+        toast.success(t('resetEmailSent') || 'Password reset email sent! Check your inbox.');
+        setShowResetForm(false);
+        setResetEmail('');
+      }
+    } catch (error) {
+      console.error('Reset error:', error);
+      toast.error(t('resetFailed') || 'Failed to send reset email');
+    } finally {
+      setIsResetLoading(false);
+    }
+  };
+
+  // Password reset form
+  if (showResetForm) {
+    return (
+      <div className="min-h-screen flex flex-col bg-secondary">
+        <header className="sticky top-0 z-50 bg-card border-b border-border">
+          <div className="flex items-center h-14 px-4">
+            <button 
+              onClick={() => setShowResetForm(false)} 
+              className="flex items-center gap-2 text-foreground"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span className="text-sm">{t("back") || "Back"}</span>
+            </button>
+          </div>
+        </header>
+
+        <div className="flex-1 flex items-center justify-center p-4 py-8">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center space-y-2">
+              <div className="mx-auto w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-2">
+                <KeyRound className="h-6 w-6 text-accent" />
+              </div>
+              <CardTitle className="text-2xl md:text-3xl font-serif">
+                {t("resetPassword") || "Reset Password"}
+              </CardTitle>
+              <CardDescription>
+                {t("resetPasswordDescription") || "Enter your email to receive a password reset link"}
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+              <form onSubmit={handlePasswordReset} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email">{t("email") || "Email"}</Label>
+                  <Input 
+                    id="reset-email" 
+                    type="email" 
+                    placeholder="agency@email.com" 
+                    required 
+                    className="h-12"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    autoComplete="email"
+                  />
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  variant="accent"
+                  className="w-full h-12 rounded-xl text-base font-medium" 
+                  disabled={isResetLoading}
+                >
+                  {isResetLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t("sending") || "Sending..."}
+                    </>
+                  ) : (
+                    t("sendResetLink") || "Send Reset Link"
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-secondary">
@@ -132,6 +250,7 @@ const AgencyLoginScreen = () => {
                   required 
                   className="h-12"
                   autoComplete="email"
+                  defaultValue={savedEmail}
                 />
                 {errors.email && <p className="text-sm text-destructive">{t("invalidEmail") || errors.email}</p>}
               </div>
@@ -148,6 +267,30 @@ const AgencyLoginScreen = () => {
                   autoComplete="current-password"
                 />
                 {errors.password && <p className="text-sm text-destructive">{t("passwordMinLength") || errors.password}</p>}
+              </div>
+
+              {/* Remember me & Forgot password */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="remember" 
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  />
+                  <label 
+                    htmlFor="remember" 
+                    className="text-sm text-muted-foreground cursor-pointer"
+                  >
+                    {t("rememberMe") || "Remember me"}
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowResetForm(true)}
+                  className="text-sm text-accent hover:underline"
+                >
+                  {t("forgotPassword") || "Forgot password?"}
+                </button>
               </div>
               
               <Button 
