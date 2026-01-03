@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { usePWADetect } from '@/hooks/usePWADetect';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,6 @@ import { z } from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -87,7 +87,7 @@ const LoginScreen = () => {
 
   const handleShare = async () => {
     const shareUrl = window.location.origin + '/login';
-    const shareText = t('guestLoginShareText') || 'Book your premium transfer with Meet Transfer!';
+    const shareText = t('guestLoginShareText');
     
     if (navigator.share) {
       try {
@@ -109,7 +109,7 @@ const LoginScreen = () => {
   const handleCopyLink = (url: string) => {
     navigator.clipboard.writeText(url);
     setCopied(true);
-    toast.success(t('linkCopied') || 'Link copied to clipboard!');
+    toast.success(t('linkCopied'));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -127,11 +127,11 @@ const LoginScreen = () => {
         const authUrl = `${baseUrl}/login?oauth=google`;
         const opened = window.open(authUrl, '_blank');
         if (!opened) {
-          setGoogleError('iOS uygulamasında Google ile giriş için Safari\'de açın. Alternatif olarak e-posta ile giriş yapabilirsiniz.');
+          setGoogleError(t('iosGoogleLoginNotice'));
           setIsGoogleLoading(false);
           return;
         }
-        toast.info('Google ile giriş için Safari açılıyor...');
+        toast.info(t('redirectingGoogle'));
         setIsGoogleLoading(false);
         return;
       }
@@ -155,12 +155,12 @@ const LoginScreen = () => {
       }
     } catch (error: any) {
       console.error('Google login error:', error);
-      setGoogleError('Google ile giriş yapılamadı. Lütfen e-posta ile deneyin.');
-      toast.error('Google ile giriş yapılamadı');
+      setGoogleError(t('loginFailed'));
+      toast.error(t('loginFailed'));
     } finally {
       setIsGoogleLoading(false);
     }
-  }, [isIOS, isStandalone]);
+  }, [isIOS, isStandalone, t]);
 
   // Check if returning from password reset email
   useEffect(() => {
@@ -298,7 +298,7 @@ const LoginScreen = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success('Password updated successfully!');
+        toast.success(t('passwordUpdated'));
         setViewMode('login');
         navigate('/login', { replace: true });
       }
@@ -326,14 +326,14 @@ const LoginScreen = () => {
         return (
           <Card className="w-full max-w-md">
             <CardHeader className="text-center space-y-2">
-              <CardTitle className="text-2xl md:text-3xl font-serif">Reset Password</CardTitle>
-              <CardDescription>Enter your email to receive a reset link</CardDescription>
+              <CardTitle className="text-2xl md:text-3xl font-serif">{t('resetPassword')}</CardTitle>
+              <CardDescription>{t('resetPasswordDescription')}</CardDescription>
             </CardHeader>
             
             <CardContent>
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('email')}</Label>
                   <Input 
                     id="email" 
                     name="email" 
@@ -355,12 +355,12 @@ const LoginScreen = () => {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
+                      {t('sending')}
                     </>
                   ) : (
                     <>
                       <Mail className="mr-2 h-4 w-4" />
-                      Send Reset Link
+                      {t('sendResetLink')}
                     </>
                   )}
                 </Button>
@@ -374,7 +374,7 @@ const LoginScreen = () => {
                 onClick={() => setViewMode('login')}
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Login
+                {t('backToLogin')}
               </Button>
             </CardFooter>
           </Card>
@@ -387,16 +387,16 @@ const LoginScreen = () => {
               <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
                 <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
-              <CardTitle className="text-2xl md:text-3xl font-serif">Check Your Email</CardTitle>
+              <CardTitle className="text-2xl md:text-3xl font-serif">{t('checkYourEmail')}</CardTitle>
               <CardDescription>
-                We've sent a password reset link to<br />
+                {t('resetLinkSent')}<br />
                 <span className="font-medium text-foreground">{resetEmail}</span>
               </CardDescription>
             </CardHeader>
             
             <CardContent className="text-center text-sm text-muted-foreground">
-              <p>Click the link in the email to reset your password. The link will expire in 1 hour.</p>
-              <p className="mt-4">Didn't receive the email? Check your spam folder or try again.</p>
+              <p>{t('linkExpiresIn')}</p>
+              <p className="mt-4">{t('didntReceiveEmail')}</p>
             </CardContent>
             
             <CardFooter className="flex flex-col gap-2">
@@ -405,14 +405,14 @@ const LoginScreen = () => {
                 className="w-full h-12 rounded-xl" 
                 onClick={() => setViewMode('forgot')}
               >
-                Try Again
+                {t('tryAgain')}
               </Button>
               <Button 
                 variant="ghost" 
                 className="w-full" 
                 onClick={() => setViewMode('login')}
               >
-                Back to Login
+                {t('backToLogin')}
               </Button>
             </CardFooter>
           </Card>
@@ -422,14 +422,14 @@ const LoginScreen = () => {
         return (
           <Card className="w-full max-w-md">
             <CardHeader className="text-center space-y-2">
-              <CardTitle className="text-2xl md:text-3xl font-serif">Set New Password</CardTitle>
-              <CardDescription>Enter your new password below</CardDescription>
+              <CardTitle className="text-2xl md:text-3xl font-serif">{t('setNewPassword')}</CardTitle>
+              <CardDescription>{t('enterNewPassword')}</CardDescription>
             </CardHeader>
             
             <CardContent>
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="password">New Password</Label>
+                  <Label htmlFor="password">{t('newPassword')}</Label>
                   <Input 
                     id="password" 
                     name="password" 
@@ -440,13 +440,13 @@ const LoginScreen = () => {
                     autoComplete="new-password"
                   />
                   <p className="text-xs text-muted-foreground">
-                    1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
+                    {t('passwordFormat')}
                   </p>
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
                   <Input 
                     id="confirmPassword" 
                     name="confirmPassword" 
@@ -468,10 +468,10 @@ const LoginScreen = () => {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Updating...
+                      {t('updatingPassword')}
                     </>
                   ) : (
-                    'Update Password'
+                    t('updatePassword')
                   )}
                 </Button>
               </form>
@@ -483,8 +483,8 @@ const LoginScreen = () => {
         return (
           <Card className="w-full max-w-md">
             <CardHeader className="text-center space-y-2">
-              <CardTitle className="text-2xl md:text-3xl font-serif">Welcome Back</CardTitle>
-              <CardDescription>Sign in to manage your bookings</CardDescription>
+              <CardTitle className="text-2xl md:text-3xl font-serif">{t('welcomeBack')}</CardTitle>
+              <CardDescription>{t('signInToManage')}</CardDescription>
             </CardHeader>
             
             <CardContent className="space-y-4">
@@ -493,9 +493,9 @@ const LoginScreen = () => {
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
                   <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-medium text-amber-600 dark:text-amber-400">iOS Uygulaması</p>
+                    <p className="font-medium text-amber-600 dark:text-amber-400">{t('iosAppNotice')}</p>
                     <p className="text-muted-foreground mt-1">
-                      Google ile giriş Safari'de açılacaktır. Alternatif olarak e-posta ile giriş yapabilirsiniz.
+                      {t('iosGoogleLoginNotice')}
                     </p>
                   </div>
                 </div>
@@ -523,7 +523,7 @@ const LoginScreen = () => {
                   <GoogleIcon />
                 )}
                 <span className="ml-2">
-                  {isGoogleLoading ? 'Yönlendiriliyor...' : 'Continue with Google'}
+                  {isGoogleLoading ? t('redirectingGoogle') : t('continueWithGoogle')}
                 </span>
               </Button>
 
@@ -532,13 +532,13 @@ const LoginScreen = () => {
                   <Separator className="w-full" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">or</span>
+                  <span className="bg-card px-2 text-muted-foreground">{t('or')}</span>
                 </div>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('email')}</Label>
                   <Input 
                     id="email" 
                     name="email" 
@@ -554,13 +554,13 @@ const LoginScreen = () => {
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">{t('password')}</Label>
                     <button
                       type="button"
                       onClick={() => setViewMode('forgot')}
                       className="text-sm text-accent hover:underline"
                     >
-                      Forgot password?
+                      {t('forgotPassword')}
                     </button>
                   </div>
                   <Input 
@@ -582,7 +582,7 @@ const LoginScreen = () => {
                     onCheckedChange={(checked) => setRememberMe(checked === true)}
                   />
                   <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
-                    Remember me
+                    {t('rememberMe')}
                   </Label>
                 </div>
                 
@@ -595,10 +595,10 @@ const LoginScreen = () => {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
+                      {t('loggingIn')}
                     </>
                   ) : (
-                    'Log In'
+                    t('login')
                   )}
                 </Button>
               </form>
@@ -606,17 +606,17 @@ const LoginScreen = () => {
             
             <CardFooter className="flex flex-col gap-4">
               <div className="text-center text-sm text-muted-foreground">
-                Don't have an account?
+                {t('dontHaveAccount')}
               </div>
               <div className="flex gap-2 w-full">
                 <Link to="/signup/customer" className="flex-1">
                   <Button variant="outline" className="w-full h-12 rounded-xl">
-                    Guest Registration
+                    {t('guestRegistration')}
                   </Button>
                 </Link>
                 <Link to="/signup/agency" className="flex-1">
                   <Button variant="secondary" className="w-full h-12 rounded-xl">
-                    Agency Registration
+                    {t('agencyRegistration')}
                   </Button>
                 </Link>
               </div>
@@ -633,7 +633,7 @@ const LoginScreen = () => {
         <div className="flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2 text-foreground">
             <ArrowLeft className="h-5 w-5" />
-            <span className="text-sm">Back</span>
+            <span className="text-sm">{t('back')}</span>
           </Link>
           <Button
             variant="ghost"
