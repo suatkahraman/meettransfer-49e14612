@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Save, Plus, X, UserPlus } from 'lucide-react';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { PhoneInput } from '@/components/ui/phone-input';
 
 const vehicleTypes = [
   { value: 'mercedes-vito', label: 'Mercedes Vito' },
@@ -282,12 +283,9 @@ const AgencyCreateReservation = () => {
                 
                 <div>
                   <Label htmlFor="customer_phone">{t('phone')} *</Label>
-                  <Input
-                    id="customer_phone"
+                  <PhoneInput
                     value={formData.customer_phone}
-                    onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
-                    placeholder="+90 555 123 4567"
-                    required
+                    onChange={(value) => setFormData({ ...formData, customer_phone: value })}
                   />
                 </div>
               </div>

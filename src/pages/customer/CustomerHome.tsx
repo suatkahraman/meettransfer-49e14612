@@ -14,6 +14,7 @@ import { LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, T
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { PhoneInput } from '@/components/ui/phone-input';
 const reservationSchema = z.object({
   pickup: z.string().trim().min(2, "Pick-up point must be at least 2 characters").max(200, "Pick-up point is too long"),
   dropoff: z.string().trim().min(2, "Drop-off location must be at least 2 characters").max(200, "Drop-off location is too long"),
@@ -306,12 +307,10 @@ const CustomerHome = () => {
                   <Phone className="h-4 w-4" />
                   {t('contactPhone')}
                 </Label>
-                <Input
-                  placeholder="+90 5XX XXX XXXX"
+                <PhoneInput
                   value={formData.passengerPhone}
-                  onChange={(e) => setFormData({...formData, passengerPhone: e.target.value})}
+                  onChange={(value) => setFormData({...formData, passengerPhone: value})}
                   className={errors.passengerPhone ? 'border-destructive' : ''}
-                  maxLength={20}
                 />
                 {errors.passengerPhone && <p className="text-sm text-destructive">{errors.passengerPhone}</p>}
               </div>
