@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff } from 'lucide-react';
+import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import AgencyLanguageSelector from '@/components/agency/AgencyLanguageSelector';
 import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
@@ -494,6 +494,24 @@ const AgencyHome = () => {
                     <div>
                       <p className="font-medium">{t('accountingDetails')}</p>
                       <p className="text-sm text-muted-foreground">{t('viewAllTransactions')}</p>
+                    </div>
+                  </div>
+                  <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="cursor-pointer hover:shadow-md transition-shadow border-amber-300/50 bg-amber-50/50 dark:bg-amber-950/20"
+                onClick={() => navigate('/agency/transactions')}
+              >
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-amber-500/20">
+                      <Receipt className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{t('transactionHistory') || 'İşlem Geçmişi'}</p>
+                      <p className="text-sm text-muted-foreground">{t('allTransactions') || 'Tüm İşlemler'}</p>
                     </div>
                   </div>
                   <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
