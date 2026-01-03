@@ -73,6 +73,14 @@ const translations: Record<Language, Record<string, string>> = {
     loginFailed: "Login failed. Please try again.",
     tooManyRequests: "Too many login attempts. Please try again later.",
     emailNotConfirmed: "Please confirm your email first",
+    rememberMe: "Remember me",
+    forgotPassword: "Forgot password?",
+    resetPassword: "Reset Password",
+    resetPasswordDescription: "Enter your email to receive a password reset link",
+    sendResetLink: "Send Reset Link",
+    resetEmailSent: "Password reset email sent! Check your inbox.",
+    resetFailed: "Failed to send reset email",
+    emailRequired: "Email is required",
     
     // Hero Section
     heroTitle: "Get Best Price Now",
@@ -596,6 +604,14 @@ const translations: Record<Language, Record<string, string>> = {
     loginFailed: "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
     tooManyRequests: "Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut.",
     emailNotConfirmed: "Bitte bestätigen Sie zuerst Ihre E-Mail",
+    rememberMe: "Angemeldet bleiben",
+    forgotPassword: "Passwort vergessen?",
+    resetPassword: "Passwort zurücksetzen",
+    resetPasswordDescription: "Geben Sie Ihre E-Mail ein, um einen Link zum Zurücksetzen des Passworts zu erhalten",
+    sendResetLink: "Reset-Link senden",
+    resetEmailSent: "E-Mail zum Zurücksetzen des Passworts gesendet! Überprüfen Sie Ihren Posteingang.",
+    resetFailed: "Fehler beim Senden der Reset-E-Mail",
+    emailRequired: "E-Mail ist erforderlich",
     
     // Hero Section
     heroTitle: "Jetzt besten Preis erhalten",
@@ -1115,6 +1131,14 @@ const translations: Record<Language, Record<string, string>> = {
     loginFailed: "Échec de la connexion. Veuillez réessayer.",
     tooManyRequests: "Trop de tentatives de connexion. Veuillez réessayer plus tard.",
     emailNotConfirmed: "Veuillez d'abord confirmer votre e-mail",
+    rememberMe: "Se souvenir de moi",
+    forgotPassword: "Mot de passe oublié?",
+    resetPassword: "Réinitialiser le mot de passe",
+    resetPasswordDescription: "Entrez votre e-mail pour recevoir un lien de réinitialisation",
+    sendResetLink: "Envoyer le lien",
+    resetEmailSent: "E-mail de réinitialisation envoyé! Vérifiez votre boîte de réception.",
+    resetFailed: "Échec de l'envoi de l'e-mail de réinitialisation",
+    emailRequired: "L'e-mail est requis",
     
     // Hero Section
     heroTitle: "Obtenez le Meilleur Prix Maintenant",
@@ -1634,6 +1658,14 @@ const translations: Record<Language, Record<string, string>> = {
     loginFailed: "Ошибка входа. Пожалуйста, попробуйте снова.",
     tooManyRequests: "Слишком много попыток входа. Пожалуйста, попробуйте позже.",
     emailNotConfirmed: "Пожалуйста, сначала подтвердите свой email",
+    rememberMe: "Запомнить меня",
+    forgotPassword: "Забыли пароль?",
+    resetPassword: "Сброс пароля",
+    resetPasswordDescription: "Введите email для получения ссылки сброса пароля",
+    sendResetLink: "Отправить ссылку",
+    resetEmailSent: "Письмо для сброса пароля отправлено! Проверьте почту.",
+    resetFailed: "Не удалось отправить письмо для сброса",
+    emailRequired: "Email обязателен",
     
     // Hero Section
     heroTitle: "Получите лучшую цену сейчас",
@@ -2153,6 +2185,14 @@ const translations: Record<Language, Record<string, string>> = {
     loginFailed: "Accesso fallito. Per favore riprova.",
     tooManyRequests: "Troppi tentativi di accesso. Per favore riprova più tardi.",
     emailNotConfirmed: "Per favore conferma prima la tua email",
+    rememberMe: "Ricordami",
+    forgotPassword: "Password dimenticata?",
+    resetPassword: "Reimposta password",
+    resetPasswordDescription: "Inserisci la tua email per ricevere un link di reimpostazione",
+    sendResetLink: "Invia link",
+    resetEmailSent: "Email di reimpostazione inviata! Controlla la posta.",
+    resetFailed: "Impossibile inviare l'email di reimpostazione",
+    emailRequired: "L'email è obbligatoria",
     
     // Hero Section
     heroTitle: "Ottieni il Miglior Prezzo Ora",
@@ -2672,6 +2712,14 @@ const translations: Record<Language, Record<string, string>> = {
     loginFailed: "Error de inicio de sesión. Por favor, intente de nuevo.",
     tooManyRequests: "Demasiados intentos de inicio de sesión. Por favor, intente más tarde.",
     emailNotConfirmed: "Por favor confirme su correo electrónico primero",
+    rememberMe: "Recordarme",
+    forgotPassword: "¿Olvidaste tu contraseña?",
+    resetPassword: "Restablecer contraseña",
+    resetPasswordDescription: "Ingresa tu correo para recibir un enlace de restablecimiento",
+    sendResetLink: "Enviar enlace",
+    resetEmailSent: "¡Correo de restablecimiento enviado! Revisa tu bandeja.",
+    resetFailed: "Error al enviar el correo de restablecimiento",
+    emailRequired: "El correo es obligatorio",
     
     // Hero Section
     heroTitle: "Obtén el Mejor Precio Ahora",
@@ -3191,6 +3239,14 @@ const translations: Record<Language, Record<string, string>> = {
     loginFailed: "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.",
     tooManyRequests: "محاولات تسجيل دخول كثيرة. يرجى المحاولة لاحقاً.",
     emailNotConfirmed: "يرجى تأكيد بريدك الإلكتروني أولاً",
+    rememberMe: "تذكرني",
+    forgotPassword: "نسيت كلمة المرور؟",
+    resetPassword: "إعادة تعيين كلمة المرور",
+    resetPasswordDescription: "أدخل بريدك الإلكتروني لتلقي رابط إعادة التعيين",
+    sendResetLink: "إرسال الرابط",
+    resetEmailSent: "تم إرسال رابط إعادة التعيين! تحقق من بريدك.",
+    resetFailed: "فشل إرسال البريد الإلكتروني",
+    emailRequired: "البريد الإلكتروني مطلوب",
     
     // Hero Section
     heroTitle: "احصل على أفضل سعر الآن",
@@ -3710,6 +3766,14 @@ const translations: Record<Language, Record<string, string>> = {
     loginFailed: "Giriş başarısız. Lütfen tekrar deneyin.",
     tooManyRequests: "Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin.",
     emailNotConfirmed: "Lütfen önce e-postanızı onaylayın",
+    rememberMe: "Beni hatırla",
+    forgotPassword: "Şifremi unuttum",
+    resetPassword: "Şifre Sıfırlama",
+    resetPasswordDescription: "Şifre sıfırlama bağlantısı almak için e-postanızı girin",
+    sendResetLink: "Bağlantı Gönder",
+    resetEmailSent: "Şifre sıfırlama e-postası gönderildi! Gelen kutunuzu kontrol edin.",
+    resetFailed: "E-posta gönderilemedi",
+    emailRequired: "E-posta gereklidir",
     
     // Hero Section
     heroTitle: "En İyi Fiyatı Şimdi Alın",
@@ -4234,6 +4298,14 @@ const translations: Record<Language, Record<string, string>> = {
     loginFailed: "Помилка входу. Будь ласка, спробуйте ще раз.",
     tooManyRequests: "Забагато спроб входу. Будь ласка, спробуйте пізніше.",
     emailNotConfirmed: "Будь ласка, спочатку підтвердіть свій email",
+    rememberMe: "Запам'ятати мене",
+    forgotPassword: "Забули пароль?",
+    resetPassword: "Скидання пароля",
+    resetPasswordDescription: "Введіть email для отримання посилання скидання пароля",
+    sendResetLink: "Надіслати посилання",
+    resetEmailSent: "Лист для скидання пароля надіслано! Перевірте пошту.",
+    resetFailed: "Не вдалося надіслати лист для скидання",
+    emailRequired: "Email обов'язковий",
     
     // Hero Section
     heroTitle: "Отримайте найкращу ціну зараз",
@@ -4753,6 +4825,14 @@ const translations: Record<Language, Record<string, string>> = {
     loginFailed: "ログインに失敗しました。もう一度お試しください。",
     tooManyRequests: "ログイン試行回数が多すぎます。後でもう一度お試しください。",
     emailNotConfirmed: "まずメールアドレスを確認してください",
+    rememberMe: "ログイン情報を保存",
+    forgotPassword: "パスワードをお忘れですか？",
+    resetPassword: "パスワードリセット",
+    resetPasswordDescription: "リセットリンクを受け取るためにメールアドレスを入力してください",
+    sendResetLink: "リンクを送信",
+    resetEmailSent: "パスワードリセットメールを送信しました！受信トレイを確認してください。",
+    resetFailed: "リセットメールの送信に失敗しました",
+    emailRequired: "メールアドレスは必須です",
     
     // Hero Section
     heroTitle: "今すぐ最高の価格を取得",
