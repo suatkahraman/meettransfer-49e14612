@@ -62,10 +62,34 @@ interface PhoneInputProps {
   inputClassName?: string;
   defaultCountry?: string;
   error?: boolean;
+  minLength?: number;
+  onValidationError?: (error: string | null) => void;
 }
 
+// Validation helper
+export const validatePhoneNumber = (phone: string, minLength: number = 7): { isValid: boolean; error: string | null } => {
+  // Remove dial code and get just the number
+  const cleanNumber = phone.replace(/^\+\d+\s*/, "").replace(/[\s\-]/g, "");
+  
+  if (!cleanNumber) {
+    return { isValid: false, error: "phoneRequired" };
+  }
+  
+  // Check if contains only digits
+  if (!/^\d+$/.test(cleanNumber)) {
+    return { isValid: false, error: "phoneDigitsOnly" };
+  }
+  
+  // Check minimum length
+  if (cleanNumber.length < minLength) {
+    return { isValid: false, error: "phoneMinLength" };
+  }
+  
+  return { isValid: true, error: null };
+};
+
 export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ value, onChange, placeholder, className, inputClassName, defaultCountry = "TR", error }, ref) => {
+  ({ value, onChange, placeholder, className, inputClassName, defaultCountry = "TR", error, minLength = 7, onValidationError }, ref) => {
     // Parse existing value to extract country code
     const getInitialCountry = () => {
       if (value) {
@@ -95,19 +119,35 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
       setSelectedCountry(countryCode);
       const country = COUNTRY_CODES.find(c => c.code === countryCode);
       if (country && phoneNumber) {
-        onChange(`${country.dialCode} ${phoneNumber}`);
+        const newValue = `${country.dialCode} ${phoneNumber}`;
+        onChange(newValue);
+        // Validate on country change
+        if (onValidationError) {
+          const validation = validatePhoneNumber(newValue, minLength);
+          onValidationError(validation.error);
+        }
       } else if (country) {
         onChange(country.dialCode);
       }
     };
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Only allow digits, spaces, and hyphens
       const newPhone = e.target.value.replace(/[^\d\s\-]/g, "");
       setPhoneNumber(newPhone);
+      
+      let newValue = "";
       if (newPhone) {
-        onChange(`${selectedCountryData.dialCode} ${newPhone}`);
+        newValue = `${selectedCountryData.dialCode} ${newPhone}`;
+        onChange(newValue);
       } else {
         onChange("");
+      }
+      
+      // Validate and report error
+      if (onValidationError) {
+        const validation = validatePhoneNumber(newValue, minLength);
+        onValidationError(validation.error);
       }
     };
 
