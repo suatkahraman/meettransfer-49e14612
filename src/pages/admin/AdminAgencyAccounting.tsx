@@ -39,6 +39,7 @@ interface Reservation {
   price_currency: string | null;
   driver_cash_amount: number | null;
   passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   status: string;
   customer_name: string;
   driver_id: string | null;
@@ -663,12 +664,23 @@ const AdminAgencyAccounting = () => {
                                       </div>
                                     </div>
 
-                                    {/* Right - Agency Price */}
-                                    <div className="text-right space-y-1">
-                                      <div className="text-xs text-muted-foreground">Acenta Fiyatı</div>
-                                      <div className="text-lg font-semibold text-primary">
-                                        {getCurrencySymbol(getAgencyPriceCurrency(res.id))}{agencyPrice.toFixed(2)}
+                                    {/* Right - Prices */}
+                                    <div className="text-right space-y-2">
+                                      <div>
+                                        <div className="text-xs text-muted-foreground">Acenta Fiyatı</div>
+                                        <div className="text-lg font-semibold text-primary">
+                                          {getCurrencySymbol(getAgencyPriceCurrency(res.id))}{agencyPrice.toFixed(2)}
+                                        </div>
                                       </div>
+                                      {res.passenger_cash_amount && res.passenger_cash_amount > 0 && (
+                                        <div>
+                                          <div className="text-xs text-muted-foreground">Yolcu Nakit</div>
+                                          <div className="text-sm font-medium text-orange-600">
+                                            {res.passenger_cash_currency === 'EUR' ? '€' : res.passenger_cash_currency === 'USD' ? '$' : '₺'}
+                                            {res.passenger_cash_amount.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
 
