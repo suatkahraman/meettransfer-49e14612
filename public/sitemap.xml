@@ -242,10 +242,64 @@
 
   <!-- Transfer Pages - Other -->
   <url><loc>https://meettransfer.app/bursa-transfer</loc><lastmod>2026-01-02</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/cyprus-transfer</loc><lastmod>2026-01-02</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://meettransfer.app/dubai-transfer</loc><lastmod>2026-01-02</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://meettransfer.app/ephesus-pamukkale</loc><lastmod>2026-01-02</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://meettransfer.app/luxury-chauffeur</loc><lastmod>2026-01-02</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- Dubai Transfer - All Languages -->
+  <url>
+    <loc>https://meettransfer.app/dubai-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://meettransfer.app/uk/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://meettransfer.app/ja/dubai-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/dubai-transfer"/>
+    <lastmod>2026-01-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/dubai-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/dubai-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/dubai-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/dubai-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/dubai-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/dubai-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/dubai-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/uk/dubai-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ja/dubai-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+
+  <!-- Cyprus Transfer - All Languages -->
+  <url>
+    <loc>https://meettransfer.app/cyprus-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://meettransfer.app/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://meettransfer.app/de/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://meettransfer.app/fr/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://meettransfer.app/ru/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://meettransfer.app/it/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://meettransfer.app/es/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://meettransfer.app/ar/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://meettransfer.app/tr/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://meettransfer.app/uk/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://meettransfer.app/ja/cyprus-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://meettransfer.app/cyprus-transfer"/>
+    <lastmod>2026-01-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url><loc>https://meettransfer.app/de/cyprus-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/fr/cyprus-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ru/cyprus-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/it/cyprus-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/es/cyprus-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ar/cyprus-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/tr/cyprus-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/uk/cyprus-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://meettransfer.app/ja/cyprus-transfer</loc><lastmod>2026-01-03</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- Blog Posts -->
   <url><loc>https://meettransfer.app/blog/istanbul-airport-to-city-guide</loc><lastmod>2026-01-02</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
