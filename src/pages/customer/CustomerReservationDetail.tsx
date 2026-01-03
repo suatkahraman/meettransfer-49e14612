@@ -184,8 +184,22 @@ const CustomerReservationDetail = () => {
     return `${symbol}${price}`;
   };
 
-  const canEdit = reservation && ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status);
-  const canCancel = reservation && ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status);
+  // Check if pickup date is in the past (not today, only past)
+  const isPickupDatePast = () => {
+    if (!reservation) return true;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const pickupDate = new Date(reservation.pickup_date);
+    pickupDate.setHours(0, 0, 0, 0);
+    return pickupDate.getTime() < today.getTime(); // Only past, not today
+  };
+
+  const canEdit = reservation && 
+    !isPickupDatePast() && 
+    ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status);
+  const canCancel = reservation && 
+    !isPickupDatePast() && 
+    ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status);
 
   const handleAcceptPrice = async () => {
     if (!reservation) return;
