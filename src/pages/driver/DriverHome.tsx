@@ -482,35 +482,15 @@ const DriverHome = () => {
               {t('monthlyAccounting')}
             </Button>
 
-            {/* Update Info Section */}
+            {/* Update Info Section - Always Visible */}
             <section className="mb-4">
-              <button 
-                onClick={() => toggleSection('settings')}
-                className="flex items-center justify-between w-full py-2 mb-2"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                    <Settings className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <span className="font-semibold">{t('updateInfo')}</span>
+              <div className="flex items-center gap-2 py-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <Settings className="h-4 w-4 text-blue-600" />
                 </div>
-                <ChevronDown className={cn(
-                  "h-5 w-5 text-muted-foreground transition-transform",
-                  expandedSections.settings && "rotate-180"
-                )} />
-              </button>
-              <AnimatePresence>
-                {expandedSections.settings && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <DriverInfoEditor onClose={() => toggleSection('settings')} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                <span className="font-semibold">{t('updateInfo')}</span>
+              </div>
+              <DriverInfoEditor />
             </section>
             {/* Pending Jobs Section */}
             {pendingJobs.length > 0 && (
