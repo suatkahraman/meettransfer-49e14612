@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { z } from 'zod';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -70,6 +71,12 @@ const LoginScreen = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('login');
   const [resetEmail, setResetEmail] = useState('');
   const [googleError, setGoogleError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(() => {
+    return localStorage.getItem('guestRememberMe') === 'true';
+  });
+  const [savedEmail] = useState(() => {
+    return localStorage.getItem('guestSavedEmail') || '';
+  });
   const { signIn, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { isIOS, isStandalone } = usePWADetect();
@@ -179,6 +186,16 @@ const LoginScreen = () => {
 
     try {
       const validation = loginSchema.parse({ email: email.trim(), password });
+      
+      // Save remember me preference
+      if (rememberMe) {
+        localStorage.setItem('guestRememberMe', 'true');
+        localStorage.setItem('guestSavedEmail', validation.email);
+      } else {
+        localStorage.removeItem('guestRememberMe');
+        localStorage.removeItem('guestSavedEmail');
+      }
+      
       await signIn(validation.email, validation.password);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -496,6 +513,7 @@ const LoginScreen = () => {
                     name="email" 
                     type="email" 
                     placeholder="your@email.com" 
+                    defaultValue={savedEmail}
                     required 
                     className="h-12"
                     autoComplete="email"
@@ -524,6 +542,17 @@ const LoginScreen = () => {
                     autoComplete="current-password"
                   />
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="rememberMe" 
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
+                    Remember me
+                  </Label>
                 </div>
                 
                 <Button 
