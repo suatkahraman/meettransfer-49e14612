@@ -6616,20 +6616,69 @@ const translations: Record<Language, Record<string, string>> = {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const getLanguageFromPath = (pathname: string): Language => {
+const STORAGE_KEY = "mt_language";
+
+const AUTH_LANGUAGE_ROUTES = [
+  "/auth",
+  "/login",
+  "/login/agency",
+  "/signup",
+  "/signup/customer",
+  "/signup/agency",
+  "/install",
+] as const;
+
+const getPrefixLanguage = (pathname: string): Language | null => {
   const pathParts = pathname.split("/").filter(Boolean);
   const firstPart = pathParts[0]?.toLowerCase();
-  
+
   if (firstPart && LANGUAGE_PREFIXES[firstPart]) {
     return LANGUAGE_PREFIXES[firstPart];
   }
-  
-  return "EN";
+
+  return null;
+};
+
+const getStoredLanguage = (): Language | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+
+    const candidate = raw.toUpperCase() as Language;
+    return candidate in translations ? candidate : null;
+  } catch {
+    return null;
+  }
+};
+
+const storeLanguage = (lang: Language) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, lang);
+  } catch {
+    // ignore
+  }
+};
+
+const isAuthLanguageRoute = (pathname: string): boolean => {
+  return AUTH_LANGUAGE_ROUTES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+};
+
+const resolveLanguage = (pathname: string): { language: Language; fromPrefix: boolean } => {
+  const prefixLang = getPrefixLanguage(pathname);
+  if (prefixLang) {
+    return { language: prefixLang, fromPrefix: true };
+  }
+
+  if (isAuthLanguageRoute(pathname)) {
+    return { language: getStoredLanguage() ?? "EN", fromPrefix: false };
+  }
+
+  return { language: "EN", fromPrefix: false };
 };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
-  const language = getLanguageFromPath(location.pathname);
+  const { language, fromPrefix } = resolveLanguage(location.pathname);
 
   const t = (key: string): string => {
     return translations[language][key] || translations["EN"][key] || key;
@@ -6638,21 +6687,29 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const getLocalizedPath = (path: string): string => {
     const prefix = LANGUAGE_TO_PREFIX[language];
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    
+
     if (language === "EN") {
       return normalizedPath;
     }
-    
+
     return `${prefix}${normalizedPath === "/" ? "" : normalizedPath}`;
   };
 
-  const setLanguage = () => {};
+  const setLanguage = (lang: Language) => {
+    storeLanguage(lang);
+  };
 
   useEffect(() => {
     document.documentElement.lang = language.toLowerCase();
     // Set RTL direction for Arabic
     document.documentElement.dir = language === "AR" ? "rtl" : "ltr";
-  }, [language]);
+
+    // Persist user preference only when it came from an explicit language prefix
+    // (so we don't accidentally turn "EN" into the stored preference when users visit /)
+    if (fromPrefix) {
+      storeLanguage(language);
+    }
+  }, [language, fromPrefix]);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, getLocalizedPath }}>
