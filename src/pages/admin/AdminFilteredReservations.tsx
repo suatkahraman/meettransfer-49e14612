@@ -66,6 +66,7 @@ const filterTitles: Record<string, string> = {
   'completed': 'Aylık Tamamlanan Transferler',
   'new': 'Atama Bekleyen Transferler',
   'active': 'Aktif Transferler',
+  'pending_admin_review': 'Admin Onayı Bekleyen Transferler',
 };
 
 const AdminFilteredReservations = () => {
@@ -113,6 +114,9 @@ const AdminFilteredReservations = () => {
       } else if (filter === 'active') {
         // Active transfers
         query = query.eq('status', 'active');
+      } else if (filter === 'pending_admin_review') {
+        // Pending admin review
+        query = query.eq('status', 'pending_admin_review');
       }
 
       const { data, error } = await query;

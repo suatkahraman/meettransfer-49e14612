@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2, Plane, MessageCircle, BarChart3, Inbox, Download, Calculator } from 'lucide-react';
+import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2, Plane, MessageCircle, BarChart3, Inbox, Download, Calculator, AlertCircle } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +29,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [unreadWhatsApp, setUnreadWhatsApp] = useState(0);
   const [pendingQuickBookings, setPendingQuickBookings] = useState(0);
+  const [pendingAdminReview, setPendingAdminReview] = useState(0);
   const [appInstallCount, setAppInstallCount] = useState(0);
 
   useEffect(() => {
@@ -145,6 +146,33 @@ const AdminDashboard = () => {
     };
   }, []);
 
+  // Fetch pending admin review reservations count
+  useEffect(() => {
+    const fetchPendingAdminReview = async () => {
+      const { count } = await supabase
+        .from('reservations')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending_admin_review');
+      
+      setPendingAdminReview(count || 0);
+    };
+
+    fetchPendingAdminReview();
+
+    const channel = supabase
+      .channel('pending-admin-review-count')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reservations' },
+        () => fetchPendingAdminReview()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   // Fetch app installation count
   useEffect(() => {
     const fetchInstallCount = async () => {
@@ -241,6 +269,21 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{loading ? '-' : kpis.newToday}</div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="border-orange-500/50 cursor-pointer hover:shadow-lg transition-shadow hover:border-orange-400"
+            onClick={() => navigate('/admin/filtered-reservations?filter=pending_admin_review')}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                Onay Bekleyen
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">{pendingAdminReview}</div>
             </CardContent>
           </Card>
 
