@@ -59,28 +59,36 @@ serve(async (req) => {
       .eq('reservation_id', reservation_id)
       .maybeSingle();
 
-    // Get passenger cash amount from reservation (this reduces agency debt)
+    // Get passenger cash amount from reservation (this is INCOME for agency - reduces their debt)
     const { data: reservationDetails } = await supabase
       .from('reservations')
-      .select('passenger_cash_amount, passenger_cash_currency')
+      .select('passenger_cash_amount, passenger_cash_currency, price, price_currency')
       .eq('id', reservation_id)
       .single();
 
-    const companyAmount = agencyDetail?.company_amount || 0;
-    const agencyCurrency = agencyDetail?.agency_price_currency || 'EUR';
+    // Admin fiyatı = Acenta'nın gideri (company_amount veya reservation price)
+    // Yolcu nakit = Acenta'nın geliri (passenger_cash_amount)
+    const adminPrice = agencyDetail?.company_amount || reservationDetails?.price || 0;
+    const agencyCurrency = agencyDetail?.agency_price_currency || reservationDetails?.price_currency || 'EUR';
     const passengerCashAmount = reservationDetails?.passenger_cash_amount || 0;
     const passengerCashCurrency = reservationDetails?.passenger_cash_currency || agencyCurrency;
 
-    // Net amount to add = company_amount - passenger_cash_amount
-    // (passenger pays cash directly to driver, so agency owes less)
-    const netAmountToAdd = companyAmount - passengerCashAmount;
+    // Net amount to add to agency debt:
+    // Gider (admin fiyatı) - Gelir (yolcu nakit) = Net borç artışı
+    // Eğer yolcu nakit >= admin fiyatı ise, acenta borcuna ekleme yapılmaz
+    const netAmountToAdd = Math.max(0, adminPrice - passengerCashAmount);
 
-    console.log(`Company amount: ${companyAmount} ${agencyCurrency}, Passenger cash: ${passengerCashAmount}, Net to add: ${netAmountToAdd}`);
+    console.log(`Admin Price (expense): ${adminPrice} ${agencyCurrency}, Passenger cash (income): ${passengerCashAmount}, Net debt to add: ${netAmountToAdd}`);
 
-    if (netAmountToAdd <= 0 && companyAmount <= 0) {
-      console.log('No amount to add to agency balance');
+    if (netAmountToAdd <= 0) {
+      console.log('No amount to add to agency balance (passenger cash covers the price)');
       return new Response(
-        JSON.stringify({ message: 'No amount to add to agency balance' }),
+        JSON.stringify({ 
+          message: 'No amount to add - passenger cash covers the price',
+          admin_price: adminPrice,
+          passenger_cash: passengerCashAmount,
+          net_debt: 0
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -132,9 +140,10 @@ serve(async (req) => {
     const passengerCashSymbol = currencySymbols[passengerCashCurrency] || passengerCashCurrency;
 
     // Create transaction record with detailed description and currency
-    let description = `Transfer tamamlandı - ${currencySymbol}${companyAmount.toFixed(2)}`;
+    let description = `Transfer tamamlandı - Gider: ${currencySymbol}${adminPrice.toFixed(2)}`;
     if (passengerCashAmount > 0) {
-      description += ` (Yolcu nakit: ${passengerCashSymbol}${passengerCashAmount.toFixed(2)} düşüldü)`;
+      description += ` | Gelir (Yolcu nakit): ${passengerCashSymbol}${passengerCashAmount.toFixed(2)}`;
+      description += ` | Net Borç: ${currencySymbol}${netAmountToAdd.toFixed(2)}`;
     }
 
     const { error: txError } = await supabase
@@ -153,12 +162,12 @@ serve(async (req) => {
       console.error('Failed to create transaction:', txError);
     }
 
-    console.log(`Added net ${currencySymbol}${netAmountToAdd} (${agencyCurrency}) to ${agency.agency_name}. Company: ${companyAmount}, Passenger cash: ${passengerCashAmount}, New ${agencyCurrency} balance: ${newCurrencyBalance}`);
+    console.log(`Added net ${currencySymbol}${netAmountToAdd} (${agencyCurrency}) to ${agency.agency_name}. Admin price: ${adminPrice}, Passenger cash: ${passengerCashAmount}, New ${agencyCurrency} balance: ${newCurrencyBalance}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        company_amount: companyAmount,
+        admin_price: adminPrice,
         passenger_cash_amount: passengerCashAmount,
         net_added_amount: netAmountToAdd,
         currency: agencyCurrency,
