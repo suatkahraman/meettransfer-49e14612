@@ -101,7 +101,8 @@ const AdminEditReservation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const returnTo = searchParams.get('returnTo') || '/admin/reservations';
+  const returnToParam = searchParams.get('returnTo');
+  const returnTo = returnToParam ? decodeURIComponent(returnToParam) : '/admin/reservations';
   const { logAction } = useAuditLog();
   const { emailCustomerPriceSet, emailDriverAssigned, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed, emailAgencyApproved, emailAgencyRejected, emailAgencyPriceSet } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
