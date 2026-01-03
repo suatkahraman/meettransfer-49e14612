@@ -140,8 +140,11 @@ export type Database = {
           agency_profit: number | null
           agency_user_id: string | null
           company_amount: number | null
+          company_amount_try: number | null
+          conversion_date: string | null
           created_at: string | null
           customer_price: number | null
+          exchange_rate_used: number | null
           id: string
           payment_status: string | null
           reservation_id: string
@@ -153,8 +156,11 @@ export type Database = {
           agency_profit?: number | null
           agency_user_id?: string | null
           company_amount?: number | null
+          company_amount_try?: number | null
+          conversion_date?: string | null
           created_at?: string | null
           customer_price?: number | null
+          exchange_rate_used?: number | null
           id?: string
           payment_status?: string | null
           reservation_id: string
@@ -166,8 +172,11 @@ export type Database = {
           agency_profit?: number | null
           agency_user_id?: string | null
           company_amount?: number | null
+          company_amount_try?: number | null
+          conversion_date?: string | null
           created_at?: string | null
           customer_price?: number | null
+          exchange_rate_used?: number | null
           id?: string
           payment_status?: string | null
           reservation_id?: string
