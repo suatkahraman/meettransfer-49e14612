@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Wallet, Key, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Key, Mail, Phone } from 'lucide-react';
 
 interface Agency {
   id: string;
@@ -483,14 +483,6 @@ const AdminAgencies = () => {
                       {agency.agency_name}
                     </span>
                     <div className="flex gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => navigate(`/admin/agency-balance/${agency.id}`)}
-                        title="Bakiye Yönet"
-                      >
-                        <Wallet className="h-4 w-4" />
-                      </Button>
                       <Button 
                         variant="ghost" 
                         size="icon"

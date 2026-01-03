@@ -57,7 +57,7 @@ const AdminCalendar = lazy(() => import("./pages/admin/AdminCalendar"));
 const AdminAgencies = lazy(() => import("./pages/admin/AdminAgencies"));
 const AdminAgencyAccounting = lazy(() => import("./pages/admin/AdminAgencyAccounting"));
 const AdminFlightMonitor = lazy(() => import("./pages/admin/AdminFlightMonitor"));
-const AdminAgencyBalance = lazy(() => import("./pages/admin/AdminAgencyBalance"));
+
 const AdminWhatsAppChat = lazy(() => import("./pages/admin/AdminWhatsAppChat"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminAppInstallations = lazy(() => import("./pages/admin/AdminAppInstallations"));
@@ -258,7 +258,7 @@ const App = () => (
               <Route path="/admin/flight-monitor" element={<AdminRoute><LazyRoute><AdminFlightMonitor /></LazyRoute></AdminRoute>} />
               <Route path="/admin/agencies" element={<AdminRoute><LazyRoute><AdminAgencies /></LazyRoute></AdminRoute>} />
               <Route path="/admin/agency-accounting/:agencyId" element={<AdminRoute><LazyRoute><AdminAgencyAccounting /></LazyRoute></AdminRoute>} />
-              <Route path="/admin/agency-balance/:agencyId" element={<AdminRoute><LazyRoute><AdminAgencyBalance /></LazyRoute></AdminRoute>} />
+              
               <Route path="/admin/whatsapp" element={<AdminRoute><LazyRoute><AdminWhatsAppChat /></LazyRoute></AdminRoute>} />
               <Route path="/admin/analytics" element={<AdminRoute><LazyRoute><AdminAnalytics /></LazyRoute></AdminRoute>} />
               <Route path="/admin/quick-bookings" element={<AdminRoute><LazyRoute><AdminQuickBookings /></LazyRoute></AdminRoute>} />
