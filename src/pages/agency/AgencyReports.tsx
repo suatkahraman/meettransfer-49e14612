@@ -171,7 +171,7 @@ const AgencyReports = () => {
         />
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6 text-center">
               <Calendar className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
@@ -190,19 +190,9 @@ const AgencyReports = () => {
 
           <Card>
             <CardContent className="pt-6 text-center">
-              <DollarSign className="h-8 w-8 mx-auto text-blue-500 mb-2" />
-              <p className="text-2xl font-bold">{currencySymbol}{totalCustomerRevenue.toFixed(0)}</p>
-              <p className="text-sm text-muted-foreground">{t('customerRevenue')}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <TrendingUp className="h-8 w-8 mx-auto text-primary mb-2" />
-              <p className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {currencySymbol}{totalProfit.toFixed(0)}
-              </p>
-              <p className="text-sm text-muted-foreground">{t('agencyProfit')}</p>
+              <DollarSign className="h-8 w-8 mx-auto text-orange-500 mb-2" />
+              <p className="text-2xl font-bold text-orange-600">{currencySymbol}{totalCompanyAmount.toFixed(0)}</p>
+              <p className="text-sm text-muted-foreground">{t('agencyDebt')}</p>
             </CardContent>
           </Card>
         </div>
@@ -214,18 +204,12 @@ const AgencyReports = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">{t('customerRevenue')}</span>
-              <span className="font-semibold">{currencySymbol}{totalCustomerRevenue.toFixed(2)}</span>
+              <span className="text-muted-foreground">{t('agencyExpense')}</span>
+              <span className="font-semibold">{currencySymbol}{totalCompanyAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">{t('amountOwedToCompany')}</span>
+              <span className="text-muted-foreground">{t('agencyDebt')}</span>
               <span className="font-semibold text-orange-600">{currencySymbol}{totalCompanyAmount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">{t('agencyProfit')}</span>
-              <span className={`font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {currencySymbol}{totalProfit.toFixed(2)}
-              </span>
             </div>
             <div className="flex justify-between py-2">
               <span className="text-muted-foreground">{t('pendingPayments')}</span>
