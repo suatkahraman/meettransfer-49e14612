@@ -145,6 +145,20 @@ const CustomerEditReservation = () => {
     setPassengerNames(updated);
   };
 
+  // Check if price-affecting fields have changed
+  const hasPriceAffectingChanges = (): boolean => {
+    if (!originalData) return false;
+    
+    return (
+      formData.pickup !== originalData.pickup ||
+      formData.dropoff !== originalData.dropoff ||
+      formData.pickup_date !== originalData.pickup_date ||
+      formData.pickup_time !== originalData.pickup_time ||
+      formData.vehicle_type !== originalData.vehicle_type ||
+      passengerNames.length !== (originalData.passenger_names?.length || 1)
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -157,19 +171,14 @@ const CustomerEditReservation = () => {
     setSaving(true);
 
     try {
-      // Store the original data before update for admin review
-      const previousData = {
-        pickup: originalData?.pickup,
-        dropoff: originalData?.dropoff,
-        pickup_date: originalData?.pickup_date,
-        pickup_time: originalData?.pickup_time,
-        flight_number: originalData?.flight_number,
-        vehicle_type: originalData?.vehicle_type,
-        passenger_names: originalData?.passenger_names,
-        driver_notes: originalData?.driver_notes,
-      };
+      const priceChangeRequired = hasPriceAffectingChanges();
+      
+      // Determine new status based on whether price-affecting fields changed
+      // If price-affecting fields changed -> awaiting-price (admin needs to set new price)
+      // If only non-price fields changed -> keep current status
+      const newStatus = priceChangeRequired ? 'awaiting-price' : originalData?.status;
 
-      // Update reservation with new status
+      // Update reservation
       const { error } = await supabase
         .from('reservations')
         .update({
@@ -189,61 +198,69 @@ const CustomerEditReservation = () => {
           customer_phone: formData.customer_phone,
           passenger_names: validPassengerNames,
           driver_notes: formData.driver_notes || null,
-          status: 'pending_admin_review',
+          status: newStatus,
+          // Clear price if price-affecting changes were made
+          ...(priceChangeRequired ? { price: null, admin_set_price: null } : {}),
         })
         .eq('id', id);
 
       if (error) throw error;
 
-      // Notify admin about the changes (in-app)
-      try {
-        await supabase.functions.invoke('create-notification', {
-          body: {
-            type: 'reservation_edited',
-            title: 'Customer Updated Reservation',
-            message: `A customer has modified a confirmed reservation #${id?.slice(0, 8)}. Please review the changes.`,
-            notify_admins: true,
-            reservation_id: id,
-          }
-        });
-      } catch (e) {
-        console.error('Failed to notify admin:', e);
-      }
-
-      // Send email to admin about the edit
-      try {
-        await emailAdminReservationEdited(id!);
-      } catch (e) {
-        console.error('Failed to send admin email:', e);
-      }
-
-      // If driver was assigned, notify them too
-      if (originalData?.driver_id) {
+      // Notify admins if price-affecting changes were made
+      if (priceChangeRequired) {
         try {
-          // Get driver's user_id
-          const { data: driver } = await supabase
-            .from('drivers')
-            .select('user_id')
-            .eq('id', originalData.driver_id)
-            .single();
-
-          if (driver?.user_id) {
-            await supabase.functions.invoke('create-notification', {
-              body: {
-                user_id: driver.user_id,
-                reservation_id: id,
-                title: 'Reservation Updated by Customer',
-                message: `Reservation #${id?.slice(0, 8)} has been modified by the customer. Admin is reviewing the changes.`,
-                type: 'reservation_updated'
-              }
-            });
-          }
+          await supabase.functions.invoke('create-notification', {
+            body: {
+              type: 'reservation_edited',
+              title: 'Müşteri Rezervasyonu Güncelledi - Fiyat Gerekli',
+              message: `Müşteri rezervasyonu güncelledi. Kritik alanlar değişti, yeni fiyat belirlenmesi gerekiyor.`,
+              notify_admins: true,
+              reservation_id: id,
+              send_push: true,
+            }
+          });
         } catch (e) {
-          console.error('Failed to notify driver:', e);
+          console.error('Failed to notify admin:', e);
         }
-      }
 
-      toast.success(t('reservationUpdatedSuccess'));
+        // Send email to admin about the edit
+        try {
+          await emailAdminReservationEdited(id!);
+        } catch (e) {
+          console.error('Failed to send admin email:', e);
+        }
+
+        // If driver was assigned, notify them too
+        if (originalData?.driver_id) {
+          try {
+            const { data: driver } = await supabase
+              .from('drivers')
+              .select('user_id')
+              .eq('id', originalData.driver_id)
+              .single();
+
+            if (driver?.user_id) {
+              await supabase.functions.invoke('create-notification', {
+                body: {
+                  user_id: driver.user_id,
+                  reservation_id: id,
+                  title: 'Reservation Updated by Customer',
+                  message: `Reservation has been modified by the customer. New price is being set.`,
+                  type: 'reservation_updated',
+                  send_push: true,
+                }
+              });
+            }
+          } catch (e) {
+            console.error('Failed to notify driver:', e);
+          }
+        }
+
+        toast.success(t('reservationUpdatedPriceRequired'));
+      } else {
+        toast.success(t('reservationUpdatedSuccess'));
+      }
+      
       navigate('/customer/bookings');
     } catch (error: any) {
       toast.error(error.message || t('failedToUpdateReservation'));

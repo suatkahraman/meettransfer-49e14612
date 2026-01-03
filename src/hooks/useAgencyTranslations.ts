@@ -140,6 +140,7 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     updateReservation: 'Update Reservation',
     changesWillBeSentToAdmin: 'Your changes will be sent for admin review.',
     reservationUpdated: 'Reservation updated successfully',
+    reservationUpdatedPriceRequired: 'Reservation updated. New price will be set by admin.',
     failedToUpdateReservation: 'Failed to update reservation',
     passengerRequired: 'At least one passenger name is required',
     primaryPassenger: 'Primary Passenger',
@@ -157,7 +158,6 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     reservationCancelled: 'Reservation cancelled successfully',
     failedToCancelReservation: 'Failed to cancel reservation',
     reservationCannotBeEdited: 'Reservation cannot be edited',
-    cannotEditOnPickupDay: 'Reservation cannot be edited on the day of transfer',
     
     // Reports Page
     agencyReports: 'Agency Reports',
@@ -333,7 +333,7 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     reservationCancelled: 'Rezervasyon başarıyla iptal edildi',
     failedToCancelReservation: 'Rezervasyon iptal edilemedi',
     reservationCannotBeEdited: 'Rezervasyon düzenlenemez',
-    cannotEditOnPickupDay: 'Transfer günü rezervasyon düzenlenemez',
+    reservationUpdatedPriceRequired: 'Rezervasyon güncellendi. Yeni fiyat admin tarafından belirlenecek.',
     
     // Reports Page
     agencyReports: 'Acenta Raporları',

@@ -405,21 +405,21 @@ const AgencyReservationDetail = () => {
     }
   };
 
-  // Check if pickup date is today or past
-  const isPickupDayOrPast = () => {
+  // Check if pickup date is past (not today, only past)
+  const isPickupDatePast = () => {
     if (!reservation) return true;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const pickupDate = new Date(reservation.pickup_date);
     pickupDate.setHours(0, 0, 0, 0);
-    return pickupDate.getTime() <= today.getTime();
+    return pickupDate.getTime() < today.getTime(); // Only past, not today
   };
 
-  // Check if reservation can be edited
+  // Check if reservation can be edited (now allowed on same day)
   const canEditReservation = () => {
     if (!reservation) return false;
-    // Cannot edit on pickup day or after
-    if (isPickupDayOrPast()) return false;
+    // Cannot edit if pickup date is in the past (but today is allowed)
+    if (isPickupDatePast()) return false;
     const editableStatuses = [
       'awaiting-price',
       'pending_admin_review',
@@ -431,11 +431,11 @@ const AgencyReservationDetail = () => {
     return editableStatuses.includes(reservation.status);
   };
 
-  // Check if reservation can be cancelled
+  // Check if reservation can be cancelled (now allowed on same day)
   const canCancelReservation = () => {
     if (!reservation) return false;
-    // Cannot cancel on pickup day or after
-    if (isPickupDayOrPast()) return false;
+    // Cannot cancel if pickup date is in the past (but today is allowed)
+    if (isPickupDatePast()) return false;
     const cancellableStatuses = [
       'awaiting-price',
       'pending_admin_review',
