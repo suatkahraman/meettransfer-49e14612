@@ -32,7 +32,7 @@ export const MonthlyProfitCard = () => {
     const monthEnd = endOfMonth(currentMonth);
     
     try {
-      // Fetch completed reservations with agency assigned for the month
+      // Fetch ALL completed reservations for the month (agency or not)
       const { data: reservations, error: resError } = await supabase
         .from("reservations")
         .select(`
@@ -43,7 +43,6 @@ export const MonthlyProfitCard = () => {
           agency_id
         `)
         .eq("status", "completed")
-        .not("agency_id", "is", null)
         .gte("pickup_date", format(monthStart, "yyyy-MM-dd"))
         .lte("pickup_date", format(monthEnd, "yyyy-MM-dd"));
 
@@ -84,13 +83,17 @@ export const MonthlyProfitCard = () => {
             return acc;
           }, {} as Record<string, number>);
 
-          // Bütçe = reservations.price (şoför ücreti)
-          reservations?.forEach(res => {
+          // Sadece agency olan rezervasyonlar için acenta geliri hesapla
+          reservations?.filter(res => res.agency_id).forEach(res => {
             totalAgencyIncome += agencyMap[res.id] || 0;
-            totalDriverExpense += res.price || 0; // Bütçe = Şoför ücreti
           });
         }
       }
+
+      // Şoför Gideri = TÜM tamamlanmış rezervasyonların price toplamı
+      reservations?.forEach(res => {
+        totalDriverExpense += res.price || 0;
+      });
 
       setTotals({
         totalAgencyIncome,
@@ -164,7 +167,7 @@ export const MonthlyProfitCard = () => {
             <div className="bg-orange-50 dark:bg-orange-950/30 rounded-lg p-3">
               <div className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400 mb-1">
                 <Banknote className="h-3 w-3" />
-                Gider (Bütçe)
+                Şoför Gideri
               </div>
               <p className="text-xl font-bold text-orange-700 dark:text-orange-300">
                 {formatCurrency(totals.totalDriverExpense)}
