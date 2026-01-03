@@ -59,13 +59,28 @@ serve(async (req) => {
       .eq('reservation_id', reservation_id)
       .maybeSingle();
 
+    // Get passenger cash amount from reservation (this reduces agency debt)
+    const { data: reservationDetails } = await supabase
+      .from('reservations')
+      .select('passenger_cash_amount, passenger_cash_currency')
+      .eq('id', reservation_id)
+      .single();
+
     const companyAmount = agencyDetail?.company_amount || 0;
     const agencyCurrency = agencyDetail?.agency_price_currency || 'TRY';
+    const passengerCashAmount = reservationDetails?.passenger_cash_amount || 0;
+    const passengerCashCurrency = reservationDetails?.passenger_cash_currency || agencyCurrency;
 
-    if (companyAmount <= 0) {
-      console.log('No company amount to add');
+    // Net amount to add = company_amount - passenger_cash_amount
+    // (passenger pays cash directly to driver, so agency owes less)
+    const netAmountToAdd = companyAmount - passengerCashAmount;
+
+    console.log(`Company amount: ${companyAmount}, Passenger cash: ${passengerCashAmount}, Net to add: ${netAmountToAdd}`);
+
+    if (netAmountToAdd <= 0 && companyAmount <= 0) {
+      console.log('No amount to add to agency balance');
       return new Response(
-        JSON.stringify({ message: 'No company amount to add' }),
+        JSON.stringify({ message: 'No amount to add to agency balance' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -85,8 +100,9 @@ serve(async (req) => {
       );
     }
 
-    // Add the company_amount to agency balance (in agency's currency)
-    const newBalance = (agency.balance || 0) + companyAmount;
+    // Add the net amount to agency balance (in agency's currency)
+    // Net = company_amount - passenger_cash_amount
+    const newBalance = (agency.balance || 0) + netAmountToAdd;
 
     // Update agency balance
     const { error: updateError } = await supabase
@@ -110,15 +126,21 @@ serve(async (req) => {
       'GBP': '£'
     };
     const currencySymbol = currencySymbols[agencyCurrency] || agencyCurrency;
+    const passengerCashSymbol = currencySymbols[passengerCashCurrency] || passengerCashCurrency;
 
-    // Create transaction record
+    // Create transaction record with detailed description
+    let description = `Transfer tamamlandı - ${currencySymbol}${companyAmount.toFixed(2)}`;
+    if (passengerCashAmount > 0) {
+      description += ` (Yolcu nakit: ${passengerCashSymbol}${passengerCashAmount.toFixed(2)} düşüldü)`;
+    }
+
     const { error: txError } = await supabase
       .from('agency_transactions')
       .insert({
         agency_id: agency.id,
-        amount: companyAmount,
+        amount: netAmountToAdd,
         type: 'reservation_completed',
-        description: `Transfer tamamlandı - ${currencySymbol}${companyAmount.toFixed(2)}`,
+        description: description,
         balance_after: newBalance,
         reservation_id: reservation_id,
       });
@@ -127,12 +149,14 @@ serve(async (req) => {
       console.error('Failed to create transaction:', txError);
     }
 
-    console.log(`Added ${currencySymbol}${companyAmount} to ${agency.agency_name}. New balance: ${currencySymbol}${newBalance}`);
+    console.log(`Added net ${currencySymbol}${netAmountToAdd} to ${agency.agency_name}. Company: ${companyAmount}, Passenger cash: ${passengerCashAmount}, New balance: ${currencySymbol}${newBalance}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        added_amount: companyAmount,
+        company_amount: companyAmount,
+        passenger_cash_amount: passengerCashAmount,
+        net_added_amount: netAmountToAdd,
         currency: agencyCurrency,
         new_balance: newBalance,
         agency_name: agency.agency_name 

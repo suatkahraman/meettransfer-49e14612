@@ -25,6 +25,8 @@ interface Reservation {
   reservation_code: string | null;
   status: string;
   pickup_date: string;
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
 }
 
 interface AgencyTransaction {
@@ -69,7 +71,7 @@ const AgencyReports = () => {
     // Fetch reservations for the month
     const { data: resData } = await supabase
       .from('reservations')
-      .select('id, reservation_code, status, pickup_date')
+      .select('id, reservation_code, status, pickup_date, passenger_cash_amount, passenger_cash_currency')
       .eq('agency_id', agencyId)
       .gte('pickup_date', monthStart)
       .lte('pickup_date', monthEnd);
@@ -114,6 +116,14 @@ const AgencyReports = () => {
   const totalProfit = agencyDetails.reduce((sum, d) => sum + (d.agency_profit || 0), 0);
   const paidCount = agencyDetails.filter(d => d.payment_status === 'paid').length;
   const pendingPayments = agencyDetails.filter(d => d.payment_status !== 'paid').length;
+  
+  // Calculate passenger cash amounts (reduces agency debt)
+  const totalPassengerCash = reservations
+    .filter(r => r.status === 'completed')
+    .reduce((sum, r) => sum + (r.passenger_cash_amount || 0), 0);
+  
+  // Net agency debt = company amount - passenger cash
+  const netAgencyDebt = totalCompanyAmount - totalPassengerCash;
 
   if (loading) {
     return (
@@ -191,8 +201,13 @@ const AgencyReports = () => {
           <Card>
             <CardContent className="pt-6 text-center">
               <DollarSign className="h-8 w-8 mx-auto text-orange-500 mb-2" />
-              <p className="text-2xl font-bold text-orange-600">{currencySymbol}{totalCompanyAmount.toFixed(0)}</p>
+              <p className="text-2xl font-bold text-orange-600">{currencySymbol}{netAgencyDebt.toFixed(0)}</p>
               <p className="text-sm text-muted-foreground">{t('agencyDebt')}</p>
+              {totalPassengerCash > 0 && (
+                <p className="text-xs text-green-600 mt-1">
+                  -{currencySymbol}{totalPassengerCash.toFixed(0)} {t('passengerCash')}
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -207,9 +222,15 @@ const AgencyReports = () => {
               <span className="text-muted-foreground">{t('agencyExpense')}</span>
               <span className="font-semibold">{currencySymbol}{totalCompanyAmount.toFixed(2)}</span>
             </div>
+            {totalPassengerCash > 0 && (
+              <div className="flex justify-between py-2 border-b">
+                <span className="text-muted-foreground">{t('passengerCashDeducted')}</span>
+                <span className="font-semibold text-green-600">-{currencySymbol}{totalPassengerCash.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between py-2 border-b">
               <span className="text-muted-foreground">{t('agencyDebt')}</span>
-              <span className="font-semibold text-orange-600">{currencySymbol}{totalCompanyAmount.toFixed(2)}</span>
+              <span className="font-semibold text-orange-600">{currencySymbol}{netAgencyDebt.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-2">
               <span className="text-muted-foreground">{t('pendingPayments')}</span>
