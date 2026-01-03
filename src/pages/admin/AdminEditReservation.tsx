@@ -180,6 +180,42 @@ const AdminEditReservation = () => {
 
   const hasPriceAffectingChanges = getChangedFields.size > 0;
 
+  // Get field display values for comparison
+  const getFieldDisplayValue = (fieldName: string, value: unknown): string => {
+    if (fieldName === 'vehicle_type') {
+      const vehicle = vehicleTypes.find(v => v.value === value);
+      return vehicle?.label || String(value || '-');
+    }
+    if (fieldName === 'passenger_count') {
+      return `${value} kişi`;
+    }
+    return String(value || '-');
+  };
+
+  // Get comparison data for changed fields
+  const changedFieldsComparison = useMemo(() => {
+    if (!originalData) return [];
+    const fieldLabels: Record<string, string> = {
+      pickup: 'Alış Noktası',
+      dropoff: 'Bırakış Noktası',
+      pickup_date: 'Tarih',
+      pickup_time: 'Saat',
+      vehicle_type: 'Araç Tipi',
+      passenger_count: 'Yolcu Sayısı'
+    };
+
+    return Array.from(getChangedFields).map(field => ({
+      field,
+      label: fieldLabels[field] || field,
+      oldValue: field === 'passenger_count' 
+        ? getFieldDisplayValue(field, originalPassengerCount)
+        : getFieldDisplayValue(field, originalData[field]),
+      newValue: field === 'passenger_count'
+        ? getFieldDisplayValue(field, passengerNames.length)
+        : getFieldDisplayValue(field, formData[field as keyof typeof formData])
+    }));
+  }, [getChangedFields, originalData, formData, passengerNames.length, originalPassengerCount]);
+
   // Critical field label component
   const CriticalFieldLabel = ({ label, fieldName, isPassengerCount = false }: { label: string; fieldName: string; isPassengerCount?: boolean }) => {
     const isChanged = isPassengerCount ? getChangedFields.has('passenger_count') : getChangedFields.has(fieldName);
@@ -198,6 +234,35 @@ const AdminEditReservation = () => {
             Değişti
           </Badge>
         )}
+      </div>
+    );
+  };
+
+  // Changes comparison component
+  const ChangesComparison = () => {
+    if (changedFieldsComparison.length === 0) return null;
+    
+    return (
+      <div className="mt-3 space-y-2">
+        <p className="text-sm font-medium text-amber-700 dark:text-amber-300">Değişiklik Karşılaştırması:</p>
+        <div className="grid gap-2">
+          {changedFieldsComparison.map(({ field, label, oldValue, newValue }) => (
+            <div key={field} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 rounded-lg border border-amber-200 dark:border-amber-700">
+              <span className="text-xs font-medium text-muted-foreground w-24 shrink-0">{label}:</span>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <div className="flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/30 rounded text-xs text-red-700 dark:text-red-300 max-w-[40%] overflow-hidden">
+                  <X className="h-3 w-3 shrink-0" />
+                  <span className="truncate" title={oldValue}>{oldValue}</span>
+                </div>
+                <span className="text-muted-foreground">→</span>
+                <div className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded text-xs text-green-700 dark:text-green-300 max-w-[40%] overflow-hidden">
+                  <CheckCircle className="h-3 w-3 shrink-0" />
+                  <span className="truncate" title={newValue}>{newValue}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
@@ -1767,22 +1832,13 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
         <Card>
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Price Affecting Changes Warning */}
+              {/* Price Affecting Changes Warning with Comparison */}
               {hasPriceAffectingChanges && (
                 <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/30">
                   <AlertTriangle className="h-4 w-4 text-amber-600" />
                   <AlertDescription className="text-amber-700 dark:text-amber-300">
-                    <strong>Dikkat:</strong> Kritik alanlar değiştirildi ({Array.from(getChangedFields).map(f => {
-                      const labels: Record<string, string> = {
-                        pickup: 'Alış',
-                        dropoff: 'Bırakış',
-                        pickup_date: 'Tarih',
-                        pickup_time: 'Saat',
-                        vehicle_type: 'Araç',
-                        passenger_count: 'Yolcu Sayısı'
-                      };
-                      return labels[f] || f;
-                    }).join(', ')}). Fiyat güncellemesi gerekebilir.
+                    <strong>Dikkat:</strong> Kritik alanlar değiştirildi. Fiyat güncellemesi gerekebilir.
+                    <ChangesComparison />
                   </AlertDescription>
                 </Alert>
               )}
