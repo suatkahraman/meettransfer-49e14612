@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Loader2, TrendingUp, DollarSign, CreditCard, Wallet, CheckCircle, Clock, Calendar } from 'lucide-react';
+import { ArrowLeft, Loader2, TrendingUp, DollarSign, CreditCard, Wallet, CheckCircle, Clock, Calendar, History } from 'lucide-react';
 import { MonthNavigator } from '@/components/accounting/MonthNavigator';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 
@@ -49,6 +49,7 @@ const AgencyReports = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [agencyDetails, setAgencyDetails] = useState<AgencyReservationDetail[]>([]);
   const [transactions, setTransactions] = useState<AgencyTransaction[]>([]);
+  const [carryoverBalance, setCarryoverBalance] = useState(0);
 
   const fetchData = useCallback(async () => {
     if (!agencyId) return;
@@ -68,38 +69,85 @@ const AgencyReports = () => {
       setAgency(agencyData);
     }
 
-    // Fetch reservations for the month
-    const { data: resData } = await supabase
-      .from('reservations')
-      .select('id, reservation_code, status, pickup_date, passenger_cash_amount, passenger_cash_currency')
-      .eq('agency_id', agencyId)
-      .gte('pickup_date', monthStart)
-      .lte('pickup_date', monthEnd);
+    // Fetch current month reservations + previous months completed reservations for carryover
+    const [resDataRes, prevMonthsReservationsRes, allPaymentsRes, transDataRes] = await Promise.all([
+      supabase
+        .from('reservations')
+        .select('id, reservation_code, status, pickup_date, passenger_cash_amount, passenger_cash_currency')
+        .eq('agency_id', agencyId)
+        .gte('pickup_date', monthStart)
+        .lte('pickup_date', monthEnd),
+      // Fetch all completed reservations before this month for carryover calculation
+      supabase
+        .from('reservations')
+        .select('id, status, pickup_date, passenger_cash_amount, passenger_cash_currency')
+        .eq('agency_id', agencyId)
+        .eq('status', 'completed')
+        .lt('pickup_date', monthStart),
+      // Fetch all agency payments
+      supabase
+        .from('agency_payments')
+        .select('*')
+        .eq('agency_id', agencyId),
+      // Fetch recent transactions
+      supabase
+        .from('agency_transactions')
+        .select('*')
+        .eq('agency_id', agencyId)
+        .order('created_at', { ascending: false })
+        .limit(10),
+    ]);
 
-    setReservations(resData || []);
+    const resData = resDataRes.data || [];
+    const prevMonthsReservations = prevMonthsReservationsRes.data || [];
+    const allPayments = allPaymentsRes.data || [];
 
-    // Fetch agency details for these reservations
-    if (resData && resData.length > 0) {
+    setReservations(resData);
+    setTransactions(transDataRes.data || []);
+
+    // Fetch agency details for current month
+    let currentMonthDetails: AgencyReservationDetail[] = [];
+    if (resData.length > 0) {
       const resIds = resData.map(r => r.id);
       const { data: detailsData } = await supabase
         .from('agency_reservation_details')
         .select('*')
         .in('reservation_id', resIds);
 
-      setAgencyDetails(detailsData || []);
+      currentMonthDetails = detailsData || [];
+      setAgencyDetails(currentMonthDetails);
     } else {
       setAgencyDetails([]);
     }
 
-    // Fetch recent transactions
-    const { data: transData } = await supabase
-      .from('agency_transactions')
-      .select('*')
-      .eq('agency_id', agencyId)
-      .order('created_at', { ascending: false })
-      .limit(10);
+    // Calculate carryover balance from previous months
+    let prevMonthsCarryoverDebt = 0;
+    if (prevMonthsReservations.length > 0) {
+      const prevReservationIds = prevMonthsReservations.map(r => r.id);
+      const { data: prevDetailsData } = await supabase
+        .from('agency_reservation_details')
+        .select('reservation_id, company_amount')
+        .in('reservation_id', prevReservationIds);
+      
+      const prevDetails = prevDetailsData || [];
+      
+      // Calculate total debt from previous months completed reservations
+      // Debt = company_amount (admin price) - passenger_cash_amount
+      prevMonthsReservations.forEach(r => {
+        const detail = prevDetails.find(d => d.reservation_id === r.id);
+        const companyAmount = detail?.company_amount || 0;
+        const passengerCash = r.passenger_cash_amount || 0;
+        prevMonthsCarryoverDebt += (companyAmount - passengerCash);
+      });
+    }
 
-    setTransactions(transData || []);
+    // Calculate payments before this month
+    const prevMonthsPayments = allPayments
+      .filter(p => p.payment_date < monthStart)
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    // Carryover = Previous months debt - Previous months payments
+    setCarryoverBalance(prevMonthsCarryoverDebt - prevMonthsPayments);
 
     setLoading(false);
   }, [agencyId, currentMonth]);
@@ -111,9 +159,7 @@ const AgencyReports = () => {
   // Calculate totals
   const totalReservations = reservations.length;
   const completedReservations = reservations.filter(r => r.status === 'completed').length;
-  const totalCustomerRevenue = agencyDetails.reduce((sum, d) => sum + (d.customer_price || 0), 0);
   const totalCompanyAmount = agencyDetails.reduce((sum, d) => sum + (d.company_amount || 0), 0);
-  const totalProfit = agencyDetails.reduce((sum, d) => sum + (d.agency_profit || 0), 0);
   const paidCount = agencyDetails.filter(d => d.payment_status === 'paid').length;
   const pendingPayments = agencyDetails.filter(d => d.payment_status !== 'paid').length;
   
@@ -122,8 +168,11 @@ const AgencyReports = () => {
     .filter(r => r.status === 'completed')
     .reduce((sum, r) => sum + (r.passenger_cash_amount || 0), 0);
   
-  // Net agency debt = company amount - passenger cash
-  const netAgencyDebt = totalCompanyAmount - totalPassengerCash;
+  // Current month debt = company amount - passenger cash
+  const currentMonthDebt = totalCompanyAmount - totalPassengerCash;
+  
+  // Total balance = carryover + current month debt
+  const totalBalance = carryoverBalance + currentMonthDebt;
 
   if (loading) {
     return (
@@ -181,7 +230,20 @@ const AgencyReports = () => {
         />
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Carryover Balance Card */}
+          {carryoverBalance !== 0 && (
+            <Card className={carryoverBalance > 0 ? 'border-blue-500/50' : 'border-green-500/50'}>
+              <CardContent className="pt-6 text-center">
+                <History className="h-8 w-8 mx-auto text-blue-500 mb-2" />
+                <p className={`text-2xl font-bold ${carryoverBalance > 0 ? 'text-blue-600' : 'text-green-600'}`}>
+                  {currencySymbol}{carryoverBalance.toFixed(0)}
+                </p>
+                <p className="text-sm text-muted-foreground">{t('carryoverBalance') || 'Devir Bakiye'}</p>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardContent className="pt-6 text-center">
               <Calendar className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
@@ -198,11 +260,11 @@ const AgencyReports = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className={totalBalance > 0 ? 'border-orange-500 border-2' : ''}>
             <CardContent className="pt-6 text-center">
               <DollarSign className="h-8 w-8 mx-auto text-orange-500 mb-2" />
-              <p className="text-2xl font-bold text-orange-600">{currencySymbol}{netAgencyDebt.toFixed(0)}</p>
-              <p className="text-sm text-muted-foreground">{t('agencyDebt')}</p>
+              <p className="text-2xl font-bold text-orange-600">{currencySymbol}{totalBalance.toFixed(0)}</p>
+              <p className="text-sm text-muted-foreground">{t('totalDebt') || 'Güncel Bakiye'}</p>
               {totalPassengerCash > 0 && (
                 <p className="text-xs text-green-600 mt-1">
                   -{currencySymbol}{totalPassengerCash.toFixed(0)} {t('passengerCash')}
@@ -218,8 +280,16 @@ const AgencyReports = () => {
             <CardTitle>{t('financialSummary')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {carryoverBalance !== 0 && (
+              <div className="flex justify-between py-2 border-b">
+                <span className="text-muted-foreground">{t('carryoverBalance') || 'Devir Bakiye'}</span>
+                <span className={`font-semibold ${carryoverBalance > 0 ? 'text-blue-600' : 'text-green-600'}`}>
+                  {currencySymbol}{carryoverBalance.toFixed(2)}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">{t('agencyExpense')}</span>
+              <span className="text-muted-foreground">{t('agencyExpense')} ({t('thisMonth') || 'Bu Ay'})</span>
               <span className="font-semibold">{currencySymbol}{totalCompanyAmount.toFixed(2)}</span>
             </div>
             {totalPassengerCash > 0 && (
@@ -229,8 +299,14 @@ const AgencyReports = () => {
               </div>
             )}
             <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">{t('agencyDebt')}</span>
-              <span className="font-semibold text-orange-600">{currencySymbol}{netAgencyDebt.toFixed(2)}</span>
+              <span className="text-muted-foreground">{t('thisMonthDebt') || 'Bu Ay Borç'}</span>
+              <span className="font-semibold text-orange-600">{currencySymbol}{currentMonthDebt.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b bg-muted/30 px-2 -mx-2 rounded">
+              <span className="font-medium">{t('totalDebt') || 'Güncel Bakiye'}</span>
+              <span className={`font-bold text-lg ${totalBalance > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                {currencySymbol}{totalBalance.toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between py-2">
               <span className="text-muted-foreground">{t('pendingPayments')}</span>
