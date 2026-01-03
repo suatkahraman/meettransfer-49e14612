@@ -23,6 +23,8 @@ interface Driver {
   name: string;
   plate_number: string | null;
   phone: string;
+  vehicle_model: string | null;
+  vehicle_color: string | null;
 }
 
 interface Reservation {
@@ -185,7 +187,7 @@ const AgencyHome = () => {
         id, reservation_code, customer_name, pickup, dropoff,
         pickup_place_name, dropoff_place_name,
         pickup_date, pickup_time, vehicle_type, status, driver_id,
-        drivers:driver_id (id, name, plate_number, phone)
+        drivers:driver_id (id, name, plate_number, phone, vehicle_model, vehicle_color)
       `)
       .eq('agency_id', agencyId)
       .order('pickup_date', { ascending: true })
@@ -311,12 +313,14 @@ const AgencyHome = () => {
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <span className="text-xs">{t('plate')}:</span>
                   <span className="font-mono text-xs">{reservation.drivers.plate_number}</span>
+                  {reservation.drivers.vehicle_color && (
+                    <span className="text-xs">• {reservation.drivers.vehicle_color}</span>
+                  )}
                 </div>
               )}
-              {reservation.drivers.phone && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span className="text-xs">{t('phone')}:</span>
-                  <span className="text-xs">{reservation.drivers.phone}</span>
+              {reservation.drivers.vehicle_model && (
+                <div className="text-xs text-muted-foreground">
+                  {reservation.drivers.vehicle_model}
                 </div>
               )}
             </div>

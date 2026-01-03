@@ -482,16 +482,6 @@ const DriverHome = () => {
               {t('monthlyAccounting')}
             </Button>
 
-            {/* Update Info Section - Always Visible */}
-            <section className="mb-4">
-              <div className="flex items-center gap-2 py-2 mb-2">
-                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Settings className="h-4 w-4 text-blue-600" />
-                </div>
-                <span className="font-semibold">{t('updateInfo')}</span>
-              </div>
-              <DriverInfoEditor />
-            </section>
             {/* Pending Jobs Section */}
             {pendingJobs.length > 0 && (
               <section>
@@ -643,6 +633,17 @@ const DriverHome = () => {
                 </AnimatePresence>
               </section>
             )}
+
+            {/* Update Info Section - Always Visible at Bottom */}
+            <section className="mt-6 pt-6 border-t">
+              <div className="flex items-center gap-2 py-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <Settings className="h-4 w-4 text-blue-600" />
+                </div>
+                <span className="font-semibold">{t('updateInfo')}</span>
+              </div>
+              <DriverInfoEditor />
+            </section>
           </div>
         )}
         </div>
