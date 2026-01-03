@@ -120,11 +120,9 @@ const AdminMonthlyProfit = () => {
       }
 
       // Fetch agency reservation details with TRY converted amount
-      // customer_price = agency income (what agency charges)
-      // company_amount_try = budget (what company charges)
+      // company_amount_try = Acenta Geliri (what agency pays to company in TRY)
       let agencyDetails: Record<string, { 
         agencyIncome: number;
-        budget: number;
         originalAmount: number; 
         currency: string; 
         exchangeRate: number | null;
@@ -143,10 +141,9 @@ const AdminMonthlyProfit = () => {
         if (!agencyError && agencyData) {
           agencyDetails = agencyData.reduce((acc, item) => {
             let agencyIncome = 0;
-            let budget = 0;
             let needsConversion = false;
             
-            // Agency Income = customer_price or company_amount_try (TRY converted)
+            // Agency Income = company_amount_try (Acenta fiyatı TRY'ye çevrilmiş)
             if (item.company_amount_try) {
               agencyIncome = item.company_amount_try;
             } else if (item.agency_price_currency === 'TRY') {
@@ -158,12 +155,8 @@ const AdminMonthlyProfit = () => {
               if (needsConversion) conversionsNeeded++;
             }
             
-            // Budget = company_amount_try (the TRY amount)
-            budget = item.company_amount_try || 0;
-            
             acc[item.reservation_id] = { 
               agencyIncome,
-              budget,
               originalAmount: item.company_amount || 0,
               currency: item.agency_price_currency || 'TRY',
               exchangeRate: item.exchange_rate_used || null,
@@ -171,7 +164,7 @@ const AdminMonthlyProfit = () => {
               reservationId: item.reservation_id
             };
             return acc;
-          }, {} as Record<string, { agencyIncome: number; budget: number; originalAmount: number; currency: string; exchangeRate: number | null; needsConversion: boolean; reservationId: string }>);
+          }, {} as Record<string, { agencyIncome: number; originalAmount: number; currency: string; exchangeRate: number | null; needsConversion: boolean; reservationId: string }>);
         }
       }
       
@@ -207,7 +200,7 @@ const AdminMonthlyProfit = () => {
           
           const agencyInfo = agencyDetails[res.id];
           const agencyIncome = agencyInfo?.agencyIncome || 0;
-          const budget = agencyInfo?.budget || 0;
+          const budget = res.price || 0; // Bütçe = Şoför ücreti
           const driverExpense = res.price || 0;
           
           dayData.agencyIncome += agencyIncome;
