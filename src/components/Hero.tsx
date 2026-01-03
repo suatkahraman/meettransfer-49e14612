@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare, Phone, Mail } from "lucide-react";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -183,6 +184,7 @@ export const Hero = () => {
   const [customerNotes, setCustomerNotes] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [phoneError, setPhoneError] = useState(false);
 
 const currencyOptions = CURRENCY_OPTIONS;
 
@@ -200,8 +202,11 @@ const currencyOptions = CURRENCY_OPTIONS;
     
     // Validate phone - required
     const phoneTrimmed = customerPhone.trim();
-    if (!phoneTrimmed) {
-      missingFields.push(t("phone") || "Phone");
+    if (!phoneTrimmed || phoneTrimmed.length < 8) {
+      setPhoneError(true);
+      setTimeout(() => setPhoneError(false), 1000);
+      toast.error(t("phoneRequired") || "Phone number is required");
+      return;
     }
     
     // Validate email - optional but must be valid if provided
@@ -528,22 +533,24 @@ const currencyOptions = CURRENCY_OPTIONS;
               <div className="space-y-2">
                 <label className="text-white/90 text-sm font-medium block text-left flex items-center gap-2">
                   <Phone className="h-4 w-4 text-accent" />
-                  {t("phoneNumber") || "Phone Number"}
+                  {t("phoneNumber") || "Phone Number"} <span className="text-red-400 font-bold">*</span>
+                  <span className="text-white/60 text-xs">({t("required") || "Required"})</span>
                 </label>
-                <Input
-                  type="tel"
+                <PhoneInput
                   value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder={t("phoneNumberPlaceholder") || "+90 555 123 4567"}
-                  className="h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md"
+                  onChange={setCustomerPhone}
+                  placeholder="555 123 4567"
+                  inputClassName="h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md"
+                  error={phoneError}
                 />
               </div>
 
-              {/* Email (Required) */}
+              {/* Email (Optional) */}
               <div className="space-y-2">
                 <label className="text-white/90 text-sm font-medium block text-left flex items-center gap-2">
                   <Mail className="h-4 w-4 text-accent" />
-                  {t("email") || "Email"} <span className="text-accent">*</span>
+                  {t("email") || "Email"}
+                  <span className="text-white/60 text-xs">({t("optional") || "Optional"})</span>
                 </label>
                 <Input
                   type="email"
@@ -551,7 +558,6 @@ const currencyOptions = CURRENCY_OPTIONS;
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   placeholder={t("emailPlaceholder") || "email@example.com"}
                   className="h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md"
-                  required
                 />
                 <p className="text-white/70 text-xs">
                   {t("emailPriceNotification") || "Your price quote will also be sent to you via email."}
