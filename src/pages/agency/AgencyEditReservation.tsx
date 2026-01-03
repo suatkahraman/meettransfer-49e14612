@@ -219,10 +219,21 @@ const AgencyEditReservation = () => {
     try {
       const priceChangeRequired = hasPriceAffectingChanges();
       
-      // Determine new status based on whether price-affecting fields changed
-      // If price-affecting fields changed -> awaiting-price (admin needs to set new price)
-      // If only non-price fields changed -> keep current status
-      const newStatus = priceChangeRequired ? 'awaiting-price' : originalData?.status;
+      // For approved/confirmed reservations, changes require admin approval
+      // Status goes to pending_admin_review for admin to approve/reject changes
+      const approvedStatuses = ['customer_approved', 'confirmed', 'sent_to_driver'];
+      const requiresAdminApproval = approvedStatuses.includes(originalData?.status || '');
+      
+      // Determine new status:
+      // - If editing approved reservation -> pending_admin_review (admin must approve changes)
+      // - If price-affecting fields changed on non-approved -> awaiting-price
+      // - Otherwise keep current status
+      let newStatus = originalData?.status;
+      if (requiresAdminApproval) {
+        newStatus = 'pending_admin_review';
+      } else if (priceChangeRequired) {
+        newStatus = 'awaiting-price';
+      }
 
       // Update reservation
       const { error } = await supabase
@@ -253,56 +264,65 @@ const AgencyEditReservation = () => {
 
       if (error) throw error;
 
-      // Notify admins if price-affecting changes were made
-      if (priceChangeRequired) {
-        try {
-          await supabase.functions.invoke('create-notification', {
-            body: {
-              type: 'agency_reservation_edited',
-              title: 'Acenta Rezervasyonu Güncelledi - Fiyat Gerekli',
-              message: `Acenta rezervasyonu güncelledi. Kritik alanlar değişti, yeni fiyat belirlenmesi gerekiyor.`,
-              notify_admins: true,
-              reservation_id: id,
-              send_push: true,
-            }
-          });
-        } catch (e) {
-          console.error('Failed to notify admin:', e);
-        }
+      // Notify admins about the update
+      try {
+        const notificationTitle = requiresAdminApproval 
+          ? 'Acenta Onaylanmış Rezervasyonu Güncelledi - Onay Gerekli'
+          : 'Acenta Rezervasyonu Güncelledi - Fiyat Gerekli';
+        const notificationMessage = requiresAdminApproval
+          ? `Acenta daha önce onaylanmış rezervasyonu güncelledi. Admin onayı bekleniyor.`
+          : `Acenta rezervasyonu güncelledi. Kritik alanlar değişti, yeni fiyat belirlenmesi gerekiyor.`;
 
-        // Send email to admin
-        try {
-          await emailAdminReservationEdited(id!);
-        } catch (e) {
-          console.error('Failed to send admin email:', e);
-        }
-
-        // If driver was assigned, notify them too
-        if (originalData?.driver_id) {
-          try {
-            const { data: driver } = await supabase
-              .from('drivers')
-              .select('user_id')
-              .eq('id', originalData.driver_id)
-              .single();
-
-            if (driver?.user_id) {
-              await supabase.functions.invoke('create-notification', {
-                body: {
-                  user_id: driver.user_id,
-                  reservation_id: id,
-                  title: 'Rezervasyon Güncellendi',
-                  message: `Rezervasyon acenta tarafından güncellendi. Fiyat yeniden belirleniyor.`,
-                  type: 'reservation_updated',
-                  send_push: true,
-                }
-              });
-            }
-          } catch (e) {
-            console.error('Failed to notify driver:', e);
+        await supabase.functions.invoke('create-notification', {
+          body: {
+            type: 'agency_reservation_edited',
+            title: notificationTitle,
+            message: notificationMessage,
+            notify_admins: true,
+            reservation_id: id,
+            send_push: true,
           }
-        }
+        });
+      } catch (e) {
+        console.error('Failed to notify admin:', e);
+      }
 
+      // Send email to admin
+      try {
+        await emailAdminReservationEdited(id!);
+      } catch (e) {
+        console.error('Failed to send admin email:', e);
+      }
+
+      // If driver was assigned, notify them about pending changes
+      if (originalData?.driver_id && requiresAdminApproval) {
+        try {
+          const { data: driver } = await supabase
+            .from('drivers')
+            .select('user_id')
+            .eq('id', originalData.driver_id)
+            .single();
+
+          if (driver?.user_id) {
+            await supabase.functions.invoke('create-notification', {
+              body: {
+                user_id: driver.user_id,
+                reservation_id: id,
+                title: 'Rezervasyon Değişiklik Bekliyor',
+                message: `Rezervasyon acenta tarafından güncellendi. Admin onayı bekleniyor.`,
+                type: 'reservation_pending_update',
+                send_push: true,
+              }
+            });
+          }
+        } catch (e) {
+          console.error('Failed to notify driver:', e);
+        }
+      }
+
+      if (requiresAdminApproval) {
+        toast.success(t('reservationUpdatedAwaitingAdminApproval') || 'Reservation updated - awaiting admin approval');
+      } else if (priceChangeRequired) {
         toast.success(t('reservationUpdatedPriceRequired'));
       } else {
         toast.success(t('reservationUpdated'));
