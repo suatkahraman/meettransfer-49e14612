@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, AlertTriangle, Car, User } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -23,6 +23,14 @@ const vehicleTypes = [
   { value: 'maybach', label: 'Maybach' },
   { value: 'minibus', label: 'Minibus' },
 ];
+
+interface Driver {
+  id: string;
+  name: string;
+  plate_number: string | null;
+  vehicle_model: string | null;
+  phone: string;
+}
 
 interface Reservation {
   id: string;
@@ -46,6 +54,7 @@ interface Reservation {
   status: string;
   driver_id: string | null;
   agency_id: string | null;
+  drivers?: Driver | null;
 }
 
 const AgencyEditReservation = () => {
@@ -83,7 +92,7 @@ const AgencyEditReservation = () => {
 
       const { data, error } = await supabase
         .from('reservations')
-        .select('*')
+        .select('*, drivers(id, name, plate_number, vehicle_model, phone)')
         .eq('id', id)
         .eq('agency_id', agencyId)
         .single();
@@ -367,6 +376,30 @@ const AgencyEditReservation = () => {
             </p>
           </CardHeader>
           <CardContent>
+            {/* Driver Info Card */}
+            {originalData?.drivers && (
+              <div className="mb-6 p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <Car className="h-5 w-5 text-blue-600" />
+                  <h3 className="font-semibold text-blue-700">{t('assignedDriver')}</h3>
+                </div>
+                <div className="space-y-1 text-sm">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{originalData.drivers.name}</span>
+                  </div>
+                  {originalData.drivers.plate_number && (
+                    <div className="flex items-center gap-2 font-mono text-blue-700">
+                      <span className="px-2 py-0.5 bg-blue-600/20 rounded">{originalData.drivers.plate_number}</span>
+                    </div>
+                  )}
+                  {originalData.drivers.vehicle_model && (
+                    <div className="text-muted-foreground">{originalData.drivers.vehicle_model}</div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Price Update Warning */}
             {showPriceWarning && (
               <Alert variant="destructive" className="mb-6 border-amber-500 bg-amber-500/10">
