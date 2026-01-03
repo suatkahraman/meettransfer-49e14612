@@ -583,7 +583,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerCyprus: "Cyprus Transfer",
     footerFleet: "Our Fleet",
     footerOnlyWhatsApp: "Only WhatsApp",
-    footerAddress: "Fatih, Istanbul, Turkey",
+    footerAddress: "VIP Terminal IST Airport",
     footerRights: "All rights reserved.",
   },
   DE: {
@@ -1129,7 +1129,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerCyprus: "Zypern Transfer",
     footerFleet: "Unsere Flotte",
     footerOnlyWhatsApp: "Nur WhatsApp",
-    footerAddress: "Fatih, Istanbul, Türkei",
+    footerAddress: "VIP Terminal IST Airport",
     footerRights: "Alle Rechte vorbehalten.",
   },
   FR: {
@@ -1675,7 +1675,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerCyprus: "Transfert Chypre",
     footerFleet: "Notre flotte",
     footerOnlyWhatsApp: "WhatsApp uniquement",
-    footerAddress: "Fatih, Istanbul, Turquie",
+    footerAddress: "VIP Terminal IST Airport",
     footerRights: "Tous droits réservés.",
   },
   RU: {
@@ -2221,7 +2221,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerCyprus: "Трансфер Кипр",
     footerFleet: "Наш автопарк",
     footerOnlyWhatsApp: "Только WhatsApp",
-    footerAddress: "Фатих, Стамбул, Турция",
+    footerAddress: "VIP Terminal IST Airport",
     footerRights: "Все права защищены.",
   },
   IT: {
@@ -2767,7 +2767,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerCyprus: "Transfer Cipro",
     footerFleet: "La nostra flotta",
     footerOnlyWhatsApp: "Solo WhatsApp",
-    footerAddress: "Fatih, Istanbul, Turchia",
+    footerAddress: "VIP Terminal IST Airport",
     footerRights: "Tutti i diritti riservati.",
   },
   ES: {
@@ -3313,7 +3313,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerCyprus: "Transfer Chipre",
     footerFleet: "Nuestra flota",
     footerOnlyWhatsApp: "Solo WhatsApp",
-    footerAddress: "Fatih, Estambul, Turquía",
+    footerAddress: "VIP Terminal IST Airport",
     footerRights: "Todos los derechos reservados.",
   },
   AR: {
@@ -3859,7 +3859,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerCyprus: "نقل قبرص",
     footerFleet: "أسطولنا",
     footerOnlyWhatsApp: "واتساب فقط",
-    footerAddress: "الفاتح، إسطنبول، تركيا",
+    footerAddress: "VIP Terminal IST Airport",
     footerRights: "جميع الحقوق محفوظة.",
   },
   TR: {
@@ -4410,7 +4410,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerCyprus: "Kıbrıs Transfer",
     footerFleet: "Filomuz",
     footerOnlyWhatsApp: "Sadece WhatsApp",
-    footerAddress: "Fatih, İstanbul, Türkiye",
+    footerAddress: "VIP Terminal IST Airport",
     footerRights: "Tüm hakları saklıdır.",
   },
   UK: {
@@ -4956,7 +4956,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerCyprus: "Трансфер Кіпр",
     footerFleet: "Наш автопарк",
     footerOnlyWhatsApp: "Тільки WhatsApp",
-    footerAddress: "Фатіх, Стамбул, Туреччина",
+    footerAddress: "VIP Terminal IST Airport",
     footerRights: "Усі права захищені.",
   },
   JA: {
@@ -5506,7 +5506,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerCyprus: "キプロス送迎",
     footerFleet: "車両一覧",
     footerOnlyWhatsApp: "WhatsAppのみ",
-    footerAddress: "ファティフ、イスタンブール、トルコ",
+    footerAddress: "VIP Terminal IST Airport",
     footerRights: "全著作権所有。",
     
     // Trusted Partners
