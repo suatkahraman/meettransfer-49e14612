@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from "date-fns";
 import { tr } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Building2, Car, Calculator, ArrowLeft, User, Banknote, RefreshCw } from "lucide-react";
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Building2, Car, Calculator, ArrowLeft, User, Banknote, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 interface ReservationDetail {
   id: string;
@@ -26,6 +27,7 @@ interface ReservationDetail {
   hasCashCollection: boolean;
   cashAmount: number;
   cashCurrency: string;
+  needsConversion: boolean;
 }
 
 interface DailyProfit {
@@ -56,6 +58,8 @@ const AdminMonthlyProfit = () => {
   });
   const [loading, setLoading] = useState(true);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
+  const [convertingRates, setConvertingRates] = useState(false);
+  const [pendingConversions, setPendingConversions] = useState<number>(0);
 
   const fetchMonthlyData = useCallback(async () => {
     setLoading(true);
@@ -118,7 +122,11 @@ const AdminMonthlyProfit = () => {
         originalAmount: number; 
         currency: string; 
         exchangeRate: number | null;
+        needsConversion: boolean;
+        reservationId: string;
       }> = {};
+      
+      let conversionsNeeded = 0;
       
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
@@ -129,23 +137,32 @@ const AdminMonthlyProfit = () => {
         if (!agencyError && agencyData) {
           agencyDetails = agencyData.reduce((acc, item) => {
             let tryAmount = 0;
+            let needsConversion = false;
+            
             if (item.company_amount_try) {
               tryAmount = item.company_amount_try;
             } else if (item.agency_price_currency === 'TRY') {
               tryAmount = item.company_amount || 0;
             } else {
-              tryAmount = item.company_amount || 0;
+              // Needs conversion - foreign currency without TRY conversion
+              needsConversion = item.company_amount && item.company_amount > 0 ? true : false;
+              tryAmount = 0; // Will be converted
+              if (needsConversion) conversionsNeeded++;
             }
             acc[item.reservation_id] = { 
               tryAmount,
               originalAmount: item.company_amount || 0,
               currency: item.agency_price_currency || 'TRY',
-              exchangeRate: item.exchange_rate_used || null
+              exchangeRate: item.exchange_rate_used || null,
+              needsConversion,
+              reservationId: item.reservation_id
             };
             return acc;
-          }, {} as Record<string, { tryAmount: number; originalAmount: number; currency: string; exchangeRate: number | null }>);
+          }, {} as Record<string, { tryAmount: number; originalAmount: number; currency: string; exchangeRate: number | null; needsConversion: boolean; reservationId: string }>);
         }
       }
+      
+      setPendingConversions(conversionsNeeded);
 
       // Create daily breakdown
       const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
@@ -182,6 +199,8 @@ const AdminMonthlyProfit = () => {
           dayData.driverExpense += driverExpense;
           dayData.netProfit = dayData.agencyIncome - dayData.driverExpense;
           
+          const needsConversion = agencyInfo?.needsConversion || false;
+          
           // Add reservation detail
           dayData.reservations.push({
             id: res.id,
@@ -199,6 +218,7 @@ const AdminMonthlyProfit = () => {
             hasCashCollection: (res.passenger_cash_amount || 0) > 0,
             cashAmount: res.passenger_cash_amount || 0,
             cashCurrency: res.passenger_cash_currency || 'TRY',
+            needsConversion,
           });
         }
       });
@@ -240,6 +260,79 @@ const AdminMonthlyProfit = () => {
   const handleNextMonth = () => {
     setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
     setExpandedDay(null);
+  };
+
+  // Convert all pending foreign currency amounts to TRY
+  const convertAllToTRY = async () => {
+    setConvertingRates(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      // Find all reservations needing conversion
+      const reservationsToConvert: ReservationDetail[] = [];
+      dailyData.forEach(day => {
+        day.reservations.forEach(res => {
+          if (res.needsConversion && res.agencyIncomeOriginal > 0) {
+            reservationsToConvert.push(res);
+          }
+        });
+      });
+
+      for (const res of reservationsToConvert) {
+        try {
+          // Call exchange rate API
+          const { data: rateData, error: rateError } = await supabase.functions.invoke('get-exchange-rate', {
+            body: {
+              from_currency: res.agencyIncomeCurrency,
+              to_currency: 'TRY',
+              amount: res.agencyIncomeOriginal
+            }
+          });
+
+          if (rateError) {
+            console.error('Exchange rate error:', rateError);
+            errorCount++;
+            continue;
+          }
+
+          if (rateData && rateData.rate && rateData.converted_amount) {
+            // Update the database with converted amount
+            const { error: updateError } = await supabase
+              .from('agency_reservation_details')
+              .update({
+                company_amount_try: rateData.converted_amount,
+                exchange_rate_used: rateData.rate,
+                conversion_date: rateData.date
+              })
+              .eq('reservation_id', res.id);
+
+            if (updateError) {
+              console.error('Update error:', updateError);
+              errorCount++;
+            } else {
+              successCount++;
+            }
+          }
+        } catch (err) {
+          console.error('Conversion error for reservation:', res.id, err);
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`${successCount} rezervasyon döviz kuru çevrildi`);
+        fetchMonthlyData(); // Refresh data
+      }
+      if (errorCount > 0) {
+        toast.error(`${errorCount} rezervasyon çevrilemedi`);
+      }
+    } catch (error) {
+      console.error('Bulk conversion error:', error);
+      toast.error('Döviz kuru çevirme hatası');
+    } finally {
+      setConvertingRates(false);
+    }
   };
 
   const formatCurrency = (amount: number, currency: string = 'TRY') => {
@@ -300,6 +393,42 @@ const AdminMonthlyProfit = () => {
           </div>
         ) : (
           <>
+            {/* Currency Conversion Alert */}
+            {pendingConversions > 0 && (
+              <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/30">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <RefreshCw className="h-5 w-5 text-amber-600" />
+                    <div>
+                      <p className="font-medium text-amber-800 dark:text-amber-300">
+                        {pendingConversions} rezervasyonun döviz kuru çevrilmemiş
+                      </p>
+                      <p className="text-sm text-amber-600 dark:text-amber-400">
+                        Güncel kurları çekmek için butona tıklayın
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={convertAllToTRY} 
+                    disabled={convertingRates}
+                    className="bg-amber-600 hover:bg-amber-700"
+                  >
+                    {convertingRates ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Çevriliyor...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Kurları Çek
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card className="bg-muted/50">
@@ -409,17 +538,29 @@ const AdminMonthlyProfit = () => {
 
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t mt-2">
                                   {/* Agency Income */}
-                                  <div className="bg-blue-50 dark:bg-blue-950/30 rounded p-2">
-                                    <div className="text-xs text-blue-600 dark:text-blue-400 mb-1">Acenta Geliri</div>
-                                    <div className="font-medium text-blue-700 dark:text-blue-300">
-                                      {formatCurrency(res.agencyIncome)}
+                                  <div className={`rounded p-2 ${res.needsConversion ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-300' : 'bg-blue-50 dark:bg-blue-950/30'}`}>
+                                    <div className={`text-xs mb-1 ${res.needsConversion ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                                      Acenta Geliri
+                                      {res.needsConversion && <span className="ml-1">(Çevrilmemiş)</span>}
                                     </div>
-                                    {res.agencyIncomeCurrency !== 'TRY' && res.exchangeRate && (
-                                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                                        <RefreshCw className="h-3 w-3" />
-                                        {formatCurrency(res.agencyIncomeOriginal, res.agencyIncomeCurrency)} 
-                                        <span className="text-muted-foreground/70">@ {res.exchangeRate.toFixed(2)}</span>
+                                    {res.needsConversion ? (
+                                      <div className="font-medium text-amber-700 dark:text-amber-300">
+                                        {formatCurrency(res.agencyIncomeOriginal, res.agencyIncomeCurrency)}
+                                        <div className="text-xs text-amber-500 mt-1">TL'ye çevrilmeli</div>
                                       </div>
+                                    ) : (
+                                      <>
+                                        <div className="font-medium text-blue-700 dark:text-blue-300">
+                                          {formatCurrency(res.agencyIncome)}
+                                        </div>
+                                        {res.agencyIncomeCurrency !== 'TRY' && res.exchangeRate && (
+                                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                            <RefreshCw className="h-3 w-3" />
+                                            {formatCurrency(res.agencyIncomeOriginal, res.agencyIncomeCurrency)} 
+                                            <span className="text-muted-foreground/70">@ {res.exchangeRate.toFixed(2)}</span>
+                                          </div>
+                                        )}
+                                      </>
                                     )}
                                   </div>
 
