@@ -74,6 +74,7 @@ const statusLabels: Record<string, string> = {
 interface AccountingSummary {
   totalRevenue: number;
   totalPaid: number;
+  totalPassengerCash: number;
   balance: number;
   monthlyReservations: number;
   completedReservations: number;
@@ -93,6 +94,7 @@ const AgencyHome = () => {
   const [accountingSummary, setAccountingSummary] = useState<AccountingSummary>({
     totalRevenue: 0,
     totalPaid: 0,
+    totalPassengerCash: 0,
     balance: 0,
     monthlyReservations: 0,
     completedReservations: 0
@@ -121,10 +123,10 @@ const AgencyHome = () => {
     const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
     const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
 
-    // Get completed reservations with agency details
+    // Get completed reservations with agency details and passenger cash
     const { data: completedRes } = await supabase
       .from('reservations')
-      .select('id, status, agency_reservation_details!inner(customer_price)')
+      .select('id, status, passenger_cash_amount, agency_reservation_details!inner(customer_price, company_amount)')
       .eq('agency_id', agencyId)
       .eq('status', 'completed');
 
@@ -143,16 +145,31 @@ const AgencyHome = () => {
       .eq('agency_id', agencyId);
 
     const totalRevenue = completedRes?.reduce((sum, r) => {
-      const detail = r.agency_reservation_details as unknown as { customer_price: number };
+      const detail = r.agency_reservation_details as unknown as { customer_price: number; company_amount: number };
       return sum + (detail?.customer_price || 0);
+    }, 0) || 0;
+
+    // Calculate total company amount (agency debt)
+    const totalCompanyAmount = completedRes?.reduce((sum, r) => {
+      const detail = r.agency_reservation_details as unknown as { customer_price: number; company_amount: number };
+      return sum + (detail?.company_amount || 0);
+    }, 0) || 0;
+
+    // Calculate total passenger cash collected
+    const totalPassengerCash = completedRes?.reduce((sum, r) => {
+      return sum + (r.passenger_cash_amount || 0);
     }, 0) || 0;
 
     const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
 
+    // Net agency debt = company amount - passenger cash collected
+    const netAgencyDebt = totalCompanyAmount - totalPassengerCash;
+
     setAccountingSummary({
       totalRevenue,
       totalPaid,
-      balance: totalRevenue - totalPaid,
+      totalPassengerCash,
+      balance: netAgencyDebt - totalPaid,
       monthlyReservations: monthlyRes?.length || 0,
       completedReservations: completedRes?.length || 0
     });
@@ -392,14 +409,19 @@ const AgencyHome = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Wallet className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">{t('balance')}</span>
+                    <span className="text-xs text-muted-foreground">{t('agencyDebt')}</span>
                   </div>
                   <p className={cn(
                     "text-xl font-bold",
-                    accountingSummary.balance > 0 ? "text-green-600" : accountingSummary.balance < 0 ? "text-destructive" : ""
+                    accountingSummary.balance > 0 ? "text-destructive" : accountingSummary.balance < 0 ? "text-green-600" : ""
                   )}>
-                    {currencySymbol}{accountingSummary.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    {currencySymbol}{Math.abs(accountingSummary.balance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                   </p>
+                  {accountingSummary.totalPassengerCash > 0 && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t('passengerCash')}: -{currencySymbol}{accountingSummary.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
@@ -407,7 +429,7 @@ const AgencyHome = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <TrendingUp className="h-4 w-4 text-green-600" />
-                    <span className="text-xs text-muted-foreground">{t('totalRevenue')}</span>
+                    <span className="text-xs text-muted-foreground">{t('agencyExpense')}</span>
                   </div>
                   <p className="text-xl font-bold text-green-600">
                     {currencySymbol}{accountingSummary.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
