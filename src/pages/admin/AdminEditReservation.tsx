@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -9,9 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy, ChevronDown, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy, ChevronDown, MessageSquare, AlertTriangle } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -128,6 +129,7 @@ const AdminEditReservation = () => {
     payment_status: string;
   }>({ customer_price: '', agency_price_currency: 'USD', agency_notes: '', payment_status: 'not_paid' });
   const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null);
+  const [originalPassengerCount, setOriginalPassengerCount] = useState<number>(1);
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [customerNotes, setCustomerNotes] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -158,6 +160,47 @@ const AdminEditReservation = () => {
     dropoff_lat: null as number | null,
     dropoff_lng: null as number | null,
   });
+
+  // Critical field detection for price-affecting changes
+  const criticalFields = ['pickup', 'dropoff', 'pickup_date', 'pickup_time', 'vehicle_type'];
+  
+  const getChangedFields = useMemo(() => {
+    if (!originalData) return new Set<string>();
+    const changed = new Set<string>();
+    
+    if (formData.pickup !== originalData.pickup) changed.add('pickup');
+    if (formData.dropoff !== originalData.dropoff) changed.add('dropoff');
+    if (formData.pickup_date !== originalData.pickup_date) changed.add('pickup_date');
+    if (formData.pickup_time !== originalData.pickup_time) changed.add('pickup_time');
+    if (formData.vehicle_type !== originalData.vehicle_type) changed.add('vehicle_type');
+    if (passengerNames.length !== originalPassengerCount) changed.add('passenger_count');
+    
+    return changed;
+  }, [formData, originalData, passengerNames.length, originalPassengerCount]);
+
+  const hasPriceAffectingChanges = getChangedFields.size > 0;
+
+  // Critical field label component
+  const CriticalFieldLabel = ({ label, fieldName, isPassengerCount = false }: { label: string; fieldName: string; isPassengerCount?: boolean }) => {
+    const isChanged = isPassengerCount ? getChangedFields.has('passenger_count') : getChangedFields.has(fieldName);
+    const isCritical = criticalFields.includes(fieldName) || isPassengerCount;
+    
+    return (
+      <div className="flex items-center gap-2 flex-wrap">
+        <Label>{label}</Label>
+        {isCritical && (
+          <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 bg-amber-500/10 text-amber-700 border-amber-300">
+            Fiyat Etkiler
+          </Badge>
+        )}
+        {isChanged && (
+          <Badge className="text-[10px] px-1 py-0 h-4 bg-blue-500 text-white animate-pulse">
+            Değişti
+          </Badge>
+        )}
+      </div>
+    );
+  };
 
   const getCurrencySymbol = (currency: string) => {
     return currencies.find(c => c.value === currency)?.symbol || currency;
@@ -216,6 +259,7 @@ const AdminEditReservation = () => {
         ? r.passenger_names 
         : [r.customer_name || ''];
       setPassengerNames(loadedPassengerNames);
+      setOriginalPassengerCount(loadedPassengerNames.length);
       
       const initialData = {
         customer_phone: r.customer_phone || '',
@@ -1723,10 +1767,30 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
         <Card>
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Price Affecting Changes Warning */}
+              {hasPriceAffectingChanges && (
+                <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+                  <AlertTriangle className="h-4 w-4 text-amber-600" />
+                  <AlertDescription className="text-amber-700 dark:text-amber-300">
+                    <strong>Dikkat:</strong> Kritik alanlar değiştirildi ({Array.from(getChangedFields).map(f => {
+                      const labels: Record<string, string> = {
+                        pickup: 'Alış',
+                        dropoff: 'Bırakış',
+                        pickup_date: 'Tarih',
+                        pickup_time: 'Saat',
+                        vehicle_type: 'Araç',
+                        passenger_count: 'Yolcu Sayısı'
+                      };
+                      return labels[f] || f;
+                    }).join(', ')}). Fiyat güncellemesi gerekebilir.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {/* Passenger Names Section */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Yolcular ({passengerNames.length}/{MAX_PASSENGERS})</Label>
+                  <CriticalFieldLabel label={`Yolcular (${passengerNames.length}/${MAX_PASSENGERS})`} fieldName="passenger_count" isPassengerCount />
                   {passengerNames.length < MAX_PASSENGERS && (
                     <Button
                       type="button"
@@ -1780,7 +1844,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Alış Noktası</Label>
+                  <CriticalFieldLabel label="Alış Noktası" fieldName="pickup" />
                   {formData.pickup_place_name && (
                     <div className="mb-2 p-2 bg-muted/50 rounded-lg">
                       <LocationDisplay
@@ -1805,7 +1869,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Bırakış Noktası</Label>
+                  <CriticalFieldLabel label="Bırakış Noktası" fieldName="dropoff" />
                   {formData.dropoff_place_name && (
                     <div className="mb-2 p-2 bg-muted/50 rounded-lg">
                       <LocationDisplay
@@ -1844,7 +1908,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Tarih</Label>
+                  <CriticalFieldLabel label="Tarih" fieldName="pickup_date" />
                   <Input
                     type="date"
                     value={formData.pickup_date}
@@ -1853,7 +1917,10 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Saat {formData.flight_number && formData.flight_number.length >= 3 && <span className="text-xs text-amber-600 font-normal">(Uçuş varış saatinden otomatik)</span>}</Label>
+                  <CriticalFieldLabel label="Saat" fieldName="pickup_time" />
+                  {formData.flight_number && formData.flight_number.length >= 3 && (
+                    <span className="text-xs text-amber-600 font-normal">(Uçuş varış saatinden otomatik)</span>
+                  )}
                   <Input
                     type="time"
                     value={formData.pickup_time}
@@ -1888,7 +1955,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Araç</Label>
+                  <CriticalFieldLabel label="Araç" fieldName="vehicle_type" />
                   <Select value={formData.vehicle_type} onValueChange={(v) => setFormData({...formData, vehicle_type: v})}>
                     <SelectTrigger>
                       <SelectValue />
