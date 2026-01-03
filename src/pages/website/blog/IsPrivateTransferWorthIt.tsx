@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const IsPrivateTransferWorthIt = () => {
-  const { getLocalizedPath } = useLanguage();
+  const { t, getLocalizedPath } = useLanguage();
 
   const faqItems = [
     {
@@ -41,8 +41,8 @@ const IsPrivateTransferWorthIt = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Is Private Transfer Worth It in Turkey? (Honest Analysis 2025)"
-        description="We break down the real costs and benefits of private airport transfers in Turkey. From safety to convenience, discover why thousands choose VIP transfers over taxis."
+        title={t('blogWorthItTitle')}
+        description={t('blogWorthItDesc')}
         keywords="private transfer Turkey worth it, Turkey airport transfer cost, VIP transfer value, should I book private transfer, Turkey taxi vs private car"
         canonicalPath="/blog/is-private-transfer-worth-it-turkey"
       />
@@ -51,8 +51,8 @@ const IsPrivateTransferWorthIt = () => {
           { type: 'LocalBusiness' },
           {
             type: 'Article',
-            headline: 'Is Private Transfer Worth It in Turkey?',
-            description: 'We break down the real costs and benefits of private airport transfers in Turkey. From safety to convenience, discover why thousands choose VIP transfers.',
+            headline: t('blogWorthItH1'),
+            description: t('blogWorthItDesc'),
             image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
             datePublished: '2024-11-20',
             dateModified: '2025-12-31',
@@ -76,19 +76,17 @@ const IsPrivateTransferWorthIt = () => {
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Blog
+          {t('backToBlog')}
         </Link>
 
         {/* Article Header */}
         <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">Travel Tips</Badge>
+          <Badge variant="secondary" className="mb-4">{t('travelTips')}</Badge>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-            Is Private Transfer Worth It in Turkey?
+            {t('blogWorthItH1')}
           </h1>
           <p className="text-xl text-muted-foreground mb-6">
-            We break down the real costs and benefits of private airport transfers in Turkey. 
-            From safety to convenience, discover why thousands of travelers choose VIP transfers 
-            over other options.
+            {t('blogWorthItIntro')}
           </p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -97,7 +95,7 @@ const IsPrivateTransferWorthIt = () => {
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              14 min read
+              14 {t('minRead')}
             </span>
           </div>
         </header>
