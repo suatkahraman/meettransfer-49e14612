@@ -824,7 +824,7 @@ const AdminEditReservation = () => {
     // Save agency details if agency is selected
     if (formData.agency_id && formData.agency_id !== 'none') {
       const driverFee = parseFloat(formData.price) || 0;
-      const agencyPrice = parseFloat(agencyDetails.customer_price) || 0;
+      const agencyPrice = safeParseFloat(agencyDetails.customer_price);
 
       // Check if record exists first
       const { data: existingAgencyDetail } = await supabase
@@ -835,20 +835,25 @@ const AdminEditReservation = () => {
 
       let agencyError;
       if (existingAgencyDetail) {
-        // Update existing record
+        // Update existing record (DO NOT overwrite customer_price with 0 when field is empty)
+        const updatePayload: Record<string, any> = {
+          company_amount: driverFee,
+          agency_notes: agencyDetails.agency_notes || null,
+          payment_status: agencyDetails.payment_status,
+        };
+
+        if (agencyPrice !== null) {
+          updatePayload.customer_price = agencyPrice;
+          updatePayload.agency_price_currency = agencyDetails.agency_price_currency;
+        }
+
         const { error } = await supabase
           .from('agency_reservation_details')
-          .update({
-            customer_price: agencyPrice,
-            agency_price_currency: agencyDetails.agency_price_currency,
-            company_amount: driverFee,
-            agency_notes: agencyDetails.agency_notes || null,
-            payment_status: agencyDetails.payment_status,
-          })
+          .update(updatePayload)
           .eq('reservation_id', id!);
         agencyError = error;
-      } else {
-        // Insert new record
+      } else if (agencyPrice !== null) {
+        // Insert new record only if we actually have an agency price
         const { error } = await supabase
           .from('agency_reservation_details')
           .insert({
@@ -864,7 +869,7 @@ const AdminEditReservation = () => {
 
       if (agencyError) {
         console.error('Failed to save agency details:', agencyError);
-      } else if (agencyPrice > 0) {
+      } else if ((agencyPrice ?? 0) > 0) {
         // Mark agency price as saved and lock it
         setAgencyPriceSaved(true);
         setIsEditingAgencyPrice(false);
@@ -1296,7 +1301,18 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                     setSaving(true);
                     try {
                       const priceValue = parseFloat(formData.price);
-                      
+
+                      // Resolve agency user id (used both for notification + linking agency details)
+                      const { data: agencyData, error: agencyFetchError } = await supabase
+                        .from('agencies')
+                        .select('user_id')
+                        .eq('id', formData.agency_id)
+                        .maybeSingle();
+
+                      if (agencyFetchError) {
+                        console.error('Failed to fetch agency user_id:', agencyFetchError);
+                      }
+
                       // Set price and change status to waiting_for_agency_approval
                       const { error } = await supabase
                         .from('reservations')
@@ -1308,6 +1324,37 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                         })
                         .eq('id', id);
                       if (error) throw error;
+
+                      // IMPORTANT: Keep agency_reservation_details.customer_price in sync (prevents negative profit)
+                      try {
+                        const { data: existingAgencyDetail } = await supabase
+                          .from('agency_reservation_details')
+                          .select('id')
+                          .eq('reservation_id', id!)
+                          .maybeSingle();
+
+                        if (existingAgencyDetail) {
+                          await supabase
+                            .from('agency_reservation_details')
+                            .update({
+                              customer_price: priceValue,
+                              agency_price_currency: formData.price_currency,
+                            })
+                            .eq('reservation_id', id!);
+                        } else if (agencyData?.user_id) {
+                          await supabase
+                            .from('agency_reservation_details')
+                            .insert({
+                              reservation_id: id,
+                              agency_user_id: agencyData.user_id,
+                              customer_price: priceValue,
+                              agency_price_currency: formData.price_currency,
+                              payment_status: 'not_paid',
+                            });
+                        }
+                      } catch (e) {
+                        console.error('Failed to sync agency_reservation_details price:', e);
+                      }
 
                       // Record price in history
                       try {
@@ -1335,12 +1382,6 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                       }
 
                       // Notify agency user in-app
-                      const { data: agencyData } = await supabase
-                        .from('agencies')
-                        .select('user_id')
-                        .eq('id', formData.agency_id)
-                        .maybeSingle();
-                      
                       if (agencyData?.user_id) {
                         try {
                           await supabase.functions.invoke('create-notification', {

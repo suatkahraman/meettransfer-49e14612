@@ -99,6 +99,8 @@ interface GooglePlacesAutocompleteProps {
   onPlaceSelected?: (value: string, details?: PlaceDetails) => void;
   /** Shorthand alias for onPlaceSelected with simplified signature */
   onPlaceSelect?: (place: { name?: string; formatted_address: string; lat?: number | null; lng?: number | null }) => void;
+  /** Called whenever the user types (manual input). */
+  onInputChange?: (value: string) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -110,6 +112,7 @@ interface GooglePlacesAutocompleteProps {
 export const GooglePlacesAutocomplete = ({
   onPlaceSelected,
   onPlaceSelect,
+  onInputChange,
   placeholder = 'Enter location',
   className,
   disabled = false,
@@ -233,6 +236,7 @@ export const GooglePlacesAutocomplete = ({
       disabled={disabled}
       maxLength={maxLength}
       autoComplete="off"
+      onInput={(e) => onInputChange?.((e.currentTarget as HTMLInputElement).value)}
       // CRITICAL: NO value, defaultValue, or onChange here
     />
   );

@@ -226,11 +226,19 @@ const AgencyEditReservation = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const validPassengerNames = passengerNames.filter(p => p.name.trim() !== '').map(p => p.name);
-    if (validPassengerNames.length === 0) {
+    const trimmedPassengerNames = passengerNames.map((p) => p.name.trim());
+
+    if (trimmedPassengerNames.every((n) => n === '')) {
       toast.error(t('passengerRequired'));
       return;
     }
+
+    if (trimmedPassengerNames.some((n) => n === '')) {
+      toast.error(t('passengerNameCannotBeEmpty') || 'Tüm yolcu isimleri dolu olmalı');
+      return;
+    }
+
+    const validPassengerNames = trimmedPassengerNames;
 
     setSaving(true);
 
@@ -428,14 +436,23 @@ const AgencyEditReservation = () => {
                 <GooglePlacesAutocomplete
                   placeholder={t('enterPickupPoint')}
                   initialValue={formData.pickup_place_name || formData.pickup}
+                  onInputChange={(value) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      pickup: value,
+                      pickup_place_name: '',
+                      pickup_lat: null,
+                      pickup_lng: null,
+                    }));
+                  }}
                   onPlaceSelect={(place) => {
-                    setFormData({
-                      ...formData,
+                    setFormData((prev) => ({
+                      ...prev,
                       pickup: place.formatted_address,
                       pickup_place_name: place.name || '',
                       pickup_lat: place.lat || null,
                       pickup_lng: place.lng || null,
-                    });
+                    }));
                   }}
                 />
               </div>
@@ -448,14 +465,23 @@ const AgencyEditReservation = () => {
                 <GooglePlacesAutocomplete
                   placeholder={t('enterDestination')}
                   initialValue={formData.dropoff_place_name || formData.dropoff}
+                  onInputChange={(value) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      dropoff: value,
+                      dropoff_place_name: '',
+                      dropoff_lat: null,
+                      dropoff_lng: null,
+                    }));
+                  }}
                   onPlaceSelect={(place) => {
-                    setFormData({
-                      ...formData,
+                    setFormData((prev) => ({
+                      ...prev,
                       dropoff: place.formatted_address,
                       dropoff_place_name: place.name || '',
                       dropoff_lat: place.lat || null,
                       dropoff_lng: place.lng || null,
-                    });
+                    }));
                   }}
                 />
               </div>
