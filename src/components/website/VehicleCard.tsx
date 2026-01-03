@@ -77,12 +77,7 @@ const VehicleCard = ({
             ))}
           </div>
         </div>
-        {/* Image caption/label */}
-        {images.length > 0 && selectedIndex < images.length && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 pointer-events-none">
-            <p className="text-white text-xs text-center truncate">{images[selectedIndex]?.alt}</p>
-          </div>
-        )}
+        {/* Image caption hidden for cleaner design - alt text still available for SEO/accessibility */}
         {images.length > 1 && (
           <>
             <button
