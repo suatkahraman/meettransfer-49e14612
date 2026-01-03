@@ -608,48 +608,68 @@ const AgencyReservationDetail = () => {
 
         {/* Edit and Cancel Actions - Show when reservation is editable */}
         {(canEditReservation() || canCancelReservation()) && (
-          <Card>
-            <CardContent className="py-4">
-              <div className="flex gap-3">
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardContent className="py-5">
+              <div className="flex flex-col sm:flex-row gap-3">
                 {canEditReservation() && (
                   <Button
                     variant="outline"
-                    className="flex-1"
+                    size="lg"
+                    className="flex-1 h-14 border-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all duration-200 group"
                     onClick={() => navigate(`/agency/reservation/${id}/edit`)}
                   >
-                    <Pencil className="h-4 w-4 mr-2" />
-                    {t('editReservation')}
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
+                        <Pencil className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-semibold text-foreground">{t('editReservation')}</div>
+                        <div className="text-xs text-muted-foreground">{t('modifyDetails')}</div>
+                      </div>
+                    </div>
                   </Button>
                 )}
                 {canCancelReservation() && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
-                        variant="destructive"
-                        className="flex-1"
+                        variant="outline"
+                        size="lg"
+                        className="flex-1 h-14 border-2 border-destructive/30 hover:border-destructive hover:bg-destructive/10 text-destructive transition-all duration-200 group"
                         disabled={cancelling}
                       >
-                        {cancelling ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4 mr-2" />
-                        )}
-                        {t('cancelReservation')}
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-destructive/10 group-hover:bg-destructive/20 flex items-center justify-center transition-colors">
+                            {cancelling ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </div>
+                          <div className="text-left">
+                            <div className="font-semibold">{t('cancelReservation')}</div>
+                            <div className="text-xs text-destructive/70">{t('cannotBeUndone')}</div>
+                          </div>
+                        </div>
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="max-w-md">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>{t('confirmCancellation')}</AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-destructive/10 flex items-center justify-center">
+                          <Trash2 className="h-7 w-7 text-destructive" />
+                        </div>
+                        <AlertDialogTitle className="text-center text-xl">{t('confirmCancellation')}</AlertDialogTitle>
+                        <AlertDialogDescription className="text-center">
                           {t('cancelReservationWarning')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                      <AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-4">
+                        <AlertDialogCancel className="flex-1 h-11">{t('cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleCancelReservation}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          className="flex-1 h-11 bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
+                          <Trash2 className="h-4 w-4 mr-2" />
                           {t('confirmCancel')}
                         </AlertDialogAction>
                       </AlertDialogFooter>
