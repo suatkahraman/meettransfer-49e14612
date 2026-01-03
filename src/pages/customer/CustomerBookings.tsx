@@ -44,6 +44,8 @@ interface Reservation {
   drivers?: {
     name: string;
     plate_number: string | null;
+    vehicle_model: string | null;
+    vehicle_color: string | null;
   } | null;
 }
 
@@ -138,7 +140,7 @@ const CustomerBookings = () => {
       .from('reservations')
       .select(`
         *,
-        drivers (name, plate_number)
+        drivers (name, plate_number, vehicle_model, vehicle_color)
       `)
       .eq('customer_id', user.id)
       .order('pickup_date', { ascending: false });
@@ -426,11 +428,19 @@ const CustomerBookings = () => {
                       {reservation.status === 'sent_to_driver' && (
                         <div className="bg-yellow-50 dark:bg-yellow-950/30 p-2 rounded text-sm text-yellow-700 dark:text-yellow-300">
                           {reservation.drivers ? (
-                            <div className="flex items-center gap-2 justify-center">
-                              <User className="h-4 w-4" />
-                              <span>{reservation.drivers.name}</span>
+                            <div className="flex flex-col items-center gap-1">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                <span>{reservation.drivers.name}</span>
+                              </div>
                               {reservation.drivers.plate_number && (
-                                <span className="font-mono">({reservation.drivers.plate_number})</span>
+                                <span className="font-mono text-xs">
+                                  {reservation.drivers.plate_number}
+                                  {reservation.drivers.vehicle_color && ` • ${reservation.drivers.vehicle_color}`}
+                                </span>
+                              )}
+                              {reservation.drivers.vehicle_model && (
+                                <span className="text-xs text-muted-foreground">{reservation.drivers.vehicle_model}</span>
                               )}
                             </div>
                           ) : (
