@@ -95,8 +95,7 @@ const statusLabels: Record<string, string> = {
 
 const paymentStatusLabels: Record<string, string> = {
   'not_paid': 'Not Paid',
-  'partially_paid': 'Partially Paid',
-  'paid': 'Paid',
+  'customer_pay_cash': 'Customer Pay Cash',
 };
 
 const AgencyReservationDetail = () => {
@@ -115,11 +114,10 @@ const AgencyReservationDetail = () => {
   const [rejecting, setRejecting] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
-  // Editable fields
-  const [customerPrice, setCustomerPrice] = useState('');
-  const [companyAmount, setCompanyAmount] = useState('');
-  const [agencyNotes, setAgencyNotes] = useState('');
+  // Editable fields - simplified: only payment status and passenger cash
   const [paymentStatus, setPaymentStatus] = useState('not_paid');
+  const [passengerCashAmount, setPassengerCashAmount] = useState('');
+  const [passengerCashCurrency, setPassengerCashCurrency] = useState('USD');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -157,10 +155,13 @@ const AgencyReservationDetail = () => {
 
       if (detailData) {
         setAgencyDetails(detailData);
-        setCustomerPrice(detailData.customer_price?.toString() || '0');
-        setCompanyAmount(detailData.company_amount?.toString() || '0');
-        setAgencyNotes(detailData.agency_notes || '');
         setPaymentStatus(detailData.payment_status || 'not_paid');
+      }
+      
+      // Load passenger cash from reservation
+      if (resData) {
+        setPassengerCashAmount(resData.passenger_cash_amount?.toString() || '');
+        setPassengerCashCurrency(resData.passenger_cash_currency || 'USD');
       }
 
       setLoading(false);
@@ -171,33 +172,49 @@ const AgencyReservationDetail = () => {
 
   const handleSave = async () => {
     if (!id || !agencyId) return;
+    
+    // Validate: if customer_pay_cash, passenger cash amount is required
+    if (paymentStatus === 'customer_pay_cash') {
+      const cashAmount = parseFloat(passengerCashAmount);
+      if (!cashAmount || cashAmount <= 0) {
+        toast.error('Yolcudan alınacak nakit tutarı zorunludur');
+        return;
+      }
+    }
+    
     setSaving(true);
 
-    const detailsData = {
-      reservation_id: id,
-      customer_price: parseFloat(customerPrice) || 0,
-      company_amount: parseFloat(companyAmount) || 0,
-      agency_notes: agencyNotes || null,
-      payment_status: paymentStatus,
-    };
-
     try {
+      // Update agency reservation details - only payment status
+      const detailsData = {
+        reservation_id: id,
+        payment_status: paymentStatus,
+      };
+
       if (agencyDetails) {
-        // Update existing
         const { error } = await supabase
           .from('agency_reservation_details')
           .update(detailsData)
           .eq('id', agencyDetails.id);
-
         if (error) throw error;
       } else {
-        // Insert new
         const { error } = await supabase
           .from('agency_reservation_details')
           .insert(detailsData);
-
         if (error) throw error;
       }
+
+      // Update reservation with passenger cash amount
+      const passengerCash = paymentStatus === 'customer_pay_cash' ? parseFloat(passengerCashAmount) || 0 : 0;
+      const { error: resError } = await supabase
+        .from('reservations')
+        .update({
+          passenger_cash_amount: passengerCash,
+          passenger_cash_currency: passengerCashCurrency,
+        })
+        .eq('id', id);
+
+      if (resError) throw resError;
 
       toast.success('Changes saved successfully');
       setIsEditing(false);
@@ -212,6 +229,9 @@ const AgencyReservationDetail = () => {
       if (data) {
         setAgencyDetails(data);
       }
+      
+      // Refresh reservation data
+      setReservation(prev => prev ? { ...prev, passenger_cash_amount: passengerCash, passenger_cash_currency: passengerCashCurrency } : null);
     } catch (error: any) {
       toast.error(error.message || 'Failed to save');
     } finally {
@@ -488,9 +508,7 @@ const AgencyReservationDetail = () => {
       reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
       `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
       '',
-      `Customer Price: ${currencySymbol}${agencyDetails?.customer_price || 0}`,
-      `Company Amount: ${currencySymbol}${agencyDetails?.company_amount || 0}`,
-      `Agency Profit: ${currencySymbol}${agencyDetails?.agency_profit || 0}`,
+      reservation.passenger_cash_amount ? `Passenger Cash: ${reservation.passenger_cash_currency || 'USD'} ${reservation.passenger_cash_amount}` : null,
       '',
       reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
       reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
@@ -501,8 +519,6 @@ const AgencyReservationDetail = () => {
     navigator.clipboard.writeText(details);
     toast.success('Reservation details copied');
   };
-
-  const calculatedProfit = (parseFloat(customerPrice) || 0) - (parseFloat(companyAmount) || 0);
 
   if (loading) {
     return (
@@ -852,9 +868,7 @@ const AgencyReservationDetail = () => {
                     reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
                     `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
                     '',
-                    `Customer Price: ${currencySymbol}${agencyDetails?.customer_price || 0}`,
-                    `Company Amount: ${currencySymbol}${agencyDetails?.company_amount || 0}`,
-                    `Agency Profit: ${currencySymbol}${agencyDetails?.agency_profit || 0}`,
+                    reservation.passenger_cash_amount ? `Passenger Cash: ${reservation.passenger_cash_currency || 'USD'} ${reservation.passenger_cash_amount}` : null,
                     '',
                     reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
                     reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
@@ -870,10 +884,10 @@ const AgencyReservationDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Agency Pricing Card */}
+        {/* Payment Status Card - Simplified */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>{t('agencyPricingNotes')}</CardTitle>
+            <CardTitle>{t('paymentStatus')}</CardTitle>
             {!isEditing && (
               <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                 <Edit className="h-4 w-4 mr-2" />
@@ -884,36 +898,6 @@ const AgencyReservationDetail = () => {
           <CardContent className="space-y-4">
             {isEditing ? (
               <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t('customerPrice')} ({currencySymbol})</Label>
-                    <Input
-                      type="number"
-                      value={customerPrice}
-                      onChange={(e) => setCustomerPrice(e.target.value)}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('companyAmount')} ({currencySymbol})</Label>
-                    <Input
-                      type="number"
-                      value={companyAmount}
-                      onChange={(e) => setCompanyAmount(e.target.value)}
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t('agencyProfit')}:</span>
-                    <span className={`font-bold ${calculatedProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {currencySymbol}{calculatedProfit.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-
                 <div className="space-y-2">
                   <Label>{t('paymentStatus')}</Label>
                   <Select value={paymentStatus} onValueChange={setPaymentStatus}>
@@ -922,21 +906,41 @@ const AgencyReservationDetail = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="not_paid">Not Paid</SelectItem>
-                      <SelectItem value="partially_paid">Partially Paid</SelectItem>
-                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="customer_pay_cash">Customer Pay Cash</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Agency Notes (Private)</Label>
-                  <Textarea
-                    value={agencyNotes}
-                    onChange={(e) => setAgencyNotes(e.target.value)}
-                    placeholder="Internal notes..."
-                    rows={3}
-                  />
-                </div>
+                {paymentStatus === 'customer_pay_cash' && (
+                  <div className="space-y-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <Label className="text-green-700">{t('passengerCashAmount')} *</Label>
+                    <div className="flex gap-2">
+                      <Select value={passengerCashCurrency} onValueChange={setPassengerCashCurrency}>
+                        <SelectTrigger className="w-24">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="USD">$</SelectItem>
+                          <SelectItem value="EUR">€</SelectItem>
+                          <SelectItem value="GBP">£</SelectItem>
+                          <SelectItem value="TRY">₺</SelectItem>
+                          <SelectItem value="AED">د.إ</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        type="number"
+                        value={passengerCashAmount}
+                        onChange={(e) => setPassengerCashAmount(e.target.value)}
+                        placeholder="0"
+                        className="flex-1"
+                        required
+                      />
+                    </div>
+                    <p className="text-sm text-green-600">
+                      {t('passengerCashInfo') || 'Bu tutar yolcudan nakit olarak alınacak ve bakiyenizden düşülecektir.'}
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   <Button 
@@ -962,37 +966,26 @@ const AgencyReservationDetail = () => {
               </>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-muted/30 p-3 rounded-lg">
-                    <div className="text-sm text-muted-foreground">Customer Price</div>
-                    <div className="text-xl font-bold">{currencySymbol}{agencyDetails?.customer_price || 0}</div>
-                  </div>
-                  <div className="bg-muted/30 p-3 rounded-lg">
-                    <div className="text-sm text-muted-foreground">Company Amount</div>
-                    <div className="text-xl font-bold">{currencySymbol}{agencyDetails?.company_amount || 0}</div>
-                  </div>
-                </div>
-
-                <div className="bg-primary/10 p-3 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Agency Profit:</span>
-                    <span className={`text-xl font-bold ${(agencyDetails?.agency_profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {currencySymbol}{agencyDetails?.agency_profit || 0}
-                    </span>
-                  </div>
-                </div>
-
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Payment Status:</span>
-                  <Badge variant={paymentStatus === 'paid' ? 'default' : 'secondary'}>
+                  <span className="text-muted-foreground">{t('paymentStatus')}:</span>
+                  <Badge variant={paymentStatus === 'customer_pay_cash' ? 'default' : 'secondary'}>
                     {paymentStatusLabels[agencyDetails?.payment_status || 'not_paid']}
                   </Badge>
                 </div>
 
-                {agencyDetails?.agency_notes && (
-                  <div className="bg-muted/30 p-3 rounded-lg">
-                    <div className="text-sm text-muted-foreground mb-1">Notes</div>
-                    <p>{agencyDetails.agency_notes}</p>
+                {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
+                  <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-green-700">{t('passengerCash')}:</span>
+                      <span className="text-xl font-bold text-green-600">
+                        {reservation.passenger_cash_currency === 'EUR' && '€'}
+                        {reservation.passenger_cash_currency === 'USD' && '$'}
+                        {reservation.passenger_cash_currency === 'GBP' && '£'}
+                        {reservation.passenger_cash_currency === 'TRY' && '₺'}
+                        {reservation.passenger_cash_currency === 'AED' && 'د.إ'}
+                        {reservation.passenger_cash_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
                   </div>
                 )}
               </>
