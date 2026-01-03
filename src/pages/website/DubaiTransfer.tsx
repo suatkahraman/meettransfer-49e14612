@@ -91,9 +91,9 @@ const DubaiTransfer = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Dubai Airport Transfer 2025 | VIP Private Transfer DXB to Palm Jumeirah, Downtown | Meet Transfer"
-        description="Book premium Dubai airport transfer from DXB & DWC. Luxury Mercedes fleet (Vito, V-Class, Maybach), professional drivers, 24/7 meet & greet. Fixed prices to Palm Jumeirah, Downtown Dubai, Marina. Flight tracking included."
-        keywords="Dubai airport transfer, DXB airport transfer, DWC airport transfer, Dubai VIP transfer, Palm Jumeirah transfer, Downtown Dubai transfer, Dubai Marina transfer, Al Maktoum airport transfer, Dubai private driver, Dubai luxury transfer, Dubai chauffeur service, JBR transfer, Business Bay transfer, Burj Khalifa transfer"
+        title={t("seoDubaiTitle")}
+        description={t("seoDubaiDesc")}
+        keywords={t("seoDubaiKeywords")}
         canonicalPath="/dubai-transfer"
         ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
@@ -121,8 +121,8 @@ const DubaiTransfer = () => {
       />
 
       <PageHeader
-        title="Dubai Airport Transfer"
-        subtitle="Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service"
+        title={t("dubaiAirportTransfer")}
+        subtitle={t("dubaiSubtitle")}
         backgroundImage={dubaiHeroImage}
       />
 
@@ -130,18 +130,17 @@ const DubaiTransfer = () => {
         {/* Main H1 Content */}
         <section className="prose max-w-none">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Private Airport Transfer in Dubai
+            {t("dubaiH1")}
           </h1>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            Experience seamless Dubai airport transfers with Meet Transfer. Our professional chauffeurs provide door-to-door service from Dubai International Airport (DXB) and Al Maktoum International Airport (DWC) to any destination in the city. Whether you're heading to the iconic Palm Jumeirah, the bustling Downtown Dubai, or the scenic Dubai Marina, our VIP meet & greet service ensures your driver will be waiting with a name board at the arrivals hall. We monitor all flights in real-time to ensure punctual pickup regardless of delays. Available 24/7, our luxury Mercedes vehicles offer premium comfort, WiFi, complimentary water, and professional service for your private Dubai transfer.
+            {t("dubaiIntro")}
           </p>
         </section>
 
-        {/* Airports Section */}
         <section>
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
             <Plane className="h-6 w-6 text-primary" />
-            Dubai Airports We Serve
+            {t("dubaiAirportsTitle")}
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
             {airports.map((airport) => (
@@ -181,7 +180,7 @@ const DubaiTransfer = () => {
         <section className="bg-secondary/50 rounded-2xl p-6">
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
             <Building2 className="h-6 w-6 text-primary" />
-            Why Choose Our Dubai Transfer Service
+            {t("whyChooseDubaiTransfer")}
           </h2>
           <div className="grid md:grid-cols-3 gap-4">
             <div className="bg-card p-4 rounded-lg">
