@@ -84,9 +84,9 @@ const CyprusTransfer = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Cyprus Airport Transfer 2025 | VIP Private Transfer Larnaca, Paphos, Ercan to Ayia Napa, Limassol | Meet Transfer"
-        description="Book premium Cyprus airport transfer from Larnaca (LCA), Paphos (PFO) & Ercan (ECN). Luxury Mercedes fleet, professional drivers, 24/7 meet & greet. Fixed prices to Ayia Napa, Limassol, Kyrenia, Nicosia. Northern Cyprus included."
-        keywords="Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ercan airport transfer, Ayia Napa transfer, Limassol transfer, Kyrenia transfer, Northern Cyprus transfer, Cyprus VIP transfer, Cyprus private driver, Protaras transfer, Famagusta transfer, Troodos transfer, Cyprus chauffeur service"
+        title={t("seoCyprusTitle")}
+        description={t("seoCyprusDesc")}
+        keywords={t("seoCyprusKeywords")}
         canonicalPath="/cyprus-transfer"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
       />
@@ -114,8 +114,8 @@ const CyprusTransfer = () => {
       />
 
       <PageHeader
-        title="Cyprus Airport Transfer"
-        subtitle="Mercedes Vito, V-Class | 24/7 Meet & Greet Service"
+        title={t("cyprusAirportTransfer")}
+        subtitle={t("cyprusSubtitle")}
         backgroundImage={cyprusHeroImage}
       />
 
@@ -123,10 +123,10 @@ const CyprusTransfer = () => {
         {/* Main H1 Content */}
         <section className="prose max-w-none">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Private Airport Transfer in Cyprus
+            {t("cyprusH1")}
           </h1>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            Discover the beauty of Cyprus with Meet Transfer's premium airport transfer service. We provide professional chauffeur service from all three major airports: Larnaca International Airport (LCA), Paphos International Airport (PFO), and Ercan International Airport (ECN) in Northern Cyprus. Whether you're heading to the party beaches of Ayia Napa, the historic streets of Limassol, the stunning harbor of Kyrenia, or the ancient ruins of Paphos, our VIP meet & greet service ensures a comfortable journey. Our professional drivers know every destination on the island and provide 24/7 service with luxury Mercedes vehicles, complimentary water, WiFi, and flight monitoring for your private Cyprus transfer.
+            {t("cyprusIntro")}
           </p>
         </section>
 
@@ -134,7 +134,7 @@ const CyprusTransfer = () => {
         <section>
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
             <Plane className="h-6 w-6 text-primary" />
-            Cyprus Airports We Serve
+            {t("cyprusAirportsTitle")}
           </h2>
           <div className="grid md:grid-cols-3 gap-4">
             {airports.map((airport) => (
@@ -174,7 +174,7 @@ const CyprusTransfer = () => {
         <section className="bg-secondary/50 rounded-2xl p-6">
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
             <Palmtree className="h-6 w-6 text-primary" />
-            Why Choose Our Cyprus Transfer Service
+            {t("whyChooseCyprusTransfer")}
           </h2>
           <div className="grid md:grid-cols-3 gap-4">
             <div className="bg-card p-4 rounded-lg">
