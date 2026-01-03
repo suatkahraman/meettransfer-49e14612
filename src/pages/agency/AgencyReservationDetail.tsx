@@ -430,7 +430,8 @@ const AgencyReservationDetail = () => {
       'waiting_for_agency_approval',
       'customer_approved',
       'confirmed',
-      'sent_to_driver'
+      'sent_to_driver',
+      'active'
     ];
     return editableStatuses.includes(reservation.status);
   };
@@ -446,7 +447,8 @@ const AgencyReservationDetail = () => {
       'waiting_for_agency_approval',
       'customer_approved',
       'confirmed',
-      'sent_to_driver'
+      'sent_to_driver',
+      'active'
     ];
     return cancellableStatuses.includes(reservation.status);
   };
