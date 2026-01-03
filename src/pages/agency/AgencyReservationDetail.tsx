@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
+import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -92,6 +93,7 @@ const AgencyReservationDetail = () => {
   const { id } = useParams();
   const { agencyId } = useUserRole();
   const { t } = useAgencyTranslations();
+  const { currencySymbol } = useAgencyLanguage();
   const { emailAdminAgencyPriceApproved, emailAdminAgencyPriceRejected } = useEmailNotifications();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState<Reservation | null>(null);
@@ -359,9 +361,9 @@ const AgencyReservationDetail = () => {
       reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
       `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
       '',
-      `Customer Price: ₺${agencyDetails?.customer_price || 0}`,
-      `Company Amount: ₺${agencyDetails?.company_amount || 0}`,
-      `Agency Profit: ₺${agencyDetails?.agency_profit || 0}`,
+      `Customer Price: ${currencySymbol}${agencyDetails?.customer_price || 0}`,
+      `Company Amount: ${currencySymbol}${agencyDetails?.company_amount || 0}`,
+      `Agency Profit: ${currencySymbol}${agencyDetails?.agency_profit || 0}`,
       '',
       reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
       reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
@@ -623,9 +625,9 @@ const AgencyReservationDetail = () => {
                     reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
                     `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
                     '',
-                    `Customer Price: ₺${agencyDetails?.customer_price || 0}`,
-                    `Company Amount: ₺${agencyDetails?.company_amount || 0}`,
-                    `Agency Profit: ₺${agencyDetails?.agency_profit || 0}`,
+                    `Customer Price: ${currencySymbol}${agencyDetails?.customer_price || 0}`,
+                    `Company Amount: ${currencySymbol}${agencyDetails?.company_amount || 0}`,
+                    `Agency Profit: ${currencySymbol}${agencyDetails?.agency_profit || 0}`,
                     '',
                     reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
                     reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
@@ -657,7 +659,7 @@ const AgencyReservationDetail = () => {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>{t('customerPrice')} (₺)</Label>
+                    <Label>{t('customerPrice')} ({currencySymbol})</Label>
                     <Input
                       type="number"
                       value={customerPrice}
@@ -666,7 +668,7 @@ const AgencyReservationDetail = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('companyAmount')} (₺)</Label>
+                    <Label>{t('companyAmount')} ({currencySymbol})</Label>
                     <Input
                       type="number"
                       value={companyAmount}
@@ -680,7 +682,7 @@ const AgencyReservationDetail = () => {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('agencyProfit')}:</span>
                     <span className={`font-bold ${calculatedProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      ₺{calculatedProfit.toFixed(2)}
+                      {currencySymbol}{calculatedProfit.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -736,11 +738,11 @@ const AgencyReservationDetail = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-muted/30 p-3 rounded-lg">
                     <div className="text-sm text-muted-foreground">Customer Price</div>
-                    <div className="text-xl font-bold">₺{agencyDetails?.customer_price || 0}</div>
+                    <div className="text-xl font-bold">{currencySymbol}{agencyDetails?.customer_price || 0}</div>
                   </div>
                   <div className="bg-muted/30 p-3 rounded-lg">
                     <div className="text-sm text-muted-foreground">Company Amount</div>
-                    <div className="text-xl font-bold">₺{agencyDetails?.company_amount || 0}</div>
+                    <div className="text-xl font-bold">{currencySymbol}{agencyDetails?.company_amount || 0}</div>
                   </div>
                 </div>
 
@@ -748,7 +750,7 @@ const AgencyReservationDetail = () => {
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Agency Profit:</span>
                     <span className={`text-xl font-bold ${(agencyDetails?.agency_profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      ₺{agencyDetails?.agency_profit || 0}
+                      {currencySymbol}{agencyDetails?.agency_profit || 0}
                     </span>
                   </div>
                 </div>
