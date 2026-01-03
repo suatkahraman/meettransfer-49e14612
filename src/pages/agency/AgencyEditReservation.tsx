@@ -107,6 +107,18 @@ const AgencyEditReservation = () => {
         return;
       }
 
+      // Check if pickup date is today - cannot edit on the day of transfer
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const pickupDate = new Date(data.pickup_date);
+      pickupDate.setHours(0, 0, 0, 0);
+      
+      if (pickupDate.getTime() <= today.getTime()) {
+        toast.error(t('cannotEditOnPickupDay'));
+        navigate(`/agency/reservation/${id}`);
+        return;
+      }
+
       setOriginalData(data);
       setFormData({
         pickup: data.pickup || '',

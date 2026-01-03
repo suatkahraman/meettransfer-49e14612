@@ -156,6 +156,8 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     confirmCancel: 'Yes, Cancel',
     reservationCancelled: 'Reservation cancelled successfully',
     failedToCancelReservation: 'Failed to cancel reservation',
+    reservationCannotBeEdited: 'Reservation cannot be edited',
+    cannotEditOnPickupDay: 'Reservation cannot be edited on the day of transfer',
     
     // Reports Page
     agencyReports: 'Agency Reports',
@@ -330,6 +332,8 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     confirmCancel: 'Evet, İptal Et',
     reservationCancelled: 'Rezervasyon başarıyla iptal edildi',
     failedToCancelReservation: 'Rezervasyon iptal edilemedi',
+    reservationCannotBeEdited: 'Rezervasyon düzenlenemez',
+    cannotEditOnPickupDay: 'Transfer günü rezervasyon düzenlenemez',
     
     // Reports Page
     agencyReports: 'Acenta Raporları',
