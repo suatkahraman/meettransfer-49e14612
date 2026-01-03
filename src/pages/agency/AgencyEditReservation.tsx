@@ -103,14 +103,16 @@ const AgencyEditReservation = () => {
         return;
       }
 
-      // Only allow editing certain statuses
+      // Only allow editing certain statuses - agencies can edit most active statuses
       const editableStatuses = [
         'awaiting-price',
         'pending_admin_review',
         'waiting_for_agency_approval',
         'customer_approved',
         'confirmed',
-        'sent_to_driver'
+        'sent_to_driver',
+        'active',
+        'in_progress'
       ];
       if (!editableStatuses.includes(data.status)) {
         toast.error(t('reservationCannotBeEdited'));
@@ -230,7 +232,7 @@ const AgencyEditReservation = () => {
       
       // For approved/confirmed reservations, changes require admin approval
       // Status goes to pending_admin_review for admin to approve/reject changes
-      const approvedStatuses = ['customer_approved', 'confirmed', 'sent_to_driver'];
+      const approvedStatuses = ['customer_approved', 'confirmed', 'sent_to_driver', 'active', 'in_progress'];
       const requiresAdminApproval = approvedStatuses.includes(originalData?.status || '');
       
       // Determine new status:
