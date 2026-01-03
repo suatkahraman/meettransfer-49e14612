@@ -67,6 +67,10 @@ const translations: Record<Language, Record<string, string>> = {
     phoneRequired: "Phone number is required",
     invalidEmail: "Please enter a valid email address",
     passwordMinLength: "Password must be at least 6 characters",
+    invalidCredentials: "Invalid email or password",
+    loginFailed: "Login failed. Please try again.",
+    tooManyRequests: "Too many login attempts. Please try again later.",
+    emailNotConfirmed: "Please confirm your email first",
     
     // Hero Section
     heroTitle: "Get Best Price Now",
@@ -584,6 +588,10 @@ const translations: Record<Language, Record<string, string>> = {
     phoneRequired: "Telefonnummer ist erforderlich",
     invalidEmail: "Bitte geben Sie eine gültige E-Mail-Adresse ein",
     passwordMinLength: "Passwort muss mindestens 6 Zeichen haben",
+    invalidCredentials: "Ungültige E-Mail oder Passwort",
+    loginFailed: "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    tooManyRequests: "Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut.",
+    emailNotConfirmed: "Bitte bestätigen Sie zuerst Ihre E-Mail",
     
     // Hero Section
     heroTitle: "Jetzt besten Preis erhalten",
@@ -1097,6 +1105,10 @@ const translations: Record<Language, Record<string, string>> = {
     phoneRequired: "Le numéro de téléphone est requis",
     invalidEmail: "Veuillez entrer une adresse e-mail valide",
     passwordMinLength: "Le mot de passe doit contenir au moins 6 caractères",
+    invalidCredentials: "Email ou mot de passe invalide",
+    loginFailed: "Échec de la connexion. Veuillez réessayer.",
+    tooManyRequests: "Trop de tentatives de connexion. Veuillez réessayer plus tard.",
+    emailNotConfirmed: "Veuillez d'abord confirmer votre e-mail",
     
     // Hero Section
     heroTitle: "Obtenez le Meilleur Prix Maintenant",
@@ -1610,6 +1622,10 @@ const translations: Record<Language, Record<string, string>> = {
     phoneRequired: "Номер телефона обязателен",
     invalidEmail: "Введите действительный адрес электронной почты",
     passwordMinLength: "Пароль должен содержать не менее 6 символов",
+    invalidCredentials: "Неверный email или пароль",
+    loginFailed: "Ошибка входа. Пожалуйста, попробуйте снова.",
+    tooManyRequests: "Слишком много попыток входа. Пожалуйста, попробуйте позже.",
+    emailNotConfirmed: "Пожалуйста, сначала подтвердите свой email",
     
     // Hero Section
     heroTitle: "Получите лучшую цену сейчас",
@@ -2123,6 +2139,10 @@ const translations: Record<Language, Record<string, string>> = {
     phoneRequired: "Il numero di telefono è obbligatorio",
     invalidEmail: "Inserisci un indirizzo email valido",
     passwordMinLength: "La password deve avere almeno 6 caratteri",
+    invalidCredentials: "Email o password non validi",
+    loginFailed: "Accesso fallito. Per favore riprova.",
+    tooManyRequests: "Troppi tentativi di accesso. Per favore riprova più tardi.",
+    emailNotConfirmed: "Per favore conferma prima la tua email",
     
     // Hero Section
     heroTitle: "Ottieni il Miglior Prezzo Ora",
@@ -2636,6 +2656,10 @@ const translations: Record<Language, Record<string, string>> = {
     phoneRequired: "El número de teléfono es obligatorio",
     invalidEmail: "Por favor ingresa un correo electrónico válido",
     passwordMinLength: "La contraseña debe tener al menos 6 caracteres",
+    invalidCredentials: "Correo electrónico o contraseña inválidos",
+    loginFailed: "Error de inicio de sesión. Por favor, intente de nuevo.",
+    tooManyRequests: "Demasiados intentos de inicio de sesión. Por favor, intente más tarde.",
+    emailNotConfirmed: "Por favor confirme su correo electrónico primero",
     
     // Hero Section
     heroTitle: "Obtén el Mejor Precio Ahora",
@@ -3149,6 +3173,10 @@ const translations: Record<Language, Record<string, string>> = {
     phoneRequired: "رقم الهاتف مطلوب",
     invalidEmail: "يرجى إدخال عنوان بريد إلكتروني صالح",
     passwordMinLength: "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+    invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صالحة",
+    loginFailed: "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+    tooManyRequests: "محاولات تسجيل دخول كثيرة. يرجى المحاولة لاحقاً.",
+    emailNotConfirmed: "يرجى تأكيد بريدك الإلكتروني أولاً",
     
     // Hero Section
     heroTitle: "احصل على أفضل سعر الآن",
@@ -3662,6 +3690,10 @@ const translations: Record<Language, Record<string, string>> = {
     phoneRequired: "Telefon numarası zorunludur",
     invalidEmail: "Lütfen geçerli bir e-posta adresi girin",
     passwordMinLength: "Şifre en az 6 karakter olmalıdır",
+    invalidCredentials: "Geçersiz e-posta veya şifre",
+    loginFailed: "Giriş başarısız. Lütfen tekrar deneyin.",
+    tooManyRequests: "Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin.",
+    emailNotConfirmed: "Lütfen önce e-postanızı onaylayın",
     
     // Hero Section
     heroTitle: "En İyi Fiyatı Şimdi Alın",
@@ -4180,6 +4212,10 @@ const translations: Record<Language, Record<string, string>> = {
     phoneRequired: "Номер телефону обов'язковий",
     invalidEmail: "Введіть дійсну адресу електронної пошти",
     passwordMinLength: "Пароль має містити щонайменше 6 символів",
+    invalidCredentials: "Невірний email або пароль",
+    loginFailed: "Помилка входу. Будь ласка, спробуйте ще раз.",
+    tooManyRequests: "Забагато спроб входу. Будь ласка, спробуйте пізніше.",
+    emailNotConfirmed: "Будь ласка, спочатку підтвердіть свій email",
     
     // Hero Section
     heroTitle: "Отримайте найкращу ціну зараз",
@@ -4693,6 +4729,10 @@ const translations: Record<Language, Record<string, string>> = {
     phoneRequired: "電話番号は必須です",
     invalidEmail: "有効なメールアドレスを入力してください",
     passwordMinLength: "パスワードは6文字以上必要です",
+    invalidCredentials: "メールアドレスまたはパスワードが無効です",
+    loginFailed: "ログインに失敗しました。もう一度お試しください。",
+    tooManyRequests: "ログイン試行回数が多すぎます。後でもう一度お試しください。",
+    emailNotConfirmed: "まずメールアドレスを確認してください",
     
     // Hero Section
     heroTitle: "今すぐ最高の価格を取得",

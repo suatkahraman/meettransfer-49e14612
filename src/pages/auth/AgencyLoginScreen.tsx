@@ -64,7 +64,21 @@ const AgencyLoginScreen = () => {
 
     try {
       const validation = loginSchema.parse({ email: email.trim(), password });
-      await signIn(validation.email, validation.password);
+      
+      const { error } = await signIn(validation.email, validation.password);
+      
+      if (error) {
+        // Handle specific Supabase auth errors
+        if (error.message?.includes('Invalid login credentials')) {
+          setErrors({ password: t('invalidCredentials') || 'Invalid email or password' });
+        } else if (error.message?.includes('Email not confirmed')) {
+          toast.error(t('emailNotConfirmed') || 'Please confirm your email first');
+        } else if (error.message?.includes('Too many requests')) {
+          toast.error(t('tooManyRequests') || 'Too many login attempts. Please try again later.');
+        } else {
+          toast.error(error.message || t('loginFailed') || 'Login failed');
+        }
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
@@ -74,6 +88,9 @@ const AgencyLoginScreen = () => {
           }
         });
         setErrors(fieldErrors);
+      } else {
+        console.error('Login error:', error);
+        toast.error(t('loginFailed') || 'Login failed. Please try again.');
       }
     } finally {
       setIsLoading(false);
