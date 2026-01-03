@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { z } from 'zod';
 import { ArrowLeft, Loader2, AlertCircle, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -202,18 +203,21 @@ const SignupScreen = () => {
             <ArrowLeft className="h-5 w-5" />
             <span className="text-sm">{t('back')}</span>
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleShare}
-            className="h-9 w-9"
-          >
-            {copied ? (
-              <Check className="h-5 w-5 text-green-500" />
-            ) : (
-              <Share2 className="h-5 w-5" />
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <AuthLanguageSelector />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleShare}
+              className="h-9 w-9"
+            >
+              {copied ? (
+                <Check className="h-5 w-5 text-green-500" />
+              ) : (
+                <Share2 className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
         </div>
       </header>
 
