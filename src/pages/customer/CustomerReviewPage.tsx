@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +13,7 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 const CustomerReviewPage = () => {
   const { reservationId } = useParams<{ reservationId: string }>();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -85,8 +87,8 @@ const CustomerReviewPage = () => {
   const handleSubmit = async () => {
     if (!user || !reservation || !driver || rating === 0) {
       toast({
-        title: "Please select a rating",
-        description: "Rating is required to submit your review",
+        title: t('pleaseSelectRating'),
+        description: t('ratingRequired'),
         variant: "destructive",
       });
       return;
@@ -94,8 +96,8 @@ const CustomerReviewPage = () => {
 
     if (reservation.status !== "completed") {
       toast({
-        title: "Cannot submit review",
-        description: "Reviews can only be submitted for completed transfers",
+        title: t('cannotSubmitReview'),
+        description: t('reviewsOnlyForCompleted'),
         variant: "destructive",
       });
       return;
@@ -115,8 +117,8 @@ const CustomerReviewPage = () => {
       if (error) {
         if (error.code === "23505") {
           toast({
-            title: "Review already submitted",
-            description: "You have already reviewed this transfer",
+            title: t('reviewAlreadySubmitted'),
+            description: t('reviewAlreadySubmitted'),
             variant: "destructive",
           });
         } else {
@@ -127,14 +129,14 @@ const CustomerReviewPage = () => {
 
       setSubmitted(true);
       toast({
-        title: "Thank you!",
-        description: "Your review has been submitted successfully",
+        title: t('thankYou'),
+        description: t('reviewSubmittedSuccess'),
       });
     } catch (error: any) {
       console.error("Error submitting review:", error);
       toast({
-        title: "Error",
-        description: "Failed to submit review. Please try again.",
+        title: t('cannotSubmitReview'),
+        description: t('failedToSubmitReview'),
         variant: "destructive",
       });
     } finally {
@@ -158,8 +160,8 @@ const CustomerReviewPage = () => {
         <div className="min-h-[60vh] flex items-center justify-center">
           <Card className="max-w-md w-full mx-4">
             <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground mb-4">Reservation not found</p>
-              <Button onClick={() => navigate("/")}>Go to Home</Button>
+              <p className="text-muted-foreground mb-4">{t('reservationNotFound')}</p>
+              <Button onClick={() => navigate("/")}>{t('goToHome')}</Button>
             </CardContent>
           </Card>
         </div>
@@ -177,13 +179,13 @@ const CustomerReviewPage = () => {
             className="mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to My Reservations
+            {t('backToMyReservations')}
           </Button>
 
           <Card>
             <CardHeader className="text-center pb-2">
               <CardTitle className="text-2xl">
-                {submitted ? "Thank You!" : "Rate Your Driver"}
+                {submitted ? t('thankYou') : t('rateYourDriver')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -193,7 +195,7 @@ const CustomerReviewPage = () => {
                     <CheckCircle className="h-16 w-16 text-green-500" />
                   </div>
                   <p className="text-muted-foreground">
-                    Your review has been submitted successfully.
+                    {t('reviewSubmittedSuccess')}
                   </p>
                   <div className="bg-muted rounded-lg p-4">
                     <div className="flex justify-center gap-1 mb-2">
@@ -220,23 +222,22 @@ const CustomerReviewPage = () => {
                   {/* Reservation Info */}
                   <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Reservation:</span>
+                      <span className="text-muted-foreground">{t('reservation')}:</span>
                       <span className="font-semibold">{reservation.reservation_code}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Date:</span>
+                      <span className="text-muted-foreground">{t('date')}:</span>
                       <span>{reservation.pickup_date}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Route:</span>
+                      <span className="text-muted-foreground">{t('route')}:</span>
                       <span className="text-right">{reservation.pickup} → {reservation.dropoff}</span>
                     </div>
                   </div>
 
-                  {/* Driver Info */}
                   {driver && (
                     <div className="text-center py-4 border-y">
-                      <p className="text-sm text-muted-foreground mb-1">Your Driver</p>
+                      <p className="text-sm text-muted-foreground mb-1">{t('yourDriver')}</p>
                       <p className="text-xl font-semibold">{driver.name}</p>
                       {driver.vehicle_model && (
                         <p className="text-sm text-muted-foreground">
@@ -246,10 +247,9 @@ const CustomerReviewPage = () => {
                     </div>
                   )}
 
-                  {/* Star Rating */}
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground mb-3">
-                      How would you rate your experience?
+                      {t('howWouldYouRate')}
                     </p>
                     <div className="flex justify-center gap-2">
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -273,24 +273,23 @@ const CustomerReviewPage = () => {
                     </div>
                     {rating > 0 && (
                       <p className="text-sm text-muted-foreground mt-2">
-                        {rating === 5 && "Excellent!"}
-                        {rating === 4 && "Very Good!"}
-                        {rating === 3 && "Good"}
-                        {rating === 2 && "Fair"}
-                        {rating === 1 && "Poor"}
+                        {rating === 5 && t('excellent')}
+                        {rating === 4 && t('veryGood')}
+                        {rating === 3 && t('good')}
+                        {rating === 2 && t('fair')}
+                        {rating === 1 && t('poor')}
                       </p>
                     )}
                   </div>
 
-                  {/* Comment */}
                   <div>
                     <label className="text-sm text-muted-foreground mb-2 block">
-                      Additional Comments (Optional)
+                      {t('additionalComments')}
                     </label>
                     <Textarea
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
-                      placeholder="Tell us about your experience..."
+                      placeholder={t('tellUsAboutExperience')}
                       rows={4}
                       maxLength={500}
                     />
@@ -299,14 +298,13 @@ const CustomerReviewPage = () => {
                     </p>
                   </div>
 
-                  {/* Submit Button */}
                   <Button
                     onClick={handleSubmit}
                     disabled={rating === 0 || submitting}
                     className="w-full"
                     size="lg"
                   >
-                    {submitting ? "Submitting..." : "Submit Review"}
+                    {submitting ? t('submittingReview') : t('submitReview')}
                   </Button>
                 </>
               )}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,7 @@ interface PortalData {
 export default function CustomerPortal() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [portalData, setPortalData] = useState<PortalData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -117,7 +119,7 @@ export default function CustomerPortal() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Loading your account...</p>
+          <p className="text-muted-foreground">{t('loadingYourAccount')}</p>
         </div>
       </div>
     );
@@ -131,9 +133,9 @@ export default function CustomerPortal() {
             <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">❌</span>
             </div>
-            <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+            <h2 className="text-xl font-semibold mb-2">{t('accessDenied')}</h2>
             <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={() => navigate("/")}>Go to Homepage</Button>
+            <Button onClick={() => navigate("/")}>{t('goToHomepage')}</Button>
           </CardContent>
         </Card>
       </div>
@@ -158,14 +160,14 @@ export default function CustomerPortal() {
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">Your Bookings</h2>
+              <h2 className="text-2xl font-bold">{t('yourBookings')}</h2>
               <p className="text-muted-foreground">
-                View and manage your transfer reservations
+                {t('viewAndManageBookings')}
               </p>
             </div>
             <Button onClick={() => navigate("/book")}>
               <Plus className="h-4 w-4 mr-2" />
-              New Booking
+              {t('newBooking')}
             </Button>
           </div>
 
@@ -177,9 +179,9 @@ export default function CustomerPortal() {
                   <Percent className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-semibold">40% Off Return Transfers!</p>
+                  <p className="font-semibold">{t('returnTransferDiscount')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Book a round-trip and get 40% discount on your return transfer
+                    {t('returnTransferDiscountDesc')}
                   </p>
                 </div>
               </div>
@@ -190,11 +192,11 @@ export default function CustomerPortal() {
             <Card>
               <CardContent className="py-12 text-center">
                 <Car className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                <h3 className="text-lg font-medium mb-2">No bookings yet</h3>
+                <h3 className="text-lg font-medium mb-2">{t('noBookingsYet')}</h3>
                 <p className="text-muted-foreground mb-4">
-                  Create your first transfer booking
+                  {t('createFirstBooking')}
                 </p>
-                <Button onClick={() => navigate("/book")}>Book a Transfer</Button>
+                <Button onClick={() => navigate("/book")}>{t('bookATransferPortal')}</Button>
               </CardContent>
             </Card>
           ) : (
@@ -214,7 +216,7 @@ export default function CustomerPortal() {
                           {reservation.is_return_transfer && (
                             <Badge variant="secondary" className="gap-1">
                               <Percent className="h-3 w-3" />
-                              Return (-40%)
+                              {t('returnLabel')}
                             </Badge>
                           )}
                         </div>
@@ -274,7 +276,7 @@ export default function CustomerPortal() {
                             onClick={() => handleCreateReturnTransfer(reservation)}
                           >
                             <Plus className="h-4 w-4 mr-2" />
-                            Add Return Transfer (40% Off)
+                            {t('addReturnTransferDiscount')}
                           </Button>
                         </div>
                       </>

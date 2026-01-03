@@ -394,7 +394,7 @@ const CustomerReservationDetail = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/customer/bookings')} className="text-primary-foreground hover:bg-primary-foreground/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-serif">Reservation Details</h1>
+          <h1 className="text-2xl font-serif">{t('reservationDetails')}</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button 
@@ -423,7 +423,7 @@ const CustomerReservationDetail = () => {
                     {reservation.reservation_code}
                   </div>
                 )}
-                <CardTitle className="text-xl">Transfer Details</CardTitle>
+                <CardTitle className="text-xl">{t('transferDetailsTitle')}</CardTitle>
               </div>
               <Badge className={statusColors[reservation.status] || 'bg-muted'}>
                 {getStatusLabel(reservation.status)}
@@ -461,7 +461,7 @@ const CustomerReservationDetail = () => {
             <div className="py-4 border-t">
               <div className="flex items-center gap-2 mb-3">
                 <Map className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Route Map</span>
+                <span className="text-sm font-medium">{t('routeMap')}</span>
               </div>
               <GoogleRouteMap
                 pickup={reservation.pickup}
@@ -475,7 +475,7 @@ const CustomerReservationDetail = () => {
               <div className="space-y-2 py-4 border-t">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Passengers ({reservation.passenger_names.length})</span>
+                  <span className="text-sm font-medium">{t('passengers')} ({reservation.passenger_names.length})</span>
                 </div>
                 <div className="pl-6 space-y-1">
                   {reservation.passenger_names.map((name, index) => (
@@ -495,7 +495,7 @@ const CustomerReservationDetail = () => {
                 ) : (
                   <>
                     <Plane className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">No flight info</span>
+                    <span className="text-sm text-muted-foreground">{t('noFlightInfo')}</span>
                   </>
                 )}
               </div>
@@ -592,7 +592,7 @@ const CustomerReservationDetail = () => {
             {priceDisplay && (
               <div className="bg-muted p-4 rounded-lg space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium">Price</span>
+                  <span className="font-medium">{t('price')}</span>
                   <div className="text-right">
                     {reservation.promo_code && reservation.price ? (
                       <>
@@ -657,7 +657,7 @@ const CustomerReservationDetail = () => {
                           }}
                         >
                           <CreditCard className="h-4 w-4 mr-2" />
-                          Pay Now
+                          {t('payNow')}
                         </Button>
                       </div>
                     )}
@@ -670,11 +670,11 @@ const CustomerReservationDetail = () => {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <Banknote className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">Payment Method</span>
+                        <span className="text-sm">{t('paymentMethod')}</span>
                       </div>
                       <Badge className="bg-green-100 text-green-700 border-green-200">
                         <Banknote className="h-3 w-3 mr-1" />
-                        Cash to Driver
+                        {t('cashToDriver')}
                       </Badge>
                     </div>
                   </div>
@@ -704,7 +704,7 @@ const CustomerReservationDetail = () => {
             {reservation.status === 'awaiting-price' && (
               <div className="bg-orange-50 dark:bg-orange-950/30 p-4 rounded-lg text-center">
                 <p className="text-orange-700 dark:text-orange-300">
-                  Our team is reviewing your request. You will receive a notification when the price is ready.
+                  {t('ourTeamReviewing')}
                 </p>
               </div>
             )}
@@ -714,10 +714,10 @@ const CustomerReservationDetail = () => {
               <div className="space-y-4">
                 <div className="bg-purple-50 dark:bg-purple-950/30 p-4 rounded-lg text-center">
                   <p className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-2">
-                    Your Transfer Price is Ready
+                    {t('priceReady')}
                   </p>
                   <p className="text-purple-600 dark:text-purple-400">
-                    Please review the price and confirm your booking
+                    {t('reviewPriceMessage')}
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -728,14 +728,14 @@ const CustomerReservationDetail = () => {
                     disabled={actionLoading}
                   >
                     <X className="h-4 w-4 mr-2" />
-                    Reject
+                    {t('reject')}
                   </Button>
                   <Button 
                     onClick={handleAcceptPrice}
                     disabled={actionLoading}
                   >
                     <Check className="h-4 w-4 mr-2" />
-                    Accept
+                    {t('accept')}
                   </Button>
                 </div>
               </div>
@@ -743,7 +743,7 @@ const CustomerReservationDetail = () => {
 
             {/* Driver Info */}
             <div className="bg-muted p-4 rounded-lg">
-              <div className="text-sm font-medium mb-3">Driver Information</div>
+              <div className="text-sm font-medium mb-3">{t('driverInformation')}</div>
               {reservation.drivers ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -766,7 +766,7 @@ const CustomerReservationDetail = () => {
                   </Button>
                 </div>
               ) : (
-                <p className="text-muted-foreground text-sm">Driver will be assigned soon.</p>
+                <p className="text-muted-foreground text-sm">{t('driverAssignedSoonMessage')}</p>
               )}
             </div>
 
@@ -774,7 +774,7 @@ const CustomerReservationDetail = () => {
             {reservation.status === 'customer_approved' && !reservation.drivers && (
               <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg text-center">
                 <p className="text-blue-700 dark:text-blue-300">
-                  Your booking is confirmed! A driver will be assigned shortly.
+                  {t('bookingConfirmed')}
                 </p>
               </div>
             )}
@@ -783,7 +783,7 @@ const CustomerReservationDetail = () => {
             {reservation.status === 'completed' && (
               <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg text-center">
                 <p className="text-green-700 dark:text-green-300">
-                  Thank you for choosing Meet Transfer! We hope you had a great experience.
+                  {t('thankYouMessage')}
                 </p>
               </div>
             )}
@@ -792,7 +792,7 @@ const CustomerReservationDetail = () => {
             {(reservation.status === 'customer_rejected' || reservation.status === 'cancelled_by_customer') && (
               <div className="bg-destructive/10 p-4 rounded-lg text-center">
                 <p className="text-destructive">
-                  This reservation has been cancelled.
+                  {t('reservationCancelledMessage')}
                 </p>
               </div>
             )}
@@ -802,7 +802,7 @@ const CustomerReservationDetail = () => {
               <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-lg text-center">
                 <AlertTriangle className="h-5 w-5 mx-auto text-amber-600 mb-2" />
                 <p className="text-amber-700 dark:text-amber-300">
-                  Your changes are being reviewed by our team. We'll notify you once they're confirmed.
+                  {t('changesUnderReview')}
                 </p>
               </div>
             )}
