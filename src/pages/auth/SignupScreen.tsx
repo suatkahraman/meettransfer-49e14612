@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { usePWADetect } from '@/hooks/usePWADetect';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Google Icon SVG component
@@ -55,10 +56,40 @@ const SignupScreen = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [copied, setCopied] = useState(false);
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { isIOS, isStandalone } = usePWADetect();
+  const { t } = useLanguage();
   const navigate = useNavigate();
+
+  const handleShare = async () => {
+    const shareUrl = window.location.origin + '/signup/customer';
+    const shareText = t('guestSignupShareText');
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Meet Transfer - Sign Up',
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          handleCopyLink(shareUrl);
+        }
+      }
+    } else {
+      handleCopyLink(shareUrl);
+    }
+  };
+
+  const handleCopyLink = (url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    toast.success(t('linkCopied'));
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Role-based redirect if already logged in
   useEffect(() => {
@@ -120,7 +151,7 @@ const SignupScreen = () => {
 
       if (signUpError) {
         if (signUpError.message.includes('already registered')) {
-          toast.error('This email is already registered. Please log in instead.');
+          toast.error(t('emailAlreadyRegistered'));
           navigate('/login');
         } else {
           toast.error(signUpError.message);
@@ -142,7 +173,7 @@ const SignupScreen = () => {
           console.error('Profile update error:', profileError);
         }
 
-        toast.success('Account created successfully! Welcome to Meet Transfer.');
+        toast.success(t('accountCreated'));
         navigate('/customer', { replace: true });
       }
     } catch (error) {
@@ -155,7 +186,7 @@ const SignupScreen = () => {
         });
         setErrors(fieldErrors);
       } else {
-        toast.error('An error occurred during sign up');
+        toast.error(t('loginFailed'));
       }
     } finally {
       setIsLoading(false);
@@ -166,11 +197,23 @@ const SignupScreen = () => {
     <div className="min-h-screen flex flex-col bg-secondary">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="flex items-center h-14 px-4">
+        <div className="flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2 text-foreground">
             <ArrowLeft className="h-5 w-5" />
-            <span className="text-sm">Back</span>
+            <span className="text-sm">{t('back')}</span>
           </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleShare}
+            className="h-9 w-9"
+          >
+            {copied ? (
+              <Check className="h-5 w-5 text-green-500" />
+            ) : (
+              <Share2 className="h-5 w-5" />
+            )}
+          </Button>
         </div>
       </header>
 
@@ -178,8 +221,8 @@ const SignupScreen = () => {
       <div className="flex-1 flex items-center justify-center p-4 py-8">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-2xl md:text-3xl font-serif">Create Account</CardTitle>
-            <CardDescription>Join Meet Transfer for premium transfers</CardDescription>
+            <CardTitle className="text-2xl md:text-3xl font-serif">{t('createAccount')}</CardTitle>
+            <CardDescription>{t('joinMeetTransfer')}</CardDescription>
           </CardHeader>
           
           <CardContent className="space-y-4">
@@ -188,9 +231,9 @@ const SignupScreen = () => {
               <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
                 <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium text-amber-600 dark:text-amber-400">iOS Uygulaması</p>
+                  <p className="font-medium text-amber-600 dark:text-amber-400">{t('iosAppNotice')}</p>
                   <p className="text-muted-foreground mt-1">
-                    Google ile kayıt Safari'de açılacaktır. Alternatif olarak e-posta ile kayıt olabilirsiniz.
+                    {t('iosGoogleSignupNotice')}
                   </p>
                 </div>
               </div>
@@ -218,11 +261,11 @@ const SignupScreen = () => {
                     const authUrl = `${window.location.origin}/signup?oauth=google`;
                     const opened = window.open(authUrl, '_blank');
                     if (!opened) {
-                      setGoogleError('iOS uygulamasında Google ile kayıt için Safari\'de açın.');
+                      setGoogleError(t('iosGoogleSignupNotice'));
                       setIsGoogleLoading(false);
                       return;
                     }
-                    toast.info('Google ile kayıt için Safari açılıyor...');
+                    toast.info(t('redirectingGoogle'));
                     setIsGoogleLoading(false);
                     return;
                   }
@@ -232,7 +275,7 @@ const SignupScreen = () => {
                     setGoogleError(error.message);
                   }
                 } catch (error) {
-                  setGoogleError('Google ile kayıt yapılamadı');
+                  setGoogleError(t('loginFailed'));
                 } finally {
                   setIsGoogleLoading(false);
                 }
@@ -245,7 +288,7 @@ const SignupScreen = () => {
                 <GoogleIcon />
               )}
               <span className="ml-2">
-                {isGoogleLoading ? 'Yönlendiriliyor...' : 'Continue with Google'}
+                {isGoogleLoading ? t('redirectingGoogle') : t('continueWithGoogle')}
               </span>
             </Button>
 
@@ -254,13 +297,13 @@ const SignupScreen = () => {
                 <Separator className="w-full" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">or</span>
+                <span className="bg-card px-2 text-muted-foreground">{t('or')}</span>
               </div>
             </div>
 
             <form onSubmit={handleSignup} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName">{t('fullName')}</Label>
                 <Input 
                   id="fullName" 
                   name="fullName" 
@@ -274,7 +317,7 @@ const SignupScreen = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t('phone')}</Label>
                 <Input 
                   id="phone" 
                   name="phone" 
@@ -288,7 +331,7 @@ const SignupScreen = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('email')}</Label>
                 <Input 
                   id="email" 
                   name="email" 
@@ -302,7 +345,7 @@ const SignupScreen = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('password')}</Label>
                 <Input 
                   id="password" 
                   name="password" 
@@ -313,7 +356,7 @@ const SignupScreen = () => {
                   autoComplete="new-password"
                 />
                 <p className="text-xs text-muted-foreground">
-                  1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
+                  {t('passwordFormat')}
                 </p>
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
@@ -329,9 +372,9 @@ const SignupScreen = () => {
                 />
                 <Label htmlFor="kvkk" className="text-sm text-muted-foreground leading-tight">
                   <Link to="/privacy" target="_blank" className="text-accent hover:underline">
-                    KVKK Aydınlatma Metni
+                    {t('kvkkLink')}
                   </Link>
-                  'ni okudum ve kabul ediyorum. Kişisel verilerimin işlenmesine onay veriyorum.
+                  {" "}{t('kvkkText').replace(t('kvkkLink'), '').replace("I have read and accept the ", "").replace(". ", " ")}
                 </Label>
               </div>
               {errors.kvkk && <p className="text-sm text-destructive">{errors.kvkk}</p>}
@@ -345,10 +388,10 @@ const SignupScreen = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Hesap oluşturuluyor...
+                    {t('creatingAccount')}
                   </>
                 ) : (
-                  'Hesap Oluştur'
+                  t('createAccount')
                 )}
               </Button>
             </form>
@@ -356,11 +399,11 @@ const SignupScreen = () => {
           
           <CardFooter className="flex flex-col gap-4 pb-8">
             <div className="text-center text-sm text-muted-foreground">
-              Already have an account?
+              {t('alreadyHaveAccount')}
             </div>
             <Link to="/login" className="w-full">
               <Button variant="outline" className="w-full h-12 rounded-xl">
-                Log In
+                {t('login')}
               </Button>
             </Link>
           </CardFooter>

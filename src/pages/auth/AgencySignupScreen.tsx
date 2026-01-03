@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { z } from 'zod';
 import { ArrowLeft, Loader2, Building2, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 // Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
 const passwordSchema = z.string()
@@ -51,7 +51,7 @@ const AgencySignupScreen = () => {
 
   const handleShare = async () => {
     const shareUrl = window.location.origin + '/signup/agency';
-    const shareText = t('agencySignupShareText') || 'Become a Meet Transfer agency partner!';
+    const shareText = t('agencySignupShareText');
     
     if (navigator.share) {
       try {
@@ -73,7 +73,7 @@ const AgencySignupScreen = () => {
   const handleCopyLink = (url: string) => {
     navigator.clipboard.writeText(url);
     setCopied(true);
-    toast.success(t('linkCopied') || 'Link copied to clipboard!');
+    toast.success(t('linkCopied'));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -130,7 +130,6 @@ const AgencySignupScreen = () => {
       });
 
       // Create agency application - admin will need to approve
-      // Use rpc or direct insert since table may not be in generated types yet
       const { error: insertError } = await supabase
         .from('agency_applications' as any)
         .insert({
@@ -140,16 +139,16 @@ const AgencySignupScreen = () => {
           phone: validation.phone,
           currency: validation.currency,
           comments: validation.comments || null,
-          password_hash: validation.password, // Will be used when approved
+          password_hash: validation.password,
           status: 'pending',
         } as any);
 
       if (insertError) {
         if (insertError.message.includes('duplicate') || insertError.message.includes('already exists')) {
-          toast.error('This email is already registered. Please contact us or try logging in.');
+          toast.error(t('emailAlreadyRegistered'));
         } else {
           console.error('Agency application error:', insertError);
-          toast.error('Failed to submit application. Please try again.');
+          toast.error(t('loginFailed'));
         }
         return;
       }
@@ -168,10 +167,9 @@ const AgencySignupScreen = () => {
         });
       } catch (notifyError) {
         console.error('Failed to notify admin:', notifyError);
-        // Don't block the user from completing the application
       }
 
-      toast.success('Agency application submitted! We will review and contact you shortly.');
+      toast.success(t('applicationSubmitted'));
       navigate('/', { replace: true });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -183,7 +181,7 @@ const AgencySignupScreen = () => {
         });
         setErrors(fieldErrors);
       } else {
-        toast.error('An error occurred during sign up');
+        toast.error(t('loginFailed'));
       }
     } finally {
       setIsLoading(false);
@@ -197,7 +195,7 @@ const AgencySignupScreen = () => {
         <div className="flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2 text-foreground">
             <ArrowLeft className="h-5 w-5" />
-            <span className="text-sm">Back</span>
+            <span className="text-sm">{t('back')}</span>
           </Link>
           <Button
             variant="ghost"
@@ -221,14 +219,14 @@ const AgencySignupScreen = () => {
             <div className="mx-auto w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-2">
               <Building2 className="h-6 w-6 text-accent" />
             </div>
-            <CardTitle className="text-2xl md:text-3xl font-serif">Agency Registration</CardTitle>
-            <CardDescription>Partner with Meet Transfer for premium transfers</CardDescription>
+            <CardTitle className="text-2xl md:text-3xl font-serif">{t('agencyRegistration')}</CardTitle>
+            <CardDescription>{t('partnerWithMeetTransfer')}</CardDescription>
           </CardHeader>
           
           <CardContent className="space-y-4">
             <form onSubmit={handleSignup} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="agencyName">Agency Name *</Label>
+                <Label htmlFor="agencyName">{t('agencyName')} *</Label>
                 <Input 
                   id="agencyName" 
                   name="agencyName" 
@@ -241,7 +239,7 @@ const AgencySignupScreen = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="contactName">Contact Person *</Label>
+                <Label htmlFor="contactName">{t('contactPerson')} *</Label>
                 <Input 
                   id="contactName" 
                   name="contactName" 
@@ -255,7 +253,7 @@ const AgencySignupScreen = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone *</Label>
+                <Label htmlFor="phone">{t('phone')} *</Label>
                 <Input 
                   id="phone" 
                   name="phone" 
@@ -269,7 +267,7 @@ const AgencySignupScreen = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">{t('email')} *</Label>
                 <Input 
                   id="email" 
                   name="email" 
@@ -283,7 +281,7 @@ const AgencySignupScreen = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="currency">Preferred Currency *</Label>
+                <Label htmlFor="currency">{t('preferredCurrencyLabel')} *</Label>
                 <Select value={currency} onValueChange={setCurrency}>
                   <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select currency" />
@@ -300,7 +298,7 @@ const AgencySignupScreen = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
+                <Label htmlFor="password">{t('password')} *</Label>
                 <Input 
                   id="password" 
                   name="password" 
@@ -311,17 +309,17 @@ const AgencySignupScreen = () => {
                   autoComplete="new-password"
                 />
                 <p className="text-xs text-muted-foreground">
-                  1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
+                  {t('passwordFormat')}
                 </p>
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="comments">Ek Bilgiler</Label>
+                <Label htmlFor="comments">{t('additionalInfo')}</Label>
                 <Textarea 
                   id="comments" 
                   name="comments" 
-                  placeholder="Acentanız hakkında bilgi, aylık beklenen transfer sayısı vb."
+                  placeholder={t('additionalInfoPlaceholder')}
                   className="min-h-[80px]"
                 />
                 {errors.comments && <p className="text-sm text-destructive">{errors.comments}</p>}
@@ -338,9 +336,9 @@ const AgencySignupScreen = () => {
                 />
                 <Label htmlFor="kvkk" className="text-sm text-muted-foreground leading-tight">
                   <Link to="/privacy" target="_blank" className="text-accent hover:underline">
-                    KVKK Aydınlatma Metni
+                    {t('kvkkLink')}
                   </Link>
-                  'ni okudum ve kabul ediyorum. Kişisel verilerimin işlenmesine onay veriyorum.
+                  {" "}{t('kvkkText').replace(t('kvkkLink'), '').replace("I have read and accept the ", "").replace(". ", " ")}
                 </Label>
               </div>
               {errors.kvkk && <p className="text-sm text-destructive">{errors.kvkk}</p>}
@@ -354,10 +352,10 @@ const AgencySignupScreen = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Gönderiliyor...
+                    {t('submittingApplication')}
                   </>
                 ) : (
-                  'Başvuru Gönder'
+                  t('submitApplication')
                 )}
               </Button>
             </form>
@@ -365,17 +363,17 @@ const AgencySignupScreen = () => {
           
           <CardFooter className="flex flex-col gap-4 pb-8">
             <div className="text-center text-sm text-muted-foreground">
-              Already have an account?
+              {t('alreadyHaveAccount')}
             </div>
             <Link to="/login" className="w-full">
               <Button variant="outline" className="w-full h-12 rounded-xl">
-                Log In
+                {t('login')}
               </Button>
             </Link>
             <div className="text-center text-sm text-muted-foreground">
-              Not an agency?{' '}
+              {t('notAnAgency')}{' '}
               <Link to="/signup" className="text-accent hover:underline">
-                Customer Sign Up
+                {t('customerSignUp')}
               </Link>
             </div>
           </CardFooter>
