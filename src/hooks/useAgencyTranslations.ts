@@ -149,6 +149,17 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     noTransactionsYet: 'No transactions yet',
     balanceTopUp: 'Balance Top-Up',
     deduction: 'Deduction',
+    
+    // Transaction History Page
+    transactionHistory: 'Transaction History',
+    reservationCompleted: 'Reservation Completed',
+    adjustment: 'Adjustment',
+    amountOwed: 'Amount owed',
+    creditBalance: 'Credit balance',
+    allTransactions: 'All Transactions',
+    noTransactions: 'No transactions yet',
+    balanceAfter: 'Balance',
+    viewReservation: 'View Reservation',
   },
   TR: {
     // Header & Navigation
@@ -283,6 +294,17 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     noTransactionsYet: 'Henüz işlem yok',
     balanceTopUp: 'Bakiye Yükleme',
     deduction: 'Kesinti',
+    
+    // Transaction History Page
+    transactionHistory: 'İşlem Geçmişi',
+    reservationCompleted: 'Rezervasyon Tamamlandı',
+    adjustment: 'Düzeltme',
+    amountOwed: 'Borçlu tutar',
+    creditBalance: 'Alacak bakiyesi',
+    allTransactions: 'Tüm İşlemler',
+    noTransactions: 'Henüz işlem bulunmuyor',
+    balanceAfter: 'Bakiye',
+    viewReservation: 'Rezervasyonu Görüntüle',
   },
   DE: {
     agencyPanel: 'Agentur-Panel',
