@@ -198,11 +198,15 @@ const currencyOptions = CURRENCY_OPTIONS;
     if (!date) missingFields.push(t("pickupDate") || "Date");
     if (!time) missingFields.push(t("pickupTime") || "Time");
     
-    // Validate email - now required
+    // Validate phone - required
+    const phoneTrimmed = customerPhone.trim();
+    if (!phoneTrimmed) {
+      missingFields.push(t("phone") || "Phone");
+    }
+    
+    // Validate email - optional but must be valid if provided
     const emailTrimmed = customerEmail.trim();
-    if (!emailTrimmed) {
-      missingFields.push(t("email") || "Email");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+    if (emailTrimmed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
       toast.error(t("invalidEmail") || "Please enter a valid email address");
       return;
     }
