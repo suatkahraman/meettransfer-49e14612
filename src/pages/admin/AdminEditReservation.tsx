@@ -933,25 +933,84 @@ const AdminEditReservation = () => {
       toast.error('Şoför mail hatası');
     }
 
-    // Send agency approval/rejection email if status changed from pending_admin_review
+    // Send agency approval/rejection email and push if status changed from pending_admin_review
     try {
       const prevStatus = (originalData?.status as string | undefined) || '';
       const prevAgencyId = (originalData?.agency_id as string | undefined) || '';
+      const prevDriverId = (originalData?.driver_id as string | undefined) || '';
       const newStatus = formData.status;
+      const newDriverId = formData.driver_id || '';
 
       // Check if this is an agency reservation that was pending and status changed
       if (prevStatus === 'pending_admin_review' && prevAgencyId && prevAgencyId !== 'none') {
+        // Get agency user id for push notification
+        const { data: agencyData } = await supabase
+          .from('agencies')
+          .select('user_id')
+          .eq('id', prevAgencyId)
+          .single();
+
         // Approved: status changed to confirmed, sent_to_driver, or customer_approved
         const approvedStatuses = ['confirmed', 'sent_to_driver', 'customer_approved'];
         if (approvedStatuses.includes(newStatus)) {
           console.log('Sending agency approval email for reservation:', id);
           await emailAgencyApproved(id!);
+          
+          // Send push notification to agency
+          if (agencyData?.user_id) {
+            await supabase.functions.invoke('create-notification', {
+              body: {
+                user_id: agencyData.user_id,
+                reservation_id: id,
+                title: 'Değişiklik Onaylandı',
+                message: `Rezervasyon değişikliğiniz admin tarafından onaylandı.`,
+                type: 'agency_update_approved',
+                send_push: true,
+              }
+            });
+          }
+
+          // Send push notification to driver if assigned
+          if (newDriverId) {
+            const { data: driver } = await supabase
+              .from('drivers')
+              .select('user_id')
+              .eq('id', newDriverId)
+              .single();
+
+            if (driver?.user_id) {
+              await supabase.functions.invoke('create-notification', {
+                body: {
+                  user_id: driver.user_id,
+                  reservation_id: id,
+                  title: 'Rezervasyon Güncellendi',
+                  message: `Acenta rezervasyonu güncelledi ve admin onayladı. Detayları kontrol edin.`,
+                  type: 'reservation_updated_approved',
+                  send_push: true,
+                }
+              });
+            }
+          }
         }
         // Rejected: status changed to customer_rejected or cancelled_by_customer
         const rejectedStatuses = ['customer_rejected', 'cancelled_by_customer'];
         if (rejectedStatuses.includes(newStatus)) {
           console.log('Sending agency rejection email for reservation:', id);
           await emailAgencyRejected(id!);
+
+          // Send push notification to agency about rejection
+          if (agencyData?.user_id) {
+            await supabase.functions.invoke('create-notification', {
+              body: {
+                user_id: agencyData.user_id,
+                reservation_id: id,
+                title: 'Değişiklik Reddedildi',
+                message: `Rezervasyon değişikliğiniz admin tarafından reddedildi.`,
+                type: 'agency_update_rejected',
+                send_push: true,
+              }
+            });
+          }
         }
       }
     } catch (e) {

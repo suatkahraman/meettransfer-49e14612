@@ -71,6 +71,8 @@ const statusColors: Record<string, string> = {
   'active': 'bg-blue-500/20 text-blue-700',
   'completed': 'bg-green-500/20 text-green-700',
   'customer_rejected': 'bg-red-500/20 text-red-700',
+  'cancelled_by_customer': 'bg-red-500/20 text-red-700',
+  'cancelled': 'bg-red-500/20 text-red-700',
 };
 
 const statusLabels: Record<string, string> = {
@@ -84,6 +86,8 @@ const statusLabels: Record<string, string> = {
   'active': 'Active',
   'completed': 'Completed',
   'customer_rejected': 'Rejected',
+  'cancelled_by_customer': 'Cancelled',
+  'cancelled': 'Cancelled',
 };
 
 const paymentStatusLabels: Record<string, string> = {
