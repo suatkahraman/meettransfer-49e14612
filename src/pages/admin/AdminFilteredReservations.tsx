@@ -4,11 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Calendar, Clock, User, UserCheck, Pencil } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, UserCheck, Pencil, Check, X } from 'lucide-react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
+import { toast } from 'sonner';
 
 interface Reservation {
   id: string;
@@ -28,6 +29,8 @@ interface Reservation {
   price_currency: string | null;
   status: string;
   driver_id: string | null;
+  driver_user_id: string | null;
+  agency_user_id: string | null;
   drivers?: {
     id: string;
     name: string;
@@ -76,6 +79,7 @@ const AdminFilteredReservations = () => {
   
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '-';
@@ -94,6 +98,7 @@ const AdminFilteredReservations = () => {
           pickup, dropoff, pickup_place_name, dropoff_place_name,
           pickup_date, pickup_time, flight_number, vehicle_type,
           payment_type, price, price_currency, status, driver_id,
+          driver_user_id, agency_user_id,
           drivers (id, name)
         `)
         .order('pickup_date', { ascending: false });
@@ -131,6 +136,91 @@ const AdminFilteredReservations = () => {
 
     fetchReservations();
   }, [filter]);
+
+  const handleApprove = async (reservation: Reservation) => {
+    setProcessingId(reservation.id);
+    try {
+      // Update reservation status to confirmed
+      const { error: updateError } = await supabase
+        .from('reservations')
+        .update({ status: 'confirmed' })
+        .eq('id', reservation.id);
+
+      if (updateError) throw updateError;
+
+      // Send notification to agency
+      if (reservation.agency_user_id) {
+        await supabase.functions.invoke('create-notification', {
+          body: {
+            userId: reservation.agency_user_id,
+            title: 'Rezervasyon Onaylandı',
+            message: `${reservation.reservation_code || reservation.id} kodlu rezervasyon admin tarafından onaylandı.`,
+            type: 'reservation_update',
+            reservationId: reservation.id,
+          },
+        });
+      }
+
+      // Send notification to driver
+      if (reservation.driver_user_id) {
+        await supabase.functions.invoke('create-notification', {
+          body: {
+            userId: reservation.driver_user_id,
+            title: 'Rezervasyon Güncellendi',
+            message: `${reservation.reservation_code || reservation.id} kodlu rezervasyon güncellendi ve onaylandı.`,
+            type: 'reservation_update',
+            reservationId: reservation.id,
+          },
+        });
+      }
+
+      // Remove from list
+      setReservations(prev => prev.filter(r => r.id !== reservation.id));
+      toast.success('Rezervasyon onaylandı');
+    } catch (error) {
+      console.error('Error approving reservation:', error);
+      toast.error('Onaylama sırasında hata oluştu');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleReject = async (reservation: Reservation) => {
+    setProcessingId(reservation.id);
+    try {
+      // Revert to previous status (sent_to_driver if has driver, otherwise confirmed)
+      const newStatus = reservation.driver_id ? 'sent_to_driver' : 'customer_approved';
+      
+      const { error: updateError } = await supabase
+        .from('reservations')
+        .update({ status: newStatus })
+        .eq('id', reservation.id);
+
+      if (updateError) throw updateError;
+
+      // Send notification to agency
+      if (reservation.agency_user_id) {
+        await supabase.functions.invoke('create-notification', {
+          body: {
+            userId: reservation.agency_user_id,
+            title: 'Güncelleme Reddedildi',
+            message: `${reservation.reservation_code || reservation.id} kodlu rezervasyon güncellemesi admin tarafından reddedildi.`,
+            type: 'reservation_update',
+            reservationId: reservation.id,
+          },
+        });
+      }
+
+      // Remove from list
+      setReservations(prev => prev.filter(r => r.id !== reservation.id));
+      toast.success('Güncelleme reddedildi');
+    } catch (error) {
+      console.error('Error rejecting reservation:', error);
+      toast.error('Reddetme sırasında hata oluştu');
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   const currentPath = `/admin/filtered-reservations?filter=${filter}`;
 
@@ -214,7 +304,30 @@ const AdminFilteredReservations = () => {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {filter === 'pending_admin_review' && (
+                        <>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleApprove(reservation)}
+                            disabled={processingId === reservation.id}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <Check className="h-4 w-4 mr-1" />
+                            Onayla
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleReject(reservation)}
+                            disabled={processingId === reservation.id}
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Reddet
+                          </Button>
+                        </>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
