@@ -585,6 +585,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerOnlyWhatsApp: "Only WhatsApp",
     footerAddress: "VIP Terminal IST Airport",
     footerRights: "All rights reserved.",
+    viewAllDestinations: "View All →",
   },
   DE: {
     // Navigation
@@ -1131,6 +1132,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerOnlyWhatsApp: "Nur WhatsApp",
     footerAddress: "VIP Terminal IST Airport",
     footerRights: "Alle Rechte vorbehalten.",
+    viewAllDestinations: "Alle anzeigen →",
   },
   FR: {
     // Navigation
@@ -1677,6 +1679,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerOnlyWhatsApp: "WhatsApp uniquement",
     footerAddress: "VIP Terminal IST Airport",
     footerRights: "Tous droits réservés.",
+    viewAllDestinations: "Voir tout →",
   },
   RU: {
     // Navigation
@@ -2223,6 +2226,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerOnlyWhatsApp: "Только WhatsApp",
     footerAddress: "VIP Terminal IST Airport",
     footerRights: "Все права защищены.",
+    viewAllDestinations: "Показать все →",
   },
   IT: {
     // Navigation
@@ -2769,6 +2773,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerOnlyWhatsApp: "Solo WhatsApp",
     footerAddress: "VIP Terminal IST Airport",
     footerRights: "Tutti i diritti riservati.",
+    viewAllDestinations: "Vedi tutti →",
   },
   ES: {
     // Navigation
@@ -3315,6 +3320,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerOnlyWhatsApp: "Solo WhatsApp",
     footerAddress: "VIP Terminal IST Airport",
     footerRights: "Todos los derechos reservados.",
+    viewAllDestinations: "Ver todo →",
   },
   AR: {
     // Navigation
@@ -3861,6 +3867,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerOnlyWhatsApp: "واتساب فقط",
     footerAddress: "VIP Terminal IST Airport",
     footerRights: "جميع الحقوق محفوظة.",
+    viewAllDestinations: "عرض الكل →",
   },
   TR: {
     // Navigation
@@ -4412,6 +4419,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerOnlyWhatsApp: "Sadece WhatsApp",
     footerAddress: "VIP Terminal IST Airport",
     footerRights: "Tüm hakları saklıdır.",
+    viewAllDestinations: "Tümünü Gör →",
   },
   UK: {
     // Navigation
@@ -4958,6 +4966,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerOnlyWhatsApp: "Тільки WhatsApp",
     footerAddress: "VIP Terminal IST Airport",
     footerRights: "Усі права захищені.",
+    viewAllDestinations: "Переглянути всі →",
   },
   JA: {
     // Navigation
@@ -5508,6 +5517,7 @@ const translations: Record<Language, Record<string, string>> = {
     footerOnlyWhatsApp: "WhatsAppのみ",
     footerAddress: "VIP Terminal IST Airport",
     footerRights: "全著作権所有。",
+    viewAllDestinations: "すべて見る →",
     
     // Trusted Partners
     trustedPartnersTitle: "信頼のパートナー",

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LogIn, LogOut, User, Download, Building2 } from "lucide-react";
+import { LogIn, LogOut, User, Download, Building2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "./LanguageSelector";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
@@ -12,6 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -38,6 +46,17 @@ const WebsiteHeader = () => {
     { path: "/blog", label: t("blog") || "Blog" },
     { path: "/about", label: t("about") },
     { path: "/contact", label: t("contact") },
+  ];
+
+  const destinationLinks = [
+    { path: "/istanbul-transfer", label: t("footerIstanbul") || "Istanbul Transfer" },
+    { path: "/antalya-transfer", label: t("footerAntalya") || "Antalya Transfer" },
+    { path: "/bodrum-transfer", label: t("footerBodrum") || "Bodrum Transfer" },
+    { path: "/dalaman-transfer", label: t("footerDalaman") || "Dalaman Transfer" },
+    { path: "/izmir-transfer", label: t("footerIzmir") || "Izmir Transfer" },
+    { path: "/cappadocia-transfer", label: t("footerCappadocia") || "Cappadocia Transfer" },
+    { path: "/dubai-transfer", label: t("footerDubai") || "Dubai Transfer" },
+    { path: "/cyprus-transfer", label: t("footerCyprus") || "Cyprus Transfer" },
   ];
 
   // Get dashboard path based on role
@@ -80,20 +99,99 @@ const WebsiteHeader = () => {
         </Link>
 
         {/* Center - Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={getLocalizedPath(link.path)}
-              className={`text-sm font-medium transition-colors ${
-                isActive(link.path) 
-                  ? "text-primary font-semibold" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+        <nav className="hidden md:flex items-center gap-4">
+          <Link
+            to={getLocalizedPath("/services")}
+            className={`text-sm font-medium transition-colors ${
+              isActive("/services") 
+                ? "text-primary font-semibold" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t("services") || "Services"}
+          </Link>
+          
+          {/* Destinations Dropdown */}
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger 
+                  className={`text-sm font-medium bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 ${
+                    location.pathname.includes("transfer") || isActive("/destinations")
+                      ? "text-primary font-semibold" 
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t("cities")}
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="grid gap-1 p-2 w-[200px]">
+                    {destinationLinks.map((dest) => (
+                      <NavigationMenuLink key={dest.path} asChild>
+                        <Link
+                          to={getLocalizedPath(dest.path)}
+                          className={`block px-3 py-2 text-sm rounded-md transition-colors hover:bg-accent ${
+                            isActive(dest.path) ? "bg-primary/10 text-primary font-semibold" : ""
+                          }`}
+                        >
+                          {dest.label}
+                        </Link>
+                      </NavigationMenuLink>
+                    ))}
+                    <NavigationMenuLink asChild>
+                      <Link
+                        to={getLocalizedPath("/destinations")}
+                        className="block px-3 py-2 text-sm rounded-md transition-colors bg-primary/5 hover:bg-primary/10 text-primary font-medium mt-1"
+                      >
+                        {t("viewAllDestinations") || "View All →"}
+                      </Link>
+                    </NavigationMenuLink>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+
+          <Link
+            to={getLocalizedPath("/fleet")}
+            className={`text-sm font-medium transition-colors ${
+              isActive("/fleet") 
+                ? "text-primary font-semibold" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t("fleet")}
+          </Link>
+          <Link
+            to={getLocalizedPath("/blog")}
+            className={`text-sm font-medium transition-colors ${
+              isActive("/blog") 
+                ? "text-primary font-semibold" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t("blog") || "Blog"}
+          </Link>
+          <Link
+            to={getLocalizedPath("/about")}
+            className={`text-sm font-medium transition-colors ${
+              isActive("/about") 
+                ? "text-primary font-semibold" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t("about")}
+          </Link>
+          <Link
+            to={getLocalizedPath("/contact")}
+            className={`text-sm font-medium transition-colors ${
+              isActive("/contact") 
+                ? "text-primary font-semibold" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t("contact")}
+          </Link>
         </nav>
 
         {/* Center - Book Button (Mobile) */}
