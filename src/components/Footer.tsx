@@ -115,8 +115,8 @@ export const Footer = () => {
             <ul className="space-y-3 text-primary-foreground/80 text-sm">
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 flex-shrink-0" />
-                <a href="https://wa.me/905528989898" target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors">
-                  +90 552 898 98 98 <span className="text-xs opacity-70">({t('footerOnlyWhatsApp')})</span>
+                <a href="https://wa.me/15558051101" target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors">
+                  +1 555 805 1101 <span className="text-xs opacity-70">({t('footerOnlyWhatsApp')})</span>
                 </a>
               </li>
               <li className="flex items-center gap-2">
