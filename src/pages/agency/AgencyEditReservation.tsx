@@ -84,8 +84,16 @@ const AgencyEditReservation = () => {
     driver_notes: '',
     customer_notes: '',
   });
-  const [passengerNames, setPassengerNames] = useState<{id: number; name: string}[]>([{id: Date.now(), name: ''}]);
-  const [nextPassengerId, setNextPassengerId] = useState(Date.now() + 1);
+
+  type PassengerField = { id: string; name: string };
+  const makePassengerId = () =>
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  const [passengerNames, setPassengerNames] = useState<PassengerField[]>([
+    { id: makePassengerId(), name: '' },
+  ]);
 
   useEffect(() => {
     const fetchReservation = async () => {
@@ -142,35 +150,32 @@ const AgencyEditReservation = () => {
         driver_notes: data.driver_notes || '',
         customer_notes: data.customer_notes || '',
       });
-      
-      const namesArray = data.passenger_names && data.passenger_names.length > 0 
-        ? data.passenger_names 
+
+      const namesArray = data.passenger_names && data.passenger_names.length > 0
+        ? data.passenger_names
         : [data.customer_name || ''];
-      const passengerObjects = namesArray.map((n, idx) => ({ id: Date.now() + idx, name: n }));
-      setPassengerNames(passengerObjects);
-      setNextPassengerId(Date.now() + namesArray.length);
-      
+
+      setPassengerNames(namesArray.map((name: string) => ({ id: makePassengerId(), name })));
+
       setLoading(false);
     };
 
     fetchReservation();
-  }, [id, agencyId, navigate, t]);
+  }, [id, agencyId, navigate]);
 
   const addPassenger = () => {
-    if (passengerNames.length < 15) {
-      setPassengerNames([...passengerNames, { id: nextPassengerId, name: '' }]);
-      setNextPassengerId(prev => prev + 1);
-    }
+    setPassengerNames((prev) => {
+      if (prev.length >= 15) return prev;
+      return [...prev, { id: makePassengerId(), name: '' }];
+    });
   };
 
-  const removePassenger = (id: number) => {
-    if (passengerNames.length > 1) {
-      setPassengerNames(passengerNames.filter(p => p.id !== id));
-    }
+  const removePassenger = (id: string) => {
+    setPassengerNames((prev) => (prev.length > 1 ? prev.filter((p) => p.id !== id) : prev));
   };
 
-  const updatePassenger = (id: number, value: string) => {
-    setPassengerNames(passengerNames.map(p => p.id === id ? { ...p, name: value } : p));
+  const updatePassenger = (id: string, value: string) => {
+    setPassengerNames((prev) => prev.map((p) => (p.id === id ? { ...p, name: value } : p)));
   };
 
   // Check if price-affecting fields have changed
