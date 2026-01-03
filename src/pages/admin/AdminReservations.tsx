@@ -82,6 +82,7 @@ const statusColors: Record<string, string> = {
   'completed': 'bg-green-500/20 text-green-700',
   'pending_admin_review': 'bg-amber-500/20 text-amber-700',
   'cancelled_by_customer': 'bg-destructive/20 text-destructive',
+  'cancelled_by_agency': 'bg-destructive/20 text-destructive',
   'cancelled': 'bg-destructive/20 text-destructive',
 };
 
@@ -96,6 +97,7 @@ const statusLabels: Record<string, string> = {
   'completed': 'Tamamlandı',
   'pending_admin_review': 'İnceleme Bekliyor',
   'cancelled_by_customer': 'Müşteri İptal Etti',
+  'cancelled_by_agency': 'Acenta İptal Etti',
   'cancelled': 'İptal Edildi',
 };
 

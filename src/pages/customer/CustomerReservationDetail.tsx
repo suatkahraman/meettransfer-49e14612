@@ -85,6 +85,7 @@ const statusColors: Record<string, string> = {
   'completed': 'bg-green-500/20 text-green-700',
   'pending_admin_review': 'bg-amber-500/20 text-amber-700',
   'cancelled_by_customer': 'bg-destructive/20 text-destructive',
+  'cancelled_by_agency': 'bg-destructive/20 text-destructive',
   'cancelled': 'bg-destructive/20 text-destructive',
 };
 
@@ -114,7 +115,9 @@ const CustomerReservationDetail = () => {
       'active': t('statusInProgress'),
       'completed': t('statusCompleted'),
       'pending_admin_review': t('statusUnderReview'),
-      'cancelled_by_customer': t('statusCancelled'),
+      'cancelled_by_customer': t('statusCancelledByCustomer'),
+      'cancelled_by_agency': t('statusCancelledByAgency'),
+      'cancelled': t('statusCancelled'),
     };
     return labels[status] || status;
   };
