@@ -69,20 +69,25 @@ export const MonthlyProfitCard = () => {
         if (!agencyError && agencyData) {
           const agencyMap = agencyData.reduce((acc, item) => {
             let tryAmount = 0;
+            // Acenta Geliri = company_amount_try (TRY'ye çevrilmiş tutar)
+            // Eğer TRY ise direkt company_amount kullan
+            // Eğer döviz ise ve çevrilmemişse 0 say (çeviri gerekiyor)
             if (item.company_amount_try) {
               tryAmount = item.company_amount_try;
             } else if (item.agency_price_currency === 'TRY') {
               tryAmount = item.company_amount || 0;
             } else {
-              tryAmount = item.company_amount || 0;
+              // Döviz çevrilmemiş - 0 olarak say
+              tryAmount = 0;
             }
             acc[item.reservation_id] = tryAmount;
             return acc;
           }, {} as Record<string, number>);
 
+          // Bütçe = reservations.price (şoför ücreti)
           reservations?.forEach(res => {
             totalAgencyIncome += agencyMap[res.id] || 0;
-            totalDriverExpense += res.price || 0;
+            totalDriverExpense += res.price || 0; // Bütçe = Şoför ücreti
           });
         }
       }
