@@ -73,6 +73,7 @@ const statusColors: Record<string, string> = {
   'completed': 'bg-green-500/20 text-green-700',
   'customer_rejected': 'bg-red-500/20 text-red-700',
   'cancelled_by_customer': 'bg-red-500/20 text-red-700',
+  'cancelled_by_agency': 'bg-red-500/20 text-red-700',
   'cancelled': 'bg-red-500/20 text-red-700',
 };
 
@@ -87,7 +88,8 @@ const statusLabels: Record<string, string> = {
   'active': 'Active',
   'completed': 'Completed',
   'customer_rejected': 'Rejected',
-  'cancelled_by_customer': 'Cancelled',
+  'cancelled_by_customer': 'Cancelled by Customer',
+  'cancelled_by_agency': 'Cancelled by Agency',
   'cancelled': 'Cancelled',
 };
 
@@ -347,7 +349,7 @@ const AgencyReservationDetail = () => {
     try {
       const { error } = await supabase
         .from('reservations')
-        .update({ status: 'cancelled_by_customer' })
+        .update({ status: 'cancelled_by_agency' })
         .eq('id', id);
 
       if (error) throw error;

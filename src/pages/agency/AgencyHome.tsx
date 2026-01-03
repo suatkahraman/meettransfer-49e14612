@@ -54,6 +54,7 @@ const statusColors: Record<string, string> = {
   'completed': 'bg-green-500/20 text-green-700',
   'cancelled': 'bg-red-500/20 text-red-700',
   'cancelled_by_customer': 'bg-red-500/20 text-red-700',
+  'cancelled_by_agency': 'bg-red-500/20 text-red-700',
   'customer_rejected': 'bg-red-500/20 text-red-700',
 };
 
@@ -69,7 +70,8 @@ const statusLabels: Record<string, string> = {
   'active': 'Active',
   'completed': 'Completed',
   'cancelled': 'Cancelled',
-  'cancelled_by_customer': 'Cancelled',
+  'cancelled_by_customer': 'Cancelled by Customer',
+  'cancelled_by_agency': 'Cancelled by Agency',
   'customer_rejected': 'Rejected',
 };
 

@@ -46,6 +46,8 @@ const statuses = [
   'completed',
   'pending_admin_review',
   'cancelled_by_customer',
+  'cancelled_by_agency',
+  'cancelled',
 ];
 
 const statusColors: Record<string, string> = {
@@ -59,6 +61,8 @@ const statusColors: Record<string, string> = {
   'completed': 'bg-green-500/20 text-green-700',
   'pending_admin_review': 'bg-amber-500/20 text-amber-700',
   'cancelled_by_customer': 'bg-destructive/20 text-destructive',
+  'cancelled_by_agency': 'bg-destructive/20 text-destructive',
+  'cancelled': 'bg-destructive/20 text-destructive',
 };
 
 const statusLabels: Record<string, string> = {
@@ -72,6 +76,8 @@ const statusLabels: Record<string, string> = {
   'completed': 'Tamamlandı',
   'pending_admin_review': 'İnceleme Gerekli',
   'cancelled_by_customer': 'Müşteri İptal Etti',
+  'cancelled_by_agency': 'Acenta İptal Etti',
+  'cancelled': 'İptal Edildi',
 };
 
 // Currency options
@@ -1079,12 +1085,12 @@ const AdminEditReservation = () => {
     
     const statusTranslations: Record<string, Record<string, string>> = {
       TR: statusLabels,
-      EN: { 'awaiting-price': 'Pending Price', 'waiting_for_customer_approval': 'Waiting Customer Approval', 'customer_approved': 'Customer Approved', 'customer_rejected': 'Customer Rejected', 'confirmed': 'Confirmed', 'sent_to_driver': 'Sent to Driver', 'active': 'Active', 'completed': 'Completed', 'pending_admin_review': 'Pending Review', 'cancelled_by_customer': 'Cancelled by Customer' },
-      DE: { 'awaiting-price': 'Preis ausstehend', 'waiting_for_customer_approval': 'Wartet auf Genehmigung', 'customer_approved': 'Kunde genehmigt', 'customer_rejected': 'Kunde abgelehnt', 'confirmed': 'Bestätigt', 'sent_to_driver': 'An Fahrer gesendet', 'active': 'Aktiv', 'completed': 'Abgeschlossen', 'pending_admin_review': 'Überprüfung erforderlich', 'cancelled_by_customer': 'Vom Kunden storniert' },
-      FR: { 'awaiting-price': 'Prix en attente', 'waiting_for_customer_approval': 'En attente d\'approbation', 'customer_approved': 'Client approuvé', 'customer_rejected': 'Client refusé', 'confirmed': 'Confirmé', 'sent_to_driver': 'Envoyé au chauffeur', 'active': 'Actif', 'completed': 'Terminé', 'pending_admin_review': 'En attente de révision', 'cancelled_by_customer': 'Annulé par le client' },
-      RU: { 'awaiting-price': 'Ожидание цены', 'waiting_for_customer_approval': 'Ожидание одобрения', 'customer_approved': 'Одобрено клиентом', 'customer_rejected': 'Отклонено', 'confirmed': 'Подтверждено', 'sent_to_driver': 'Отправлено водителю', 'active': 'Активно', 'completed': 'Завершено', 'pending_admin_review': 'На рассмотрении', 'cancelled_by_customer': 'Отменено клиентом' },
-      IT: { 'awaiting-price': 'Prezzo in attesa', 'waiting_for_customer_approval': 'In attesa di approvazione', 'customer_approved': 'Cliente approvato', 'customer_rejected': 'Cliente rifiutato', 'confirmed': 'Confermato', 'sent_to_driver': 'Inviato all\'autista', 'active': 'Attivo', 'completed': 'Completato', 'pending_admin_review': 'In revisione', 'cancelled_by_customer': 'Annullato dal cliente' },
-      ES: { 'awaiting-price': 'Precio pendiente', 'waiting_for_customer_approval': 'Esperando aprobación', 'customer_approved': 'Cliente aprobado', 'customer_rejected': 'Cliente rechazado', 'confirmed': 'Confirmado', 'sent_to_driver': 'Enviado al conductor', 'active': 'Activo', 'completed': 'Completado', 'pending_admin_review': 'En revisión', 'cancelled_by_customer': 'Cancelado por cliente' },
+      EN: { 'awaiting-price': 'Pending Price', 'waiting_for_customer_approval': 'Waiting Customer Approval', 'customer_approved': 'Customer Approved', 'customer_rejected': 'Customer Rejected', 'confirmed': 'Confirmed', 'sent_to_driver': 'Sent to Driver', 'active': 'Active', 'completed': 'Completed', 'pending_admin_review': 'Pending Review', 'cancelled_by_customer': 'Cancelled by Customer', 'cancelled_by_agency': 'Cancelled by Agency', 'cancelled': 'Cancelled' },
+      DE: { 'awaiting-price': 'Preis ausstehend', 'waiting_for_customer_approval': 'Wartet auf Genehmigung', 'customer_approved': 'Kunde genehmigt', 'customer_rejected': 'Kunde abgelehnt', 'confirmed': 'Bestätigt', 'sent_to_driver': 'An Fahrer gesendet', 'active': 'Aktiv', 'completed': 'Abgeschlossen', 'pending_admin_review': 'Überprüfung erforderlich', 'cancelled_by_customer': 'Vom Kunden storniert', 'cancelled_by_agency': 'Von Agentur storniert', 'cancelled': 'Storniert' },
+      FR: { 'awaiting-price': 'Prix en attente', 'waiting_for_customer_approval': "En attente d'approbation", 'customer_approved': 'Client approuvé', 'customer_rejected': 'Client refusé', 'confirmed': 'Confirmé', 'sent_to_driver': 'Envoyé au chauffeur', 'active': 'Actif', 'completed': 'Terminé', 'pending_admin_review': 'En attente de révision', 'cancelled_by_customer': 'Annulé par le client', 'cancelled_by_agency': "Annulé par l'agence", 'cancelled': 'Annulé' },
+      RU: { 'awaiting-price': 'Ожидание цены', 'waiting_for_customer_approval': 'Ожидание одобрения', 'customer_approved': 'Одобрено клиентом', 'customer_rejected': 'Отклонено', 'confirmed': 'Подтверждено', 'sent_to_driver': 'Отправлено водителю', 'active': 'Активно', 'completed': 'Завершено', 'pending_admin_review': 'На рассмотрении', 'cancelled_by_customer': 'Отменено клиентом', 'cancelled_by_agency': 'Отменено агентством', 'cancelled': 'Отменено' },
+      IT: { 'awaiting-price': 'Prezzo in attesa', 'waiting_for_customer_approval': 'In attesa di approvazione', 'customer_approved': 'Cliente approvato', 'customer_rejected': 'Cliente rifiutato', 'confirmed': 'Confermato', 'sent_to_driver': "Inviato all'autista", 'active': 'Attivo', 'completed': 'Completato', 'pending_admin_review': 'In revisione', 'cancelled_by_customer': 'Annullato dal cliente', 'cancelled_by_agency': "Annullato dall'agenzia", 'cancelled': 'Annullato' },
+      ES: { 'awaiting-price': 'Precio pendiente', 'waiting_for_customer_approval': 'Esperando aprobación', 'customer_approved': 'Cliente aprobado', 'customer_rejected': 'Cliente rechazado', 'confirmed': 'Confirmado', 'sent_to_driver': 'Enviado al conductor', 'active': 'Activo', 'completed': 'Completado', 'pending_admin_review': 'En revisión', 'cancelled_by_customer': 'Cancelado por cliente', 'cancelled_by_agency': 'Cancelado por agencia', 'cancelled': 'Cancelado' },
     };
     const statusLabel = (statusTranslations[lang] || statusTranslations.TR)[formData.status] || formData.status;
 

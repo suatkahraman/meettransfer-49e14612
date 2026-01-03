@@ -110,6 +110,7 @@ const DriverJobDetails = () => {
     'completed': 'bg-green-500/20 text-green-700',
     'cancelled': 'bg-red-500/20 text-red-700',
     'cancelled_by_customer': 'bg-red-500/20 text-red-700',
+    'cancelled_by_agency': 'bg-red-500/20 text-red-700',
     'customer_rejected': 'bg-red-500/20 text-red-700',
   };
 
