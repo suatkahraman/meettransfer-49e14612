@@ -11,7 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 
@@ -159,6 +161,37 @@ const CustomerEditReservation = () => {
     );
   };
 
+  // Check which specific fields changed for highlighting
+  const getChangedFields = () => {
+    if (!originalData) return {};
+    return {
+      pickup: formData.pickup !== originalData.pickup,
+      dropoff: formData.dropoff !== originalData.dropoff,
+      pickup_date: formData.pickup_date !== originalData.pickup_date,
+      pickup_time: formData.pickup_time !== originalData.pickup_time,
+      vehicle_type: formData.vehicle_type !== originalData.vehicle_type,
+      passenger_count: passengerNames.length !== (originalData.passenger_names?.length || 1),
+    };
+  };
+
+  const changedFields = getChangedFields();
+  const showPriceWarning = hasPriceAffectingChanges();
+
+  // Critical field label component
+  const CriticalFieldLabel = ({ children, isChanged }: { children: React.ReactNode; isChanged?: boolean }) => (
+    <div className="flex items-center gap-2 flex-wrap">
+      {children}
+      <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
+        {t('priceAffecting')}
+      </Badge>
+      {isChanged && (
+        <Badge variant="destructive" className="text-xs animate-pulse">
+          {t('changed')}
+        </Badge>
+      )}
+    </div>
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -300,10 +333,22 @@ const CustomerEditReservation = () => {
             </p>
           </CardHeader>
           <CardContent>
+            {/* Price Update Warning */}
+            {showPriceWarning && (
+              <Alert variant="destructive" className="mb-6 border-amber-500 bg-amber-500/10">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-600">
+                  {t('priceUpdateWarning')}
+                </AlertDescription>
+              </Alert>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Pick-up Point */}
-              <div className="space-y-2">
-                <Label>{t('pickupPoint')} *</Label>
+              <div className={`space-y-2 p-3 rounded-lg transition-colors ${changedFields.pickup ? 'bg-amber-500/10 border border-amber-500/30' : ''}`}>
+                <CriticalFieldLabel isChanged={changedFields.pickup}>
+                  <Label>{t('pickupPoint')} *</Label>
+                </CriticalFieldLabel>
                 <GooglePlacesAutocomplete
                   placeholder={t('enterPickupPoint')}
                   initialValue={formData.pickup_place_name || formData.pickup}
@@ -320,8 +365,10 @@ const CustomerEditReservation = () => {
               </div>
 
               {/* Drop-off */}
-              <div className="space-y-2">
-                <Label>{t('dropoffLocation')} *</Label>
+              <div className={`space-y-2 p-3 rounded-lg transition-colors ${changedFields.dropoff ? 'bg-amber-500/10 border border-amber-500/30' : ''}`}>
+                <CriticalFieldLabel isChanged={changedFields.dropoff}>
+                  <Label>{t('dropoffLocation')} *</Label>
+                </CriticalFieldLabel>
                 <GooglePlacesAutocomplete
                   placeholder={t('enterDestination')}
                   initialValue={formData.dropoff_place_name || formData.dropoff}
@@ -348,8 +395,10 @@ const CustomerEditReservation = () => {
 
               {/* Date & Time */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="date">{t('date')} *</Label>
+                <div className={`space-y-2 p-3 rounded-lg transition-colors ${changedFields.pickup_date ? 'bg-amber-500/10 border border-amber-500/30' : ''}`}>
+                  <CriticalFieldLabel isChanged={changedFields.pickup_date}>
+                    <Label htmlFor="date">{t('date')} *</Label>
+                  </CriticalFieldLabel>
                   <Input
                     id="date"
                     type="date"
@@ -359,8 +408,10 @@ const CustomerEditReservation = () => {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="time">{t('time')} *</Label>
+                <div className={`space-y-2 p-3 rounded-lg transition-colors ${changedFields.pickup_time ? 'bg-amber-500/10 border border-amber-500/30' : ''}`}>
+                  <CriticalFieldLabel isChanged={changedFields.pickup_time}>
+                    <Label htmlFor="time">{t('time')} *</Label>
+                  </CriticalFieldLabel>
                   <Input
                     id="time"
                     type="time"
@@ -372,8 +423,10 @@ const CustomerEditReservation = () => {
               </div>
 
               {/* Vehicle Type */}
-              <div className="space-y-2">
-                <Label>{t('vehicleType')} *</Label>
+              <div className={`space-y-2 p-3 rounded-lg transition-colors ${changedFields.vehicle_type ? 'bg-amber-500/10 border border-amber-500/30' : ''}`}>
+                <CriticalFieldLabel isChanged={changedFields.vehicle_type}>
+                  <Label>{t('vehicleType')} *</Label>
+                </CriticalFieldLabel>
                 <Select value={formData.vehicle_type} onValueChange={(v) => setFormData({ ...formData, vehicle_type: v })}>
                   <SelectTrigger>
                     <SelectValue placeholder={t('selectVehicle')} />
@@ -398,8 +451,10 @@ const CustomerEditReservation = () => {
               </div>
 
               {/* Passenger Names */}
-              <div className="space-y-4">
-                <Label>{t('passengers')} *</Label>
+              <div className={`space-y-4 p-3 rounded-lg transition-colors ${changedFields.passenger_count ? 'bg-amber-500/10 border border-amber-500/30' : ''}`}>
+                <CriticalFieldLabel isChanged={changedFields.passenger_count}>
+                  <Label>{t('passengers')} * ({passengerNames.length} {t('person')})</Label>
+                </CriticalFieldLabel>
                 {passengerNames.map((name, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
