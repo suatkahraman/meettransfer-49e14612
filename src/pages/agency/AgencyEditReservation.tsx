@@ -84,7 +84,8 @@ const AgencyEditReservation = () => {
     driver_notes: '',
     customer_notes: '',
   });
-  const [passengerNames, setPassengerNames] = useState<string[]>(['']);
+  const [passengerNames, setPassengerNames] = useState<{id: number; name: string}[]>([{id: Date.now(), name: ''}]);
+  const [nextPassengerId, setNextPassengerId] = useState(Date.now() + 1);
 
   useEffect(() => {
     const fetchReservation = async () => {
@@ -142,10 +143,12 @@ const AgencyEditReservation = () => {
         customer_notes: data.customer_notes || '',
       });
       
-      const names = data.passenger_names && data.passenger_names.length > 0 
+      const namesArray = data.passenger_names && data.passenger_names.length > 0 
         ? data.passenger_names 
         : [data.customer_name || ''];
-      setPassengerNames(names);
+      const passengerObjects = namesArray.map((n, idx) => ({ id: Date.now() + idx, name: n }));
+      setPassengerNames(passengerObjects);
+      setNextPassengerId(Date.now() + namesArray.length);
       
       setLoading(false);
     };
@@ -155,20 +158,19 @@ const AgencyEditReservation = () => {
 
   const addPassenger = () => {
     if (passengerNames.length < 15) {
-      setPassengerNames([...passengerNames, '']);
+      setPassengerNames([...passengerNames, { id: nextPassengerId, name: '' }]);
+      setNextPassengerId(prev => prev + 1);
     }
   };
 
-  const removePassenger = (index: number) => {
+  const removePassenger = (id: number) => {
     if (passengerNames.length > 1) {
-      setPassengerNames(passengerNames.filter((_, i) => i !== index));
+      setPassengerNames(passengerNames.filter(p => p.id !== id));
     }
   };
 
-  const updatePassenger = (index: number, value: string) => {
-    const updated = [...passengerNames];
-    updated[index] = value;
-    setPassengerNames(updated);
+  const updatePassenger = (id: number, value: string) => {
+    setPassengerNames(passengerNames.map(p => p.id === id ? { ...p, name: value } : p));
   };
 
   // Check if price-affecting fields have changed
@@ -219,7 +221,7 @@ const AgencyEditReservation = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
+    const validPassengerNames = passengerNames.filter(p => p.name.trim() !== '').map(p => p.name);
     if (validPassengerNames.length === 0) {
       toast.error(t('passengerRequired'));
       return;
@@ -262,7 +264,7 @@ const AgencyEditReservation = () => {
           pickup_time: formData.pickup_time,
           flight_number: formData.flight_number || null,
           vehicle_type: formData.vehicle_type,
-          customer_name: validPassengerNames[0],
+          customer_name: validPassengerNames[0] || '',
           customer_phone: formData.customer_phone,
           passenger_names: validPassengerNames,
           driver_notes: formData.driver_notes || null,
@@ -524,11 +526,11 @@ const AgencyEditReservation = () => {
                 <CriticalFieldLabel isChanged={changedFields.passenger_count}>
                   <Label>{t('passengers')} * ({passengerNames.length} {t('person')})</Label>
                 </CriticalFieldLabel>
-                {passengerNames.map((name, index) => (
-                  <div key={index} className="flex gap-2">
+                {passengerNames.map((passenger, index) => (
+                  <div key={passenger.id} className="flex gap-2">
                     <Input
-                      value={name}
-                      onChange={(e) => updatePassenger(index, e.target.value)}
+                      value={passenger.name}
+                      onChange={(e) => updatePassenger(passenger.id, e.target.value)}
                       placeholder={index === 0 ? t('primaryPassenger') : `${t('passenger')} ${index + 1}`}
                     />
                     {passengerNames.length > 1 && (
@@ -536,7 +538,7 @@ const AgencyEditReservation = () => {
                         type="button" 
                         variant="outline" 
                         size="icon"
-                        onClick={() => removePassenger(index)}
+                        onClick={() => removePassenger(passenger.id)}
                       >
                         ×
                       </Button>
