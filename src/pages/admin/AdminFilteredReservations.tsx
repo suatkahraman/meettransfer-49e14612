@@ -214,7 +214,7 @@ const AdminFilteredReservations = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/admin/reservations/${reservation.id}/edit?returnTo=${encodeURIComponent(currentPath)}`)}
+                        onClick={() => navigate(`/admin/reservations/${reservation.id}?returnTo=${encodeURIComponent(currentPath)}`)}
                       >
                         <Pencil className="h-4 w-4 mr-1" />
                         Düzenle
