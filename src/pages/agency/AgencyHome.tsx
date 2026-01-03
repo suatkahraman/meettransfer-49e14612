@@ -403,64 +403,66 @@ const AgencyHome = () => {
               </CardContent>
             </Card>
 
-            {/* Accounting Summary Cards */}
-            <div className="grid grid-cols-2 gap-3">
-              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Wallet className="h-4 w-4 text-primary" />
+            {/* Accounting Summary Card - Clickable */}
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
+              onClick={() => navigate('/agency/reports')}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-full bg-primary/10">
+                      <Wallet className="h-5 w-5 text-primary" />
+                    </div>
+                    <CardTitle className="text-lg">{t('accountingDetails')}</CardTitle>
+                  </div>
+                  <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Agency Debt */}
+                  <div className="space-y-1">
                     <span className="text-xs text-muted-foreground">{t('agencyDebt')}</span>
-                  </div>
-                  <p className={cn(
-                    "text-xl font-bold",
-                    accountingSummary.balance > 0 ? "text-destructive" : accountingSummary.balance < 0 ? "text-green-600" : ""
-                  )}>
-                    {currencySymbol}{Math.abs(accountingSummary.balance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                  </p>
-                  {accountingSummary.totalPassengerCash > 0 && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {t('passengerCash')}: -{currencySymbol}{accountingSummary.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    <p className={cn(
+                      "text-xl font-bold",
+                      accountingSummary.balance > 0 ? "text-destructive" : accountingSummary.balance < 0 ? "text-green-600" : ""
+                    )}>
+                      {currencySymbol}{Math.abs(accountingSummary.balance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                     </p>
-                  )}
-                </CardContent>
-              </Card>
+                    {accountingSummary.totalPassengerCash > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {t('passengerCash')}: -{currencySymbol}{accountingSummary.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                      </p>
+                    )}
+                  </div>
 
-              <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
+                  {/* Agency Expense / Revenue */}
+                  <div className="space-y-1">
                     <span className="text-xs text-muted-foreground">{t('agencyExpense')}</span>
+                    <p className="text-xl font-bold text-green-600">
+                      {currencySymbol}{accountingSummary.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    </p>
                   </div>
-                  <p className="text-xl font-bold text-green-600">
-                    {currencySymbol}{accountingSummary.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                  </p>
-                </CardContent>
-              </Card>
 
-              <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CreditCard className="h-4 w-4 text-blue-600" />
+                  {/* Paid */}
+                  <div className="space-y-1">
                     <span className="text-xs text-muted-foreground">{t('paid')}</span>
+                    <p className="text-xl font-bold text-blue-600">
+                      {currencySymbol}{accountingSummary.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    </p>
                   </div>
-                  <p className="text-xl font-bold text-blue-600">
-                    {currencySymbol}{accountingSummary.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                  </p>
-                </CardContent>
-              </Card>
 
-              <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="h-4 w-4 text-purple-600" />
+                  {/* This Month */}
+                  <div className="space-y-1">
                     <span className="text-xs text-muted-foreground">{t('thisMonth')}</span>
+                    <p className="text-xl font-bold text-purple-600">
+                      {accountingSummary.monthlyReservations} <span className="text-sm font-normal">{t('transfer')}</span>
+                    </p>
                   </div>
-                  <p className="text-xl font-bold text-purple-600">
-                    {accountingSummary.monthlyReservations} <span className="text-sm font-normal">{t('transfer')}</span>
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -476,24 +478,6 @@ const AgencyHome = () => {
                     <div>
                       <p className="font-medium">{t('newReservation')}</p>
                       <p className="text-sm text-muted-foreground">{t('createTransferRequest')}</p>
-                    </div>
-                  </div>
-                  <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
-                </CardContent>
-              </Card>
-
-              <Card 
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => navigate('/agency/reports')}
-              >
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-primary/10">
-                      <BarChart3 className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{t('accountingDetails')}</p>
-                      <p className="text-sm text-muted-foreground">{t('viewAllTransactions')}</p>
                     </div>
                   </div>
                   <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
