@@ -594,6 +594,39 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_budgets: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          month: number
+          notes: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          month: number
+          notes?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          month?: number
+          notes?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string

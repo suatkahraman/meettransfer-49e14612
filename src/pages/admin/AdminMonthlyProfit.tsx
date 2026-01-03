@@ -4,12 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from "date-fns";
 import { tr } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Building2, Car, Calculator, ArrowLeft, User, Banknote, RefreshCw, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Building2, Car, Calculator, ArrowLeft, User, Banknote, RefreshCw, Loader2, Pencil, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ReservationDetail {
   id: string;
@@ -46,6 +49,14 @@ interface MonthlyTotals {
   totalTransfers: number;
 }
 
+interface MonthlyBudget {
+  id?: string;
+  year: number;
+  month: number;
+  amount: number;
+  notes: string | null;
+}
+
 const AdminMonthlyProfit = () => {
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -60,6 +71,12 @@ const AdminMonthlyProfit = () => {
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [convertingRates, setConvertingRates] = useState(false);
   const [pendingConversions, setPendingConversions] = useState<number>(0);
+  
+  // Budget state
+  const [monthlyBudget, setMonthlyBudget] = useState<MonthlyBudget | null>(null);
+  const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
+  const [budgetForm, setBudgetForm] = useState({ amount: '', notes: '' });
+  const [savingBudget, setSavingBudget] = useState(false);
 
   const fetchMonthlyData = useCallback(async () => {
     setLoading(true);
@@ -248,9 +265,40 @@ const AdminMonthlyProfit = () => {
     }
   }, [currentMonth]);
 
+  // Fetch monthly budget
+  const fetchBudget = useCallback(async () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth() + 1;
+    
+    const { data, error } = await supabase
+      .from("monthly_budgets")
+      .select("*")
+      .eq("year", year)
+      .eq("month", month)
+      .maybeSingle();
+    
+    if (error) {
+      console.error("Error fetching budget:", error);
+      return;
+    }
+    
+    if (data) {
+      setMonthlyBudget({
+        id: data.id,
+        year: data.year,
+        month: data.month,
+        amount: data.amount,
+        notes: data.notes
+      });
+    } else {
+      setMonthlyBudget(null);
+    }
+  }, [currentMonth]);
+
   useEffect(() => {
     fetchMonthlyData();
-  }, [fetchMonthlyData]);
+    fetchBudget();
+  }, [fetchMonthlyData, fetchBudget]);
 
   const handlePrevMonth = () => {
     setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
@@ -260,6 +308,49 @@ const AdminMonthlyProfit = () => {
   const handleNextMonth = () => {
     setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
     setExpandedDay(null);
+  };
+
+  const openBudgetDialog = () => {
+    setBudgetForm({
+      amount: monthlyBudget?.amount?.toString() || '',
+      notes: monthlyBudget?.notes || ''
+    });
+    setBudgetDialogOpen(true);
+  };
+
+  const saveBudget = async () => {
+    setSavingBudget(true);
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth() + 1;
+    const amount = parseFloat(budgetForm.amount) || 0;
+    
+    try {
+      if (monthlyBudget?.id) {
+        // Update existing
+        const { error } = await supabase
+          .from("monthly_budgets")
+          .update({ amount, notes: budgetForm.notes || null })
+          .eq("id", monthlyBudget.id);
+        
+        if (error) throw error;
+      } else {
+        // Insert new
+        const { error } = await supabase
+          .from("monthly_budgets")
+          .insert({ year, month, amount, notes: budgetForm.notes || null });
+        
+        if (error) throw error;
+      }
+      
+      toast.success("Bütçe kaydedildi");
+      setBudgetDialogOpen(false);
+      fetchBudget();
+    } catch (error: any) {
+      console.error("Budget save error:", error);
+      toast.error("Bütçe kaydedilemedi: " + (error.message || "Bilinmeyen hata"));
+    } finally {
+      setSavingBudget(false);
+    }
   };
 
   // Convert all pending foreign currency amounts to TRY
@@ -453,29 +544,44 @@ const AdminMonthlyProfit = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
+              <Card 
+                className="bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800 cursor-pointer hover:shadow-md transition-shadow"
+                onClick={openBudgetDialog}
+              >
                 <CardContent className="p-4">
-                  <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 mb-1">
-                    <Banknote className="h-4 w-4" />
-                    <span className="text-xs font-medium">Gider (Bütçe)</span>
+                  <div className="flex items-center justify-between text-orange-600 dark:text-orange-400 mb-1">
+                    <div className="flex items-center gap-2">
+                      <Banknote className="h-4 w-4" />
+                      <span className="text-xs font-medium">Bütçe</span>
+                    </div>
+                    <Pencil className="h-3 w-3" />
                   </div>
                   <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-                    {formatCurrency(totals.totalDriverExpense)}
+                    {monthlyBudget ? formatCurrency(monthlyBudget.amount) : '₺0'}
                   </p>
+                  {monthlyBudget?.notes && (
+                    <p className="text-xs text-orange-600/70 mt-1 truncate">{monthlyBudget.notes}</p>
+                  )}
                 </CardContent>
               </Card>
 
-              <Card className={`${totals.totalNetProfit >= 0 ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'}`}>
-                <CardContent className="p-4">
-                  <div className={`flex items-center gap-2 mb-1 ${totals.totalNetProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                    {totals.totalNetProfit >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                    <span className="text-xs font-medium">Admin Kâr</span>
-                  </div>
-                  <p className={`text-2xl font-bold ${totals.totalNetProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
-                    {formatCurrency(totals.totalNetProfit)}
-                  </p>
-                </CardContent>
-              </Card>
+              {(() => {
+                const budgetAmount = monthlyBudget?.amount || 0;
+                const netProfit = totals.totalAgencyIncome - budgetAmount;
+                return (
+                  <Card className={`${netProfit >= 0 ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'}`}>
+                    <CardContent className="p-4">
+                      <div className={`flex items-center gap-2 mb-1 ${netProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {netProfit >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                        <span className="text-xs font-medium">Admin Kâr</span>
+                      </div>
+                      <p className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
+                        {formatCurrency(netProfit)}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
             </div>
 
             {/* Daily Breakdown with expandable details */}
@@ -612,42 +718,100 @@ const AdminMonthlyProfit = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-blue-500" />
-                      <span className="font-medium">Acenta Geliri (TL)</span>
+                {(() => {
+                  const budgetAmount = monthlyBudget?.amount || 0;
+                  const netProfit = totals.totalAgencyIncome - budgetAmount;
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-5 w-5 text-blue-500" />
+                          <span className="font-medium">Acenta Geliri (TL)</span>
+                        </div>
+                        <span className="text-xl font-bold text-blue-600">{formatCurrency(totals.totalAgencyIncome)}</span>
+                      </div>
+                      
+                      <div 
+                        className="flex justify-between items-center py-2 border-b cursor-pointer hover:bg-muted/30 rounded -mx-2 px-2 transition-colors"
+                        onClick={openBudgetDialog}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Banknote className="h-5 w-5 text-orange-500" />
+                          <span className="font-medium">Bütçe</span>
+                          <Pencil className="h-3 w-3 text-muted-foreground" />
+                        </div>
+                        <span className="text-xl font-bold text-orange-600">- {formatCurrency(budgetAmount)}</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center py-3 bg-muted/50 rounded-lg px-3 -mx-3">
+                        <div className="flex items-center gap-2">
+                          {netProfit >= 0 ? (
+                            <TrendingUp className="h-6 w-6 text-green-500" />
+                          ) : (
+                            <TrendingDown className="h-6 w-6 text-red-500" />
+                          )}
+                          <span className="text-lg font-bold">Admin Kâr</span>
+                        </div>
+                        <span className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {formatCurrency(netProfit)}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-xl font-bold text-blue-600">{formatCurrency(totals.totalAgencyIncome)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <div className="flex items-center gap-2">
-                      <Banknote className="h-5 w-5 text-orange-500" />
-                      <span className="font-medium">Gider (Bütçe)</span>
-                    </div>
-                    <span className="text-xl font-bold text-orange-600">- {formatCurrency(totals.totalDriverExpense)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center py-3 bg-muted/50 rounded-lg px-3 -mx-3">
-                    <div className="flex items-center gap-2">
-                      {totals.totalNetProfit >= 0 ? (
-                        <TrendingUp className="h-6 w-6 text-green-500" />
-                      ) : (
-                        <TrendingDown className="h-6 w-6 text-red-500" />
-                      )}
-                      <span className="text-lg font-bold">Admin Kâr</span>
-                    </div>
-                    <span className={`text-2xl font-bold ${totals.totalNetProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatCurrency(totals.totalNetProfit)}
-                    </span>
-                  </div>
-                </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           </>
         )}
       </main>
+
+      {/* Budget Edit Dialog */}
+      <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Banknote className="h-5 w-5 text-orange-500" />
+              Aylık Bütçe - {format(currentMonth, "MMMM yyyy", { locale: tr })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="budget-amount">Bütçe Miktarı (₺)</Label>
+              <Input
+                id="budget-amount"
+                type="number"
+                placeholder="Örn: 50000"
+                value={budgetForm.amount}
+                onChange={(e) => setBudgetForm({ ...budgetForm, amount: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="budget-notes">Notlar (opsiyonel)</Label>
+              <Textarea
+                id="budget-notes"
+                placeholder="Bu ay için bütçe notları..."
+                value={budgetForm.notes}
+                onChange={(e) => setBudgetForm({ ...budgetForm, notes: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setBudgetDialogOpen(false)} disabled={savingBudget}>
+              <X className="h-4 w-4 mr-2" />
+              İptal
+            </Button>
+            <Button onClick={saveBudget} disabled={savingBudget}>
+              {savingBudget ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
+              Kaydet
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
