@@ -24,6 +24,7 @@ interface Driver {
   name: string;
   plate_number: string | null;
   vehicle_model: string | null;
+  vehicle_color: string | null;
   phone: string;
 }
 
@@ -131,7 +132,7 @@ const AgencyReservationDetail = () => {
           pickup_date, pickup_time, flight_number, vehicle_type, status,
           passenger_names, driver_id, price, price_currency,
           passenger_cash_amount, passenger_cash_currency,
-          drivers:driver_id (id, name, plate_number, vehicle_model, phone)
+          drivers:driver_id (id, name, plate_number, vehicle_model, vehicle_color, phone)
         `)
         .eq('id', id)
         .single();
@@ -492,6 +493,7 @@ const AgencyReservationDetail = () => {
       reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
       reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
       reservation.drivers?.vehicle_model ? `Vehicle: ${reservation.drivers.vehicle_model}` : null,
+      reservation.drivers?.vehicle_color ? `Color: ${reservation.drivers.vehicle_color}` : null,
     ].filter(Boolean).join('\n');
 
     navigator.clipboard.writeText(details);
@@ -796,7 +798,12 @@ const AgencyReservationDetail = () => {
                     <p className="text-sm text-muted-foreground">{reservation.drivers.vehicle_model}</p>
                   )}
                   {reservation.drivers.plate_number && (
-                    <p className="text-sm font-mono">{reservation.drivers.plate_number}</p>
+                    <p className="text-sm font-mono">
+                      {reservation.drivers.plate_number}
+                      {reservation.drivers.vehicle_color && (
+                        <span className="text-muted-foreground font-normal ml-2">• {reservation.drivers.vehicle_color}</span>
+                      )}
+                    </p>
                   )}
                 </div>
               </div>
