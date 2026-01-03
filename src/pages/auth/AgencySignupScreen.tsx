@@ -10,8 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Building2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Building2, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
 const passwordSchema = z.string()
@@ -42,9 +43,39 @@ const AgencySignupScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currency, setCurrency] = useState('EUR');
+  const [copied, setCopied] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
+  const { t } = useLanguage();
   const navigate = useNavigate();
+
+  const handleShare = async () => {
+    const shareUrl = window.location.origin + '/signup/agency';
+    const shareText = t('agencySignupShareText') || 'Become a Meet Transfer agency partner!';
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Meet Transfer - Agency Registration',
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          handleCopyLink(shareUrl);
+        }
+      }
+    } else {
+      handleCopyLink(shareUrl);
+    }
+  };
+
+  const handleCopyLink = (url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    toast.success(t('linkCopied') || 'Link copied to clipboard!');
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Role-based redirect if already logged in
   useEffect(() => {
@@ -163,11 +194,23 @@ const AgencySignupScreen = () => {
     <div className="min-h-screen flex flex-col bg-secondary">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="flex items-center h-14 px-4">
+        <div className="flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2 text-foreground">
             <ArrowLeft className="h-5 w-5" />
             <span className="text-sm">Back</span>
           </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleShare}
+            className="h-9 w-9"
+          >
+            {copied ? (
+              <Check className="h-5 w-5 text-green-500" />
+            ) : (
+              <Share2 className="h-5 w-5" />
+            )}
+          </Button>
         </div>
       </header>
 
