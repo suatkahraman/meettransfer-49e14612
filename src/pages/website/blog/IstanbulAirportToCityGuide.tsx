@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 
 const IstanbulAirportToCityGuide = () => {
-  const { getLocalizedPath } = useLanguage();
+  const { t, getLocalizedPath } = useLanguage();
 
   const faqItems = [
     {
@@ -84,8 +84,8 @@ const IstanbulAirportToCityGuide = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Best Way to Get from Istanbul Airport to City Center (2025 Guide)"
-        description="Complete guide to Istanbul Airport transportation. Compare private transfers, taxis, metro & buses. Find the safest, fastest way to reach Taksim, Sultanahmet. Updated prices & tips."
+        title={t('blogIstanbul1Title')}
+        description={t('blogIstanbul1Desc')}
         keywords="Istanbul Airport to city, Istanbul Airport transfer, IST to Taksim, Istanbul Airport taxi, Istanbul Airport metro, Istanbul Airport to Sultanahmet, private transfer Istanbul"
         canonicalPath="/blog/istanbul-airport-to-city-best-way"
       />
@@ -94,8 +94,8 @@ const IstanbulAirportToCityGuide = () => {
           { type: 'LocalBusiness' },
           {
             type: 'Article',
-            headline: 'Best Way to Get from Istanbul Airport to City Center',
-            description: 'Complete guide to Istanbul Airport transportation. Compare private transfers, taxis, metro & buses. Find the safest, fastest way to reach Taksim, Sultanahmet.',
+            headline: t('blogIstanbul1H1'),
+            description: t('blogIstanbul1Desc'),
             image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
             datePublished: '2024-12-15',
             dateModified: '2025-12-31',
@@ -119,19 +119,17 @@ const IstanbulAirportToCityGuide = () => {
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Blog
+          {t('backToBlog')}
         </Link>
 
         {/* Article Header */}
         <header className="mb-12">
           <Badge variant="secondary" className="mb-4">Istanbul</Badge>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-            Best Way to Get from Istanbul Airport to City Center
+            {t('blogIstanbul1H1')}
           </h1>
           <p className="text-xl text-muted-foreground mb-6">
-            Complete guide to Istanbul Airport transportation options. Compare private transfers, 
-            taxis, metro, and buses. Find the safest, fastest, and most comfortable way to reach 
-            Taksim, Sultanahmet, or your hotel.
+            {t('blogIstanbul1Intro')}
           </p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -140,7 +138,7 @@ const IstanbulAirportToCityGuide = () => {
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              12 min read
+              12 {t('minRead')}
             </span>
           </div>
         </header>
@@ -440,21 +438,21 @@ const IstanbulAirportToCityGuide = () => {
         {/* CTA Section */}
         <div className="my-12 p-8 bg-primary/5 rounded-2xl text-center">
           <h3 className="font-serif text-2xl font-bold mb-4">
-            Ready to Book Your Istanbul Transfer?
+            {t('readyToBookTransfer')}
           </h3>
           <p className="text-muted-foreground mb-6">
-            Get a personalized quote in minutes. No hidden fees, no surprises.
+            {t('getInstantQuote')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to={getLocalizedPath("/book")}>
               <Button size="lg" variant="accent" className="gap-2">
-                Request Price
+                {t('requestPrice')}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link to={getLocalizedPath("/istanbul-transfer")}>
               <Button size="lg" variant="outline">
-                View Istanbul Transfers
+                {t('footerIstanbul')}
               </Button>
             </Link>
           </div>
@@ -462,7 +460,7 @@ const IstanbulAirportToCityGuide = () => {
 
         {/* FAQ Section */}
         <section className="my-12">
-          <h2 className="font-serif text-2xl font-bold mb-8">Frequently Asked Questions</h2>
+          <h2 className="font-serif text-2xl font-bold mb-8">{t('frequentlyAskedQuestions')}</h2>
           <div className="space-y-6">
             {faqItems.map((item, index) => (
               <div key={index} className="border-b border-border pb-6 last:border-0">
@@ -475,21 +473,21 @@ const IstanbulAirportToCityGuide = () => {
 
         {/* Related Articles */}
         <section className="my-12">
-          <h2 className="font-serif text-2xl font-bold mb-6">Related Articles</h2>
+          <h2 className="font-serif text-2xl font-bold mb-6">{t('relatedArticles')}</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <Link 
               to={getLocalizedPath("/blog/istanbul-airport-transfer-price-guide")}
               className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
             >
-              <h4 className="font-semibold mb-1">Istanbul Airport Transfer Price Guide 2025</h4>
-              <p className="text-sm text-muted-foreground">Complete pricing breakdown for all destinations</p>
+              <h4 className="font-semibold mb-1">{t('blogIstanbul2H1')}</h4>
+              <p className="text-sm text-muted-foreground">{t('readMore')}</p>
             </Link>
             <Link 
               to={getLocalizedPath("/blog/private-vs-taxi-transfer-turkey")}
               className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
             >
-              <h4 className="font-semibold mb-1">Private Transfer vs Taxi in Turkey</h4>
-              <p className="text-sm text-muted-foreground">Honest comparison to help you decide</p>
+              <h4 className="font-semibold mb-1">{t('blogPrivateTaxiH1')}</h4>
+              <p className="text-sm text-muted-foreground">{t('readMore')}</p>
             </Link>
           </div>
         </section>

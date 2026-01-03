@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const PrivateVsTaxiTurkey = () => {
-  const { getLocalizedPath } = useLanguage();
+  const { t, getLocalizedPath } = useLanguage();
 
   const faqItems = [
     {
@@ -41,8 +41,8 @@ const PrivateVsTaxiTurkey = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Private Transfer vs Taxi in Turkey: Honest Comparison (2025)"
-        description="Detailed comparison of private airport transfers and taxis in Turkey. We analyze safety, comfort, pricing, and reliability. Make the best choice for your trip."
+        title={t('blogPrivateTaxiTitle')}
+        description={t('blogPrivateTaxiDesc')}
         keywords="private transfer vs taxi Turkey, Turkey airport taxi, private car Turkey, Turkish taxi tips, airport transfer comparison, is private transfer worth it"
         canonicalPath="/blog/private-vs-taxi-transfer-turkey"
       />
@@ -51,8 +51,8 @@ const PrivateVsTaxiTurkey = () => {
           { type: 'LocalBusiness' },
           {
             type: 'Article',
-            headline: 'Private Transfer vs Taxi in Turkey: Which is Better?',
-            description: 'Detailed comparison of private airport transfers and taxis in Turkey. We analyze safety, comfort, pricing, and reliability.',
+            headline: t('blogPrivateTaxiH1'),
+            description: t('blogPrivateTaxiDesc'),
             image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
             datePublished: '2024-12-05',
             dateModified: '2025-12-31',
@@ -76,18 +76,17 @@ const PrivateVsTaxiTurkey = () => {
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Blog
+          {t('backToBlog')}
         </Link>
 
         {/* Article Header */}
         <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">Travel Tips</Badge>
+          <Badge variant="secondary" className="mb-4">{t('travelTips')}</Badge>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-            Private Transfer vs Taxi in Turkey: Which is Better?
+            {t('blogPrivateTaxiH1')}
           </h1>
           <p className="text-xl text-muted-foreground mb-6">
-            An honest comparison of private airport transfers and regular taxis in Turkey. We analyze 
-            safety, comfort, pricing, and reliability to help you make the best choice for your trip.
+            {t('blogPrivateTaxiIntro')}
           </p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -96,7 +95,7 @@ const PrivateVsTaxiTurkey = () => {
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              11 min read
+              11 {t('minRead')}
             </span>
           </div>
         </header>
