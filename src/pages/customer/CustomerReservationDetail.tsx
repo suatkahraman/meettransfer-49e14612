@@ -71,6 +71,7 @@ interface Reservation {
     phone: string;
     plate_number: string | null;
     vehicle_model: string | null;
+    vehicle_color: string | null;
   } | null;
 }
 
@@ -124,7 +125,7 @@ const CustomerReservationDetail = () => {
       .from('reservations')
       .select(`
         *,
-        drivers (name, phone, plate_number, vehicle_model)
+        drivers (name, phone, plate_number, vehicle_model, vehicle_color)
       `)
       .eq('id', id)
       .eq('customer_id', user.id)
@@ -768,6 +769,14 @@ const CustomerReservationDetail = () => {
                     <div className="flex items-center gap-2">
                       <Car className="h-4 w-4 text-muted-foreground" />
                       <span>{reservation.drivers.plate_number}</span>
+                      {reservation.drivers.vehicle_color && (
+                        <span className="text-muted-foreground">• {reservation.drivers.vehicle_color}</span>
+                      )}
+                    </div>
+                  )}
+                  {reservation.drivers.vehicle_model && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{reservation.drivers.vehicle_model}</span>
                     </div>
                   )}
                   {/* WhatsApp Support Button */}
