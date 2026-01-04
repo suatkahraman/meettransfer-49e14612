@@ -460,8 +460,7 @@ ${dropoffFormatted}
 
 ${reservation.flight_number ? `${t('flightNumber')}: ${reservation.flight_number}\n` : ''}
 ${t('vehicle')}: ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}
-${t('price')}: ${reservation.price ? `${currencySymbol}${reservation.price}` : '—'}
-${t('cashCollectedLabel')}: ${reservation.driver_cash_amount ? `${currencySymbol}${reservation.driver_cash_amount}` : '—'}
+${reservation.passenger_cash_amount ? `${t('cashToCollect')}: ${getCurrencySymbol(reservation.passenger_cash_currency)}${reservation.passenger_cash_amount}\n` : ''}${t('cashCollectedLabel')}: ${reservation.driver_cash_amount ? `${currencySymbol}${reservation.driver_cash_amount}` : '—'}
 
 ${t('phone')}: ${reservation.customer_phone}
 ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reservation.driver_notes || '—'}
@@ -681,14 +680,7 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
                 </div>
               </div>
 
-              {/* Price Display */}
-              <div className="flex items-start gap-3">
-                <DollarSign className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <div className="text-sm text-muted-foreground">{t('budget')}</div>
-                  <div className="font-bold text-lg">{formatPrice(reservation.price, reservation.price_currency)}</div>
-                </div>
-              </div>
+              {/* Price Display - Hidden from drivers, they only see passenger cash */}
 
               {/* Yolcudan Alınacak Nakit - Display only if set */}
               {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
@@ -761,24 +753,11 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              {t('transferPriceAndCash')}
+              {t('cashAndNotes') || 'Cash & Notes'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="driver_price">{t('transferPrice')} ({currencySymbol})</Label>
-              <MoneyInput
-                id="driver_price"
-                currencySymbol={currencySymbol}
-                placeholder={t('enterFinalPrice')}
-                value={driverPrice}
-                onValueChange={setDriverPrice}
-                aria-label={`${t('transferPrice')} (${currencySymbol})`}
-                className="text-lg font-semibold"
-                maxLength={16}
-              />
-              <p className="text-xs text-muted-foreground">{t('updateFinalPrice')}</p>
-            </div>
+            {/* Transfer Price field removed - drivers should not see agreed prices */}
 
             <div className="space-y-2">
               <Label htmlFor="driver_cash">{t('cashCollectedLabel')} ({currencySymbol})</Label>
@@ -924,7 +903,7 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
             <DialogTitle>{t('cashCollection')}</DialogTitle>
           </DialogHeader>
           <p className="py-4">
-            {formatPrice(reservation.price, reservation.price_currency)} {t('didYouCollectCash')}
+            {t('didYouCollectCash')}
           </p>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => updateStatus('completed', false)} disabled={updating}>
