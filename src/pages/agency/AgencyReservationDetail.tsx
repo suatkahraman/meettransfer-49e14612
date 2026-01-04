@@ -281,7 +281,8 @@ const AgencyReservationDetail = () => {
                 reservation_id: id,
                 title: 'Acenta Fiyatı Onayladı',
                 message: `Acenta fiyatı onayladı. Rezervasyon onaylandı.`,
-                type: 'agency_price_approved'
+                type: 'agency_price_approved',
+                send_push: true
               }
             });
           }
@@ -342,7 +343,8 @@ const AgencyReservationDetail = () => {
                 reservation_id: id,
                 title: 'Acenta Fiyatı Reddetti',
                 message: `Acenta belirlenen fiyatı reddetti.`,
-                type: 'agency_price_rejected'
+                type: 'agency_price_rejected',
+                send_push: true
               }
             });
           }

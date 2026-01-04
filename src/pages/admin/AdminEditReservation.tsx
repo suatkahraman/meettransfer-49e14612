@@ -472,7 +472,8 @@ const AdminEditReservation = () => {
               reservation_id: id,
               title: 'Your Transfer Price is Ready',
               message: `Your transfer price has been set: ${symbol}${formData.price}. Please review and confirm your booking.`,
-              type: 'price_ready'
+              type: 'price_ready',
+              send_push: true
             }
           });
         } catch (e) {
@@ -1388,15 +1389,16 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                       // Notify agency user in-app
                       if (agencyData?.user_id) {
                         try {
-                          await supabase.functions.invoke('create-notification', {
-                            body: {
-                              user_id: agencyData.user_id,
-                              reservation_id: id,
-                              title: 'Fiyat Belirlendi',
-                              message: `Rezervasyon iÃ§in fiyat belirlendi: ${currencySymbol}${priceValue}. LÃ¼tfen onaylayÄ±n veya reddedin.`,
-                              type: 'price_ready'
-                            }
-                          });
+                        await supabase.functions.invoke('create-notification', {
+                          body: {
+                            user_id: agencyData.user_id,
+                            reservation_id: id,
+                            title: 'Fiyat Belirlendi',
+                            message: `Rezervasyon iÃ§in fiyat belirlendi: ${currencySymbol}${priceValue}. LÃ¼tfen onaylayÄ±n veya reddedin.`,
+                            type: 'price_ready',
+                            send_push: true
+                          }
+                        });
                         } catch (e) {
                           console.error('Failed to notify agency:', e);
                         }
@@ -1496,7 +1498,8 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                               reservation_id: id,
                               title: 'Changes Approved',
                               message: 'Your reservation changes have been approved.',
-                              type: 'changes_approved'
+                              type: 'changes_approved',
+                              send_push: true
                             }
                           });
                         } catch (e) {
@@ -1547,7 +1550,8 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                                 reservation_id: id,
                                 title: 'Changes Rejected',
                                 message: 'Your reservation changes have been rejected. The original details have been restored.',
-                                type: 'changes_rejected'
+                                type: 'changes_rejected',
+                                send_push: true
                               }
                             });
                           } catch (e) {
@@ -1840,7 +1844,8 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                             reservation_id: id,
                             title: 'Payment Required',
                             message: `Please complete your payment of ${currencySymbol}${formData.price} using the provided link.`,
-                            type: 'payment_request'
+                            type: 'payment_request',
+                            send_push: true
                           }
                         });
                       }
@@ -1892,7 +1897,8 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                             reservation_id: id,
                             title: 'âœ… Payment Confirmed',
                             message: `Your payment of ${currencySymbol}${formData.price} has been received. Your booking is confirmed!`,
-                            type: 'payment_confirmed'
+                            type: 'payment_confirmed',
+                            send_push: true
                           }
                         });
                       }
