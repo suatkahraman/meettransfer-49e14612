@@ -182,7 +182,8 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
         <Card 
           className={cn(
             "cursor-pointer active:shadow-lg transition-shadow border-l-4",
-            config.bgColor.replace('bg-', 'border-'),
+            // Agency reservations get purple border, guest reservations get status color
+            reservation.agency_id ? "border-purple-500" : config.bgColor.replace('bg-', 'border-'),
             isProcessing && "opacity-50 pointer-events-none"
           )}
           onClick={onClick}
@@ -211,12 +212,23 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
               </Badge>
             </div>
 
-            {/* Agency Badge */}
-            {reservation.agencies && (
-              <div className="flex items-center gap-2 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg px-3 py-2">
-                <Building2 className="h-4 w-4 text-purple-600 dark:text-purple-400 flex-shrink-0" />
-                <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                  {t('agencyReservation')}: {reservation.agencies.agency_name}
+            {/* Agency or Guest Badge */}
+            {reservation.agency_id || reservation.agencies ? (
+              <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-950/40 dark:to-indigo-950/40 border border-purple-300 dark:border-purple-700 rounded-lg px-3 py-2 shadow-sm">
+                <div className="bg-purple-500 p-1.5 rounded-full">
+                  <Building2 className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm font-bold text-purple-800 dark:text-purple-200">
+                  {t('agencyReservation')}: {reservation.agencies?.agency_name || 'Acenta'}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border border-blue-200 dark:border-blue-800 rounded-lg px-3 py-2 shadow-sm">
+                <div className="bg-blue-500 p-1.5 rounded-full">
+                  <User className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm font-bold text-blue-800 dark:text-blue-200">
+                  {t('guestReservation') || 'Misafir Rezervasyonu'}
                 </span>
               </div>
             )}
