@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -10,8 +10,17 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2, Star, Mail, Palette } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2, Star, Mail, Palette, Search, X, Filter } from 'lucide-react';
+
+// Shared constants - synchronized with DriverInfoEditor
+const vehicleTypes = [
+  { value: 'Mercedes Vito', label: 'Mercedes Vito' },
+  { value: 'Mercedes VIP Vito', label: 'Mercedes VIP Vito' },
+  { value: 'Maybach', label: 'Maybach' },
+  { value: 'Minibus', label: 'Minibus' },
+];
 
 const regions = [
   { value: 'Istanbul', label: 'İstanbul' },
@@ -20,6 +29,22 @@ const regions = [
   { value: 'Dalaman', label: 'Dalaman' },
   { value: 'Izmir', label: 'İzmir' },
   { value: 'Cappadocia', label: 'Kapadokya' },
+  { value: 'Bursa', label: 'Bursa' },
+  { value: 'Dubai', label: 'Dubai' },
+  { value: 'Cyprus', label: 'Kıbrıs' },
+];
+
+const vehicleColors = [
+  { value: 'Siyah', label: 'Siyah' },
+  { value: 'Beyaz', label: 'Beyaz' },
+  { value: 'Gri', label: 'Gri' },
+  { value: 'Gümüş', label: 'Gümüş' },
+  { value: 'Lacivert', label: 'Lacivert' },
+  { value: 'Mavi', label: 'Mavi' },
+  { value: 'Kırmızı', label: 'Kırmızı' },
+  { value: 'Bordo', label: 'Bordo' },
+  { value: 'Kahverengi', label: 'Kahverengi' },
+  { value: 'Bej', label: 'Bej' },
 ];
 
 interface Driver {
@@ -36,6 +61,30 @@ interface Driver {
   total_reviews: number | null;
 }
 
+// Skeleton component for driver cards
+const DriverCardSkeleton = () => (
+  <Card>
+    <CardContent className="pt-6">
+      <div className="flex justify-between items-start mb-4">
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-5 w-16" />
+        </div>
+        <div className="flex gap-1">
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-4 w-48" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+    </CardContent>
+  </Card>
+);
+
 const AdminDrivers = () => {
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
@@ -51,6 +100,12 @@ const AdminDrivers = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [viewingDriverEmail, setViewingDriverEmail] = useState<string | null>(null);
   const [loadingDriverEmail, setLoadingDriverEmail] = useState(false);
+  
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterRegion, setFilterRegion] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -62,6 +117,28 @@ const AdminDrivers = () => {
     password: '',
   });
 
+  // Filtered drivers
+  const filteredDrivers = useMemo(() => {
+    return drivers.filter(driver => {
+      // Search filter
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = !searchQuery || 
+        driver.name.toLowerCase().includes(searchLower) ||
+        driver.phone.includes(searchQuery) ||
+        (driver.plate_number?.toLowerCase().includes(searchLower));
+      
+      // Region filter
+      const matchesRegion = filterRegion === 'all' || driver.region === filterRegion;
+      
+      // Status filter
+      const matchesStatus = filterStatus === 'all' || 
+        (filterStatus === 'active' && driver.active) ||
+        (filterStatus === 'inactive' && !driver.active);
+      
+      return matchesSearch && matchesRegion && matchesStatus;
+    });
+  }, [drivers, searchQuery, filterRegion, filterStatus]);
+
   const fetchDrivers = async () => {
     const { data, error } = await supabase
       .from('drivers')
@@ -70,6 +147,7 @@ const AdminDrivers = () => {
 
     if (error) {
       console.error('Error:', error);
+      toast.error('Şoförler yüklenemedi');
     } else {
       setDrivers(data || []);
     }
@@ -80,8 +158,7 @@ const AdminDrivers = () => {
     fetchDrivers();
   }, []);
 
-  const openAddDialog = () => {
-    setEditingDriver(null);
+  const resetForm = () => {
     setFormData({
       name: '',
       phone: '',
@@ -92,6 +169,11 @@ const AdminDrivers = () => {
       email: '',
       password: '',
     });
+  };
+
+  const openAddDialog = () => {
+    setEditingDriver(null);
+    resetForm();
     setDialogOpen(true);
   };
 
@@ -111,11 +193,34 @@ const AdminDrivers = () => {
   };
 
   const handleSubmit = async () => {
+    // Validation
+    if (!formData.name.trim()) {
+      toast.error('Ad soyad gereklidir');
+      return;
+    }
+    if (!formData.phone.trim()) {
+      toast.error('Telefon numarası gereklidir');
+      return;
+    }
+    if (!formData.region) {
+      toast.error('Lütfen bir bölge seçin');
+      return;
+    }
+    if (!editingDriver) {
+      if (!formData.email.trim()) {
+        toast.error('E-posta gereklidir');
+        return;
+      }
+      if (!formData.password || formData.password.length < 6) {
+        toast.error('Şifre en az 6 karakter olmalıdır');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     
     try {
       if (editingDriver) {
-        // Store old data for audit log
         const oldData = {
           name: editingDriver.name,
           phone: editingDriver.phone,
@@ -125,96 +230,68 @@ const AdminDrivers = () => {
           region: editingDriver.region,
         };
 
-        // Update existing driver
         const { error } = await supabase
           .from('drivers')
           .update({
-            name: formData.name,
-            phone: formData.phone,
-            plate_number: formData.plate_number || null,
+            name: formData.name.trim(),
+            phone: formData.phone.trim(),
+            plate_number: formData.plate_number.trim() || null,
             vehicle_model: formData.vehicle_model || null,
             vehicle_color: formData.vehicle_color || null,
             region: formData.region || null,
           })
           .eq('id', editingDriver.id);
 
-        if (error) {
-          toast.error('Şoför güncellenemedi');
-        } else {
-          // Audit log for driver update
-          await logAction({
-            action: 'UPDATE',
-            table_name: 'drivers',
-            record_id: editingDriver.id,
-            old_data: oldData,
-            new_data: {
-              name: formData.name,
-              phone: formData.phone,
-              plate_number: formData.plate_number || null,
-              vehicle_model: formData.vehicle_model || null,
-              vehicle_color: formData.vehicle_color || null,
-              region: formData.region || null,
-            },
-          });
+        if (error) throw error;
 
-          toast.success('Şoför güncellendi');
-          setDialogOpen(false);
-          fetchDrivers();
-        }
+        await logAction({
+          action: 'UPDATE',
+          table_name: 'drivers',
+          record_id: editingDriver.id,
+          old_data: oldData,
+          new_data: {
+            name: formData.name.trim(),
+            phone: formData.phone.trim(),
+            plate_number: formData.plate_number.trim() || null,
+            vehicle_model: formData.vehicle_model || null,
+            vehicle_color: formData.vehicle_color || null,
+            region: formData.region || null,
+          },
+        });
+
+        toast.success('Şoför güncellendi');
+        setDialogOpen(false);
+        fetchDrivers();
       } else {
-        // Create new driver via edge function
-        if (!formData.email || !formData.password) {
-          toast.error('Yeni şoförler için e-posta ve şifre gereklidir');
-          return;
-        }
-
-        if (!formData.name || !formData.phone) {
-          toast.error('Ad ve telefon gereklidir');
-          return;
-        }
-
-        if (!formData.region) {
-          toast.error('Lütfen bir bölge seçin');
-          return;
-        }
-
         const { data, error } = await supabase.functions.invoke('create-user-account', {
           body: {
-            email: formData.email,
+            email: formData.email.trim(),
             password: formData.password,
             role: 'driver',
-            name: formData.name,
-            phone: formData.phone,
-            plate_number: formData.plate_number,
+            name: formData.name.trim(),
+            phone: formData.phone.trim(),
+            plate_number: formData.plate_number.trim(),
             vehicle_model: formData.vehicle_model,
             vehicle_color: formData.vehicle_color,
             region: formData.region,
           },
         });
 
-        if (error) {
-          toast.error(error.message || 'Şoför oluşturulamadı');
-          return;
-        }
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
 
-        if (data?.error) {
-          toast.error(data.error);
-          return;
-        }
-
-        // Audit log for driver creation
         await logAction({
           action: 'CREATE',
           table_name: 'drivers',
           record_id: data?.driver_id,
           new_data: {
-            name: formData.name,
-            phone: formData.phone,
-            plate_number: formData.plate_number,
+            name: formData.name.trim(),
+            phone: formData.phone.trim(),
+            plate_number: formData.plate_number.trim(),
             vehicle_model: formData.vehicle_model,
             vehicle_color: formData.vehicle_color,
             region: formData.region,
-            email: formData.email,
+            email: formData.email.trim(),
           },
         });
 
@@ -223,7 +300,7 @@ const AdminDrivers = () => {
         fetchDrivers();
       }
     } catch (err: any) {
-      toast.error(err.message || 'Şoför oluşturulamadı');
+      toast.error(err.message || 'Şoför kaydedilemedi');
     } finally {
       setIsSubmitting(false);
     }
@@ -238,7 +315,6 @@ const AdminDrivers = () => {
     if (error) {
       toast.error('Şoför durumu güncellenemedi');
     } else {
-      // Audit log for status toggle
       await logAction({
         action: driver.active ? 'DEACTIVATE' : 'ACTIVATE',
         table_name: 'drivers',
@@ -267,27 +343,25 @@ const AdminDrivers = () => {
         .delete()
         .eq('id', deletingDriver.id);
 
-      if (error) {
-        toast.error('Şoför silinemedi');
-      } else {
-        await logAction({
-          action: 'DELETE',
-          table_name: 'drivers',
-          record_id: deletingDriver.id,
-          old_data: {
-            name: deletingDriver.name,
-            phone: deletingDriver.phone,
-            plate_number: deletingDriver.plate_number,
-            vehicle_model: deletingDriver.vehicle_model,
-            region: deletingDriver.region,
-          },
-        });
+      if (error) throw error;
 
-        toast.success('Şoför başarıyla silindi');
-        setDeleteDialogOpen(false);
-        setDeletingDriver(null);
-        fetchDrivers();
-      }
+      await logAction({
+        action: 'DELETE',
+        table_name: 'drivers',
+        record_id: deletingDriver.id,
+        old_data: {
+          name: deletingDriver.name,
+          phone: deletingDriver.phone,
+          plate_number: deletingDriver.plate_number,
+          vehicle_model: deletingDriver.vehicle_model,
+          region: deletingDriver.region,
+        },
+      });
+
+      toast.success('Şoför başarıyla silindi');
+      setDeleteDialogOpen(false);
+      setDeletingDriver(null);
+      fetchDrivers();
     } catch (err) {
       toast.error('Şoför silinemedi');
     } finally {
@@ -295,30 +369,121 @@ const AdminDrivers = () => {
     }
   };
 
+  const openViewDialog = async (driver: Driver) => {
+    setViewingDriver(driver);
+    setViewDialogOpen(true);
+    setViewingDriverEmail(null);
+    setLoadingDriverEmail(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('get-driver-email', {
+        body: { driver_id: driver.id }
+      });
+      if (!error && data?.email) {
+        setViewingDriverEmail(data.email);
+      }
+    } catch (e) {
+      console.error('Exception fetching driver email:', e);
+    } finally {
+      setLoadingDriverEmail(false);
+    }
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setFilterRegion('all');
+    setFilterStatus('all');
+  };
+
+  const hasActiveFilters = searchQuery || filterRegion !== 'all' || filterStatus !== 'all';
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
-            <ArrowLeft className="h-5 w-5" />
+      <header className="bg-primary text-primary-foreground py-4 px-4 md:px-6">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl md:text-2xl font-serif">Şoförler</h1>
+              <p className="text-sm text-primary-foreground/70">
+                {loading ? '...' : `${filteredDrivers.length} / ${drivers.length} şoför`}
+              </p>
+            </div>
+          </div>
+          <Button onClick={openAddDialog} className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Şoför Ekle</span>
+            <span className="sm:hidden">Ekle</span>
           </Button>
-          <h1 className="text-2xl font-serif">Şoförler</h1>
         </div>
-        <Button onClick={openAddDialog} className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Şoför Ekle
-        </Button>
+        
+        {/* Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="İsim, telefon veya plaka ara..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-primary-foreground text-foreground"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Select value={filterRegion} onValueChange={setFilterRegion}>
+              <SelectTrigger className="w-32 bg-primary-foreground text-foreground">
+                <MapPin className="h-4 w-4 mr-1" />
+                <SelectValue placeholder="Bölge" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tüm Bölgeler</SelectItem>
+                {regions.map(r => (
+                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-28 bg-primary-foreground text-foreground">
+                <Filter className="h-4 w-4 mr-1" />
+                <SelectValue placeholder="Durum" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tümü</SelectItem>
+                <SelectItem value="active">Aktif</SelectItem>
+                <SelectItem value="inactive">Pasif</SelectItem>
+              </SelectContent>
+            </Select>
+            {hasActiveFilters && (
+              <Button variant="ghost" size="icon" onClick={clearFilters} className="text-primary-foreground hover:bg-primary-foreground/10">
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
       </header>
 
-      <main className="container mx-auto py-8 px-4">
+      <main className="container mx-auto py-6 px-4">
         {loading ? (
-          <div className="text-center py-12">Yükleniyor...</div>
-        ) : drivers.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">Henüz şoför yok</div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => <DriverCardSkeleton key={i} />)}
+          </div>
+        ) : filteredDrivers.length === 0 ? (
+          <div className="text-center py-12">
+            <Car className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground">
+              {hasActiveFilters ? 'Filtrelere uygun şoför bulunamadı' : 'Henüz şoför yok'}
+            </p>
+            {hasActiveFilters && (
+              <Button variant="link" onClick={clearFilters} className="mt-2">
+                Filtreleri Temizle
+              </Button>
+            )}
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {drivers.map((driver) => (
-              <Card key={driver.id} className={!driver.active ? 'opacity-60' : ''}>
+            {filteredDrivers.map((driver) => (
+              <Card key={driver.id} className={`transition-opacity ${!driver.active ? 'opacity-60' : ''}`}>
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -331,26 +496,7 @@ const AdminDrivers = () => {
                       <Button 
                         variant="outline" 
                         size="icon"
-                        onClick={async () => {
-                          setViewingDriver(driver);
-                          setViewDialogOpen(true);
-                          setViewingDriverEmail(null);
-                          setLoadingDriverEmail(true);
-                          try {
-                            const { data, error } = await supabase.functions.invoke('get-driver-email', {
-                              body: { driver_id: driver.id }
-                            });
-                            if (error) {
-                              console.error('Failed to fetch driver email:', error);
-                            } else if (data?.email) {
-                              setViewingDriverEmail(data.email);
-                            }
-                          } catch (e) {
-                            console.error('Exception fetching driver email:', e);
-                          } finally {
-                            setLoadingDriverEmail(false);
-                          }
-                        }}
+                        onClick={() => openViewDialog(driver)}
                         title="Detayları Gör"
                       >
                         <Eye className="h-4 w-4" />
@@ -394,43 +540,27 @@ const AdminDrivers = () => {
                   
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{driver.phone}</span>
+                      <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="truncate">{driver.phone}</span>
                     </div>
-                    {driver.plate_number && (
+                    {(driver.vehicle_model || driver.plate_number || driver.vehicle_color) && (
                       <div className="flex items-center gap-2">
-                        <Car className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {driver.plate_number}
-                          {driver.vehicle_model ? ` - ${driver.vehicle_model}` : ''}
-                          {driver.vehicle_color ? ` (${driver.vehicle_color})` : ''}
+                        <Car className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="truncate">
+                          {[driver.vehicle_model, driver.plate_number, driver.vehicle_color && `(${driver.vehicle_color})`]
+                            .filter(Boolean)
+                            .join(' - ')}
                         </span>
-                      </div>
-                    )}
-                    {!driver.plate_number && driver.vehicle_model && (
-                      <div className="flex items-center gap-2">
-                        <Car className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {driver.vehicle_model}
-                          {driver.vehicle_color ? ` (${driver.vehicle_color})` : ''}
-                        </span>
-                      </div>
-                    )}
-                    {!driver.plate_number && !driver.vehicle_model && driver.vehicle_color && (
-                      <div className="flex items-center gap-2">
-                        <Palette className="h-4 w-4 text-muted-foreground" />
-                        <span>{driver.vehicle_color}</span>
                       </div>
                     )}
                     {driver.region && (
                       <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>{driver.region}</span>
+                        <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span>{regions.find(r => r.value === driver.region)?.label || driver.region}</span>
                       </div>
                     )}
-                    {/* Driver Rating */}
                     <div className="flex items-center gap-2 pt-1">
-                      <Star className={`h-4 w-4 ${(driver.total_reviews || 0) > 0 ? 'fill-accent text-accent' : 'text-muted-foreground/50'}`} />
+                      <Star className={`h-4 w-4 flex-shrink-0 ${(driver.total_reviews || 0) > 0 ? 'fill-accent text-accent' : 'text-muted-foreground/50'}`} />
                       {(driver.total_reviews || 0) > 0 ? (
                         <span className="font-medium">
                           {(driver.average_rating || 0).toFixed(1)} 
@@ -452,53 +582,35 @@ const AdminDrivers = () => {
 
       {/* Add/Edit Driver Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingDriver ? 'Şoförü Düzenle' : 'Yeni Şoför Ekle'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Ad Soyad</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-              />
+          
+          <div className="grid gap-4 py-2">
+            {/* Personal Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Ad Soyad *</Label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  placeholder="Ahmet Yılmaz"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Telefon *</Label>
+                <Input
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  placeholder="+90 5XX XXX XX XX"
+                />
+              </div>
             </div>
+
+            {/* Region */}
             <div className="space-y-2">
-              <Label>Telefon</Label>
-              <Input
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Plaka</Label>
-              <Input
-                value={formData.plate_number}
-                onChange={(e) => setFormData({...formData, plate_number: e.target.value})}
-                placeholder="örn. 34 ABC 123"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Araç Modeli</Label>
-              <Input
-                value={formData.vehicle_model}
-                onChange={(e) => setFormData({...formData, vehicle_model: e.target.value})}
-                placeholder="örn. Mercedes Vito"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Araç Rengi</Label>
-              <Input
-                value={formData.vehicle_color}
-                onChange={(e) => setFormData({...formData, vehicle_color: e.target.value})}
-                placeholder="örn. Siyah"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Bölge</Label>
+              <Label>Bölge *</Label>
               <Select value={formData.region} onValueChange={(v) => setFormData({...formData, region: v})}>
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Bölge seçin" />
@@ -512,32 +624,88 @@ const AdminDrivers = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Vehicle Info */}
+            <div className="border-t pt-4 mt-2">
+              <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Car className="h-4 w-4" />
+                Araç Bilgileri
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Araç Modeli</Label>
+                  <Select value={formData.vehicle_model} onValueChange={(v) => setFormData({...formData, vehicle_model: v})}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Model seçin" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50">
+                      {vehicleTypes.map(type => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Araç Rengi</Label>
+                  <Select value={formData.vehicle_color} onValueChange={(v) => setFormData({...formData, vehicle_color: v})}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Renk seçin" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50">
+                      {vehicleColors.map(color => (
+                        <SelectItem key={color.value} value={color.value}>
+                          {color.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="mt-4 space-y-2">
+                <Label>Plaka</Label>
+                <Input
+                  value={formData.plate_number}
+                  onChange={(e) => setFormData({...formData, plate_number: e.target.value.toUpperCase()})}
+                  placeholder="34 ABC 123"
+                  className="font-mono"
+                />
+              </div>
+            </div>
+
+            {/* Login Credentials (only for new drivers) */}
             {!editingDriver && (
-              <>
-                <div className="space-y-2">
-                  <Label>E-posta (giriş için)</Label>
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="sofor@example.com"
-                    required
-                  />
+              <div className="border-t pt-4 mt-2">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Giriş Bilgileri
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>E-posta *</Label>
+                    <Input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      placeholder="sofor@example.com"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Şifre *</Label>
+                    <Input
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      placeholder="Min. 6 karakter"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Şifre</Label>
-                  <Input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    placeholder="Minimum 6 karakter"
-                    required
-                  />
-                </div>
-              </>
+              </div>
             )}
           </div>
-          <DialogFooter>
+
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting}>
               İptal
             </Button>
@@ -586,9 +754,11 @@ const AdminDrivers = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <Car className="h-4 w-4" /> Plaka
+                    <MapPin className="h-4 w-4" /> Bölge
                   </span>
-                  <span className="font-medium">{viewingDriver.plate_number || 'Belirtilmedi'}</span>
+                  <span className="font-medium">
+                    {regions.find(r => r.value === viewingDriver.region)?.label || viewingDriver.region || 'Atanmadı'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">
@@ -598,15 +768,15 @@ const AdminDrivers = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <Palette className="h-4 w-4" /> Araç Rengi
+                    <Car className="h-4 w-4" /> Plaka
                   </span>
-                  <span className="font-medium">{viewingDriver.vehicle_color || 'Belirtilmedi'}</span>
+                  <span className="font-medium font-mono">{viewingDriver.plate_number || 'Belirtilmedi'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <MapPin className="h-4 w-4" /> Bölge
+                    <Palette className="h-4 w-4" /> Araç Rengi
                   </span>
-                  <span className="font-medium">{viewingDriver.region || 'Atanmadı'}</span>
+                  <span className="font-medium">{viewingDriver.vehicle_color || 'Belirtilmedi'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">
@@ -623,10 +793,22 @@ const AdminDrivers = () => {
                     <span className="font-medium text-destructive">E-posta bulunamadı</span>
                   )}
                 </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Star className="h-4 w-4" /> Değerlendirme
+                  </span>
+                  {(viewingDriver.total_reviews || 0) > 0 ? (
+                    <span className="font-medium">
+                      {(viewingDriver.average_rating || 0).toFixed(1)} ({viewingDriver.total_reviews} yorum)
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Henüz yok</span>
+                  )}
+                </div>
               </div>
             </div>
           )}
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button 
               variant="outline" 
               onClick={() => {
@@ -635,7 +817,7 @@ const AdminDrivers = () => {
               }}
             >
               <Pencil className="h-4 w-4 mr-2" />
-              Şoförü Düzenle
+              Düzenle
             </Button>
             <Button onClick={() => setViewDialogOpen(false)}>Kapat</Button>
           </DialogFooter>
@@ -648,7 +830,7 @@ const AdminDrivers = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Şoförü Sil</AlertDialogTitle>
             <AlertDialogDescription>
-              <strong>{deletingDriver?.name}</strong> şoförünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve tüm şoför bilgileri silinecektir.
+              <strong>{deletingDriver?.name}</strong> şoförünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
