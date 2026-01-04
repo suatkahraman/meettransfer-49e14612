@@ -132,7 +132,8 @@ const AdminAgencyApplications = () => {
   };
 
   const pendingApplications = applications.filter(app => app.status === 'pending');
-  const processedApplications = applications.filter(app => app.status !== 'pending');
+  // Only show rejected applications in processed list (approved ones are already in agencies)
+  const processedApplications = applications.filter(app => app.status === 'rejected');
 
   return (
     <div className="min-h-screen bg-background">
@@ -242,10 +243,10 @@ const AdminAgencyApplications = () => {
               </div>
             )}
 
-            {/* Processed Applications */}
+            {/* Rejected Applications */}
             {processedApplications.length > 0 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">İşlenmiş Başvurular</h2>
+                <h2 className="text-xl font-semibold mb-4">Reddedilen Başvurular</h2>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {processedApplications.map((application) => (
                     <Card key={application.id} className={application.status === 'approved' ? 'border-green-200' : 'border-red-200'}>
