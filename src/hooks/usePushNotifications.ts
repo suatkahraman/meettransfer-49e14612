@@ -50,6 +50,28 @@ export const usePushNotifications = () => {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
       setIsSubscribed(!!subscription);
+
+      // Keep backend in sync (prevents "subscribed but no push" after stale endpoints are pruned)
+      if (user && subscription) {
+        const subscriptionJson = subscription.toJSON();
+        const { error } = await supabase
+          .from('push_subscriptions')
+          .upsert(
+            {
+              user_id: user.id,
+              endpoint: subscriptionJson.endpoint!,
+              p256dh: subscriptionJson.keys!.p256dh,
+              auth: subscriptionJson.keys!.auth,
+            },
+            {
+              onConflict: 'user_id,endpoint',
+            }
+          );
+
+        if (error) {
+          console.warn('Push subscription sync failed:', error);
+        }
+      }
     } catch (error) {
       console.error('Error checking subscription:', error);
     }
