@@ -979,114 +979,116 @@ const AgencyReservationDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Payment Status Card - Simplified */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>{t('paymentStatus')}</CardTitle>
-            {!isEditing && (
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                <Edit className="h-4 w-4 mr-2" />
-                {t('edit')}
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isEditing ? (
-              <>
-                <div className="space-y-2">
-                  <Label>{t('paymentStatus')}</Label>
-                  <Select value={paymentStatus} onValueChange={setPaymentStatus}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="not_paid">Not Paid</SelectItem>
-                      <SelectItem value="customer_pay_cash">Customer Pay Cash</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {paymentStatus === 'customer_pay_cash' && (
-                  <div className="space-y-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                    <Label className="text-green-700">{t('passengerCashAmount')} *</Label>
-                    <div className="flex gap-2">
-                      <Select value={passengerCashCurrency} onValueChange={setPassengerCashCurrency}>
-                        <SelectTrigger className="w-24">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="USD">$</SelectItem>
-                          <SelectItem value="EUR">€</SelectItem>
-                          <SelectItem value="GBP">£</SelectItem>
-                          <SelectItem value="TRY">₺</SelectItem>
-                          <SelectItem value="AED">د.إ</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        type="number"
-                        value={passengerCashAmount}
-                        onChange={(e) => setPassengerCashAmount(e.target.value)}
-                        placeholder="0"
-                        className="flex-1"
-                        required
-                      />
-                    </div>
-                    <p className="text-sm text-green-600">
-                      {t('passengerCashInfo') || 'Bu tutar yolcudan nakit olarak alınacak ve bakiyenizden düşülecektir.'}
-                    </p>
+        {/* Payment Status Card - Only show for cash payments */}
+        {(agencyDetails?.payment_status === 'customer_pay_cash' || reservation.passenger_cash_amount) && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>{t('paymentStatus')}</CardTitle>
+              {!isEditing && (
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  {t('edit')}
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isEditing ? (
+                <>
+                  <div className="space-y-2">
+                    <Label>{t('paymentStatus')}</Label>
+                    <Select value={paymentStatus} onValueChange={setPaymentStatus}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="not_paid">Not Paid</SelectItem>
+                        <SelectItem value="customer_pay_cash">Customer Pay Cash</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
 
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={() => setIsEditing(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    className="flex-1"
-                    onClick={handleSave}
-                    disabled={saving}
-                  >
-                    {saving ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <Save className="h-4 w-4 mr-2" />
-                    )}
-                    Save
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">{t('paymentStatus')}:</span>
-                  <Badge variant={paymentStatus === 'customer_pay_cash' ? 'default' : 'secondary'}>
-                    {paymentStatusLabels[agencyDetails?.payment_status || 'not_paid']}
-                  </Badge>
-                </div>
-
-                {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
-                  <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium text-green-700">{t('passengerCash')}:</span>
-                      <span className="text-xl font-bold text-green-600">
-                        {reservation.passenger_cash_currency === 'EUR' && '€'}
-                        {reservation.passenger_cash_currency === 'USD' && '$'}
-                        {reservation.passenger_cash_currency === 'GBP' && '£'}
-                        {reservation.passenger_cash_currency === 'TRY' && '₺'}
-                        {reservation.passenger_cash_currency === 'AED' && 'د.إ'}
-                        {reservation.passenger_cash_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                      </span>
+                  {paymentStatus === 'customer_pay_cash' && (
+                    <div className="space-y-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                      <Label className="text-green-700">{t('passengerCashAmount')} *</Label>
+                      <div className="flex gap-2">
+                        <Select value={passengerCashCurrency} onValueChange={setPassengerCashCurrency}>
+                          <SelectTrigger className="w-24">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="USD">$</SelectItem>
+                            <SelectItem value="EUR">€</SelectItem>
+                            <SelectItem value="GBP">£</SelectItem>
+                            <SelectItem value="TRY">₺</SelectItem>
+                            <SelectItem value="AED">د.إ</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          type="number"
+                          value={passengerCashAmount}
+                          onChange={(e) => setPassengerCashAmount(e.target.value)}
+                          placeholder="0"
+                          className="flex-1"
+                          required
+                        />
+                      </div>
+                      <p className="text-sm text-green-600">
+                        {t('passengerCashInfo') || 'Bu tutar yolcudan nakit olarak alınacak ve bakiyenizden düşülecektir.'}
+                      </p>
                     </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => setIsEditing(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      className="flex-1"
+                      onClick={handleSave}
+                      disabled={saving}
+                    >
+                      {saving ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : (
+                        <Save className="h-4 w-4 mr-2" />
+                      )}
+                      Save
+                    </Button>
                   </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">{t('paymentStatus')}:</span>
+                    <Badge variant={paymentStatus === 'customer_pay_cash' ? 'default' : 'secondary'}>
+                      {paymentStatusLabels[agencyDetails?.payment_status || 'not_paid']}
+                    </Badge>
+                  </div>
+
+                  {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
+                    <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-green-700">{t('passengerCash')}:</span>
+                        <span className="text-xl font-bold text-green-600">
+                          {reservation.passenger_cash_currency === 'EUR' && '€'}
+                          {reservation.passenger_cash_currency === 'USD' && '$'}
+                          {reservation.passenger_cash_currency === 'GBP' && '£'}
+                          {reservation.passenger_cash_currency === 'TRY' && '₺'}
+                          {reservation.passenger_cash_currency === 'AED' && 'د.إ'}
+                          {reservation.passenger_cash_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );
