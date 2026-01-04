@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowLeft, Settings, Users, Shield } from 'lucide-react';
+import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 
 const AdminSettings = () => {
   const navigate = useNavigate();
@@ -17,6 +18,9 @@ const AdminSettings = () => {
 
       <main className="container mx-auto py-8 px-4 max-w-2xl">
         <div className="space-y-4">
+          {/* Notification Settings */}
+          <NotificationSettingsPanel />
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
