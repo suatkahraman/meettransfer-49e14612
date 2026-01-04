@@ -547,7 +547,7 @@ export default function AdminWhatsAppChat() {
     return info;
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -1054,7 +1054,7 @@ export default function AdminWhatsAppChat() {
                 <Textarea
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyPress}
                   placeholder="Mesaj yazın..."
                   className="min-h-[60px] max-h-[120px] resize-none"
                 />

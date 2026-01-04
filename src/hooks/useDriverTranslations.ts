@@ -128,8 +128,9 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     cannotCompleteNow: 'Bu transfer şu anda tamamlanamaz',
     reservationNotFound: 'Rezervasyon bulunamadı',
     
-    // Agency
+    // Agency / Guest
     agencyReservation: 'Acenta Rezervasyonu',
+    guestReservation: 'Misafir Rezervasyonu',
     
     // Cash Dialog
     cashCollectionQuestion: 'Nakit tahsil ettiniz mi?',
@@ -304,6 +305,7 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     reservationNotFound: 'Reservation not found',
     
     agencyReservation: 'Agency Reservation',
+    guestReservation: 'Guest Reservation',
     
     cashCollectionQuestion: 'Did you collect cash?',
     yesCollectedCash: 'Yes, I collected cash',
@@ -473,6 +475,7 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     reservationNotFound: 'Reservierung nicht gefunden',
     
     agencyReservation: 'Agenturreservierung',
+    guestReservation: 'Gastereservierung',
     
     cashCollectionQuestion: 'Haben Sie Bargeld eingesammelt?',
     yesCollectedCash: 'Ja, ich habe Bargeld eingesammelt',
@@ -642,6 +645,7 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     reservationNotFound: 'Réservation non trouvée',
     
     agencyReservation: 'Réservation agence',
+    guestReservation: 'Réservation client',
     
     cashCollectionQuestion: 'Avez-vous collecté des espèces?',
     yesCollectedCash: 'Oui, j\'ai collecté des espèces',
@@ -811,6 +815,7 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     reservationNotFound: 'Бронирование не найдено',
     
     agencyReservation: 'Бронирование агентства',
+    guestReservation: 'Бронирование клиента',
     
     cashCollectionQuestion: 'Вы собрали наличные?',
     yesCollectedCash: 'Да, я собрал наличные',
@@ -980,6 +985,7 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     reservationNotFound: 'الحجز غير موجود',
     
     agencyReservation: 'حجز الوكالة',
+    guestReservation: 'حجز الضيف',
     
     cashCollectionQuestion: 'هل جمعت النقود؟',
     yesCollectedCash: 'نعم، جمعت النقود',
