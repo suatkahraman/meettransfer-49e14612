@@ -132,6 +132,8 @@ export default function AdminWhatsAppChat() {
     flight_number: "",
   });
   const [creatingReservation, setCreatingReservation] = useState(false);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchConversations();
@@ -189,11 +191,61 @@ export default function AdminWhatsAppChat() {
         )
         .subscribe();
 
+      // Create presence channel for typing indicator
+      const typingChannel = supabase.channel(`typing:${selectedConversation.id}`);
+      typingChannel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          typingChannelRef.current = typingChannel;
+        }
+      });
+
       return () => {
         supabase.removeChannel(messagesChannel);
+        if (typingChannelRef.current) {
+          typingChannelRef.current.untrack();
+          supabase.removeChannel(typingChannelRef.current);
+          typingChannelRef.current = null;
+        }
       };
     }
   }, [selectedConversation]);
+
+  // Broadcast typing status when message changes
+  useEffect(() => {
+    if (!typingChannelRef.current || !selectedConversation) return;
+
+    const isTyping = newMessage.trim().length > 0;
+    
+    // Track typing status via presence
+    typingChannelRef.current.track({
+      user_type: 'admin',
+      is_typing: isTyping,
+      conversation_id: selectedConversation.id,
+    });
+
+    // Clear typing after 3 seconds of no input
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    if (isTyping) {
+      typingTimeoutRef.current = setTimeout(() => {
+        if (typingChannelRef.current) {
+          typingChannelRef.current.track({
+            user_type: 'admin',
+            is_typing: false,
+            conversation_id: selectedConversation?.id,
+          });
+        }
+      }, 3000);
+    }
+
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [newMessage, selectedConversation]);
 
   useEffect(() => {
     scrollToBottom();
