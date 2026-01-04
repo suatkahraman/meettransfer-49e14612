@@ -74,7 +74,13 @@ export default function CustomerPortal() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [adminTyping, setAdminTyping] = useState(false);
+  const [newMessage, setNewMessage] = useState("");
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingChannelRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -161,11 +167,16 @@ export default function CustomerPortal() {
         );
         setAdminTyping(!!adminPresence);
       })
-      .subscribe();
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          typingChannelRef.current = typingChannel;
+        }
+      });
 
     return () => {
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(typingChannel);
+      typingChannelRef.current = null;
     };
   }, [showChat, portalData?.conversation_id]);
 
@@ -177,6 +188,92 @@ export default function CustomerPortal() {
       }, 100);
     }
   }, [messages, showChat]);
+
+  // Handle customer typing indicator
+  const handleTypingChange = (value: string) => {
+    setNewMessage(value);
+    
+    if (!typingChannelRef.current) return;
+    
+    // Start typing
+    if (!isTyping && value.length > 0) {
+      setIsTyping(true);
+      typingChannelRef.current.track({
+        user_type: "customer",
+        is_typing: true,
+        phone: portalData?.phone,
+      });
+    }
+    
+    // Reset timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Stop typing after 3 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      if (typingChannelRef.current) {
+        typingChannelRef.current.untrack();
+      }
+    }, 3000);
+  };
+
+  // Send message to admin via WhatsApp
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !portalData?.conversation_id || sendingMessage) return;
+
+    const messageContent = newMessage.trim();
+    setNewMessage("");
+    setSendingMessage(true);
+    
+    // Stop typing indicator
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    setIsTyping(false);
+    if (typingChannelRef.current) {
+      typingChannelRef.current.untrack();
+    }
+
+    try {
+      // Insert message directly to database (as incoming from customer perspective in admin view)
+      const { error } = await supabase.from("whatsapp_messages").insert({
+        conversation_id: portalData.conversation_id,
+        direction: "incoming", // incoming = from customer to admin
+        content: messageContent,
+        message_type: "portal",
+        status: "delivered",
+      });
+
+      if (error) throw error;
+
+      // Update conversation last message time
+      await supabase
+        .from("whatsapp_conversations")
+        .update({ 
+          last_message_at: new Date().toISOString(),
+          unread_count: supabase.rpc ? 1 : 1, // Increment would need RPC
+        })
+        .eq("id", portalData.conversation_id);
+
+      // Focus back on input
+      setTimeout(() => inputRef.current?.focus(), 100);
+    } catch (err: any) {
+      console.error("Error sending message:", err);
+      toast.error(t('errorSendingMessage') || "Mesaj gönderilemedi");
+      setNewMessage(messageContent); // Restore message on error
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -506,10 +603,34 @@ export default function CustomerPortal() {
               )}
             </ScrollArea>
 
-            {/* Info Footer */}
-            <div className="p-3 border-t bg-muted/30">
-              <p className="text-xs text-center text-muted-foreground">
-                {t('chatViaWhatsApp') || 'WhatsApp üzerinden mesaj göndermek için telefonunuzu kullanın'}
+            {/* Message Input */}
+            <div className="p-3 border-t bg-background">
+              <div className="flex items-end gap-2">
+                <Textarea
+                  ref={inputRef}
+                  value={newMessage}
+                  onChange={(e) => handleTypingChange(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={t('typeMessage') || "Mesajınızı yazın..."}
+                  className="min-h-[44px] max-h-[120px] resize-none rounded-xl text-sm"
+                  rows={1}
+                  disabled={sendingMessage}
+                />
+                <Button
+                  size="icon"
+                  className="h-11 w-11 rounded-full shrink-0"
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim() || sendingMessage}
+                >
+                  {sendingMessage ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-[10px] text-center text-muted-foreground mt-2">
+                {t('portalChatNote') || "Mesajlarınız destek ekibimize iletilecektir"}
               </p>
             </div>
           </motion.div>
