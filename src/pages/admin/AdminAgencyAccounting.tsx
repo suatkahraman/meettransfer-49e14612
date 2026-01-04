@@ -56,6 +56,7 @@ interface AgencyPayment {
   payment_date: string;
   notes: string | null;
   created_at: string;
+  currency?: string;
 }
 
 interface AgencyReservationDetail {
@@ -151,9 +152,9 @@ const AdminAgencyAccounting = () => {
     }
   }, [agencyId, allAgencies]);
 
-  // State for carryover balance from previous months
-  const [carryoverBalance, setCarryoverBalance] = useState(0);
-  const [carryoverPayments, setCarryoverPayments] = useState(0);
+  // State for carryover balance from previous months - now currency-based
+  const [carryoverBalances, setCarryoverBalances] = useState<Record<string, number>>({});
+  const [carryoverPayments, setCarryoverPayments] = useState<Record<string, number>>({});
 
   // Fetch reservations, agency details, and payments
   const fetchData = async () => {
@@ -218,7 +219,8 @@ const AdminAgencyAccounting = () => {
     }
 
     // Fetch agency reservation details for previous months completed reservations
-    let prevMonthsCarryoverDebt = 0;
+    // PARA BİRİMİ BAZLI hesaplama
+    const prevMonthsCarryoverDebts: Record<string, number> = {};
     if (prevMonthsReservations.length > 0) {
       const prevReservationIds = prevMonthsReservations.map(r => r.id);
       const { data: prevDetailsData } = await supabase
@@ -228,27 +230,57 @@ const AdminAgencyAccounting = () => {
       
       const prevDetails = prevDetailsData || [];
       
-      // Calculate total debt from previous months completed reservations
-      // Debt = customer_price (acenta fiyatı) - passenger_cash_amount
-      // DÜZELTME: customer_price kullanılmalı (acenta fiyatı), company_amount değil
+      // Calculate debt by currency from previous months completed reservations
       prevMonthsReservations.forEach(r => {
         const detail = prevDetails.find(d => d.reservation_id === r.id);
-        // Öncelikle customer_price kullan, yoksa price kullan
+        const currency = detail?.agency_price_currency || 'TRY';
         const agencyPrice = detail?.customer_price || r.price || 0;
+        
+        if (!prevMonthsCarryoverDebts[currency]) {
+          prevMonthsCarryoverDebts[currency] = 0;
+        }
+        prevMonthsCarryoverDebts[currency] += agencyPrice;
+      });
+      
+      // Subtract passenger cash by their currency
+      prevMonthsReservations.forEach(r => {
         const passengerCash = r.passenger_cash_amount || 0;
-        prevMonthsCarryoverDebt += (agencyPrice - passengerCash);
+        const cashCurrency = r.passenger_cash_currency || 'TRY';
+        if (passengerCash > 0) {
+          if (!prevMonthsCarryoverDebts[cashCurrency]) {
+            prevMonthsCarryoverDebts[cashCurrency] = 0;
+          }
+          prevMonthsCarryoverDebts[cashCurrency] -= passengerCash;
+        }
       });
     }
 
-    // Calculate payments made in months before the current selected month
-    // Bu ödemeler sadece devir hesaplamasında kullanılacak
-    const prevMonthsPayments = allPayments
+    // Calculate payments by currency made in months before the current selected month
+    const prevMonthsPaymentsByCurrency: Record<string, number> = {};
+    allPayments
       .filter(p => p.payment_date < monthStart)
-      .reduce((sum, p) => sum + p.amount, 0);
+      .forEach(p => {
+        const currency = p.currency || 'TRY';
+        if (!prevMonthsPaymentsByCurrency[currency]) {
+          prevMonthsPaymentsByCurrency[currency] = 0;
+        }
+        prevMonthsPaymentsByCurrency[currency] += p.amount;
+      });
 
-    // Carryover = Previous months debt - Previous months payments
-    setCarryoverBalance(prevMonthsCarryoverDebt - prevMonthsPayments);
-    setCarryoverPayments(prevMonthsPayments);
+    // Calculate carryover balance by currency = debt - payments
+    const carryoverByCurrency: Record<string, number> = {};
+    const allCurrencies = new Set([...Object.keys(prevMonthsCarryoverDebts), ...Object.keys(prevMonthsPaymentsByCurrency)]);
+    allCurrencies.forEach(currency => {
+      const debt = prevMonthsCarryoverDebts[currency] || 0;
+      const payments = prevMonthsPaymentsByCurrency[currency] || 0;
+      const balance = debt - payments;
+      if (balance !== 0) {
+        carryoverByCurrency[currency] = balance;
+      }
+    });
+
+    setCarryoverBalances(carryoverByCurrency);
+    setCarryoverPayments(prevMonthsPaymentsByCurrency);
 
     setLoading(false);
   };
@@ -362,8 +394,14 @@ const AdminAgencyAccounting = () => {
   // Net Acenta Borcu bu ay = Toplam Acenta Fiyatı - Yolcu Nakit
   const currentMonthDebt = totalAgencyPrice - totalPassengerCash;
   
-  // Devir Bakiye dahil güncel bakiye = Önceki aylardan devir + Bu ayki borç - Bu ayki ödemeler
-  const totalBalance = carryoverBalance + currentMonthDebt - currentMonthPayments;
+  // TRY cinsinden toplam bakiye hesapla (sadece TRY için)
+  const tryCarryover = carryoverBalances['TRY'] || 0;
+  const tryCurrentMonthPayments = payments
+    .filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd && (p.currency || 'TRY') === 'TRY')
+    .reduce((sum, p) => sum + p.amount, 0);
+  
+  // TRY bakiye (sadece TRY para birimli işlemler için)
+  const tryBalance = tryCarryover + currentMonthDebt - tryCurrentMonthPayments;
 
   const handleAgencyChange = (newAgencyId: string) => {
     navigate(`/admin/agency-accounting/${newAgencyId}`);
@@ -620,31 +658,31 @@ const AdminAgencyAccounting = () => {
                 <>
                   {/* Summary Cards - Enhanced Visual Design */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Devir Bakiye Card - Only show if not zero */}
-                    {carryoverBalance !== 0 && (
-                      <Card className={`relative overflow-hidden ${carryoverBalance > 0 ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-300 dark:border-blue-700' : 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-300 dark:border-green-700'}`}>
+                    {/* Devir Bakiye Cards - Para birimi bazlı */}
+                    {Object.entries(carryoverBalances).filter(([_, balance]) => balance !== 0).map(([currency, balance]) => (
+                      <Card key={`carryover-${currency}`} className={`relative overflow-hidden ${balance > 0 ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-300 dark:border-blue-700' : 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-300 dark:border-green-700'}`}>
                         <div className="absolute top-0 right-0 p-3 opacity-10">
                           <History className="h-16 w-16" />
                         </div>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm font-medium flex items-center gap-2">
-                            <div className={`p-2 rounded-full ${carryoverBalance > 0 ? 'bg-blue-500/20' : 'bg-green-500/20'}`}>
-                              <History className={`h-4 w-4 ${carryoverBalance > 0 ? 'text-blue-600' : 'text-green-600'}`} />
+                            <div className={`p-2 rounded-full ${balance > 0 ? 'bg-blue-500/20' : 'bg-green-500/20'}`}>
+                              <History className={`h-4 w-4 ${balance > 0 ? 'text-blue-600' : 'text-green-600'}`} />
                             </div>
-                            Devir Bakiye
+                            Devir Bakiye ({currency})
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className={`text-3xl font-bold ${carryoverBalance > 0 ? 'text-blue-700 dark:text-blue-400' : 'text-green-700 dark:text-green-400'}`}>
-                            ₺{Math.abs(carryoverBalance).toFixed(2)}
+                          <div className={`text-3xl font-bold ${balance > 0 ? 'text-blue-700 dark:text-blue-400' : 'text-green-700 dark:text-green-400'}`}>
+                            {getCurrencySymbol(currency)}{Math.abs(balance).toFixed(2)}
                           </div>
                           <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                            <span className={`inline-block w-2 h-2 rounded-full ${carryoverBalance > 0 ? 'bg-blue-500' : 'bg-green-500'}`}></span>
-                            {carryoverBalance > 0 ? 'Önceki aylardan borç' : 'Önceki aylardan alacak'}
+                            <span className={`inline-block w-2 h-2 rounded-full ${balance > 0 ? 'bg-blue-500' : 'bg-green-500'}`}></span>
+                            {balance > 0 ? 'Önceki aylardan borç' : 'Önceki aylardan alacak'}
                           </p>
                         </CardContent>
                       </Card>
-                    )}
+                    ))}
 
                     {/* This Month Reservations Card */}
                     <Card className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700">
@@ -697,11 +735,11 @@ const AdminAgencyAccounting = () => {
                       </Card>
                     )}
 
-                    {/* Current Balance Card */}
+                    {/* Current Balance Card - TRY için */}
                     <Card className={`relative overflow-hidden ${
-                      totalBalance > 0 
+                      tryBalance > 0 
                         ? 'bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900 border-amber-400 dark:border-amber-600 border-2' 
-                        : totalBalance < 0 
+                        : tryBalance < 0 
                           ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-400 dark:border-green-600 border-2' 
                           : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800'
                     }`}>
@@ -710,20 +748,20 @@ const AdminAgencyAccounting = () => {
                       </div>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium flex items-center gap-2">
-                          <div className={`p-2 rounded-full ${totalBalance > 0 ? 'bg-amber-500/20' : totalBalance < 0 ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
-                            <Banknote className={`h-4 w-4 ${totalBalance > 0 ? 'text-amber-600' : totalBalance < 0 ? 'text-green-600' : 'text-gray-600'}`} />
+                          <div className={`p-2 rounded-full ${tryBalance > 0 ? 'bg-amber-500/20' : tryBalance < 0 ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
+                            <Banknote className={`h-4 w-4 ${tryBalance > 0 ? 'text-amber-600' : tryBalance < 0 ? 'text-green-600' : 'text-gray-600'}`} />
                           </div>
-                          Güncel Bakiye
+                          Güncel Bakiye (TRY)
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className={`text-3xl font-bold ${totalBalance > 0 ? 'text-amber-700 dark:text-amber-400' : totalBalance < 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-400'}`}>
-                          ₺{Math.abs(totalBalance).toFixed(2)}
+                        <div className={`text-3xl font-bold ${tryBalance > 0 ? 'text-amber-700 dark:text-amber-400' : tryBalance < 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-400'}`}>
+                          ₺{Math.abs(tryBalance).toFixed(2)}
                         </div>
                         <p className="text-xs mt-2 flex items-center gap-1">
-                          <span className={`inline-block w-2 h-2 rounded-full ${totalBalance > 0 ? 'bg-amber-500 animate-pulse' : totalBalance < 0 ? 'bg-green-500' : 'bg-gray-400'}`}></span>
-                          <span className={`font-medium ${totalBalance > 0 ? 'text-amber-600 dark:text-amber-400' : totalBalance < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-600'}`}>
-                            {totalBalance > 0 ? 'Acenta borçlu' : totalBalance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
+                          <span className={`inline-block w-2 h-2 rounded-full ${tryBalance > 0 ? 'bg-amber-500 animate-pulse' : tryBalance < 0 ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                          <span className={`font-medium ${tryBalance > 0 ? 'text-amber-600 dark:text-amber-400' : tryBalance < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-600'}`}>
+                            {tryBalance > 0 ? 'Acenta borçlu' : tryBalance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
                           </span>
                         </p>
                       </CardContent>
