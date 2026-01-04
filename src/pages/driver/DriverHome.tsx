@@ -318,27 +318,66 @@ const DriverHome = () => {
           .eq('id', driverId)
           .maybeSingle();
 
-        // Create notification for customer
-        await supabase.from('notifications').insert({
-          user_id: reservation.customer_id,
-          reservation_id: id,
-          type: 'trip_completed',
-          title: '🎉 Trip Completed',
-          message: 'Your trip has been completed. Thank you for choosing Meet Transfer!'
-        });
+        // Get full reservation data to check if agency
+        const { data: resData } = await supabase
+          .from('reservations')
+          .select('customer_id, agency_id, reservation_code, pickup_date, pickup, dropoff')
+          .eq('id', id)
+          .single();
 
-        // Try to send push notification to customer
-        try {
-          await supabase.functions.invoke('send-push-notification', {
-            body: {
-              user_id: reservation.customer_id,
-              title: '🎉 Trip Completed',
-              body: 'Your trip has been completed. Thank you for choosing Meet Transfer!',
-              data: { reservation_id: id }
-            }
+        // Create notification for customer (if customer exists)
+        if (resData?.customer_id) {
+          await supabase.from('notifications').insert({
+            user_id: resData.customer_id,
+            reservation_id: id,
+            type: 'trip_completed',
+            title: '🎉 Trip Completed',
+            message: 'Your trip has been completed. Thank you for choosing Meet Transfer!'
           });
-        } catch (pushError) {
-          console.log('Push notification failed:', pushError);
+
+          // Try to send push notification to customer
+          try {
+            await supabase.functions.invoke('send-push-notification', {
+              body: {
+                user_id: resData.customer_id,
+                title: '🎉 Trip Completed',
+                body: 'Your trip has been completed. Thank you for choosing Meet Transfer!',
+                data: { reservation_id: id }
+              }
+            });
+          } catch (pushError) {
+            console.log('Push notification failed:', pushError);
+          }
+
+          // Send review request email to customer
+          try {
+            await supabase.functions.invoke('send-review-request', {
+              body: {
+                reservationId: id,
+                customerName: reservation.customer_name || 'Customer',
+                driverName: driverData?.name || 'Your Driver',
+                reservationCode: resData.reservation_code || id.slice(0, 8),
+                pickupDate: resData.pickup_date,
+                pickup: resData.pickup,
+                dropoff: resData.dropoff
+              }
+            });
+            console.log('Review request email sent');
+          } catch (emailError) {
+            console.log('Review request email failed:', emailError);
+          }
+        }
+
+        // If agency reservation, deduct balance (same as DriverJobDetails)
+        if (resData?.agency_id) {
+          try {
+            await supabase.functions.invoke('deduct-agency-balance', {
+              body: { reservation_id: id }
+            });
+            console.log('Agency balance deduction triggered');
+          } catch (balanceError) {
+            console.error('Balance deduction failed:', balanceError);
+          }
         }
 
         // Notify admins (push + in-app)
