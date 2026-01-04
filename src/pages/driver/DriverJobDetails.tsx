@@ -735,16 +735,6 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
               )}
             </div>
 
-            {/* Currency Display - READ ONLY */}
-            <div className="bg-muted/50 p-3 rounded-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{t('currency')}</span>
-                <span className="font-medium">{reservation.price_currency || 'TRY'} ({currencySymbol})</span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t('currencySetByAdmin')}
-              </p>
-            </div>
           </CardContent>
         </Card>
 
