@@ -515,16 +515,47 @@ const AdminEditReservation = () => {
     setAssigningDriver(true);
 
     try {
-      // Update reservation with driver and status
+      // If price is null/empty (e.g., after agency edit), restore from agency_reservation_details
+      let finalPrice = formData.price ? parseFloat(formData.price) : null;
+      let finalCurrency = formData.price_currency;
+
+      if (!finalPrice && formData.agency_id && formData.agency_id !== 'none') {
+        const { data: agencyDetail } = await supabase
+          .from('agency_reservation_details')
+          .select('customer_price, agency_price_currency')
+          .eq('reservation_id', id!)
+          .maybeSingle();
+
+        if (agencyDetail?.customer_price) {
+          finalPrice = agencyDetail.customer_price;
+          finalCurrency = agencyDetail.agency_price_currency || formData.price_currency;
+          console.log('Restored price from agency_reservation_details:', finalPrice, finalCurrency);
+        }
+      }
+
+      // Update reservation with driver, status, and ensure price is set
+      const updatePayload: Record<string, any> = {
+        driver_id: formData.driver_id,
+        status: 'sent_to_driver',
+      };
+
+      // Include price if it was restored or is set
+      if (finalPrice) {
+        updatePayload.price = finalPrice;
+        updatePayload.price_currency = finalCurrency;
+      }
+
       const { error } = await supabase
         .from('reservations')
-        .update({
-          driver_id: formData.driver_id,
-          status: 'sent_to_driver',
-        })
+        .update(updatePayload)
         .eq('id', id);
 
       if (error) throw error;
+
+      // Update local formData with restored price
+      if (finalPrice && !formData.price) {
+        setFormData(prev => ({ ...prev, price: finalPrice!.toString(), price_currency: finalCurrency }));
+      }
 
       // Get driver info for notification
       const selectedDriver = drivers.find(d => d.id === formData.driver_id);
