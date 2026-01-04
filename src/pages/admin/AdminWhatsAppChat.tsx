@@ -1037,6 +1037,39 @@ export default function AdminWhatsAppChat() {
                   <div ref={messagesEndRef} />
                 </div>
               )}
+              
+              {/* Typing Indicator */}
+              <AnimatePresence>
+                {newMessage.trim().length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="flex justify-end px-4 pb-2"
+                  >
+                    <div className="flex items-center gap-1.5 bg-primary/10 text-primary rounded-full px-3 py-1.5">
+                      <span className="text-xs font-medium">Yazıyorsunuz</span>
+                      <div className="flex gap-0.5">
+                        <motion.span
+                          animate={{ y: [0, -3, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                          className="w-1 h-1 bg-primary rounded-full"
+                        />
+                        <motion.span
+                          animate={{ y: [0, -3, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
+                          className="w-1 h-1 bg-primary rounded-full"
+                        />
+                        <motion.span
+                          animate={{ y: [0, -3, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
+                          className="w-1 h-1 bg-primary rounded-full"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </ScrollArea>
 
             <Separator />
