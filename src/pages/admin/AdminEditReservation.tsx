@@ -538,7 +538,8 @@ const AdminEditReservation = () => {
               reservation_id: id,
               title: 'New Job Assigned',
               message: `New transfer: ${formData.pickup} → ${formData.dropoff} on ${formData.pickup_date} at ${formData.pickup_time}. Price: ${symbol}${formData.price}`,
-              type: 'driver_assigned'
+              type: 'driver_assigned',
+              send_push: true
             }
           });
         } catch (e) {
@@ -555,7 +556,8 @@ const AdminEditReservation = () => {
               reservation_id: id,
               title: 'Driver Assigned',
               message: `Your driver: ${selectedDriver.name}${selectedDriver.plate_number ? ` (${selectedDriver.plate_number})` : ''}`,
-              type: 'driver_assigned'
+              type: 'driver_assigned',
+              send_push: true
             }
           });
         } catch (e) {

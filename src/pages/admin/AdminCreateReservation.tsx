@@ -318,7 +318,8 @@ const AdminCreateReservation = () => {
                 reservation_id: reservation.id,
                 title: 'New Job Assigned',
                 message: `New transfer: ${formData.pickup} → ${formData.dropoff} on ${formData.pickup_date} at ${formData.pickup_time}. Price: ${symbol}${formData.price}`,
-                type: 'driver_assigned'
+                type: 'driver_assigned',
+                send_push: true
               }
             });
           }

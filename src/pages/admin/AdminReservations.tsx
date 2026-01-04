@@ -294,7 +294,8 @@ const AdminReservations = () => {
               reservation_id: assignDialog.reservationId,
               title: 'Yeni İş Atandı',
               message: `Yeni transfer: ${reservation.pickup} → ${reservation.dropoff} tarih ${format(new Date(reservation.pickup_date), 'PP', { locale: tr })} saat ${reservation.pickup_time}. Fiyat: ${priceDisplay}`,
-              type: 'driver_assigned'
+              type: 'driver_assigned',
+              send_push: true
             }
           });
         } catch (err) {
@@ -311,7 +312,8 @@ const AdminReservations = () => {
               reservation_id: assignDialog.reservationId,
               title: 'Driver Assigned',
               message: `Your driver: ${selectedDriverData.name}${selectedDriverData.plate_number ? ` (${selectedDriverData.plate_number})` : ''}`,
-              type: 'driver_assigned'
+              type: 'driver_assigned',
+              send_push: true
             }
           });
         } catch (err) {
@@ -449,7 +451,8 @@ const AdminReservations = () => {
                   reservation_id: id,
                   title: 'Yeni İş Atandı',
                   message: `Yeni transfer: ${reservation.pickup} → ${reservation.dropoff} tarih ${format(new Date(reservation.pickup_date), 'PP', { locale: tr })} saat ${reservation.pickup_time}. Fiyat: ${priceDisplay}`,
-                  type: 'driver_assigned'
+                  type: 'driver_assigned',
+                  send_push: true
                 }
               });
             } catch (err) {

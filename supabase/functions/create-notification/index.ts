@@ -189,11 +189,17 @@ Deno.serve(async (req) => {
 
       console.log(`Created ${data.length} notifications for admins`)
 
-      // Send push notifications and WhatsApp messages to all admins
-      for (const admin of adminRoles) {
-        await sendPushToUser(supabaseAdmin, admin.user_id, title, message, reservation_id ? `/admin/reservations/${reservation_id}` : '/admin/reservations');
-        // Also send WhatsApp to admins if requested
-        if (send_whatsapp) {
+      // Send push notifications to admins if requested
+      if (send_push) {
+        console.log('Sending push notifications to all admins...')
+        for (const admin of adminRoles) {
+          await sendPushToUser(supabaseAdmin, admin.user_id, title, message, reservation_id ? `/admin/reservations/${reservation_id}` : '/admin/reservations');
+        }
+      }
+      
+      // Also send WhatsApp to admins if requested
+      if (send_whatsapp) {
+        for (const admin of adminRoles) {
           await sendWhatsAppToUser(admin.user_id, title, message);
         }
       }
