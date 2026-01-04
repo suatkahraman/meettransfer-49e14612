@@ -465,7 +465,7 @@ const DriverHome = () => {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden mb-4"
             >
-              <NotificationSettingsPanel />
+              <NotificationSettingsPanel language="TR" />
             </motion.div>
           )}
         </AnimatePresence>

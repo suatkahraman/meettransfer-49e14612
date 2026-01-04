@@ -19,7 +19,7 @@ const AdminSettings = () => {
       <main className="container mx-auto py-8 px-4 max-w-2xl">
         <div className="space-y-4">
           {/* Notification Settings */}
-          <NotificationSettingsPanel />
+          <NotificationSettingsPanel language="TR" />
 
           <Card>
             <CardHeader>
