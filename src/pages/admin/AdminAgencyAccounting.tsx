@@ -229,16 +229,19 @@ const AdminAgencyAccounting = () => {
       const prevDetails = prevDetailsData || [];
       
       // Calculate total debt from previous months completed reservations
-      // Debt = company_amount (admin price) - passenger_cash_amount
+      // Debt = customer_price (acenta fiyatı) - passenger_cash_amount
+      // DÜZELTME: customer_price kullanılmalı (acenta fiyatı), company_amount değil
       prevMonthsReservations.forEach(r => {
         const detail = prevDetails.find(d => d.reservation_id === r.id);
-        const companyAmount = detail?.company_amount || r.price || 0;
+        // Öncelikle customer_price kullan, yoksa price kullan
+        const agencyPrice = detail?.customer_price || r.price || 0;
         const passengerCash = r.passenger_cash_amount || 0;
-        prevMonthsCarryoverDebt += (companyAmount - passengerCash);
+        prevMonthsCarryoverDebt += (agencyPrice - passengerCash);
       });
     }
 
-    // Calculate payments before this month
+    // Calculate payments made in months before the current selected month
+    // Bu ödemeler sadece devir hesaplamasında kullanılacak
     const prevMonthsPayments = allPayments
       .filter(p => p.payment_date < monthStart)
       .reduce((sum, p) => sum + p.amount, 0);
@@ -586,10 +589,13 @@ const AdminAgencyAccounting = () => {
                   <Plus className="h-4 w-4" />
                   Ödeme Kaydet
                 </Button>
-                <Button variant="outline" onClick={() => setHistoryDialogOpen(true)} className="gap-2">
-                  <History className="h-4 w-4" />
-                  Ödeme Geçmişi ({payments.length})
-                </Button>
+                {/* Ödeme geçmişi butonu sadece bu ayda ödeme varsa göster */}
+                {payments.filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd).length > 0 && (
+                  <Button variant="outline" onClick={() => setHistoryDialogOpen(true)} className="gap-2">
+                    <History className="h-4 w-4" />
+                    Bu Ay Ödemeler ({payments.filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd).length})
+                  </Button>
+                )}
               </div>
 
               {/* Status Filter */}
@@ -948,59 +954,65 @@ const AdminAgencyAccounting = () => {
       <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Ödeme Geçmişi - {agency?.agency_name}</DialogTitle>
+            <DialogTitle>Bu Ay Ödemeler - {agency?.agency_name}</DialogTitle>
             <DialogDescription>
-              Bu acentadan alınan tüm ödemeler.
+              {format(currentMonth, 'MMMM yyyy')} ayında alınan ödemeler.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            {payments.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">
-                Henüz ödeme kaydedilmedi
-              </p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tarih</TableHead>
-                    <TableHead className="text-right">Tutar</TableHead>
-                    <TableHead>Notlar</TableHead>
-                    <TableHead className="text-right">İşlemler</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {payments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>{format(new Date(payment.payment_date), 'dd MMM yyyy')}</TableCell>
-                      <TableCell className="text-right font-medium">₺{payment.amount.toFixed(2)}</TableCell>
-                      <TableCell className="text-muted-foreground max-w-[200px] truncate">{payment.notes || '-'}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => {
-                              setHistoryDialogOpen(false);
-                              openEditPaymentDialog(payment);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => setDeletingPayment(payment)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+            {(() => {
+              const currentMonthPaymentsList = payments.filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd);
+              if (currentMonthPaymentsList.length === 0) {
+                return (
+                  <p className="text-center py-8 text-muted-foreground">
+                    Bu ayda ödeme kaydedilmedi
+                  </p>
+                );
+              }
+              return (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tarih</TableHead>
+                      <TableHead className="text-right">Tutar</TableHead>
+                      <TableHead>Notlar</TableHead>
+                      <TableHead className="text-right">İşlemler</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+                  </TableHeader>
+                  <TableBody>
+                    {currentMonthPaymentsList.map((payment) => (
+                      <TableRow key={payment.id}>
+                        <TableCell>{format(new Date(payment.payment_date), 'dd MMM yyyy')}</TableCell>
+                        <TableCell className="text-right font-medium">₺{payment.amount.toFixed(2)}</TableCell>
+                        <TableCell className="text-muted-foreground max-w-[200px] truncate">{payment.notes || '-'}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => {
+                                setHistoryDialogOpen(false);
+                                openEditPaymentDialog(payment);
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => setDeletingPayment(payment)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              );
+            })()}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setHistoryDialogOpen(false)}>
