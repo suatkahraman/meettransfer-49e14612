@@ -545,35 +545,37 @@ const AdminAgencies = () => {
                     <Badge variant="outline" className="font-mono">{agency.currency || 'EUR'}</Badge>
                   </div>
 
-                  {/* Multi-Currency Balances */}
-                  {agency.currencyBalances && agency.currencyBalances.length > 0 && (
+                  {/* Multi-Currency Balances - Only show currencies with non-zero balance */}
+                  {agency.currencyBalances && agency.currencyBalances.filter(cb => cb.netAgencyDebt !== 0 || cb.totalAgencyPrice !== 0).length > 0 && (
                     <div className="space-y-3">
-                      {agency.currencyBalances.map((cb) => {
-                        const symbol = cb.currency === 'EUR' ? '€' : cb.currency === 'USD' ? '$' : cb.currency === 'GBP' ? '£' : cb.currency === 'AED' ? 'د.إ' : cb.currency === 'AUD' ? 'A$' : '₺';
-                        return (
-                          <div key={cb.currency} className="space-y-2 p-3 bg-muted rounded-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="secondary" className="font-mono">{cb.currency}</Badge>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-muted-foreground">Acenta Fiyatı</span>
-                              <span className="font-medium">{symbol}{cb.totalAgencyPrice.toFixed(2)}</span>
-                            </div>
-                            {cb.totalPassengerCash > 0 && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm text-muted-foreground">Yolcu Nakit</span>
-                                <span className="font-medium text-orange-600">-{symbol}{cb.totalPassengerCash.toFixed(2)}</span>
+                      {agency.currencyBalances
+                        .filter(cb => cb.netAgencyDebt !== 0 || cb.totalAgencyPrice !== 0)
+                        .map((cb) => {
+                          const symbol = cb.currency === 'EUR' ? '€' : cb.currency === 'USD' ? '$' : cb.currency === 'GBP' ? '£' : cb.currency === 'AED' ? 'د.إ' : cb.currency === 'AUD' ? 'A$' : '₺';
+                          return (
+                            <div key={cb.currency} className="space-y-2 p-3 bg-muted rounded-lg">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="secondary" className="font-mono">{cb.currency}</Badge>
                               </div>
-                            )}
-                            <div className="flex items-center justify-between border-t pt-2">
-                              <span className="text-sm font-medium">Net Borç</span>
-                              <span className={`font-bold ${cb.netAgencyDebt > 0 ? 'text-primary' : cb.netAgencyDebt < 0 ? 'text-green-600' : ''}`}>
-                                {symbol}{cb.netAgencyDebt.toFixed(2)}
-                              </span>
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground">Acenta Fiyatı</span>
+                                <span className="font-medium">{symbol}{cb.totalAgencyPrice.toFixed(2)}</span>
+                              </div>
+                              {cb.totalPassengerCash > 0 && (
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm text-muted-foreground">Yolcu Nakit</span>
+                                  <span className="font-medium text-orange-600">-{symbol}{cb.totalPassengerCash.toFixed(2)}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center justify-between border-t pt-2">
+                                <span className="text-sm font-medium">Net Borç</span>
+                                <span className={`font-bold ${cb.netAgencyDebt > 0 ? 'text-primary' : cb.netAgencyDebt < 0 ? 'text-green-600' : ''}`}>
+                                  {symbol}{cb.netAgencyDebt.toFixed(2)}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
                     </div>
                   )}
 
