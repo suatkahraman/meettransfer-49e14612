@@ -26,7 +26,7 @@ interface Transaction {
 
 const AgencyTransactionHistory = () => {
   const { agencyId } = useUserRole();
-  const { t } = useAgencyTranslations();
+  const { t, locale } = useAgencyTranslations();
   const { currencySymbol } = useAgencyLanguage();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -328,7 +328,7 @@ const AgencyTransactionHistory = () => {
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        <span>{format(new Date(transaction.created_at), 'dd MMM yyyy HH:mm')}</span>
+                        <span>{format(new Date(transaction.created_at), 'dd MMM yyyy HH:mm', { locale })}</span>
                       </div>
                       <span>{t('balanceAfter') || 'Bakiye'}: {currencySymbol}{transaction.balance_after.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
                     </div>

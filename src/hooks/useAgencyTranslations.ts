@@ -1470,6 +1470,23 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
   },
 };
 
+// Date-fns locale imports
+import { tr, de, fr, ru, it, es, enUS, ar, uk, ja } from 'date-fns/locale';
+import type { Locale } from 'date-fns';
+
+const localeMap: Record<AgencyLanguage, Locale> = {
+  TR: tr,
+  DE: de,
+  FR: fr,
+  RU: ru,
+  IT: it,
+  ES: es,
+  EN: enUS,
+  AR: ar,
+  UK: uk,
+  JA: ja,
+};
+
 export const useAgencyTranslations = () => {
   const { language } = useAgencyLanguage();
 
@@ -1477,5 +1494,7 @@ export const useAgencyTranslations = () => {
     return agencyTranslations[language][key] || agencyTranslations['EN'][key] || key;
   };
 
-  return { t, language };
+  const locale = localeMap[language] || enUS;
+
+  return { t, language, locale };
 };

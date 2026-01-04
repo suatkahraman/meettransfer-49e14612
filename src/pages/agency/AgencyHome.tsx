@@ -90,7 +90,7 @@ interface AccountingSummary {
 const AgencyHome = () => {
   const { signOut } = useAuth();
   const { agencyId } = useUserRole();
-  const { t } = useAgencyTranslations();
+  const { t, locale } = useAgencyTranslations();
   const { currencySymbol, language: agencyLang } = useAgencyLanguage();
   const { isSupported, isSubscribed, isLoading: pushLoading, permission, subscribe, unsubscribe } = usePushNotifications();
   const navigate = useNavigate();
@@ -301,7 +301,7 @@ const AgencyHome = () => {
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>{format(new Date(reservation.pickup_date), 'dd MMM yyyy')}</span>
+            <span>{format(new Date(reservation.pickup_date), 'dd MMM yyyy', { locale })}</span>
             <Clock className="h-4 w-4 text-muted-foreground ml-2" />
             <span>{reservation.pickup_time}</span>
           </div>

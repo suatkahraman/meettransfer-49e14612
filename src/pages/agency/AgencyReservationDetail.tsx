@@ -100,7 +100,7 @@ const paymentStatusLabels: Record<string, string> = {
 const AgencyReservationDetail = () => {
   const { id } = useParams();
   const { agencyId } = useUserRole();
-  const { t } = useAgencyTranslations();
+  const { t, locale } = useAgencyTranslations();
   const { currencySymbol } = useAgencyLanguage();
   const { emailAdminAgencyPriceApproved, emailAdminAgencyPriceRejected, emailAdminReservationCancelled } = useEmailNotifications();
   const navigate = useNavigate();
@@ -717,7 +717,7 @@ const AgencyReservationDetail = () => {
               )}
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                {format(new Date(reservation.pickup_date), 'PPPP')}
+                {format(new Date(reservation.pickup_date), 'PPPP', { locale })}
               </CardTitle>
             </div>
           </CardHeader>
