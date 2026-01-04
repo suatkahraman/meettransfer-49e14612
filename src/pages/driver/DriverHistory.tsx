@@ -309,11 +309,8 @@ const DriverHistory = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-primary">
-                          {formatPrice(reservation.price, reservation.price_currency)}
-                        </p>
-                        {reservation.driver_cash_amount && (
-                          <p className="text-xs text-muted-foreground">
+                        {reservation.driver_cash_amount && reservation.driver_cash_amount > 0 && (
+                          <p className="text-sm text-green-600 font-medium">
                             {t('cash')}: {formatPrice(reservation.driver_cash_amount, reservation.price_currency)}
                           </p>
                         )}

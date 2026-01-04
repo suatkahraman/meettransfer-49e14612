@@ -315,7 +315,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
               </div>
             )}
 
-            {/* Price & Swipe hints */}
+            {/* Swipe hints - No price shown to drivers */}
             <div className="pt-2 border-t">
               <div className="flex items-center justify-between">
                 {canSwipeRight && (
@@ -337,9 +337,6 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                   </span>
                 )}
                 {!canSwipeRight && !canSwipeLeft && reservation.status !== 'active' && <span />}
-                <span className="font-bold text-lg text-primary">
-                  {formatPriceLocal(reservation.price, reservation.price_currency)}
-                </span>
               </div>
             </div>
           </CardContent>
