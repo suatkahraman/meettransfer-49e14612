@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import NotificationBell from '@/components/NotificationBell';
@@ -15,6 +15,7 @@ import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
+import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -115,6 +116,7 @@ const CustomerBookings = () => {
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const { playSound } = useNotificationSound();
   const { isSubscribed, subscribe, unsubscribe, isLoading: pushLoading } = usePushNotifications();
 
@@ -214,6 +216,15 @@ const CustomerBookings = () => {
           <Button 
             variant="ghost" 
             size="icon" 
+            onClick={() => setShowNotificationSettings(!showNotificationSettings)}
+            className="text-primary-foreground hover:bg-primary-foreground/10"
+            title="Bildirim Ayarları"
+          >
+            <Volume2 className="h-5 w-5" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
             onClick={() => isSubscribed ? unsubscribe() : subscribe()}
             disabled={pushLoading}
             className="text-primary-foreground hover:bg-primary-foreground/10"
@@ -233,6 +244,13 @@ const CustomerBookings = () => {
 
       <main className="flex-1 overflow-y-auto">
         <div className="container mx-auto py-8 px-4 max-w-2xl">
+        {/* Notification Settings Panel */}
+        {showNotificationSettings && (
+          <div className="mb-6">
+            <NotificationSettingsPanel />
+          </div>
+        )}
+        
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
