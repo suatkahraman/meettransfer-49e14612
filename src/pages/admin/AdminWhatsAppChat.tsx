@@ -606,7 +606,7 @@ export default function AdminWhatsAppChat() {
   };
 
   // Conversation List Component
-  const ConversationsList = () => (
+  const renderConversationsList = () => (
     <Card className={cn("flex flex-col", isMobile ? "h-full border-0 rounded-none" : "w-80 flex-shrink-0")}>
       <CardHeader className="pb-3 space-y-3">
         <div className="flex items-center justify-between">
@@ -720,7 +720,7 @@ export default function AdminWhatsAppChat() {
   );
 
   // Chat Area Component
-  const ChatArea = () => (
+  const renderChatArea = () => (
     <Card className={cn("flex flex-col", isMobile ? "h-full border-0 rounded-none" : "flex-1")}>
       {selectedConversation ? (
         <>
@@ -1107,7 +1107,7 @@ export default function AdminWhatsAppChat() {
               exit={{ x: -100, opacity: 0 }}
               className="absolute inset-0"
             >
-              <ConversationsList />
+              {renderConversationsList()}
             </motion.div>
           ) : (
             <motion.div
@@ -1117,7 +1117,7 @@ export default function AdminWhatsAppChat() {
               exit={{ x: 100, opacity: 0 }}
               className="absolute inset-0"
             >
-              <ChatArea />
+              {renderChatArea()}
             </motion.div>
           )}
         </AnimatePresence>
@@ -1128,8 +1128,8 @@ export default function AdminWhatsAppChat() {
   // Desktop view
   return (
     <div className="flex h-[calc(100vh-200px)] gap-4">
-      <ConversationsList />
-      <ChatArea />
+      {renderConversationsList()}
+      {renderChatArea()}
     </div>
   );
 }
