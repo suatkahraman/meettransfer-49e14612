@@ -1307,30 +1307,65 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                     try {
                       const priceValue = parseFloat(formData.price);
 
-                      // Resolve agency user id (used both for notification + linking agency details)
+                      // Resolve agency user id and currency (used for notification + linking agency details + currency conversion)
                       const { data: agencyData, error: agencyFetchError } = await supabase
                         .from('agencies')
-                        .select('user_id')
+                        .select('user_id, currency')
                         .eq('id', formData.agency_id)
                         .maybeSingle();
 
                       if (agencyFetchError) {
-                        console.error('Failed to fetch agency user_id:', agencyFetchError);
+                        console.error('Failed to fetch agency:', agencyFetchError);
+                      }
+
+                      const agencyCurrency = agencyData?.currency || 'EUR';
+                      let convertedPrice = priceValue;
+                      let exchangeRateUsed: number | null = null;
+                      let finalCurrency = formData.price_currency;
+
+                      // Convert price to agency's preferred currency if different
+                      if (agencyCurrency !== formData.price_currency) {
+                        try {
+                          // First convert admin currency to agency currency
+                          const { data: rateData, error: rateError } = await supabase.functions.invoke('get-exchange-rate', {
+                            body: {
+                              from_currency: formData.price_currency,
+                              to_currency: agencyCurrency,
+                              amount: priceValue
+                            }
+                          });
+
+                          if (rateError) {
+                            console.error('Exchange rate fetch error:', rateError);
+                            toast.error(`Döviz kuru alınamadı, ${formData.price_currency} ile devam ediliyor`);
+                          } else if (rateData?.converted_amount && rateData?.rate) {
+                            convertedPrice = Math.round(rateData.converted_amount * 100) / 100; // Round to 2 decimals
+                            exchangeRateUsed = rateData.rate;
+                            finalCurrency = agencyCurrency;
+                            console.log(`Converted ${priceValue} ${formData.price_currency} to ${convertedPrice} ${agencyCurrency} (rate: ${exchangeRateUsed})`);
+                          }
+                        } catch (e) {
+                          console.error('Failed to convert currency:', e);
+                          toast.error(`Döviz çevirisi başarısız, ${formData.price_currency} ile devam ediliyor`);
+                        }
                       }
 
                       // Set price and change status to waiting_for_agency_approval
+                      // Store the original admin price in admin_set_price
                       const { error } = await supabase
                         .from('reservations')
                         .update({ 
-                          price: priceValue,
-                          price_currency: formData.price_currency,
-                          admin_set_price: priceValue,
+                          price: convertedPrice,
+                          price_currency: finalCurrency,
+                          admin_set_price: priceValue, // Original admin price for reference
                           status: 'waiting_for_agency_approval' 
                         })
                         .eq('id', id);
                       if (error) throw error;
 
-                      // IMPORTANT: Keep agency_reservation_details.customer_price in sync (prevents negative profit)
+                      // IMPORTANT: Keep agency_reservation_details in sync
+                      // company_amount = admin set price (what we charge agency)
+                      // customer_price = converted price shown to agency
                       try {
                         const { data: existingAgencyDetail } = await supabase
                           .from('agency_reservation_details')
@@ -1338,13 +1373,18 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                           .eq('reservation_id', id!)
                           .maybeSingle();
 
+                        const agencyDetailPayload = {
+                          customer_price: convertedPrice,
+                          company_amount: convertedPrice, // Agency's expense = converted price
+                          agency_price_currency: finalCurrency,
+                          exchange_rate_used: exchangeRateUsed,
+                          conversion_date: exchangeRateUsed ? new Date().toISOString().split('T')[0] : null,
+                        };
+
                         if (existingAgencyDetail) {
                           await supabase
                             .from('agency_reservation_details')
-                            .update({
-                              customer_price: priceValue,
-                              agency_price_currency: formData.price_currency,
-                            })
+                            .update(agencyDetailPayload)
                             .eq('reservation_id', id!);
                         } else if (agencyData?.user_id) {
                           await supabase
@@ -1352,31 +1392,36 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                             .insert({
                               reservation_id: id,
                               agency_user_id: agencyData.user_id,
-                              customer_price: priceValue,
-                              agency_price_currency: formData.price_currency,
                               payment_status: 'not_paid',
+                              ...agencyDetailPayload,
                             });
                         }
                       } catch (e) {
-                        console.error('Failed to sync agency_reservation_details price:', e);
+                        console.error('Failed to sync agency_reservation_details:', e);
                       }
 
-                      // Record price in history
+                      // Record price in history (original admin price)
                       try {
                         await supabase.from('price_history').insert({
                           reservation_id: id,
                           price: priceValue,
                           price_currency: formData.price_currency,
                           action: 'sent_to_agency',
+                          customer_note: exchangeRateUsed 
+                            ? `Converted to ${convertedPrice} ${finalCurrency} (rate: ${exchangeRateUsed})`
+                            : null,
                         });
                       } catch (e) {
                         console.error('Failed to record price history:', e);
                       }
 
-                      // Send email to agency
+                      // Get currency symbol for notification
+                      const agencyCurrencySymbol = currencies.find(c => c.value === finalCurrency)?.symbol || finalCurrency;
+
+                      // Send email to agency with converted price
                       try {
                         console.log('Sending agency price set email for reservation:', id);
-                        const emailResult = await emailAgencyPriceSet(id!, priceValue, formData.price_currency);
+                        const emailResult = await emailAgencyPriceSet(id!, convertedPrice, finalCurrency);
                         if (!emailResult.success) {
                           console.error('Agency price email failed:', emailResult.error);
                         } else {
@@ -1386,19 +1431,19 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                         console.error('Failed to send agency price email:', e);
                       }
 
-                      // Notify agency user in-app
+                      // Notify agency user in-app with converted price
                       if (agencyData?.user_id) {
                         try {
-                        await supabase.functions.invoke('create-notification', {
-                          body: {
-                            user_id: agencyData.user_id,
-                            reservation_id: id,
-                            title: 'Fiyat Belirlendi',
-                            message: `Rezervasyon için fiyat belirlendi: ${currencySymbol}${priceValue}. Lütfen onaylayın veya reddedin.`,
-                            type: 'price_ready',
-                            send_push: true
-                          }
-                        });
+                          await supabase.functions.invoke('create-notification', {
+                            body: {
+                              user_id: agencyData.user_id,
+                              reservation_id: id,
+                              title: 'Fiyat Belirlendi',
+                              message: `Rezervasyon için fiyat belirlendi: ${agencyCurrencySymbol}${convertedPrice.toFixed(2)}. Lütfen onaylayın veya reddedin.`,
+                              type: 'price_ready',
+                              send_push: true
+                            }
+                          });
                         } catch (e) {
                           console.error('Failed to notify agency:', e);
                         }
