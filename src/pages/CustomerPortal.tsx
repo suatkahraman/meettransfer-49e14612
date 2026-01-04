@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Car,
   Calendar,
@@ -19,6 +22,9 @@ import {
   CheckCircle,
   Loader2,
   Percent,
+  MessageCircle,
+  Send,
+  X,
 } from "lucide-react";
 
 interface Reservation {
@@ -41,6 +47,13 @@ interface Reservation {
   reservation_code: string | null;
 }
 
+interface Message {
+  id: string;
+  direction: string;
+  content: string;
+  created_at: string;
+}
+
 interface PortalData {
   user_id: string;
   phone: string;
@@ -55,6 +68,13 @@ export default function CustomerPortal() {
   const [loading, setLoading] = useState(true);
   const [portalData, setPortalData] = useState<PortalData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Chat state
+  const [showChat, setShowChat] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [adminTyping, setAdminTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -86,6 +106,77 @@ export default function CustomerPortal() {
       setLoading(false);
     }
   };
+
+  // Fetch messages and setup realtime subscriptions when chat opens
+  useEffect(() => {
+    if (!showChat || !portalData?.conversation_id) return;
+
+    const fetchMessages = async () => {
+      setMessagesLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("whatsapp_messages")
+          .select("id, direction, content, created_at")
+          .eq("conversation_id", portalData.conversation_id)
+          .order("created_at", { ascending: true });
+
+        if (error) throw error;
+        setMessages(data || []);
+      } catch (err) {
+        console.error("Error fetching messages:", err);
+      } finally {
+        setMessagesLoading(false);
+      }
+    };
+
+    fetchMessages();
+
+    // Subscribe to new messages
+    const messagesChannel = supabase
+      .channel(`customer-messages-${portalData.conversation_id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "whatsapp_messages",
+          filter: `conversation_id=eq.${portalData.conversation_id}`,
+        },
+        (payload: any) => {
+          setMessages((prev) => [...prev, payload.new as Message]);
+          setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+          }, 100);
+        }
+      )
+      .subscribe();
+
+    // Subscribe to admin typing presence
+    const typingChannel = supabase
+      .channel(`typing:${portalData.conversation_id}`)
+      .on("presence", { event: "sync" }, () => {
+        const state = typingChannel.presenceState();
+        const adminPresence = Object.values(state).flat().find(
+          (p: any) => p.user_type === "admin" && p.is_typing
+        );
+        setAdminTyping(!!adminPresence);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(typingChannel);
+    };
+  }, [showChat, portalData?.conversation_id]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (showChat && messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [messages, showChat]);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -288,6 +379,142 @@ export default function CustomerPortal() {
           )}
         </div>
       </main>
+
+      {/* Floating Chat Button */}
+      {portalData?.conversation_id && (
+        <AnimatePresence>
+          {!showChat && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              className="fixed bottom-6 right-6 z-50"
+            >
+              <Button
+                size="lg"
+                className="h-14 w-14 rounded-full shadow-lg"
+                onClick={() => setShowChat(true)}
+              >
+                <MessageCircle className="h-6 w-6" />
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
+
+      {/* Chat Panel */}
+      <AnimatePresence>
+        {showChat && portalData?.conversation_id && (
+          <motion.div
+            initial={{ opacity: 0, y: 100, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 100, scale: 0.95 }}
+            className="fixed bottom-4 right-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[500px] max-h-[calc(100vh-2rem)] bg-background border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+          >
+            {/* Chat Header */}
+            <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+                  <MessageCircle className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Meet Transfer</h3>
+                  <p className="text-xs opacity-80">{t('supportTeam') || 'Destek Ekibi'}</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-primary-foreground hover:bg-primary-foreground/20"
+                onClick={() => setShowChat(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Messages */}
+            <ScrollArea className="flex-1 p-4">
+              {messagesLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                  <MessageCircle className="h-12 w-12 mb-3 opacity-50" />
+                  <p className="text-sm">{t('noMessagesYet') || 'Henüz mesaj yok'}</p>
+                  <p className="text-xs mt-1">{t('startConversation') || 'WhatsApp üzerinden sohbete başlayın'}</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {messages.map((msg) => (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex ${msg.direction === "incoming" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-2xl px-4 py-2.5 shadow-sm ${
+                          msg.direction === "incoming"
+                            ? "bg-primary text-primary-foreground rounded-br-md"
+                            : "bg-muted rounded-bl-md"
+                        }`}
+                      >
+                        <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                        <p className="text-[10px] opacity-70 mt-1 text-right">
+                          {format(new Date(msg.created_at), "HH:mm")}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                  
+                  {/* Admin Typing Indicator */}
+                  <AnimatePresence>
+                    {adminTyping && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="flex justify-start"
+                      >
+                        <div className="flex items-center gap-2 bg-muted rounded-2xl rounded-bl-md px-4 py-3">
+                          <span className="text-xs text-muted-foreground">{t('supportTyping') || 'Destek ekibi yazıyor'}</span>
+                          <div className="flex gap-0.5">
+                            <motion.span
+                              animate={{ y: [0, -3, 0] }}
+                              transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                              className="w-1.5 h-1.5 bg-primary rounded-full"
+                            />
+                            <motion.span
+                              animate={{ y: [0, -3, 0] }}
+                              transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
+                              className="w-1.5 h-1.5 bg-primary rounded-full"
+                            />
+                            <motion.span
+                              animate={{ y: [0, -3, 0] }}
+                              transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
+                              className="w-1.5 h-1.5 bg-primary rounded-full"
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </ScrollArea>
+
+            {/* Info Footer */}
+            <div className="p-3 border-t bg-muted/30">
+              <p className="text-xs text-center text-muted-foreground">
+                {t('chatViaWhatsApp') || 'WhatsApp üzerinden mesaj göndermek için telefonunuzu kullanın'}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
