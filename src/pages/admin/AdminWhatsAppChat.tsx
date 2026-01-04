@@ -118,6 +118,7 @@ export default function AdminWhatsAppChat() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileChat, setShowMobileChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageInputRef = useRef<HTMLTextAreaElement>(null);
   
   // Quick reservation form state
   const [showQuickReservation, setShowQuickReservation] = useState(false);
@@ -198,9 +199,10 @@ export default function AdminWhatsAppChat() {
     scrollToBottom();
   }, [messages]);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    if (typeof document !== "undefined" && document.activeElement === messageInputRef.current) return;
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current?.scrollIntoView({ behavior });
     }, 100);
   };
 
@@ -548,9 +550,13 @@ export default function AdminWhatsAppChat() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Prevent IME/composition from accidentally sending
+    if ((e.nativeEvent as any).isComposing) return;
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      // Use the live textarea value so the last character isn't lost
+      sendMessage("text", e.currentTarget.value);
     }
   };
 
@@ -590,9 +596,13 @@ export default function AdminWhatsAppChat() {
   const handleSelectConversation = (conv: Conversation) => {
     setSelectedConversation(conv);
     fetchReservationsForPhone(conv.customer_phone);
+
     if (isMobile) {
       setShowMobileChat(true);
     }
+
+    // Focus message box for faster manual typing
+    setTimeout(() => messageInputRef.current?.focus(), 50);
   };
 
   // Conversation List Component
@@ -1052,6 +1062,7 @@ export default function AdminWhatsAppChat() {
             <div className="p-3">
               <div className="flex gap-2">
                 <Textarea
+                  ref={messageInputRef}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={handleKeyPress}
@@ -1059,6 +1070,7 @@ export default function AdminWhatsAppChat() {
                   className="min-h-[60px] max-h-[120px] resize-none"
                 />
                 <Button
+                  type="button"
                   onClick={() => sendMessage()}
                   disabled={!newMessage.trim() || sending}
                   className="h-auto px-4"
