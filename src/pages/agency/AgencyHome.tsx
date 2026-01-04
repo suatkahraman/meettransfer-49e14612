@@ -47,6 +47,7 @@ interface Reservation {
   driver_id: string | null;
   drivers?: Driver | null;
   passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
   agency_reservation_details?: AgencyReservationDetail | null;
 }
 
@@ -207,7 +208,7 @@ const AgencyHome = () => {
         id, reservation_code, customer_name, pickup, dropoff,
         pickup_place_name, dropoff_place_name,
         pickup_date, pickup_time, vehicle_type, status, driver_id,
-        passenger_cash_amount,
+        passenger_cash_amount, passenger_cash_currency,
         drivers:driver_id (id, name, plate_number, phone, vehicle_model, vehicle_color),
         agency_reservation_details (payment_status)
       `)
@@ -372,6 +373,19 @@ const AgencyHome = () => {
                   {reservation.drivers.vehicle_model}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Cash amount display */}
+          {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
+            <div className="pt-2 border-t">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">💵</span>
+                <span className="font-semibold text-green-700">
+                  {reservation.passenger_cash_currency || 'TRY'} {reservation.passenger_cash_amount.toLocaleString()}
+                </span>
+                <span className="text-xs text-muted-foreground">({t('cashToCollect') || 'Alınacak Nakit'})</span>
+              </div>
             </div>
           )}
         </div>
