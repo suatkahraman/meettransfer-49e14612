@@ -474,7 +474,7 @@ const AdminAgencies = () => {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {agencies.filter(agency => agency.calculatedBalance !== 0).map((agency) => (
+            {agencies.map((agency) => (
               <Card key={agency.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center justify-between">
