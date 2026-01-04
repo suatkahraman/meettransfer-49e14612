@@ -471,6 +471,20 @@ const DriverHome = () => {
               </CardContent>
             </Card>
 
+            {/* Settings Section */}
+            <AnimatePresence>
+              {expandedSections.settings && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden mb-4"
+                >
+                  <DriverInfoEditor onClose={() => toggleSection('settings')} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Monthly Accounting Button */}
             <Button
               variant="outline"
@@ -633,16 +647,6 @@ const DriverHome = () => {
               </section>
             )}
 
-            {/* Update Info Section - Always Visible at Bottom */}
-            <section className="mt-6 pt-6 border-t">
-              <div className="flex items-center gap-2 py-2 mb-2">
-                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Settings className="h-4 w-4 text-blue-600" />
-                </div>
-                <span className="font-semibold">{t('updateInfo')}</span>
-              </div>
-              <DriverInfoEditor />
-            </section>
           </div>
         )}
         </div>
