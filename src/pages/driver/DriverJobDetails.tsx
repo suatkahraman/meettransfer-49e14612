@@ -389,7 +389,7 @@ const DriverJobDetails = () => {
             }
           }
 
-          // Notify admins (in-app)
+          // Notify admins (in-app + push)
           await supabase.functions.invoke('create-notification', {
             body: {
               type: 'trip_completed',
@@ -397,6 +397,7 @@ const DriverJobDetails = () => {
               message: `${driverData?.name || 'Driver'} completed trip #${id.slice(0, 8)}.`,
               notify_admins: true,
               reservation_id: id,
+              send_push: true
             }
           });
 

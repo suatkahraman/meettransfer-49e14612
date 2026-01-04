@@ -341,7 +341,7 @@ const DriverHome = () => {
           console.log('Push notification failed:', pushError);
         }
 
-        // Notify admins
+        // Notify admins (push + in-app)
         await supabase.functions.invoke('create-notification', {
           body: {
             type: 'trip_completed',
@@ -349,6 +349,7 @@ const DriverHome = () => {
             message: `${driverData?.name || 'Driver'} completed trip #${id.slice(0, 8)}.`,
             notify_admins: true,
             reservation_id: id,
+            send_push: true
           }
         });
       } catch (notifyError) {

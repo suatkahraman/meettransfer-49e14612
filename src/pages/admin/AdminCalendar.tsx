@@ -132,7 +132,8 @@ const AdminCalendar = () => {
             reservation_id: reservation.id,
             title: 'New Job Assigned',
             message: `New transfer: ${reservation.pickup} → ${reservation.dropoff} on ${format(parseISO(reservation.pickup_date), 'PP')} at ${reservation.pickup_time}. ${priceDisplay ? `Price: ${priceDisplay}` : ''}`,
-            type: 'driver_assigned'
+            type: 'driver_assigned',
+            send_push: true
           }
         });
       } catch (err) {

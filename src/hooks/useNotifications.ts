@@ -50,6 +50,8 @@ export const useNotifications = () => {
           message: options.message,
           type: options.type,
           notify_admins: options.notify_admins,
+          send_push: options.send_push,
+          url: options.url,
         }
       });
 
@@ -58,8 +60,8 @@ export const useNotifications = () => {
         return { success: false, error };
       }
 
-      // Also send push notification if requested
-      if (options.send_push && options.user_id) {
+      // Send push notification for individual user (non-admin case)
+      if (options.send_push && options.user_id && !options.notify_admins) {
         try {
           await supabase.functions.invoke('send-push-notification', {
             body: {
@@ -272,6 +274,7 @@ export const useNotifications = () => {
       message: `New transfer request from ${customerName}. Please set a price.`,
       type: 'new_reservation',
       notify_admins: true,
+      send_push: true,
       send_whatsapp: true,
     });
   }, [sendNotification]);
@@ -285,6 +288,7 @@ export const useNotifications = () => {
       message: 'A customer has modified a confirmed reservation. Please review the changes.',
       type: 'reservation_edited',
       notify_admins: true,
+      send_push: true,
     });
   }, [sendNotification]);
 
@@ -298,6 +302,7 @@ export const useNotifications = () => {
       message: `${customerName} has cancelled their reservation.`,
       type: 'customer_cancelled',
       notify_admins: true,
+      send_push: true,
     });
   }, [sendNotification]);
 
@@ -311,6 +316,7 @@ export const useNotifications = () => {
       message: `${driverName} has accepted the job.`,
       type: 'driver_accepted',
       notify_admins: true,
+      send_push: true,
     });
   }, [sendNotification]);
 
@@ -325,6 +331,7 @@ export const useNotifications = () => {
       message: `${driverName} updated payment: ${changes}`,
       type: 'driver_updated_payment',
       notify_admins: true,
+      send_push: true,
     });
   }, [sendNotification]);
 
