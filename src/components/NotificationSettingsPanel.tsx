@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, BellOff, Volume2, VolumeX, Vibrate, Smartphone, TestTube, Check, X } from 'lucide-react';
+import { Bell, BellOff, Volume2, VolumeX, Vibrate, Smartphone, TestTube, Check } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -27,18 +27,85 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   soundType: 'default'
 };
 
-const SOUND_TYPE_LABELS: Record<NotificationSoundType, string> = {
-  default: 'Varsayılan',
-  success: 'Başarı',
-  warning: 'Uyarı',
-  urgent: 'Acil',
-  message: 'Mesaj',
-  reservation: 'Rezervasyon',
-  driver: 'Sürücü',
-  payment: 'Ödeme'
+// Multi-language translations
+type NotificationLanguage = 'TR' | 'EN';
+
+const translations: Record<NotificationLanguage, Record<string, string>> = {
+  TR: {
+    notificationsNotSupported: 'Bildirimler Desteklenmiyor',
+    browserNotSupported: 'Tarayıcınız push bildirimleri desteklemiyor. Lütfen modern bir tarayıcı kullanın.',
+    notificationSettings: 'Bildirim Ayarları',
+    manageSettings: 'Push bildirimleri, ses ve titreşim ayarlarınızı yönetin',
+    permissionGranted: 'İzin Verildi',
+    permissionDenied: 'Reddedildi',
+    permissionPending: 'Bekliyor',
+    pushNotifications: 'Push Bildirimleri',
+    notificationsOn: 'Bildirimler açık',
+    getImportantUpdates: 'Önemli güncellemeler için bildirim alın',
+    permissionDeniedMessage: 'Bildirim izni reddedilmiş. Bildirimleri etkinleştirmek için tarayıcı ayarlarından izin vermeniz gerekiyor.',
+    notificationSound: 'Bildirim Sesi',
+    playSoundOnNotification: 'Bildirim geldiğinde ses çal',
+    soundVolume: 'Ses Seviyesi',
+    soundType: 'Ses Türü',
+    vibration: 'Titreşim',
+    vibrationOnNotification: 'Bildirim geldiğinde titreşim',
+    activeForImportantRoles: '(Admin/Sürücü için aktif)',
+    testNotification: 'Bildirimi Test Et',
+    testSent: 'Test Gönderildi',
+    testNotificationSent: 'Test bildirimi gönderildi!',
+    testNotificationTitle: '🔔 Test Bildirimi',
+    testNotificationBody: 'Bu bir test bildirimidir. Ses ve titreşim ayarlarınız çalışıyor!',
+    // Sound type labels
+    default: 'Varsayılan',
+    success: 'Başarı',
+    warning: 'Uyarı',
+    urgent: 'Acil',
+    message: 'Mesaj',
+    reservation: 'Rezervasyon',
+    driver: 'Sürücü',
+    payment: 'Ödeme',
+  },
+  EN: {
+    notificationsNotSupported: 'Notifications Not Supported',
+    browserNotSupported: 'Your browser does not support push notifications. Please use a modern browser.',
+    notificationSettings: 'Notification Settings',
+    manageSettings: 'Manage your push notifications, sound and vibration settings',
+    permissionGranted: 'Granted',
+    permissionDenied: 'Denied',
+    permissionPending: 'Pending',
+    pushNotifications: 'Push Notifications',
+    notificationsOn: 'Notifications are on',
+    getImportantUpdates: 'Get notifications for important updates',
+    permissionDeniedMessage: 'Notification permission was denied. You need to enable permissions in browser settings.',
+    notificationSound: 'Notification Sound',
+    playSoundOnNotification: 'Play sound when notification arrives',
+    soundVolume: 'Sound Volume',
+    soundType: 'Sound Type',
+    vibration: 'Vibration',
+    vibrationOnNotification: 'Vibrate when notification arrives',
+    activeForImportantRoles: '(Active for Admin/Driver)',
+    testNotification: 'Test Notification',
+    testSent: 'Test Sent',
+    testNotificationSent: 'Test notification sent!',
+    testNotificationTitle: '🔔 Test Notification',
+    testNotificationBody: 'This is a test notification. Your sound and vibration settings are working!',
+    // Sound type labels
+    default: 'Default',
+    success: 'Success',
+    warning: 'Warning',
+    urgent: 'Urgent',
+    message: 'Message',
+    reservation: 'Reservation',
+    driver: 'Driver',
+    payment: 'Payment',
+  }
 };
 
-export const NotificationSettingsPanel = () => {
+interface NotificationSettingsPanelProps {
+  language?: NotificationLanguage;
+}
+
+export const NotificationSettingsPanel = ({ language = 'TR' }: NotificationSettingsPanelProps) => {
   const { 
     isSupported, 
     isSubscribed, 
@@ -52,6 +119,22 @@ export const NotificationSettingsPanel = () => {
   
   const [settings, setSettings] = useState<NotificationSettings>(DEFAULT_SETTINGS);
   const [isTesting, setIsTesting] = useState(false);
+
+  // Translation helper
+  const t = (key: string): string => {
+    return translations[language]?.[key] || translations['EN'][key] || key;
+  };
+
+  const SOUND_TYPE_LABELS: Record<NotificationSoundType, string> = {
+    default: t('default'),
+    success: t('success'),
+    warning: t('warning'),
+    urgent: t('urgent'),
+    message: t('message'),
+    reservation: t('reservation'),
+    driver: t('driver'),
+    payment: t('payment')
+  };
 
   // Load settings from localStorage
   useEffect(() => {
@@ -97,25 +180,25 @@ export const NotificationSettingsPanel = () => {
       try {
         const registration = await navigator.serviceWorker.ready;
         const notificationOptions: NotificationOptions & { vibrate?: number[] } = {
-          body: 'Bu bir test bildirimidir. Ses ve titreşim ayarlarınız çalışıyor!',
+          body: t('testNotificationBody'),
           icon: '/pwa-192x192.png',
           badge: '/pwa-192x192.png',
           tag: 'test-notification',
           requireInteraction: false
         };
         
-        // Add vibrate if supported (not in TypeScript types but works in browsers)
+        // Add vibrate if supported
         if (settings.vibrationEnabled) {
           (notificationOptions as any).vibrate = [200, 100, 200];
         }
         
-        await registration.showNotification('🔔 Test Bildirimi', notificationOptions);
+        await registration.showNotification(t('testNotificationTitle'), notificationOptions);
       } catch (error) {
         console.error('Test notification error:', error);
       }
     }
     
-    toast.success('Test bildirimi gönderildi!');
+    toast.success(t('testNotificationSent'));
     
     setTimeout(() => setIsTesting(false), 1000);
   };
@@ -123,11 +206,11 @@ export const NotificationSettingsPanel = () => {
   const getPermissionBadge = () => {
     switch (permission) {
       case 'granted':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">İzin Verildi</Badge>;
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">{t('permissionGranted')}</Badge>;
       case 'denied':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">Reddedildi</Badge>;
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">{t('permissionDenied')}</Badge>;
       default:
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">Bekliyor</Badge>;
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">{t('permissionPending')}</Badge>;
     }
   };
 
@@ -137,10 +220,10 @@ export const NotificationSettingsPanel = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BellOff className="h-5 w-5 text-muted-foreground" />
-            Bildirimler Desteklenmiyor
+            {t('notificationsNotSupported')}
           </CardTitle>
           <CardDescription>
-            Tarayıcınız push bildirimleri desteklemiyor. Lütfen modern bir tarayıcı kullanın.
+            {t('browserNotSupported')}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -153,12 +236,12 @@ export const NotificationSettingsPanel = () => {
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-primary" />
-            Bildirim Ayarları
+            {t('notificationSettings')}
           </span>
           {getPermissionBadge()}
         </CardTitle>
         <CardDescription>
-          Push bildirimleri, ses ve titreşim ayarlarınızı yönetin
+          {t('manageSettings')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -167,9 +250,9 @@ export const NotificationSettingsPanel = () => {
           <div className="flex items-center gap-3">
             <Smartphone className="h-5 w-5 text-muted-foreground" />
             <div>
-              <Label className="text-base">Push Bildirimleri</Label>
+              <Label className="text-base">{t('pushNotifications')}</Label>
               <p className="text-sm text-muted-foreground">
-                {isSubscribed ? 'Bildirimler açık' : 'Önemli güncellemeler için bildirim alın'}
+                {isSubscribed ? t('notificationsOn') : t('getImportantUpdates')}
               </p>
             </div>
           </div>
@@ -183,7 +266,7 @@ export const NotificationSettingsPanel = () => {
         {permission === 'denied' && (
           <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
             <p className="text-sm text-red-700 dark:text-red-400">
-              Bildirim izni reddedilmiş. Bildirimleri etkinleştirmek için tarayıcı ayarlarından izin vermeniz gerekiyor.
+              {t('permissionDeniedMessage')}
             </p>
           </div>
         )}
@@ -198,9 +281,9 @@ export const NotificationSettingsPanel = () => {
                 <VolumeX className="h-5 w-5 text-muted-foreground" />
               )}
               <div>
-                <Label className="text-base">Bildirim Sesi</Label>
+                <Label className="text-base">{t('notificationSound')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Bildirim geldiğinde ses çal
+                  {t('playSoundOnNotification')}
                 </p>
               </div>
             </div>
@@ -215,7 +298,7 @@ export const NotificationSettingsPanel = () => {
               {/* Volume Slider */}
               <div className="space-y-2 pl-8">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm text-muted-foreground">Ses Seviyesi</Label>
+                  <Label className="text-sm text-muted-foreground">{t('soundVolume')}</Label>
                   <span className="text-sm font-medium">{Math.round(settings.volume * 100)}%</span>
                 </div>
                 <Slider
@@ -230,7 +313,7 @@ export const NotificationSettingsPanel = () => {
 
               {/* Sound Type Selector */}
               <div className="space-y-2 pl-8">
-                <Label className="text-sm text-muted-foreground">Ses Türü</Label>
+                <Label className="text-sm text-muted-foreground">{t('soundType')}</Label>
                 <Select
                   value={settings.soundType}
                   onValueChange={(value: NotificationSoundType) => {
@@ -239,7 +322,7 @@ export const NotificationSettingsPanel = () => {
                   }}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Ses seçin" />
+                    <SelectValue placeholder={t('soundType')} />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(SOUND_TYPE_LABELS).map(([key, label]) => (
@@ -259,10 +342,10 @@ export const NotificationSettingsPanel = () => {
           <div className="flex items-center gap-3">
             <Vibrate className="h-5 w-5 text-muted-foreground" />
             <div>
-              <Label className="text-base">Titreşim</Label>
+              <Label className="text-base">{t('vibration')}</Label>
               <p className="text-sm text-muted-foreground">
-                Bildirim geldiğinde titreşim
-                {isImportantRole && <span className="text-primary"> (Admin/Sürücü için aktif)</span>}
+                {t('vibrationOnNotification')}
+                {isImportantRole && <span className="text-primary"> {t('activeForImportantRoles')}</span>}
               </p>
             </div>
           </div>
@@ -283,12 +366,12 @@ export const NotificationSettingsPanel = () => {
             {isTesting ? (
               <>
                 <Check className="h-4 w-4 text-green-500" />
-                Test Gönderildi
+                {t('testSent')}
               </>
             ) : (
               <>
                 <TestTube className="h-4 w-4" />
-                Bildirimi Test Et
+                {t('testNotification')}
               </>
             )}
           </Button>

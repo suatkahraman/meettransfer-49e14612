@@ -112,7 +112,7 @@ const statusIcons: Record<string, React.ReactNode> = {
 
 const CustomerBookings = () => {
   const { user, signOut } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -247,7 +247,7 @@ const CustomerBookings = () => {
         {/* Notification Settings Panel */}
         {showNotificationSettings && (
           <div className="mb-6">
-            <NotificationSettingsPanel />
+            <NotificationSettingsPanel language={language === 'TR' ? 'TR' : 'EN'} />
           </div>
         )}
         

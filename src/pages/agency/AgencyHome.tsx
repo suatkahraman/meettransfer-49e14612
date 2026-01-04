@@ -7,10 +7,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt } from 'lucide-react';
+import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt, Volume2 } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import AgencyLanguageSelector from '@/components/agency/AgencyLanguageSelector';
 import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
+import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -90,7 +91,7 @@ const AgencyHome = () => {
   const { signOut } = useAuth();
   const { agencyId } = useUserRole();
   const { t } = useAgencyTranslations();
-  const { currencySymbol } = useAgencyLanguage();
+  const { currencySymbol, language: agencyLang } = useAgencyLanguage();
   const { isSupported, isSubscribed, isLoading: pushLoading, permission, subscribe, unsubscribe } = usePushNotifications();
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -108,7 +109,8 @@ const AgencyHome = () => {
   const [expandedSections, setExpandedSections] = useState({
     upcoming: true,
     active: true,
-    completed: false
+    completed: false,
+    notificationSettings: false
   });
 
   const fetchData = useCallback(async (showToast = false) => {
@@ -240,7 +242,7 @@ const AgencyHome = () => {
     await fetchData(true);
   };
 
-  const toggleSection = (section: 'upcoming' | 'active' | 'completed') => {
+  const toggleSection = (section: 'upcoming' | 'active' | 'completed' | 'notificationSettings') => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -341,6 +343,15 @@ const AgencyHome = () => {
         </div>
         <div className="flex items-center gap-1.5">
           <AgencyLanguageSelector />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => toggleSection('notificationSettings')}
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
+            title={t('notificationSettings') || 'Bildirim Ayarları'}
+          >
+            <Volume2 className="h-4 w-4" />
+          </Button>
           {isSupported && (
             <Button 
               variant="ghost" 
@@ -403,6 +414,20 @@ const AgencyHome = () => {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Notification Settings Panel */}
+            <AnimatePresence>
+              {expandedSections.notificationSettings && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <NotificationSettingsPanel language={agencyLang === 'TR' ? 'TR' : 'EN'} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Reservation Code Search */}
             <Card>
               <CardContent className="p-4">
