@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -24,7 +31,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, isToday, isYesterday } from "date-fns";
+import { tr } from "date-fns/locale";
 import {
   MessageCircle,
   Send,
@@ -34,6 +42,7 @@ import {
   Link as LinkIcon,
   RefreshCw,
   CheckCircle,
+  CheckCircle2,
   Clock,
   Plus,
   MapPin,
@@ -41,8 +50,19 @@ import {
   Car,
   Plane,
   ArrowLeft,
+  Search,
+  X,
+  ChevronLeft,
+  Zap,
+  Check,
+  XCircle,
+  AlertCircle,
+  FileText,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface Conversation {
   id: string;
@@ -69,14 +89,25 @@ interface Message {
   created_at: string;
 }
 
+// Quick reply templates
+const quickReplies = [
+  { label: "Merhaba", text: "Merhaba! Meet Transfer'a hoş geldiniz. Size nasıl yardımcı olabilirim?" },
+  { label: "Fiyat Bilgisi", text: "Transfer fiyatınızı hesaplıyorum, lütfen biraz bekleyin." },
+  { label: "Teşekkürler", text: "Teşekkür ederiz! İyi yolculuklar dileriz. 🚗" },
+  { label: "Bilgi İste", text: "Lütfen aşağıdaki bilgileri paylaşır mısınız?\n\n• Alış noktası\n• Varış noktası\n• Tarih ve saat\n• Yolcu sayısı" },
+  { label: "Onay", text: "Rezervasyonunuz onaylandı! Detayları kısa süre içinde paylaşacağız." },
+];
+
 export default function AdminWhatsAppChat() {
   const { session } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [checkingMessageId, setCheckingMessageId] = useState<string | null>(null);
   const [priceDialogOpen, setPriceDialogOpen] = useState(false);
@@ -84,6 +115,8 @@ export default function AdminWhatsAppChat() {
   const [currency, setCurrency] = useState("EUR");
   const [reservationId, setReservationId] = useState("");
   const [reservations, setReservations] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showMobileChat, setShowMobileChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Quick reservation form state
@@ -102,7 +135,6 @@ export default function AdminWhatsAppChat() {
   useEffect(() => {
     fetchConversations();
     
-    // Subscribe to realtime updates
     const conversationsChannel = supabase
       .channel("whatsapp-conversations")
       .on(
@@ -121,10 +153,10 @@ export default function AdminWhatsAppChat() {
 
   useEffect(() => {
     if (selectedConversation) {
+      setMessagesLoading(true);
       fetchMessages(selectedConversation.id);
       markAsRead(selectedConversation.id);
 
-      // Subscribe to messages for this conversation (INSERT + UPDATE so delivery status changes appear)
       const messagesChannel = supabase
         .channel(`whatsapp-messages-${selectedConversation.id}`)
         .on(
@@ -167,7 +199,9 @@ export default function AdminWhatsAppChat() {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   const fetchConversations = async () => {
@@ -198,6 +232,8 @@ export default function AdminWhatsAppChat() {
       setMessages(data || []);
     } catch (error) {
       console.error("Error fetching messages:", error);
+    } finally {
+      setMessagesLoading(false);
     }
   };
 
@@ -213,13 +249,11 @@ export default function AdminWhatsAppChat() {
   };
 
   const normalizePhone = (phone: string): string => {
-    // Remove all non-digit characters except leading +
     return phone.replace(/[^\d+]/g, "").replace(/^0+/, "").replace(/^\+90/, "").replace(/^90/, "");
   };
 
   const fetchReservationsForPhone = async (phone: string) => {
     try {
-      // Get all reservations and filter by normalized phone
       const { data, error } = await supabase
         .from("reservations")
         .select("*")
@@ -241,8 +275,9 @@ export default function AdminWhatsAppChat() {
     }
   };
 
-  const sendMessage = async (messageType: "text" | "price" | "magic_link" = "text") => {
-    if (!selectedConversation || (!newMessage.trim() && messageType === "text")) return;
+  const sendMessage = async (messageType: "text" | "price" | "magic_link" = "text", customMessage?: string) => {
+    const messageToSend = customMessage || newMessage;
+    if (!selectedConversation || (!messageToSend.trim() && messageType === "text")) return;
 
     if (!session?.access_token) {
       toast.error("Admin oturumu bulunamadı. Lütfen tekrar giriş yapın.");
@@ -253,7 +288,7 @@ export default function AdminWhatsAppChat() {
     try {
       const payload: any = {
         conversation_id: selectedConversation.id,
-        message: newMessage,
+        message: messageToSend,
         message_type: messageType,
       };
 
@@ -278,10 +313,10 @@ export default function AdminWhatsAppChat() {
       setPrice("");
       setReservationId("");
       setPriceDialogOpen(false);
-      toast.success("Message sent");
+      toast.success("Mesaj gönderildi");
     } catch (error: any) {
       console.error("Error sending message:", error);
-      toast.error(error.message || "Failed to send message");
+      toast.error(error.message || "Mesaj gönderilemedi");
     } finally {
       setSending(false);
     }
@@ -309,10 +344,10 @@ export default function AdminWhatsAppChat() {
       });
 
       if (error) throw error;
-      toast.success("Account link sent");
+      toast.success("Hesap linki gönderildi");
     } catch (error: any) {
       console.error("Error sending magic link:", error);
-      toast.error(error.message || "Failed to send link");
+      toast.error(error.message || "Link gönderilemedi");
     } finally {
       setSending(false);
     }
@@ -320,7 +355,7 @@ export default function AdminWhatsAppChat() {
 
   const checkMessageStatus = async (msg: Message) => {
     if (!msg.twilio_sid) {
-      toast.error("This message has no delivery SID");
+      toast.error("Bu mesajın teslimat SID'i yok");
       return;
     }
 
@@ -332,10 +367,10 @@ export default function AdminWhatsAppChat() {
       if (error) throw error;
 
       const status = data?.status ? String(data.status) : "unknown";
-      toast.success(`WhatsApp status: ${status}`);
+      toast.success(`WhatsApp durumu: ${status}`);
     } catch (error: any) {
       console.error("Error checking message status:", error);
-      toast.error(error.message || "Failed to check status");
+      toast.error(error.message || "Durum kontrol edilemedi");
     } finally {
       setCheckingMessageId(null);
     }
@@ -347,7 +382,7 @@ export default function AdminWhatsAppChat() {
     const { pickup, dropoff, pickup_date, pickup_time, customer_name, vehicle_type, flight_number } = quickReservation;
     
     if (!pickup || !dropoff || !pickup_date || !pickup_time || !customer_name) {
-      toast.error("Please fill in all required fields");
+      toast.error("Lütfen tüm zorunlu alanları doldurun");
       return;
     }
 
@@ -355,11 +390,7 @@ export default function AdminWhatsAppChat() {
     try {
       let customerId = selectedConversation.customer_user_id;
       
-      // If no customer account in conversation, check by phone number first
       if (!customerId) {
-        console.log("Checking for existing customer by phone:", selectedConversation.customer_phone);
-        
-        // Search for existing customer by phone number in profiles table
         const { data: existingProfile } = await supabase
           .from("profiles")
           .select("id")
@@ -368,17 +399,12 @@ export default function AdminWhatsAppChat() {
         
         if (existingProfile) {
           customerId = existingProfile.id;
-          console.log("Found existing customer by phone:", customerId);
           
-          // Update the conversation with the existing customer_user_id
           await supabase
             .from("whatsapp_conversations")
             .update({ customer_user_id: customerId, customer_name: customer_name.trim() })
             .eq("id", selectedConversation.id);
         } else {
-          console.log("No existing customer found, creating new account...");
-          
-          // Generate a random password for the customer
           const randomPassword = crypto.randomUUID().slice(0, 12) + "Aa1!";
           const customerEmail = `customer_${selectedConversation.customer_phone.replace(/\+/g, '')}@meettransfer.customer`;
           
@@ -396,18 +422,15 @@ export default function AdminWhatsAppChat() {
           );
 
           if (createError) {
-            console.error("Error creating customer account:", createError);
-            throw new Error("Failed to create customer account: " + createError.message);
+            throw new Error("Müşteri hesabı oluşturulamadı: " + createError.message);
           }
 
           if (!createResult?.user_id) {
-            throw new Error("Failed to get customer user ID");
+            throw new Error("Müşteri ID alınamadı");
           }
 
           customerId = createResult.user_id;
-          console.log("Created new customer account:", customerId);
 
-          // Update the conversation with the new customer_user_id
           await supabase
             .from("whatsapp_conversations")
             .update({ customer_user_id: customerId, customer_name: customer_name.trim() })
@@ -435,14 +458,12 @@ export default function AdminWhatsAppChat() {
 
       if (error) throw error;
 
-      toast.success("Reservation created successfully");
+      toast.success("Rezervasyon oluşturuldu");
       
-      // Add to reservations list and select it
       const updatedReservations = [newReservation, ...reservations];
       setReservations(updatedReservations);
       setReservationId(newReservation.id);
       
-      // Reset form but keep quick reservation closed
       setQuickReservation({
         pickup: "",
         dropoff: "",
@@ -453,17 +474,14 @@ export default function AdminWhatsAppChat() {
         flight_number: "",
       });
       setShowQuickReservation(false);
-      
-      console.log("Created reservation:", newReservation.id, "Total reservations:", updatedReservations.length);
     } catch (error: any) {
       console.error("Error creating reservation:", error);
-      toast.error(error.message || "Failed to create reservation");
+      toast.error(error.message || "Rezervasyon oluşturulamadı");
     } finally {
       setCreatingReservation(false);
     }
   };
 
-  // Parse messages to extract customer info
   const parseCustomerInfoFromMessages = () => {
     const incomingMessages = messages.filter(m => m.direction === "incoming");
     let info = {
@@ -478,7 +496,6 @@ export default function AdminWhatsAppChat() {
     };
 
     for (const msg of incomingMessages) {
-      const content = msg.content.toLowerCase();
       const lines = msg.content.split("\n");
       
       for (const line of lines) {
@@ -511,17 +528,16 @@ export default function AdminWhatsAppChat() {
           const emailMatch = line.match(/[\w.-]+@[\w.-]+\.\w+/);
           if (emailMatch) info.email = emailMatch[0];
         }
-        // Parse vehicle type
         if (lowerLine.includes("vehicle") || lowerLine.includes("araç") || lowerLine.includes("vito") || lowerLine.includes("maybach") || lowerLine.includes("minibus") || lowerLine.includes("sprinter")) {
           if (!info.vehicle_type) {
             if (lowerLine.includes("maybach")) {
-              info.vehicle_type = "mercedes-maybach";
+              info.vehicle_type = "maybach";
             } else if (lowerLine.includes("vip") && lowerLine.includes("vito")) {
-              info.vehicle_type = "vip-vito";
+              info.vehicle_type = "mercedes-vclass";
             } else if (lowerLine.includes("vito")) {
               info.vehicle_type = "mercedes-vito";
             } else if (lowerLine.includes("minibus") || lowerLine.includes("sprinter")) {
-              info.vehicle_type = "mercedes-sprinter";
+              info.vehicle_type = "minibus";
             }
           }
         }
@@ -538,264 +554,359 @@ export default function AdminWhatsAppChat() {
     }
   };
 
-  return (
-    <div className="flex h-[calc(100vh-200px)] gap-4">
-      {/* Conversations List */}
-      <Card className="w-80 flex-shrink-0">
-        <CardHeader className="pb-3">
-          <div className="flex flex-col gap-2">
+  const formatConversationDate = (date: string) => {
+    const d = new Date(date);
+    if (isToday(d)) return format(d, "HH:mm");
+    if (isYesterday(d)) return "Dün";
+    return format(d, "dd MMM", { locale: tr });
+  };
+
+  const getMessageStatusIcon = (status: string) => {
+    switch (status) {
+      case "delivered":
+        return <CheckCircle2 className="h-3 w-3 text-blue-400" />;
+      case "read":
+        return <CheckCircle2 className="h-3 w-3 text-green-400" />;
+      case "sent":
+        return <Check className="h-3 w-3 opacity-70" />;
+      case "failed":
+        return <XCircle className="h-3 w-3 text-red-400" />;
+      default:
+        return <Clock className="h-3 w-3 opacity-50" />;
+    }
+  };
+
+  const filteredConversations = conversations.filter(conv => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      (conv.customer_name?.toLowerCase() || "").includes(query) ||
+      conv.customer_phone.includes(query)
+    );
+  });
+
+  const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+
+  const handleSelectConversation = (conv: Conversation) => {
+    setSelectedConversation(conv);
+    fetchReservationsForPhone(conv.customer_phone);
+    if (isMobile) {
+      setShowMobileChat(true);
+    }
+  };
+
+  // Conversation List Component
+  const ConversationsList = () => (
+    <Card className={cn("flex flex-col", isMobile ? "h-full border-0 rounded-none" : "w-80 flex-shrink-0")}>
+      <CardHeader className="pb-3 space-y-3">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="-ml-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Geri
+          </Button>
+          <Button variant="ghost" size="icon" onClick={fetchConversations}>
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <MessageCircle className="h-5 w-5 text-primary" />
+          <CardTitle className="text-lg">WhatsApp</CardTitle>
+          {totalUnread > 0 && (
+            <Badge variant="destructive" className="text-xs">
+              {totalUnread}
+            </Badge>
+          )}
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="İsim veya telefon ara..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 pr-8"
+          />
+          {searchQuery && (
             <Button
               variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="w-fit -ml-2"
+              size="icon"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+              onClick={() => setSearchQuery("")}
             >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Geri
+              <X className="h-3 w-3" />
             </Button>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
-                WhatsApp Inbox
-              </CardTitle>
-              <Button variant="ghost" size="icon" onClick={fetchConversations}>
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <ScrollArea className="h-[calc(100vh-300px)]">
-            {loading ? (
-              <div className="p-4 text-center text-muted-foreground">Loading...</div>
-            ) : conversations.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground">
-                No conversations yet
-              </div>
-            ) : (
-              conversations.map((conv) => (
-                <div
-                  key={conv.id}
-                  className={`p-3 border-b cursor-pointer hover:bg-muted/50 transition-colors ${
-                    selectedConversation?.id === conv.id ? "bg-muted" : ""
-                  }`}
-                  onClick={() => {
-                    setSelectedConversation(conv);
-                    fetchReservationsForPhone(conv.customer_phone);
-                  }}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <User className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">
-                          {conv.customer_name || "Unknown"}
-                        </p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {conv.customer_phone}
-                        </p>
-                      </div>
-                    </div>
-                    {conv.unread_count > 0 && (
-                      <Badge variant="destructive" className="text-xs">
-                        {conv.unread_count}
-                      </Badge>
-                    )}
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="p-0 flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
+          {loading ? (
+            <div className="p-3 space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-3 p-2">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {format(new Date(conv.last_message_at), "MMM d, HH:mm")}
+                </div>
+              ))}
+            </div>
+          ) : filteredConversations.length === 0 ? (
+            <div className="p-6 text-center text-muted-foreground">
+              {searchQuery ? "Sonuç bulunamadı" : "Henüz sohbet yok"}
+            </div>
+          ) : (
+            filteredConversations.map((conv) => (
+              <motion.div
+                key={conv.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className={cn(
+                  "p-3 border-b cursor-pointer hover:bg-muted/50 transition-colors",
+                  selectedConversation?.id === conv.id && "bg-primary/5 border-l-2 border-l-primary"
+                )}
+                onClick={() => handleSelectConversation(conv)}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={cn(
+                    "h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0",
+                    conv.unread_count > 0 ? "bg-primary text-primary-foreground" : "bg-muted"
+                  )}>
+                    <User className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={cn("font-medium text-sm truncate", conv.unread_count > 0 && "font-semibold")}>
+                        {conv.customer_name || "Bilinmeyen"}
+                      </p>
+                      <span className="text-xs text-muted-foreground flex-shrink-0">
+                        {formatConversationDate(conv.last_message_at)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                      <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                        <Phone className="h-3 w-3 flex-shrink-0" />
+                        {conv.customer_phone}
+                      </p>
+                      {conv.unread_count > 0 && (
+                        <Badge variant="destructive" className="text-[10px] h-5 min-w-[20px] px-1.5">
+                          {conv.unread_count}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+
+  // Chat Area Component
+  const ChatArea = () => (
+    <Card className={cn("flex flex-col", isMobile ? "h-full border-0 rounded-none" : "flex-1")}>
+      {selectedConversation ? (
+        <>
+          <CardHeader className="pb-3 border-b">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3 min-w-0">
+                {isMobile && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowMobileChat(false)}
+                    className="-ml-2"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </Button>
+                )}
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <CardTitle className="text-base truncate">
+                    {selectedConversation.customer_name || "Bilinmeyen Müşteri"}
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {selectedConversation.customer_phone}
                   </p>
                 </div>
-              ))
-            )}
-          </ScrollArea>
-        </CardContent>
-      </Card>
-
-      {/* Chat Area */}
-      <Card className="flex-1 flex flex-col">
-        {selectedConversation ? (
-          <>
-            <CardHeader className="pb-3 border-b">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">
-                      {selectedConversation.customer_name || "Unknown Customer"}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedConversation.customer_phone}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Dialog open={priceDialogOpen} onOpenChange={setPriceDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <DollarSign className="h-4 w-4 mr-1" />
-                        Send Price
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Send Price Quote</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 pt-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>Price</Label>
-                            <Input
-                              type="number"
-                              value={price}
-                              onChange={(e) => setPrice(e.target.value)}
-                              placeholder="65"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Currency</Label>
-                            <Select value={currency} onValueChange={setCurrency}>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="EUR">€ EUR</SelectItem>
-                                <SelectItem value="USD">$ USD</SelectItem>
-                                <SelectItem value="GBP">£ GBP</SelectItem>
-                                <SelectItem value="TRY">₺ TRY</SelectItem>
-                                <SelectItem value="AED">د.إ AED</SelectItem>
-                                <SelectItem value="AUD">$ AUD</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+              </div>
+              <div className="flex gap-1.5 flex-shrink-0">
+                <Dialog open={priceDialogOpen} onOpenChange={setPriceDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8">
+                      <DollarSign className="h-4 w-4" />
+                      {!isMobile && <span className="ml-1">Fiyat</span>}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Fiyat Teklifi Gönder</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <Label>Fiyat</Label>
+                          <Input
+                            type="number"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                            placeholder="65"
+                          />
                         </div>
-                        {reservations.length > 0 ? (
-                          <div className="space-y-2">
-                            <Label>Link to Reservation <span className="text-destructive">*</span></Label>
-                            <Select value={reservationId} onValueChange={setReservationId}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select reservation (required)" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {reservations.map((res) => (
-                                  <SelectItem key={res.id} value={res.id}>
-                                    {res.pickup} → {res.dropoff} ({format(new Date(res.pickup_date), "MMM d")})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                        <div className="space-y-2">
+                          <Label>Para Birimi</Label>
+                          <Select value={currency} onValueChange={setCurrency}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="EUR">€ EUR</SelectItem>
+                              <SelectItem value="USD">$ USD</SelectItem>
+                              <SelectItem value="GBP">£ GBP</SelectItem>
+                              <SelectItem value="TRY">₺ TRY</SelectItem>
+                              <SelectItem value="AED">د.إ AED</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      {reservations.length > 0 ? (
+                        <div className="space-y-2">
+                          <Label>Rezervasyon <span className="text-destructive">*</span></Label>
+                          <Select value={reservationId} onValueChange={setReservationId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Rezervasyon seçin" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {reservations.map((res) => (
+                                <SelectItem key={res.id} value={res.id}>
+                                  <span className="truncate">
+                                    {res.pickup.slice(0, 15)}... → {res.dropoff.slice(0, 15)}... ({format(new Date(res.pickup_date), "dd MMM")})
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ) : !showQuickReservation ? (
+                        <div className="space-y-3">
+                          <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                            Bu numara için rezervasyon bulunamadı.
                           </div>
-                        ) : !showQuickReservation ? (
-                          <div className="space-y-3">
-                            <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground">
-                              No reservations found for this phone number.
-                            </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => {
+                              const info = parseCustomerInfoFromMessages();
+                              setQuickReservation({
+                                pickup: info.pickup || "",
+                                dropoff: info.dropoff || "",
+                                pickup_date: info.date || "",
+                                pickup_time: info.time || "",
+                                customer_name: info.name || selectedConversation?.customer_name || "",
+                                vehicle_type: info.vehicle_type || "mercedes-vito",
+                                flight_number: "",
+                              });
+                              setShowQuickReservation(true);
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Hızlı Rezervasyon Oluştur
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-3 border rounded-lg p-3 bg-muted/30">
+                          <div className="flex items-center justify-between">
+                            <Label className="font-semibold">Hızlı Rezervasyon</Label>
                             <Button
                               type="button"
-                              variant="outline"
-                              className="w-full"
-                              onClick={() => {
-                                const info = parseCustomerInfoFromMessages();
-                                setQuickReservation({
-                                  pickup: info.pickup || "",
-                                  dropoff: info.dropoff || "",
-                                  pickup_date: info.date || "",
-                                  pickup_time: info.time || "",
-                                  customer_name: info.name || selectedConversation?.customer_name || "",
-                                  vehicle_type: info.vehicle_type || "mercedes-vito",
-                                  flight_number: "",
-                                });
-                                setShowQuickReservation(true);
-                              }}
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setShowQuickReservation(false)}
                             >
-                              <Plus className="h-4 w-4 mr-2" />
-                              Create Quick Reservation
+                              İptal
                             </Button>
                           </div>
-                        ) : (
-                          <div className="space-y-3 border rounded-lg p-3 bg-muted/30">
-                            <div className="flex items-center justify-between">
-                              <Label className="font-semibold">Quick Reservation</Label>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowQuickReservation(false)}
-                              >
-                                Cancel
-                              </Button>
-                            </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs flex items-center gap-1">
+                              <User className="h-3 w-3" /> Müşteri Adı *
+                            </Label>
+                            <Input
+                              value={quickReservation.customer_name}
+                              onChange={(e) => setQuickReservation({...quickReservation, customer_name: e.target.value})}
+                              placeholder="Müşteri adı"
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
                             <div className="space-y-2">
                               <Label className="text-xs flex items-center gap-1">
-                                <User className="h-3 w-3" /> Customer Name *
-                              </Label>
-                              <Input
-                                value={quickReservation.customer_name}
-                                onChange={(e) => setQuickReservation({...quickReservation, customer_name: e.target.value})}
-                                placeholder="Customer name"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-xs flex items-center gap-1">
-                                <MapPin className="h-3 w-3" /> Pick-up *
+                                <MapPin className="h-3 w-3" /> Alış *
                               </Label>
                               <Input
                                 value={quickReservation.pickup}
                                 onChange={(e) => setQuickReservation({...quickReservation, pickup: e.target.value})}
-                                placeholder="e.g. Istanbul Airport (IST)"
+                                placeholder="IST Havalimanı"
                               />
                             </div>
                             <div className="space-y-2">
                               <Label className="text-xs flex items-center gap-1">
-                                <MapPin className="h-3 w-3" /> Drop-off *
+                                <MapPin className="h-3 w-3" /> Varış *
                               </Label>
                               <Input
                                 value={quickReservation.dropoff}
                                 onChange={(e) => setQuickReservation({...quickReservation, dropoff: e.target.value})}
-                                placeholder="e.g. Taksim, Istanbul"
+                                placeholder="Taksim"
                               />
                             </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div className="space-y-2">
-                                <Label className="text-xs flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" /> Date *
-                                </Label>
-                                <Input
-                                  type="date"
-                                  value={quickReservation.pickup_date}
-                                  onChange={(e) => setQuickReservation({...quickReservation, pickup_date: e.target.value})}
-                                  min={new Date().toISOString().split('T')[0]}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-xs flex items-center gap-1">
-                                  <Clock className="h-3 w-3" /> Time *
-                                </Label>
-                                <Input
-                                  type="time"
-                                  value={quickReservation.pickup_time}
-                                  onChange={(e) => setQuickReservation({...quickReservation, pickup_time: e.target.value})}
-                                />
-                              </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-2">
+                              <Label className="text-xs flex items-center gap-1">
+                                <Calendar className="h-3 w-3" /> Tarih *
+                              </Label>
+                              <Input
+                                type="date"
+                                value={quickReservation.pickup_date}
+                                onChange={(e) => setQuickReservation({...quickReservation, pickup_date: e.target.value})}
+                                min={new Date().toISOString().split('T')[0]}
+                              />
                             </div>
                             <div className="space-y-2">
                               <Label className="text-xs flex items-center gap-1">
-                                <Plane className="h-3 w-3" /> Flight Number
+                                <Clock className="h-3 w-3" /> Saat *
+                              </Label>
+                              <Input
+                                type="time"
+                                value={quickReservation.pickup_time}
+                                onChange={(e) => setQuickReservation({...quickReservation, pickup_time: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-2">
+                              <Label className="text-xs flex items-center gap-1">
+                                <Plane className="h-3 w-3" /> Uçuş No
                               </Label>
                               <Input
                                 value={quickReservation.flight_number}
                                 onChange={(e) => setQuickReservation({...quickReservation, flight_number: e.target.value})}
-                                placeholder="e.g. TK123"
+                                placeholder="TK123"
                               />
                             </div>
                             <div className="space-y-2">
                               <Label className="text-xs flex items-center gap-1">
-                                <Car className="h-3 w-3" /> Vehicle
+                                <Car className="h-3 w-3" /> Araç
                               </Label>
                               <Select 
                                 value={quickReservation.vehicle_type} 
@@ -805,77 +916,105 @@ export default function AdminWhatsAppChat() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="mercedes-vito">Mercedes Vito</SelectItem>
-                                  <SelectItem value="mercedes-vclass">Mercedes VIP Vito</SelectItem>
+                                  <SelectItem value="mercedes-vito">Vito</SelectItem>
+                                  <SelectItem value="mercedes-vclass">VIP Vito</SelectItem>
                                   <SelectItem value="maybach">Maybach</SelectItem>
                                   <SelectItem value="minibus">Minibus</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
-                            <Button
-                              type="button"
-                              className="w-full"
-                              onClick={createQuickReservation}
-                              disabled={creatingReservation}
-                            >
-                              {creatingReservation ? "Creating..." : "Create Reservation"}
-                            </Button>
                           </div>
-                        )}
-                        <Button
-                          className="w-full"
-                          onClick={() => sendMessage("price")}
-                          disabled={!price || !reservationId || sending}
-                        >
-                          {sending ? "Sending..." : "Send Price with Confirm Button"}
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  <Button variant="outline" size="sm" onClick={sendMagicLink} disabled={sending}>
-                    <LinkIcon className="h-4 w-4 mr-1" />
-                    Send Account Link
-                  </Button>
-                </div>
+                          <Button
+                            type="button"
+                            className="w-full"
+                            onClick={createQuickReservation}
+                            disabled={creatingReservation}
+                          >
+                            {creatingReservation ? "Oluşturuluyor..." : "Rezervasyon Oluştur"}
+                          </Button>
+                        </div>
+                      )}
+                      
+                      <Button
+                        className="w-full"
+                        onClick={() => sendMessage("price")}
+                        disabled={!price || !reservationId || sending}
+                      >
+                        {sending ? "Gönderiliyor..." : "Fiyat Gönder"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Button variant="outline" size="sm" onClick={sendMagicLink} disabled={sending} className="h-8">
+                  <LinkIcon className="h-4 w-4" />
+                  {!isMobile && <span className="ml-1">Hesap</span>}
+                </Button>
               </div>
-            </CardHeader>
+            </div>
+            
+            {/* Customer Reservations Summary */}
+            {reservations.length > 0 && (
+              <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1">
+                <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                {reservations.slice(0, 3).map((res) => (
+                  <Badge key={res.id} variant="secondary" className="text-xs whitespace-nowrap">
+                    {format(new Date(res.pickup_date), "dd MMM")} • {res.status === 'completed' ? '✓' : res.status === 'cancelled' ? '✗' : '⏳'}
+                  </Badge>
+                ))}
+                {reservations.length > 3 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{reservations.length - 3}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </CardHeader>
 
-            <CardContent className="flex-1 p-0 flex flex-col">
-              <ScrollArea className="flex-1 p-4">
+          <CardContent className="flex-1 p-0 flex flex-col min-h-0">
+            <ScrollArea className="flex-1 p-4">
+              {messagesLoading ? (
                 <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"}`}>
+                      <Skeleton className={`h-16 ${i % 2 === 0 ? "w-48" : "w-56"} rounded-lg`} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
                   {messages.map((msg) => (
-                    <div
+                    <motion.div
                       key={msg.id}
-                      className={`flex ${
-                        msg.direction === "outgoing" ? "justify-end" : "justify-start"
-                      }`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex ${msg.direction === "outgoing" ? "justify-end" : "justify-start"}`}
                     >
                       <div
-                        className={`max-w-[70%] rounded-lg p-3 ${
+                        className={cn(
+                          "max-w-[80%] rounded-2xl px-4 py-2.5 shadow-sm",
                           msg.direction === "outgoing"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted"
-                        }`}
+                            ? "bg-primary text-primary-foreground rounded-br-md"
+                            : "bg-muted rounded-bl-md"
+                        )}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <p className="text-xs opacity-70">
+                        <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                        <div className="flex items-center justify-end gap-1.5 mt-1">
+                          <span className="text-[10px] opacity-70">
                             {format(new Date(msg.created_at), "HH:mm")}
-                          </p>
-
+                          </span>
                           {msg.direction === "outgoing" && (
                             <>
-                              <span className="text-xs opacity-70">• {msg.status || "sent"}</span>
+                              {getMessageStatusIcon(msg.status)}
                               {msg.twilio_sid && (
                                 <button
                                   type="button"
-                                  className="ml-1 inline-flex items-center opacity-70 hover:opacity-100"
+                                  className="opacity-50 hover:opacity-100 transition-opacity"
                                   onClick={() => checkMessageStatus(msg)}
                                   disabled={checkingMessageId === msg.id}
-                                  title="Check WhatsApp delivery status"
+                                  title="Teslimat durumunu kontrol et"
                                 >
                                   <RefreshCw
-                                    className={`h-3 w-3 ${checkingMessageId === msg.id ? "animate-spin" : ""}`}
+                                    className={cn("h-3 w-3", checkingMessageId === msg.id && "animate-spin")}
                                   />
                                 </button>
                               )}
@@ -883,43 +1022,102 @@ export default function AdminWhatsAppChat() {
                           )}
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                   <div ref={messagesEndRef} />
                 </div>
-              </ScrollArea>
+              )}
+            </ScrollArea>
 
-              <Separator />
+            <Separator />
 
-              <div className="p-4">
-                <div className="flex gap-2">
-                  <Textarea
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Type a message..."
-                    className="min-h-[80px] resize-none"
-                  />
-                  <Button
-                    onClick={() => sendMessage()}
-                    disabled={!newMessage.trim() || sending}
-                    className="h-auto"
-                  >
-                    <Send className="h-5 w-5" />
-                  </Button>
-                </div>
+            {/* Quick Replies */}
+            <div className="px-3 py-2 flex gap-2 overflow-x-auto border-b bg-muted/30">
+              {quickReplies.map((reply, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs whitespace-nowrap flex-shrink-0"
+                  onClick={() => {
+                    setNewMessage(reply.text);
+                  }}
+                >
+                  <Zap className="h-3 w-3 mr-1" />
+                  {reply.label}
+                </Button>
+              ))}
+            </div>
+
+            <div className="p-3">
+              <div className="flex gap-2">
+                <Textarea
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Mesaj yazın..."
+                  className="min-h-[60px] max-h-[120px] resize-none"
+                />
+                <Button
+                  onClick={() => sendMessage()}
+                  disabled={!newMessage.trim() || sending}
+                  className="h-auto px-4"
+                >
+                  <Send className="h-5 w-5" />
+                </Button>
               </div>
-            </CardContent>
-          </>
-        ) : (
-          <CardContent className="flex-1 flex items-center justify-center">
-            <div className="text-center text-muted-foreground">
-              <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Select a conversation to start chatting</p>
             </div>
           </CardContent>
-        )}
-      </Card>
+        </>
+      ) : (
+        <CardContent className="flex-1 flex items-center justify-center">
+          <div className="text-center text-muted-foreground">
+            <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+              <MessageCircle className="h-8 w-8 opacity-50" />
+            </div>
+            <p className="font-medium">Sohbet seçin</p>
+            <p className="text-sm mt-1">Mesajlaşmaya başlamak için sol taraftan bir sohbet seçin</p>
+          </div>
+        </CardContent>
+      )}
+    </Card>
+  );
+
+  // Mobile view with slide animation
+  if (isMobile) {
+    return (
+      <div className="h-[calc(100vh-4rem)] relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {!showMobileChat ? (
+            <motion.div
+              key="list"
+              initial={{ x: 0 }}
+              exit={{ x: -100, opacity: 0 }}
+              className="absolute inset-0"
+            >
+              <ConversationsList />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="chat"
+              initial={{ x: 100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 100, opacity: 0 }}
+              className="absolute inset-0"
+            >
+              <ChatArea />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  // Desktop view
+  return (
+    <div className="flex h-[calc(100vh-200px)] gap-4">
+      <ConversationsList />
+      <ChatArea />
     </div>
   );
 }
