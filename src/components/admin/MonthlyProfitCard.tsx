@@ -62,24 +62,24 @@ export const MonthlyProfitCard = () => {
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
           .from("agency_reservation_details")
-          .select("reservation_id, customer_price, agency_price_currency, exchange_rate_used")
+          .select("reservation_id, company_amount, agency_price_currency, exchange_rate_used")
           .in("reservation_id", reservationIds);
 
         if (!agencyError && agencyData) {
           const agencyMap = agencyData.reduce((acc, item) => {
             let tryAmount = 0;
-            const customerPrice = item.customer_price || 0;
+            // company_amount = Acentaya gönderilen fiyat = Acenta Geliri for admin
+            const companyAmount = item.company_amount || 0;
             
-            // Acenta Geliri = customer_price (Acentadan Alınacak Tutar)
-            // Eğer TRY ise direkt customer_price kullan
+            // Eğer TRY ise direkt kullan
             // Eğer döviz ise ve kur varsa çevir, yoksa 0 say
             if (item.agency_price_currency === 'TRY') {
-              tryAmount = customerPrice;
-            } else if (item.exchange_rate_used && customerPrice > 0) {
+              tryAmount = companyAmount;
+            } else if (item.exchange_rate_used && companyAmount > 0) {
               // Döviz ve kur varsa çevir
-              tryAmount = customerPrice * item.exchange_rate_used;
+              tryAmount = companyAmount * item.exchange_rate_used;
             } else {
-              // Döviz çevrilmemiş veya customer_price 0 - 0 olarak say
+              // Döviz çevrilmemiş veya amount 0 - 0 olarak say
               tryAmount = 0;
             }
             acc[item.reservation_id] = tryAmount;
@@ -93,7 +93,8 @@ export const MonthlyProfitCard = () => {
         }
       }
 
-      // Şoför Gideri = TÜM tamamlanmış rezervasyonların price toplamı
+      // Şoför Gideri = Şoförün yazdığı bütçe tutarı (reservation.price)
+      // TÜM tamamlanmış rezervasyonların price toplamı
       reservations?.forEach(res => {
         totalDriverExpense += res.price || 0;
       });

@@ -740,14 +740,42 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
           </CardContent>
         </Card>
 
-        {/* Driver Editable Fields Card */}
+        {/* Driver Editable Fields Card - Bütçe ve Nakit */}
         <Card>
-          <CardContent className="pt-6 space-y-4">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Banknote className="h-5 w-5" />
+              {t('budgetAndCash') || 'Bütçe & Nakit'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
 
-            {/* Transfer Price field removed - drivers should not see agreed prices */}
-
+            {/* Budget Field - Bütçe Tutarı */}
             <div className="space-y-2">
-              <Label htmlFor="driver_cash">{t('cashCollectedLabel')} ({currencySymbol})</Label>
+              <Label htmlFor="driver_budget" className="text-base font-semibold flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-primary" />
+                {t('budgetAmount') || 'Bütçe Tutarı'} (₺)
+              </Label>
+              <MoneyInput
+                id="driver_budget"
+                currencySymbol="₺"
+                placeholder={t('enterBudget') || 'Bütçe tutarını girin'}
+                value={driverPrice}
+                onValueChange={setDriverPrice}
+                aria-label={t('budgetAmount') || 'Bütçe Tutarı'}
+                maxLength={16}
+              />
+              <p className="text-xs text-muted-foreground">
+                {t('budgetInfo') || 'Bu tutar şoför gideri olarak kaydedilecektir.'}
+              </p>
+            </div>
+
+            {/* Cash Collected Field */}
+            <div className="space-y-2">
+              <Label htmlFor="driver_cash" className="text-base font-semibold flex items-center gap-2">
+                <Banknote className="h-4 w-4 text-green-600" />
+                {t('cashCollectedLabel')} ({currencySymbol})
+              </Label>
               <MoneyInput
                 id="driver_cash"
                 currencySymbol={currencySymbol}
@@ -757,6 +785,9 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
                 aria-label={`${t('cashCollectedLabel')} (${currencySymbol})`}
                 maxLength={16}
               />
+              <p className="text-xs text-muted-foreground">
+                {t('cashInfo') || 'Yolcudan toplanan nakit tutar. Bu tutar alacağınızdan düşülür.'}
+              </p>
             </div>
 
             <div className="space-y-2">
