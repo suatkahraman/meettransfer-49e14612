@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const ADMIN_EMAIL = "sautkahraman@gmail.com";
+
 const WELCOME_MESSAGE = `Hello 👋
 Welcome to Meet Transfer.
 
@@ -16,6 +18,116 @@ Please send:
 • Number of passengers
 • Email address
 • Vehicle Type: Vito / Vip Vito / Mercedes Maybach / Minibus`;
+
+// Send email notification to admin using Resend API directly
+async function sendAdminEmailNotification(
+  customerPhone: string,
+  customerName: string | null,
+  messageContent: string,
+  isNewCustomer: boolean
+): Promise<void> {
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendApiKey) {
+    console.log("RESEND_API_KEY not configured, skipping email notification");
+    return;
+  }
+
+  try {
+    
+    const subject = isNewCustomer 
+      ? `🆕 Yeni WhatsApp Müşterisi: ${customerName || customerPhone}`
+      : `💬 WhatsApp Mesajı: ${customerName || customerPhone}`;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 24px; }
+          .header h1 { margin: 0; font-size: 20px; }
+          .header p { margin: 8px 0 0; opacity: 0.8; font-size: 14px; }
+          .content { padding: 24px; }
+          .info-row { display: flex; margin-bottom: 12px; }
+          .info-label { font-weight: 600; color: #666; width: 120px; }
+          .info-value { color: #333; }
+          .message-box { background: #f8f9fa; border-left: 4px solid #1a1a2e; padding: 16px; margin: 16px 0; border-radius: 0 8px 8px 0; }
+          .message-box p { margin: 0; color: #333; white-space: pre-wrap; }
+          .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+          .badge-new { background: #e3fcef; color: #00875a; }
+          .badge-existing { background: #deebff; color: #0052cc; }
+          .cta { display: inline-block; background: #1a1a2e; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin-top: 16px; }
+          .footer { background: #f8f9fa; padding: 16px 24px; text-align: center; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📱 WhatsApp Bildirimi</h1>
+            <p>Meet Transfer Admin Paneli</p>
+          </div>
+          <div class="content">
+            <span class="badge ${isNewCustomer ? 'badge-new' : 'badge-existing'}">
+              ${isNewCustomer ? '🆕 Yeni Müşteri' : '💬 Mevcut Müşteri'}
+            </span>
+            
+            <div style="margin-top: 20px;">
+              <div class="info-row">
+                <span class="info-label">📞 Telefon:</span>
+                <span class="info-value">${customerPhone}</span>
+              </div>
+              ${customerName ? `
+              <div class="info-row">
+                <span class="info-label">👤 İsim:</span>
+                <span class="info-value">${customerName}</span>
+              </div>
+              ` : ''}
+              <div class="info-row">
+                <span class="info-label">🕐 Zaman:</span>
+                <span class="info-value">${new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' })}</span>
+              </div>
+            </div>
+            
+            <h3 style="margin: 24px 0 8px; color: #333;">Mesaj İçeriği:</h3>
+            <div class="message-box">
+              <p>${messageContent}</p>
+            </div>
+            
+            <a href="https://meettransfer.app/admin/whatsapp" class="cta">
+              WhatsApp Sohbetine Git →
+            </a>
+          </div>
+          <div class="footer">
+            Bu e-posta Meet Transfer WhatsApp entegrasyonu tarafından otomatik olarak gönderilmiştir.
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const emailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Meet Transfer <onboarding@resend.dev>",
+        to: [ADMIN_EMAIL],
+        subject: subject,
+        html: htmlContent,
+      }),
+    });
+
+    const result = await emailResponse.json();
+
+    console.log("Admin email notification sent:", result);
+  } catch (error) {
+    console.error("Failed to send admin email notification:", error);
+  }
+}
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -96,6 +208,10 @@ serve(async (req) => {
     if (msgError) {
       console.error("Error storing message:", msgError);
     }
+
+    // Send email notification to admin (fire and forget, don't block response)
+    sendAdminEmailNotification(customerPhone, profileName || null, body, isNewCustomer)
+      .catch(err => console.error("Email notification error:", err));
 
     // Check if this is a booking confirmation callback
     if (body.toLowerCase().includes("confirm") || body === "1") {
