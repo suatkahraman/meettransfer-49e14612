@@ -612,70 +612,113 @@ const AdminAgencyAccounting = () => {
                 <div className="text-center py-12">Yükleniyor...</div>
               ) : (
                 <>
-                  {/* Summary Cards */}
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    {/* Devir Bakiye Card */}
+                  {/* Summary Cards - Enhanced Visual Design */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Devir Bakiye Card - Only show if not zero */}
                     {carryoverBalance !== 0 && (
-                      <Card className={carryoverBalance > 0 ? 'border-blue-500/50' : 'border-green-500/50'}>
+                      <Card className={`relative overflow-hidden ${carryoverBalance > 0 ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-300 dark:border-blue-700' : 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-300 dark:border-green-700'}`}>
+                        <div className="absolute top-0 right-0 p-3 opacity-10">
+                          <History className="h-16 w-16" />
+                        </div>
                         <CardHeader className="pb-2">
-                          <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                            <History className="h-4 w-4" />
+                          <CardTitle className="text-sm font-medium flex items-center gap-2">
+                            <div className={`p-2 rounded-full ${carryoverBalance > 0 ? 'bg-blue-500/20' : 'bg-green-500/20'}`}>
+                              <History className={`h-4 w-4 ${carryoverBalance > 0 ? 'text-blue-600' : 'text-green-600'}`} />
+                            </div>
                             Devir Bakiye
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className={`text-2xl font-bold ${carryoverBalance > 0 ? 'text-blue-600' : 'text-green-600'}`}>
-                            ₺{carryoverBalance.toFixed(2)}
+                          <div className={`text-3xl font-bold ${carryoverBalance > 0 ? 'text-blue-700 dark:text-blue-400' : 'text-green-700 dark:text-green-400'}`}>
+                            ₺{Math.abs(carryoverBalance).toFixed(2)}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Önceki aylardan devir
+                          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                            <span className={`inline-block w-2 h-2 rounded-full ${carryoverBalance > 0 ? 'bg-blue-500' : 'bg-green-500'}`}></span>
+                            {carryoverBalance > 0 ? 'Önceki aylardan borç' : 'Önceki aylardan alacak'}
                           </p>
                         </CardContent>
                       </Card>
                     )}
 
-                    <Card>
+                    {/* This Month Reservations Card */}
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700">
+                      <div className="absolute top-0 right-0 p-3 opacity-10">
+                        <Receipt className="h-16 w-16" />
+                      </div>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                          <Receipt className="h-4 w-4" />
+                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                          <div className="p-2 rounded-full bg-slate-500/20">
+                            <Receipt className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                          </div>
                           Bu Ay Rezervasyon
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{totalReservations}</div>
+                        <div className="text-3xl font-bold text-slate-700 dark:text-slate-300">{totalReservations}</div>
                         {currentMonthDebt > 0 && (
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                            <TrendingUp className="h-3 w-3" />
                             Bu ay borç: ₺{currentMonthDebt.toFixed(2)}
                           </p>
+                        )}
+                        {currentMonthDebt === 0 && (
+                          <p className="text-xs text-muted-foreground mt-2">Aktif borç yok</p>
                         )}
                       </CardContent>
                     </Card>
 
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                          <CreditCard className="h-4 w-4" />
-                          Bu Ay Ödemeler
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold text-green-600">₺{totalPaymentsReceived.toFixed(2)}</div>
-                      </CardContent>
-                    </Card>
+                    {/* This Month Payments Card - Only show if payments exist */}
+                    {totalPaymentsReceived > 0 && (
+                      <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 border-emerald-300 dark:border-emerald-700">
+                        <div className="absolute top-0 right-0 p-3 opacity-10">
+                          <CreditCard className="h-16 w-16" />
+                        </div>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium flex items-center gap-2">
+                            <div className="p-2 rounded-full bg-emerald-500/20">
+                              <CreditCard className="h-4 w-4 text-emerald-600" />
+                            </div>
+                            Bu Ay Ödemeler
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">₺{totalPaymentsReceived.toFixed(2)}</div>
+                          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                            Alınan ödeme
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
 
-                    <Card className={totalBalance > 0 ? 'border-amber-500 border-2' : totalBalance < 0 ? 'border-green-500 border-2' : ''}>
+                    {/* Current Balance Card */}
+                    <Card className={`relative overflow-hidden ${
+                      totalBalance > 0 
+                        ? 'bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900 border-amber-400 dark:border-amber-600 border-2' 
+                        : totalBalance < 0 
+                          ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-400 dark:border-green-600 border-2' 
+                          : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800'
+                    }`}>
+                      <div className="absolute top-0 right-0 p-3 opacity-10">
+                        <Banknote className="h-16 w-16" />
+                      </div>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                          <Banknote className="h-4 w-4" />
+                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                          <div className={`p-2 rounded-full ${totalBalance > 0 ? 'bg-amber-500/20' : totalBalance < 0 ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
+                            <Banknote className={`h-4 w-4 ${totalBalance > 0 ? 'text-amber-600' : totalBalance < 0 ? 'text-green-600' : 'text-gray-600'}`} />
+                          </div>
                           Güncel Bakiye
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className={`text-2xl font-bold ${totalBalance > 0 ? 'text-amber-600' : totalBalance < 0 ? 'text-green-600' : ''}`}>
-                          ₺{totalBalance.toFixed(2)}
+                        <div className={`text-3xl font-bold ${totalBalance > 0 ? 'text-amber-700 dark:text-amber-400' : totalBalance < 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-400'}`}>
+                          ₺{Math.abs(totalBalance).toFixed(2)}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {totalBalance > 0 ? 'Acenta borçlu' : totalBalance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
+                        <p className="text-xs mt-2 flex items-center gap-1">
+                          <span className={`inline-block w-2 h-2 rounded-full ${totalBalance > 0 ? 'bg-amber-500 animate-pulse' : totalBalance < 0 ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                          <span className={`font-medium ${totalBalance > 0 ? 'text-amber-600 dark:text-amber-400' : totalBalance < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-600'}`}>
+                            {totalBalance > 0 ? 'Acenta borçlu' : totalBalance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
+                          </span>
                         </p>
                       </CardContent>
                     </Card>
