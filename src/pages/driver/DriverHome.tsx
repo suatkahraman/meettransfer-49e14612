@@ -447,6 +447,20 @@ const DriverHome = () => {
             {refreshing ? t('loading') : t('refresh')}
           </span>
         </motion.div>
+        {/* Settings Section - Always visible when expanded */}
+        <AnimatePresence>
+          {expandedSections.settings && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden mb-4"
+            >
+              <DriverInfoEditor onClose={() => toggleSection('settings')} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -470,20 +484,6 @@ const DriverHome = () => {
                 <ReservationSearch userType="driver" driverId={driverId || undefined} placeholder="MT123456" />
               </CardContent>
             </Card>
-
-            {/* Settings Section */}
-            <AnimatePresence>
-              {expandedSections.settings && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden mb-4"
-                >
-                  <DriverInfoEditor onClose={() => toggleSection('settings')} />
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             {/* Monthly Accounting Button */}
             <Button
