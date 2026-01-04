@@ -613,6 +613,28 @@ const AgencyReservationDetail = () => {
                 </Button>
               </div>
             </CardContent>
+        </Card>
+        )}
+
+        {/* Confirmed Price Card - Show for approved/confirmed/completed reservations */}
+        {['customer_approved', 'confirmed', 'sent_to_driver', 'active', 'completed'].includes(reservation.status) && agencyDetails?.company_amount && agencyDetails.company_amount > 0 && (
+          <Card className="border-green-300 bg-green-50 dark:bg-green-950/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300 text-base">
+                <CheckCircle className="h-5 w-5" />
+                {t('confirmedPrice') || 'Confirmed Price'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-2">
+                <p className="text-3xl font-bold text-green-700 dark:text-green-300">
+                  {currencySymbol}{agencyDetails.company_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-sm text-green-600/80 dark:text-green-400/80 mt-1">
+                  {t('agencyExpense') || 'Agency Expense'}
+                </p>
+              </div>
+            </CardContent>
           </Card>
         )}
 

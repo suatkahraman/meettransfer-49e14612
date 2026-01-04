@@ -511,11 +511,20 @@ const AgencyHome = () => {
                     </p>
                   </div>
 
-                  {/* This Month */}
-                  <div className="space-y-1">
-                    <span className="text-xs text-muted-foreground">{t('thisMonth')}</span>
-                    <p className="text-xl font-bold text-purple-600">
-                      {accountingSummary.monthlyReservations} <span className="text-sm font-normal">{t('transfer')}</span>
+                  {/* Completed - Clickable */}
+                  <div 
+                    className="space-y-1 cursor-pointer hover:bg-green-50 dark:hover:bg-green-950/30 rounded-lg p-2 -m-2 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedSections(prev => ({ ...prev, completed: true }));
+                      setTimeout(() => {
+                        document.getElementById('completed-section')?.scrollIntoView({ behavior: 'smooth' });
+                      }, 100);
+                    }}
+                  >
+                    <span className="text-xs text-muted-foreground">{t('completed') || 'Completed'}</span>
+                    <p className="text-xl font-bold text-green-600">
+                      {accountingSummary.completedReservations} <span className="text-sm font-normal">{t('transfer')}</span>
                     </p>
                   </div>
                 </div>
@@ -669,13 +678,13 @@ const AgencyHome = () => {
 
             {/* Completed Section */}
             {completedJobs.length > 0 && (
-              <section>
+              <section id="completed-section">
                 <button 
                   onClick={() => toggleSection('completed')}
                   className="flex items-center justify-between w-full py-2 mb-3"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">Completed Transfers</span>
+                    <span className="font-semibold">{t('completedTransfers') || 'Completed Transfers'}</span>
                     <Badge variant="secondary" className="bg-green-500/20 text-green-700">{completedJobs.length}</Badge>
                   </div>
                   <ChevronDown className={cn(
