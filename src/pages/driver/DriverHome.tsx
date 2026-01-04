@@ -8,9 +8,10 @@ import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History, Settings } from 'lucide-react';
+import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History, Settings, Volume2 } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { PushNotificationToggle } from '@/components/PushNotificationToggle';
+import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { toast } from 'sonner';
 import SwipeableJobCard from '@/components/driver/SwipeableJobCard';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
@@ -18,7 +19,6 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ReservationSearch from '@/components/ReservationSearch';
 import DriverInfoEditor from '@/components/driver/DriverInfoEditor';
-
 interface Reservation {
   id: string;
   customer_id: string;
@@ -64,7 +64,8 @@ const DriverHome = () => {
     pending: true,
     active: true,
     completed: false,
-    settings: false
+    settings: false,
+    notificationSettings: false
   });
   
   const pullY = useMotionValue(0);
@@ -356,7 +357,7 @@ const DriverHome = () => {
     }
   };
 
-  const toggleSection = (section: 'pending' | 'active' | 'completed' | 'settings') => {
+  const toggleSection = (section: 'pending' | 'active' | 'completed' | 'settings' | 'notificationSettings') => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -417,6 +418,14 @@ const DriverHome = () => {
           </Button>
           <Button 
             variant="ghost" 
+            onClick={() => toggleSection('notificationSettings')} 
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2"
+            title="Bildirim Ayarları"
+          >
+            <Volume2 className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
             onClick={() => toggleSection('settings')} 
             className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2"
           >
@@ -447,6 +456,20 @@ const DriverHome = () => {
             {refreshing ? t('loading') : t('refresh')}
           </span>
         </motion.div>
+        {/* Notification Settings Section */}
+        <AnimatePresence>
+          {expandedSections.notificationSettings && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden mb-4"
+            >
+              <NotificationSettingsPanel />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Settings Section - Always visible when expanded */}
         <AnimatePresence>
           {expandedSections.settings && (
