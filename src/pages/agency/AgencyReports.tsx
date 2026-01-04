@@ -40,7 +40,7 @@ interface AgencyTransaction {
 
 const AgencyReports = () => {
   const { agencyId } = useUserRole();
-  const { t } = useAgencyTranslations();
+  const { t, locale } = useAgencyTranslations();
   const { currencySymbol } = useAgencyLanguage();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -351,7 +351,7 @@ const AgencyReports = () => {
                           {tx.type === 'top_up' ? t('balanceTopUp') : t('deduction')}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {tx.description || format(new Date(tx.created_at), 'dd MMM yyyy HH:mm')}
+                          {tx.description || format(new Date(tx.created_at), 'dd MMM yyyy HH:mm', { locale })}
                         </p>
                       </div>
                     </div>
