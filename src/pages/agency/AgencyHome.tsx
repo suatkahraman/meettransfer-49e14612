@@ -28,6 +28,10 @@ interface Driver {
   vehicle_color: string | null;
 }
 
+interface AgencyReservationDetail {
+  payment_status: string | null;
+}
+
 interface Reservation {
   id: string;
   reservation_code: string | null;
@@ -42,6 +46,8 @@ interface Reservation {
   status: string;
   driver_id: string | null;
   drivers?: Driver | null;
+  passenger_cash_amount: number | null;
+  agency_reservation_details?: AgencyReservationDetail | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -194,14 +200,16 @@ const AgencyHome = () => {
       completedReservations: completedRes?.length || 0
     });
 
-    // Fetch reservations with driver info
+    // Fetch reservations with driver info and cash payment details
     const { data, error } = await supabase
       .from('reservations')
       .select(`
         id, reservation_code, customer_name, pickup, dropoff,
         pickup_place_name, dropoff_place_name,
         pickup_date, pickup_time, vehicle_type, status, driver_id,
-        drivers:driver_id (id, name, plate_number, phone, vehicle_model, vehicle_color)
+        passenger_cash_amount,
+        drivers:driver_id (id, name, plate_number, phone, vehicle_model, vehicle_color),
+        agency_reservation_details (payment_status)
       `)
       .eq('agency_id', agencyId)
       .order('pickup_date', { ascending: true })
@@ -297,7 +305,7 @@ const AgencyHome = () => {
               <span className="font-medium">{reservation.customer_name}</span>
             </div>
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 items-end">
             <Badge className={statusColors[reservation.status] || 'bg-muted'}>
               {statusLabels[reservation.status] || reservation.status}
             </Badge>
@@ -305,6 +313,20 @@ const AgencyHome = () => {
               <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50 text-xs">
                 {t('awaitingDriverInfo')}
               </Badge>
+            )}
+            {/* Cash payment warning badge - show when cash payment is expected but amount not entered */}
+            {reservation.agency_reservation_details?.payment_status === 'cash' && 
+             !reservation.passenger_cash_amount && 
+             !['completed', 'cancelled', 'cancelled_by_customer', 'cancelled_by_agency'].includes(reservation.status) && (
+              <motion.div
+                initial={{ scale: 1 }}
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+              >
+                <Badge className="bg-red-500 text-white border-red-600 text-xs animate-pulse">
+                  💵 {t('cashRequired') || 'Nakit Girin'}
+                </Badge>
+              </motion.div>
             )}
           </div>
         </div>
