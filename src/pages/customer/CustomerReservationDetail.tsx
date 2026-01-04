@@ -240,6 +240,7 @@ const CustomerReservationDetail = () => {
             message: `Reservation #${reservation.id.slice(0, 8)} is confirmed. Price: ${formatPrice(reservation.price, reservation.price_currency)}`,
             notify_admins: true,
             reservation_id: reservation.id,
+            send_push: true,
           }
         });
       } catch (e) {
@@ -297,6 +298,7 @@ const CustomerReservationDetail = () => {
             message: `Reservation #${reservation.id.slice(0, 8)} was declined by customer.`,
             notify_admins: true,
             reservation_id: reservation.id,
+            send_push: true,
           }
         });
       } catch (e) {
@@ -346,6 +348,7 @@ const CustomerReservationDetail = () => {
             message: `A customer cancelled reservation #${reservation.id.slice(0, 8)}.`,
             notify_admins: true,
             reservation_id: reservation.id,
+            send_push: true,
           }
         });
       } catch (e) {
@@ -375,7 +378,8 @@ const CustomerReservationDetail = () => {
                 reservation_id: reservation.id,
                 title: 'Reservation Cancelled',
                 message: `Reservation #${reservation.id.slice(0, 8)} has been cancelled by the customer.`,
-                type: 'reservation_cancelled'
+                type: 'reservation_cancelled',
+                send_push: true
               }
             });
           }
