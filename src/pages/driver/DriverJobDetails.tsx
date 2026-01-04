@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, DollarSign, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare, Building2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -432,8 +432,9 @@ const DriverJobDetails = () => {
       : `  1. ${reservation.customer_name}`;
 
     const formattedDate = format(new Date(reservation.pickup_date), 'dd MMM yyyy');
-    const currencySymbol = getCurrencySymbol(reservation.price_currency);
-    
+    const cashCurrency = reservation.passenger_cash_currency || reservation.price_currency || 'TRY';
+    const currencySymbol = getCurrencySymbol(cashCurrency);
+
     // Format location with place name + address
     const formatLocation = (placeName: string | null, address: string) => {
       if (placeName && placeName.trim() && !address.toLowerCase().startsWith(placeName.toLowerCase())) {
@@ -490,7 +491,8 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
     );
   }
 
-  const currencySymbol = getCurrencySymbol(reservation.price_currency);
+  const cashCurrency = reservation.passenger_cash_currency || reservation.price_currency || 'TRY';
+  const currencySymbol = getCurrencySymbol(cashCurrency);
 
   return (
     <div className="min-h-screen bg-background">
@@ -740,13 +742,8 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
 
         {/* Driver Editable Fields Card */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
-              {t('cashAndNotes') || 'Cash & Notes'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-6 space-y-4">
+
             {/* Transfer Price field removed - drivers should not see agreed prices */}
 
             <div className="space-y-2">
