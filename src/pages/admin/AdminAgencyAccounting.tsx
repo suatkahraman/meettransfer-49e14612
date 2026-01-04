@@ -117,6 +117,7 @@ const AdminAgencyAccounting = () => {
   // Payment dialog state
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentCurrency, setPaymentCurrency] = useState('TRY');
   const [paymentDate, setPaymentDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [paymentNotes, setPaymentNotes] = useState('');
   const [savingPayment, setSavingPayment] = useState(false);
@@ -431,6 +432,7 @@ const AdminAgencyAccounting = () => {
         .insert({
           agency_id: agencyId,
           amount,
+          currency: paymentCurrency,
           payment_date: paymentDate,
           notes: paymentNotes || null,
           created_by: user?.id,
@@ -452,6 +454,7 @@ const AdminAgencyAccounting = () => {
       toast.success('Payment recorded successfully');
       setPaymentDialogOpen(false);
       setPaymentAmount('');
+      setPaymentCurrency('TRY');
       setPaymentNotes('');
       setPaymentDate(format(new Date(), 'yyyy-MM-dd'));
       fetchData();
@@ -484,6 +487,7 @@ const AdminAgencyAccounting = () => {
         .from('agency_payments')
         .update({
           amount: newAmount,
+          currency: paymentCurrency,
           payment_date: paymentDate,
           notes: paymentNotes || null,
         })
@@ -508,6 +512,7 @@ const AdminAgencyAccounting = () => {
       setEditingPayment(null);
       setPaymentDialogOpen(false);
       setPaymentAmount('');
+      setPaymentCurrency('TRY');
       setPaymentNotes('');
       setPaymentDate(format(new Date(), 'yyyy-MM-dd'));
       fetchData();
@@ -556,6 +561,7 @@ const AdminAgencyAccounting = () => {
   const openEditPaymentDialog = (payment: AgencyPayment) => {
     setEditingPayment(payment);
     setPaymentAmount(payment.amount.toString());
+    setPaymentCurrency(payment.currency || 'TRY');
     setPaymentDate(payment.payment_date);
     setPaymentNotes(payment.notes || '');
     setPaymentDialogOpen(true);
@@ -564,6 +570,7 @@ const AdminAgencyAccounting = () => {
   const openNewPaymentDialog = () => {
     setEditingPayment(null);
     setPaymentAmount('');
+    setPaymentCurrency('TRY');
     setPaymentDate(format(new Date(), 'yyyy-MM-dd'));
     setPaymentNotes('');
     setPaymentDialogOpen(true);
@@ -939,16 +946,33 @@ const AdminAgencyAccounting = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="amount">Ödeme Tutarı (₺)</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                placeholder="Tutar girin"
-                value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="amount">Ödeme Tutarı</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  placeholder="Tutar girin"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="currency">Para Birimi</Label>
+                <Select value={paymentCurrency} onValueChange={setPaymentCurrency}>
+                  <SelectTrigger id="currency">
+                    <SelectValue placeholder="Para birimi seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(currencies).map(([code, symbol]) => (
+                      <SelectItem key={code} value={code}>
+                        {symbol} {code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="date">Ödeme Tarihi</Label>
@@ -1018,35 +1042,38 @@ const AdminAgencyAccounting = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {currentMonthPaymentsList.map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell>{format(new Date(payment.payment_date), 'dd MMM yyyy')}</TableCell>
-                        <TableCell className="text-right font-medium">₺{payment.amount.toFixed(2)}</TableCell>
-                        <TableCell className="text-muted-foreground max-w-[200px] truncate">{payment.notes || '-'}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => {
-                                setHistoryDialogOpen(false);
-                                openEditPaymentDialog(payment);
-                              }}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => setDeletingPayment(payment)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {currentMonthPaymentsList.map((payment) => {
+                      const paymentSymbol = currencies[payment.currency || 'TRY'] || '₺';
+                      return (
+                        <TableRow key={payment.id}>
+                          <TableCell>{format(new Date(payment.payment_date), 'dd MMM yyyy')}</TableCell>
+                          <TableCell className="text-right font-medium">{paymentSymbol}{payment.amount.toFixed(2)}</TableCell>
+                          <TableCell className="text-muted-foreground max-w-[200px] truncate">{payment.notes || '-'}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => {
+                                  setHistoryDialogOpen(false);
+                                  openEditPaymentDialog(payment);
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => setDeletingPayment(payment)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               );
@@ -1066,7 +1093,7 @@ const AdminAgencyAccounting = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Ödeme Sil</AlertDialogTitle>
             <AlertDialogDescription>
-              ₺{deletingPayment?.amount.toFixed(2)} tutarındaki bu ödemeyi silmek istediğinizden emin misiniz? 
+              {currencies[deletingPayment?.currency || 'TRY'] || '₺'}{deletingPayment?.amount.toFixed(2)} tutarındaki bu ödemeyi silmek istediğinizden emin misiniz? 
               Bu tutar acenta bakiyesine geri eklenecektir.
             </AlertDialogDescription>
           </AlertDialogHeader>
