@@ -109,6 +109,7 @@ const AgencyHome = () => {
   const [expandedSections, setExpandedSections] = useState({
     upcoming: true,
     active: true,
+    pastIncomplete: false,
     completed: false,
     notificationSettings: false
   });
@@ -242,7 +243,7 @@ const AgencyHome = () => {
     await fetchData(true);
   };
 
-  const toggleSection = (section: 'upcoming' | 'active' | 'completed' | 'notificationSettings') => {
+  const toggleSection = (section: 'upcoming' | 'active' | 'pastIncomplete' | 'completed' | 'notificationSettings') => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -257,6 +258,14 @@ const AgencyHome = () => {
       new Date(`${r.pickup_date}T00:00:00`) >= startOfToday
   );
   const activeJobs = reservations.filter((r) => r.status === 'active');
+  
+  // Past incomplete: pickup date before today and status is NOT completed/cancelled
+  const pastIncompleteJobs = reservations.filter(
+    (r) =>
+      new Date(`${r.pickup_date}T00:00:00`) < startOfToday &&
+      !['completed', 'cancelled', 'cancelled_by_customer', 'cancelled_by_agency'].includes(r.status)
+  );
+  
   const completedJobs = reservations.filter((r) => r.status === 'completed');
 
   const ReservationCard = ({ reservation }: { reservation: Reservation }) => (
@@ -606,6 +615,39 @@ const AgencyHome = () => {
                       className="space-y-3 overflow-hidden"
                     >
                       {activeJobs.map((res) => (
+                        <ReservationCard key={res.id} reservation={res} />
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </section>
+            )}
+
+            {/* Past Incomplete Section */}
+            {pastIncompleteJobs.length > 0 && (
+              <section>
+                <button 
+                  onClick={() => toggleSection('pastIncomplete')}
+                  className="flex items-center justify-between w-full py-2 mb-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">{t('pastIncompleteTransfers') || 'Past (Incomplete)'}</span>
+                    <Badge variant="secondary" className="bg-orange-500/20 text-orange-700">{pastIncompleteJobs.length}</Badge>
+                  </div>
+                  <ChevronDown className={cn(
+                    "h-5 w-5 text-muted-foreground transition-transform",
+                    expandedSections.pastIncomplete && "rotate-180"
+                  )} />
+                </button>
+                <AnimatePresence>
+                  {expandedSections.pastIncomplete && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="space-y-3 overflow-hidden"
+                    >
+                      {pastIncompleteJobs.map((res) => (
                         <ReservationCard key={res.id} reservation={res} />
                       ))}
                     </motion.div>
