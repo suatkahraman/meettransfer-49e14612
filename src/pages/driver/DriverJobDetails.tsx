@@ -682,22 +682,22 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
 
               {/* Price Display - Hidden from drivers, they only see passenger cash */}
 
-              {/* Yolcudan Alınacak Nakit - Display only if set */}
+              {/* Yolcudan Alınacak Nakit - Prominent Display */}
               {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
-                <div className="bg-amber-100 dark:bg-amber-950/50 p-4 rounded-xl border-2 border-amber-300 dark:border-amber-700">
+                <div className="bg-gradient-to-r from-emerald-500 to-green-600 dark:from-emerald-600 dark:to-green-700 p-5 rounded-2xl shadow-xl">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="bg-amber-500 p-2 rounded-full">
+                      <div className="bg-white/20 p-3 rounded-full">
                         <Banknote className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-amber-800 dark:text-amber-200">{t('cashToCollect')}</div>
-                        <div className="text-xs text-amber-600 dark:text-amber-400">{t('collectAtEnd')}</div>
+                        <div className="text-sm font-medium text-white/90">{t('cashToCollect')}</div>
+                        <div className="text-xs text-white/70 mt-0.5">{t('collectAtEnd')}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-2xl text-amber-800 dark:text-amber-200">
-                        {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
+                      <div className="font-black text-4xl text-white drop-shadow-lg">
+                        {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR')}
                       </div>
                     </div>
                   </div>

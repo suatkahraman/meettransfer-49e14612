@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText, Building2 } from 'lucide-react';
+import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText, Building2, Banknote } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
@@ -290,12 +290,17 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
               </div>
             </div>
 
-            {/* Passenger Cash Amount */}
+            {/* Passenger Cash Amount - Prominent Display */}
             {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
-              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
+              <div className="bg-gradient-to-r from-emerald-500 to-green-600 dark:from-emerald-600 dark:to-green-700 rounded-xl px-4 py-3 shadow-lg">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">💵 {t('cashToCollect')}</span>
-                  <span className="font-bold text-lg text-amber-700 dark:text-amber-400">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-white/20 p-2 rounded-full">
+                      <Banknote className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="text-sm text-white/90 font-medium">{t('cashToCollect')}</span>
+                  </div>
+                  <span className="font-black text-2xl text-white drop-shadow-sm">
                     {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR')}
                   </span>
                 </div>
