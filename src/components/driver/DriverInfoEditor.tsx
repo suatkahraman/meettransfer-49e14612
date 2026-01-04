@@ -9,13 +9,38 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Loader2, Save, User, Car, Phone, Mail, Palette } from 'lucide-react';
+import { Loader2, Save, User, Car, Phone, Mail, Palette, MapPin } from 'lucide-react';
 
 const vehicleTypes = [
-  { value: 'mercedes-vito', label: 'Mercedes Vito' },
-  { value: 'mercedes-vclass', label: 'Mercedes VIP Vito' },
-  { value: 'maybach', label: 'Maybach' },
-  { value: 'minibus', label: 'Minibus' },
+  { value: 'Mercedes Vito', label: 'Mercedes Vito' },
+  { value: 'Mercedes VIP Vito', label: 'Mercedes VIP Vito' },
+  { value: 'Maybach', label: 'Maybach' },
+  { value: 'Minibus', label: 'Minibus' },
+];
+
+const regions = [
+  { value: 'Istanbul', label: 'İstanbul' },
+  { value: 'Antalya', label: 'Antalya' },
+  { value: 'Bodrum', label: 'Bodrum' },
+  { value: 'Dalaman', label: 'Dalaman' },
+  { value: 'Izmir', label: 'İzmir' },
+  { value: 'Cappadocia', label: 'Kapadokya' },
+  { value: 'Bursa', label: 'Bursa' },
+  { value: 'Dubai', label: 'Dubai' },
+  { value: 'Cyprus', label: 'Kıbrıs' },
+];
+
+const vehicleColors = [
+  { value: 'Siyah', label: 'Siyah' },
+  { value: 'Beyaz', label: 'Beyaz' },
+  { value: 'Gri', label: 'Gri' },
+  { value: 'Gümüş', label: 'Gümüş' },
+  { value: 'Lacivert', label: 'Lacivert' },
+  { value: 'Mavi', label: 'Mavi' },
+  { value: 'Kırmızı', label: 'Kırmızı' },
+  { value: 'Bordo', label: 'Bordo' },
+  { value: 'Kahverengi', label: 'Kahverengi' },
+  { value: 'Bej', label: 'Bej' },
 ];
 
 interface DriverInfo {
@@ -25,6 +50,7 @@ interface DriverInfo {
   plate_number: string | null;
   vehicle_model: string | null;
   vehicle_color: string | null;
+  region: string | null;
   user_id: string;
 }
 
@@ -45,6 +71,7 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
     plate_number: '',
     vehicle_model: '',
     vehicle_color: '',
+    region: '',
   });
 
   useEffect(() => {
@@ -70,6 +97,7 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
         plate_number: data.plate_number || '',
         vehicle_model: data.vehicle_model || '',
         vehicle_color: data.vehicle_color || '',
+        region: data.region || '',
       });
 
       // Fetch user email
@@ -100,6 +128,7 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
           plate_number: formData.plate_number || null,
           vehicle_model: formData.vehicle_model || null,
           vehicle_color: formData.vehicle_color || null,
+          region: formData.region || null,
         })
         .eq('id', driverId);
 
@@ -185,6 +214,29 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
           />
         </div>
 
+        {/* Region (Select from options) */}
+        <div className="space-y-1.5">
+          <Label htmlFor="region" className="flex items-center gap-1.5">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            {t('region') || 'Bölge'}
+          </Label>
+          <Select
+            value={formData.region || ''}
+            onValueChange={(value) => setFormData({ ...formData, region: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('selectRegion') || 'Bölge seçin'} />
+            </SelectTrigger>
+            <SelectContent>
+              {regions.map((region) => (
+                <SelectItem key={region.value} value={region.value}>
+                  {region.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Vehicle Model (Select from options) */}
         <div className="space-y-1.5">
           <Label htmlFor="vehicle" className="flex items-center gap-1.5">
@@ -223,18 +275,27 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
           />
         </div>
 
-        {/* Vehicle Color */}
+        {/* Vehicle Color (Select from options) */}
         <div className="space-y-1.5">
           <Label htmlFor="color" className="flex items-center gap-1.5">
             <Palette className="h-4 w-4 text-muted-foreground" />
             {t('vehicleColor')}
           </Label>
-          <Input
-            id="color"
-            value={formData.vehicle_color}
-            onChange={(e) => setFormData({ ...formData, vehicle_color: e.target.value })}
-            placeholder={t('vehicleColorPlaceholder')}
-          />
+          <Select
+            value={formData.vehicle_color || ''}
+            onValueChange={(value) => setFormData({ ...formData, vehicle_color: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('vehicleColorPlaceholder') || 'Renk seçin'} />
+            </SelectTrigger>
+            <SelectContent>
+              {vehicleColors.map((color) => (
+                <SelectItem key={color.value} value={color.value}>
+                  {color.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Save Button */}
