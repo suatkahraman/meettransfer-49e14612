@@ -6,6 +6,41 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Fallback exchange rates (TRY based)
+const FALLBACK_RATES: Record<string, number> = {
+  'EUR': 38.5,
+  'USD': 35.5,
+  'GBP': 45.0,
+  'AED': 9.7,
+  'AUD': 23.0,
+};
+
+// Get exchange rate from API or fallback
+async function getExchangeRate(fromCurrency: string, toCurrency: string = 'TRY'): Promise<number> {
+  if (fromCurrency === toCurrency) return 1;
+  
+  try {
+    const response = await fetch(
+      `https://api.frankfurter.app/latest?from=${fromCurrency}&to=${toCurrency}`
+    );
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.rates && data.rates[toCurrency]) {
+        console.log(`Exchange rate ${fromCurrency} -> ${toCurrency}: ${data.rates[toCurrency]}`);
+        return data.rates[toCurrency];
+      }
+    }
+  } catch (error) {
+    console.error('Exchange rate API error:', error);
+  }
+  
+  // Use fallback rate
+  const fallbackRate = FALLBACK_RATES[fromCurrency] || 1;
+  console.log(`Using fallback rate for ${fromCurrency}: ${fallbackRate}`);
+  return fallbackRate;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -31,7 +66,7 @@ serve(async (req) => {
     // Get reservation with agency info
     const { data: reservation, error: resError } = await supabase
       .from('reservations')
-      .select('id, agency_id, status')
+      .select('id, agency_id, status, price, price_currency, passenger_cash_amount, passenger_cash_currency, driver_cash_amount')
       .eq('id', reservation_id)
       .single();
 
@@ -59,26 +94,70 @@ serve(async (req) => {
       .eq('reservation_id', reservation_id)
       .maybeSingle();
 
-    // Get passenger cash amount from reservation (this is INCOME for agency - reduces their debt)
-    const { data: reservationDetails } = await supabase
-      .from('reservations')
-      .select('passenger_cash_amount, passenger_cash_currency, price, price_currency')
-      .eq('id', reservation_id)
-      .single();
-
-    // Admin fiyatı = Acenta'nın gideri (company_amount veya reservation price)
-    // Yolcu nakit = Acenta'nın geliri (passenger_cash_amount)
-    const adminPrice = agencyDetail?.company_amount || reservationDetails?.price || 0;
-    const agencyCurrency = agencyDetail?.agency_price_currency || reservationDetails?.price_currency || 'EUR';
-    const passengerCashAmount = reservationDetails?.passenger_cash_amount || 0;
-    const passengerCashCurrency = reservationDetails?.passenger_cash_currency || agencyCurrency;
+    // Admin fiyatı (company_amount) = Acenta'nın gideri = Acenta Geliri for admin
+    const adminPrice = agencyDetail?.company_amount || 0;
+    const agencyCurrency = agencyDetail?.agency_price_currency || 'EUR';
+    
+    // Yolcu nakit = Acenta'nın geliri (passenger_cash_amount) - bu acentanın borcundan düşer
+    const passengerCashAmount = reservation.passenger_cash_amount || 0;
+    const passengerCashCurrency = reservation.passenger_cash_currency || agencyCurrency;
 
     // Net amount to add to agency debt:
     // Gider (admin fiyatı) - Gelir (yolcu nakit) = Net borç artışı
-    // Eğer yolcu nakit >= admin fiyatı ise, acenta borcuna ekleme yapılmaz
     const netAmountToAdd = Math.max(0, adminPrice - passengerCashAmount);
 
     console.log(`Admin Price (expense): ${adminPrice} ${agencyCurrency}, Passenger cash (income): ${passengerCashAmount}, Net debt to add: ${netAmountToAdd}`);
+
+    // === DRIVER BALANCE DEDUCTION ===
+    // Şoförün topladığı nakit tutarı şoförün alacağından düşülecek
+    const driverCashCollected = reservation.driver_cash_amount || 0;
+    const driverCashCurrency = reservation.passenger_cash_currency || 'TRY';
+    
+    if (driverCashCollected > 0) {
+      // Get driver from reservation
+      const { data: resWithDriver } = await supabase
+        .from('reservations')
+        .select('driver_id')
+        .eq('id', reservation_id)
+        .single();
+      
+      if (resWithDriver?.driver_id) {
+        // Convert to TRY if needed
+        let cashInTRY = driverCashCollected;
+        if (driverCashCurrency !== 'TRY') {
+          const rate = await getExchangeRate(driverCashCurrency, 'TRY');
+          cashInTRY = driverCashCollected * rate;
+          console.log(`Converted driver cash ${driverCashCollected} ${driverCashCurrency} to ${cashInTRY} TRY (rate: ${rate})`);
+        }
+        
+        // Get or create driver balance
+        const { data: existingBalance } = await supabase
+          .from('driver_balances')
+          .select('id, balance')
+          .eq('driver_id', resWithDriver.driver_id)
+          .maybeSingle();
+        
+        if (existingBalance) {
+          // Deduct cash from driver balance (cash collected reduces what company owes driver)
+          const newBalance = existingBalance.balance - cashInTRY;
+          await supabase
+            .from('driver_balances')
+            .update({ balance: newBalance, updated_at: new Date().toISOString() })
+            .eq('id', existingBalance.id);
+          console.log(`Deducted ${cashInTRY} TRY from driver balance. Old: ${existingBalance.balance}, New: ${newBalance}`);
+        } else {
+          // Create new balance record with negative amount (driver owes company)
+          await supabase
+            .from('driver_balances')
+            .insert({ 
+              driver_id: resWithDriver.driver_id, 
+              balance: -cashInTRY 
+            });
+          console.log(`Created driver balance with -${cashInTRY} TRY`);
+        }
+      }
+    }
+    // === END DRIVER BALANCE DEDUCTION ===
 
     if (netAmountToAdd <= 0) {
       console.log('No amount to add to agency balance (passenger cash covers the price)');
@@ -87,7 +166,8 @@ serve(async (req) => {
           message: 'No amount to add - passenger cash covers the price',
           admin_price: adminPrice,
           passenger_cash: passengerCashAmount,
-          net_debt: 0
+          net_debt: 0,
+          driver_cash_deducted: driverCashCollected
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -134,7 +214,8 @@ serve(async (req) => {
       'TRY': '₺',
       'EUR': '€',
       'USD': '$',
-      'GBP': '£'
+      'GBP': '£',
+      'AED': 'د.إ'
     };
     const currencySymbol = currencySymbols[agencyCurrency] || agencyCurrency;
     const passengerCashSymbol = currencySymbols[passengerCashCurrency] || passengerCashCurrency;
@@ -172,7 +253,8 @@ serve(async (req) => {
         net_added_amount: netAmountToAdd,
         currency: agencyCurrency,
         new_currency_balance: newCurrencyBalance,
-        agency_name: agency.agency_name 
+        agency_name: agency.agency_name,
+        driver_cash_deducted: driverCashCollected
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

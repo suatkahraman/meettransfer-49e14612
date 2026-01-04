@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy, MessageCircle, CheckCircle, XCircle, DollarSign, Pencil, Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { LocationDisplay } from '@/components/ui/location-display';
@@ -172,14 +173,7 @@ const AgencyReservationDetail = () => {
   const handleSave = async () => {
     if (!id || !agencyId) return;
     
-    // Validate: if customer_pay_cash, passenger cash amount is required
-    if (paymentStatus === 'customer_pay_cash') {
-      const cashAmount = parseFloat(passengerCashAmount);
-      if (!cashAmount || cashAmount <= 0) {
-        toast.error('Yolcudan alınacak nakit tutarı zorunludur');
-        return;
-      }
-    }
+    // No validation required - cash amount is optional, agency can save without entering it
     
     setSaving(true);
 
@@ -636,6 +630,47 @@ const AgencyReservationDetail = () => {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Cash Entry Warning - Show when approved but cash payment not entered yet */}
+        {['customer_approved', 'confirmed', 'sent_to_driver', 'active'].includes(reservation.status) && 
+         agencyDetails?.payment_status === 'customer_pay_cash' && 
+         (!reservation.passenger_cash_amount || reservation.passenger_cash_amount <= 0) && (
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card className="border-2 border-amber-500 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50 shadow-lg">
+              <CardContent className="py-5">
+                <motion.div
+                  animate={{ 
+                    boxShadow: ['0 0 0 0 rgba(245, 158, 11, 0.4)', '0 0 0 10px rgba(245, 158, 11, 0)', '0 0 0 0 rgba(245, 158, 11, 0)']
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="rounded-lg"
+                >
+                  <div className="flex items-center gap-4">
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                      className="h-14 w-14 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0"
+                    >
+                      <DollarSign className="h-7 w-7 text-amber-600" />
+                    </motion.div>
+                    <div className="flex-1">
+                      <p className="font-bold text-amber-700 dark:text-amber-300 text-lg">
+                        {t('enterCashAmount') || 'Nakit Tutarını Girin!'}
+                      </p>
+                      <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                        {t('cashAmountRequired') || 'Yolcudan alınacak nakit tutarını girmeniz gerekmektedir.'}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
         {/* Pending Admin Review Info */}
