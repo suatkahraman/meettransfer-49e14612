@@ -417,11 +417,10 @@ const DriverHome = () => {
           </Button>
           <Button 
             variant="ghost" 
-            onClick={() => navigate('/driver/monthly-accounting')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2 gap-1"
+            onClick={() => toggleSection('settings')} 
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2"
           >
-            <Calculator className="h-5 w-5" />
-            <span className="text-xs">{t('monthlyAccounting')}</span>
+            <Settings className="h-4 w-4" />
           </Button>
           <Button 
             variant="ghost" 
