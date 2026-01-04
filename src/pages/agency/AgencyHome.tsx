@@ -247,12 +247,17 @@ const AgencyHome = () => {
   };
 
   const now = new Date();
-  const upcomingJobs = reservations.filter(r => 
-    !['completed', 'cancelled', 'active'].includes(r.status) && 
-    new Date(`${r.pickup_date}T${r.pickup_time}`) >= now
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+
+  // Keep same-day reservations visible even if pickup_time already passed
+  const upcomingJobs = reservations.filter(
+    (r) =>
+      !['completed', 'cancelled', 'active'].includes(r.status) &&
+      new Date(`${r.pickup_date}T00:00:00`) >= startOfToday
   );
-  const activeJobs = reservations.filter(r => r.status === 'active');
-  const completedJobs = reservations.filter(r => r.status === 'completed');
+  const activeJobs = reservations.filter((r) => r.status === 'active');
+  const completedJobs = reservations.filter((r) => r.status === 'completed');
 
   const ReservationCard = ({ reservation }: { reservation: Reservation }) => (
     <Card 
