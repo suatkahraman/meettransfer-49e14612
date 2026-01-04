@@ -18,6 +18,7 @@ interface AgencyReservationDetail {
   company_amount: number;
   agency_profit: number;
   payment_status: string;
+  agency_price_currency: string | null;
 }
 
 interface Reservation {
@@ -36,16 +37,17 @@ interface AgencyTransaction {
   description: string | null;
   balance_after: number;
   created_at: string;
+  currency: string;
 }
 
 const AgencyReports = () => {
   const { agencyId } = useUserRole();
   const { t, locale } = useAgencyTranslations();
-  const { currencySymbol } = useAgencyLanguage();
+  const { currencySymbol, currency: agencyCurrency } = useAgencyLanguage();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [agency, setAgency] = useState<{ agency_name: string; balance: number } | null>(null);
+  const [agency, setAgency] = useState<{ agency_name: string; balance: number; currency: string } | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [agencyDetails, setAgencyDetails] = useState<AgencyReservationDetail[]>([]);
   const [transactions, setTransactions] = useState<AgencyTransaction[]>([]);
@@ -61,7 +63,7 @@ const AgencyReports = () => {
     // Fetch agency info
     const { data: agencyData } = await supabase
       .from('agencies')
-      .select('agency_name, balance')
+      .select('agency_name, balance, currency')
       .eq('id', agencyId)
       .single();
 
@@ -156,10 +158,18 @@ const AgencyReports = () => {
     fetchData();
   }, [fetchData]);
 
-  // Calculate totals
+  // Calculate totals - only count reservations where agency_price_currency matches agency's currency
+  const agencyCurrencyCode = agency?.currency || agencyCurrency || 'EUR';
+  
   const totalReservations = reservations.length;
   const completedReservations = reservations.filter(r => r.status === 'completed').length;
-  const totalCompanyAmount = agencyDetails.reduce((sum, d) => sum + (d.company_amount || 0), 0);
+  
+  // Filter to only include details in agency's currency
+  const matchingDetails = agencyDetails.filter(d => 
+    !d.agency_price_currency || d.agency_price_currency === agencyCurrencyCode
+  );
+  
+  const totalCompanyAmount = matchingDetails.reduce((sum, d) => sum + (d.company_amount || 0), 0);
   const paidCount = agencyDetails.filter(d => d.payment_status === 'paid').length;
   const pendingPayments = agencyDetails.filter(d => d.payment_status !== 'paid').length;
   

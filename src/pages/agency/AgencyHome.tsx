@@ -120,12 +120,12 @@ const AgencyHome = () => {
     // Fetch agency info
     const { data: agencyData } = await supabase
       .from('agencies')
-      .select('agency_name, balance')
+      .select('agency_name, balance, currency')
       .eq('id', agencyId)
       .single();
 
     if (agencyData) {
-      setAgency(agencyData);
+      setAgency({ agency_name: agencyData.agency_name, balance: agencyData.balance || 0 });
     }
 
     // Fetch accounting summary
@@ -135,7 +135,7 @@ const AgencyHome = () => {
     // Get completed reservations with agency details and passenger cash
     const { data: completedRes } = await supabase
       .from('reservations')
-      .select('id, status, passenger_cash_amount, agency_reservation_details!inner(customer_price, company_amount)')
+      .select('id, status, passenger_cash_amount, agency_reservation_details!inner(customer_price, company_amount, agency_price_currency)')
       .eq('agency_id', agencyId)
       .eq('status', 'completed');
 
@@ -153,14 +153,25 @@ const AgencyHome = () => {
       .select('amount')
       .eq('agency_id', agencyId);
 
+    // Get agency currency from context or DB
+    const agencyCurrencyCode = agencyData?.currency || 'EUR';
+
     const totalRevenue = completedRes?.reduce((sum, r) => {
-      const detail = r.agency_reservation_details as unknown as { customer_price: number; company_amount: number };
+      const detail = r.agency_reservation_details as unknown as { customer_price: number; company_amount: number; agency_price_currency: string | null };
+      // Only count if currency matches agency's currency
+      if (detail?.agency_price_currency && detail.agency_price_currency !== agencyCurrencyCode) {
+        return sum;
+      }
       return sum + (detail?.customer_price || 0);
     }, 0) || 0;
 
     // Calculate total company amount (agency debt)
     const totalCompanyAmount = completedRes?.reduce((sum, r) => {
-      const detail = r.agency_reservation_details as unknown as { customer_price: number; company_amount: number };
+      const detail = r.agency_reservation_details as unknown as { customer_price: number; company_amount: number; agency_price_currency: string | null };
+      // Only count if currency matches agency's currency
+      if (detail?.agency_price_currency && detail.agency_price_currency !== agencyCurrencyCode) {
+        return sum;
+      }
       return sum + (detail?.company_amount || 0);
     }, 0) || 0;
 
