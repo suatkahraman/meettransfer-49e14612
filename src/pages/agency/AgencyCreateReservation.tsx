@@ -410,9 +410,6 @@ const AgencyCreateReservation = () => {
                       <SelectItem value="agency_pay">{t('agencyPayment')}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {t('priceWillBeSetByAdmin')}
-                  </p>
                 </div>
               </div>
 
