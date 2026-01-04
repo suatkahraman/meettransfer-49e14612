@@ -1,44 +1,53 @@
 // Push notification service worker with enhanced features
+// Works even when app is closed - handles sound, vibration, and badge
 const APP_NAME = 'Meet Transfer';
 const DEFAULT_ICON = '/pwa-192x192.png';
 const BADGE_ICON = '/pwa-192x192.png';
 
-// Notification type configurations
+// Store badge count
+let currentBadgeCount = 0;
+
+// Notification type configurations with sounds
 const NOTIFICATION_CONFIGS = {
   reservation: {
     icon: '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
     vibrate: [200, 100, 200, 100, 300],
     requireInteraction: true,
-    tag: 'reservation'
+    tag: 'reservation',
+    sound: 'default'
   },
   driver: {
     icon: '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
     vibrate: [250, 100, 250],
     requireInteraction: true,
-    tag: 'driver'
+    tag: 'driver',
+    sound: 'default'
   },
   payment: {
     icon: '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
     vibrate: [100, 50, 100, 50, 200],
     requireInteraction: false,
-    tag: 'payment'
+    tag: 'payment',
+    sound: 'default'
   },
   urgent: {
     icon: '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
     vibrate: [100, 50, 100, 50, 100, 50, 100, 50, 400],
     requireInteraction: true,
-    tag: 'urgent'
+    tag: 'urgent',
+    sound: 'default'
   },
   default: {
     icon: '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
     vibrate: [200, 100, 200],
     requireInteraction: false,
-    tag: 'notification'
+    tag: 'notification',
+    sound: 'default'
   }
 };
 
@@ -69,8 +78,43 @@ function formatTime(timestamp) {
   return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 }
 
+// Update app badge count
+async function updateBadgeCount(increment = true) {
+  if (increment) {
+    currentBadgeCount++;
+  }
+  
+  if ('setAppBadge' in navigator) {
+    try {
+      if (currentBadgeCount > 0) {
+        await navigator.setAppBadge(currentBadgeCount);
+        console.log('[SW] Badge set to:', currentBadgeCount);
+      } else {
+        await navigator.clearAppBadge();
+        console.log('[SW] Badge cleared');
+      }
+    } catch (err) {
+      console.log('[SW] Badge error:', err);
+    }
+  }
+  
+  // Also try to use registration badge API
+  if (self.registration && 'setAppBadge' in self.registration) {
+    try {
+      if (currentBadgeCount > 0) {
+        await self.registration.setAppBadge(currentBadgeCount);
+      } else {
+        await self.registration.clearAppBadge();
+      }
+    } catch (err) {
+      console.log('[SW] Registration badge error:', err);
+    }
+  }
+}
+
+// Main push event handler - works when app is closed
 self.addEventListener('push', function(event) {
-  console.log('[SW] Push received:', event);
+  console.log('[SW] Push received (app may be closed):', event);
   
   let data = {
     title: APP_NAME,
@@ -89,7 +133,6 @@ self.addEventListener('push', function(event) {
     }
   } catch (e) {
     console.error('[SW] Error parsing push data:', e);
-    // Try to parse as text
     try {
       data.body = event.data.text();
     } catch (textError) {
@@ -101,11 +144,12 @@ self.addEventListener('push', function(event) {
   const notificationType = data.type || getNotificationType(data.title, data.body);
   const config = NOTIFICATION_CONFIGS[notificationType] || NOTIFICATION_CONFIGS.default;
 
+  // Build notification options - these work even when app is closed
   const options = {
     body: data.body,
     icon: data.icon || config.icon,
     badge: data.badge || config.badge,
-    vibrate: config.vibrate,
+    vibrate: config.vibrate, // Vibration pattern
     data: {
       url: data.url,
       type: notificationType,
@@ -117,9 +161,10 @@ self.addEventListener('push', function(event) {
       { action: 'close', title: 'Kapat' }
     ],
     requireInteraction: config.requireInteraction,
-    tag: config.tag + '-' + Date.now(), // Unique tag for each notification
+    tag: config.tag + '-' + Date.now(),
     renotify: true,
-    silent: false, // Allow sound
+    // CRITICAL: silent must be false for sound to play when app is closed
+    silent: false,
     timestamp: data.timestamp || Date.now()
   };
 
@@ -129,27 +174,43 @@ self.addEventListener('push', function(event) {
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title, options)
+    Promise.all([
+      // Show notification with sound and vibration
+      self.registration.showNotification(data.title, options),
+      // Update badge count
+      updateBadgeCount(true)
+    ])
       .then(() => {
-        console.log('[SW] Notification shown successfully');
-        // Notify all clients about the new notification
-        return self.clients.matchAll({ type: 'window' });
+        console.log('[SW] Notification shown with sound and vibration');
+        return self.clients.matchAll({ type: 'window', includeUncontrolled: true });
       })
       .then(clients => {
+        // Notify open windows if any
         clients.forEach(client => {
           client.postMessage({ 
             type: 'NOTIFICATION_RECEIVED',
-            data: data
+            data: data,
+            badgeCount: currentBadgeCount
           });
         });
+      })
+      .catch(err => {
+        console.error('[SW] Error showing notification:', err);
       })
   );
 });
 
+// Handle notification click
 self.addEventListener('notificationclick', function(event) {
   console.log('[SW] Notification click:', event.action, event.notification);
   
   event.notification.close();
+  
+  // Decrease badge count when notification is clicked
+  if (currentBadgeCount > 0) {
+    currentBadgeCount--;
+    updateBadgeCount(false);
+  }
   
   if (event.action === 'close') {
     return;
@@ -163,7 +224,6 @@ self.addEventListener('notificationclick', function(event) {
         // Check if there's already a window open
         for (const client of clientList) {
           if (client.url.includes(self.location.origin) && 'focus' in client) {
-            // Navigate and focus the existing window
             return client.navigate(urlToOpen).then(() => client.focus());
           }
         }
@@ -173,7 +233,6 @@ self.addEventListener('notificationclick', function(event) {
         }
       })
       .then(() => {
-        // Notify the app that notification was clicked
         return self.clients.matchAll({ type: 'window' });
       })
       .then(clients => {
@@ -181,22 +240,31 @@ self.addEventListener('notificationclick', function(event) {
           client.postMessage({ 
             type: 'NOTIFICATION_CLICKED',
             url: urlToOpen,
-            notificationType: event.notification.data?.type
+            notificationType: event.notification.data?.type,
+            badgeCount: currentBadgeCount
           });
         });
       })
   );
 });
 
+// Handle notification close/dismiss
 self.addEventListener('notificationclose', function(event) {
   console.log('[SW] Notification closed:', event.notification.tag);
+  
+  // Decrease badge count when notification is dismissed
+  if (currentBadgeCount > 0) {
+    currentBadgeCount--;
+    updateBadgeCount(false);
+  }
   
   // Notify app about dismissed notification
   self.clients.matchAll({ type: 'window' }).then(clients => {
     clients.forEach(client => {
       client.postMessage({ 
         type: 'NOTIFICATION_DISMISSED',
-        tag: event.notification.tag
+        tag: event.notification.tag,
+        badgeCount: currentBadgeCount
       });
     });
   });
@@ -207,14 +275,20 @@ self.addEventListener('message', function(event) {
   console.log('[SW] Message received:', event.data);
   
   if (event.data && event.data.type === 'SET_BADGE') {
-    const count = event.data.count;
-    if ('setAppBadge' in navigator) {
-      if (count > 0) {
-        navigator.setAppBadge(count).catch(err => console.log('[SW] Badge error:', err));
-      } else {
-        navigator.clearAppBadge().catch(err => console.log('[SW] Clear badge error:', err));
-      }
-    }
+    currentBadgeCount = event.data.count || 0;
+    updateBadgeCount(false);
+  }
+  
+  if (event.data && event.data.type === 'CLEAR_BADGE') {
+    currentBadgeCount = 0;
+    updateBadgeCount(false);
+  }
+  
+  if (event.data && event.data.type === 'GET_BADGE_COUNT') {
+    event.source.postMessage({
+      type: 'BADGE_COUNT',
+      count: currentBadgeCount
+    });
   }
   
   if (event.data && event.data.type === 'SKIP_WAITING') {
@@ -224,12 +298,18 @@ self.addEventListener('message', function(event) {
 
 // Handle service worker activation
 self.addEventListener('activate', function(event) {
-  console.log('[SW] Activated');
-  event.waitUntil(self.clients.claim());
+  console.log('[SW] Activated - push notifications ready for background');
+  event.waitUntil(
+    Promise.all([
+      self.clients.claim(),
+      // Clear badge on activation
+      updateBadgeCount(false)
+    ])
+  );
 });
 
 // Handle service worker installation
 self.addEventListener('install', function(event) {
-  console.log('[SW] Installed');
+  console.log('[SW] Installed - background push ready');
   self.skipWaiting();
 });
