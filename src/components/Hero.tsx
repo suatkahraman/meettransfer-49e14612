@@ -582,7 +582,6 @@ export const Hero = () => {
                 <label className="text-white/90 text-sm font-medium block text-left flex items-center gap-2">
                   <Phone className="h-4 w-4 text-accent" />
                   {t("phoneNumber") || "Phone Number"} <span className="text-red-400 font-bold">*</span>
-                  <span className="text-white/60 text-xs">({t("required") || "Required"})</span>
                 </label>
                 <PhoneInput
                   value={customerPhone}
