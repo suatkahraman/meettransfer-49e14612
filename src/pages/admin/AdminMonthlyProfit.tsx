@@ -72,6 +72,7 @@ const AdminMonthlyProfit = () => {
     
     try {
       // Fetch completed reservations with agency assigned for the month
+      // Must have driver_earning (Bütçe) filled
       const { data: reservations, error: resError } = await supabase
         .from("reservations")
         .select(`
@@ -91,6 +92,8 @@ const AdminMonthlyProfit = () => {
         `)
         .eq("status", "completed")
         .not("agency_id", "is", null)
+        .not("driver_earning", "is", null)
+        .gt("driver_earning", 0)
         .gte("pickup_date", format(monthStart, "yyyy-MM-dd"))
         .lte("pickup_date", format(monthEnd, "yyyy-MM-dd"));
 
@@ -121,7 +124,7 @@ const AdminMonthlyProfit = () => {
       }
 
       // Fetch agency reservation details with TRY converted amount
-      // customer_price = Acentadan Alınacak Tutar (what agency pays to company)
+      // company_amount = Acentadan Alınacak Tutar = Gelir (what agency pays to company)
       let agencyDetails: Record<string, { 
         agencyIncome: number;
         originalAmount: number; 
@@ -129,6 +132,7 @@ const AdminMonthlyProfit = () => {
         exchangeRate: number | null;
         needsConversion: boolean;
         reservationId: string;
+        hasCompanyAmount: boolean;
       }> = {};
       
       let conversionsNeeded = 0;
@@ -136,40 +140,43 @@ const AdminMonthlyProfit = () => {
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
           .from("agency_reservation_details")
-          .select("reservation_id, customer_price, agency_price_currency, exchange_rate_used")
+          .select("reservation_id, company_amount, agency_price_currency, exchange_rate_used")
           .in("reservation_id", reservationIds);
 
         if (!agencyError && agencyData) {
           agencyDetails = agencyData.reduce((acc, item) => {
             let agencyIncome = 0;
             let needsConversion = false;
-            const customerPrice = item.customer_price || 0;
+            // company_amount = Acentadan Alınacak Tutar = Gelir
+            const companyAmount = item.company_amount || 0;
+            const hasCompanyAmount = companyAmount > 0;
             
-            // Acenta Geliri = customer_price (Acentadan Alınacak Tutar)
-            // Eğer TRY ise direkt customer_price kullan
+            // Acenta Geliri = company_amount (Acentadan Alınacak Tutar)
+            // Eğer TRY ise direkt company_amount kullan
             // Eğer döviz ise ve kur varsa çevir, yoksa çeviri gerekli
             if (item.agency_price_currency === 'TRY') {
-              agencyIncome = customerPrice;
-            } else if (item.exchange_rate_used && customerPrice > 0) {
+              agencyIncome = companyAmount;
+            } else if (item.exchange_rate_used && companyAmount > 0) {
               // Döviz ve kur varsa çevir
-              agencyIncome = customerPrice * item.exchange_rate_used;
+              agencyIncome = companyAmount * item.exchange_rate_used;
             } else {
               // Needs conversion - foreign currency without exchange rate
-              needsConversion = customerPrice > 0;
+              needsConversion = companyAmount > 0;
               agencyIncome = 0; // Will be converted
               if (needsConversion) conversionsNeeded++;
             }
             
             acc[item.reservation_id] = { 
               agencyIncome,
-              originalAmount: customerPrice,
+              originalAmount: companyAmount,
               currency: item.agency_price_currency || 'TRY',
               exchangeRate: item.exchange_rate_used || null,
               needsConversion,
-              reservationId: item.reservation_id
+              reservationId: item.reservation_id,
+              hasCompanyAmount
             };
             return acc;
-          }, {} as Record<string, { agencyIncome: number; originalAmount: number; currency: string; exchangeRate: number | null; needsConversion: boolean; reservationId: string }>);
+          }, {} as Record<string, { agencyIncome: number; originalAmount: number; currency: string; exchangeRate: number | null; needsConversion: boolean; reservationId: string; hasCompanyAmount: boolean }>);
         }
       }
       
@@ -193,9 +200,16 @@ const AdminMonthlyProfit = () => {
         });
       });
 
-      // Process reservations
+      // Process reservations - only include those with BOTH driver_earning AND company_amount
       reservations?.forEach(res => {
         if (!res.pickup_date) return;
+        
+        const agencyInfo = agencyDetails[res.id];
+        
+        // CRITICAL: Only include reservations that have BOTH:
+        // 1. driver_earning (Bütçe) > 0
+        // 2. company_amount (Acenta Fiyatı) > 0
+        if (!agencyInfo?.hasCompanyAmount) return;
         
         const dateStr = res.pickup_date;
         const dayData = dailyMap.get(dateStr);
@@ -203,9 +217,8 @@ const AdminMonthlyProfit = () => {
         if (dayData) {
           dayData.transferCount += 1;
           
-          const agencyInfo = agencyDetails[res.id];
           const agencyIncome = agencyInfo?.agencyIncome || 0;
-          // Bütçe = driver_earning (şoför gideri/iş maliyeti), price değil
+          // Bütçe = driver_earning (şoför gideri/iş maliyeti) = Gider
           const budget = res.driver_earning || 0;
           const driverExpense = res.driver_earning || 0;
           
