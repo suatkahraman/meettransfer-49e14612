@@ -126,12 +126,15 @@ const AdminMonthlyAccounting = () => {
       .from('driver_payments')
       .select('*');
 
-    // Fetch ALL completed reservations for carry-over calculation
+    // Fetch ALL completed reservations with driver_earning for carry-over calculation
+    // Only completed jobs with budget (driver_earning) are counted for driver accounting
     const { data: allReservationsData } = await supabase
       .from('reservations')
-      .select('driver_id, price, driver_cash_amount')
+      .select('driver_id, driver_earning, driver_cash_amount')
       .not('driver_id', 'is', null)
-      .in('status', ['completed', 'active', 'assigned', 'sent_to_driver']);
+      .eq('status', 'completed')
+      .not('driver_earning', 'is', null)
+      .gt('driver_earning', 0);
 
     // Calculate all-time data per driver
     const allTimeMap = new Map<string, AllTimeDriverData>();
@@ -146,7 +149,7 @@ const AdminMonthlyAccounting = () => {
           totalPaymentsToDriver: 0,
           totalPaymentsFromDriver: 0
         };
-        existing.totalEarnings += (res.price || 0) - (res.driver_cash_amount || 0);
+        existing.totalEarnings += (res.driver_earning || 0) - (res.driver_cash_amount || 0);
         allTimeMap.set(res.driver_id, existing);
       });
     }
