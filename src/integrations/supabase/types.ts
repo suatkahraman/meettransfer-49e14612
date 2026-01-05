@@ -597,6 +597,45 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          company_address: string | null
+          company_name: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          invoice_number: string
+          total_amount: number
+          transfer_lines: Json
+          updated_at: string
+        }
+        Insert: {
+          company_address?: string | null
+          company_name: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          invoice_number: string
+          total_amount?: number
+          transfer_lines?: Json
+          updated_at?: string
+        }
+        Update: {
+          company_address?: string | null
+          company_name?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          invoice_number?: string
+          total_amount?: number
+          transfer_lines?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       monthly_budgets: {
         Row: {
           amount: number
