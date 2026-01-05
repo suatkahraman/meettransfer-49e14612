@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { tr, enUS, de, fr, ar } from 'date-fns/locale';
-import { Plus, Printer, Trash2, FileDown, Save, History, ChevronLeft, Eye, Search, Globe, Coins } from 'lucide-react';
+import { Plus, Printer, Trash2, FileDown, Save, History, ChevronLeft, Eye, Search, Globe, Coins, Share2, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -502,6 +502,62 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
     setTimeout(() => printWindow.print(), 300);
   };
 
+  const handleShareWhatsApp = (invoice?: SavedInvoice) => {
+    const inv = invoice || { 
+      invoice_number: invoiceNumber, 
+      company_name: companyName, 
+      company_address: companyAddress, 
+      transfer_lines: transferLines, 
+      total_amount: totalAmount,
+      currency: selectedCurrency,
+      created_at: new Date().toISOString()
+    };
+
+    const t = INVOICE_TRANSLATIONS[selectedLanguage];
+    const currencyToUse = inv.currency || selectedCurrency;
+    const dateLocale = getDateLocale(selectedLanguage);
+
+    const formatWhatsAppDate = (dateStr: string) => {
+      if (!dateStr) return '-';
+      try {
+        return format(new Date(dateStr), 'dd.MM.yyyy', { locale: dateLocale });
+      } catch {
+        return dateStr;
+      }
+    };
+
+    // Create text message for WhatsApp
+    let message = `*${t.invoiceTitle}*\n`;
+    message += `━━━━━━━━━━━━━━━━\n`;
+    message += `📄 ${t.invoiceNo}: ${inv.invoice_number}\n`;
+    message += `📅 ${t.issueDate}: ${format(new Date(inv.created_at), 'dd.MM.yyyy', { locale: dateLocale })}\n\n`;
+    
+    message += `*${t.billedTo}:*\n`;
+    message += `🏢 ${inv.company_name}\n`;
+    if (inv.company_address) {
+      message += `📍 ${inv.company_address}\n`;
+    }
+    message += `\n`;
+    
+    message += `*${t.transferDetails}:*\n`;
+    message += `━━━━━━━━━━━━━━━━\n`;
+    
+    inv.transfer_lines.forEach((line, index) => {
+      message += `\n*${index + 1}. ${line.passengerName || '-'}*\n`;
+      message += `📅 ${formatWhatsAppDate(line.date)} ${line.time ? `⏰ ${line.time}` : ''}\n`;
+      message += `📍 ${line.pickup || '-'} → ${line.dropoff || '-'}\n`;
+      message += `💰 ${formatCurrencyAmount(Number(line.price) || 0, currencyToUse)}\n`;
+    });
+    
+    message += `\n━━━━━━━━━━━━━━━━\n`;
+    message += `*${t.grandTotal}: ${formatCurrencyAmount(inv.total_amount, currencyToUse)}*\n\n`;
+    message += `_Meet Travel Transfer_\n`;
+    message += `_${t.companySubtitle}_`;
+
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+  };
+
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from('invoices').delete().eq('id', id);
     if (!error) {
@@ -753,9 +809,13 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                   <Save className="h-4 w-4" />
                   {saving ? 'Kaydediliyor...' : 'Kaydet'}
                 </Button>
+                <Button variant="outline" onClick={() => handleShareWhatsApp()} className="gap-2 bg-[#25D366] hover:bg-[#22c55e] text-white border-0">
+                  <MessageCircle className="h-4 w-4" />
+                  WhatsApp
+                </Button>
                 <Button onClick={() => handleExport()} className="gap-2">
                   <Printer className="h-4 w-4" />
-                  PDF Çıktı Al
+                  PDF
                 </Button>
               </div>
             </div>
@@ -816,10 +876,16 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                     <Trash2 className="h-4 w-4 mr-1" />
                     Sil
                   </Button>
-                  <Button onClick={() => handleExport(viewingInvoice)} className="ml-auto gap-2">
-                    <Printer className="h-4 w-4" />
-                    PDF Çıktı Al
-                  </Button>
+                  <div className="flex gap-2 ml-auto">
+                    <Button variant="outline" onClick={() => handleShareWhatsApp(viewingInvoice)} className="gap-2 bg-[#25D366] hover:bg-[#22c55e] text-white border-0">
+                      <MessageCircle className="h-4 w-4" />
+                      WhatsApp
+                    </Button>
+                    <Button onClick={() => handleExport(viewingInvoice)} className="gap-2">
+                      <Printer className="h-4 w-4" />
+                      PDF
+                    </Button>
+                  </div>
                 </div>
               </div>
             ) : (
