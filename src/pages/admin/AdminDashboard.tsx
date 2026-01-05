@@ -1,19 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { endOfDay, endOfMonth, format, startOfDay, startOfMonth } from 'date-fns';
+import { AlertCircle, Banknote, BarChart3, Building2, Calculator, Calendar, CalendarDays, Car, CheckCircle, ClipboardList, DollarSign, Download, FileText, Inbox, LogOut, MessageCircle, Plane, Settings, Users } from 'lucide-react';
+
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, Calendar, Users, Car, CheckCircle, DollarSign, ClipboardList, Settings, FileText, CalendarDays, Building2, Plane, MessageCircle, BarChart3, Inbox, Download, Calculator, AlertCircle } from 'lucide-react';
-import { startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { supabase } from '@/integrations/supabase/client';
 interface KPIs {
   newToday: number;
   pendingAssignment: number;
   activeTrips: number;
   completedTrips: number;
-  monthlyRevenue: number;
+  monthlyDriverExpense: number;
+}
+
+interface DriverExpenseBreakdownItem {
+  driverId: string;
+  driverName: string;
+  totalExpense: number;
+  transferCount: number;
 }
 
 const AdminDashboard = () => {
@@ -24,13 +33,24 @@ const AdminDashboard = () => {
     pendingAssignment: 0,
     activeTrips: 0,
     completedTrips: 0,
-    monthlyRevenue: 0,
+    monthlyDriverExpense: 0,
   });
+  const [driverExpenseBreakdown, setDriverExpenseBreakdown] = useState<DriverExpenseBreakdownItem[]>([]);
+  const [driverExpenseOpen, setDriverExpenseOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [unreadWhatsApp, setUnreadWhatsApp] = useState(0);
   const [pendingQuickBookings, setPendingQuickBookings] = useState(0);
   const [pendingAdminReview, setPendingAdminReview] = useState(0);
   const [appInstallCount, setAppInstallCount] = useState(0);
+
+  const monthLabel = format(new Date(), 'MM.yyyy');
+  const formatTRY = (amount: number) =>
+    new Intl.NumberFormat('tr-TR', {
+      style: 'currency',
+      currency: 'TRY',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
 
   useEffect(() => {
     const fetchKPIs = async () => {
@@ -67,22 +87,61 @@ const AdminDashboard = () => {
         .gte('updated_at', monthStart.toISOString())
         .lte('updated_at', monthEnd.toISOString());
 
-      // Monthly revenue
-      const { data: revenueData } = await supabase
-        .from('reservations')
-        .select('price')
-        .eq('status', 'completed')
-        .gte('updated_at', monthStart.toISOString())
-        .lte('updated_at', monthEnd.toISOString());
+      // Monthly driver expense (sum of driver_earning) for completed jobs by pickup_date
+      const monthStartStr = format(monthStart, 'yyyy-MM-dd');
+      const monthEndStr = format(monthEnd, 'yyyy-MM-dd');
 
-      const monthlyRevenue = revenueData?.reduce((sum, r) => sum + (r.price || 0), 0) || 0;
+      const { data: expenseRows } = await supabase
+        .from('reservations')
+        .select('driver_id, driver_earning')
+        .eq('status', 'completed')
+        .gte('pickup_date', monthStartStr)
+        .lte('pickup_date', monthEndStr)
+        .not('driver_id', 'is', null)
+        .not('driver_earning', 'is', null)
+        .gt('driver_earning', 0);
+
+      const driverIds = Array.from(
+        new Set((expenseRows || []).map((r) => r.driver_id).filter(Boolean))
+      ) as string[];
+
+      const driverNameMap = new Map<string, string>();
+      if (driverIds.length > 0) {
+        const { data: driversData } = await supabase
+          .from('drivers')
+          .select('id, name')
+          .in('id', driverIds);
+
+        (driversData || []).forEach((d) => driverNameMap.set(d.id, d.name));
+      }
+
+      const expenseMap = new Map<string, { total: number; count: number }>();
+      (expenseRows || []).forEach((r) => {
+        if (!r.driver_id) return;
+        const existing = expenseMap.get(r.driver_id) || { total: 0, count: 0 };
+        existing.total += Number(r.driver_earning || 0);
+        existing.count += 1;
+        expenseMap.set(r.driver_id, existing);
+      });
+
+      const breakdown: DriverExpenseBreakdownItem[] = Array.from(expenseMap.entries())
+        .map(([driverId, val]) => ({
+          driverId,
+          driverName: driverNameMap.get(driverId) || 'Bilinmiyor',
+          totalExpense: val.total,
+          transferCount: val.count,
+        }))
+        .sort((a, b) => b.totalExpense - a.totalExpense);
+
+      const monthlyDriverExpense = breakdown.reduce((sum, row) => sum + row.totalExpense, 0);
+      setDriverExpenseBreakdown(breakdown);
 
       setKpis({
         newToday: newToday || 0,
         pendingAssignment: pendingAssignment || 0,
         activeTrips: activeTrips || 0,
         completedTrips: completedTrips || 0,
-        monthlyRevenue,
+        monthlyDriverExpense,
       });
       setLoading(false);
     };
@@ -332,15 +391,27 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card
+            className="cursor-pointer hover:shadow-lg transition-shadow hover:border-primary"
+            role="button"
+            tabIndex={0}
+            onClick={() => setDriverExpenseOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') setDriverExpenseOpen(true);
+            }}
+            aria-label="Aylık şoför gideri detaylarını aç"
+          >
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Aylık Şöför Gideri
+                <Banknote className="h-4 w-4" />
+                Aylık Şoför Gideri
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">₺{loading ? '-' : kpis.monthlyRevenue.toFixed(0)}</div>
+              <div className="text-2xl font-bold text-primary">
+                {loading ? '-' : formatTRY(kpis.monthlyDriverExpense)}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">Detay için tıklayın</div>
             </CardContent>
           </Card>
 
@@ -356,6 +427,37 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        <Dialog open={driverExpenseOpen} onOpenChange={setDriverExpenseOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Aylık Şoför Gideri ({monthLabel})</DialogTitle>
+            </DialogHeader>
+
+            <div className="flex items-center justify-between rounded-lg bg-muted/40 p-3">
+              <div className="text-sm text-muted-foreground">Toplam</div>
+              <div className="text-lg font-semibold">{formatTRY(kpis.monthlyDriverExpense)}</div>
+            </div>
+
+            {driverExpenseBreakdown.length === 0 ? (
+              <div className="py-6 text-center text-sm text-muted-foreground">
+                Bu ay tamamlanmış şoför işi bulunamadı.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {driverExpenseBreakdown.map((row) => (
+                  <div key={row.driverId} className="flex items-center justify-between rounded-lg border p-3">
+                    <div>
+                      <div className="font-medium">{row.driverName}</div>
+                      <div className="text-xs text-muted-foreground">{row.transferCount} transfer</div>
+                    </div>
+                    <div className="font-semibold">{formatTRY(row.totalExpense)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Navigation Menu */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
