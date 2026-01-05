@@ -126,7 +126,7 @@ const AdminMonthlyProfit = () => {
       }
 
       // Fetch agency reservation details with TRY converted amount
-      // company_amount = Acentadan Alınacak Tutar = Gelir (what agency pays to company)
+      // customer_price = Müşterinin acentaya ödediği fiyat = Acenta Geliri
       let agencyDetails: Record<string, { 
         agencyIncome: number;
         originalAmount: number; 
@@ -134,7 +134,7 @@ const AdminMonthlyProfit = () => {
         exchangeRate: number | null;
         needsConversion: boolean;
         reservationId: string;
-        hasCompanyAmount: boolean;
+        hasCustomerPrice: boolean;
       }> = {};
       
       let conversionsNeeded = 0;
@@ -142,43 +142,43 @@ const AdminMonthlyProfit = () => {
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
           .from("agency_reservation_details")
-          .select("reservation_id, company_amount, agency_price_currency, exchange_rate_used")
+          .select("reservation_id, customer_price, agency_price_currency, exchange_rate_used")
           .in("reservation_id", reservationIds);
 
         if (!agencyError && agencyData) {
           agencyDetails = agencyData.reduce((acc, item) => {
             let agencyIncome = 0;
             let needsConversion = false;
-            // company_amount = Acentadan Alınacak Tutar = Gelir
-            const companyAmount = item.company_amount || 0;
-            const hasCompanyAmount = companyAmount > 0;
+            // customer_price = Müşterinin acentaya ödediği fiyat = Acenta Geliri
+            const customerPrice = item.customer_price || 0;
+            const hasCustomerPrice = customerPrice > 0;
             
-            // Acenta Geliri = company_amount (Acentadan Alınacak Tutar)
-            // Eğer TRY ise direkt company_amount kullan
+            // Acenta Geliri = customer_price (Müşterinin acentaya ödediği fiyat)
+            // Eğer TRY ise direkt customer_price kullan
             // Eğer döviz ise ve kur varsa çevir, yoksa çeviri gerekli
             if (item.agency_price_currency === 'TRY') {
-              agencyIncome = companyAmount;
-            } else if (item.exchange_rate_used && companyAmount > 0) {
+              agencyIncome = customerPrice;
+            } else if (item.exchange_rate_used && customerPrice > 0) {
               // Döviz ve kur varsa çevir
-              agencyIncome = companyAmount * item.exchange_rate_used;
+              agencyIncome = customerPrice * item.exchange_rate_used;
             } else {
               // Needs conversion - foreign currency without exchange rate
-              needsConversion = companyAmount > 0;
+              needsConversion = customerPrice > 0;
               agencyIncome = 0; // Will be converted
               if (needsConversion) conversionsNeeded++;
             }
             
             acc[item.reservation_id] = { 
               agencyIncome,
-              originalAmount: companyAmount,
+              originalAmount: customerPrice,
               currency: item.agency_price_currency || 'TRY',
               exchangeRate: item.exchange_rate_used || null,
               needsConversion,
               reservationId: item.reservation_id,
-              hasCompanyAmount
+              hasCustomerPrice
             };
             return acc;
-          }, {} as Record<string, { agencyIncome: number; originalAmount: number; currency: string; exchangeRate: number | null; needsConversion: boolean; reservationId: string; hasCompanyAmount: boolean }>);
+          }, {} as Record<string, { agencyIncome: number; originalAmount: number; currency: string; exchangeRate: number | null; needsConversion: boolean; reservationId: string; hasCustomerPrice: boolean }>);
         }
       }
       
@@ -202,7 +202,7 @@ const AdminMonthlyProfit = () => {
         });
       });
 
-      // Process reservations - only include those with BOTH driver_earning AND company_amount
+      // Process reservations - only include those with BOTH driver_earning AND customer_price
       reservations?.forEach(res => {
         if (!res.pickup_date) return;
         
@@ -210,8 +210,8 @@ const AdminMonthlyProfit = () => {
         
         // CRITICAL: Only include reservations that have BOTH:
         // 1. driver_earning (Bütçe) > 0
-        // 2. company_amount (Acenta Fiyatı) > 0
-        if (!agencyInfo?.hasCompanyAmount) return;
+        // 2. customer_price (Müşteri Fiyatı) > 0
+        if (!agencyInfo?.hasCustomerPrice) return;
         
         const dateStr = res.pickup_date;
         const dayData = dailyMap.get(dateStr);
