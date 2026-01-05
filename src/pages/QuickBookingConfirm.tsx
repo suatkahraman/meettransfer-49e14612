@@ -63,6 +63,27 @@ export default function QuickBookingConfirm() {
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "payment_link">("cash");
 
   const token = searchParams.get("token");
+  const urlHasReturn = searchParams.get("hasReturn") === "true";
+  const urlReturnDate = searchParams.get("returnDate") || "";
+  const urlReturnTime = searchParams.get("returnTime") || "";
+  const urlPromoCode = searchParams.get("promoCode") || "";
+
+  // Pre-fill return trip and promo code from URL params
+  useEffect(() => {
+    if (urlHasReturn) {
+      setHasReturnTrip(true);
+      setReturnTripData({
+        date: urlReturnDate,
+        time: urlReturnTime,
+      });
+    }
+    if (urlPromoCode) {
+      setPromoCode(urlPromoCode);
+      if (urlPromoCode.toLowerCase() === VALID_PROMO_CODE.toLowerCase()) {
+        setIsPromoCodeValid(true);
+      }
+    }
+  }, [urlHasReturn, urlReturnDate, urlReturnTime, urlPromoCode]);
 
   useEffect(() => {
     if (token) {
@@ -665,7 +686,7 @@ export default function QuickBookingConfirm() {
                     {t("qbReturnTransfer")}
                     {isPromoCodeValid && (
                       <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
-                        40% OFF
+                        30% OFF
                       </span>
                     )}
                   </span>
