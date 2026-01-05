@@ -526,7 +526,7 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
     setTimeout(() => printWindow.print(), 300);
   };
 
-  const handleShareWhatsApp = (invoice?: SavedInvoice) => {
+  const handleShareWhatsApp = async (invoice?: SavedInvoice) => {
     const inv = invoice || { 
       invoice_number: invoiceNumber, 
       company_name: companyName, 
@@ -538,10 +538,11 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
     };
 
     const t = INVOICE_TRANSLATIONS[selectedLanguage];
-    const currencyToUse = inv.currency || selectedCurrency;
     const dateLocale = getDateLocale(selectedLanguage);
+    const isRTL = selectedLanguage === 'ar';
+    const currencyToUse = inv.currency || selectedCurrency;
 
-    const formatWhatsAppDate = (dateStr: string) => {
+    const formatExportDate = (dateStr: string) => {
       if (!dateStr) return '-';
       try {
         return format(new Date(dateStr), 'dd.MM.yyyy', { locale: dateLocale });
@@ -550,36 +551,264 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
       }
     };
 
-    // Create text message for WhatsApp
-    let message = `*${t.invoiceTitle}*\n`;
-    message += `━━━━━━━━━━━━━━━━\n`;
-    message += `📄 ${t.invoiceNo}: ${inv.invoice_number}\n`;
-    message += `📅 ${t.issueDate}: ${format(new Date(inv.created_at), 'dd.MM.yyyy', { locale: dateLocale })}\n\n`;
-    
-    message += `*${t.billedTo}:*\n`;
-    message += `🏢 ${inv.company_name}\n`;
-    if (inv.company_address) {
-      message += `📍 ${inv.company_address}\n`;
-    }
-    message += `\n`;
-    
-    message += `*${t.transferDetails}:*\n`;
-    message += `━━━━━━━━━━━━━━━━\n`;
-    
-    inv.transfer_lines.forEach((line, index) => {
-      message += `\n*${index + 1}. ${line.passengerName || '-'}*\n`;
-      message += `📅 ${formatWhatsAppDate(line.date)} ${line.time ? `⏰ ${line.time}` : ''}\n`;
-      message += `📍 ${line.pickup || '-'} → ${line.dropoff || '-'}\n`;
-      message += `💰 ${formatCurrencyAmount(Number(line.price) || 0, currencyToUse)}\n`;
-    });
-    
-    message += `\n━━━━━━━━━━━━━━━━\n`;
-    message += `*${t.grandTotal}: ${formatCurrencyAmount(inv.total_amount, currencyToUse)}*\n\n`;
-    message += `_Meet Travel Transfer_\n`;
-    message += `_${t.companySubtitle}_`;
+    // Generate HTML for PDF
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html dir="${isRTL ? 'rtl' : 'ltr'}">
+        <head>
+          <title>${t.invoiceTitle} - ${inv.invoice_number}</title>
+          <style>
+            @page { size: A4; margin: 15mm 20mm; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              color: #1a1a1a;
+              background: white;
+              padding: 20px;
+              direction: ${isRTL ? 'rtl' : 'ltr'};
+            }
+            .invoice-container { max-width: 800px; margin: 0 auto; }
+            .invoice-header { 
+              text-align: center; 
+              margin-bottom: 30px;
+              border-bottom: 3px solid #c9a961;
+              padding-bottom: 25px;
+            }
+            .logo { max-width: 100px; margin-bottom: 10px; }
+            .company-title { 
+              font-size: 28px; 
+              font-weight: bold; 
+              color: #1a1a1a;
+              letter-spacing: 2px;
+            }
+            .company-subtitle {
+              font-size: 12px;
+              color: #888;
+              margin-top: 5px;
+              letter-spacing: 1px;
+            }
+            .invoice-meta {
+              display: flex;
+              justify-content: center;
+              gap: 60px;
+              margin-top: 20px;
+            }
+            .invoice-meta-item { text-align: center; }
+            .invoice-meta-label {
+              font-size: 10px;
+              color: #888;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .invoice-meta-value {
+              font-size: 15px;
+              font-weight: 600;
+              color: #1a1a1a;
+              margin-top: 3px;
+            }
+            .section { margin-bottom: 30px; }
+            .section-title { 
+              font-size: 11px; 
+              font-weight: 700; 
+              color: #c9a961;
+              margin-bottom: 12px;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .client-info { 
+              padding: 18px;
+              background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+              border-radius: 8px;
+              border-${isRTL ? 'right' : 'left'}: 4px solid #c9a961;
+            }
+            .client-name { font-weight: 700; font-size: 17px; color: #1a1a1a; }
+            .client-address { color: #555; margin-top: 8px; white-space: pre-line; font-size: 13px; line-height: 1.6; }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin-top: 12px;
+              font-size: 12px;
+            }
+            th { 
+              background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+              color: white; 
+              padding: 12px 10px; 
+              text-align: ${isRTL ? 'right' : 'left'};
+              font-size: 10px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            th:last-child { text-align: ${isRTL ? 'left' : 'right'}; }
+            td { 
+              padding: 12px 10px; 
+              border-bottom: 1px solid #eee;
+              vertical-align: top;
+            }
+            tr:nth-child(even) { background: #fafafa; }
+            .date-cell { white-space: nowrap; font-size: 11px; }
+            .date-main { color: #1a1a1a; font-weight: 500; }
+            .date-time { color: #888; font-size: 10px; }
+            .price-cell { text-align: ${isRTL ? 'left' : 'right'}; font-weight: 600; white-space: nowrap; color: #1a1a1a; }
+            .total-section {
+              margin-top: 25px;
+              padding-top: 20px;
+            }
+            .total-row { 
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              background: linear-gradient(135deg, #c9a961 0%, #b8954d 100%);
+              color: white;
+              padding: 18px 25px;
+              border-radius: 8px;
+              font-size: 20px;
+              font-weight: bold;
+              box-shadow: 0 4px 15px rgba(201, 169, 97, 0.3);
+            }
+            .footer {
+              margin-top: 50px;
+              padding-top: 20px;
+              border-top: 1px solid #eee;
+              text-align: center;
+              color: #888;
+              font-size: 10px;
+            }
+            .footer-company {
+              font-weight: 600;
+              color: #666;
+              margin-bottom: 5px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-container">
+            <div class="invoice-header">
+              <img src="${logo}" class="logo" alt="Logo" />
+              <div class="company-title">MEET TRAVEL TRANSFER</div>
+              <div class="company-subtitle">${t.companySubtitle}</div>
+              <div class="invoice-meta">
+                <div class="invoice-meta-item">
+                  <div class="invoice-meta-label">${t.invoiceNo}</div>
+                  <div class="invoice-meta-value">${inv.invoice_number}</div>
+                </div>
+                <div class="invoice-meta-item">
+                  <div class="invoice-meta-label">${t.issueDate}</div>
+                  <div class="invoice-meta-value">${format(new Date(inv.created_at), 'dd.MM.yyyy', { locale: dateLocale })}</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="section">
+              <div class="section-title">${t.billedTo}</div>
+              <div class="client-info">
+                <div class="client-name">${inv.company_name || '-'}</div>
+                <div class="client-address">${inv.company_address || '-'}</div>
+              </div>
+            </div>
 
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+            <div class="section">
+              <div class="section-title">${t.transferDetails}</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 15%;">${t.dateTime}</th>
+                    <th style="width: 20%;">${t.passenger}</th>
+                    <th style="width: 25%;">${t.pickup}</th>
+                    <th style="width: 25%;">${t.dropoff}</th>
+                    <th style="width: 15%;">${t.price}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${inv.transfer_lines.map(line => `
+                    <tr>
+                      <td class="date-cell">
+                        <div class="date-main">${formatExportDate(line.date)}</div>
+                        <div class="date-time">${line.time || '-'}</div>
+                      </td>
+                      <td><strong>${line.passengerName || '-'}</strong></td>
+                      <td>${line.pickup || '-'}</td>
+                      <td>${line.dropoff || '-'}</td>
+                      <td class="price-cell">${formatCurrencyAmount(Number(line.price) || 0, currencyToUse)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="total-section">
+              <div class="total-row">
+                <span>${t.grandTotal}</span>
+                <span>${formatCurrencyAmount(inv.total_amount, currencyToUse)}</span>
+              </div>
+            </div>
+
+            <div class="footer">
+              <div class="footer-company">Meet Travel Transfer</div>
+              ${t.footerNote}
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    // Check if Web Share API with files is supported
+    if (navigator.share && navigator.canShare) {
+      try {
+        // Create a hidden iframe to render and print to PDF
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'absolute';
+        iframe.style.left = '-9999px';
+        iframe.style.width = '800px';
+        iframe.style.height = '1200px';
+        document.body.appendChild(iframe);
+        
+        iframe.contentDocument?.write(htmlContent);
+        iframe.contentDocument?.close();
+
+        // Wait for content to load
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Use print-to-PDF via canvas approach - create blob from HTML
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const file = new File([blob], `Fatura-${inv.invoice_number}.html`, { type: 'text/html' });
+        
+        document.body.removeChild(iframe);
+
+        // Check if we can share files
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `Fatura - ${inv.invoice_number}`,
+            text: `${inv.company_name} - ${formatCurrencyAmount(inv.total_amount, currencyToUse)}`
+          });
+          return;
+        }
+      } catch (error) {
+        console.log('File share not supported, falling back to text share');
+      }
+    }
+
+    // Fallback: Open PDF in new window and prompt to save/share
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.focus();
+      
+      // Add a message at the top for the user
+      const shareMessage = document.createElement('div');
+      shareMessage.innerHTML = `
+        <div style="background: #25D366; color: white; padding: 15px; text-align: center; font-family: sans-serif; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;">
+          <strong>PDF olarak kaydet:</strong> Ctrl+P (veya Cmd+P) → "PDF olarak kaydet" seçin → Sonra WhatsApp'ta paylaşın
+          <button onclick="this.parentElement.remove(); window.print();" style="margin-left: 20px; background: white; color: #25D366; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            PDF Oluştur
+          </button>
+        </div>
+      `;
+      printWindow.document.body.insertBefore(shareMessage, printWindow.document.body.firstChild);
+    }
+
+    toast.info('PDF olarak kaydedin ve WhatsApp\'ta paylaşın');
   };
 
   const handleDelete = async (id: string) => {
