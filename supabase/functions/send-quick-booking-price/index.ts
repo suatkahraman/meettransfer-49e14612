@@ -14,6 +14,11 @@ interface SendPriceRequest {
   price: number;
   currency: string;
   customer_email?: string;
+  // Return trip info (optional)
+  return_price?: number;
+  return_date?: string;
+  return_time?: string;
+  promo_code?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -27,8 +32,16 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { quick_booking_id, price, currency, customer_email }: SendPriceRequest =
-      await req.json();
+    const { 
+      quick_booking_id, 
+      price, 
+      currency, 
+      customer_email,
+      return_price,
+      return_date,
+      return_time,
+      promo_code
+    }: SendPriceRequest = await req.json();
 
     console.log("Sending price notification for quick booking:", quick_booking_id);
 
@@ -75,6 +88,16 @@ const handler = async (req: Request): Promise<Response> => {
       day: "numeric",
     });
 
+    // Format return date if exists
+    const formattedReturnDate = return_date 
+      ? new Date(return_date).toLocaleDateString("en-GB", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : null;
+
     // Vehicle type labels
     const vehicleLabels: Record<string, string> = {
       "mercedes-vito": "Mercedes Vito",
@@ -85,6 +108,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     const vehicleName = vehicleLabels[booking.vehicle_type] || booking.vehicle_type;
 
+    // Calculate discount if promo code exists
+    const hasReturnTrip = return_price !== undefined && return_date && return_time;
+    const originalReturnPrice = hasReturnTrip && promo_code && return_price !== undefined
+      ? Math.round(return_price / 0.7) // Original price before 30% discount
+      : null;
+    const discountAmount = originalReturnPrice && return_price !== undefined
+      ? originalReturnPrice - return_price
+      : null;
+
+    // Calculate total
+    const totalPrice = hasReturnTrip ? price + return_price : price;
+
     const toEmail = customer_email ?? booking.customer_email ?? null;
     let emailSent = false;
     let usedFrom: string | null = null;
@@ -94,25 +129,72 @@ const handler = async (req: Request): Promise<Response> => {
 
       const fromEmail = "Meet Transfer <info@meettransfer.app>";
 
+      // Build return trip text for plain text email
+      const returnTripText = hasReturnTrip ? `
+
+🔄 Return Transfer:
+- From: ${booking.dropoff}
+- To: ${booking.pickup}
+- Date: ${formattedReturnDate}
+- Time: ${return_time}
+${promo_code && originalReturnPrice ? `- Original Price: ${currencySymbol}${originalReturnPrice}` : ''}
+${promo_code && discountAmount ? `- Discount (30%): -${currencySymbol}${discountAmount}` : ''}
+- Price: ${currencySymbol}${return_price}
+${promo_code ? `- Promo Code: ${promo_code} ✓` : ''}
+
+Total: ${currencySymbol}${totalPrice}
+${promo_code && discountAmount ? `You save: ${currencySymbol}${discountAmount}` : ''}
+` : '';
+
+      // Build return trip HTML
+      const returnTripHtml = hasReturnTrip ? `
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#e8f5e9;border-radius:8px;margin:20px 0;">
+          <tr><td style="padding:15px;">
+            <p style="margin:0 0 10px;color:#2e7d32;font-weight:bold;">🔄 Return Transfer</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>From:</strong> ${booking.dropoff}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>To:</strong> ${booking.pickup}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Date:</strong> ${formattedReturnDate}</p>
+            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Time:</strong> ${return_time}</p>
+            ${promo_code && originalReturnPrice ? `
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff;border-radius:6px;margin:10px 0;border:1px dashed #2e7d32;">
+              <tr><td style="padding:12px;">
+                <p style="margin:0 0 5px;color:#666;font-size:13px;text-decoration:line-through;">Original: ${currencySymbol}${originalReturnPrice}</p>
+                <p style="margin:0 0 5px;color:#2e7d32;font-size:14px;font-weight:bold;">🎉 Discount (30%): -${currencySymbol}${discountAmount}</p>
+                <p style="margin:0;color:#1a365d;font-size:16px;font-weight:bold;">Final Price: ${currencySymbol}${return_price}</p>
+                <p style="margin:8px 0 0;color:#2e7d32;font-size:12px;background-color:#e8f5e9;padding:4px 8px;border-radius:4px;display:inline-block;">✓ Promo Code: ${promo_code}</p>
+              </td></tr>
+            </table>
+            ` : `<p style="margin:5px 0;color:#333;font-size:14px;"><strong>Price:</strong> ${currencySymbol}${return_price}</p>`}
+          </td></tr>
+        </table>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#1a365d;border-radius:8px;margin:20px 0;">
+          <tr><td style="padding:15px;text-align:center;">
+            <p style="margin:0;color:#fff;font-size:24px;font-weight:bold;">Total: ${currencySymbol}${totalPrice}</p>
+            ${promo_code && discountAmount ? `<p style="margin:8px 0 0;color:#48bb78;font-size:14px;">🎉 You save ${currencySymbol}${discountAmount} with promo code!</p>` : ''}
+          </td></tr>
+        </table>
+      ` : '';
+
       try {
         const emailResponse = await resend.emails.send({
           from: fromEmail,
           to: [toEmail],
           reply_to: "info@meettransfer.app",
-          subject: `Transfer Quote - ${pickupDate}`,
+          subject: hasReturnTrip 
+            ? `Transfer Quote (Round Trip) - ${pickupDate}` 
+            : `Transfer Quote - ${pickupDate}`,
           text: `
 Meet Transfer - Your Transfer Quote
 
-Price: ${currencySymbol}${price}
-
-Transfer Details:
+${hasReturnTrip ? '➡️ Outbound Transfer:' : 'Transfer Details:'}
 - From: ${booking.pickup}
 - To: ${booking.dropoff}
 - Date: ${pickupDate}
 - Time: ${booking.pickup_time}
 - Vehicle: ${vehicleName}
 - Passengers: ${booking.passengers}
-
+- Price: ${currencySymbol}${price}
+${returnTripText}
 To confirm your booking, please visit:
 ${confirmUrl}
 
@@ -139,12 +221,14 @@ Meet Transfer Team
     <tr>
       <td style="background-color:#1a365d;padding:20px;text-align:center;">
         <h1 style="color:#ffffff;margin:0;font-size:24px;">Meet Transfer</h1>
+        ${hasReturnTrip ? '<p style="color:#48bb78;margin:5px 0 0;font-size:14px;">Round Trip Quote</p>' : ''}
       </td>
     </tr>
     <tr>
       <td style="padding:30px 20px;">
         <p style="color:#333;font-size:16px;margin:0 0 20px;">Thank you for your transfer request. Here is your quote:</p>
         
+        ${!hasReturnTrip ? `
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#48bb78;border-radius:8px;margin:20px 0;">
           <tr>
             <td style="padding:20px;text-align:center;">
@@ -153,18 +237,22 @@ Meet Transfer Team
             </td>
           </tr>
         </table>
+        ` : ''}
 
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7fafc;border-radius:8px;margin:20px 0;">
           <tr><td style="padding:15px;">
-            <p style="margin:0 0 10px;color:#1a365d;font-weight:bold;">Transfer Details</p>
+            <p style="margin:0 0 10px;color:#1a365d;font-weight:bold;">${hasReturnTrip ? '➡️ Outbound Transfer' : 'Transfer Details'}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>From:</strong> ${booking.pickup}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>To:</strong> ${booking.dropoff}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Date:</strong> ${pickupDate}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Time:</strong> ${booking.pickup_time}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Vehicle:</strong> ${vehicleName}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Passengers:</strong> ${booking.passengers}</p>
+            ${hasReturnTrip ? `<p style="margin:10px 0 0;color:#1a365d;font-size:16px;font-weight:bold;">Price: ${currencySymbol}${price}</p>` : ''}
           </td></tr>
         </table>
+
+        ${returnTripHtml}
 
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>

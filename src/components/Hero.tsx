@@ -320,6 +320,11 @@ export const Hero = () => {
         customer_notes: customerNotes.trim() || null,
         customer_phone: customerPhone.trim() || null,
         customer_email: customerEmail.trim() || null,
+        // Return trip info
+        has_return_trip: hasReturnTrip && returnDate && returnTime ? true : false,
+        return_date: hasReturnTrip && returnDate ? format(returnDate, "yyyy-MM-dd") : null,
+        return_time: hasReturnTrip && returnTime ? returnTime : null,
+        promo_code: hasReturnTrip && isPromoCodeValid && promoCode ? promoCode : null,
       };
       
       // If user is an agency, link the request to the agency
