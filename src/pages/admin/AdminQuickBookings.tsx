@@ -91,6 +91,12 @@ interface QuickBookingRequest {
   agency_id: string | null;
   agency_user_id: string | null;
   agency?: { agency_name: string } | null;
+  // Return trip fields
+  has_return_trip: boolean | null;
+  return_date: string | null;
+  return_time: string | null;
+  return_price: number | null;
+  promo_code: string | null;
 }
 
 const vehicleLabels: Record<string, string> = {
@@ -120,6 +126,7 @@ export default function AdminQuickBookings() {
   const [priceDialogOpen, setPriceDialogOpen] = useState(false);
   const [paymentLinkDialogOpen, setPaymentLinkDialogOpen] = useState(false);
   const [price, setPrice] = useState("");
+  const [returnPrice, setReturnPrice] = useState("");
   const [currency, setCurrency] = useState("EUR");
   const [paymentLink, setPaymentLink] = useState("");
   const [sendingPrice, setSendingPrice] = useState(false);
@@ -217,9 +224,23 @@ export default function AdminQuickBookings() {
       return;
     }
 
+    // Check if return trip exists and return price is required
+    if (selectedRequest.has_return_trip && !returnPrice) {
+      toast.error("Dönüş transferi için fiyat giriniz");
+      return;
+    }
+
     setSendingPrice(true);
     try {
       const priceValue = parseFloat(price);
+      const returnPriceValue = returnPrice ? parseFloat(returnPrice) : null;
+      
+      // Calculate discounted return price if promo code exists
+      let finalReturnPrice = returnPriceValue;
+      if (returnPriceValue && selectedRequest.promo_code) {
+        // Apply 30% discount
+        finalReturnPrice = Math.round(returnPriceValue * 0.7);
+      }
       
       const { error: updateError } = await supabase
         .from("quick_booking_requests")
@@ -227,6 +248,7 @@ export default function AdminQuickBookings() {
           price: priceValue,
           price_currency: currency,
           status: "price_sent",
+          return_price: finalReturnPrice,
         })
         .eq("id", selectedRequest.id);
 
@@ -252,6 +274,11 @@ export default function AdminQuickBookings() {
               price: priceValue,
               currency,
               customer_email: selectedRequest.customer_email ?? undefined,
+              // Return trip info for email
+              return_price: finalReturnPrice ?? undefined,
+              return_date: selectedRequest.return_date ?? undefined,
+              return_time: selectedRequest.return_time ?? undefined,
+              promo_code: selectedRequest.promo_code ?? undefined,
             },
           }
         );
@@ -271,6 +298,7 @@ export default function AdminQuickBookings() {
       setPriceDialogOpen(false);
       setDetailDialogOpen(false);
       setPrice("");
+      setReturnPrice("");
       setSelectedRequest(null);
       fetchRequests();
     } catch (error: any) {
@@ -529,6 +557,13 @@ export default function AdminQuickBookings() {
                             <div className="flex flex-col max-w-[200px]">
                               <span className="truncate text-sm">{request.pickup}</span>
                               <span className="truncate text-xs text-muted-foreground">→ {request.dropoff}</span>
+                              {request.has_return_trip && (
+                                <Badge variant="secondary" className="w-fit mt-1 text-xs bg-green-100 text-green-700 border-green-200">
+                                  <RefreshCw className="h-3 w-3 mr-1" />
+                                  Dönüş
+                                  {request.promo_code && " %30"}
+                                </Badge>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -609,6 +644,13 @@ export default function AdminQuickBookings() {
                           <MapPin className="h-3 w-3 text-accent flex-shrink-0" />
                           <span className="truncate">{request.dropoff}</span>
                         </div>
+                        {request.has_return_trip && (
+                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 border-green-200 mt-1">
+                            <RefreshCw className="h-3 w-3 mr-1" />
+                            Dönüş Transfer
+                            {request.promo_code && " (%30 İndirim)"}
+                          </Badge>
+                        )}
                       </div>
 
                       <div className="flex items-center justify-between pt-2 border-t">
@@ -714,16 +756,69 @@ export default function AdminQuickBookings() {
                   </Card>
                 </div>
 
-                {/* Price Info */}
-                {selectedRequest.price && (
+                {/* Return Trip Info */}
+                {selectedRequest.has_return_trip && (
                   <Card className="bg-green-50 dark:bg-green-900/20 border-green-200">
                     <CardContent className="p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <RefreshCw className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-green-700">Dönüş Transferi</span>
+                        {selectedRequest.promo_code && (
+                          <Badge variant="secondary" className="bg-green-200 text-green-800 text-xs">
+                            {selectedRequest.promo_code} - %30 İndirim
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Tarih</p>
+                          <p className="font-medium">
+                            {selectedRequest.return_date 
+                              ? format(parseISO(selectedRequest.return_date), "dd MMM yyyy", { locale: tr })
+                              : "-"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Saat</p>
+                          <p className="font-medium">{selectedRequest.return_time || "-"}</p>
+                        </div>
+                      </div>
+                      {selectedRequest.return_price && (
+                        <div className="mt-2 pt-2 border-t border-green-200">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Dönüş Fiyatı</span>
+                            <span className="font-bold text-green-600">
+                              {selectedRequest.return_price} {selectedRequest.price_currency}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Price Info */}
+                {selectedRequest.price && (
+                  <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200">
+                    <CardContent className="p-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Fiyat</span>
+                        <span className="text-sm text-muted-foreground">
+                          {selectedRequest.has_return_trip ? "Gidiş Fiyatı" : "Fiyat"}
+                        </span>
                         <span className="text-lg font-bold text-green-600">
                           {selectedRequest.price} {selectedRequest.price_currency}
                         </span>
                       </div>
+                      {selectedRequest.has_return_trip && selectedRequest.return_price && (
+                        <div className="mt-2 pt-2 border-t">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Toplam</span>
+                            <span className="text-lg font-bold text-primary">
+                              {selectedRequest.price + selectedRequest.return_price} {selectedRequest.price_currency}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       {selectedRequest.payment_method && (
                         <div className="flex items-center gap-2 mt-2">
                           <Badge variant="outline" className={selectedRequest.payment_method === "payment_link" ? "text-blue-600 border-blue-600" : "text-green-600 border-green-600"}>
@@ -867,23 +962,42 @@ export default function AdminQuickBookings() {
 
       {/* Send Price Dialog */}
       <Dialog open={priceDialogOpen} onOpenChange={setPriceDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Fiyat Gönder</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Fiyat</Label>
+            {/* Return trip info badge */}
+            {selectedRequest?.has_return_trip && (
+              <div className="bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-medium mb-2">
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Dönüş Transferi Var</span>
+                  {selectedRequest.promo_code && (
+                    <Badge variant="secondary" className="bg-green-200 text-green-800">
+                      {selectedRequest.promo_code} - %30 İndirim
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <p>Tarih: {selectedRequest.return_date ? format(parseISO(selectedRequest.return_date), "dd MMM yyyy", { locale: tr }) : "-"}</p>
+                  <p>Saat: {selectedRequest.return_time || "-"}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Outbound price */}
+            <div className="space-y-2">
+              <Label className="font-medium">
+                {selectedRequest?.has_return_trip ? "➡️ Gidiş Fiyatı" : "Fiyat"}
+              </Label>
+              <div className="grid grid-cols-2 gap-4">
                 <Input
                   type="number"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="0"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Para Birimi</Label>
                 <Select value={currency} onValueChange={setCurrency}>
                   <SelectTrigger>
                     <SelectValue />
@@ -900,9 +1014,49 @@ export default function AdminQuickBookings() {
               </div>
             </div>
 
+            {/* Return price - only shown if has return trip */}
+            {selectedRequest?.has_return_trip && (
+              <div className="space-y-2">
+                <Label className="font-medium flex items-center gap-2">
+                  🔄 Dönüş Fiyatı
+                  {selectedRequest.promo_code && (
+                    <span className="text-xs text-green-600 font-normal">(%30 indirim otomatik uygulanacak)</span>
+                  )}
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={returnPrice}
+                    onChange={(e) => setReturnPrice(e.target.value)}
+                    placeholder="Normal fiyatı girin"
+                    className="flex-1"
+                  />
+                  <span className="text-muted-foreground">{currency}</span>
+                </div>
+                {returnPrice && selectedRequest.promo_code && (
+                  <div className="bg-green-50 dark:bg-green-900/20 rounded p-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground line-through">Normal: {returnPrice} {currency}</span>
+                      <span className="text-green-600 font-medium">
+                        İndirimli: {Math.round(parseFloat(returnPrice) * 0.7)} {currency}
+                      </span>
+                    </div>
+                    <div className="text-green-700 font-medium mt-1">
+                      Toplam: {parseFloat(price || "0") + Math.round(parseFloat(returnPrice) * 0.7)} {currency}
+                    </div>
+                  </div>
+                )}
+                {returnPrice && !selectedRequest.promo_code && (
+                  <div className="text-sm text-muted-foreground">
+                    Toplam: {parseFloat(price || "0") + parseFloat(returnPrice || "0")} {currency}
+                  </div>
+                )}
+              </div>
+            )}
+
             <Button
               onClick={sendPrice}
-              disabled={sendingPrice || !price}
+              disabled={sendingPrice || !price || (selectedRequest?.has_return_trip && !returnPrice)}
               className="w-full"
             >
               {sendingPrice ? (

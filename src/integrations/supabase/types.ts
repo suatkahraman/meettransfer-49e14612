@@ -836,6 +836,7 @@ export type Database = {
           customer_session_id: string
           dropoff: string
           expires_at: string | null
+          has_return_trip: boolean | null
           id: string
           passengers: number
           payment_link: string | null
@@ -845,6 +846,10 @@ export type Database = {
           pickup_time: string
           price: number | null
           price_currency: string | null
+          promo_code: string | null
+          return_date: string | null
+          return_price: number | null
+          return_time: string | null
           status: string
           updated_at: string | null
           vehicle_type: string
@@ -863,6 +868,7 @@ export type Database = {
           customer_session_id: string
           dropoff: string
           expires_at?: string | null
+          has_return_trip?: boolean | null
           id?: string
           passengers?: number
           payment_link?: string | null
@@ -872,6 +878,10 @@ export type Database = {
           pickup_time: string
           price?: number | null
           price_currency?: string | null
+          promo_code?: string | null
+          return_date?: string | null
+          return_price?: number | null
+          return_time?: string | null
           status?: string
           updated_at?: string | null
           vehicle_type: string
@@ -890,6 +900,7 @@ export type Database = {
           customer_session_id?: string
           dropoff?: string
           expires_at?: string | null
+          has_return_trip?: boolean | null
           id?: string
           passengers?: number
           payment_link?: string | null
@@ -899,6 +910,10 @@ export type Database = {
           pickup_time?: string
           price?: number | null
           price_currency?: string | null
+          promo_code?: string | null
+          return_date?: string | null
+          return_price?: number | null
+          return_time?: string | null
           status?: string
           updated_at?: string | null
           vehicle_type?: string
