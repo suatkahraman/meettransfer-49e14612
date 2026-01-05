@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { tr, enUS, de, fr, ar } from 'date-fns/locale';
-import { Plus, Printer, Trash2, FileDown, Save, History, ChevronLeft, Eye, Search, Globe, Coins, Share2, MessageCircle } from 'lucide-react';
+import { Plus, Printer, Trash2, FileDown, Save, History, ChevronLeft, Eye, Search, Globe, Coins, MessageCircle, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -181,6 +181,7 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
   const [loadingInvoices, setLoadingInvoices] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewingInvoice, setViewingInvoice] = useState<SavedInvoice | null>(null);
+  const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
 
   const fetchSavedInvoices = async () => {
     setLoadingInvoices(true);
@@ -247,22 +248,45 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
     }
 
     setSaving(true);
-    const { error } = await supabase.from('invoices').insert([{
-      invoice_number: invoiceNumber,
-      company_name: companyName,
-      company_address: companyAddress,
-      transfer_lines: JSON.parse(JSON.stringify(transferLines)),
-      total_amount: totalAmount,
-      currency: selectedCurrency,
-      created_by: user?.id
-    }]);
+    
+    if (editingInvoiceId) {
+      // Update existing invoice
+      const { error } = await supabase.from('invoices').update({
+        invoice_number: invoiceNumber,
+        company_name: companyName,
+        company_address: companyAddress,
+        transfer_lines: JSON.parse(JSON.stringify(transferLines)),
+        total_amount: totalAmount,
+        currency: selectedCurrency,
+      }).eq('id', editingInvoiceId);
 
-    if (error) {
-      toast.error('Fatura kaydedilemedi');
-      console.error(error);
+      if (error) {
+        toast.error('Fatura güncellenemedi');
+        console.error(error);
+      } else {
+        toast.success('Fatura güncellendi');
+        fetchSavedInvoices();
+        setEditingInvoiceId(null);
+      }
     } else {
-      toast.success('Fatura kaydedildi');
-      fetchSavedInvoices();
+      // Insert new invoice
+      const { error } = await supabase.from('invoices').insert([{
+        invoice_number: invoiceNumber,
+        company_name: companyName,
+        company_address: companyAddress,
+        transfer_lines: JSON.parse(JSON.stringify(transferLines)),
+        total_amount: totalAmount,
+        currency: selectedCurrency,
+        created_by: user?.id
+      }]);
+
+      if (error) {
+        toast.error('Fatura kaydedilemedi');
+        console.error(error);
+      } else {
+        toast.success('Fatura kaydedildi');
+        fetchSavedInvoices();
+      }
     }
     setSaving(false);
   };
@@ -579,11 +603,26 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
       { id: crypto.randomUUID(), date: '', time: '', passengerName: '', pickup: '', dropoff: '', price: 0 }
     ]);
     setViewingInvoice(null);
+    setEditingInvoiceId(null);
     setActiveTab('create');
   };
 
-  const loadInvoiceToEdit = (invoice: SavedInvoice) => {
+  const loadInvoiceToView = (invoice: SavedInvoice) => {
     setViewingInvoice(invoice);
+  };
+
+  const loadInvoiceToEdit = (invoice: SavedInvoice) => {
+    setInvoiceNumber(invoice.invoice_number);
+    setCompanyName(invoice.company_name);
+    setCompanyAddress(invoice.company_address || '');
+    setSelectedCurrency(invoice.currency);
+    setTransferLines(invoice.transfer_lines.map(line => ({
+      ...line,
+      id: line.id || crypto.randomUUID()
+    })));
+    setEditingInvoiceId(invoice.id);
+    setViewingInvoice(null);
+    setActiveTab('create');
   };
 
   const filteredInvoices = savedInvoices.filter(inv => 
@@ -607,8 +646,8 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="create" className="gap-2">
-              <Plus className="h-4 w-4" />
-              Yeni Fatura
+              {editingInvoiceId ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {editingInvoiceId ? 'Fatura Düzenle' : 'Yeni Fatura'}
             </TabsTrigger>
             <TabsTrigger value="history" className="gap-2">
               <History className="h-4 w-4" />
@@ -801,13 +840,21 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
 
             {/* Actions */}
             <div className="flex justify-between gap-2 pt-4 border-t mt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                İptal
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  İptal
+                </Button>
+                {editingInvoiceId && (
+                  <Button variant="ghost" onClick={resetForm} className="gap-1">
+                    <Plus className="h-4 w-4" />
+                    Yeni Fatura
+                  </Button>
+                )}
+              </div>
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={handleSave} disabled={saving} className="gap-2">
                   <Save className="h-4 w-4" />
-                  {saving ? 'Kaydediliyor...' : 'Kaydet'}
+                  {saving ? 'Kaydediliyor...' : editingInvoiceId ? 'Güncelle' : 'Kaydet'}
                 </Button>
                 <Button variant="outline" onClick={() => handleShareWhatsApp()} className="gap-2 bg-[#25D366] hover:bg-[#22c55e] text-white border-0">
                   <MessageCircle className="h-4 w-4" />
@@ -877,11 +924,15 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                     Sil
                   </Button>
                   <div className="flex gap-2 ml-auto">
-                    <Button variant="outline" onClick={() => handleShareWhatsApp(viewingInvoice)} className="gap-2 bg-[#25D366] hover:bg-[#22c55e] text-white border-0">
+                    <Button variant="secondary" size="sm" onClick={() => loadInvoiceToEdit(viewingInvoice)} className="gap-1">
+                      <Pencil className="h-4 w-4" />
+                      Düzenle
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleShareWhatsApp(viewingInvoice)} className="gap-1 bg-[#25D366] hover:bg-[#22c55e] text-white border-0">
                       <MessageCircle className="h-4 w-4" />
                       WhatsApp
                     </Button>
-                    <Button onClick={() => handleExport(viewingInvoice)} className="gap-2">
+                    <Button size="sm" onClick={() => handleExport(viewingInvoice)} className="gap-1">
                       <Printer className="h-4 w-4" />
                       PDF
                     </Button>
@@ -912,7 +963,7 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                         <div 
                           key={inv.id} 
                           className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                          onClick={() => loadInvoiceToEdit(inv)}
+                          onClick={() => loadInvoiceToView(inv)}
                         >
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
