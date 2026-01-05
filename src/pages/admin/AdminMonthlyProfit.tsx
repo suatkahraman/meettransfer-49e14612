@@ -82,6 +82,7 @@ const AdminMonthlyProfit = () => {
           customer_name,
           price,
           price_currency,
+          driver_earning,
           status,
           agency_id,
           driver_id,
@@ -204,8 +205,9 @@ const AdminMonthlyProfit = () => {
           
           const agencyInfo = agencyDetails[res.id];
           const agencyIncome = agencyInfo?.agencyIncome || 0;
-          const budget = res.price || 0; // Bütçe = Şoför ücreti
-          const driverExpense = res.price || 0;
+          // Bütçe = driver_earning (şoför gideri/iş maliyeti), price değil
+          const budget = res.driver_earning || 0;
+          const driverExpense = res.driver_earning || 0;
           
           dayData.agencyIncome += agencyIncome;
           dayData.budget += budget;
