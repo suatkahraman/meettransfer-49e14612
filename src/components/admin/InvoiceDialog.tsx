@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { tr } from 'date-fns/locale';
-import { Plus, Printer, Trash2, FileDown, Save, History, ChevronLeft, Eye, Search } from 'lucide-react';
+import { tr, enUS, de, fr, ar } from 'date-fns/locale';
+import { Plus, Printer, Trash2, FileDown, Save, History, ChevronLeft, Eye, Search, Globe, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -11,9 +11,11 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { CURRENCY_OPTIONS, getCurrencySymbol } from '@/lib/currency';
 import logo from '@/assets/meet-transfer-logo.webp';
 
 interface TransferLine {
@@ -42,6 +44,118 @@ interface InvoiceDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+type InvoiceLanguage = 'tr' | 'en' | 'de' | 'fr' | 'ar';
+
+const INVOICE_LANGUAGES = [
+  { value: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+  { value: 'en', label: 'English', flag: '🇬🇧' },
+  { value: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { value: 'fr', label: 'Français', flag: '🇫🇷' },
+  { value: 'ar', label: 'العربية', flag: '🇦🇪' },
+];
+
+const INVOICE_TRANSLATIONS: Record<InvoiceLanguage, {
+  invoiceTitle: string;
+  invoiceNo: string;
+  issueDate: string;
+  billedTo: string;
+  transferDetails: string;
+  dateTime: string;
+  passenger: string;
+  pickup: string;
+  dropoff: string;
+  price: string;
+  grandTotal: string;
+  companySubtitle: string;
+  footerNote: string;
+}> = {
+  tr: {
+    invoiceTitle: 'FATURA',
+    invoiceNo: 'Fatura No',
+    issueDate: 'Düzenleme Tarihi',
+    billedTo: 'Fatura Kesilen Firma',
+    transferDetails: 'Transfer Detayları',
+    dateTime: 'Tarih / Saat',
+    passenger: 'Yolcu',
+    pickup: 'Alış Noktası',
+    dropoff: 'Bırakış Noktası',
+    price: 'Ücret',
+    grandTotal: 'GENEL TOPLAM',
+    companySubtitle: 'VIP Transfer Hizmetleri',
+    footerNote: 'Bu belge bilgisayar ortamında oluşturulmuştur.'
+  },
+  en: {
+    invoiceTitle: 'INVOICE',
+    invoiceNo: 'Invoice No',
+    issueDate: 'Issue Date',
+    billedTo: 'Billed To',
+    transferDetails: 'Transfer Details',
+    dateTime: 'Date / Time',
+    passenger: 'Passenger',
+    pickup: 'Pickup Point',
+    dropoff: 'Drop-off Point',
+    price: 'Price',
+    grandTotal: 'GRAND TOTAL',
+    companySubtitle: 'VIP Transfer Services',
+    footerNote: 'This document was generated electronically.'
+  },
+  de: {
+    invoiceTitle: 'RECHNUNG',
+    invoiceNo: 'Rechnungsnr.',
+    issueDate: 'Ausstellungsdatum',
+    billedTo: 'Rechnungsempfänger',
+    transferDetails: 'Transfer Details',
+    dateTime: 'Datum / Zeit',
+    passenger: 'Passagier',
+    pickup: 'Abholpunkt',
+    dropoff: 'Absetzpunkt',
+    price: 'Preis',
+    grandTotal: 'GESAMTBETRAG',
+    companySubtitle: 'VIP Transfer Dienstleistungen',
+    footerNote: 'Dieses Dokument wurde elektronisch erstellt.'
+  },
+  fr: {
+    invoiceTitle: 'FACTURE',
+    invoiceNo: 'N° de facture',
+    issueDate: 'Date d\'émission',
+    billedTo: 'Facturer à',
+    transferDetails: 'Détails du transfert',
+    dateTime: 'Date / Heure',
+    passenger: 'Passager',
+    pickup: 'Point de prise en charge',
+    dropoff: 'Point de dépôt',
+    price: 'Prix',
+    grandTotal: 'TOTAL GÉNÉRAL',
+    companySubtitle: 'Services de transfert VIP',
+    footerNote: 'Ce document a été généré électroniquement.'
+  },
+  ar: {
+    invoiceTitle: 'فاتورة',
+    invoiceNo: 'رقم الفاتورة',
+    issueDate: 'تاريخ الإصدار',
+    billedTo: 'مفوتر إلى',
+    transferDetails: 'تفاصيل النقل',
+    dateTime: 'التاريخ / الوقت',
+    passenger: 'الراكب',
+    pickup: 'نقطة الالتقاط',
+    dropoff: 'نقطة الإنزال',
+    price: 'السعر',
+    grandTotal: 'المجموع الكلي',
+    companySubtitle: 'خدمات النقل VIP',
+    footerNote: 'تم إنشاء هذه الوثيقة إلكترونياً.'
+  }
+};
+
+const getDateLocale = (lang: InvoiceLanguage) => {
+  switch (lang) {
+    case 'en': return enUS;
+    case 'de': return de;
+    case 'fr': return fr;
+    case 'ar': return ar;
+    default: return tr;
+  }
+};
+
 const generateInvoiceNumber = () => {
   const date = new Date();
   const year = date.getFullYear();
@@ -57,6 +171,8 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
   const [invoiceNumber, setInvoiceNumber] = useState(generateInvoiceNumber);
   const [companyName, setCompanyName] = useState('');
   const [companyAddress, setCompanyAddress] = useState('');
+  const [selectedCurrency, setSelectedCurrency] = useState('EUR');
+  const [selectedLanguage, setSelectedLanguage] = useState<InvoiceLanguage>('tr');
   const [transferLines, setTransferLines] = useState<TransferLine[]>([
     { id: crypto.randomUUID(), date: '', time: '', passengerName: '', pickup: '', dropoff: '', price: 0 }
   ]);
@@ -110,12 +226,9 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
 
   const totalAmount = transferLines.reduce((sum, line) => sum + (Number(line.price) || 0), 0);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 2
-    }).format(amount);
+  const formatCurrencyAmount = (amount: number, currency: string = selectedCurrency) => {
+    const symbol = getCurrencySymbol(currency);
+    return `${symbol}${amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const formatDisplayDate = (dateStr: string) => {
@@ -140,7 +253,7 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
       company_address: companyAddress,
       transfer_lines: JSON.parse(JSON.stringify(transferLines)),
       total_amount: totalAmount,
-      currency: 'EUR',
+      currency: selectedCurrency,
       created_by: user?.id
     }]);
 
@@ -161,7 +274,22 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
       company_address: companyAddress, 
       transfer_lines: transferLines, 
       total_amount: totalAmount,
+      currency: selectedCurrency,
       created_at: new Date().toISOString()
+    };
+
+    const t = INVOICE_TRANSLATIONS[selectedLanguage];
+    const dateLocale = getDateLocale(selectedLanguage);
+    const isRTL = selectedLanguage === 'ar';
+    const currencyToUse = inv.currency || selectedCurrency;
+
+    const formatExportDate = (dateStr: string) => {
+      if (!dateStr) return '-';
+      try {
+        return format(new Date(dateStr), 'dd.MM.yyyy', { locale: dateLocale });
+      } catch {
+        return dateStr;
+      }
     };
 
     const printWindow = window.open('', '_blank');
@@ -169,9 +297,9 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
 
     printWindow.document.write(`
       <!DOCTYPE html>
-      <html>
+      <html dir="${isRTL ? 'rtl' : 'ltr'}">
         <head>
-          <title>Fatura - ${inv.invoice_number}</title>
+          <title>${t.invoiceTitle} - ${inv.invoice_number}</title>
           <style>
             @page { size: A4; margin: 15mm 20mm; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -180,6 +308,7 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
               color: #1a1a1a;
               background: white;
               padding: 20px;
+              direction: ${isRTL ? 'rtl' : 'ltr'};
             }
             .invoice-container { max-width: 800px; margin: 0 auto; }
             .invoice-header { 
@@ -233,7 +362,7 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
               padding: 18px;
               background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
               border-radius: 8px;
-              border-left: 4px solid #c9a961;
+              border-${isRTL ? 'right' : 'left'}: 4px solid #c9a961;
             }
             .client-name { font-weight: 700; font-size: 17px; color: #1a1a1a; }
             .client-address { color: #555; margin-top: 8px; white-space: pre-line; font-size: 13px; line-height: 1.6; }
@@ -247,12 +376,12 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
               background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
               color: white; 
               padding: 12px 10px; 
-              text-align: left;
+              text-align: ${isRTL ? 'right' : 'left'};
               font-size: 10px;
               text-transform: uppercase;
               letter-spacing: 0.5px;
             }
-            th:last-child { text-align: right; }
+            th:last-child { text-align: ${isRTL ? 'left' : 'right'}; }
             td { 
               padding: 12px 10px; 
               border-bottom: 1px solid #eee;
@@ -262,7 +391,7 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
             .date-cell { white-space: nowrap; font-size: 11px; }
             .date-main { color: #1a1a1a; font-weight: 500; }
             .date-time { color: #888; font-size: 10px; }
-            .price-cell { text-align: right; font-weight: 600; white-space: nowrap; color: #1a1a1a; }
+            .price-cell { text-align: ${isRTL ? 'left' : 'right'}; font-weight: 600; white-space: nowrap; color: #1a1a1a; }
             .total-section {
               margin-top: 25px;
               padding-top: 20px;
@@ -302,21 +431,21 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
             <div class="invoice-header">
               <img src="${logo}" class="logo" alt="Logo" />
               <div class="company-title">MEET TRAVEL TRANSFER</div>
-              <div class="company-subtitle">VIP Transfer Hizmetleri</div>
+              <div class="company-subtitle">${t.companySubtitle}</div>
               <div class="invoice-meta">
                 <div class="invoice-meta-item">
-                  <div class="invoice-meta-label">Fatura No</div>
+                  <div class="invoice-meta-label">${t.invoiceNo}</div>
                   <div class="invoice-meta-value">${inv.invoice_number}</div>
                 </div>
                 <div class="invoice-meta-item">
-                  <div class="invoice-meta-label">Düzenleme Tarihi</div>
-                  <div class="invoice-meta-value">${format(new Date(inv.created_at), 'dd.MM.yyyy', { locale: tr })}</div>
+                  <div class="invoice-meta-label">${t.issueDate}</div>
+                  <div class="invoice-meta-value">${format(new Date(inv.created_at), 'dd.MM.yyyy', { locale: dateLocale })}</div>
                 </div>
               </div>
             </div>
             
             <div class="section">
-              <div class="section-title">Fatura Kesilen Firma</div>
+              <div class="section-title">${t.billedTo}</div>
               <div class="client-info">
                 <div class="client-name">${inv.company_name || '-'}</div>
                 <div class="client-address">${inv.company_address || '-'}</div>
@@ -324,28 +453,28 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
             </div>
 
             <div class="section">
-              <div class="section-title">Transfer Detayları</div>
+              <div class="section-title">${t.transferDetails}</div>
               <table>
                 <thead>
                   <tr>
-                    <th style="width: 15%;">Tarih / Saat</th>
-                    <th style="width: 20%;">Yolcu</th>
-                    <th style="width: 25%;">Alış Noktası</th>
-                    <th style="width: 25%;">Bırakış Noktası</th>
-                    <th style="width: 15%;">Ücret</th>
+                    <th style="width: 15%;">${t.dateTime}</th>
+                    <th style="width: 20%;">${t.passenger}</th>
+                    <th style="width: 25%;">${t.pickup}</th>
+                    <th style="width: 25%;">${t.dropoff}</th>
+                    <th style="width: 15%;">${t.price}</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${inv.transfer_lines.map(line => `
                     <tr>
                       <td class="date-cell">
-                        <div class="date-main">${formatDisplayDate(line.date)}</div>
+                        <div class="date-main">${formatExportDate(line.date)}</div>
                         <div class="date-time">${line.time || '-'}</div>
                       </td>
                       <td><strong>${line.passengerName || '-'}</strong></td>
                       <td>${line.pickup || '-'}</td>
                       <td>${line.dropoff || '-'}</td>
-                      <td class="price-cell">${formatCurrency(Number(line.price) || 0)}</td>
+                      <td class="price-cell">${formatCurrencyAmount(Number(line.price) || 0, currencyToUse)}</td>
                     </tr>
                   `).join('')}
                 </tbody>
@@ -354,14 +483,14 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
 
             <div class="total-section">
               <div class="total-row">
-                <span>GENEL TOPLAM</span>
-                <span>${formatCurrency(inv.total_amount)}</span>
+                <span>${t.grandTotal}</span>
+                <span>${formatCurrencyAmount(inv.total_amount, currencyToUse)}</span>
               </div>
             </div>
 
             <div class="footer">
               <div class="footer-company">Meet Travel Transfer</div>
-              Bu belge bilgisayar ortamında oluşturulmuştur.
+              ${t.footerNote}
             </div>
           </div>
         </body>
@@ -388,6 +517,8 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
     setInvoiceNumber(generateInvoiceNumber());
     setCompanyName('');
     setCompanyAddress('');
+    setSelectedCurrency('EUR');
+    setSelectedLanguage('tr');
     setTransferLines([
       { id: crypto.randomUUID(), date: '', time: '', passengerName: '', pickup: '', dropoff: '', price: 0 }
     ]);
@@ -448,6 +579,54 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                     </div>
                   </div>
                 </div>
+
+                {/* Language & Currency Selection */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                      <Globe className="h-3 w-3" />
+                      Fatura Dili
+                    </Label>
+                    <Select value={selectedLanguage} onValueChange={(v) => setSelectedLanguage(v as InvoiceLanguage)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {INVOICE_LANGUAGES.map(lang => (
+                          <SelectItem key={lang.value} value={lang.value}>
+                            <span className="flex items-center gap-2">
+                              <span>{lang.flag}</span>
+                              <span>{lang.label}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                      <Coins className="h-3 w-3" />
+                      Para Birimi
+                    </Label>
+                    <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CURRENCY_OPTIONS.map(curr => (
+                          <SelectItem key={curr.value} value={curr.value}>
+                            <span className="flex items-center gap-2">
+                              <span>{curr.flag}</span>
+                              <span>{curr.label}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <Separator />
 
                 {/* Company Info */}
                 <div className="space-y-3">
@@ -542,7 +721,7 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                           />
                         </div>
                         <div>
-                          <Label className="text-[10px] text-muted-foreground">Ücret (€)</Label>
+                          <Label className="text-[10px] text-muted-foreground">Ücret ({getCurrencySymbol(selectedCurrency)})</Label>
                           <Input
                             type="number"
                             placeholder="0"
@@ -559,7 +738,7 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                 {/* Total */}
                 <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
                   <span className="font-semibold">Genel Toplam</span>
-                  <span className="text-2xl font-bold text-primary">{formatCurrency(totalAmount)}</span>
+                  <span className="text-2xl font-bold text-primary">{formatCurrencyAmount(totalAmount)}</span>
                 </div>
               </div>
             </ScrollArea>
@@ -621,14 +800,14 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                                 {formatDisplayDate(line.date)} {line.time} • {line.pickup} → {line.dropoff}
                               </div>
                             </div>
-                            <div className="font-semibold">{formatCurrency(line.price)}</div>
+                            <div className="font-semibold">{formatCurrencyAmount(line.price, viewingInvoice.currency)}</div>
                           </div>
                         ))}
                       </div>
                     </div>
                     <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg">
                       <span className="font-semibold">Toplam</span>
-                      <span className="text-xl font-bold text-primary">{formatCurrency(viewingInvoice.total_amount)}</span>
+                      <span className="text-xl font-bold text-primary">{formatCurrencyAmount(viewingInvoice.total_amount, viewingInvoice.currency)}</span>
                     </div>
                   </div>
                 </div>
@@ -679,7 +858,7 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                             <div className="text-sm text-muted-foreground truncate">{inv.company_name}</div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="font-semibold text-primary">{formatCurrency(inv.total_amount)}</span>
+                            <span className="font-semibold text-primary">{formatCurrencyAmount(inv.total_amount, inv.currency)}</span>
                             <Eye className="h-4 w-4 text-muted-foreground" />
                           </div>
                         </div>
