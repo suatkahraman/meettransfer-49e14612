@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare, Phone, Mail } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare, Phone, Mail, Tag, CheckCircle, XCircle } from "lucide-react";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -189,6 +189,22 @@ export const Hero = () => {
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [phoneError, setPhoneError] = useState(false);
+  
+  // Promo code state for return trip
+  const [promoCode, setPromoCode] = useState("");
+  const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
+  const VALID_PROMO_CODE = "Meet40Return";
+  
+  const handlePromoCodeChange = (value: string) => {
+    setPromoCode(value);
+    if (value.trim() === "") {
+      setIsPromoCodeValid(null);
+    } else if (value.trim().toLowerCase() === VALID_PROMO_CODE.toLowerCase()) {
+      setIsPromoCodeValid(true);
+    } else {
+      setIsPromoCodeValid(false);
+    }
+  };
 
   const currencyOptions = CURRENCY_OPTIONS;
 
@@ -345,6 +361,9 @@ export const Hero = () => {
       let url = `/quick-booking-confirm?token=${data.confirmation_token}`;
       if (hasReturnTrip && returnDate && returnTime) {
         url += `&hasReturn=true&returnDate=${format(returnDate, "yyyy-MM-dd")}&returnTime=${returnTime}`;
+        if (isPromoCodeValid && promoCode) {
+          url += `&promoCode=${encodeURIComponent(promoCode)}`;
+        }
       }
       navigate(url);
       toast.success(t("priceRequestSent") || "Your price request has been sent!");
@@ -521,34 +540,70 @@ export const Hero = () => {
                 </div>
                 
                 {hasReturnTrip && (
-                  <div className="grid md:grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="relative">
-                      <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("returnDate")}</label>
-                      <Popover open={returnDatePopoverOpen} onOpenChange={setReturnDatePopoverOpen}>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className={cn("w-full h-12 justify-start text-left font-normal bg-white border-0 text-foreground rounded-lg shadow-md hover:bg-white/95", !returnDate && "text-muted-foreground")}>
-                            <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
-                            {returnDate ? format(returnDate, "dd/MM/yyyy") : <span>{t("selectDate")}</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 z-50" align="start">
-                          <Calendar mode="single" selected={returnDate} onSelect={(selectedDate) => { setReturnDate(selectedDate); setReturnDatePopoverOpen(false); }} disabled={(d) => d < (date || new Date())} initialFocus className={cn("p-3 pointer-events-auto")} />
-                        </PopoverContent>
-                      </Popover>
+                  <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="relative">
+                        <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("returnDate")}</label>
+                        <Popover open={returnDatePopoverOpen} onOpenChange={setReturnDatePopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full h-12 justify-start text-left font-normal bg-white border-0 text-foreground rounded-lg shadow-md hover:bg-white/95", !returnDate && "text-muted-foreground")}>
+                              <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
+                              {returnDate ? format(returnDate, "dd/MM/yyyy") : <span>{t("selectDate")}</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 z-50" align="start">
+                            <Calendar mode="single" selected={returnDate} onSelect={(selectedDate) => { setReturnDate(selectedDate); setReturnDatePopoverOpen(false); }} disabled={(d) => d < (date || new Date())} initialFocus className={cn("p-3 pointer-events-auto")} />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div className="relative">
+                        <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("returnTime")}</label>
+                        <Select value={returnTime} onValueChange={setReturnTime}>
+                          <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
+                            <div className="flex items-center"><Clock className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectTime")} /></div>
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[300px] z-50">{timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="relative">
-                      <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("returnTime")}</label>
-                      <Select value={returnTime} onValueChange={setReturnTime}>
-                        <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
-                          <div className="flex items-center"><Clock className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectTime")} /></div>
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[300px] z-50">{timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}</SelectContent>
-                      </Select>
+                    
+                    {/* Promo Code Section */}
+                    <div className="space-y-2">
+                      <label className="text-white/90 text-sm font-medium block text-left flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-accent" />
+                        {t("promoCode") || "Promo Code"}
+                      </label>
+                      <div className="relative">
+                        <Input
+                          placeholder={t("enterPromoCode") || "Enter promo code"}
+                          value={promoCode}
+                          onChange={(e) => handlePromoCodeChange(e.target.value)}
+                          className={cn(
+                            "h-12 bg-white border-0 text-foreground placeholder:text-muted-foreground rounded-lg shadow-md pr-10",
+                            isPromoCodeValid === true && "ring-2 ring-green-500",
+                            isPromoCodeValid === false && "ring-2 ring-red-500"
+                          )}
+                        />
+                        {isPromoCodeValid === true && (
+                          <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                        )}
+                        {isPromoCodeValid === false && (
+                          <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500" />
+                        )}
+                      </div>
+                      {isPromoCodeValid === true && (
+                        <p className="text-green-400 text-sm font-medium flex items-center gap-2">
+                          ✓ {t("promoCodeAccepted") || "Promo code accepted! 30% discount will be applied to your return transfer."}
+                        </p>
+                      )}
+                      {isPromoCodeValid === false && (
+                        <p className="text-red-400 text-sm">
+                          {t("invalidPromoCode") || "Invalid promo code"}
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
-                
-                {hasReturnTrip && <p className="text-accent text-sm font-medium flex items-center gap-2">🎁 {t("returnTripDiscount")}</p>}
               </div>
 
               {/* Currency Selection */}
