@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { endOfDay, endOfMonth, format, startOfDay, startOfMonth } from 'date-fns';
-import { AlertCircle, Banknote, BarChart3, Building2, Calculator, Calendar, CalendarDays, Car, CheckCircle, ClipboardList, DollarSign, Download, FileText, Inbox, LogOut, MessageCircle, Plane, Settings, Users } from 'lucide-react';
+import { AlertCircle, Banknote, BarChart3, Building2, Calculator, Calendar, CalendarDays, Car, CheckCircle, ClipboardList, DollarSign, Download, FileText, Inbox, LogOut, MessageCircle, Plane, Receipt, Settings, Users } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import NotificationBell from '@/components/NotificationBell';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { InvoiceDialog } from '@/components/admin/InvoiceDialog';
 import { supabase } from '@/integrations/supabase/client';
 interface KPIs {
   newToday: number;
@@ -37,6 +38,7 @@ const AdminDashboard = () => {
   });
   const [driverExpenseBreakdown, setDriverExpenseBreakdown] = useState<DriverExpenseBreakdownItem[]>([]);
   const [driverExpenseOpen, setDriverExpenseOpen] = useState(false);
+  const [invoiceOpen, setInvoiceOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [unreadWhatsApp, setUnreadWhatsApp] = useState(0);
   const [pendingQuickBookings, setPendingQuickBookings] = useState(0);
@@ -426,6 +428,21 @@ const AdminDashboard = () => {
               <div className="text-2xl font-bold text-purple-600">{appInstallCount}</div>
             </CardContent>
           </Card>
+
+          <Card 
+            className="border-amber-500/50 cursor-pointer hover:shadow-lg transition-shadow hover:border-amber-400"
+            onClick={() => setInvoiceOpen(true)}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                <Receipt className="h-4 w-4" />
+                Fatura Hazırla
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-amber-600 font-medium">Fatura Oluştur</div>
+            </CardContent>
+          </Card>
         </div>
 
         <Dialog open={driverExpenseOpen} onOpenChange={setDriverExpenseOpen}>
@@ -458,6 +475,8 @@ const AdminDashboard = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        <InvoiceDialog open={invoiceOpen} onOpenChange={setInvoiceOpen} />
 
         {/* Navigation Menu */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
