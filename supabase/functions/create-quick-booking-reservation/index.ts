@@ -206,6 +206,14 @@ serve(async (req) => {
             ? requestData.price + (requestData.returnPrice || requestData.price)
             : requestData.price;
 
+          // Calculate discount amount for return trip
+          const originalReturnPrice = requestData.promoCode && requestData.returnPrice 
+            ? Math.round(requestData.returnPrice / 0.7) // Original price before 30% discount
+            : null;
+          const discountAmount = originalReturnPrice 
+            ? originalReturnPrice - requestData.returnPrice!
+            : null;
+
           // Build return trip section
           const returnTripText = returnReservation ? `
 Return Transfer:
@@ -214,26 +222,37 @@ Return Transfer:
 - To: ${requestData.pickup}
 - Date: ${formattedReturnDate}
 - Time: ${requestData.returnTime}
+${requestData.promoCode && originalReturnPrice ? `- Original Price: ${currencySymbol}${originalReturnPrice}` : ''}
+${requestData.promoCode && discountAmount ? `- Discount (30%): -${currencySymbol}${discountAmount}` : ''}
 - Price: ${currencySymbol}${requestData.returnPrice || requestData.price}
-${requestData.promoCode ? `- Promo: ${requestData.promoCode} (30% discount)` : ''}
+${requestData.promoCode ? `- Promo Code: ${requestData.promoCode}` : ''}
 ` : '';
 
           const returnTripHtml = returnReservation ? `
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#e8f5e9;border-radius:8px;margin:20px 0;">
           <tr><td style="padding:15px;">
-            <p style="margin:0 0 10px;color:#2e7d32;font-weight:bold;">Return Transfer</p>
+            <p style="margin:0 0 10px;color:#2e7d32;font-weight:bold;">🔄 Return Transfer</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Code:</strong> ${returnReservation.reservation_code}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>From:</strong> ${requestData.dropoff}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>To:</strong> ${requestData.pickup}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Date:</strong> ${formattedReturnDate}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Time:</strong> ${requestData.returnTime}</p>
-            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Price:</strong> ${currencySymbol}${requestData.returnPrice || requestData.price}</p>
-            ${requestData.promoCode ? `<p style="margin:10px 0 0;color:#2e7d32;font-size:13px;">Promo: ${requestData.promoCode} (30% discount)</p>` : ''}
+            ${requestData.promoCode && originalReturnPrice ? `
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff;border-radius:6px;margin:10px 0;border:1px dashed #2e7d32;">
+              <tr><td style="padding:12px;">
+                <p style="margin:0 0 5px;color:#666;font-size:13px;text-decoration:line-through;">Original: ${currencySymbol}${originalReturnPrice}</p>
+                <p style="margin:0 0 5px;color:#2e7d32;font-size:14px;font-weight:bold;">🎉 Discount (30%): -${currencySymbol}${discountAmount}</p>
+                <p style="margin:0;color:#1a365d;font-size:16px;font-weight:bold;">Final Price: ${currencySymbol}${requestData.returnPrice}</p>
+                <p style="margin:8px 0 0;color:#2e7d32;font-size:12px;background-color:#e8f5e9;padding:4px 8px;border-radius:4px;display:inline-block;">✓ Promo Code: ${requestData.promoCode}</p>
+              </td></tr>
+            </table>
+            ` : `<p style="margin:5px 0;color:#333;font-size:14px;"><strong>Price:</strong> ${currencySymbol}${requestData.returnPrice || requestData.price}</p>`}
           </td></tr>
         </table>
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#1a365d;border-radius:8px;margin:20px 0;">
           <tr><td style="padding:15px;text-align:center;">
             <p style="margin:0;color:#fff;font-size:18px;"><strong>Total:</strong> ${currencySymbol}${totalPrice}</p>
+            ${requestData.promoCode && discountAmount ? `<p style="margin:5px 0 0;color:#48bb78;font-size:14px;">You saved ${currencySymbol}${discountAmount} with promo code!</p>` : ''}
           </td></tr>
         </table>
           ` : '';
