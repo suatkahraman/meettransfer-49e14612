@@ -235,20 +235,15 @@ export default function AdminQuickBookings() {
       const priceValue = parseFloat(price);
       const returnPriceValue = returnPrice ? parseFloat(returnPrice) : null;
       
-      // Calculate discounted return price if promo code exists
-      let finalReturnPrice = returnPriceValue;
-      if (returnPriceValue && selectedRequest.promo_code) {
-        // Apply 30% discount
-        finalReturnPrice = Math.round(returnPriceValue * 0.7);
-      }
-      
+      // Store the original return price - discount will be calculated on client side
+      // This allows the customer to see the original price with strikethrough
       const { error: updateError } = await supabase
         .from("quick_booking_requests")
         .update({
           price: priceValue,
           price_currency: currency,
           status: "price_sent",
-          return_price: finalReturnPrice,
+          return_price: returnPriceValue, // Store original price, not discounted
         })
         .eq("id", selectedRequest.id);
 
@@ -266,6 +261,12 @@ export default function AdminQuickBookings() {
       }
 
       try {
+        // Calculate discounted return price for email display
+        let emailReturnPrice = returnPriceValue;
+        if (returnPriceValue && selectedRequest.promo_code) {
+          emailReturnPrice = Math.round(returnPriceValue * 0.7);
+        }
+        
         const { data, error: fnError } = await supabase.functions.invoke(
           "send-quick-booking-price",
           {
@@ -274,8 +275,9 @@ export default function AdminQuickBookings() {
               price: priceValue,
               currency,
               customer_email: selectedRequest.customer_email ?? undefined,
-              // Return trip info for email
-              return_price: finalReturnPrice ?? undefined,
+              // Return trip info for email - send both original and discounted for email
+              return_price: emailReturnPrice ?? undefined,
+              original_return_price: returnPriceValue ?? undefined,
               return_date: selectedRequest.return_date ?? undefined,
               return_time: selectedRequest.return_time ?? undefined,
               promo_code: selectedRequest.promo_code ?? undefined,

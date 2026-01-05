@@ -226,34 +226,39 @@ export default function QuickBookingConfirm() {
     }
   };
 
-  // Calculate return price - use database value if available, otherwise calculate
+  // Calculate return price - apply discount if promo code is valid
+  // Note: booking.return_price from DB is the ORIGINAL price (before discount)
   const getReturnPrice = () => {
     if (!hasReturnTrip) return null;
     
-    // If admin has already set return_price in database, use that
+    // If admin has set return_price in database, use that as base
     if (booking?.return_price != null) {
+      // Apply discount if promo code is valid
+      if (isPromoCodeValid) {
+        return Math.round(booking.return_price * 0.7); // 30% discount
+      }
       return booking.return_price;
     }
     
     // Fallback: calculate from outbound price
     if (!booking?.price) return null;
     if (isPromoCodeValid) {
-      return booking.price * 0.7; // 30% discount
+      return Math.round(booking.price * 0.7); // 30% discount
     }
     return booking.price;
   };
 
   // Get original return price (before discount) for display
   const getOriginalReturnPrice = () => {
-    if (!hasReturnTrip || !booking?.price) return null;
+    if (!hasReturnTrip) return null;
     
-    // If admin set return_price and there's a promo code, calculate original
-    if (booking?.return_price != null && isPromoCodeValid) {
-      // Original = discounted / 0.7
-      return Math.round(booking.return_price / 0.7);
+    // If admin set return_price, that's the original
+    if (booking?.return_price != null) {
+      return booking.return_price;
     }
     
-    return booking.price;
+    // Fallback to outbound price
+    return booking?.price || null;
   };
 
   const getTotalPrice = () => {

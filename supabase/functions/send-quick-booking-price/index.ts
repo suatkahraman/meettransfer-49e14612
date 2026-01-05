@@ -15,7 +15,8 @@ interface SendPriceRequest {
   currency: string;
   customer_email?: string;
   // Return trip info (optional)
-  return_price?: number;
+  return_price?: number; // Discounted price (if promo applied)
+  original_return_price?: number; // Original price before discount
   return_date?: string;
   return_time?: string;
   promo_code?: string;
@@ -38,6 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
       currency, 
       customer_email,
       return_price,
+      original_return_price,
       return_date,
       return_time,
       promo_code
@@ -110,8 +112,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Calculate discount if promo code exists
     const hasReturnTrip = return_price !== undefined && return_date && return_time;
-    const originalReturnPrice = hasReturnTrip && promo_code && return_price !== undefined
-      ? Math.round(return_price / 0.7) // Original price before 30% discount
+    // Use original_return_price if provided, otherwise calculate from discounted price
+    const originalReturnPrice = hasReturnTrip && promo_code && original_return_price !== undefined
+      ? original_return_price
       : null;
     const discountAmount = originalReturnPrice && return_price !== undefined
       ? originalReturnPrice - return_price
