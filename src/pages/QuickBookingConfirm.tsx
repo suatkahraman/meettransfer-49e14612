@@ -26,6 +26,12 @@ interface BookingRequest {
   confirmation_token: string;
   payment_method?: string;
   payment_link?: string;
+  // Return trip fields from database
+  has_return_trip?: boolean;
+  return_date?: string;
+  return_time?: string;
+  return_price?: number | null;
+  promo_code?: string;
 }
 
 const vehicleLabels: Record<string, string> = {
@@ -68,8 +74,9 @@ export default function QuickBookingConfirm() {
   const urlReturnTime = searchParams.get("returnTime") || "";
   const urlPromoCode = searchParams.get("promoCode") || "";
 
-  // Pre-fill return trip and promo code from URL params
+  // Pre-fill return trip and promo code from URL params or database
   useEffect(() => {
+    // First try from URL params
     if (urlHasReturn) {
       setHasReturnTrip(true);
       setReturnTripData({
@@ -84,6 +91,25 @@ export default function QuickBookingConfirm() {
       }
     }
   }, [urlHasReturn, urlReturnDate, urlReturnTime, urlPromoCode]);
+
+  // Pre-fill from database if available (when admin has sent price with return info)
+  useEffect(() => {
+    if (booking) {
+      if (booking.has_return_trip && booking.return_date && booking.return_time) {
+        setHasReturnTrip(true);
+        setReturnTripData({
+          date: booking.return_date,
+          time: booking.return_time,
+        });
+      }
+      if (booking.promo_code) {
+        setPromoCode(booking.promo_code);
+        if (booking.promo_code.toLowerCase() === VALID_PROMO_CODE.toLowerCase()) {
+          setIsPromoCodeValid(true);
+        }
+      }
+    }
+  }, [booking]);
 
   useEffect(() => {
     if (token) {
@@ -200,19 +226,51 @@ export default function QuickBookingConfirm() {
     }
   };
 
-  // Calculate return price with discount
+  // Calculate return price - use database value if available, otherwise calculate
   const getReturnPrice = () => {
+    if (!hasReturnTrip) return null;
+    
+    // If admin has already set return_price in database, use that
+    if (booking?.return_price != null) {
+      return booking.return_price;
+    }
+    
+    // Fallback: calculate from outbound price
     if (!booking?.price) return null;
-    if (hasReturnTrip && isPromoCodeValid) {
+    if (isPromoCodeValid) {
       return booking.price * 0.7; // 30% discount
     }
-    return hasReturnTrip ? booking.price : null;
+    return booking.price;
+  };
+
+  // Get original return price (before discount) for display
+  const getOriginalReturnPrice = () => {
+    if (!hasReturnTrip || !booking?.price) return null;
+    
+    // If admin set return_price and there's a promo code, calculate original
+    if (booking?.return_price != null && isPromoCodeValid) {
+      // Original = discounted / 0.7
+      return Math.round(booking.return_price / 0.7);
+    }
+    
+    return booking.price;
   };
 
   const getTotalPrice = () => {
     if (!booking?.price) return null;
     const returnPrice = getReturnPrice();
     return booking.price + (returnPrice || 0);
+  };
+
+  // Calculate discount amount for display
+  const getDiscountAmount = () => {
+    if (!hasReturnTrip || !isPromoCodeValid) return null;
+    const originalReturn = getOriginalReturnPrice();
+    const discountedReturn = getReturnPrice();
+    if (originalReturn && discountedReturn) {
+      return originalReturn - discountedReturn;
+    }
+    return null;
   };
 
   const handleConfirm = async () => {
@@ -691,7 +749,7 @@ export default function QuickBookingConfirm() {
                     )}
                   </span>
                   <span className="font-medium">
-                    {isPromoCodeValid && booking.price && (
+                    {isPromoCodeValid && getOriginalReturnPrice() && (
                       <span className="line-through text-muted-foreground mr-2">
                         {booking.price_currency === "EUR" && "€"}
                         {booking.price_currency === "USD" && "$"}
@@ -699,7 +757,7 @@ export default function QuickBookingConfirm() {
                         {booking.price_currency === "TRY" && "₺"}
                         {booking.price_currency === "AED" && "د.إ"}
                         {booking.price_currency === "AUD" && "A$"}
-                        {booking.price}
+                        {getOriginalReturnPrice()}
                       </span>
                     )}
                     {booking.price_currency === "EUR" && "€"}
@@ -711,6 +769,23 @@ export default function QuickBookingConfirm() {
                     {getReturnPrice()?.toFixed(0)}
                   </span>
                 </div>
+                {isPromoCodeValid && getDiscountAmount() && (
+                  <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-400">
+                    <span className="flex items-center gap-2">
+                      <Tag className="h-4 w-4" />
+                      {t("qbDiscountWithCode")} ({promoCode})
+                    </span>
+                    <span className="font-medium">
+                      -{booking.price_currency === "EUR" && "€"}
+                      {booking.price_currency === "USD" && "$"}
+                      {booking.price_currency === "GBP" && "£"}
+                      {booking.price_currency === "TRY" && "₺"}
+                      {booking.price_currency === "AED" && "د.إ"}
+                      {booking.price_currency === "AUD" && "A$"}
+                      {getDiscountAmount()?.toFixed(0)}
+                    </span>
+                  </div>
+                )}
                 <div className="border-t pt-3">
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">{t("qbTotal")}</span>
