@@ -56,6 +56,7 @@ const ContactPage = () => {
         description={t("seoContactDesc")}
         keywords="contact Meet Transfer, airport transfer booking, WhatsApp transfer booking, Turkey transfer contact, Istanbul transfer phone, VIP transfer support"
         canonicalPath="/contact"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

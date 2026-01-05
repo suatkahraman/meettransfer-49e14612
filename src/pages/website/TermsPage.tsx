@@ -10,6 +10,7 @@ const TermsPage = () => {
         description="Terms and conditions for Meet Transfer airport transfer services. Booking, payment, cancellation policy, waiting time, and privacy information."
         keywords="Meet Transfer terms, transfer service terms, cancellation policy, booking terms, airport transfer conditions"
         canonicalPath="/terms"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
         noIndex={false}
       />
       <SchemaOrg

@@ -45,6 +45,11 @@ const PrivateVsTaxiTurkey = () => {
         description={t('blogPrivateTaxiDesc')}
         keywords="private transfer vs taxi Turkey, Turkey airport taxi, private car Turkey, Turkish taxi tips, airport transfer comparison, is private transfer worth it"
         canonicalPath="/blog/private-vs-taxi-transfer-turkey"
+        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
+        ogType="article"
+        articlePublishedTime="2024-12-05"
+        articleModifiedTime="2025-01-05"
+        articleSection="Travel Tips"
       />
       <SchemaOrg
         schemas={[

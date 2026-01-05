@@ -88,6 +88,11 @@ const IstanbulAirportToCityGuide = () => {
         description={t('blogIstanbul1Desc')}
         keywords="Istanbul Airport to city, Istanbul Airport transfer, IST to Taksim, Istanbul Airport taxi, Istanbul Airport metro, Istanbul Airport to Sultanahmet, private transfer Istanbul"
         canonicalPath="/blog/istanbul-airport-to-city-best-way"
+        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
+        ogType="article"
+        articlePublishedTime="2024-12-15"
+        articleModifiedTime="2025-01-05"
+        articleSection="Travel Guide"
       />
       <SchemaOrg
         schemas={[

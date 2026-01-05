@@ -23,6 +23,7 @@ const Index = () => {
         description={t("seoHomeDesc")}
         keywords={t("seoHomeKeywords")}
         canonicalPath="/"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

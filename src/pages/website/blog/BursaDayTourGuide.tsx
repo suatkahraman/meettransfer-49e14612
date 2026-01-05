@@ -35,6 +35,11 @@ const BursaDayTourGuide = () => {
         description={t("blogBursaSeoDesc")}
         keywords="Istanbul to Bursa day trip, Bursa day tour, Bursa from Istanbul, Cumalıkızık village, Uludağ cable car, Green Mosque Bursa, Grand Mosque Bursa, İskender kebab Bursa, Bursa thermal baths, Ottoman capital Bursa, Bursa private transfer"
         canonicalPath="/blog/istanbul-bursa-day-tour-guide"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
+        ogType="article"
+        articlePublishedTime="2025-12-26"
+        articleModifiedTime="2025-01-05"
+        articleSection="Day Tour Guide"
       />
       <SchemaOrg
         schemas={[
