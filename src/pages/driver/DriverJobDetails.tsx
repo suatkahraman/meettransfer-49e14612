@@ -148,7 +148,8 @@ const DriverJobDetails = () => {
         // Initialize editable financial fields only once per reservation
         if (initializedFinancialsForIdRef.current !== resData.id) {
           initializedFinancialsForIdRef.current = resData.id;
-          setDriverPrice(resData.price?.toString() || '');
+          // Bütçe = driver_earning (job cost/expense), NOT price
+          setDriverPrice(resData.driver_earning?.toString() || '');
           setDriverCashAmount(resData.driver_cash_amount?.toString() || '');
           setDriverNotes(resData.driver_notes || '');
         }
@@ -238,14 +239,15 @@ const DriverJobDetails = () => {
     if (!id) return;
     setSavingFinancials(true);
 
-    const finalPrice = parseMoneyInput(driverPrice);
+    const finalBudget = parseMoneyInput(driverPrice);
     const finalCashAmount = parseMoneyInput(driverCashAmount);
 
-    // Driver can update price, cash amount, and notes
+    // Driver can update driver_earning (Bütçe/job cost), cash amount, and notes
+    // NOTE: driver_earning is used for job cost/budget, NOT price (which is customer price)
     const { error } = await supabase
       .from('reservations')
       .update({
-        price: finalPrice,
+        driver_earning: finalBudget,
         driver_cash_amount: finalCashAmount,
         driver_notes: driverNotes?.trim() || null
       })
@@ -258,7 +260,7 @@ const DriverJobDetails = () => {
       toast.success(t('changesSaved'));
       setReservation(prev => prev ? {
         ...prev,
-        price: finalPrice,
+        driver_earning: finalBudget,
         driver_cash_amount: finalCashAmount,
         driver_notes: driverNotes?.trim() || null
       } : null);
