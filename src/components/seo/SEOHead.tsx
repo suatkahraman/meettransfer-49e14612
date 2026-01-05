@@ -68,10 +68,27 @@ const SEOHead = ({
   const basePath = canonicalPath || getBasePath();
   const currentLangFromUrl = getCurrentLanguageFromUrl();
   
-  // SELF-REFERENCING CANONICAL: Always use the exact current URL path WITHOUT query strings
-  // This is critical for Google to properly index the page
-  const cleanPathname = location.pathname === "/" ? "" : location.pathname;
-  const canonicalUrl = `${baseUrl}${cleanPathname}`;
+  // Build the correct canonical URL based on basePath and current language
+  // This ensures each language version has its own canonical URL pointing to itself
+  const buildCanonicalUrl = (): string => {
+    // If canonicalPath is provided, build the canonical for the current language version
+    if (canonicalPath) {
+      if (currentLangFromUrl === "en") {
+        // English version - no prefix
+        return canonicalPath === "/" ? baseUrl : `${baseUrl}${canonicalPath}`;
+      } else {
+        // Other languages - add language prefix
+        return canonicalPath === "/" 
+          ? `${baseUrl}/${currentLangFromUrl}` 
+          : `${baseUrl}/${currentLangFromUrl}${canonicalPath}`;
+      }
+    }
+    // Fallback to current URL path without query strings
+    const cleanPathname = location.pathname === "/" ? "" : location.pathname;
+    return `${baseUrl}${cleanPathname}`;
+  };
+  
+  const canonicalUrl = buildCanonicalUrl();
   const fullUrl = canonicalUrl;
 
   useEffect(() => {
