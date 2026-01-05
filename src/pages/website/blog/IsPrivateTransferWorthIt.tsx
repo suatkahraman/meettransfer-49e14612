@@ -45,6 +45,11 @@ const IsPrivateTransferWorthIt = () => {
         description={t('blogWorthItDesc')}
         keywords="private transfer Turkey worth it, Turkey airport transfer cost, VIP transfer value, should I book private transfer, Turkey taxi vs private car"
         canonicalPath="/blog/is-private-transfer-worth-it-turkey"
+        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
+        ogType="article"
+        articlePublishedTime="2024-11-20"
+        articleModifiedTime="2025-01-05"
+        articleSection="Travel Tips"
       />
       <SchemaOrg
         schemas={[

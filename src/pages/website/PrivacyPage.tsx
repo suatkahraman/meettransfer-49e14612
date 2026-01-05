@@ -10,6 +10,7 @@ const PrivacyPage = () => {
         description="Privacy policy for Meet Transfer airport transfer services. Learn how we collect, use, and protect your personal information."
         keywords="Meet Transfer privacy, data protection, personal information, GDPR, privacy policy"
         canonicalPath="/privacy"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
         noIndex={false}
       />
       <SchemaOrg

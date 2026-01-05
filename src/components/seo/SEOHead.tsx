@@ -8,8 +8,13 @@ interface SEOHeadProps {
   keywords?: string;
   canonicalPath?: string;
   ogImage?: string;
-  ogType?: string;
+  ogType?: 'website' | 'article';
   noIndex?: boolean;
+  // Article-specific props for blog posts
+  articlePublishedTime?: string;
+  articleModifiedTime?: string;
+  articleAuthor?: string;
+  articleSection?: string;
 }
 
 // All supported language prefixes in URL paths
@@ -29,18 +34,43 @@ const LANGUAGE_CODES: Record<Language, string> = {
   JA: "ja",
 };
 
+// Default OG images for different page types
+const DEFAULT_OG_IMAGES = {
+  home: 'https://meettransfer.app/og/home-og.jpg',
+  transfer: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+  fleet: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
+  blog: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
+  default: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+};
+
 const SEOHead = ({
   title,
   description,
   keywords,
   canonicalPath,
-  ogImage = 'https://meettransfer.app/og-image.jpg',
+  ogImage,
   ogType = 'website',
   noIndex = false,
+  articlePublishedTime,
+  articleModifiedTime,
+  articleAuthor = 'Meet Transfer',
+  articleSection,
 }: SEOHeadProps) => {
   const location = useLocation();
   const { language } = useLanguage();
   const baseUrl = 'https://meettransfer.app';
+
+  // Determine default OG image based on path
+  const getDefaultOgImage = (): string => {
+    const path = canonicalPath || location.pathname;
+    if (path === '/' || path === '') return DEFAULT_OG_IMAGES.home;
+    if (path.includes('/blog')) return DEFAULT_OG_IMAGES.blog;
+    if (path.includes('/fleet')) return DEFAULT_OG_IMAGES.fleet;
+    if (path.includes('transfer')) return DEFAULT_OG_IMAGES.transfer;
+    return DEFAULT_OG_IMAGES.default;
+  };
+
+  const finalOgImage = ogImage || getDefaultOgImage();
 
   // Get the base path without any language prefix
   const getBasePath = (): string => {
@@ -69,21 +99,16 @@ const SEOHead = ({
   const currentLangFromUrl = getCurrentLanguageFromUrl();
   
   // Build the correct canonical URL based on basePath and current language
-  // This ensures each language version has its own canonical URL pointing to itself
   const buildCanonicalUrl = (): string => {
-    // If canonicalPath is provided, build the canonical for the current language version
     if (canonicalPath) {
       if (currentLangFromUrl === "en") {
-        // English version - no prefix
         return canonicalPath === "/" ? baseUrl : `${baseUrl}${canonicalPath}`;
       } else {
-        // Other languages - add language prefix
         return canonicalPath === "/" 
           ? `${baseUrl}/${currentLangFromUrl}` 
           : `${baseUrl}/${currentLangFromUrl}${canonicalPath}`;
       }
     }
-    // Fallback to current URL path without query strings
     const cleanPathname = location.pathname === "/" ? "" : location.pathname;
     return `${baseUrl}${cleanPathname}`;
   };
@@ -109,6 +134,13 @@ const SEOHead = ({
       }
     };
 
+    // Helper to remove meta tag
+    const removeMeta = (name: string, property = false) => {
+      const attr = property ? 'property' : 'name';
+      const meta = document.querySelector(`meta[${attr}="${name}"]`);
+      if (meta) meta.remove();
+    };
+
     // Update meta tags
     updateMeta('description', description);
     if (keywords) {
@@ -118,16 +150,17 @@ const SEOHead = ({
     // Robots
     updateMeta('robots', noIndex ? 'noindex, nofollow' : 'index, follow');
 
-    // Open Graph
+    // Open Graph basic
     updateMeta('og:title', title, true);
     updateMeta('og:description', description, true);
     updateMeta('og:url', fullUrl, true);
     updateMeta('og:type', ogType, true);
-    updateMeta('og:image', ogImage, true);
+    updateMeta('og:image', finalOgImage, true);
     updateMeta('og:image:width', '1200', true);
     updateMeta('og:image:height', '630', true);
     updateMeta('og:image:alt', title, true);
     updateMeta('og:site_name', 'Meet Transfer', true);
+    updateMeta('og:image:type', 'image/jpeg', true);
     
     // Set og:locale based on current URL language
     const localeMap: Record<string, string> = {
@@ -144,13 +177,42 @@ const SEOHead = ({
     };
     updateMeta('og:locale', localeMap[currentLangFromUrl] || 'en_US', true);
 
-    // Twitter
+    // Article-specific meta tags for blog posts
+    if (ogType === 'article') {
+      if (articlePublishedTime) {
+        updateMeta('article:published_time', articlePublishedTime, true);
+      }
+      if (articleModifiedTime) {
+        updateMeta('article:modified_time', articleModifiedTime, true);
+      }
+      if (articleAuthor) {
+        updateMeta('article:author', articleAuthor, true);
+      }
+      if (articleSection) {
+        updateMeta('article:section', articleSection, true);
+      }
+      updateMeta('article:publisher', 'https://meettransfer.app', true);
+    } else {
+      // Remove article meta tags if not article type
+      removeMeta('article:published_time', true);
+      removeMeta('article:modified_time', true);
+      removeMeta('article:author', true);
+      removeMeta('article:section', true);
+      removeMeta('article:publisher', true);
+    }
+
+    // Twitter Card - optimized for large image
     updateMeta('twitter:card', 'summary_large_image');
     updateMeta('twitter:site', '@meettransfer');
+    updateMeta('twitter:creator', '@meettransfer');
     updateMeta('twitter:title', title);
     updateMeta('twitter:description', description);
-    updateMeta('twitter:image', ogImage);
+    updateMeta('twitter:image', finalOgImage);
     updateMeta('twitter:image:alt', title);
+
+    // Additional SEO meta tags
+    updateMeta('author', 'Meet Transfer');
+    updateMeta('publisher', 'Meet Transfer');
 
     // Update canonical - SELF-REFERENCING
     let canonical = document.querySelector('link[rel="canonical"]');
@@ -166,7 +228,7 @@ const SEOHead = ({
     // Remove existing hreflang tags
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
 
-    // All languages for hreflang (including Turkish and Ukrainian)
+    // All languages for hreflang
     const allLanguages = ["en", "de", "fr", "ru", "it", "es", "ar", "tr", "uk", "ja"];
     
     // Add hreflang tags for all languages
@@ -175,13 +237,10 @@ const SEOHead = ({
       hreflang.setAttribute('rel', 'alternate');
       hreflang.setAttribute('hreflang', lang);
       
-      // Build the URL for this language version
       let langUrl: string;
       if (lang === "en") {
-        // English is the default (no prefix)
         langUrl = basePath === "/" ? baseUrl : `${baseUrl}${basePath}`;
       } else {
-        // Other languages have a prefix
         langUrl = basePath === "/" 
           ? `${baseUrl}/${lang}` 
           : `${baseUrl}/${lang}${basePath}`;
@@ -203,7 +262,7 @@ const SEOHead = ({
       // Cleanup hreflang tags on unmount
       document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
     };
-  }, [title, description, keywords, fullUrl, canonicalUrl, ogImage, ogType, noIndex, currentLangFromUrl, basePath]);
+  }, [title, description, keywords, fullUrl, canonicalUrl, finalOgImage, ogType, noIndex, currentLangFromUrl, basePath, articlePublishedTime, articleModifiedTime, articleAuthor, articleSection]);
 
   return null;
 };

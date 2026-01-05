@@ -52,6 +52,11 @@ const IstanbulTransferPriceGuide = () => {
         description={t("blogPriceSeoDesc")}
         keywords="Istanbul Airport transfer price, IST transfer cost, Istanbul taxi fare, private transfer Istanbul price, Istanbul Airport to Taksim price, airport transfer pricing Turkey"
         canonicalPath="/blog/istanbul-airport-transfer-price-guide"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
+        ogType="article"
+        articlePublishedTime="2024-12-10"
+        articleModifiedTime="2025-01-05"
+        articleSection="Price Guide"
       />
       <SchemaOrg
         schemas={[

@@ -56,6 +56,7 @@ const LuxuryChauffeur = () => {
         description={t("seoLuxuryDesc")}
         keywords="luxury chauffeur Turkey, VIP private driver, business travel Turkey, event transportation, hourly chauffeur service, Mercedes chauffeur, private driver Istanbul, executive car service"
         canonicalPath="/luxury-chauffeur"
+        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
       />
       <SchemaOrg
         schemas={[

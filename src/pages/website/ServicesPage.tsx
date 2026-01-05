@@ -88,6 +88,7 @@ const ServicesPage = () => {
         description={t("seoServicesDesc")}
         keywords="VIP airport transfer Turkey, private chauffeur service, luxury transfer service, Istanbul airport transfer, Antalya airport transfer, Bodrum airport transfer, Turkey transfer services, Mercedes VIP transfer"
         canonicalPath="/services"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

@@ -63,6 +63,11 @@ const CyprusAirportTransferGuide = () => {
         description={t("blogCyprusSeoDesc")}
         keywords="Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Cyprus taxi, Protaras transfer, Kyrenia transfer, Northern Cyprus transfer, Ercan airport, Famagusta transfer, Troodos transfer"
         canonicalPath="/blog/cyprus-airport-transfer-guide"
+        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
+        ogType="article"
+        articlePublishedTime="2024-12-26"
+        articleModifiedTime="2025-01-05"
+        articleSection="Travel Guide"
       />
       <SchemaOrg
         schemas={[
