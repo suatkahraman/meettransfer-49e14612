@@ -59,6 +59,10 @@ interface Reservation {
   driver_id: string | null;
   passenger_names: string[] | null;
   promo_code: string | null;
+  is_return_transfer: boolean | null;
+  original_reservation_id: string | null;
+  discount_percentage: number | null;
+  discount_amount: number | null;
   // Place details
   pickup_place_name: string | null;
   pickup_lat: number | null;
@@ -98,6 +102,7 @@ const CustomerReservationDetail = () => {
   const { isSubscribed, subscribe, unsubscribe, isLoading: pushLoading
  } = usePushNotifications();
   const [reservation, setReservation] = useState<Reservation | null>(null);
+  const [linkedReservation, setLinkedReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
@@ -141,6 +146,34 @@ const CustomerReservationDetail = () => {
     }
 
     setReservation(data);
+    
+    // Fetch linked reservation (return trip) if this is the outbound or if this has original_reservation_id
+    if (data) {
+      // If this is outbound, find the return trip that references this reservation
+      const { data: returnTrip } = await supabase
+        .from('reservations')
+        .select('*')
+        .eq('original_reservation_id', data.id)
+        .eq('customer_id', user.id)
+        .single();
+      
+      if (returnTrip) {
+        setLinkedReservation(returnTrip);
+      } else if (data.original_reservation_id) {
+        // If this is the return trip, fetch the outbound trip
+        const { data: outboundTrip } = await supabase
+          .from('reservations')
+          .select('*')
+          .eq('id', data.original_reservation_id)
+          .eq('customer_id', user.id)
+          .single();
+        
+        if (outboundTrip) {
+          setLinkedReservation(outboundTrip);
+        }
+      }
+    }
+    
     setLoading(false);
   };
 
@@ -613,32 +646,97 @@ const CustomerReservationDetail = () => {
             {/* Price Section - only show if price is set */}
             {priceDisplay && (
               <div className="bg-muted p-4 rounded-lg space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">{t('price')}</span>
-                  <div className="text-right">
-                    {reservation.promo_code && reservation.price ? (
-                      <>
+                {/* Check if this is part of a return trip with discount */}
+                {linkedReservation && reservation.promo_code ? (
+                  <>
+                    {/* Outbound & Return Trip Price Breakdown */}
+                    <div className="space-y-3">
+                      {/* Determine which is outbound and which is return */}
+                      {(() => {
+                        const isThisReturn = reservation.is_return_transfer;
+                        const outbound = isThisReturn ? linkedReservation : reservation;
+                        const returnTrip = isThisReturn ? reservation : linkedReservation;
+                        const outboundPrice = outbound.price || 0;
+                        const returnOriginalPrice = returnTrip.price || 0;
+                        // Return trip gets 30% discount with promo code
+                        const returnDiscountedPrice = Math.round(returnOriginalPrice * 0.7);
+                        const discountAmount = returnOriginalPrice - returnDiscountedPrice;
+                        const totalPrice = outboundPrice + returnDiscountedPrice;
+                        const currency = reservation.price_currency;
+                        
+                        return (
+                          <>
+                            {/* Outbound Price */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">{t('outbound') || 'Outbound'}</span>
+                              <span className="font-medium">{formatPrice(outboundPrice, currency)}</span>
+                            </div>
+                            
+                            {/* Return Price with Discount */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">{t('returnTrip') || 'Return'}</span>
+                              <div className="text-right">
+                                <span className="text-muted-foreground line-through text-sm mr-2">
+                                  {formatPrice(returnOriginalPrice, currency)}
+                                </span>
+                                <span className="font-medium text-green-600 dark:text-green-400">
+                                  {formatPrice(returnDiscountedPrice, currency)}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            {/* Discount Line */}
+                            <div className="flex justify-between items-center text-green-600 dark:text-green-400">
+                              <div className="flex items-center gap-1">
+                                <Tag className="h-3 w-3" />
+                                <span className="text-sm">
+                                  {t('discount') || 'Discount'} ({reservation.promo_code})
+                                </span>
+                              </div>
+                              <span className="font-medium">-{formatPrice(discountAmount, currency)}</span>
+                            </div>
+                            
+                            {/* Total */}
+                            <div className="flex justify-between items-center pt-3 border-t">
+                              <span className="font-medium">{t('total') || 'Total'}</span>
+                              <span className="font-bold text-primary text-2xl">{formatPrice(totalPrice, currency)}</span>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </>
+                ) : reservation.promo_code && reservation.price && reservation.is_return_transfer ? (
+                  // Single return trip with discount (no linked outbound visible)
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{t('price')}</span>
+                      <div className="text-right">
                         {/* Original price with strikethrough */}
                         <span className="text-muted-foreground line-through text-lg mr-2">
                           {priceDisplay}
                         </span>
-                        {/* Discounted price */}
+                        {/* Discounted price - 30% off */}
                         <span className="font-bold text-green-600 dark:text-green-400 text-2xl">
-                          {formatPrice(Math.round(reservation.price * 0.6), reservation.price_currency)}
+                          {formatPrice(Math.round(reservation.price * 0.7), reservation.price_currency)}
                         </span>
                         {/* Discount badge */}
                         <div className="flex items-center justify-end gap-1 mt-1">
                           <Tag className="h-3 w-3 text-green-600 dark:text-green-400" />
                           <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                            40% {t('discount') || 'discount'}
+                            30% {t('discount') || 'discount'} ({reservation.promo_code})
                           </span>
                         </div>
-                      </>
-                    ) : (
-                      <span className="font-bold text-primary text-2xl">{priceDisplay}</span>
-                    )}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  // Regular price display without discount
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{t('price')}</span>
+                    <span className="font-bold text-primary text-2xl">{priceDisplay}</span>
                   </div>
-                </div>
+                )}
                 
                 {/* Payment Status Indicator */}
                 {reservation.payment_type === 'payment_link' && (
