@@ -77,42 +77,42 @@ export const MonthlyProfitCard = () => {
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
           .from("agency_reservation_details")
-          .select("reservation_id, company_amount, agency_price_currency, exchange_rate_used")
+          .select("reservation_id, customer_price, agency_price_currency, exchange_rate_used")
           .in("reservation_id", reservationIds);
 
         if (!agencyError && agencyData) {
-          // Create map of reservation_id -> { tryAmount, hasCompanyAmount, needsConversion }
+          // Create map of reservation_id -> { tryAmount, hasCustomerPrice, needsConversion }
           const agencyMap = agencyData.reduce((acc, item) => {
             let tryAmount = 0;
             let needsConversion = false;
-            // company_amount = Acentadan Alınacak Tutar = Gelir
-            const companyAmount = item.company_amount || 0;
-            const hasCompanyAmount = companyAmount > 0;
+            // customer_price = Müşterinin acentaya ödediği fiyat = Acenta Geliri
+            const customerPrice = item.customer_price || 0;
+            const hasCustomerPrice = customerPrice > 0;
             
             // Eğer TRY ise direkt kullan
             // Eğer döviz ise ve kur varsa çevir, yoksa çevirme gerekli
             if (item.agency_price_currency === 'TRY') {
-              tryAmount = companyAmount;
-            } else if (item.exchange_rate_used && companyAmount > 0) {
+              tryAmount = customerPrice;
+            } else if (item.exchange_rate_used && customerPrice > 0) {
               // Döviz ve kur varsa çevir
-              tryAmount = companyAmount * item.exchange_rate_used;
-            } else if (companyAmount > 0) {
+              tryAmount = customerPrice * item.exchange_rate_used;
+            } else if (customerPrice > 0) {
               // Döviz çevrilmemiş - kur çekilmeli
               needsConversion = true;
               pending.push({
                 reservationId: item.reservation_id,
                 currency: item.agency_price_currency || 'EUR',
-                amount: companyAmount
+                amount: customerPrice
               });
             }
-            acc[item.reservation_id] = { tryAmount, hasCompanyAmount, needsConversion };
+            acc[item.reservation_id] = { tryAmount, hasCustomerPrice, needsConversion };
             return acc;
-          }, {} as Record<string, { tryAmount: number; hasCompanyAmount: boolean; needsConversion: boolean }>);
+          }, {} as Record<string, { tryAmount: number; hasCustomerPrice: boolean; needsConversion: boolean }>);
 
-          // Only count reservations that have BOTH driver_earning AND company_amount
+          // Only count reservations that have BOTH driver_earning AND customer_price
           reservations?.forEach(res => {
             const agencyInfo = agencyMap[res.id];
-            if (agencyInfo?.hasCompanyAmount) {
+            if (agencyInfo?.hasCustomerPrice) {
               totalAgencyIncome += agencyInfo.tryAmount;
               // Gider = driver_earning (Bütçe)
               totalDriverExpense += res.driver_earning || 0;
