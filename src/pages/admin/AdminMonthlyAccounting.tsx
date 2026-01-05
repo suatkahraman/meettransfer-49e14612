@@ -128,9 +128,10 @@ const AdminMonthlyAccounting = () => {
 
     // Fetch ALL completed reservations with driver_earning for carry-over calculation
     // Only completed jobs with budget (driver_earning) are counted for driver accounting
+    // Exclude cancelled and deleted reservations
     const { data: allReservationsData } = await supabase
       .from('reservations')
-      .select('driver_id, driver_earning, driver_cash_amount')
+      .select('driver_id, driver_earning, driver_cash_amount, status')
       .not('driver_id', 'is', null)
       .eq('status', 'completed')
       .not('driver_earning', 'is', null)
@@ -190,12 +191,14 @@ const AdminMonthlyAccounting = () => {
       const monthStart = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
       const monthEnd = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
 
+      // Exclude cancelled and deleted reservations from accounting
       let query = supabase
         .from('reservations')
         .select('*')
         .gte('pickup_date', monthStart)
         .lte('pickup_date', monthEnd)
         .not('driver_id', 'is', null)
+        .not('status', 'in', '("cancelled","deleted")')
         .order('pickup_date', { ascending: true });
 
       if (selectedDriver !== 'all') {
