@@ -61,13 +61,14 @@ const DriverMonthlyAccounting = () => {
       const monthStart = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
       const monthEnd = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
 
-      // Fetch reservations
+      // Fetch reservations - exclude cancelled and deleted
       const { data: reservationsData } = await supabase
         .from('reservations')
         .select('*')
         .eq('driver_id', driverId)
         .gte('pickup_date', monthStart)
         .lte('pickup_date', monthEnd)
+        .not('status', 'in', '("cancelled","deleted")')
         .order('pickup_date', { ascending: true });
 
       if (reservationsData) {
@@ -98,12 +99,14 @@ const DriverMonthlyAccounting = () => {
         setAllPayments(allPaymentsData);
       }
 
-      // Fetch all reservations BEFORE current month for carry-over
+      // Fetch all completed reservations BEFORE current month for carry-over
+      // Exclude cancelled and deleted
       const { data: previousReservations } = await supabase
         .from('reservations')
-        .select('price, driver_cash_amount, pickup_date')
+        .select('price, driver_cash_amount, pickup_date, status')
         .eq('driver_id', driverId)
-        .lt('pickup_date', monthStart);
+        .lt('pickup_date', monthStart)
+        .eq('status', 'completed');
 
       // Calculate previous months earnings (price - cash collected)
       let prevEarnings = 0;
