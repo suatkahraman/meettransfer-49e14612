@@ -1,3 +1,30 @@
+# Meet Transfer Robots.txt
+# https://meettransfer.app
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and auth routes (not for public indexing)
+Disallow: /admin/
+Disallow: /admin
+Disallow: /driver/
+Disallow: /driver
+Disallow: /customer/
+Disallow: /customer
+Disallow: /agency/
+Disallow: /agency
+Disallow: /auth
+Disallow: /login
+Disallow: /signup
+Disallow: /install
+Disallow: /book/
+Disallow: /confirm-booking
+Disallow: /quick-booking-confirm
+Disallow: /quick-booking-customer-info
+Disallow: /customer-portal
+
+# Allow important bots full access
 User-agent: Googlebot
 Allow: /
 
@@ -10,8 +37,30 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
+User-agent: LinkedInBot
 Allow: /
 
-# Sitemap
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Sitemap location
 Sitemap: https://meettransfer.app/sitemap.xml
+
+# Crawl-delay for less important bots
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Crawl-delay: 10
