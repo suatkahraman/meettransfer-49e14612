@@ -51,6 +51,8 @@ export const MonthlyProfitCard = () => {
           agency_id
         `)
         .eq("status", "completed")
+        .not("status", "eq", "deleted")
+        .not("status", "eq", "cancelled_by_customer")
         .not("agency_id", "is", null)
         .not("driver_earning", "is", null)
         .gt("driver_earning", 0)
