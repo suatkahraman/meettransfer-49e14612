@@ -962,10 +962,12 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                       {filteredInvoices.map(inv => (
                         <div 
                           key={inv.id} 
-                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                          onClick={() => loadInvoiceToView(inv)}
+                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                         >
-                          <div className="flex-1 min-w-0">
+                          <div 
+                            className="flex-1 min-w-0 cursor-pointer"
+                            onClick={() => loadInvoiceToView(inv)}
+                          >
                             <div className="flex items-center gap-2">
                               <span className="font-mono text-sm font-medium">{inv.invoice_number}</span>
                               <Badge variant="outline" className="text-[10px]">
@@ -974,9 +976,56 @@ export const InvoiceDialog = ({ open, onOpenChange }: InvoiceDialogProps) => {
                             </div>
                             <div className="text-sm text-muted-foreground truncate">{inv.company_name}</div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold text-primary">{formatCurrencyAmount(inv.total_amount, inv.currency)}</span>
-                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-primary mr-2">{formatCurrencyAmount(inv.total_amount, inv.currency)}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                loadInvoiceToEdit(inv);
+                              }}
+                              title="Düzenle"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-[#25D366] hover:text-[#22c55e] hover:bg-[#25D366]/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleShareWhatsApp(inv);
+                              }}
+                              title="WhatsApp ile Paylaş"
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExport(inv);
+                              }}
+                              title="PDF İndir"
+                            >
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                loadInvoiceToView(inv);
+                              }}
+                              title="Görüntüle"
+                            >
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            </Button>
                           </div>
                         </div>
                       ))}
