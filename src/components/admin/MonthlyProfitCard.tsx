@@ -32,17 +32,20 @@ export const MonthlyProfitCard = () => {
     const monthEnd = endOfMonth(currentMonth);
     
     try {
-      // Fetch ALL completed reservations for the month (agency or not)
+      // Fetch completed agency reservations with driver_earning (Bütçe) filled
       const { data: reservations, error: resError } = await supabase
         .from("reservations")
         .select(`
           id,
           pickup_date,
-          price,
+          driver_earning,
           status,
           agency_id
         `)
         .eq("status", "completed")
+        .not("agency_id", "is", null)
+        .not("driver_earning", "is", null)
+        .gt("driver_earning", 0)
         .gte("pickup_date", format(monthStart, "yyyy-MM-dd"))
         .lte("pickup_date", format(monthEnd, "yyyy-MM-dd"));
 
@@ -58,6 +61,7 @@ export const MonthlyProfitCard = () => {
       // Fetch agency reservation details with TRY converted amount
       let totalAgencyIncome = 0;
       let totalDriverExpense = 0;
+      let validReservationCount = 0;
       
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
@@ -66,10 +70,12 @@ export const MonthlyProfitCard = () => {
           .in("reservation_id", reservationIds);
 
         if (!agencyError && agencyData) {
+          // Create map of reservation_id -> { tryAmount, hasCompanyAmount }
           const agencyMap = agencyData.reduce((acc, item) => {
             let tryAmount = 0;
-            // company_amount = Acentaya gönderilen fiyat = Acenta Geliri for admin
+            // company_amount = Acentadan Alınacak Tutar = Gelir
             const companyAmount = item.company_amount || 0;
+            const hasCompanyAmount = companyAmount > 0;
             
             // Eğer TRY ise direkt kullan
             // Eğer döviz ise ve kur varsa çevir, yoksa 0 say
@@ -82,28 +88,28 @@ export const MonthlyProfitCard = () => {
               // Döviz çevrilmemiş veya amount 0 - 0 olarak say
               tryAmount = 0;
             }
-            acc[item.reservation_id] = tryAmount;
+            acc[item.reservation_id] = { tryAmount, hasCompanyAmount };
             return acc;
-          }, {} as Record<string, number>);
+          }, {} as Record<string, { tryAmount: number; hasCompanyAmount: boolean }>);
 
-          // Sadece agency olan rezervasyonlar için acenta geliri hesapla
-          reservations?.filter(res => res.agency_id).forEach(res => {
-            totalAgencyIncome += agencyMap[res.id] || 0;
+          // Only count reservations that have BOTH driver_earning AND company_amount
+          reservations?.forEach(res => {
+            const agencyInfo = agencyMap[res.id];
+            if (agencyInfo?.hasCompanyAmount) {
+              totalAgencyIncome += agencyInfo.tryAmount;
+              // Gider = driver_earning (Bütçe)
+              totalDriverExpense += res.driver_earning || 0;
+              validReservationCount++;
+            }
           });
         }
       }
-
-      // Şoför Gideri = Şoförün yazdığı bütçe tutarı (reservation.price)
-      // TÜM tamamlanmış rezervasyonların price toplamı
-      reservations?.forEach(res => {
-        totalDriverExpense += res.price || 0;
-      });
 
       setTotals({
         totalAgencyIncome,
         totalDriverExpense,
         totalNetProfit: totalAgencyIncome - totalDriverExpense,
-        totalTransfers: reservations?.length || 0,
+        totalTransfers: validReservationCount,
       });
     } catch (error) {
       console.error("Error fetching monthly profit data:", error);
