@@ -278,9 +278,91 @@ const AdminMonthlyProfit = () => {
     }
   }, [currentMonth]);
 
+  // Auto-convert pending currencies when data is loaded
+  const autoConvertPending = useCallback(async () => {
+    if (pendingConversions === 0 || dailyData.length === 0 || convertingRates) return;
+    
+    // Find all reservations needing conversion
+    const reservationsToConvert: ReservationDetail[] = [];
+    dailyData.forEach(day => {
+      day.reservations.forEach(res => {
+        if (res.needsConversion && res.agencyIncomeOriginal > 0) {
+          reservationsToConvert.push(res);
+        }
+      });
+    });
+    
+    if (reservationsToConvert.length === 0) return;
+    
+    console.log(`Auto-converting ${reservationsToConvert.length} pending currency conversions...`);
+    setConvertingRates(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      for (const res of reservationsToConvert) {
+        try {
+          const { data: rateData, error: rateError } = await supabase.functions.invoke('get-exchange-rate', {
+            body: {
+              from_currency: res.agencyIncomeCurrency,
+              to_currency: 'TRY',
+              amount: res.agencyIncomeOriginal
+            }
+          });
+
+          if (rateError) {
+            console.error('Exchange rate error:', rateError);
+            errorCount++;
+            continue;
+          }
+
+          if (rateData && rateData.rate && rateData.converted_amount) {
+            const { error: updateError } = await supabase
+              .from('agency_reservation_details')
+              .update({
+                company_amount_try: rateData.converted_amount,
+                exchange_rate_used: rateData.rate,
+                conversion_date: rateData.date
+              })
+              .eq('reservation_id', res.id);
+
+            if (updateError) {
+              console.error('Update error:', updateError);
+              errorCount++;
+            } else {
+              successCount++;
+            }
+          }
+        } catch (err) {
+          console.error('Conversion error for reservation:', res.id, err);
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`${successCount} döviz kuru otomatik çevrildi`);
+        fetchMonthlyData(); // Refresh data with new rates
+      }
+      if (errorCount > 0 && successCount === 0) {
+        toast.error(`Döviz kuru çevrilemedi`);
+      }
+    } catch (error) {
+      console.error('Auto-conversion error:', error);
+    } finally {
+      setConvertingRates(false);
+    }
+  }, [pendingConversions, dailyData, convertingRates, fetchMonthlyData]);
+
   useEffect(() => {
     fetchMonthlyData();
   }, [fetchMonthlyData]);
+
+  // Trigger auto-conversion when pending conversions are detected
+  useEffect(() => {
+    if (pendingConversions > 0 && !loading && !convertingRates) {
+      autoConvertPending();
+    }
+  }, [pendingConversions, loading, autoConvertPending, convertingRates]);
 
   const handlePrevMonth = () => {
     setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
