@@ -112,16 +112,43 @@ export const usePushNotifications = () => {
     setIsLoading(true);
     try {
       // Request notification permission
-      const permission = await Notification.requestPermission();
-      setPermission(permission);
+      const permissionResult = await Notification.requestPermission();
+      setPermission(permissionResult);
       
-      if (permission !== 'granted') {
+      if (permissionResult !== 'granted') {
         toast.error('Notification permission denied');
         return false;
       }
 
-      // Get service worker registration
-      const registration = await navigator.serviceWorker.ready;
+      // Try to get existing registration or wait with timeout
+      let registration: ServiceWorkerRegistration | null = null;
+      
+      // Check if there's already a registration
+      const existingRegistrations = await navigator.serviceWorker.getRegistrations();
+      const pushSwRegistration = existingRegistrations.find(r => r.active?.scriptURL?.includes('sw-push.js'));
+      
+      if (pushSwRegistration) {
+        registration = pushSwRegistration;
+      } else {
+        // Try to register the push service worker
+        try {
+          registration = await navigator.serviceWorker.register('/sw-push.js');
+          // Wait for it to be ready with a timeout
+          await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Service worker timeout')), 5000))
+          ]);
+        } catch (swError) {
+          console.error('Service worker registration failed:', swError);
+          toast.error('Failed to initialize notifications');
+          return false;
+        }
+      }
+
+      if (!registration) {
+        toast.error('Notification service not available');
+        return false;
+      }
       
       // Subscribe to push
       const subscription = await registration.pushManager.subscribe({
