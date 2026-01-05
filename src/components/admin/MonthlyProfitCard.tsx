@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { tr } from "date-fns/locale";
-import { TrendingUp, TrendingDown, Building2, Banknote, Calculator, ChevronRight } from "lucide-react";
+import { TrendingUp, TrendingDown, Building2, Banknote, Calculator, ChevronRight, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface MonthlyTotals {
@@ -12,6 +12,12 @@ interface MonthlyTotals {
   totalDriverExpense: number;
   totalNetProfit: number;
   totalTransfers: number;
+}
+
+interface PendingConversion {
+  reservationId: string;
+  currency: string;
+  amount: number;
 }
 
 export const MonthlyProfitCard = () => {
@@ -24,6 +30,8 @@ export const MonthlyProfitCard = () => {
     totalTransfers: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [converting, setConverting] = useState(false);
+  const [pendingConversions, setPendingConversions] = useState<PendingConversion[]>([]);
 
   const fetchMonthlyData = useCallback(async () => {
     setLoading(true);
@@ -62,6 +70,7 @@ export const MonthlyProfitCard = () => {
       let totalAgencyIncome = 0;
       let totalDriverExpense = 0;
       let validReservationCount = 0;
+      const pending: PendingConversion[] = [];
       
       if (reservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
@@ -70,27 +79,33 @@ export const MonthlyProfitCard = () => {
           .in("reservation_id", reservationIds);
 
         if (!agencyError && agencyData) {
-          // Create map of reservation_id -> { tryAmount, hasCompanyAmount }
+          // Create map of reservation_id -> { tryAmount, hasCompanyAmount, needsConversion }
           const agencyMap = agencyData.reduce((acc, item) => {
             let tryAmount = 0;
+            let needsConversion = false;
             // company_amount = Acentadan Alınacak Tutar = Gelir
             const companyAmount = item.company_amount || 0;
             const hasCompanyAmount = companyAmount > 0;
             
             // Eğer TRY ise direkt kullan
-            // Eğer döviz ise ve kur varsa çevir, yoksa 0 say
+            // Eğer döviz ise ve kur varsa çevir, yoksa çevirme gerekli
             if (item.agency_price_currency === 'TRY') {
               tryAmount = companyAmount;
             } else if (item.exchange_rate_used && companyAmount > 0) {
               // Döviz ve kur varsa çevir
               tryAmount = companyAmount * item.exchange_rate_used;
-            } else {
-              // Döviz çevrilmemiş veya amount 0 - 0 olarak say
-              tryAmount = 0;
+            } else if (companyAmount > 0) {
+              // Döviz çevrilmemiş - kur çekilmeli
+              needsConversion = true;
+              pending.push({
+                reservationId: item.reservation_id,
+                currency: item.agency_price_currency || 'EUR',
+                amount: companyAmount
+              });
             }
-            acc[item.reservation_id] = { tryAmount, hasCompanyAmount };
+            acc[item.reservation_id] = { tryAmount, hasCompanyAmount, needsConversion };
             return acc;
-          }, {} as Record<string, { tryAmount: number; hasCompanyAmount: boolean }>);
+          }, {} as Record<string, { tryAmount: number; hasCompanyAmount: boolean; needsConversion: boolean }>);
 
           // Only count reservations that have BOTH driver_earning AND company_amount
           reservations?.forEach(res => {
@@ -105,6 +120,7 @@ export const MonthlyProfitCard = () => {
         }
       }
 
+      setPendingConversions(pending);
       setTotals({
         totalAgencyIncome,
         totalDriverExpense,
@@ -118,9 +134,63 @@ export const MonthlyProfitCard = () => {
     }
   }, [currentMonth]);
 
+  // Auto-convert pending currencies
+  const autoConvertPending = useCallback(async () => {
+    if (pendingConversions.length === 0 || converting) return;
+    
+    console.log(`Auto-converting ${pendingConversions.length} pending currency conversions...`);
+    setConverting(true);
+
+    try {
+      for (const item of pendingConversions) {
+        try {
+          const { data: rateData, error: rateError } = await supabase.functions.invoke('get-exchange-rate', {
+            body: {
+              from_currency: item.currency,
+              to_currency: 'TRY',
+              amount: item.amount
+            }
+          });
+
+          if (rateError) {
+            console.error('Exchange rate error:', rateError);
+            continue;
+          }
+
+          if (rateData && rateData.rate && rateData.converted_amount) {
+            await supabase
+              .from('agency_reservation_details')
+              .update({
+                company_amount_try: rateData.converted_amount,
+                exchange_rate_used: rateData.rate,
+                conversion_date: rateData.date
+              })
+              .eq('reservation_id', item.reservationId);
+          }
+        } catch (err) {
+          console.error('Conversion error for reservation:', item.reservationId, err);
+        }
+      }
+
+      // Refresh data after conversions
+      fetchMonthlyData();
+    } catch (error) {
+      console.error('Auto-conversion error:', error);
+    } finally {
+      setConverting(false);
+    }
+  }, [pendingConversions, converting, fetchMonthlyData]);
+
   useEffect(() => {
     fetchMonthlyData();
   }, [fetchMonthlyData]);
+
+  // Trigger auto-conversion when pending conversions are detected
+  useEffect(() => {
+    if (pendingConversions.length > 0 && !loading && !converting) {
+      autoConvertPending();
+    }
+  }, [pendingConversions, loading, autoConvertPending, converting]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("tr-TR", {
@@ -141,6 +211,9 @@ export const MonthlyProfitCard = () => {
           <CardTitle className="flex items-center gap-2 text-lg">
             <Calculator className="h-5 w-5 text-primary" />
             Aylık Kâr Hesabı
+            {converting && (
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            )}
           </CardTitle>
           <div className="flex items-center gap-2 text-muted-foreground">
             <span className="text-sm font-medium">
