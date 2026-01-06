@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,7 @@ import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol, formatCurrency } from '@/lib/currency';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
-
+import { supabase } from '@/integrations/supabase/client';
 interface Reservation {
   id: string;
   customer_name: string;
@@ -54,8 +54,37 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
   const [isProcessing, setIsProcessing] = useState(false);
   const [flightDelay, setFlightDelay] = useState<number | null>(null);
   const [flightStatusValue, setFlightStatusValue] = useState<string | null>(null);
+  const [tryAmount, setTryAmount] = useState<number | null>(null);
   const { t, getPaymentTypeLabel } = useDriverTranslations();
   const x = useMotionValue(0);
+
+  // Fetch TL equivalent when cash amount is not in TRY
+  useEffect(() => {
+    const fetchTryAmount = async () => {
+      if (
+        reservation.passenger_cash_amount &&
+        reservation.passenger_cash_amount > 0 &&
+        reservation.passenger_cash_currency &&
+        reservation.passenger_cash_currency !== 'TRY'
+      ) {
+        try {
+          const { data, error } = await supabase.functions.invoke('get-exchange-rate', {
+            body: {
+              from_currency: reservation.passenger_cash_currency,
+              to_currency: 'TRY',
+              amount: reservation.passenger_cash_amount
+            }
+          });
+          if (!error && data?.converted_amount) {
+            setTryAmount(Math.round(data.converted_amount));
+          }
+        } catch (err) {
+          console.error('Failed to fetch TRY amount:', err);
+        }
+      }
+    };
+    fetchTryAmount();
+  }, [reservation.passenger_cash_amount, reservation.passenger_cash_currency]);
   
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { label: string; color: string; bgColor: string; icon: React.ReactNode }> = {
@@ -312,9 +341,17 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                     </div>
                     <span className="text-sm text-white/90 font-medium">{t('cashToCollect')}</span>
                   </div>
-                  <span className="font-black text-2xl text-white drop-shadow-sm">
-                    {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR')}
-                  </span>
+                  <div className="text-right">
+                    <div className="font-black text-2xl text-white drop-shadow-sm">
+                      {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR')}
+                    </div>
+                    {/* TL equivalent */}
+                    {tryAmount && reservation.passenger_cash_currency !== 'TRY' && (
+                      <div className="text-sm text-white/80 font-medium">
+                        ≈ ₺{tryAmount.toLocaleString('tr-TR')}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

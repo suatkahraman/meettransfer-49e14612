@@ -89,6 +89,7 @@ const DriverJobDetails = () => {
   const [updating, setUpdating] = useState(false);
   const [showCashDialog, setShowCashDialog] = useState(false);
   const [adminNotes, setAdminNotes] = useState<string | null>(null);
+  const [tryAmount, setTryAmount] = useState<number | null>(null);
   
   // Driver editable fields
   const [driverPrice, setDriverPrice] = useState('');
@@ -106,6 +107,34 @@ const DriverJobDetails = () => {
   useEffect(() => {
     reservationRef.current = reservation;
   }, [reservation]);
+
+  // Fetch TL equivalent when cash amount is not in TRY
+  useEffect(() => {
+    const fetchTryAmount = async () => {
+      if (
+        reservation?.passenger_cash_amount &&
+        reservation.passenger_cash_amount > 0 &&
+        reservation.passenger_cash_currency &&
+        reservation.passenger_cash_currency !== 'TRY'
+      ) {
+        try {
+          const { data, error } = await supabase.functions.invoke('get-exchange-rate', {
+            body: {
+              from_currency: reservation.passenger_cash_currency,
+              to_currency: 'TRY',
+              amount: reservation.passenger_cash_amount
+            }
+          });
+          if (!error && data?.converted_amount) {
+            setTryAmount(Math.round(data.converted_amount));
+          }
+        } catch (err) {
+          console.error('Failed to fetch TRY amount:', err);
+        }
+      }
+    };
+    fetchTryAmount();
+  }, [reservation?.passenger_cash_amount, reservation?.passenger_cash_currency]);
 
   const initializedFinancialsForIdRef = useRef<string | null>(null);
 
@@ -730,6 +759,12 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
                       <div className="font-black text-4xl text-white drop-shadow-lg">
                         {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR')}
                       </div>
+                      {/* TL equivalent */}
+                      {tryAmount && reservation.passenger_cash_currency !== 'TRY' && (
+                        <div className="text-lg text-white/80 font-semibold mt-1">
+                          ≈ ₺{tryAmount.toLocaleString('tr-TR')}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
