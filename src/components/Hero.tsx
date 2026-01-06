@@ -568,13 +568,21 @@ export const Hero = () => {
               </div>
 
               {/* Return Trip Option */}
-              <div className="bg-white/10 rounded-lg p-4 space-y-4">
+              <div className="bg-white/10 rounded-lg p-4 space-y-3">
                 <div className="flex items-center space-x-3">
                   <Checkbox id="returnTrip" checked={hasReturnTrip} onCheckedChange={(checked) => setHasReturnTrip(checked === true)} className="border-white/60 data-[state=checked]:bg-accent data-[state=checked]:border-accent" />
                   <Label htmlFor="returnTrip" className="flex items-center gap-2 cursor-pointer text-white font-medium">
                     <ArrowLeftRight className="h-4 w-4 text-accent" />
                     {t("addReturnTrip")}
                   </Label>
+                </div>
+                
+                {/* 30% Discount Info */}
+                <div className="flex items-center gap-2 text-sm text-accent bg-accent/20 px-3 py-2 rounded-lg">
+                  <Tag className="h-4 w-4 flex-shrink-0" />
+                  <span>
+                    {t("returnTripDiscount") || "Book round-trip & get 30% OFF on return! Use code: Meet40Return"}
+                  </span>
                 </div>
                 
                 {hasReturnTrip && (
