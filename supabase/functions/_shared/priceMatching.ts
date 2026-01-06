@@ -186,6 +186,29 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'inegol', 'inegöl', 'orhangazi', 'kestel', 'gursu', 'gürsu'
     ]
   },
+  'Kocaeli': {
+    priority: 1,
+    keywords: [
+      'kocaeli', 'izmit', 'İzmit', 'gebze', 'kartepe', 'sapanca', 'kandira', 'kandıra',
+      'darica', 'darıca', 'cayirova', 'çayırova', 'dilovasi', 'dilovası', 'golcuk', 'gölcük',
+      'derince', 'basiskele', 'başiskele', 'karamursel', 'karamürsel', 'korfez', 'körfez',
+      'maşukiye', 'masukiye', 'kuzuyayla', 'sogucak', 'soğucak'
+    ]
+  },
+  'Sapanca': {
+    priority: 1,
+    keywords: [
+      'sapanca', 'sapanca golu', 'sapanca gölü', 'sapanca lake', 'kirkpinar', 'kırkpınar',
+      'mahmudiye', 'hasanpasa', 'hasanpaşa', 'rustemler', 'rüstemler'
+    ]
+  },
+  'Sakarya': {
+    priority: 1,
+    keywords: [
+      'sakarya', 'adapazari', 'adapazarı', 'serdivan', 'akyazi', 'akyazı', 
+      'hendek', 'karasu', 'ferizli', 'sogutlu', 'söğütlü'
+    ]
+  },
   'Dubai': {
     priority: 1,
     keywords: [
@@ -294,6 +317,20 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Cumalikizik': { priority: 1, keywords: ['cumalikizik', 'cumalıkızık', 'cumalikizik village', 'cumalikizik koyu'], city: 'Bursa' },
   'Iznik': { priority: 2, keywords: ['iznik', 'nicaea', 'iznik lake', 'iznik golu', 'iznik gölü'], city: 'Bursa' },
   'Nilufer': { priority: 2, keywords: ['nilufer', 'nilüfer', 'gorukle', 'görükle', 'ozluece', 'özlüce'], city: 'Bursa' },
+  
+  // Kocaeli
+  'Izmit': { priority: 1, keywords: ['izmit', 'İzmit', 'kocaeli center', 'kocaeli merkez', 'kocaeli city'], city: 'Kocaeli' },
+  'Kartepe': { priority: 1, keywords: ['kartepe', 'masukiye', 'maşukiye', 'kuzuyayla', 'sogucak', 'soğucak', 'kartepe ski', 'kartepe kayak'], city: 'Kocaeli' },
+  'Gebze': { priority: 1, keywords: ['gebze', 'cayirova', 'çayırova', 'darica', 'darıca', 'dilovasi', 'dilovası'], city: 'Kocaeli' },
+  'Golcuk': { priority: 2, keywords: ['golcuk', 'gölcük', 'degirmendere', 'değirmendere'], city: 'Kocaeli' },
+  'Derince': { priority: 2, keywords: ['derince', 'korfez', 'körfez'], city: 'Kocaeli' },
+  'Kandira': { priority: 2, keywords: ['kandira', 'kandıra', 'kerpe', 'cebeci'], city: 'Kocaeli' },
+  
+  // Sapanca / Sakarya
+  'Sapanca Center': { priority: 1, keywords: ['sapanca', 'sapanca merkez', 'sapanca golu', 'sapanca gölü', 'sapanca lake'], city: 'Sapanca' },
+  'Kirkpinar': { priority: 1, keywords: ['kirkpinar', 'kırkpınar', 'mahmudiye', 'hasanpasa', 'hasanpaşa'], city: 'Sapanca' },
+  'Adapazari': { priority: 1, keywords: ['adapazari', 'adapazarı', 'sakarya center', 'sakarya merkez'], city: 'Sakarya' },
+  'Serdivan': { priority: 2, keywords: ['serdivan', 'bahcesehir', 'bahçeşehir'], city: 'Sakarya' },
   
   // Dubai
   'Downtown Dubai': { priority: 1, keywords: ['downtown', 'downtown dubai', 'burj khalifa', 'dubai mall', 'boulevard', 'dubai fountain'], city: 'Dubai' },
