@@ -726,7 +726,7 @@ export default function QuickBookingConfirm() {
                 <span className="ml-2 text-muted-foreground">Loading vehicle options...</span>
               </div>
             ) : allVehiclePrices.length > 0 ? (
-              <div className="grid gap-3">
+              <div className="grid gap-4">
                 {allVehiclePrices.map((vehicle) => {
                   const isSelected = (selectedVehicle || booking.vehicle_type) === vehicle.vehicleType;
                   const vehicleInfo = VEHICLE_TYPE_MAP[vehicle.vehicleType];
@@ -739,121 +739,181 @@ export default function QuickBookingConfirm() {
                       key={vehicle.vehicleType}
                       onClick={() => vehicle.available && setSelectedVehicle(vehicle.vehicleType)}
                       className={`
-                        relative border rounded-xl p-4 cursor-pointer transition-all duration-200
+                        relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 group
                         ${isSelected 
-                          ? 'border-primary bg-primary/5 ring-2 ring-primary shadow-lg' 
-                          : isRecommended
-                            ? 'border-green-500/50 bg-green-500/5 hover:border-green-500 hover:bg-green-500/10'
-                            : vehicle.available 
-                              ? 'border-border hover:border-primary/50 hover:bg-muted/50' 
-                              : 'border-border opacity-50 cursor-not-allowed bg-muted/30'
+                          ? 'ring-2 ring-primary shadow-xl scale-[1.01]' 
+                          : vehicle.available 
+                            ? 'hover:shadow-lg hover:scale-[1.005]' 
+                            : 'opacity-50 cursor-not-allowed'
                         }
                       `}
                     >
-                      {/* Recommended Badge */}
-                      {isRecommended && (
-                        <div className="absolute -top-2.5 left-4 z-10">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-500 text-white shadow-sm">
-                            <ThumbsUp className="h-3 w-3" />
-                            {t("qbRecommended") || "Recommended"}
-                          </span>
+                      {/* Gradient Background */}
+                      <div className={`
+                        absolute inset-0 transition-all duration-300
+                        ${isSelected 
+                          ? 'bg-gradient-to-br from-primary/10 via-primary/5 to-background' 
+                          : isRecommended
+                            ? 'bg-gradient-to-br from-green-500/10 via-green-500/5 to-background group-hover:from-green-500/15'
+                            : 'bg-gradient-to-br from-muted/80 via-muted/50 to-background group-hover:from-muted'
+                        }
+                      `} />
+                      
+                      {/* Border */}
+                      <div className={`
+                        absolute inset-0 rounded-2xl border-2 transition-colors duration-300
+                        ${isSelected 
+                          ? 'border-primary' 
+                          : isRecommended
+                            ? 'border-green-500/40 group-hover:border-green-500/60'
+                            : 'border-border/60 group-hover:border-primary/40'
+                        }
+                      `} />
+                      
+                      {/* Selection Indicator */}
+                      {isSelected && (
+                        <div className="absolute top-3 right-3 z-10">
+                          <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                            <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
+                          </div>
                         </div>
                       )}
-                      <div className="flex items-start gap-4">
-                        {/* Vehicle Image Carousel with click to enlarge */}
-                        <div 
-                          className="w-28 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0 relative group cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (vehicleImages.length > 0) {
-                              setSelectedVehicleImages(vehicleImages);
-                              setSelectedVehicleLabel(vehicleInfo?.label || vehicle.vehicleLabel);
-                              setSelectedVehicleForModal(vehicleInfo || null);
-                              setImageModalOpen(true);
-                            }
-                          }}
-                        >
-                          {vehicleImages.length > 0 ? (
-                            <>
-                              <Carousel 
-                                className="w-full h-full"
-                                plugins={[Autoplay({ delay: 3000, stopOnInteraction: false })]}
-                                opts={{ loop: true }}
-                              >
-                                <CarouselContent className="h-full">
-                                  {vehicleImages.slice(0, 4).map((img, idx) => (
-                                    <CarouselItem key={idx} className="h-full">
-                                      <img
-                                        src={img.src}
-                                        alt={img.alt}
-                                        className="w-full h-full object-cover"
-                                      />
-                                    </CarouselItem>
-                                  ))}
-                                </CarouselContent>
-                              </Carousel>
-                              {/* Zoom overlay on hover */}
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <ZoomIn className="h-5 w-5 text-white" />
-                              </div>
-                            </>
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-muted">
-                              <Car className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                          )}
+                      
+                      {/* Recommended Badge */}
+                      {isRecommended && (
+                        <div className="absolute top-0 left-0 z-10">
+                          <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-1.5 rounded-br-xl rounded-tl-xl shadow-lg">
+                            <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
+                              <ThumbsUp className="h-3.5 w-3.5" />
+                              {t("qbRecommended") || "Best for you"}
+                            </span>
+                          </div>
                         </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-semibold">{vehicleInfo?.label || vehicle.vehicleLabel}</h4>
-                            {vehicle.available && vehicle.price ? (
-                              <span className="text-xl font-bold text-primary">
-                                {currencySymbol}{vehicle.price}
-                              </span>
+                      )}
+                      
+                      <div className="relative p-4 sm:p-5">
+                        <div className="flex gap-4">
+                          {/* Vehicle Image */}
+                          <div 
+                            className="w-32 sm:w-40 h-24 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 relative cursor-pointer shadow-md"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (vehicleImages.length > 0) {
+                                setSelectedVehicleImages(vehicleImages);
+                                setSelectedVehicleLabel(vehicleInfo?.label || vehicle.vehicleLabel);
+                                setSelectedVehicleForModal(vehicleInfo || null);
+                                setImageModalOpen(true);
+                              }
+                            }}
+                          >
+                            {vehicleImages.length > 0 ? (
+                              <>
+                                <Carousel 
+                                  className="w-full h-full"
+                                  plugins={[Autoplay({ delay: 3500, stopOnInteraction: false })]}
+                                  opts={{ loop: true }}
+                                >
+                                  <CarouselContent className="h-full">
+                                    {vehicleImages.slice(0, 4).map((img, idx) => (
+                                      <CarouselItem key={idx} className="h-full">
+                                        <img
+                                          src={img.src}
+                                          alt={img.alt}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </CarouselItem>
+                                    ))}
+                                  </CarouselContent>
+                                </Carousel>
+                                {/* Zoom overlay on hover */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-2">
+                                  <span className="flex items-center gap-1 text-white text-xs font-medium">
+                                    <ZoomIn className="h-3.5 w-3.5" />
+                                    {t("qbViewGallery") || "View Gallery"}
+                                  </span>
+                                </div>
+                              </>
                             ) : (
-                              <span className="text-sm text-muted-foreground">
-                                {t("qbPriceNotAvailable") || "Not available"}
-                              </span>
+                              <div className="w-full h-full flex items-center justify-center bg-muted">
+                                <Car className="h-10 w-10 text-muted-foreground" />
+                              </div>
                             )}
                           </div>
                           
-                          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Users className="h-4 w-4" />
-                              {vehicleInfo?.passengers || vehicle.passengers} {t("passengers")}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Briefcase className="h-4 w-4" />
-                              {vehicleInfo?.luggage || vehicle.luggage} {t("luggage") || "luggage"}
-                            </span>
-                          </div>
-                          
-                          {/* Feature Icons */}
-                          {vehicleInfo?.features && vehicleInfo.features.length > 0 && (
-                            <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              {vehicleInfo.features.slice(0, 4).map((feature, idx) => {
-                                const FeatureIcon = getFeatureIcon(feature.icon);
-                                return (
-                                  <div 
-                                    key={idx}
-                                    className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/70 text-xs text-muted-foreground"
-                                    title={t("locale") === "tr" ? feature.labelTr : feature.label}
-                                  >
-                                    <FeatureIcon className="h-3 w-3" />
-                                    <span className="hidden sm:inline">{t("locale") === "tr" ? feature.labelTr : feature.label}</span>
-                                  </div>
-                                );
-                              })}
+                          {/* Vehicle Details */}
+                          <div className="flex-1 min-w-0 flex flex-col justify-between">
+                            {/* Header: Name + Price */}
+                            <div>
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <h4 className="font-bold text-base sm:text-lg leading-tight">
+                                  {vehicleInfo?.label || vehicle.vehicleLabel}
+                                </h4>
+                              </div>
+                              
+                              {/* Capacity Pills */}
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-semibold">
+                                  <Users className="h-3.5 w-3.5" />
+                                  {vehicleInfo?.passengers || vehicle.passengers}
+                                </div>
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 text-accent-foreground text-xs font-semibold">
+                                  <Briefcase className="h-3.5 w-3.5" />
+                                  {vehicleInfo?.luggage || vehicle.luggage}
+                                </div>
+                              </div>
                             </div>
-                          )}
+                            
+                            {/* Feature Icons */}
+                            {vehicleInfo?.features && vehicleInfo.features.length > 0 && (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {vehicleInfo.features.slice(0, 4).map((feature, idx) => {
+                                  const FeatureIcon = getFeatureIcon(feature.icon);
+                                  return (
+                                    <div 
+                                      key={idx}
+                                      className="flex items-center gap-1 px-2 py-1 rounded-md bg-background/80 border border-border/50 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+                                      title={t("locale") === "tr" ? feature.labelTr : feature.label}
+                                    >
+                                      <FeatureIcon className="h-3 w-3 flex-shrink-0" />
+                                      <span className="hidden sm:inline truncate max-w-[80px]">
+                                        {t("locale") === "tr" ? feature.labelTr : feature.label}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                                {vehicleInfo.features.length > 4 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    +{vehicleInfo.features.length - 4}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                         
-                        {isSelected && (
-                          <div className="absolute top-3 right-3">
-                            <CheckCircle className="h-6 w-6 text-primary" />
-                          </div>
-                        )}
+                        {/* Price Section - Full width at bottom */}
+                        <div className={`
+                          mt-4 pt-3 border-t flex items-center justify-between
+                          ${isSelected ? 'border-primary/20' : 'border-border/40'}
+                        `}>
+                          <span className="text-sm text-muted-foreground">
+                            {t("qbOneWayPrice") || "One-way transfer"}
+                          </span>
+                          {vehicle.available && vehicle.price ? (
+                            <div className="text-right">
+                              <span className={`
+                                text-2xl sm:text-3xl font-extrabold tracking-tight
+                                ${isSelected ? 'text-primary' : 'text-foreground'}
+                              `}>
+                                {currencySymbol}{vehicle.price}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground italic">
+                              {t("qbPriceNotAvailable") || "Not available"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
