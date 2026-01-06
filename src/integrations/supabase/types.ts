@@ -967,6 +967,48 @@ export type Database = {
           },
         ]
       }
+      region_prices: {
+        Row: {
+          airport: string | null
+          city: string
+          created_at: string
+          created_by: string | null
+          district: string
+          id: string
+          is_active: boolean
+          price: number
+          price_currency: string
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          airport?: string | null
+          city: string
+          created_at?: string
+          created_by?: string | null
+          district: string
+          id?: string
+          is_active?: boolean
+          price: number
+          price_currency?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Update: {
+          airport?: string | null
+          city?: string
+          created_at?: string
+          created_by?: string | null
+          district?: string
+          id?: string
+          is_active?: boolean
+          price?: number
+          price_currency?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       reservation_admin_notes: {
         Row: {
           created_at: string | null
