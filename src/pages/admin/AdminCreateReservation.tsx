@@ -609,12 +609,12 @@ const AdminCreateReservation = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Valiz Sayısı</Label>
-                    <Select value={formData.luggage_count} onValueChange={(v) => setFormData({...formData, luggage_count: v})}>
+                    <Select value={formData.luggage_count || "none"} onValueChange={(v) => setFormData({...formData, luggage_count: v === "none" ? "" : v})}>
                       <SelectTrigger>
                         <SelectValue placeholder="Valiz seçin" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Yok</SelectItem>
+                        <SelectItem value="none">Yok</SelectItem>
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
                           <SelectItem key={n} value={n.toString()}>{n} Valiz</SelectItem>
                         ))}
@@ -623,12 +623,12 @@ const AdminCreateReservation = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>Bebek Koltuğu</Label>
-                    <Select value={formData.baby_seat_count} onValueChange={(v) => setFormData({...formData, baby_seat_count: v})}>
+                    <Select value={formData.baby_seat_count || "none"} onValueChange={(v) => setFormData({...formData, baby_seat_count: v === "none" ? "" : v})}>
                       <SelectTrigger>
                         <SelectValue placeholder="Bebek koltuğu seçin" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Yok</SelectItem>
+                        <SelectItem value="none">Yok</SelectItem>
                         <SelectItem value="1">1 Bebek Koltuğu</SelectItem>
                         <SelectItem value="2">2 Bebek Koltuğu</SelectItem>
                       </SelectContent>
