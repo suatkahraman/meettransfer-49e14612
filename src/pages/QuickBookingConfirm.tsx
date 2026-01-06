@@ -123,6 +123,8 @@ export default function QuickBookingConfirm() {
   // Auto discount state
   const [canReject, setCanReject] = useState(true);
   const [isDiscountedOffer, setIsDiscountedOffer] = useState(false);
+  const [discountJustApplied, setDiscountJustApplied] = useState(false);
+  const [previousPrice, setPreviousPrice] = useState<number | null>(null);
   
   // All vehicle prices
   const [allVehiclePrices, setAllVehiclePrices] = useState<VehiclePriceInfo[]>([]);
@@ -543,22 +545,50 @@ export default function QuickBookingConfirm() {
 
           if (discountResult?.success) {
             const currencySymbol = getCurrencySymbol(discountResult.currency);
+            const oldPrice = booking.price;
+            const newPrice = discountResult.new_price;
+            
             toast.success(
               t("autoDiscountApplied") || 
-              `Fiyat indirildi! Yeni fiyat: ${currencySymbol}${discountResult.new_price}`
+              `Fiyat indirildi! Yeni fiyat: ${currencySymbol}${newPrice}`
             );
             
-            // Update local state
+            // Store previous price for animation
+            setPreviousPrice(oldPrice);
+            setDiscountJustApplied(true);
+            
+            // Update booking state with new price
             setBooking({ 
               ...booking, 
-              price: discountResult.new_price,
+              price: newPrice,
               status: "price_sent",
             });
+            
+            // Update allVehiclePrices to reflect the discount on selected vehicle
+            if (allVehiclePrices.length > 0) {
+              const discountAmount = (oldPrice || 0) - newPrice;
+              setAllVehiclePrices(prevPrices => 
+                prevPrices.map(v => {
+                  if (v.vehicleType === (selectedVehicle || booking.vehicle_type)) {
+                    return { ...v, price: newPrice };
+                  }
+                  // Apply proportional discount to other vehicles
+                  if (v.price) {
+                    return { ...v, price: Math.max(v.price - discountAmount, 0) };
+                  }
+                  return v;
+                })
+              );
+            }
+            
             setIsDiscountedOffer(true);
             setCanReject(false);
             
-            // Refetch vehicle prices with new discount
-            fetchAllVehiclePrices();
+            // Clear animation after 3 seconds
+            setTimeout(() => {
+              setDiscountJustApplied(false);
+              setPreviousPrice(null);
+            }, 3000);
             
             return; // Don't proceed to waiting state
           }
@@ -1193,16 +1223,37 @@ export default function QuickBookingConfirm() {
           </div>
 
           {/* Price Display */}
-          <div className="bg-primary/10 rounded-lg p-6 mb-6 text-center">
+          <div className={`rounded-lg p-6 mb-6 text-center transition-all duration-500 ${
+            discountJustApplied 
+              ? 'bg-green-100 dark:bg-green-900/30 ring-2 ring-green-500 animate-pulse' 
+              : 'bg-primary/10'
+          }`}>
             {!hasReturnTrip ? (
               <>
                 <p className="text-sm text-muted-foreground mb-2">{t("qbYourTransferPrice")}</p>
-                <p className="text-4xl font-bold text-primary">
+                {discountJustApplied && previousPrice && (
+                  <div className="mb-2">
+                    <span className="text-xl line-through text-muted-foreground">
+                      {currencySymbol}{previousPrice}
+                    </span>
+                    <span className="ml-2 text-sm bg-green-500 text-white px-2 py-1 rounded-full animate-bounce inline-block">
+                      -€3 {t("discount") || "İndirim"}!
+                    </span>
+                  </div>
+                )}
+                <p className={`text-4xl font-bold transition-all duration-300 ${
+                  discountJustApplied ? 'text-green-600 dark:text-green-400 scale-110' : 'text-primary'
+                }`}>
                   {currencySymbol}{selectedPrice}
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
                   {booking.price_currency}
                 </p>
+                {discountJustApplied && (
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-2 font-medium">
+                    ✨ {t("specialDiscountApplied") || "Sizin için özel indirim uygulandı!"}
+                  </p>
+                )}
               </>
             ) : (
               <div className="space-y-3">
