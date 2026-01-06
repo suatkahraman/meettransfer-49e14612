@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase, ZoomIn, X, Snowflake, Wifi, BatteryCharging, Droplets, Sparkles, Tv, Crown, Wine, Armchair, Stars } from "lucide-react";
+import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase, ZoomIn, X, Snowflake, Wifi, BatteryCharging, Droplets, Sparkles, Tv, Crown, Wine, Armchair, Stars, ThumbsUp } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -79,6 +79,29 @@ const getFeatureIcon = (iconName: string) => {
     'champagne': Wine,
   };
   return iconMap[iconName] || Sparkles;
+};
+
+// Get recommended vehicle based on passenger and luggage count
+const getRecommendedVehicle = (passengers: number, luggage: number): string => {
+  const maxNeeded = Math.max(passengers, luggage);
+  
+  // For 7+ passengers/luggage, recommend minibus
+  if (maxNeeded >= 7) {
+    return 'minibus';
+  }
+  
+  // For 5-6 passengers/luggage, recommend Mercedes Vito
+  if (maxNeeded >= 5) {
+    return 'mercedes-vito';
+  }
+  
+  // For 4 passengers/luggage, recommend VIP Mercedes (best value)
+  if (maxNeeded >= 4) {
+    return 'vip-mercedes';
+  }
+  
+  // For 1-3 passengers/luggage, recommend VIP Mercedes for comfort
+  return 'vip-mercedes';
 };
 
 export default function QuickBookingConfirm() {
@@ -707,8 +730,9 @@ export default function QuickBookingConfirm() {
                 {allVehiclePrices.map((vehicle) => {
                   const isSelected = (selectedVehicle || booking.vehicle_type) === vehicle.vehicleType;
                   const vehicleInfo = VEHICLE_TYPE_MAP[vehicle.vehicleType];
-                  
                   const vehicleImages = vehicleInfo?.images || [];
+                  const recommendedVehicle = getRecommendedVehicle(booking.passengers, booking.luggage_count || 0);
+                  const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
                   
                   return (
                     <div
@@ -718,12 +742,23 @@ export default function QuickBookingConfirm() {
                         relative border rounded-xl p-4 cursor-pointer transition-all duration-200
                         ${isSelected 
                           ? 'border-primary bg-primary/5 ring-2 ring-primary shadow-lg' 
-                          : vehicle.available 
-                            ? 'border-border hover:border-primary/50 hover:bg-muted/50' 
-                            : 'border-border opacity-50 cursor-not-allowed bg-muted/30'
+                          : isRecommended
+                            ? 'border-green-500/50 bg-green-500/5 hover:border-green-500 hover:bg-green-500/10'
+                            : vehicle.available 
+                              ? 'border-border hover:border-primary/50 hover:bg-muted/50' 
+                              : 'border-border opacity-50 cursor-not-allowed bg-muted/30'
                         }
                       `}
                     >
+                      {/* Recommended Badge */}
+                      {isRecommended && (
+                        <div className="absolute -top-2.5 left-4 z-10">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-500 text-white shadow-sm">
+                            <ThumbsUp className="h-3 w-3" />
+                            {t("qbRecommended") || "Recommended"}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-start gap-4">
                         {/* Vehicle Image Carousel with click to enlarge */}
                         <div 
