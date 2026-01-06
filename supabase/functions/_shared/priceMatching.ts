@@ -815,12 +815,79 @@ export function logAnalysis(
   console.log(`   → Airport: ${transferInfo.dropoffAnalysis.airport?.value || 'NOT FOUND'} ${transferInfo.dropoffAnalysis.airport ? `(${transferInfo.dropoffAnalysis.airport.matchedKeyword})` : ''}`);
   console.log(`   → City: ${transferInfo.dropoffAnalysis.city?.value || 'NOT FOUND'} ${transferInfo.dropoffAnalysis.city ? `(${transferInfo.dropoffAnalysis.city.matchedKeyword})` : ''}`);
   console.log(`   → District: ${transferInfo.dropoffAnalysis.district?.value || 'NOT FOUND'} ${transferInfo.dropoffAnalysis.district ? `(${transferInfo.dropoffAnalysis.district.matchedKeyword})` : ''}`);
-  console.log(`${'─'.repeat(60)}`);
-  console.log(`🎯 RESULT:`);
-  console.log(`   → Airport: ${transferInfo.airport || 'N/A'}`);
-  console.log(`   → City: ${transferInfo.city || 'N/A'}`);
-  console.log(`   → District: ${transferInfo.district || 'N/A'}`);
-  console.log(`   → Direction: ${transferInfo.direction}`);
-  console.log(`   → Confidence: ${transferInfo.confidence}`);
+  console.log(`🎯 RESULT: Airport=${transferInfo.airport}, City=${transferInfo.city}, District=${transferInfo.district}`);
+  console.log(`   Direction: ${transferInfo.direction} | Confidence: ${transferInfo.confidence}`);
   console.log(`${'='.repeat(60)}\n`);
+}
+
+// ==================== PRICE SANITY CHECK ====================
+// Minimum price thresholds for intercity/long-distance routes
+// If matched price is below this, it's likely a wrong match
+interface RouteMinimumPrice {
+  minPrice: number;  // EUR
+  description: string;
+}
+
+// Define minimum prices for specific route patterns
+const ROUTE_MINIMUM_PRICES: Record<string, RouteMinimumPrice> = {
+  // Istanbul to other cities
+  'Istanbul->Bursa': { minPrice: 180, description: 'Istanbul - Bursa (250+ km)' },
+  'Istanbul->Kocaeli': { minPrice: 80, description: 'Istanbul - Kocaeli (100+ km)' },
+  'Istanbul->Sapanca': { minPrice: 120, description: 'Istanbul - Sapanca (150+ km)' },
+  'Istanbul->Sakarya': { minPrice: 130, description: 'Istanbul - Sakarya (160+ km)' },
+  
+  // Bursa routes
+  'Bursa->Istanbul': { minPrice: 180, description: 'Bursa - Istanbul (250+ km)' },
+  'Bursa->Kocaeli': { minPrice: 100, description: 'Bursa - Kocaeli (130+ km)' },
+  
+  // Antalya long-distance
+  'Antalya->Istanbul': { minPrice: 400, description: 'Antalya - Istanbul (700+ km)' },
+  'Antalya->Cappadocia': { minPrice: 250, description: 'Antalya - Cappadocia (500+ km)' },
+  
+  // Cappadocia routes
+  'Cappadocia->Istanbul': { minPrice: 400, description: 'Cappadocia - Istanbul (750+ km)' },
+  'Cappadocia->Antalya': { minPrice: 250, description: 'Cappadocia - Antalya (500+ km)' },
+};
+
+export interface PriceSanityResult {
+  isValid: boolean;
+  reason?: string;
+  minimumExpected?: number;
+  actualPrice?: number;
+  routeKey?: string;
+}
+
+export function checkPriceSanity(
+  pickupCity: string | null,
+  dropoffCity: string | null,
+  price: number,
+  currency: string
+): PriceSanityResult {
+  // Only check EUR prices for now (most prices are in EUR)
+  if (currency !== 'EUR') {
+    return { isValid: true };
+  }
+  
+  // Skip if we don't have both cities
+  if (!pickupCity || !dropoffCity) {
+    return { isValid: true };
+  }
+  
+  // Check both directions
+  const routeKey1 = `${pickupCity}->${dropoffCity}`;
+  const routeKey2 = `${dropoffCity}->${pickupCity}`;
+  
+  const minPrice = ROUTE_MINIMUM_PRICES[routeKey1] || ROUTE_MINIMUM_PRICES[routeKey2];
+  
+  if (minPrice && price < minPrice.minPrice) {
+    return {
+      isValid: false,
+      reason: `Price ${price}€ is too low for ${minPrice.description}. Minimum expected: ${minPrice.minPrice}€`,
+      minimumExpected: minPrice.minPrice,
+      actualPrice: price,
+      routeKey: routeKey1,
+    };
+  }
+  
+  return { isValid: true };
 }
