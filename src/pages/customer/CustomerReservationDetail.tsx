@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle, Tag } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle, Tag, Briefcase, Baby } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol, CURRENCY_SYMBOLS } from '@/lib/currency';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -66,6 +66,8 @@ interface Reservation {
   original_reservation_id: string | null;
   discount_percentage: number | null;
   discount_amount: number | null;
+  luggage_count: number | null;
+  baby_seat_count: number | null;
   // Place details
   pickup_place_name: string | null;
   pickup_lat: number | null;
@@ -562,6 +564,28 @@ const CustomerReservationDetail = () => {
                 <span className="text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
               </div>
             </div>
+
+            {/* Luggage and Baby Seat Info */}
+            {((reservation.luggage_count && reservation.luggage_count > 0) || (reservation.baby_seat_count && reservation.baby_seat_count > 0)) && (
+              <div className="flex flex-wrap gap-3 py-4 border-t">
+                {reservation.luggage_count && reservation.luggage_count > 0 && (
+                  <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
+                    <Briefcase className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                      {reservation.luggage_count} {t('luggage') || 'Luggage'}
+                    </span>
+                  </div>
+                )}
+                {reservation.baby_seat_count && reservation.baby_seat_count > 0 && (
+                  <div className="flex items-center gap-2 bg-pink-50 dark:bg-pink-950/30 border border-pink-200 dark:border-pink-800 rounded-lg px-3 py-2">
+                    <Baby className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                    <span className="text-sm font-medium text-pink-700 dark:text-pink-300">
+                      {reservation.baby_seat_count} {t('babySeat') || 'Baby Seat'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Flight Status with Delay Alert */}
             {reservation.flight_number && (

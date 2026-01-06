@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy, ChevronDown, MessageSquare, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy, ChevronDown, MessageSquare, AlertTriangle, Briefcase, Baby } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -163,6 +163,9 @@ const AdminEditReservation = () => {
     dropoff_place_name: '',
     dropoff_lat: null as number | null,
     dropoff_lng: null as number | null,
+    // Luggage and baby seat
+    luggage_count: 0,
+    baby_seat_count: 0,
   });
 
   // Critical field detection for price-affecting changes
@@ -357,6 +360,9 @@ const AdminEditReservation = () => {
         dropoff_place_name: (r as any).dropoff_place_name || '',
         dropoff_lat: (r as any).dropoff_lat || null,
         dropoff_lng: (r as any).dropoff_lng || null,
+        // Luggage and baby seat
+        luggage_count: (r as any).luggage_count || 0,
+        baby_seat_count: (r as any).baby_seat_count || 0,
       };
       
       setOriginalData(initialData);
@@ -2299,6 +2305,25 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                   </Select>
                 </div>
               </div>
+
+              {/* Luggage and Baby Seat Info Display */}
+              {(formData.luggage_count > 0 || formData.baby_seat_count > 0) && (
+                <div className="flex flex-wrap gap-3 p-3 bg-muted/50 rounded-lg border">
+                  <span className="text-sm text-muted-foreground">Kapasite:</span>
+                  {formData.luggage_count > 0 && (
+                    <span className="flex items-center gap-1.5 text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded text-sm font-medium">
+                      <Briefcase className="h-4 w-4" />
+                      {formData.luggage_count} valiz
+                    </span>
+                  )}
+                  {formData.baby_seat_count > 0 && (
+                    <span className="flex items-center gap-1.5 text-pink-600 bg-pink-50 dark:bg-pink-900/30 px-2 py-1 rounded text-sm font-medium">
+                      <Baby className="h-4 w-4" />
+                      {formData.baby_seat_count} bebek koltuÄŸu
+                    </span>
+                  )}
+                </div>
+              )}
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">

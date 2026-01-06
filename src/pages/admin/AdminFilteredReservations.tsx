@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Calendar, Clock, User, UserCheck, Pencil, Check, X } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, UserCheck, Pencil, Check, X, Car, Briefcase, Baby } from 'lucide-react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { LocationDisplay } from '@/components/ui/location-display';
@@ -31,11 +31,22 @@ interface Reservation {
   driver_id: string | null;
   driver_user_id: string | null;
   agency_user_id: string | null;
+  luggage_count: number | null;
+  baby_seat_count: number | null;
   drivers?: {
     id: string;
     name: string;
   } | null;
 }
+
+const vehicleLabels: Record<string, string> = {
+  'mercedes-vito': 'Mercedes Vito',
+  'vip-mercedes': 'VIP Mercedes',
+  'maybach-minibus': 'Maybach Minibus',
+  'minibus': 'Mercedes Sprinter',
+  'mercedes-vclass': 'VIP Vito',
+  'maybach': 'Maybach',
+};
 
 const statusColors: Record<string, string> = {
   'awaiting-price': 'bg-orange-500/20 text-orange-700',
@@ -102,7 +113,7 @@ const AdminFilteredReservations = () => {
           pickup, dropoff, pickup_place_name, dropoff_place_name,
           pickup_date, pickup_time, flight_number, vehicle_type,
           payment_type, price, price_currency, status, driver_id,
-          driver_user_id, agency_user_id,
+          driver_user_id, agency_user_id, luggage_count, baby_seat_count,
           drivers (id, name)
         `)
         .order('pickup_date', { ascending: false });
@@ -306,6 +317,26 @@ const AdminFilteredReservations = () => {
                           <span className="text-primary">{reservation.drivers.name}</span>
                         </div>
                       )}
+
+                      {/* Vehicle & Capacity Info */}
+                      <div className="flex items-center gap-3 text-sm flex-wrap">
+                        <span className="flex items-center gap-1.5 text-muted-foreground">
+                          <Car className="h-3.5 w-3.5 text-primary" />
+                          <span className="font-medium">{vehicleLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
+                        </span>
+                        {reservation.luggage_count !== null && reservation.luggage_count > 0 && (
+                          <span className="flex items-center gap-1 text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded text-xs">
+                            <Briefcase className="h-3 w-3" />
+                            {reservation.luggage_count} valiz
+                          </span>
+                        )}
+                        {reservation.baby_seat_count !== null && reservation.baby_seat_count > 0 && (
+                          <span className="flex items-center gap-1 text-pink-600 bg-pink-50 dark:bg-pink-900/30 px-1.5 py-0.5 rounded text-xs">
+                            <Baby className="h-3 w-3" />
+                            {reservation.baby_seat_count} bebek koltuğu
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
