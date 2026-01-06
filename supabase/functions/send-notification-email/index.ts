@@ -17,6 +17,7 @@ type EmailType =
   | 'price_set_customer'         // Admin sets price → Customer
   | 'driver_assigned_driver'     // Admin assigns driver → Driver
   | 'driver_assigned_customer'   // Admin assigns driver → Customer
+  | 'reservation_updated_driver' // Reservation updated → Driver (new assignment or changes)
   | 'payment_request_customer'   // Admin sends payment link → Customer
   | 'payment_confirmed_customer' // Admin confirms payment → Customer
   | 'trip_completed_admin'       // Driver completes trip → Admin
@@ -324,6 +325,96 @@ const getEmailTemplate = (type: EmailType, data: any) => {
               <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
                 <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Rezervasyon Kodu</p>
                 <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #2196f3; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              ${data.passenger_cash_display ? `
+              <div style="background: #fff8e1; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #ffb300;">
+                <p style="margin: 0; color: #f57c00; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">💵 YOLCUDAN ALINACAK NAKİT</p>
+                <p style="margin: 10px 0 0; font-size: 32px; font-weight: bold; color: #e65100;">${data.passenger_cash_display}</p>
+                <p style="margin: 8px 0 0; color: #ef6c00; font-size: 13px;">Transfer sonunda müşteriden nakit olarak tahsil edilecek</p>
+              </div>
+              ` : (data.payment_type === 'cash' ? `
+              <div style="background: #fff8e1; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #ffb300;">
+                <p style="margin: 0; color: #f57c00; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">💵 YOLCUDAN ALINACAK NAKİT</p>
+                <p style="margin: 10px 0 0; font-size: 32px; font-weight: bold; color: #e65100;">${data.price_display}</p>
+                <p style="margin: 8px 0 0; color: #ef6c00; font-size: 13px;">Transfer sonunda müşteriden nakit olarak tahsil edilecek</p>
+              </div>
+              ` : `
+              <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 2px solid #2196f3;">
+                <p style="margin: 0; color: #1565c0; font-size: 14px;">💳 Online Ödeme - Nakit almayınız</p>
+              </div>
+              `)}
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Tarih & Saat</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #d32f2f;">${data.pickup_date} - ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Alış Noktası</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Bırakış Noktası</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Araç Tipi</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${getVehicleLabel(data.vehicle_type)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Yolcular</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.passengers}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Ödeme Yöntemi</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.payment_type === 'cash' ? '💵 Nakit' : '💳 Online'}</td>
+                </tr>
+                ${data.driver_notes ? `
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Notlar</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.driver_notes}</td>
+                </tr>
+                ` : ''}
+              </table>
+
+              <div style="text-align: center; margin-top: 25px;">
+                <a href="${baseUrl}/driver/job/${data.reservation_id}" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Görevi Görüntüle</a>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>© 2025 Meet Transfer. Tüm hakları saklıdır.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+    case 'reservation_updated_driver':
+      return {
+        subject: `📋 Rezervasyon Güncellendi - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">📋 Rezervasyon Güncellendi</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">Size atanan transferde değişiklik yapıldı</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Rezervasyon Kodu</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #ff9800; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 2px solid #ff9800;">
+                <p style="margin: 0; color: #e65100; font-weight: bold; text-align: center;">⚠️ Lütfen güncel detayları kontrol edin</p>
               </div>
 
               ${data.passenger_cash_display ? `
@@ -1330,7 +1421,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get driver email if needed
     let driverEmail = "";
-    if (type === 'driver_assigned_driver') {
+    if (type === 'driver_assigned_driver' || type === 'reservation_updated_driver') {
       console.log('=== DRIVER EMAIL LOOKUP START ===');
       console.log('Reservation ID:', reservation_id);
       console.log('Driver ID from reservation:', reservation.driver_id);
@@ -1461,6 +1552,7 @@ const handler = async (req: Request): Promise<Response> => {
         recipient = customerEmail;
         break;
       case 'driver_assigned_driver':
+      case 'reservation_updated_driver':
         recipient = driverEmail;
         break;
       case 'agency_approved_agency':

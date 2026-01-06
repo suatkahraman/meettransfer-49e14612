@@ -8,6 +8,7 @@ type EmailType =
   | 'price_set_customer'
   | 'driver_assigned_driver'
   | 'driver_assigned_customer'
+  | 'reservation_updated_driver'
   | 'payment_request_customer'
   | 'payment_confirmed_customer'
   | 'trip_completed_admin'
@@ -112,6 +113,19 @@ export const useEmailNotifications = () => {
   ) => {
     return sendEmail({
       type: 'driver_assigned_driver',
+      reservation_id: reservationId,
+      additional_data: { driver_email: driverEmail, driver_name: driverName },
+    });
+  }, [sendEmail]);
+
+  // 4c. When reservation is updated and driver is assigned → Email to driver
+  const emailDriverReservationUpdated = useCallback(async (
+    reservationId: string,
+    driverEmail?: string,
+    driverName?: string
+  ) => {
+    return sendEmail({
+      type: 'reservation_updated_driver',
       reservation_id: reservationId,
       additional_data: { driver_email: driverEmail, driver_name: driverName },
     });
@@ -248,6 +262,7 @@ export const useEmailNotifications = () => {
     emailAdminPriceRejected,
     emailCustomerPriceSet,
     emailDriverAssigned,
+    emailDriverReservationUpdated,
     emailCustomerDriverAssigned,
     emailPaymentRequest,
     emailPaymentConfirmed,
