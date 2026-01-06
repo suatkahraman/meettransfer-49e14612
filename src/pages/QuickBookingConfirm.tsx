@@ -62,23 +62,28 @@ interface VehiclePriceInfo {
 
 const VALID_PROMO_CODE = "Meet40Return";
 
-// Icon mapping for vehicle features
-const getFeatureIcon = (iconName: string) => {
-  const iconMap: Record<string, typeof Snowflake> = {
-    'snowflake': Snowflake,
-    'armchair': Armchair,
-    'wifi': Wifi,
-    'battery-charging': BatteryCharging,
-    'droplets': Droplets,
-    'luggage': Briefcase,
-    'stars': Stars,
-    'wine': Wine,
-    'sparkles': Sparkles,
-    'crown': Crown,
-    'tv': Tv,
-    'champagne': Wine,
+// Icon mapping for vehicle features with colors
+const getFeatureIconWithColor = (iconName: string) => {
+  const iconConfig: Record<string, { icon: typeof Snowflake; color: string }> = {
+    'snowflake': { icon: Snowflake, color: 'text-sky-500' },
+    'armchair': { icon: Armchair, color: 'text-amber-600' },
+    'wifi': { icon: Wifi, color: 'text-blue-500' },
+    'battery-charging': { icon: BatteryCharging, color: 'text-green-500' },
+    'droplets': { icon: Droplets, color: 'text-cyan-500' },
+    'luggage': { icon: Briefcase, color: 'text-orange-500' },
+    'stars': { icon: Stars, color: 'text-yellow-500' },
+    'wine': { icon: Wine, color: 'text-rose-500' },
+    'sparkles': { icon: Sparkles, color: 'text-purple-500' },
+    'crown': { icon: Crown, color: 'text-yellow-600' },
+    'tv': { icon: Tv, color: 'text-indigo-500' },
+    'champagne': { icon: Wine, color: 'text-pink-500' },
   };
-  return iconMap[iconName] || Sparkles;
+  return iconConfig[iconName] || { icon: Sparkles, color: 'text-purple-500' };
+};
+
+// Legacy function for backwards compatibility
+const getFeatureIcon = (iconName: string) => {
+  return getFeatureIconWithColor(iconName).icon;
 };
 
 // Get recommended vehicle based on passenger and luggage count
@@ -114,6 +119,10 @@ export default function QuickBookingConfirm() {
   const [confirming, setConfirming] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [waitingForPrice, setWaitingForPrice] = useState(false);
+  
+  // Auto discount state
+  const [canReject, setCanReject] = useState(true);
+  const [isDiscountedOffer, setIsDiscountedOffer] = useState(false);
   
   // All vehicle prices
   const [allVehiclePrices, setAllVehiclePrices] = useState<VehiclePriceInfo[]>([]);
@@ -282,6 +291,21 @@ export default function QuickBookingConfirm() {
       }
 
       setBooking(data as BookingRequest);
+      
+      // Check price history to determine if this is a discounted offer
+      const { data: priceHistory } = await supabase
+        .from("price_history")
+        .select("*")
+        .eq("quick_booking_id", data.id)
+        .in("action", ["rejected", "auto_discount"])
+        .order("created_at", { ascending: false });
+      
+      if (priceHistory) {
+        const hasAutoDiscount = priceHistory.some(h => h.action === "auto_discount");
+        setIsDiscountedOffer(hasAutoDiscount);
+        setCanReject(!hasAutoDiscount);
+        console.log(`Quick booking - Has auto discount: ${hasAutoDiscount}, Can reject: ${!hasAutoDiscount}`);
+      }
     } catch (err: any) {
       console.error("Fetch error:", err);
       setError(err.message || "Failed to load booking");
@@ -491,15 +515,7 @@ export default function QuickBookingConfirm() {
 
     setRejecting(true);
     try {
-      const { error } = await supabase
-        .from("quick_booking_requests")
-        .update({
-          status: "price_rejected",
-        })
-        .eq("id", booking.id);
-
-      if (error) throw error;
-
+      // Record the rejection in price history first
       if (booking.price) {
         try {
           await supabase.from("price_history").insert({
@@ -512,6 +528,55 @@ export default function QuickBookingConfirm() {
           console.error("Failed to record price history:", e);
         }
       }
+
+      // If this is the first rejection, apply auto discount instead of waiting
+      if (canReject && !isDiscountedOffer) {
+        try {
+          const { data: discountResult, error: discountError } = await supabase.functions.invoke("apply-auto-discount", {
+            body: { quick_booking_id: booking.id }
+          });
+
+          if (discountError) {
+            console.error("Auto discount error:", discountError);
+            throw discountError;
+          }
+
+          if (discountResult?.success) {
+            const currencySymbol = getCurrencySymbol(discountResult.currency);
+            toast.success(
+              t("autoDiscountApplied") || 
+              `Fiyat indirildi! Yeni fiyat: ${currencySymbol}${discountResult.new_price}`
+            );
+            
+            // Update local state
+            setBooking({ 
+              ...booking, 
+              price: discountResult.new_price,
+              status: "price_sent",
+            });
+            setIsDiscountedOffer(true);
+            setCanReject(false);
+            
+            // Refetch vehicle prices with new discount
+            fetchAllVehiclePrices();
+            
+            return; // Don't proceed to waiting state
+          }
+        } catch (e) {
+          console.error("Failed to apply auto discount:", e);
+          // If auto discount fails, proceed with normal rejection flow
+        }
+      }
+
+      // Normal rejection flow - set to waiting state
+      const { error } = await supabase
+        .from("quick_booking_requests")
+        .update({
+          status: "price_rejected",
+        })
+        .eq("id", booking.id);
+
+      if (error) throw error;
 
       try {
         await supabase.functions.invoke("notify-admin-quick-booking-rejected", {
@@ -863,19 +928,19 @@ export default function QuickBookingConfirm() {
                               </div>
                             </div>
                             
-                            {/* Feature Icons */}
+                            {/* Feature Icons - Colorful */}
                             {vehicleInfo?.features && vehicleInfo.features.length > 0 && (
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 {vehicleInfo.features.slice(0, 4).map((feature, idx) => {
-                                  const FeatureIcon = getFeatureIcon(feature.icon);
+                                  const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
                                   return (
                                     <div 
                                       key={idx}
-                                      className="flex items-center gap-1 px-2 py-1 rounded-md bg-background/80 border border-border/50 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+                                      className="flex items-center gap-1 px-2 py-1 rounded-md bg-background/80 border border-border/50 text-xs hover:border-border transition-colors"
                                       title={t("locale") === "tr" ? feature.labelTr : feature.label}
                                     >
-                                      <FeatureIcon className="h-3 w-3 flex-shrink-0" />
-                                      <span className="hidden sm:inline truncate max-w-[80px]">
+                                      <FeatureIcon className={`h-3 w-3 flex-shrink-0 ${color}`} />
+                                      <span className="hidden sm:inline truncate max-w-[80px] text-muted-foreground">
                                         {t("locale") === "tr" ? feature.labelTr : feature.label}
                                       </span>
                                     </div>
@@ -1000,19 +1065,19 @@ export default function QuickBookingConfirm() {
                         )}
                       </div>
                       
-                      {/* Feature Icons */}
+                      {/* Feature Icons - Colorful */}
                       {selectedVehicleInfo?.features && selectedVehicleInfo.features.length > 0 && (
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {selectedVehicleInfo.features.slice(0, 4).map((feature, idx) => {
-                            const FeatureIcon = getFeatureIcon(feature.icon);
+                            const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
                             return (
                               <div 
                                 key={idx}
-                                className="flex items-center gap-1 px-2 py-1 rounded-md bg-background/80 border border-border/50 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+                                className="flex items-center gap-1 px-2 py-1 rounded-md bg-background/80 border border-border/50 text-xs hover:border-border transition-colors"
                                 title={t("locale") === "tr" ? feature.labelTr : feature.label}
                               >
-                                <FeatureIcon className="h-3 w-3 flex-shrink-0" />
-                                <span className="hidden sm:inline truncate max-w-[80px]">
+                                <FeatureIcon className={`h-3 w-3 flex-shrink-0 ${color}`} />
+                                <span className="hidden sm:inline truncate max-w-[80px] text-muted-foreground">
                                   {t("locale") === "tr" ? feature.labelTr : feature.label}
                                 </span>
                               </div>
@@ -1219,35 +1284,68 @@ export default function QuickBookingConfirm() {
             </RadioGroup>
           </div>
 
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-4">
-            <Button
-              variant="outline"
-              onClick={handleReject}
-              disabled={rejecting || confirming}
-              className="h-12"
-            >
-              {rejecting ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <XCircle className="h-4 w-4 mr-2" />
-              )}
-              {t("qbReject")}
-            </Button>
+          {/* Discounted Offer Badge */}
+          {isDiscountedOffer && (
+            <div className="bg-green-50 dark:bg-green-950/30 p-3 rounded-lg border border-green-200 dark:border-green-800 mb-4">
+              <div className="flex items-center gap-2 justify-center">
+                <Tag className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                  {t("specialDiscountApplied") || "İndirimli fiyat uygulandı!"}
+                </span>
+              </div>
+            </div>
+          )}
 
-            <Button
-              onClick={handleConfirm}
-              disabled={confirming || rejecting}
-              className="h-12"
-            >
-              {confirming ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <CheckCircle className="h-4 w-4 mr-2" />
-              )}
-              {t("qbConfirmBooking")}
-            </Button>
-          </div>
+          {/* Action Buttons */}
+          {canReject ? (
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                variant="outline"
+                onClick={handleReject}
+                disabled={rejecting || confirming}
+                className="h-12"
+              >
+                {rejecting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <XCircle className="h-4 w-4 mr-2" />
+                )}
+                {t("qbReject")}
+              </Button>
+
+              <Button
+                onClick={handleConfirm}
+                disabled={confirming || rejecting}
+                className="h-12"
+              >
+                {confirming ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                )}
+                {t("qbConfirmBooking")}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <Button
+                onClick={handleConfirm}
+                disabled={confirming || rejecting}
+                className="w-full h-12"
+                size="lg"
+              >
+                {confirming ? (
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                ) : (
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                )}
+                {t("qbConfirmBooking")}
+              </Button>
+              <p className="text-center text-sm text-muted-foreground">
+                {t("finalOfferMessage") || "Bu sizin için özel indirimli son teklifimizdir."}
+              </p>
+            </div>
+          )}
 
           <p className="text-xs text-muted-foreground text-center mt-4">
             {t("qbByConfirming")}
