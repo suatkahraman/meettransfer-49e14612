@@ -41,12 +41,21 @@ export interface VehicleImage {
   alt: string;
 }
 
+export interface VehicleFeature {
+  icon: string;
+  label: string;
+  labelTr: string;
+}
+
 export interface VehicleTypeInfo {
   value: string;
   label: string;
   passengers: number;
   luggage: number;
   images: VehicleImage[];
+  features: VehicleFeature[];
+  description: string;
+  descriptionTr: string;
 }
 
 // Central vehicle type configuration - SYNC WITH edge functions _shared/vehicleConfig.ts
@@ -56,6 +65,16 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     label: 'Mercedes Vito',
     passengers: 6,
     luggage: 6,
+    description: 'Comfortable family minivan with spacious interior, perfect for airport transfers and city tours. Professional chauffeur service with meet & greet.',
+    descriptionTr: 'Konforlu aile minivan, geniş iç mekan, havalimanı transferleri ve şehir turları için ideal. Karşılama hizmeti dahil profesyonel şoför.',
+    features: [
+      { icon: 'snowflake', label: 'Air Conditioning', labelTr: 'Klima' },
+      { icon: 'armchair', label: 'Leather Seats', labelTr: 'Deri Koltuk' },
+      { icon: 'wifi', label: 'Free WiFi', labelTr: 'Ücretsiz WiFi' },
+      { icon: 'battery-charging', label: 'USB Charging', labelTr: 'USB Şarj' },
+      { icon: 'droplets', label: 'Bottled Water', labelTr: 'Su İkramı' },
+      { icon: 'luggage', label: 'Large Luggage Space', labelTr: 'Geniş Bagaj Alanı' },
+    ],
     images: [
       { src: vitoAirportAnime, alt: "Mercedes Vito private transfer at airport terminal" },
       { src: vitoAirportWelcome, alt: "Mercedes Vito airport pickup with welcome service" },
@@ -76,6 +95,17 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     label: 'VIP Mercedes',
     passengers: 5,
     luggage: 5,
+    description: 'Premium VIP transfer with starlight ceiling, ambient lighting, and luxurious leather interior. Ultimate comfort for business and leisure travelers.',
+    descriptionTr: 'Yıldızlı tavan, ambiyans aydınlatma ve lüks deri iç mekan ile premium VIP transfer. İş ve tatil yolculukları için üstün konfor.',
+    features: [
+      { icon: 'snowflake', label: 'Climate Control', labelTr: 'Klima Kontrolü' },
+      { icon: 'armchair', label: 'Premium Leather', labelTr: 'Premium Deri' },
+      { icon: 'stars', label: 'Starlight Ceiling', labelTr: 'Yıldızlı Tavan' },
+      { icon: 'wifi', label: 'High-Speed WiFi', labelTr: 'Yüksek Hızlı WiFi' },
+      { icon: 'battery-charging', label: 'USB & Wireless Charging', labelTr: 'USB & Kablosuz Şarj' },
+      { icon: 'wine', label: 'Refreshments', labelTr: 'İkramlar' },
+      { icon: 'sparkles', label: 'Ambient Lighting', labelTr: 'Ambiyans Aydınlatma' },
+    ],
     images: [
       { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple starlight roof interior" },
       { src: meetTransferDubai, alt: "Meet Transfer VIP service in Dubai UAE" },
@@ -93,6 +123,18 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     label: 'Maybach Minibus',
     passengers: 4,
     luggage: 4,
+    description: 'Ultra-luxury Maybach class minivan with exclusive starlight roof, entertainment system, and first-class seating. The pinnacle of private transfers.',
+    descriptionTr: 'Özel yıldızlı tavan, eğlence sistemi ve birinci sınıf koltuklar ile ultra lüks Maybach sınıfı minivan. Özel transferlerin zirvesi.',
+    features: [
+      { icon: 'snowflake', label: 'Dual-Zone Climate', labelTr: 'Çift Bölgeli Klima' },
+      { icon: 'crown', label: 'First-Class Seats', labelTr: 'Birinci Sınıf Koltuk' },
+      { icon: 'stars', label: 'Starlight Ceiling', labelTr: 'Yıldızlı Tavan' },
+      { icon: 'tv', label: 'Entertainment System', labelTr: 'Eğlence Sistemi' },
+      { icon: 'wifi', label: 'Premium WiFi', labelTr: 'Premium WiFi' },
+      { icon: 'battery-charging', label: 'Wireless Charging', labelTr: 'Kablosuz Şarj' },
+      { icon: 'champagne', label: 'Champagne Service', labelTr: 'Şampanya Servisi' },
+      { icon: 'sparkles', label: 'RGB Ambient Lighting', labelTr: 'RGB Ambiyans' },
+    ],
     images: [
       { src: meetTransferCyprus, alt: "Meet Transfer Maybach service in Cyprus" },
       { src: maybachInterior, alt: "Mercedes Maybach starlight ceiling luxury interior" },
@@ -107,6 +149,18 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     label: 'Mercedes Sprinter',
     passengers: 16,
     luggage: 16,
+    description: 'Spacious VIP minibus perfect for large groups, corporate events, and airport transfers. Premium comfort with entertainment and ample luggage space.',
+    descriptionTr: 'Büyük gruplar, kurumsal etkinlikler ve havalimanı transferleri için ideal geniş VIP minibüs. Eğlence sistemi ve bol bagaj alanı ile premium konfor.',
+    features: [
+      { icon: 'snowflake', label: 'Full Climate Control', labelTr: 'Tam Klima Kontrolü' },
+      { icon: 'armchair', label: 'VIP Leather Seats', labelTr: 'VIP Deri Koltuk' },
+      { icon: 'tv', label: 'LED TV Entertainment', labelTr: 'LED TV Eğlence' },
+      { icon: 'wifi', label: 'High-Speed WiFi', labelTr: 'Yüksek Hızlı WiFi' },
+      { icon: 'battery-charging', label: 'Multiple USB Ports', labelTr: 'Çoklu USB Port' },
+      { icon: 'luggage', label: 'Extra Large Luggage', labelTr: 'Ekstra Geniş Bagaj' },
+      { icon: 'sparkles', label: 'Starlight Ceiling', labelTr: 'Yıldızlı Tavan' },
+      { icon: 'droplets', label: 'Refreshment Bar', labelTr: 'İkram Barı' },
+    ],
     images: [
       { src: sprinterExteriorVip, alt: "Mercedes Sprinter VIP exterior luxury design" },
       { src: sprinterInteriorGrey, alt: "Mercedes Sprinter grey leather interior design" },

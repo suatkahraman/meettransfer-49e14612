@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase, ZoomIn, X } from "lucide-react";
+import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase, ZoomIn, X, Snowflake, Wifi, BatteryCharging, Droplets, Sparkles, Tv, Crown, Wine, Armchair, Stars } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -62,6 +62,25 @@ interface VehiclePriceInfo {
 
 const VALID_PROMO_CODE = "Meet40Return";
 
+// Icon mapping for vehicle features
+const getFeatureIcon = (iconName: string) => {
+  const iconMap: Record<string, typeof Snowflake> = {
+    'snowflake': Snowflake,
+    'armchair': Armchair,
+    'wifi': Wifi,
+    'battery-charging': BatteryCharging,
+    'droplets': Droplets,
+    'luggage': Briefcase,
+    'stars': Stars,
+    'wine': Wine,
+    'sparkles': Sparkles,
+    'crown': Crown,
+    'tv': Tv,
+    'champagne': Wine,
+  };
+  return iconMap[iconName] || Sparkles;
+};
+
 export default function QuickBookingConfirm() {
   const { t } = useLanguage();
   const [searchParams] = useSearchParams();
@@ -96,6 +115,7 @@ export default function QuickBookingConfirm() {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedVehicleImages, setSelectedVehicleImages] = useState<{src: string; alt: string}[]>([]);
   const [selectedVehicleLabel, setSelectedVehicleLabel] = useState("");
+  const [selectedVehicleForModal, setSelectedVehicleForModal] = useState<typeof VEHICLE_TYPE_MAP[string] | null>(null);
 
   const token = searchParams.get("token");
   const urlHasReturn = searchParams.get("hasReturn") === "true";
@@ -713,6 +733,7 @@ export default function QuickBookingConfirm() {
                             if (vehicleImages.length > 0) {
                               setSelectedVehicleImages(vehicleImages);
                               setSelectedVehicleLabel(vehicleInfo?.label || vehicle.vehicleLabel);
+                              setSelectedVehicleForModal(vehicleInfo || null);
                               setImageModalOpen(true);
                             }
                           }}
@@ -1039,34 +1060,77 @@ export default function QuickBookingConfirm() {
         </CardContent>
       </Card>
 
-      {/* Vehicle Image Modal */}
+      {/* Vehicle Image Modal with Features */}
       <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
           <div className="relative">
-            <div className="absolute top-4 left-4 z-10 bg-black/60 text-white px-3 py-1.5 rounded-lg font-semibold">
-              {selectedVehicleLabel}
+            {/* Image Carousel Section */}
+            <div className="relative">
+              <div className="absolute top-4 left-4 z-10 bg-black/60 text-white px-3 py-1.5 rounded-lg font-semibold">
+                {selectedVehicleLabel}
+              </div>
+              <DialogClose className="absolute top-4 right-4 z-10 bg-black/60 text-white rounded-full p-2 hover:bg-black/80 transition-colors">
+                <X className="h-5 w-5" />
+              </DialogClose>
+              <Carousel className="w-full" opts={{ loop: true }}>
+                <CarouselContent>
+                  {selectedVehicleImages.map((img, idx) => (
+                    <CarouselItem key={idx}>
+                      <div className="aspect-video">
+                        <img
+                          src={img.src}
+                          alt={img.alt}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="left-4" />
+                <CarouselNext className="right-4" />
+                <CarouselDots className="absolute bottom-4 left-1/2 -translate-x-1/2" />
+              </Carousel>
             </div>
-            <DialogClose className="absolute top-4 right-4 z-10 bg-black/60 text-white rounded-full p-2 hover:bg-black/80 transition-colors">
-              <X className="h-5 w-5" />
-            </DialogClose>
-            <Carousel className="w-full" opts={{ loop: true }}>
-              <CarouselContent>
-                {selectedVehicleImages.map((img, idx) => (
-                  <CarouselItem key={idx}>
-                    <div className="aspect-video">
-                      <img
-                        src={img.src}
-                        alt={img.alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="left-4" />
-              <CarouselNext className="right-4" />
-              <CarouselDots className="absolute bottom-4 left-1/2 -translate-x-1/2" />
-            </Carousel>
+            
+            {/* Vehicle Details Section */}
+            {selectedVehicleForModal && (
+              <div className="p-6 bg-background">
+                {/* Capacity Info */}
+                <div className="flex items-center gap-6 mb-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Users className="h-5 w-5 text-primary" />
+                    <span className="font-medium">{selectedVehicleForModal.passengers} {t("passengers")}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Briefcase className="h-5 w-5 text-primary" />
+                    <span className="font-medium">{selectedVehicleForModal.luggage} {t("luggage") || "luggage"}</span>
+                  </div>
+                </div>
+                
+                {/* Description */}
+                <p className="text-muted-foreground mb-6">
+                  {t("locale") === "tr" ? selectedVehicleForModal.descriptionTr : selectedVehicleForModal.description}
+                </p>
+                
+                {/* Features Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {selectedVehicleForModal.features?.map((feature, idx) => {
+                    const IconComponent = getFeatureIcon(feature.icon);
+                    return (
+                      <div 
+                        key={idx} 
+                        className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border/50"
+                      >
+                        <IconComponent className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span className="text-sm font-medium">
+                          {t("locale") === "tr" ? feature.labelTr : feature.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
