@@ -37,6 +37,13 @@ const LANGUAGE_TO_PREFIX: Record<Language, string> = {
 
 const translations: Record<Language, Record<string, string>> = {
   EN: {
+    // Best Price Animation
+    preparingBestPrice: "Preparing Your Best Price",
+    preparingBestPriceDesc: "We're calculating the best possible price for you...",
+    bestPriceGuarantee: "Best Price Guarantee",
+    noHiddenFees: "No Hidden Fees",
+    qbNewPriceReceived: "New price received! You can now review and confirm.",
+    
     // Navigation
     home: "Home",
     cities: "Cities",
@@ -1116,6 +1123,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq6A: "Yes! All our tours are fully customizable based on your interests - history, nature, food, thermal baths, or a mix of everything.",
   },
   DE: {
+    // Best Price Animation
+    preparingBestPrice: "Wir bereiten Ihren besten Preis vor",
+    preparingBestPriceDesc: "Wir berechnen den bestmöglichen Preis für Sie...",
+    bestPriceGuarantee: "Bestpreisgarantie",
+    noHiddenFees: "Keine versteckten Gebühren",
+    qbNewPriceReceived: "Neuer Preis erhalten! Sie können jetzt prüfen und bestätigen.",
+    
     // Reject button hint
     rejectButtonHint: "Wenn Ihnen der Preis nicht gefällt, senden Sie Ablehnung",
     // Navigation
@@ -2123,6 +2137,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "Meet Transfer Team",
   },
   FR: {
+    // Best Price Animation
+    preparingBestPrice: "Préparation de votre meilleur prix",
+    preparingBestPriceDesc: "Nous calculons le meilleur prix possible pour vous...",
+    bestPriceGuarantee: "Garantie du meilleur prix",
+    noHiddenFees: "Sans frais cachés",
+    qbNewPriceReceived: "Nouveau prix reçu ! Vous pouvez maintenant vérifier et confirmer.",
+    
     // Reject button hint
     rejectButtonHint: "Si le prix ne vous convient pas, envoyez un refus",
     // Navigation
@@ -3114,6 +3135,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "Équipe Meet Transfer",
   },
   RU: {
+    // Best Price Animation
+    preparingBestPrice: "Готовим лучшую цену для вас",
+    preparingBestPriceDesc: "Мы рассчитываем лучшую возможную цену для вас...",
+    bestPriceGuarantee: "Гарантия лучшей цены",
+    noHiddenFees: "Без скрытых платежей",
+    qbNewPriceReceived: "Новая цена получена! Теперь вы можете проверить и подтвердить.",
+    
     // Reject button hint
     rejectButtonHint: "Если вас не устраивает цена, отправьте отказ",
     // Navigation
@@ -4048,6 +4076,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "Команда Meet Transfer",
   },
   IT: {
+    // Best Price Animation
+    preparingBestPrice: "Prepariamo il miglior prezzo per te",
+    preparingBestPriceDesc: "Stiamo calcolando il miglior prezzo possibile per te...",
+    bestPriceGuarantee: "Garanzia del miglior prezzo",
+    noHiddenFees: "Nessun costo nascosto",
+    qbNewPriceReceived: "Nuovo prezzo ricevuto! Ora puoi verificare e confermare.",
+    
     // Reject button hint
     rejectButtonHint: "Se non ti piace il prezzo, invia rifiuto",
     // Navigation
@@ -5035,6 +5070,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "Team Meet Transfer",
   },
   ES: {
+    // Best Price Animation
+    preparingBestPrice: "Preparando tu mejor precio",
+    preparingBestPriceDesc: "Estamos calculando el mejor precio posible para ti...",
+    bestPriceGuarantee: "Garantía del mejor precio",
+    noHiddenFees: "Sin cargos ocultos",
+    qbNewPriceReceived: "¡Nuevo precio recibido! Ahora puedes revisar y confirmar.",
+    
     // Reject button hint
     rejectButtonHint: "Si no le gusta el precio, envíe rechazo",
     // Navigation
@@ -6022,6 +6064,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "Equipo Meet Transfer",
   },
   AR: {
+    // Best Price Animation
+    preparingBestPrice: "نحضر لك أفضل سعر",
+    preparingBestPriceDesc: "نحن نحسب أفضل سعر ممكن لك...",
+    bestPriceGuarantee: "ضمان أفضل سعر",
+    noHiddenFees: "بدون رسوم مخفية",
+    qbNewPriceReceived: "تم استلام السعر الجديد! يمكنك الآن المراجعة والتأكيد.",
+    
     // Reject button hint
     rejectButtonHint: "إذا لم يعجبك السعر، أرسل رفض",
     // Navigation
@@ -6956,6 +7005,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "فريق Meet Transfer",
   },
   TR: {
+    // Best Price Animation
+    preparingBestPrice: "En İyi Fiyatımız Hazırlanıyor",
+    preparingBestPriceDesc: "Sizin için en iyi fiyatı hesaplıyoruz...",
+    bestPriceGuarantee: "En İyi Fiyat Garantisi",
+    noHiddenFees: "Gizli Ücret Yok",
+    qbNewPriceReceived: "Yeni fiyat alındı! Artık inceleyip onaylayabilirsiniz.",
+    
     // Reject button hint
     rejectButtonHint: "Fiyatı beğenmediyseniz reddet gönderin",
     // Navigation
@@ -8020,6 +8076,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq6A: "Evet! Kış Uludağ'da kayak için harikadır. Cumalıkızık ve tarihi mekanlar yıl boyunca ziyaret edilebilir.",
   },
   UK: {
+    // Best Price Animation
+    preparingBestPrice: "Готуємо найкращу ціну для вас",
+    preparingBestPriceDesc: "Ми розраховуємо найкращу можливу ціну для вас...",
+    bestPriceGuarantee: "Гарантія найкращої ціни",
+    noHiddenFees: "Без прихованих платежів",
+    qbNewPriceReceived: "Нову ціну отримано! Тепер ви можете переглянути та підтвердити.",
+    
     // Reject button hint
     rejectButtonHint: "Якщо вас не влаштовує ціна, надішліть відмову",
     // Navigation
@@ -8975,6 +9038,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq6A: "Так! Зима ідеальна для катання на лижах на Улудаг. Село Куамликизик та історичні місця працюють цілий рік.",
   },
   JA: {
+    // Best Price Animation
+    preparingBestPrice: "最高の価格を準備中",
+    preparingBestPriceDesc: "お客様に最適な価格を計算しています...",
+    bestPriceGuarantee: "最安値保証",
+    noHiddenFees: "隠れた料金なし",
+    qbNewPriceReceived: "新しい価格を受け取りました！確認してご承認ください。",
+    
     // Reject button hint
     rejectButtonHint: "価格が気に入らない場合は拒否を送信してください",
     // Navigation
