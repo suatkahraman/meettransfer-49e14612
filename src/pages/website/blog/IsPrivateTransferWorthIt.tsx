@@ -154,8 +154,8 @@ const IsPrivateTransferWorthIt = () => {
                     <span className="text-green-600 font-bold">$5-7</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <span className="font-medium">Regular Taxi</span>
-                    <span className="text-amber-600 font-bold">$20-35</span>
+                    <span className="font-medium">Regular Transport</span>
+                    <span className="text-amber-600 font-bold">Variable</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg border border-primary/20">
                     <span className="font-medium">Private Transfer (Mercedes Vito)</span>
@@ -170,7 +170,7 @@ const IsPrivateTransferWorthIt = () => {
           </div>
 
           <p>
-            Looking at these numbers, the taxi appears to be the obvious choice for the budget-conscious. 
+            Looking at these numbers, regular transport may appear to be the cheaper option. 
             But here's where it gets interesting...
           </p>
 
@@ -252,9 +252,9 @@ const IsPrivateTransferWorthIt = () => {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="p-4 bg-amber-500/5 rounded-lg">
-                    <h4 className="font-semibold mb-2">Two Regular Taxis</h4>
-                    <p className="text-2xl font-bold mb-1">$40-70 total</p>
-                    <p className="text-sm text-muted-foreground">$10-17 per person</p>
+                    <h4 className="font-semibold mb-2">Regular Transport (x2)</h4>
+                    <p className="text-2xl font-bold mb-1">Variable total</p>
+                    <p className="text-sm text-muted-foreground">Per person varies</p>
                     <ul className="text-sm mt-3 space-y-1 text-muted-foreground">
                       <li>• Split into two vehicles</li>
                       <li>• Coordinate two drivers</li>
@@ -278,7 +278,7 @@ const IsPrivateTransferWorthIt = () => {
 
           <p>
             <strong>The verdict:</strong> For 2+ travelers, private transfer often costs the same 
-            or less per person than taxi, while offering a dramatically better experience.
+            or less per person than regular transport, while offering a dramatically better experience.
           </p>
 
           <h2>When Private Transfer is DEFINITELY Worth It</h2>
@@ -292,8 +292,7 @@ const IsPrivateTransferWorthIt = () => {
             Arriving late at night? Private transfer is almost always worth it because:
           </p>
           <ul>
-            <li>Taxi night tariff adds 50% to the meter</li>
-            <li>Fewer taxis available, longer queues</li>
+            <li>Fewer transport options available</li>
             <li>Safety concerns in unfamiliar city at night</li>
             <li>Public transport may not be running</li>
             <li>You're tired and want to get to bed ASAP</li>
@@ -317,7 +316,7 @@ const IsPrivateTransferWorthIt = () => {
           </p>
           <ul>
             <li>Confusion navigating the airport</li>
-            <li>Risk of taxi scams targeting tourists</li>
+            <li>Risk of issues with unfamiliar transport</li>
             <li>Stress of explaining your destination</li>
             <li>Uncertainty about fair pricing</li>
           </ul>
@@ -369,7 +368,7 @@ const IsPrivateTransferWorthIt = () => {
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-500 mt-2" />
-                  <span>You're an experienced traveler comfortable with Turkish taxis</span>
+                  <span>You're an experienced traveler comfortable with local transport</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-500 mt-2" />
@@ -388,17 +387,17 @@ const IsPrivateTransferWorthIt = () => {
             Don't just take our word for it. Here's what travelers say about their experience:
           </p>
           <blockquote className="border-l-4 border-primary pl-4 italic">
-            "After a 12-hour flight with two kids under 5, the last thing I wanted was to wrestle 
-            for a taxi. Having our driver waiting with cold water and helping with the car seats 
+            "After a 12-hour flight with two kids under 5, the last thing I wanted was to struggle 
+            with transport. Having our driver waiting with cold water and helping with the car seats 
             was worth every dollar." – Sarah M., UK
           </blockquote>
           <blockquote className="border-l-4 border-primary pl-4 italic">
-            "I tried taking a taxi on my first trip to Istanbul. The driver tried to charge 
-            triple the normal rate. Second trip, I booked private transfer - no stress, fixed 
+            "I tried regular transport on my first trip to Istanbul. Had some communication issues. 
+            Second trip, I booked private transfer - no stress, fixed 
             price, professional service. Never going back." – Marco D., Italy
           </blockquote>
           <blockquote className="border-l-4 border-primary pl-4 italic">
-            "For our group of 6, private minivan was actually cheaper than 2 taxis and so much 
+            "For our group of 6, private minivan was the obvious choice and so much 
             easier. We could all chat and plan on the way to the hotel." – Jennifer T., USA
           </blockquote>
 

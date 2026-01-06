@@ -29,15 +29,15 @@ const IstanbulTransferPriceGuide = () => {
   ];
 
   const priceData = [
-    { destination: "Taksim / Beyoğlu", taxi: "600-800 TL ($20-25)", private: "€50-55", bus: "150 TL ($5)" },
-    { destination: "Sultanahmet", taxi: "650-850 TL ($21-27)", private: "€50-55", bus: "150 TL ($5)" },
-    { destination: "Kadıköy", taxi: "800-1000 TL ($26-32)", private: "€65-70", bus: "180 TL ($6)" },
-    { destination: "Beşiktaş", taxi: "600-750 TL ($19-24)", private: "€50-55", bus: "150 TL ($5)" },
-    { destination: "Galataport Cruise Terminal", taxi: "600-800 TL ($20-25)", private: "€50-55", bus: "N/A" },
-    { destination: "Sabiha Gökçen Airport", taxi: "1500-2000 TL ($48-65)", private: "€110-130", bus: "N/A" },
-    { destination: "Bursa (Osmangazi)", taxi: "N/A", private: "€185-195", bus: "N/A" },
-    { destination: "Sapanca", taxi: "N/A", private: "€245-255", bus: "N/A" },
-    { destination: "Kartepe Kayak Merkezi", taxi: "N/A", private: "€255-275", bus: "N/A" },
+    { destination: "Taksim / Beyoğlu", private: "€50-55", bus: "150 TL ($5)" },
+    { destination: "Sultanahmet", private: "€50-55", bus: "150 TL ($5)" },
+    { destination: "Kadıköy", private: "€65-70", bus: "180 TL ($6)" },
+    { destination: "Beşiktaş", private: "€50-55", bus: "150 TL ($5)" },
+    { destination: "Galataport Cruise Terminal", private: "€50-55", bus: "N/A" },
+    { destination: "Sabiha Gökçen Airport", private: "€110-130", bus: "N/A" },
+    { destination: "Bursa (Osmangazi)", private: "€185-195", bus: "N/A" },
+    { destination: "Sapanca", private: "€245-255", bus: "N/A" },
+    { destination: "Kartepe Kayak Merkezi", private: "€255-275", bus: "N/A" },
   ];
 
   const vehiclePrices = [
@@ -137,7 +137,6 @@ const IstanbulTransferPriceGuide = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("blogPriceTableDestination")}</TableHead>
-                  <TableHead>{t("blogPriceTableTaxi")}</TableHead>
                   <TableHead>{t("blogPriceTablePrivate")}</TableHead>
                   <TableHead>{t("blogPriceTableBus")}</TableHead>
                 </TableRow>
@@ -146,7 +145,6 @@ const IstanbulTransferPriceGuide = () => {
                 {priceData.map((row, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-medium">{row.destination}</TableCell>
-                    <TableCell>{row.taxi}</TableCell>
                     <TableCell className="text-primary font-semibold">{row.private}</TableCell>
                     <TableCell>{row.bus}</TableCell>
                   </TableRow>
