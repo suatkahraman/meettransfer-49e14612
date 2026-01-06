@@ -197,6 +197,29 @@ const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = 
       'inegol', 'inegöl', 'orhangazi', 'kestel', 'gursu', 'gürsu'
     ]
   },
+  'Kocaeli': {
+    priority: 1,
+    keywords: [
+      'kocaeli', 'izmit', 'İzmit', 'gebze', 'kartepe', 'kandira', 'kandıra',
+      'darica', 'darıca', 'cayirova', 'çayırova', 'dilovasi', 'dilovası', 'golcuk', 'gölcük',
+      'derince', 'basiskele', 'başiskele', 'karamursel', 'karamürsel', 'korfez', 'körfez',
+      'maşukiye', 'masukiye', 'kuzuyayla', 'sogucak', 'soğucak'
+    ]
+  },
+  'Sapanca': {
+    priority: 1,
+    keywords: [
+      'sapanca', 'sapanca golu', 'sapanca gölü', 'sapanca lake', 'kirkpinar', 'kırkpınar',
+      'mahmudiye', 'hasanpasa', 'hasanpaşa', 'rustemler', 'rüstemler'
+    ]
+  },
+  'Sakarya': {
+    priority: 1,
+    keywords: [
+      'sakarya', 'adapazari', 'adapazarı', 'serdivan', 'akyazi', 'akyazı', 
+      'hendek', 'karasu', 'ferizli', 'sogutlu', 'söğütlü'
+    ]
+  },
   'Dubai': {
     priority: 1,
     keywords: [
@@ -286,6 +309,20 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Uludag': { priority: 1, keywords: ['uludag', 'uludağ', 'mount uludag'], city: 'Bursa' },
   'Cumalikizik': { priority: 1, keywords: ['cumalikizik', 'cumalıkızık'], city: 'Bursa' },
   'Iznik': { priority: 2, keywords: ['iznik', 'nicaea'], city: 'Bursa' },
+  
+  // Kocaeli
+  'Izmit': { priority: 1, keywords: ['izmit', 'İzmit', 'kocaeli center', 'kocaeli merkez', 'kocaeli city'], city: 'Kocaeli' },
+  'Kartepe': { priority: 1, keywords: ['kartepe', 'masukiye', 'maşukiye', 'kuzuyayla', 'sogucak', 'soğucak', 'kartepe ski', 'kartepe kayak'], city: 'Kocaeli' },
+  'Gebze': { priority: 1, keywords: ['gebze', 'cayirova', 'çayırova', 'darica', 'darıca', 'dilovasi', 'dilovası'], city: 'Kocaeli' },
+  'Golcuk': { priority: 2, keywords: ['golcuk', 'gölcük', 'degirmendere', 'değirmendere'], city: 'Kocaeli' },
+  'Derince': { priority: 2, keywords: ['derince', 'korfez', 'körfez'], city: 'Kocaeli' },
+  'Kandira': { priority: 2, keywords: ['kandira', 'kandıra', 'kerpe', 'cebeci'], city: 'Kocaeli' },
+  
+  // Sapanca / Sakarya
+  'Sapanca Center': { priority: 1, keywords: ['sapanca', 'sapanca merkez', 'sapanca golu', 'sapanca gölü', 'sapanca lake'], city: 'Sapanca' },
+  'Kirkpinar': { priority: 1, keywords: ['kirkpinar', 'kırkpınar', 'mahmudiye', 'hasanpasa', 'hasanpaşa'], city: 'Sapanca' },
+  'Adapazari': { priority: 1, keywords: ['adapazari', 'adapazarı', 'sakarya center', 'sakarya merkez'], city: 'Sakarya' },
+  'Serdivan': { priority: 2, keywords: ['serdivan', 'bahcesehir', 'bahçeşehir'], city: 'Sakarya' },
   
   // Dubai
   'Downtown Dubai': { priority: 1, keywords: ['downtown', 'downtown dubai', 'burj khalifa', 'dubai mall', 'boulevard'], city: 'Dubai' },
@@ -542,31 +579,34 @@ export async function matchPrice(
       }
     }
     
-    // 3. Try city only match
-    if (city) {
-      const { data: cityOnlyMatch, error } = await supabase
+    // 3. Try city + district match (for intercity transfers without airport)
+    if (city && district) {
+      const { data: cityDistrictMatch, error } = await supabase
         .from('region_prices')
         .select('*')
         .eq('city', city)
+        .eq('district', district)
         .eq('vehicle_type', vehicleType)
         .eq('is_active', true)
-        .order('price', { ascending: true })
         .limit(1);
       
-      if (!error && cityOnlyMatch && cityOnlyMatch.length > 0) {
-        console.log('✅ City-only fallback match found:', cityOnlyMatch[0]);
+      if (!error && cityDistrictMatch && cityDistrictMatch.length > 0) {
+        console.log('✅ City+District match found:', cityDistrictMatch[0]);
         return {
           found: true,
-          price: cityOnlyMatch[0].price,
-          currency: cityOnlyMatch[0].price_currency,
-          matchedCity: cityOnlyMatch[0].city,
-          matchedDistrict: cityOnlyMatch[0].district,
-          matchedAirport: cityOnlyMatch[0].airport || undefined,
-          confidence: 'low',
-          matchType: 'city_fallback',
+          price: cityDistrictMatch[0].price,
+          currency: cityDistrictMatch[0].price_currency,
+          matchedCity: cityDistrictMatch[0].city,
+          matchedDistrict: cityDistrictMatch[0].district,
+          matchedAirport: cityDistrictMatch[0].airport || undefined,
+          confidence: 'medium',
+          matchType: 'district_fallback',
         };
       }
     }
+    
+    // NOTE: city-only match REMOVED - too broad, causes incorrect pricing
+    // If no airport and no district match, require manual pricing
     
     console.log('❌ No price match found');
     return { found: false };

@@ -163,23 +163,26 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
 
-      // 3. Try city only match (any airport)
-      if (!bestPrice && city) {
-        const { data: cityOnlyMatch } = await supabase
+      // 3. Try city + district match (without airport - for intercity transfers)
+      if (!bestPrice && city && district) {
+        const { data: cityDistrictMatch } = await supabase
           .from("region_prices")
           .select("*")
           .eq("city", city)
+          .eq("district", district)
           .eq("vehicle_type", vehicleType)
           .eq("is_active", true)
-          .order("price", { ascending: true })
           .limit(1);
 
-        if (cityOnlyMatch && cityOnlyMatch.length > 0) {
-          bestPrice = cityOnlyMatch[0];
-          matchType = `city-only (${city}) [${vehicleType}]`;
-          console.log(`✅ City-only match found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        if (cityDistrictMatch && cityDistrictMatch.length > 0) {
+          bestPrice = cityDistrictMatch[0];
+          matchType = `city+district (${city}/${district}) [${vehicleType}]`;
+          console.log(`✅ City+District match found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
         }
       }
+
+      // NOTE: city-only match REMOVED - too broad, causes incorrect pricing
+      // If no airport and no district match, require manual pricing
 
       // 4. Try airport only match (if we have airport but city matching failed)
       if (!bestPrice && airport) {
