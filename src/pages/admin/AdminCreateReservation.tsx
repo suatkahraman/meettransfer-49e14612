@@ -102,6 +102,8 @@ const AdminCreateReservation = () => {
     driver_id: '',
     agency_id: '',
     admin_notes: '',
+    luggage_count: '',
+    baby_seat_count: '',
     // Place details
     pickup_place_name: '',
     pickup_lat: null as number | null,
@@ -262,6 +264,8 @@ const AdminCreateReservation = () => {
           driver_id: formData.driver_id || null,
           agency_id: formData.agency_id || null,
           passenger_names: validPassengerNames,
+          luggage_count: formData.luggage_count ? parseInt(formData.luggage_count) : null,
+          baby_seat_count: formData.baby_seat_count ? parseInt(formData.baby_seat_count) : null,
           // Place details
           pickup_place_name: formData.pickup_place_name || null,
           pickup_lat: formData.pickup_lat,
@@ -600,6 +604,36 @@ const AdminCreateReservation = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Valiz Sayısı</Label>
+                    <Select value={formData.luggage_count} onValueChange={(v) => setFormData({...formData, luggage_count: v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Valiz seçin" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Yok</SelectItem>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                          <SelectItem key={n} value={n.toString()}>{n} Valiz</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Bebek Koltuğu</Label>
+                    <Select value={formData.baby_seat_count} onValueChange={(v) => setFormData({...formData, baby_seat_count: v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Bebek koltuğu seçin" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Yok</SelectItem>
+                        <SelectItem value="1">1 Bebek Koltuğu</SelectItem>
+                        <SelectItem value="2">2 Bebek Koltuğu</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
