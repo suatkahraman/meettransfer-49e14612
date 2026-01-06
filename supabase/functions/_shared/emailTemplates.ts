@@ -22,6 +22,7 @@ interface TransferMatchInfo {
   district?: string | null;
   direction: string;
   confidence: string;
+  additionalReason?: string;
 }
 
 interface PriceInfo {
@@ -157,6 +158,11 @@ export function manualPriceRequiredEmail(
           <p style="margin: 5px 0; color: #666;"><strong>Bulunan Şehir:</strong> ${matchInfo.city || 'Bulunamadı'}</p>
           <p style="margin: 5px 0; color: #666;"><strong>Bulunan İlçe:</strong> ${matchInfo.district || 'Bulunamadı'}</p>
           <p style="margin: 5px 0; color: #666;"><strong>Yön:</strong> ${matchInfo.direction}</p>
+          ${matchInfo.additionalReason ? `
+            <div style="margin-top: 10px; padding: 10px; background: #fef2f2; border-radius: 6px; border: 1px solid #fca5a5;">
+              <p style="margin: 0; color: #b91c1c; font-weight: bold;">⚠️ ${matchInfo.additionalReason}</p>
+            </div>
+          ` : ''}
         </div>
         
         <div style="text-align: center; margin: 20px 0; padding: 20px; background: #fef3c7; border-radius: 8px; border: 2px solid #f59e0b;">

@@ -5,6 +5,7 @@ import {
   analyzeTransfer,
   calculateDiscount,
   logAnalysis,
+  checkPriceSanity,
 } from "../_shared/priceMatching.ts";
 import { getVehicleFallbackList, getVehicleLabel } from "../_shared/vehicleConfig.ts";
 import { convertCurrency, getCurrencySymbol } from "../_shared/currencyUtils.ts";
@@ -24,7 +25,8 @@ interface AutoPriceRequest {
 // Send admin notification for manual pricing
 async function sendManualPriceRequestEmail(
   booking: any,
-  transferInfo: any
+  transferInfo: any,
+  reason?: string
 ): Promise<void> {
   const adminEmail = "sautkahraman@gmail.com";
   
@@ -37,6 +39,7 @@ async function sendManualPriceRequestEmail(
         district: transferInfo.district,
         direction: transferInfo.direction,
         confidence: transferInfo.confidence,
+        additionalReason: reason,
       },
       'quick_booking'
     );
@@ -211,6 +214,36 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log(`🎯 Best price found: ${bestPrice.price} ${bestPrice.price_currency} | Match type: ${matchType}`);
+
+    // Sanity check: verify price is reasonable for the route
+    const pickupCityForCheck = transferInfo.pickupAnalysis.city?.value || transferInfo.pickupAnalysis.district?.city || null;
+    const dropoffCityForCheck = transferInfo.dropoffAnalysis.city?.value || transferInfo.dropoffAnalysis.district?.city || null;
+    
+    const sanityCheck = checkPriceSanity(
+      pickupCityForCheck,
+      dropoffCityForCheck,
+      bestPrice.price,
+      bestPrice.price_currency || 'EUR'
+    );
+
+    if (!sanityCheck.isValid) {
+      console.log(`⚠️ Price sanity check FAILED: ${sanityCheck.reason}`);
+      console.log(`   Route: ${sanityCheck.routeKey}, Price: ${sanityCheck.actualPrice}€, Minimum: ${sanityCheck.minimumExpected}€`);
+      
+      // Send email to admin for manual pricing with reason
+      await sendManualPriceRequestEmail(booking, transferInfo, sanityCheck.reason);
+      
+      return new Response(JSON.stringify({ 
+        matched: false, 
+        reason: "price_sanity_failed",
+        sanityCheck,
+        searchedParams: { airport, city, district, vehicles: vehicleFallbacks }
+      }), {
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log(`✅ Price sanity check passed`);
 
     // Admin enters price in EUR - check if customer requested different currency
     const basePriceCurrency = bestPrice.price_currency || 'EUR';
