@@ -341,26 +341,43 @@ export const Hero = () => {
 
       if (error) throw error;
 
-      // Notify admin about new quick booking request via email
-      try {
-        await supabase.functions.invoke("notify-admin-quick-booking-new", {
-          body: {
-            bookingId: data.id,
-            pickup,
-            dropoff,
-            pickupDate: format(date, "yyyy-MM-dd"),
-            pickupTime: time,
-            vehicleType,
-            passengers: parseInt(passengers),
-            priceCurrency: preferredCurrency,
-            customerEmail: customerEmail.trim() || null,
-            customerPhone: customerPhone.trim() || null,
-            customerNotes: customerNotes.trim() || null,
-          },
-        });
-      } catch (notifyError) {
-        console.error("Failed to notify admin:", notifyError);
-        // Don't fail the user flow
+      // Try auto-pricing first (only for non-agency guests)
+      let autoPriceResult: any = null;
+      if (!isAgency) {
+        try {
+          const { data: autoPriceData } = await supabase.functions.invoke("auto-price-quick-booking", {
+            body: { quick_booking_id: data.id },
+          });
+          autoPriceResult = autoPriceData;
+          console.log("Auto-price result:", autoPriceResult);
+        } catch (autoPriceError) {
+          console.error("Auto-pricing failed:", autoPriceError);
+          // Continue with manual pricing flow
+        }
+      }
+
+      // Only notify admin if auto-pricing didn't work
+      if (!autoPriceResult?.matched) {
+        try {
+          await supabase.functions.invoke("notify-admin-quick-booking-new", {
+            body: {
+              bookingId: data.id,
+              pickup,
+              dropoff,
+              pickupDate: format(date, "yyyy-MM-dd"),
+              pickupTime: time,
+              vehicleType,
+              passengers: parseInt(passengers),
+              priceCurrency: preferredCurrency,
+              customerEmail: customerEmail.trim() || null,
+              customerPhone: customerPhone.trim() || null,
+              customerNotes: customerNotes.trim() || null,
+            },
+          });
+        } catch (notifyError) {
+          console.error("Failed to notify admin:", notifyError);
+          // Don't fail the user flow
+        }
       }
 
       let url = `/quick-booking-confirm?token=${data.confirmation_token}`;
@@ -371,7 +388,13 @@ export const Hero = () => {
         }
       }
       navigate(url);
-      toast.success(t("priceRequestSent") || "Your price request has been sent!");
+      
+      // Show appropriate success message
+      if (autoPriceResult?.matched) {
+        toast.success(t("priceCalculated") || "Price has been calculated! Check your email.");
+      } else {
+        toast.success(t("priceRequestSent") || "Your price request has been sent!");
+      }
     } catch (error: any) {
       console.error("Error submitting request:", error);
       toast.error(error.message || "Failed to submit request");
