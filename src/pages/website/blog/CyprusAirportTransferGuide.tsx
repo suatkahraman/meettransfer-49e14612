@@ -61,7 +61,7 @@ const CyprusAirportTransferGuide = () => {
       <SEOHead
         title={t("blogCyprusSeoTitle")}
         description={t("blogCyprusSeoDesc")}
-        keywords="Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Cyprus taxi, Protaras transfer, Kyrenia transfer, Northern Cyprus transfer, Ercan airport, Famagusta transfer, Troodos transfer"
+        keywords="Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Protaras transfer, Kyrenia transfer, Northern Cyprus transfer, Ercan airport, Famagusta transfer, Troodos transfer"
         canonicalPath="/blog/cyprus-airport-transfer-guide"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
         ogType="article"

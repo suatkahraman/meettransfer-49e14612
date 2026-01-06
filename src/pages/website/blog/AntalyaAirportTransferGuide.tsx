@@ -44,7 +44,7 @@ const AntalyaAirportTransferGuide = () => {
       <SEOHead
         title={t("blogAntalyaSeoTitle")}
         description={t("blogAntalyaSeoDesc")}
-        keywords="Antalya airport transfer, AYT airport hotel transfer, Antalya to Belek transfer, Antalya to Side transfer, Lara Beach transfer, Antalya airport taxi, private transfer Antalya"
+        keywords="Antalya airport transfer, AYT airport hotel transfer, Antalya to Belek transfer, Antalya to Side transfer, Lara Beach transfer, private transfer Antalya"
         canonicalPath="/blog/antalya-airport-transfer-to-hotels"
         ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
         ogType="article"

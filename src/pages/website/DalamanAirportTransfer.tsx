@@ -33,7 +33,7 @@ const faqItems = [
     answer: "Our private Dalaman Airport transfer to Fethiye takes about 45 minutes. We meet you at arrivals, help with your luggage, and drive you directly to your hotel in Fethiye or Ölüdeniz. Price is fixed at $45.",
   },
   {
-    question: "How much is a taxi from Dalaman Airport to Marmaris?",
+    question: "How much is transfer from Dalaman Airport to Marmaris?",
     answer: "Our Dalaman Airport to Marmaris private transfer is $75 fixed price. This includes meet & greet, luxury Mercedes vehicle, and door-to-door service. The journey takes approximately 1.5 hours.",
   },
   {
@@ -79,7 +79,7 @@ const DalamanAirportTransfer = () => {
       <SEOHead
         title="Dalaman Airport Transfer | Fethiye, Marmaris, Ölüdeniz Shuttle | Meet Transfer"
         description="Book Dalaman Airport (DLM) private transfer from $35. Direct service to Fethiye, Ölüdeniz, Marmaris, Dalyan, Göcek & Kaş. 24/7 meet & greet. Book now!"
-        keywords="Dalaman Airport transfer, DLM airport transfer, Dalaman to Fethiye transfer, Dalaman Airport taxi, Dalaman to Marmaris, Dalaman to Ölüdeniz, Dalaman Airport shuttle, Dalaman to Göcek yacht transfer"
+        keywords="Dalaman Airport transfer, DLM airport transfer, Dalaman to Fethiye transfer, Dalaman to Marmaris, Dalaman to Ölüdeniz, Dalaman Airport shuttle, Dalaman to Göcek yacht transfer"
         canonicalPath="/dalaman-airport-transfer"
       />
       <SchemaOrg

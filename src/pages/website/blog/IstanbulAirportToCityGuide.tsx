@@ -25,8 +25,8 @@ const IstanbulAirportToCityGuide = () => {
       answer: "The fastest way is by private transfer, taking approximately 35-45 minutes to Taksim or Sultanahmet depending on traffic. The metro takes about 50-60 minutes but requires transfers."
     },
     {
-      question: "How much does a taxi cost from Istanbul Airport to Taksim?",
-      answer: "A taxi from Istanbul Airport to Taksim typically costs between 600-800 TL ($20-25 USD) depending on traffic and time of day. Prices can be higher at night or during peak hours."
+      question: "How much does regular transport cost from Istanbul Airport to Taksim?",
+      answer: "Regular transport from Istanbul Airport to Taksim typically costs between 600-800 TL ($20-25 USD) depending on traffic and time of day. Prices can be higher at night or during peak hours."
     },
     {
       question: "Is there a metro from Istanbul Airport?",
@@ -86,7 +86,7 @@ const IstanbulAirportToCityGuide = () => {
       <SEOHead
         title={t('blogIstanbul1Title')}
         description={t('blogIstanbul1Desc')}
-        keywords="Istanbul Airport to city, Istanbul Airport transfer, IST to Taksim, Istanbul Airport taxi, Istanbul Airport metro, Istanbul Airport to Sultanahmet, private transfer Istanbul"
+        keywords="Istanbul Airport to city, Istanbul Airport transfer, IST to Taksim, Istanbul Airport metro, Istanbul Airport to Sultanahmet, private transfer Istanbul"
         canonicalPath="/blog/istanbul-airport-to-city-best-way"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
         ogType="article"
@@ -265,7 +265,7 @@ const IstanbulAirportToCityGuide = () => {
               <CardContent className="grid md:grid-cols-2 gap-4">
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>No waiting in taxi queues</span>
+                  <span>No waiting in queues</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
@@ -342,7 +342,7 @@ const IstanbulAirportToCityGuide = () => {
           <h2>Option 4: Havaist Airport Buses</h2>
           <p>
             Havaist is the official airport bus service connecting Istanbul Airport to various parts of 
-            the city. It's a good middle-ground option between metro and taxi.
+            the city. It's a good middle-ground option between metro and private transfer.
           </p>
 
           <h3>Main Havaist Routes</h3>

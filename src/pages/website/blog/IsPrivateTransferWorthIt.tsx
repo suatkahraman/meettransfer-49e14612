@@ -14,18 +14,18 @@ const IsPrivateTransferWorthIt = () => {
   const faqItems = [
     {
       question: "Is private transfer really worth the extra cost?",
-      answer: "For most travelers, yes. When you factor in time saved, comfort, safety, and especially when traveling with others, the value proposition is strong. A family of 4 pays roughly the same per person as taking separate taxis."
+      answer: "For most travelers, yes. When you factor in time saved, comfort, safety, and especially when traveling with others, the value proposition is strong. A family of 4 pays roughly the same per person as taking separate regular transport options."
     },
     {
       question: "When is private transfer NOT worth it?",
-      answer: "Solo budget travelers on short distances during daytime may find taxis or public transport more economical. However, for night arrivals, families, or groups, private transfer almost always offers better value."
+      answer: "Solo budget travelers on short distances during daytime may find regular transport or public transport more economical. However, for night arrivals, families, or groups, private transfer almost always offers better value."
     },
     {
       question: "How much more expensive is private transfer?",
-      answer: "Private transfers typically cost 2-3x more than a single taxi fare. However, this includes meet & greet, fixed pricing, premium vehicle, and professional driver. For 2+ passengers, the per-person cost becomes comparable."
+      answer: "Private transfers typically cost 2-3x more than a single regular fare. However, this includes meet & greet, fixed pricing, premium vehicle, and professional driver. For 2+ passengers, the per-person cost becomes comparable."
     },
     {
-      question: "What makes private transfer better than regular taxi?",
+      question: "What makes private transfer better than regular transport?",
       answer: "Key advantages include: pre-booked so no waiting, fixed price so no surprises, meet & greet service, professional English-speaking driver, premium vehicle, flight monitoring, and door-to-door service."
     },
     {
@@ -43,7 +43,7 @@ const IsPrivateTransferWorthIt = () => {
       <SEOHead
         title={t('blogWorthItTitle')}
         description={t('blogWorthItDesc')}
-        keywords="private transfer Turkey worth it, Turkey airport transfer cost, VIP transfer value, should I book private transfer, Turkey taxi vs private car"
+        keywords="private transfer Turkey worth it, Turkey airport transfer cost, VIP transfer value, should I book private transfer, Turkey private transfer"
         canonicalPath="/blog/is-private-transfer-worth-it-turkey"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
         ogType="article"
@@ -119,7 +119,7 @@ const IsPrivateTransferWorthIt = () => {
           <h2>The Million-Dollar Question</h2>
           <p>
             You're planning your trip to Turkey and facing a common dilemma: should you splurge on 
-            a private airport transfer, or save money with a regular taxi? It's a question we hear 
+            a private airport transfer, or save money with regular transport? It's a question we hear 
             all the time, and we're going to give you an honest, no-nonsense answer.
           </p>
           <p>
@@ -163,7 +163,7 @@ const IsPrivateTransferWorthIt = () => {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground mt-4">
-                  *Taxi prices vary with traffic and time of day. Private transfer is fixed.
+                  *Regular transport prices vary with traffic and time of day. Private transfer is fixed.
                 </p>
               </CardContent>
             </Card>
@@ -191,7 +191,7 @@ const IsPrivateTransferWorthIt = () => {
               <CardContent className="space-y-3 text-sm">
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                  <span>No waiting in taxi queues (save 15-45 min)</span>
+                  <span>No waiting in queues (save 15-45 min)</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
@@ -469,7 +469,7 @@ const IsPrivateTransferWorthIt = () => {
               to={getLocalizedPath("/blog/private-vs-taxi-transfer-turkey")}
               className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
             >
-              <h4 className="font-semibold mb-1">Private Transfer vs Taxi in Turkey</h4>
+              <h4 className="font-semibold mb-1">Private Transfer vs Regular in Turkey</h4>
               <p className="text-sm text-muted-foreground">Detailed comparison of both options</p>
             </Link>
             <Link 

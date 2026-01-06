@@ -33,8 +33,8 @@ const faqItems = [
     answer: "The most comfortable way is with our private Bodrum Airport transfer. We meet you at arrivals and drive you directly to your hotel or destination in Bodrum town. The journey takes approximately 35-45 minutes depending on traffic.",
   },
   {
-    question: "How much is a taxi from Bodrum Airport to Yalıkavak?",
-    answer: "Our fixed-price Bodrum Airport transfer to Yalıkavak is $55. This includes meet & greet service, luxury Mercedes vehicle, and door-to-door delivery. Regular taxis are often more expensive and don't offer the same comfort level.",
+    question: "How much is transfer from Bodrum Airport to Yalıkavak?",
+    answer: "Our fixed-price Bodrum Airport transfer to Yalıkavak is $55. This includes meet & greet service, luxury Mercedes vehicle, and door-to-door delivery. We offer better comfort and fixed pricing compared to other options.",
   },
   {
     question: "Is there public transport from Bodrum Airport?",
@@ -79,7 +79,7 @@ const BodrumAirportTransfer = () => {
       <SEOHead
         title="Bodrum Airport Transfer | Private Shuttle to Hotels & Marinas | Meet Transfer"
         description="Book Bodrum Airport (BJV) private transfer from $45. Direct service to Bodrum, Yalıkavak, Türkbükü, Gümbet & all areas. Meet & greet included. Book now!"
-        keywords="Bodrum Airport transfer, BJV airport transfer, Bodrum Airport taxi, Bodrum to Yalıkavak transfer, Bodrum Airport shuttle, Bodrum hotel transfer, Bodrum Airport to Türkbükü, Bodrum marina transfer"
+        keywords="Bodrum Airport transfer, BJV airport transfer, Bodrum to Yalıkavak transfer, Bodrum Airport shuttle, Bodrum hotel transfer, Bodrum Airport to Türkbükü, Bodrum marina transfer"
         canonicalPath="/bodrum-airport-transfer"
       />
       <SchemaOrg

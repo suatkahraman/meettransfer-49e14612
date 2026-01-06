@@ -44,7 +44,7 @@ const IstanbulAirportHotelTransfer = () => {
         <section className="prose max-w-none">
           <h1 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">Istanbul Airport to Hotel Transfer: Seamless Door-to-Door Service</h1>
           <p className="text-muted-foreground leading-relaxed text-lg mb-6">After a long flight to Istanbul, the last thing you want is the stress of finding your hotel. Our Istanbul Airport to hotel transfer service takes the hassle out of arrival. We pick you up at the airport and deliver you directly to your hotel entrance – whether it's a luxury property in Taksim, a boutique gem in Sultanahmet, or a business hotel in Levent.</p>
-          <p className="text-muted-foreground leading-relaxed text-lg">Our drivers know every hotel in Istanbul, from the famous Four Seasons and Raffles to charming family-run guesthouses in the old city. No navigating confusing streets, no language barriers, no taxi negotiations. Just smooth, comfortable transfer from airport to hotel lobby.</p>
+          <p className="text-muted-foreground leading-relaxed text-lg">Our drivers know every hotel in Istanbul, from the famous Four Seasons and Raffles to charming family-run guesthouses in the old city. No navigating confusing streets, no language barriers, no hassle. Just smooth, comfortable transfer from airport to hotel lobby.</p>
         </section>
 
         <section className="bg-card rounded-2xl p-8">

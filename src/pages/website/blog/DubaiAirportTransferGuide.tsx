@@ -51,7 +51,7 @@ const DubaiAirportTransferGuide = () => {
       <SEOHead
         title={t("blogDubaiSeoTitle")}
         description={t("blogDubaiSeoDesc")}
-        keywords="Dubai airport transfer, DXB private transfer, Dubai Airport to Downtown, Palm Jumeirah transfer, Dubai VIP transfer, Dubai Airport taxi, Dubai luxury transfer, Dubai Marina transfer, Burj Khalifa transfer, JBR transfer, Business Bay transfer, Dubai Airport to hotel, DWC airport transfer, Al Maktoum airport"
+        keywords="Dubai airport transfer, DXB private transfer, Dubai Airport to Downtown, Palm Jumeirah transfer, Dubai VIP transfer, Dubai luxury transfer, Dubai Marina transfer, Burj Khalifa transfer, JBR transfer, Business Bay transfer, Dubai Airport to hotel, DWC airport transfer, Al Maktoum airport"
         canonicalPath="/blog/dubai-airport-transfer-guide"
         ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
         ogType="article"

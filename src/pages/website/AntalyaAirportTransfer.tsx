@@ -41,8 +41,8 @@ const faqItems = [
     answer: "Antalya Airport is approximately 35 km from Belek. With our private transfer, the journey takes about 30-40 minutes depending on traffic. We'll have you relaxing at your Belek resort in no time.",
   },
   {
-    question: "Is there a taxi from Antalya Airport to Alanya?",
-    answer: "Yes, but private transfer is a better option for the long journey to Alanya. Regular taxis can be expensive and uncomfortable for the 130 km trip. Our fixed-price transfer at $85 offers a luxury Mercedes with AC, WiFi, and professional driver.",
+    question: "Is there transfer from Antalya Airport to Alanya?",
+    answer: "Yes, private transfer is the best option for the long journey to Alanya. Regular transport can be expensive and uncomfortable for the 130 km trip. Our fixed-price transfer at $85 offers a luxury Mercedes with AC, WiFi, and professional driver.",
   },
   {
     question: "Can I book Antalya Airport transfer for late night arrival?",
@@ -79,7 +79,7 @@ const AntalyaAirportTransfer = () => {
       <SEOHead
         title="Antalya Airport Transfer | Private Hotel Shuttle from AYT | Meet Transfer"
         description="Book Antalya Airport (AYT) private transfer from $25. Direct service to Lara, Belek, Side, Alanya & all hotels. 24/7 meet & greet. Fixed prices. Book now!"
-        keywords="Antalya Airport transfer, AYT airport transfer, Antalya Airport taxi, Antalya to Belek transfer, Antalya Airport shuttle, Antalya hotel transfer, Antalya Airport to Lara, Antalya Airport to Side, Antalya Airport to Alanya"
+        keywords="Antalya Airport transfer, AYT airport transfer, Antalya to Belek transfer, Antalya Airport shuttle, Antalya hotel transfer, Antalya Airport to Lara, Antalya Airport to Side, Antalya Airport to Alanya"
         canonicalPath="/antalya-airport-transfer"
       />
       <SchemaOrg
@@ -120,7 +120,7 @@ const AntalyaAirportTransfer = () => {
             Welcome to the gateway of the Turkish Riviera! Antalya Airport (AYT) is Turkey's busiest tourist airport, welcoming millions of sun-seekers every year to the stunning Mediterranean coast. Our Antalya Airport transfer service ensures your holiday begins the moment you land, with a professional driver and luxury vehicle ready to whisk you to your resort in comfort.
           </p>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            Whether you're heading to the famous beaches of Lara, the golf resorts of Belek, the historic charm of Side, or the vibrant resort town of Alanya, our experienced drivers know every route and every hotel. Skip the crowded shuttle buses and taxi queues – with our private Antalya Airport transfer, you're on vacation from the moment you step off the plane.
+            Whether you're heading to the famous beaches of Lara, the golf resorts of Belek, the historic charm of Side, or the vibrant resort town of Alanya, our experienced drivers know every route and every hotel. Skip the crowded shuttle buses and queues – with our private Antalya Airport transfer, you're on vacation from the moment you step off the plane.
           </p>
         </section>
 

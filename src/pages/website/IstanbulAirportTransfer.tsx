@@ -82,7 +82,7 @@ const IstanbulAirportTransfer = () => {
       <SEOHead
         title="Istanbul Airport Transfer | Private VIP Service from IST Airport | Meet Transfer"
         description="Book Istanbul Airport (IST) private transfer from €50. Professional meet & greet, flight tracking, luxury Mercedes vehicles. 24/7 service. Fixed prices, no hidden fees. Book now!"
-        keywords="Istanbul Airport transfer, IST airport transfer, Istanbul Airport taxi, Istanbul Airport private transfer, IST to city center, Istanbul Airport VIP transfer, Istanbul Airport shuttle, Istanbul new airport transfer"
+        keywords="Istanbul Airport transfer, IST airport transfer, Istanbul Airport private transfer, IST to city center, Istanbul Airport VIP transfer, Istanbul Airport shuttle, Istanbul new airport transfer"
         canonicalPath="/istanbul-airport-transfer"
       />
       <SchemaOrg
@@ -120,7 +120,7 @@ const IstanbulAirportTransfer = () => {
             Istanbul Airport Transfer: Your Gateway to Hassle-Free Travel
           </h1>
           <p className="text-muted-foreground leading-relaxed text-lg mb-6">
-            Welcome to Meet Transfer's premium Istanbul Airport transfer service. When you land at Istanbul Airport (IST), the last thing you want is the stress of navigating public transport or haggling with taxi drivers. Our professional private transfer service ensures you start your Turkish adventure in comfort and style, with a professional driver waiting just for you at the arrivals gate.
+            Welcome to Meet Transfer's premium Istanbul Airport transfer service. When you land at Istanbul Airport (IST), the last thing you want is the stress of navigating public transport. Our professional private transfer service ensures you start your Turkish adventure in comfort and style, with a professional driver waiting just for you at the arrivals gate.
           </p>
           <p className="text-muted-foreground leading-relaxed text-lg">
             Istanbul Airport, officially known as Istanbul Havalimanı, is one of the world's largest airports and the main international gateway to Turkey. Located approximately 35 kilometers from the city center, it serves millions of passengers annually. Our Istanbul Airport transfer service has been perfected over years of experience, ensuring seamless journeys for business travelers, tourists, and families alike.
