@@ -316,16 +316,24 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
 };
 
 // ==================== VEHICLE TYPE MAPPING ====================
+// SYNCED with src/lib/vehicleTypes.ts and AdminRegionPrices.tsx
 export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
-  'Mercedes Vito VIP': ['Mercedes Vito VIP', 'Mercedes Vito', 'VIP', 'Minivan'],
-  'Mercedes Vito': ['Mercedes Vito', 'Mercedes Vito VIP', 'Minivan'],
-  'Mercedes Sprinter VIP': ['Mercedes Sprinter VIP', 'Mercedes Sprinter', 'VIP Minibus', 'Minibus'],
-  'Mercedes Sprinter': ['Mercedes Sprinter', 'Mercedes Sprinter VIP', 'Minibus'],
-  'Mercedes Maybach': ['Mercedes Maybach', 'Mercedes S-Class', 'Luxury Sedan', 'Sedan'],
-  'VIP': ['VIP', 'Mercedes Vito VIP', 'Mercedes Sprinter VIP'],
-  'Sedan': ['Sedan', 'Mercedes Maybach', 'Mercedes S-Class'],
-  'Minivan': ['Minivan', 'Mercedes Vito', 'Mercedes Vito VIP'],
-  'Minibus': ['Minibus', 'Mercedes Sprinter', 'Mercedes Sprinter VIP'],
+  // Primary vehicle types (used in forms)
+  'mercedes-vito': ['mercedes-vito', 'mercedes-vclass', 'minibus'],
+  'mercedes-vclass': ['mercedes-vclass', 'mercedes-vito', 'maybach', 'minibus'],
+  'maybach': ['maybach', 'mercedes-vclass', 'mercedes-vito'],
+  'minibus': ['minibus', 'mercedes-vito', 'mercedes-vclass'],
+  // Legacy vehicle type names (for backward compatibility)
+  'Mercedes Vito': ['mercedes-vito', 'mercedes-vclass', 'minibus'],
+  'Mercedes Vito VIP': ['mercedes-vclass', 'mercedes-vito', 'maybach'],
+  'VIP Vito': ['mercedes-vclass', 'mercedes-vito', 'maybach'],
+  'Mercedes Sprinter': ['minibus', 'mercedes-vito'],
+  'Mercedes Sprinter VIP': ['minibus', 'mercedes-vclass'],
+  'Mercedes Maybach': ['maybach', 'mercedes-vclass'],
+  'Maybach Minivan': ['maybach', 'mercedes-vclass'],
+  'VIP': ['mercedes-vclass', 'maybach', 'mercedes-vito'],
+  'Minivan': ['mercedes-vito', 'mercedes-vclass'],
+  'Minibus': ['minibus', 'mercedes-vito'],
 };
 
 // ==================== NORMALIZATION ====================
