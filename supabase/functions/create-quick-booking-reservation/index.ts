@@ -131,15 +131,24 @@ serve(async (req) => {
       }
     }
 
-    // Update quick booking status to confirmed
+    // Update quick booking status to confirmed with selected vehicle and price
     const { error: updateError } = await supabase
       .from("quick_booking_requests")
       .update({
         status: "confirmed",
         confirmed_at: new Date().toISOString(),
         payment_method: requestData.paymentMethod,
+        vehicle_type: requestData.vehicleType,
+        price: requestData.price,
+        has_return_trip: requestData.hasReturnTrip,
+        return_date: requestData.returnDate || null,
+        return_time: requestData.returnTime || null,
+        return_price: requestData.returnPrice || null,
+        promo_code: requestData.promoCode || null,
       })
       .eq("id", requestData.bookingId);
+
+    console.log("Quick booking updated with selected vehicle:", requestData.vehicleType, "and price:", requestData.price);
 
     if (updateError) {
       console.error("Error updating quick booking:", updateError);
