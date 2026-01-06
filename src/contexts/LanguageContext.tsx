@@ -689,6 +689,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbPayOnlineDesc: "Receive a secure payment link via email",
     qbConfirmBooking: "Confirm Booking",
     qbReject: "Reject",
+    rejectButtonHint: "Request better price",
     qbByConfirming: "By confirming, you'll proceed to complete your booking details.",
     
     // Footer
@@ -1130,8 +1131,7 @@ const translations: Record<Language, Record<string, string>> = {
     noHiddenFees: "Keine versteckten Gebühren",
     qbNewPriceReceived: "Neuer Preis erhalten! Sie können jetzt prüfen und bestätigen.",
     
-    // Reject button hint
-    rejectButtonHint: "Wenn Ihnen der Preis nicht gefällt, senden Sie Ablehnung",
+    // Navigation
     // Navigation
     home: "Startseite",
     cities: "Städte",
@@ -1773,6 +1773,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbPayOnlineDesc: "Erhalten Sie einen sicheren Zahlungslink per E-Mail",
     qbConfirmBooking: "Buchung bestätigen",
     qbReject: "Ablehnen",
+    rejectButtonHint: "Besseren Preis anfordern",
     qbByConfirming: "Mit der Bestätigung fahren Sie fort, Ihre Buchungsdetails zu vervollständigen.",
     
     // Footer
@@ -2144,8 +2145,7 @@ const translations: Record<Language, Record<string, string>> = {
     noHiddenFees: "Sans frais cachés",
     qbNewPriceReceived: "Nouveau prix reçu ! Vous pouvez maintenant vérifier et confirmer.",
     
-    // Reject button hint
-    rejectButtonHint: "Si le prix ne vous convient pas, envoyez un refus",
+    // Navigation
     // Navigation
     home: "Accueil",
     cities: "Villes",
@@ -2787,6 +2787,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbPayOnlineDesc: "Recevez un lien de paiement sécurisé par e-mail",
     qbConfirmBooking: "Confirmer la réservation",
     qbReject: "Refuser",
+    rejectButtonHint: "Demander un meilleur prix",
     qbByConfirming: "En confirmant, vous procéderez à compléter les détails de votre réservation.",
     
     // Footer
@@ -3142,8 +3143,7 @@ const translations: Record<Language, Record<string, string>> = {
     noHiddenFees: "Без скрытых платежей",
     qbNewPriceReceived: "Новая цена получена! Теперь вы можете проверить и подтвердить.",
     
-    // Reject button hint
-    rejectButtonHint: "Если вас не устраивает цена, отправьте отказ",
+    // Navigation
     // Navigation
     home: "Главная",
     cities: "Города",
@@ -3785,6 +3785,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbPayOnlineDesc: "Получите безопасную ссылку для оплаты по email",
     qbConfirmBooking: "Подтвердить бронирование",
     qbReject: "Отклонить",
+    rejectButtonHint: "Запросить лучшую цену",
     qbByConfirming: "Подтверждая, вы перейдете к заполнению деталей бронирования.",
     
     // Footer
@@ -4083,8 +4084,7 @@ const translations: Record<Language, Record<string, string>> = {
     noHiddenFees: "Nessun costo nascosto",
     qbNewPriceReceived: "Nuovo prezzo ricevuto! Ora puoi verificare e confermare.",
     
-    // Reject button hint
-    rejectButtonHint: "Se non ti piace il prezzo, invia rifiuto",
+    // Navigation
     // Navigation
     home: "Home",
     cities: "Città",
@@ -4726,6 +4726,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbPayOnlineDesc: "Ricevi un link di pagamento sicuro via email",
     qbConfirmBooking: "Conferma prenotazione",
     qbReject: "Rifiuta",
+    rejectButtonHint: "Richiedi un prezzo migliore",
     qbByConfirming: "Confermando, procederai a completare i dettagli della tua prenotazione.",
     
     // Footer
@@ -5077,8 +5078,7 @@ const translations: Record<Language, Record<string, string>> = {
     noHiddenFees: "Sin cargos ocultos",
     qbNewPriceReceived: "¡Nuevo precio recibido! Ahora puedes revisar y confirmar.",
     
-    // Reject button hint
-    rejectButtonHint: "Si no le gusta el precio, envíe rechazo",
+    // Navigation
     // Navigation
     home: "Inicio",
     cities: "Ciudades",
@@ -5720,6 +5720,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbPayOnlineDesc: "Reciba un enlace de pago seguro por correo electrónico",
     qbConfirmBooking: "Confirmar reserva",
     qbReject: "Rechazar",
+    rejectButtonHint: "Solicitar mejor precio",
     qbByConfirming: "Al confirmar, procederá a completar los detalles de su reserva.",
     
     // Footer
@@ -6071,8 +6072,7 @@ const translations: Record<Language, Record<string, string>> = {
     noHiddenFees: "بدون رسوم مخفية",
     qbNewPriceReceived: "تم استلام السعر الجديد! يمكنك الآن المراجعة والتأكيد.",
     
-    // Reject button hint
-    rejectButtonHint: "إذا لم يعجبك السعر، أرسل رفض",
+    // Navigation
     // Navigation
     home: "الرئيسية",
     cities: "المدن",
@@ -6714,6 +6714,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbPayOnlineDesc: "احصل على رابط دفع آمن عبر البريد الإلكتروني",
     qbConfirmBooking: "تأكيد الحجز",
     qbReject: "رفض",
+    rejectButtonHint: "طلب سعر أفضل",
     qbByConfirming: "بالتأكيد، ستنتقل لإكمال تفاصيل حجزك.",
     
     // Footer
@@ -7012,8 +7013,7 @@ const translations: Record<Language, Record<string, string>> = {
     noHiddenFees: "Gizli Ücret Yok",
     qbNewPriceReceived: "Yeni fiyat alındı! Artık inceleyip onaylayabilirsiniz.",
     
-    // Reject button hint
-    rejectButtonHint: "Fiyatı beğenmediyseniz reddet gönderin",
+    // Navigation
     // Navigation
     home: "Ana Sayfa",
     cities: "Şehirler",
@@ -7660,6 +7660,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbPayOnlineDesc: "E-posta ile güvenli ödeme linki alın",
     qbConfirmBooking: "Rezervasyonu Onayla",
     qbReject: "Reddet",
+    rejectButtonHint: "Daha iyi fiyat iste",
     qbByConfirming: "Onaylayarak, rezervasyon detaylarınızı tamamlamaya devam edeceksiniz.",
     
     // Footer
@@ -8083,8 +8084,7 @@ const translations: Record<Language, Record<string, string>> = {
     noHiddenFees: "Без прихованих платежів",
     qbNewPriceReceived: "Нову ціну отримано! Тепер ви можете переглянути та підтвердити.",
     
-    // Reject button hint
-    rejectButtonHint: "Якщо вас не влаштовує ціна, надішліть відмову",
+    // Navigation
     // Navigation
     home: "Головна",
     cities: "Міста",
@@ -8726,6 +8726,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbPayOnlineDesc: "Отримайте безпечне посилання для оплати на email",
     qbConfirmBooking: "Підтвердити бронювання",
     qbReject: "Відхилити",
+    rejectButtonHint: "Запросити кращу ціну",
     qbByConfirming: "Підтверджуючи, ви перейдете до заповнення деталей бронювання.",
     
     // Footer
@@ -9045,8 +9046,7 @@ const translations: Record<Language, Record<string, string>> = {
     noHiddenFees: "隠れた料金なし",
     qbNewPriceReceived: "新しい価格を受け取りました！確認してご承認ください。",
     
-    // Reject button hint
-    rejectButtonHint: "価格が気に入らない場合は拒否を送信してください",
+    // Navigation
     // Navigation
     home: "ホーム",
     cities: "都市",
@@ -9692,6 +9692,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbPayOnlineDesc: "安全な支払いリンクをメールで受け取る",
     qbConfirmBooking: "予約を確定",
     qbReject: "拒否",
+    rejectButtonHint: "より良い価格をリクエスト",
     qbByConfirming: "確定すると、予約の詳細入力に進みます。",
     
     // Footer

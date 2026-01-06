@@ -208,7 +208,7 @@ export default function QuickBookingConfirm() {
       setShowPriceAnimation(true);
       const timer = setTimeout(() => {
         setShowPriceAnimation(false);
-      }, 3500); // Show for 3.5 seconds
+      }, 5000); // Show for 5 seconds
       return () => clearTimeout(timer);
     }
   }, [isNewRequest, token]);
@@ -219,7 +219,7 @@ export default function QuickBookingConfirm() {
       if (isNewRequest) {
         const timer = setTimeout(() => {
           fetchBooking(token);
-        }, 3500);
+        }, 5000);
         return () => clearTimeout(timer);
       } else {
         fetchBooking(token);
@@ -734,11 +734,11 @@ export default function QuickBookingConfirm() {
               
               {/* Progress bar animation */}
               <div className="w-full max-w-xs mx-auto mb-6">
-                <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-full"
                     style={{
-                      animation: 'progressSlide 3.5s ease-out forwards'
+                      animation: 'progressSlide 5s ease-out forwards'
                     }}
                   />
                 </div>
@@ -1517,7 +1517,7 @@ export default function QuickBookingConfirm() {
                   variant="outline"
                   onClick={handleReject}
                   disabled={rejecting || confirming}
-                  className="h-12 flex-col py-2"
+                  className="h-14 flex-col py-2"
                 >
                   <div className="flex items-center">
                     {rejecting ? (
@@ -1527,8 +1527,8 @@ export default function QuickBookingConfirm() {
                     )}
                     {t("qbReject")}
                   </div>
-                  <span className="text-[10px] font-normal opacity-70">
-                    If you Don't Like Price Send Reject
+                  <span className="text-xs font-medium text-muted-foreground mt-0.5">
+                    {t("rejectButtonHint") || "Request better price"}
                   </span>
                 </Button>
 
