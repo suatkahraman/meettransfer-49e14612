@@ -485,6 +485,70 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Failed to record price history:", e);
     }
 
+    // Send email notification to admin
+    const adminEmail = "sautkahraman@gmail.com";
+    try {
+      const totalPrice = booking.has_return_trip ? bestPrice.price + returnPrice : bestPrice.price;
+      await resend.emails.send({
+        from: "Meet Transfer <no-reply@meet-transfer.com>",
+        to: adminEmail,
+        subject: `🤖 Quick Booking Otomatik Fiyat: ${booking.customer_name || 'Misafir'} - ${totalPrice} ${bestPrice.price_currency}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 24px;">🤖 Quick Booking Otomatik Fiyat</h1>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px;">
+              <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #10b981;">
+                <h3 style="margin: 0 0 10px 0; color: #333;">Müşteri Bilgileri</h3>
+                <p style="margin: 5px 0; color: #666;"><strong>Müşteri:</strong> ${booking.customer_name || 'Henüz girilmedi'}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Email:</strong> ${booking.customer_email || 'Henüz girilmedi'}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Telefon:</strong> ${booking.customer_phone || 'Henüz girilmedi'}</p>
+              </div>
+              
+              <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;">
+                <h3 style="margin: 0 0 10px 0; color: #333;">Transfer Detayları</h3>
+                <p style="margin: 5px 0; color: #666;"><strong>Alış:</strong> ${booking.pickup}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Bırakış:</strong> ${booking.dropoff}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Tarih:</strong> ${booking.pickup_date}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Saat:</strong> ${booking.pickup_time}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Araç:</strong> ${booking.vehicle_type}</p>
+                ${booking.has_return_trip ? `<p style="margin: 5px 0; color: #666;"><strong>Dönüş:</strong> ${booking.return_date} - ${booking.return_time}</p>` : ''}
+              </div>
+              
+              <div style="text-align: center; margin: 20px 0; padding: 20px; background: #10b981; border-radius: 8px;">
+                <p style="font-size: 14px; color: white; margin-bottom: 5px;">Gidiş Fiyatı</p>
+                <p style="font-size: 28px; font-weight: bold; color: white; margin: 0;">
+                  ${bestPrice.price} ${bestPrice.price_currency}
+                </p>
+                ${booking.has_return_trip ? `
+                  <p style="font-size: 14px; color: white; margin: 10px 0 5px 0;">Dönüş Fiyatı</p>
+                  <p style="font-size: 24px; font-weight: bold; color: white; margin: 0;">
+                    ${returnPrice} ${bestPrice.price_currency}
+                    ${hasDiscount ? '<span style="font-size: 12px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; margin-left: 8px;">%30 İndirim</span>' : ''}
+                  </p>
+                  <div style="border-top: 1px solid rgba(255,255,255,0.3); margin-top: 15px; padding-top: 15px;">
+                    <p style="font-size: 14px; color: white; margin-bottom: 5px;">Toplam</p>
+                    <p style="font-size: 32px; font-weight: bold; color: white; margin: 0;">
+                      ${totalPrice} ${bestPrice.price_currency}
+                    </p>
+                  </div>
+                ` : ''}
+              </div>
+              
+              <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
+                Bu bildirim otomatik fiyat sistemi tarafından gönderilmiştir.
+              </p>
+            </div>
+          </div>
+        `,
+      });
+      console.log("📧 Admin notification email sent for quick booking");
+    } catch (adminEmailError) {
+      console.error("Failed to send admin notification email:", adminEmailError);
+    }
+
     // Send email if customer email exists
     let emailSent = false;
     if (booking.customer_email) {
