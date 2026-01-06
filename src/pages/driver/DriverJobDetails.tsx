@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare, Building2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare, Building2, Briefcase, Baby } from 'lucide-react';
 import { format } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -61,6 +61,8 @@ interface Reservation {
   passenger_cash_currency: string | null;
   customer_notes: string | null;
   agency_id: string | null;
+  luggage_count: number | null;
+  baby_seat_count: number | null;
   // Place details
   pickup_place_name: string | null;
   pickup_lat: number | null;
@@ -648,6 +650,28 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
                   <div className="font-medium">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</div>
                 </div>
               </div>
+
+              {/* Luggage and Baby Seat Info */}
+              {((reservation.luggage_count && reservation.luggage_count > 0) || (reservation.baby_seat_count && reservation.baby_seat_count > 0)) && (
+                <div className="flex flex-wrap gap-3">
+                  {reservation.luggage_count && reservation.luggage_count > 0 && (
+                    <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg px-3 py-2">
+                      <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                        {reservation.luggage_count} {t('luggage') || 'Bavul'}
+                      </span>
+                    </div>
+                  )}
+                  {reservation.baby_seat_count && reservation.baby_seat_count > 0 && (
+                    <div className="flex items-center gap-2 bg-pink-50 dark:bg-pink-950/30 border border-pink-200 dark:border-pink-800 rounded-lg px-3 py-2">
+                      <Baby className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                      <span className="text-sm font-medium text-pink-700 dark:text-pink-300">
+                        {reservation.baby_seat_count} {t('babySeat') || 'Bebek Koltuğu'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex items-start gap-3">
                 <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />

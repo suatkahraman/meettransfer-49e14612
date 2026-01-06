@@ -204,6 +204,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     vehicleColorPlaceholder: 'Örn: Siyah, Beyaz, Gri',
     failedToLoad: 'Bilgiler yüklenemedi',
     emailUpdateFailed: 'E-posta güncellenemedi',
+    
+    // Luggage & Baby Seat
+    luggage: 'Bavul',
+    babySeat: 'Bebek Koltuğu',
   },
   EN: {
     driverPanel: 'Driver Panel',
@@ -374,6 +378,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     vehicleColorPlaceholder: 'E.g: Black, White, Grey',
     failedToLoad: 'Failed to load info',
     emailUpdateFailed: 'Failed to update email',
+    
+    // Luggage & Baby Seat
+    luggage: 'Luggage',
+    babySeat: 'Baby Seat',
   },
   DE: {
     driverPanel: 'Fahrer-Panel',
@@ -544,6 +552,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     vehicleColorPlaceholder: 'Z.B: Schwarz, Weiß, Grau',
     failedToLoad: 'Laden fehlgeschlagen',
     emailUpdateFailed: 'E-Mail-Aktualisierung fehlgeschlagen',
+    
+    // Luggage & Baby Seat
+    luggage: 'Gepäck',
+    babySeat: 'Kindersitz',
   },
   FR: {
     driverPanel: 'Panneau Chauffeur',
@@ -714,6 +726,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     vehicleColorPlaceholder: 'Ex: Noir, Blanc, Gris',
     failedToLoad: 'Échec du chargement',
     emailUpdateFailed: 'Échec de la mise à jour de l\'e-mail',
+    
+    // Luggage & Baby Seat
+    luggage: 'Bagages',
+    babySeat: 'Siège Bébé',
   },
   RU: {
     driverPanel: 'Панель Водителя',
@@ -884,6 +900,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     vehicleColorPlaceholder: 'Напр: Черный, Белый, Серый',
     failedToLoad: 'Ошибка загрузки',
     emailUpdateFailed: 'Ошибка обновления email',
+    
+    // Luggage & Baby Seat
+    luggage: 'Багаж',
+    babySeat: 'Детское Кресло',
   },
   AR: {
     driverPanel: 'لوحة السائق',
@@ -1054,6 +1074,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     vehicleColorPlaceholder: 'مثال: أسود، أبيض، رمادي',
     failedToLoad: 'فشل التحميل',
     emailUpdateFailed: 'فشل تحديث البريد الإلكتروني',
+    
+    // Luggage & Baby Seat
+    luggage: 'أمتعة',
+    babySeat: 'مقعد طفل',
   },
 };
 
