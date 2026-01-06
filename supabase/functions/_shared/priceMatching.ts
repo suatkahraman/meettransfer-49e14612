@@ -1,29 +1,8 @@
-import { supabase } from '@/integrations/supabase/client';
-
-// ==================== TYPES ====================
-interface RegionPrice {
-  id: string;
-  city: string;
-  airport: string | null;
-  district: string;
-  vehicle_type: string;
-  price: number;
-  price_currency: string;
-}
-
-export interface MatchResult {
-  found: boolean;
-  price?: number;
-  currency?: string;
-  matchedCity?: string;
-  matchedDistrict?: string;
-  matchedAirport?: string;
-  confidence?: 'high' | 'medium' | 'low';
-  matchType?: 'exact' | 'district_fallback' | 'city_fallback';
-}
+// Shared price matching utilities for edge functions
+// Optimized location matching with fuzzy search and priority ordering
 
 // ==================== AIRPORT KEYWORDS ====================
-const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = {
+export const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = {
   'Istanbul Airport (IST)': {
     priority: 1,
     keywords: [
@@ -125,7 +104,7 @@ const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: number }>
 };
 
 // ==================== CITY KEYWORDS ====================
-const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = {
+export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = {
   'Istanbul': {
     priority: 1,
     keywords: [
@@ -185,8 +164,7 @@ const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = 
       'cappadocia', 'kapadokya', 'goreme', 'göreme', 'urgup', 'ürgüp', 
       'uchisar', 'uçhisar', 'avanos', 'ortahisar', 'cavusin', 'çavuşin',
       'zelve', 'pasabag', 'paşabağ', 'devrent', 'derinkuyu', 'kaymakli',
-      'kaymaklı', 'ihlara', 'guzelyurt', 'güzelyurt', 'mustafapasa', 'mustafapaşa',
-      'nevsehir', 'nevşehir', 'kayseri'
+      'kaymaklı', 'ihlara', 'guzelyurt', 'güzelyurt', 'mustafapasa', 'mustafapaşa'
     ]
   },
   'Bursa': {
@@ -215,11 +193,20 @@ const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = 
       'coral bay', 'latchi', 'troodos', 'platres'
     ]
   },
+  // Kayseri and Nevsehir redirect to Cappadocia
+  'Kayseri': {
+    priority: 2,
+    keywords: ['kayseri']
+  },
+  'Nevsehir': {
+    priority: 2,
+    keywords: ['nevsehir', 'nevşehir']
+  },
 };
 
 // ==================== DISTRICT KEYWORDS ====================
-const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; priority: number }> = {
-  // Istanbul - Avrupa Yakası
+export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; priority: number }> = {
+  // Istanbul - Avrupa Yakası (High Priority)
   'Taksim': { priority: 1, keywords: ['taksim', 'taksim square', 'taksim meydanı', 'taksim meydani'], city: 'Istanbul' },
   'Sultanahmet': { priority: 1, keywords: ['sultanahmet', 'blue mosque', 'hagia sophia', 'ayasofya', 'topkapi', 'topkapı', 'hippodrome'], city: 'Istanbul' },
   'Beyoglu': { priority: 1, keywords: ['beyoglu', 'beyoğlu', 'galata', 'karakoy', 'karaköy', 'cihangir', 'istiklal', 'pera'], city: 'Istanbul' },
@@ -306,14 +293,15 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
 };
 
 // ==================== NORMALIZATION ====================
-function normalizeLocation(location: string): string {
+export function normalizeLocation(location: string): string {
   return location
     .toLowerCase()
     .replace(/türkiye|turkey|türkei|turkiye/gi, '')
     .replace(/,\s*(tr|turkey)$/i, '')
-    .replace(/\(.*?\)/g, '')
+    .replace(/\(.*?\)/g, '') // Remove parentheses content
     .replace(/[,.\-_\/\\#&]/g, ' ')
     .replace(/\s+/g, ' ')
+    // Turkish character normalization
     .replace(/ı/g, 'i')
     .replace(/ğ/g, 'g')
     .replace(/ü/g, 'u')
@@ -330,26 +318,23 @@ function normalizeLocation(location: string): string {
 }
 
 // ==================== MATCHING FUNCTIONS ====================
-interface InternalMatchResult {
+export interface MatchResult {
   value: string;
   confidence: number;
   priority: number;
   matchedKeyword: string;
 }
 
-interface DistrictInternalMatch extends InternalMatchResult {
-  city: string;
-}
-
-function findAirport(location: string): InternalMatchResult | null {
+export function findAirport(location: string): MatchResult | null {
   const normalized = normalizeLocation(location);
-  let bestMatch: InternalMatchResult | null = null;
+  let bestMatch: MatchResult | null = null;
   
   for (const [airport, data] of Object.entries(AIRPORT_KEYWORDS)) {
     for (const keyword of data.keywords) {
       const keywordNorm = normalizeLocation(keyword);
       
       if (normalized.includes(keywordNorm)) {
+        // Calculate confidence based on keyword length and specificity
         const confidence = Math.min(1, 0.7 + (keywordNorm.length / 30));
         
         if (!bestMatch || 
@@ -369,9 +354,9 @@ function findAirport(location: string): InternalMatchResult | null {
   return bestMatch;
 }
 
-function findCity(location: string): InternalMatchResult | null {
+export function findCity(location: string): MatchResult | null {
   const normalized = normalizeLocation(location);
-  let bestMatch: InternalMatchResult | null = null;
+  let bestMatch: MatchResult | null = null;
   
   for (const [city, data] of Object.entries(CITY_KEYWORDS)) {
     for (const keyword of data.keywords) {
@@ -394,12 +379,21 @@ function findCity(location: string): InternalMatchResult | null {
     }
   }
   
+  // Map Kayseri and Nevsehir to Cappadocia for pricing
+  if (bestMatch && (bestMatch.value === 'Kayseri' || bestMatch.value === 'Nevsehir')) {
+    bestMatch.value = 'Cappadocia';
+  }
+  
   return bestMatch;
 }
 
-function findDistrict(location: string): DistrictInternalMatch | null {
+export interface DistrictMatchResult extends MatchResult {
+  city: string;
+}
+
+export function findDistrict(location: string): DistrictMatchResult | null {
   const normalized = normalizeLocation(location);
-  let bestMatch: DistrictInternalMatch | null = null;
+  let bestMatch: DistrictMatchResult | null = null;
   
   for (const [district, data] of Object.entries(DISTRICT_KEYWORDS)) {
     for (const keyword of data.keywords) {
@@ -426,249 +420,102 @@ function findDistrict(location: string): DistrictInternalMatch | null {
   return bestMatch;
 }
 
-// ==================== LOCATION PARSING ====================
-interface ParsedLocation {
+// ==================== PRICE MATCHING ====================
+export interface TransferInfo {
   airport: string | null;
   city: string | null;
   district: string | null;
-  originalParts: string[];
+  direction: 'from_airport' | 'to_airport' | 'city_to_city' | 'unknown';
+  confidence: 'high' | 'medium' | 'low';
 }
 
-function parseGoogleMapsLocation(location: string): ParsedLocation {
-  const parts = location.split(',').map(p => p.trim());
+export function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
+  const pickupAirport = findAirport(pickup);
+  const dropoffAirport = findAirport(dropoff);
+  const pickupCity = findCity(pickup);
+  const dropoffCity = findCity(dropoff);
+  const pickupDistrict = findDistrict(pickup);
+  const dropoffDistrict = findDistrict(dropoff);
   
-  const airportMatch = findAirport(location);
-  const cityMatch = findCity(location);
-  const districtMatch = findDistrict(location);
-  
-  return {
-    airport: airportMatch?.value || null,
-    city: cityMatch?.value || districtMatch?.city || null,
-    district: districtMatch?.value || null,
-    originalParts: parts,
+  let result: TransferInfo = {
+    airport: null,
+    city: null,
+    district: null,
+    direction: 'unknown',
+    confidence: 'low'
   };
-}
-
-// ==================== PRICE MATCHING ====================
-export async function matchPrice(
-  pickup: string,
-  dropoff: string,
-  vehicleType: string
-): Promise<MatchResult> {
-  try {
-    console.log('🔍 Price matching started:', { pickup, dropoff, vehicleType });
-    
-    const pickupParsed = parseGoogleMapsLocation(pickup);
-    const dropoffParsed = parseGoogleMapsLocation(dropoff);
-    
-    console.log('📍 Parsed locations:', { pickupParsed, dropoffParsed });
-    
-    // Determine transfer direction
-    let airport: string | null = null;
-    let district: string | null = null;
-    let city: string | null = null;
-    
-    if (pickupParsed.airport && (dropoffParsed.district || dropoffParsed.city)) {
-      airport = pickupParsed.airport;
-      district = dropoffParsed.district;
-      city = dropoffParsed.city;
-    } else if (dropoffParsed.airport && (pickupParsed.district || pickupParsed.city)) {
-      airport = dropoffParsed.airport;
-      district = pickupParsed.district;
-      city = pickupParsed.city;
-    } else if (pickupParsed.city || dropoffParsed.city) {
-      city = pickupParsed.city || dropoffParsed.city;
-      district = pickupParsed.district || dropoffParsed.district;
-    }
-    
-    console.log('🚗 Transfer info:', { airport, city, district });
-    
-    if (!city && !airport) {
-      console.log('❌ No city or airport found in locations');
-      return { found: false };
-    }
-    
-    // 1. Try exact match
-    if (airport && city && district) {
-      const { data: exactMatch, error } = await supabase
-        .from('region_prices')
-        .select('*')
-        .eq('city', city)
-        .eq('airport', airport)
-        .eq('district', district)
-        .eq('vehicle_type', vehicleType)
-        .eq('is_active', true)
-        .limit(1);
-      
-      if (!error && exactMatch && exactMatch.length > 0) {
-        console.log('✅ Exact match found:', exactMatch[0]);
-        return {
-          found: true,
-          price: exactMatch[0].price,
-          currency: exactMatch[0].price_currency,
-          matchedCity: exactMatch[0].city,
-          matchedDistrict: exactMatch[0].district,
-          matchedAirport: exactMatch[0].airport || undefined,
-          confidence: 'high',
-          matchType: 'exact',
-        };
-      }
-    }
-    
-    // 2. Try airport + city match
-    if (airport && city) {
-      const { data: cityMatch, error } = await supabase
-        .from('region_prices')
-        .select('*')
-        .eq('city', city)
-        .eq('airport', airport)
-        .eq('vehicle_type', vehicleType)
-        .eq('is_active', true)
-        .order('price', { ascending: true })
-        .limit(1);
-      
-      if (!error && cityMatch && cityMatch.length > 0) {
-        console.log('✅ City+Airport match found:', cityMatch[0]);
-        return {
-          found: true,
-          price: cityMatch[0].price,
-          currency: cityMatch[0].price_currency,
-          matchedCity: cityMatch[0].city,
-          matchedDistrict: cityMatch[0].district,
-          matchedAirport: cityMatch[0].airport || undefined,
-          confidence: district ? 'medium' : 'low',
-          matchType: 'district_fallback',
-        };
-      }
-    }
-    
-    // 3. Try city only match
-    if (city) {
-      const { data: cityOnlyMatch, error } = await supabase
-        .from('region_prices')
-        .select('*')
-        .eq('city', city)
-        .eq('vehicle_type', vehicleType)
-        .eq('is_active', true)
-        .order('price', { ascending: true })
-        .limit(1);
-      
-      if (!error && cityOnlyMatch && cityOnlyMatch.length > 0) {
-        console.log('✅ City-only fallback match found:', cityOnlyMatch[0]);
-        return {
-          found: true,
-          price: cityOnlyMatch[0].price,
-          currency: cityOnlyMatch[0].price_currency,
-          matchedCity: cityOnlyMatch[0].city,
-          matchedDistrict: cityOnlyMatch[0].district,
-          matchedAirport: cityOnlyMatch[0].airport || undefined,
-          confidence: 'low',
-          matchType: 'city_fallback',
-        };
-      }
-    }
-    
-    console.log('❌ No price match found');
-    return { found: false };
-    
-  } catch (error) {
-    console.error('❌ Price matching error:', error);
-    return { found: false };
+  
+  // Case 1: Airport to destination (district/city)
+  if (pickupAirport && (dropoffDistrict || dropoffCity)) {
+    result.airport = pickupAirport.value;
+    result.district = dropoffDistrict?.value || null;
+    result.city = dropoffDistrict?.city || dropoffCity?.value || null;
+    result.direction = 'from_airport';
+    result.confidence = dropoffDistrict ? 'high' : 'medium';
   }
-}
-
-// ==================== TEST FUNCTION ====================
-export async function testPriceMatch(
-  pickup: string,
-  dropoff: string,
-  vehicleType: string
-): Promise<{
-  result: MatchResult;
-  analysis: {
-    pickup: ParsedLocation;
-    dropoff: ParsedLocation;
-  };
-}> {
-  const pickupParsed = parseGoogleMapsLocation(pickup);
-  const dropoffParsed = parseGoogleMapsLocation(dropoff);
-  const result = await matchPrice(pickup, dropoff, vehicleType);
-  
-  return {
-    result,
-    analysis: {
-      pickup: pickupParsed,
-      dropoff: dropoffParsed,
-    },
-  };
-}
-
-// ==================== DISCOUNT FUNCTIONS ====================
-const VALID_PROMO_CODES = ['MEET40RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30'];
-
-export function applyPromoDiscount(
-  price: number,
-  hasReturnTrip: boolean,
-  promoCode: string | null
-): { finalPrice: number; discountApplied: boolean; discountPercent: number } {
-  if (hasReturnTrip && promoCode && VALID_PROMO_CODES.includes(promoCode.toUpperCase())) {
-    const discountPercent = 30;
-    const discountAmount = Math.round(price * (discountPercent / 100));
-    return {
-      finalPrice: price - discountAmount,
-      discountApplied: true,
-      discountPercent,
-    };
+  // Case 2: Destination (district/city) to airport
+  else if (dropoffAirport && (pickupDistrict || pickupCity)) {
+    result.airport = dropoffAirport.value;
+    result.district = pickupDistrict?.value || null;
+    result.city = pickupDistrict?.city || pickupCity?.value || null;
+    result.direction = 'to_airport';
+    result.confidence = pickupDistrict ? 'high' : 'medium';
+  }
+  // Case 3: City to city (no airport)
+  else if (pickupCity && dropoffCity) {
+    result.city = pickupCity.value;
+    result.district = pickupDistrict?.value || null;
+    result.direction = 'city_to_city';
+    result.confidence = 'medium';
   }
   
-  return {
-    finalPrice: price,
-    discountApplied: false,
-    discountPercent: 0,
-  };
+  return result;
 }
 
-export function calculateTotalPrice(
+// ==================== DISCOUNT CALCULATION ====================
+export const VALID_PROMO_CODES = ['MEET40RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30'];
+
+export function calculateDiscount(
   basePrice: number,
   hasReturnTrip: boolean,
   promoCode: string | null
-): {
-  oneWayPrice: number;
-  returnPrice: number | null;
-  totalPrice: number;
-  discountApplied: boolean;
-  discountPercent: number;
-  savings: number;
-} {
-  const oneWayPrice = basePrice;
+): { price: number; returnPrice: number | null; totalPrice: number; discountApplied: boolean; discountPercent: number } {
+  let discountApplied = false;
+  let discountPercent = 0;
+  let returnPrice: number | null = null;
   
-  if (!hasReturnTrip) {
-    return {
-      oneWayPrice,
-      returnPrice: null,
-      totalPrice: basePrice,
-      discountApplied: false,
-      discountPercent: 0,
-      savings: 0,
-    };
+  if (hasReturnTrip) {
+    returnPrice = basePrice;
+    
+    // Apply 30% discount for return trip with valid promo code
+    if (promoCode && VALID_PROMO_CODES.includes(promoCode.toUpperCase())) {
+      returnPrice = Math.round(basePrice * 0.7);
+      discountApplied = true;
+      discountPercent = 30;
+    }
   }
   
-  const { finalPrice: discountedReturn, discountApplied, discountPercent } = applyPromoDiscount(
-    basePrice,
-    true,
-    promoCode
-  );
-  
-  const returnPrice = discountApplied ? discountedReturn : basePrice;
-  const totalPrice = oneWayPrice + returnPrice;
-  const originalTotal = basePrice * 2;
-  const savings = originalTotal - totalPrice;
+  const totalPrice = hasReturnTrip && returnPrice ? basePrice + returnPrice : basePrice;
   
   return {
-    oneWayPrice,
+    price: basePrice,
     returnPrice,
     totalPrice,
     discountApplied,
-    discountPercent,
-    savings,
+    discountPercent
   };
+}
+
+// ==================== LOGGING HELPER ====================
+export function logAnalysis(
+  type: 'reservation' | 'quick_booking',
+  id: string,
+  pickup: string,
+  dropoff: string,
+  transferInfo: TransferInfo
+): void {
+  console.log(`🚗 Auto-pricing ${type}: ${id}`);
+  console.log(`📍 Pickup: ${pickup}`);
+  console.log(`📍 Dropoff: ${dropoff}`);
+  console.log(`🎯 Analysis:`, JSON.stringify(transferInfo, null, 2));
 }
