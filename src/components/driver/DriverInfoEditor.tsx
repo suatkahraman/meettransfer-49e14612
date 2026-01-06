@@ -12,9 +12,9 @@ import { toast } from 'sonner';
 import { Loader2, Save, User, Car, Phone, Mail, Palette, MapPin } from 'lucide-react';
 
 const vehicleTypes = [
-  { value: 'Mercedes Vito', label: 'Mercedes Vito' },
-  { value: 'Mercedes VIP Vito', label: 'Mercedes VIP Vito' },
-  { value: 'Maybach', label: 'Maybach' },
+  { value: 'Mercedes Vito', label: 'Mercedes-vito' },
+  { value: 'Mercedes VIP Vito', label: 'Vip Mercedes' },
+  { value: 'Maybach Minibus', label: 'Maybach Minibus' },
   { value: 'Minibus', label: 'Minibus' },
 ];
 

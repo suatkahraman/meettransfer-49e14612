@@ -23,9 +23,9 @@ import PriceHistoryCard from '@/components/admin/PriceHistoryCard';
 
 // Airports list removed - pickup is now free text
 const vehicleTypes = [
-  { value: 'mercedes-vito', label: 'Mercedes Vito' },
-  { value: 'mercedes-vclass', label: 'Mercedes Vip Vito' },
-  { value: 'maybach', label: 'Maybach' },
+  { value: 'mercedes-vito', label: 'Mercedes-vito' },
+  { value: 'vip-mercedes', label: 'Vip Mercedes' },
+  { value: 'maybach-minibus', label: 'Maybach Minibus' },
   { value: 'minibus', label: 'Minibus' },
 ];
 const paymentTypes = [

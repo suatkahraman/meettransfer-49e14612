@@ -27,10 +27,13 @@ const customerInfoSchema = z.object({
 });
 
 const vehicleLabels: Record<string, string> = {
-  "mercedes-vito": "Mercedes Vito",
-  "mercedes-vclass": "VIP Vito",
-  maybach: "Maybach Minivan",
+  "mercedes-vito": "Mercedes-vito",
+  "vip-mercedes": "Vip Mercedes",
+  "maybach-minibus": "Maybach Minibus",
   minibus: "Minibus",
+  // Legacy support
+  "mercedes-vclass": "Vip Mercedes",
+  maybach: "Maybach Minibus",
 };
 
 export default function QuickBookingCustomerInfo() {
