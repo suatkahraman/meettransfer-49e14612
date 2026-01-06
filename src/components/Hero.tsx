@@ -559,7 +559,7 @@ export const Hero = () => {
                       <SelectValue placeholder={t("selectBabySeat") || "Baby Seat"} />
                     </SelectTrigger>
                     <SelectContent className="bg-white z-50">
-                      {Array.from({ length: 4 }, (_, i) => i).map((num) => (
+                      {Array.from({ length: 3 }, (_, i) => i).map((num) => (
                         <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
                       ))}
                     </SelectContent>
