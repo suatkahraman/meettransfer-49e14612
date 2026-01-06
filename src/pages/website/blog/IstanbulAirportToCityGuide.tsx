@@ -50,7 +50,7 @@ const IstanbulAirportToCityGuide = () => {
     {
       method: "Private Transfer",
       duration: "35-45 min",
-      price: "$55-75",
+      price: "€50-65",
       pros: ["Door-to-door", "Meet & Greet", "Flight tracking", "Child seats available"],
       cons: ["Higher cost than public transport"],
       rating: 5
@@ -58,7 +58,7 @@ const IstanbulAirportToCityGuide = () => {
     {
       method: "Taxi",
       duration: "40-60 min",
-      price: "$20-30",
+      price: "€20-30",
       pros: ["Available at airport", "No booking needed"],
       cons: ["Variable pricing", "Language barrier", "No meet & greet", "Traffic issues"],
       rating: 3
@@ -66,7 +66,7 @@ const IstanbulAirportToCityGuide = () => {
     {
       method: "Metro (M11)",
       duration: "50-70 min",
-      price: "$1-2",
+      price: "€1-2",
       pros: ["Very affordable", "Avoids traffic"],
       cons: ["Requires transfer", "Limited luggage space", "Crowded", "Not 24/7"],
       rating: 3
@@ -74,7 +74,7 @@ const IstanbulAirportToCityGuide = () => {
     {
       method: "Havaist Bus",
       duration: "60-90 min",
-      price: "$5-8",
+      price: "€5-8",
       pros: ["Affordable", "Direct to major areas"],
       cons: ["Infrequent schedule", "Traffic dependent", "Limited stops"],
       rating: 3
@@ -192,25 +192,25 @@ const IstanbulAirportToCityGuide = () => {
                 <TableRow>
                   <TableCell className="font-medium">Private Transfer</TableCell>
                   <TableCell>35-45 min</TableCell>
-                  <TableCell>$55-75</TableCell>
+                  <TableCell>€50-65</TableCell>
                   <TableCell>Families, Business, Comfort</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium">Taxi</TableCell>
                   <TableCell>40-60 min</TableCell>
-                  <TableCell>$20-30</TableCell>
+                  <TableCell>€20-30</TableCell>
                   <TableCell>Solo travelers, Flexibility</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium">Metro (M11)</TableCell>
                   <TableCell>50-70 min</TableCell>
-                  <TableCell>$1-2</TableCell>
+                  <TableCell>€1-2</TableCell>
                   <TableCell>Budget travelers</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium">Havaist Bus</TableCell>
                   <TableCell>60-90 min</TableCell>
-                  <TableCell>$5-8</TableCell>
+                  <TableCell>€5-8</TableCell>
                   <TableCell>Budget, Major destinations</TableCell>
                 </TableRow>
               </TableBody>
@@ -245,10 +245,13 @@ const IstanbulAirportToCityGuide = () => {
             Private transfer prices from Istanbul Airport are fixed and transparent:
           </p>
           <ul>
-            <li><strong>To Taksim/Beyoğlu:</strong> $55-65 (Mercedes Vito)</li>
-            <li><strong>To Sultanahmet:</strong> $55-65 (Mercedes Vito)</li>
-            <li><strong>To Kadıköy (Asian Side):</strong> $70-85</li>
-            <li><strong>To Sabiha Gökçen Airport:</strong> $120-150</li>
+            <li><strong>To Taksim/Beyoğlu:</strong> €50-55 (Mercedes Vito)</li>
+            <li><strong>To Sultanahmet:</strong> €50-55 (Mercedes Vito)</li>
+            <li><strong>To Kadıköy (Asian Side):</strong> €65-70</li>
+            <li><strong>To Sabiha Gökçen Airport:</strong> €110-130</li>
+            <li><strong>To Bursa:</strong> €185-220</li>
+            <li><strong>To Sapanca:</strong> €245-265</li>
+            <li><strong>To Kartepe:</strong> €255-285</li>
           </ul>
 
           <div className="not-prose my-8">
@@ -298,10 +301,10 @@ const IstanbulAirportToCityGuide = () => {
             Taxi fares from Istanbul Airport use a metered system:
           </p>
           <ul>
-            <li><strong>Base fare:</strong> 35 TL (~$1.10)</li>
-            <li><strong>Per km:</strong> 25-30 TL (~$0.80)</li>
-            <li><strong>To Taksim:</strong> 600-800 TL ($20-25)</li>
-            <li><strong>To Sultanahmet:</strong> 650-850 TL ($21-27)</li>
+            <li><strong>Base fare:</strong> 35 TL (~€1)</li>
+            <li><strong>Per km:</strong> 25-30 TL (~€0.70)</li>
+            <li><strong>To Taksim:</strong> 600-800 TL (€17-22)</li>
+            <li><strong>To Sultanahmet:</strong> 650-850 TL (€18-24)</li>
           </ul>
 
           <div className="not-prose my-8">

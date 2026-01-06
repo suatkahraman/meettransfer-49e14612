@@ -18,13 +18,16 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "Istanbul Airport", to: "Taksim", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Sultanahmet", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Beşiktaş", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Levent", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Kadıköy", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Üsküdar", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Galataport", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Taksim", price: "From €50" },
+  { from: "Istanbul Airport", to: "Sultanahmet", price: "From €50" },
+  { from: "Istanbul Airport", to: "Beşiktaş", price: "From €50" },
+  { from: "Istanbul Airport", to: "Levent", price: "From €50" },
+  { from: "Istanbul Airport", to: "Kadıköy", price: "From €65" },
+  { from: "Istanbul Airport", to: "Üsküdar", price: "From €60" },
+  { from: "Istanbul Airport", to: "Galataport", price: "From €50" },
+  { from: "Istanbul Airport", to: "Bursa", price: "From €185" },
+  { from: "Istanbul Airport", to: "Sapanca", price: "From €245" },
+  { from: "Istanbul Airport", to: "Kartepe", price: "From €255" },
 ];
 
 const faqItems = [
@@ -34,7 +37,7 @@ const faqItems = [
   },
   {
     question: "How much does Istanbul Airport transfer cost?",
-    answer: "Our Istanbul Airport transfer prices start from $45 for destinations like Taksim, Sultanahmet, and Beşiktaş. The price is fixed and includes meet & greet service, flight tracking, professional driver, luxury vehicle, complimentary water, WiFi, and all taxes. No hidden fees or surge pricing.",
+    answer: "Our Istanbul Airport transfer prices start from €50 for destinations like Taksim, Sultanahmet, and Beşiktaş. The price is fixed and includes meet & greet service, flight tracking, professional driver, luxury vehicle, complimentary water, WiFi, and all taxes. No hidden fees or surge pricing.",
   },
   {
     question: "Is Istanbul Airport transfer safe and reliable?",
@@ -78,7 +81,7 @@ const IstanbulAirportTransfer = () => {
     <WebsiteLayout>
       <SEOHead
         title="Istanbul Airport Transfer | Private VIP Service from IST Airport | Meet Transfer"
-        description="Book Istanbul Airport (IST) private transfer from $45. Professional meet & greet, flight tracking, luxury Mercedes vehicles. 24/7 service. Fixed prices, no hidden fees. Book now!"
+        description="Book Istanbul Airport (IST) private transfer from €50. Professional meet & greet, flight tracking, luxury Mercedes vehicles. 24/7 service. Fixed prices, no hidden fees. Book now!"
         keywords="Istanbul Airport transfer, IST airport transfer, Istanbul Airport taxi, Istanbul Airport private transfer, IST to city center, Istanbul Airport VIP transfer, Istanbul Airport shuttle, Istanbul new airport transfer"
         canonicalPath="/istanbul-airport-transfer"
       />
@@ -99,7 +102,7 @@ const IstanbulAirportTransfer = () => {
             name: 'Istanbul Airport Transfer Service',
             description: 'Premium private transfer from Istanbul Airport (IST) to city center with meet & greet',
             image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '45', priceCurrency: 'USD' },
+            offers: { price: '50', priceCurrency: 'EUR' },
           },
         ]}
       />
