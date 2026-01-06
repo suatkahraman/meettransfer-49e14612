@@ -60,6 +60,8 @@ import {
   Building2,
   ChevronRight,
   Eye,
+  Briefcase,
+  Baby,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PriceHistoryCard from "@/components/admin/PriceHistoryCard";
@@ -590,16 +592,29 @@ export default function AdminQuickBookings() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-col text-sm">
-                              <div className="flex items-center gap-1">
-                                <Car className="h-3 w-3 text-muted-foreground" />
-                                <span>{vehicleLabels[request.vehicle_type] || request.vehicle_type}</span>
+                            <div className="flex flex-col gap-1.5 text-sm">
+                              <div className="flex items-center gap-1.5">
+                                <Car className="h-3.5 w-3.5 text-primary" />
+                                <span className="font-medium">{vehicleLabels[request.vehicle_type] || request.vehicle_type}</span>
                               </div>
-                              <span className="text-xs text-muted-foreground">
-                                {request.passengers} yolcu
-                                {request.luggage_count ? ` • ${request.luggage_count} valiz` : ''}
-                                {request.baby_seat_count ? ` • ${request.baby_seat_count} 👶` : ''}
-                              </span>
+                              <div className="flex items-center gap-2 text-xs">
+                                <span className="flex items-center gap-1 text-muted-foreground">
+                                  <Users className="h-3 w-3" />
+                                  {request.passengers}
+                                </span>
+                                {request.luggage_count !== null && request.luggage_count > 0 && (
+                                  <span className="flex items-center gap-1 text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded">
+                                    <Briefcase className="h-3 w-3" />
+                                    {request.luggage_count}
+                                  </span>
+                                )}
+                                {request.baby_seat_count !== null && request.baby_seat_count > 0 && (
+                                  <span className="flex items-center gap-1 text-pink-600 bg-pink-50 dark:bg-pink-900/30 px-1.5 py-0.5 rounded">
+                                    <Baby className="h-3 w-3" />
+                                    {request.baby_seat_count}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
@@ -667,19 +682,29 @@ export default function AdminQuickBookings() {
                       </div>
 
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Car className="h-3 w-3" />
-                            {vehicleLabels[request.vehicle_type] || request.vehicle_type}
+                        <div className="flex flex-col gap-1.5 text-xs">
+                          <span className="flex items-center gap-1.5 text-muted-foreground">
+                            <Car className="h-3.5 w-3.5 text-primary" />
+                            <span className="font-medium">{vehicleLabels[request.vehicle_type] || request.vehicle_type}</span>
                           </span>
-                          <span className="flex items-center gap-2">
-                            <span className="flex items-center gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className="flex items-center gap-1 text-muted-foreground">
                               <Users className="h-3 w-3" />
                               {request.passengers}
                             </span>
-                            {request.luggage_count ? <span>🧳 {request.luggage_count}</span> : null}
-                            {request.baby_seat_count ? <span>👶 {request.baby_seat_count}</span> : null}
-                          </span>
+                            {request.luggage_count !== null && request.luggage_count > 0 && (
+                              <span className="flex items-center gap-1 text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded">
+                                <Briefcase className="h-3 w-3" />
+                                {request.luggage_count}
+                              </span>
+                            )}
+                            {request.baby_seat_count !== null && request.baby_seat_count > 0 && (
+                              <span className="flex items-center gap-1 text-pink-600 bg-pink-50 dark:bg-pink-900/30 px-1.5 py-0.5 rounded">
+                                <Baby className="h-3 w-3" />
+                                {request.baby_seat_count}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         {request.price && (
                           <span className="font-semibold text-green-600">
@@ -763,14 +788,27 @@ export default function AdminQuickBookings() {
                   <Card>
                     <CardContent className="p-3">
                       <div className="flex items-center gap-2 text-sm">
-                        <Car className="h-4 w-4 text-muted-foreground" />
-                        <div>
+                        <Car className="h-4 w-4 text-primary" />
+                        <div className="flex-1">
                           <p className="font-medium">{vehicleLabels[selectedRequest.vehicle_type] || selectedRequest.vehicle_type}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {selectedRequest.passengers} yolcu
-                            {selectedRequest.luggage_count ? ` • ${selectedRequest.luggage_count} valiz` : ''}
-                            {selectedRequest.baby_seat_count ? ` • ${selectedRequest.baby_seat_count} bebek koltuğu` : ''}
-                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Users className="h-3 w-3" />
+                              {selectedRequest.passengers} yolcu
+                            </span>
+                            {selectedRequest.luggage_count !== null && selectedRequest.luggage_count > 0 && (
+                              <span className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded">
+                                <Briefcase className="h-3 w-3" />
+                                {selectedRequest.luggage_count} valiz
+                              </span>
+                            )}
+                            {selectedRequest.baby_seat_count !== null && selectedRequest.baby_seat_count > 0 && (
+                              <span className="flex items-center gap-1 text-xs text-pink-600 bg-pink-50 dark:bg-pink-900/30 px-1.5 py-0.5 rounded">
+                                <Baby className="h-3 w-3" />
+                                {selectedRequest.baby_seat_count} bebek koltuğu
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </CardContent>
