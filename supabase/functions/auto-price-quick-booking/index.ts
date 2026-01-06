@@ -18,6 +18,104 @@ interface AutoPriceRequest {
   quick_booking_id: string;
 }
 
+// Currency conversion helper
+async function convertCurrency(
+  amount: number,
+  fromCurrency: string,
+  toCurrency: string
+): Promise<{ amount: number; rate: number }> {
+  if (fromCurrency === toCurrency) {
+    return { amount, rate: 1 };
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.frankfurter.app/latest?from=${fromCurrency}&to=${toCurrency}`
+    );
+    if (response.ok) {
+      const data = await response.json();
+      const rate = data.rates[toCurrency];
+      return { amount: Math.round(amount * rate), rate };
+    }
+  } catch (e) {
+    console.error("Currency conversion error:", e);
+  }
+
+  // Fallback rates
+  const fallbackRates: Record<string, Record<string, number>> = {
+    'EUR': { 'USD': 1.08, 'TRY': 37.5, 'GBP': 0.85, 'AED': 3.97 },
+    'USD': { 'EUR': 0.93, 'TRY': 34.5, 'GBP': 0.79, 'AED': 3.67 },
+    'TRY': { 'EUR': 0.027, 'USD': 0.029, 'GBP': 0.023, 'AED': 0.11 },
+  };
+
+  const rate = fallbackRates[fromCurrency]?.[toCurrency] || 1;
+  return { amount: Math.round(amount * rate), rate };
+}
+
+// Send admin notification for manual pricing
+async function sendManualPriceRequestEmail(
+  booking: any,
+  transferInfo: any
+): Promise<void> {
+  const adminEmail = "sautkahraman@gmail.com";
+  
+  try {
+    await resend.emails.send({
+      from: "Meet Transfer <no-reply@meet-transfer.com>",
+      to: adminEmail,
+      subject: `⚠️ Quick Booking Manuel Fiyat Gerekli: ${booking.customer_name || 'Misafir'}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">⚠️ Manuel Fiyat Gerekli</h1>
+            <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">Quick Booking - Otomatik fiyat eşleştirilemedi</p>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px;">
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
+              <h3 style="margin: 0 0 10px 0; color: #333;">Müşteri Bilgileri</h3>
+              <p style="margin: 5px 0; color: #666;"><strong>Müşteri:</strong> ${booking.customer_name || 'Henüz girilmedi'}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Email:</strong> ${booking.customer_email || 'Henüz girilmedi'}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Telefon:</strong> ${booking.customer_phone || 'Henüz girilmedi'}</p>
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;">
+              <h3 style="margin: 0 0 10px 0; color: #333;">Transfer Detayları</h3>
+              <p style="margin: 5px 0; color: #666;"><strong>Alış:</strong> ${booking.pickup}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Bırakış:</strong> ${booking.dropoff}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Tarih:</strong> ${booking.pickup_date}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Saat:</strong> ${booking.pickup_time}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Araç:</strong> ${booking.vehicle_type}</p>
+              ${booking.has_return_trip ? `<p style="margin: 5px 0; color: #666;"><strong>Dönüş:</strong> ${booking.return_date} - ${booking.return_time}</p>` : ''}
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ef4444;">
+              <h3 style="margin: 0 0 10px 0; color: #333;">Eşleşme Sonucu</h3>
+              <p style="margin: 5px 0; color: #666;"><strong>Bulunan Havalimanı:</strong> ${transferInfo.airport || 'Bulunamadı'}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Bulunan Şehir:</strong> ${transferInfo.city || 'Bulunamadı'}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Bulunan İlçe:</strong> ${transferInfo.district || 'Bulunamadı'}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Yön:</strong> ${transferInfo.direction}</p>
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0; padding: 20px; background: #fef3c7; border-radius: 8px; border: 2px solid #f59e0b;">
+              <p style="font-size: 16px; color: #92400e; margin: 0; font-weight: bold;">
+                🔧 Lütfen admin panelinden manuel fiyat girin
+              </p>
+            </div>
+            
+            <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
+              Bu bildirim otomatik fiyat sistemi tarafından gönderilmiştir.
+            </p>
+          </div>
+        </div>
+      `,
+    });
+    console.log("📧 Manual price request email sent to admin for quick booking");
+  } catch (emailError) {
+    console.error("Failed to send manual price request email:", emailError);
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -63,31 +161,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!city && !airport) {
       console.log("❌ No city or airport matched - manual pricing required");
-      
-      // Notify admin about unmatched booking
-      try {
-        await supabase.functions.invoke("notify-admin-quick-booking-new", {
-          body: {
-            booking_id: quick_booking_id,
-            pickup: booking.pickup,
-            dropoff: booking.dropoff,
-            pickup_date: booking.pickup_date,
-            pickup_time: booking.pickup_time,
-            vehicle_type: booking.vehicle_type,
-            auto_priced: false,
-            needs_manual_price: true,
-          },
-        });
-      } catch (e) {
-        console.error("Failed to notify admin:", e);
-      }
-      
+      // Send email to admin for manual pricing
+      await sendManualPriceRequestEmail(booking, transferInfo);
       return new Response(JSON.stringify({ matched: false, reason: "no_location_match" }), {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    // Query for matching price
+    // Query for matching price - bidirectional (airport->address OR address->airport same price)
     let bestPrice = null;
 
     // 1. Try exact match (airport + city + district + vehicle)
@@ -144,32 +225,17 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!bestPrice) {
-      console.log("❌ No price found for this route - notifying admin");
-      
-      // Notify admin about booking needing manual pricing
-      try {
-        await supabase.functions.invoke("notify-admin-quick-booking-new", {
-          body: {
-            booking_id: quick_booking_id,
-            pickup: booking.pickup,
-            dropoff: booking.dropoff,
-            pickup_date: booking.pickup_date,
-            pickup_time: booking.pickup_time,
-            vehicle_type: booking.vehicle_type,
-            auto_priced: false,
-            needs_manual_price: true,
-            matched_city: city,
-            matched_airport: airport,
-          },
-        });
-      } catch (e) {
-        console.error("Failed to notify admin:", e);
-      }
-      
+      console.log("❌ No price found for this route - sending manual price request to admin");
+      // Send email to admin for manual pricing
+      await sendManualPriceRequestEmail(booking, transferInfo);
       return new Response(JSON.stringify({ matched: false, reason: "no_price_found" }), {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
+
+    // Admin enters price in EUR - check if customer requested different currency
+    const basePriceCurrency = bestPrice.price_currency || 'EUR';
+    const customerRequestedCurrency = booking.price_currency || basePriceCurrency;
 
     // Calculate price with discount
     const discountInfo = calculateDiscount(
@@ -178,14 +244,35 @@ const handler = async (req: Request): Promise<Response> => {
       booking.promo_code
     );
 
+    let finalPrice = discountInfo.price;
+    let finalReturnPrice = discountInfo.returnPrice;
+    let finalTotalPrice = discountInfo.totalPrice;
+    let finalCurrency = basePriceCurrency;
+    let exchangeRate = 1;
+
+    // Convert to customer's requested currency if different
+    if (customerRequestedCurrency !== basePriceCurrency) {
+      const conversion = await convertCurrency(discountInfo.price, basePriceCurrency, customerRequestedCurrency);
+      finalPrice = conversion.amount;
+      exchangeRate = conversion.rate;
+      finalCurrency = customerRequestedCurrency;
+      
+      if (discountInfo.returnPrice) {
+        finalReturnPrice = Math.round(discountInfo.returnPrice * exchangeRate);
+      }
+      finalTotalPrice = finalPrice + (finalReturnPrice || 0);
+      
+      console.log(`💱 Currency converted: ${discountInfo.price} ${basePriceCurrency} → ${finalPrice} ${finalCurrency} (rate: ${exchangeRate})`);
+    }
+
     // Update booking with price
     const { error: updateError } = await supabase
       .from("quick_booking_requests")
       .update({
-        price: discountInfo.price,
-        price_currency: bestPrice.price_currency,
+        price: finalPrice,
+        price_currency: finalCurrency,
         status: "price_sent",
-        return_price: discountInfo.returnPrice,
+        return_price: finalReturnPrice,
       })
       .eq("id", quick_booking_id);
 
@@ -194,16 +281,16 @@ const handler = async (req: Request): Promise<Response> => {
       throw updateError;
     }
 
-    console.log("✅ Booking updated with price:", discountInfo.price, bestPrice.price_currency);
+    console.log("✅ Booking updated with price:", finalPrice, finalCurrency);
 
     // Record price history
     try {
       await supabase.from("price_history").insert({
         quick_booking_id: quick_booking_id,
-        price: discountInfo.price,
-        price_currency: bestPrice.price_currency,
+        price: finalPrice,
+        price_currency: finalCurrency,
         action: "auto_sent",
-        customer_note: `Otomatik: ${city || 'N/A'} - ${district || 'N/A'} (${airport || 'N/A'}) [${confidence}]`,
+        customer_note: `Otomatik: ${city || 'N/A'} - ${district || 'N/A'} (${airport || 'N/A'}) [${confidence}]${exchangeRate !== 1 ? ` [Kur: ${exchangeRate.toFixed(2)}]` : ''}`,
       });
     } catch (e) {
       console.error("Failed to record price history:", e);
@@ -215,7 +302,7 @@ const handler = async (req: Request): Promise<Response> => {
       await resend.emails.send({
         from: "Meet Transfer <no-reply@meet-transfer.com>",
         to: adminEmail,
-        subject: `🤖 Quick Booking Otomatik Fiyat: ${booking.customer_name || 'Misafir'} - ${discountInfo.totalPrice} ${bestPrice.price_currency}`,
+        subject: `🤖 Quick Booking Otomatik Fiyat: ${booking.customer_name || 'Misafir'} - ${finalTotalPrice} ${finalCurrency}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
@@ -245,32 +332,33 @@ const handler = async (req: Request): Promise<Response> => {
                 <p style="margin: 5px 0; color: #666;"><strong>Şehir:</strong> ${city || 'N/A'}</p>
                 <p style="margin: 5px 0; color: #666;"><strong>İlçe:</strong> ${district || 'N/A'}</p>
                 <p style="margin: 5px 0; color: #666;"><strong>Havalimanı:</strong> ${airport || 'N/A'}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>Yön:</strong> ${direction}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>Güven:</strong> ${confidence}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Yön:</strong> ${direction} (${confidence})</p>
               </div>
               
               <div style="text-align: center; margin: 20px 0; padding: 20px; background: #10b981; border-radius: 8px;">
+                ${exchangeRate !== 1 ? `<p style="font-size: 12px; color: #d1fae5; margin-bottom: 10px;">Baz Fiyat: ${discountInfo.price} ${basePriceCurrency} | Kur: ${exchangeRate.toFixed(2)}</p>` : ''}
                 <p style="font-size: 14px; color: white; margin-bottom: 5px;">Gidiş Fiyatı</p>
                 <p style="font-size: 28px; font-weight: bold; color: white; margin: 0;">
-                  ${discountInfo.price} ${bestPrice.price_currency}
+                  ${finalPrice} ${finalCurrency}
                 </p>
                 ${booking.has_return_trip ? `
                   <p style="font-size: 14px; color: white; margin: 10px 0 5px 0;">Dönüş Fiyatı</p>
                   <p style="font-size: 24px; font-weight: bold; color: white; margin: 0;">
-                    ${discountInfo.returnPrice} ${bestPrice.price_currency}
+                    ${finalReturnPrice} ${finalCurrency}
                     ${discountInfo.discountApplied ? `<span style="font-size: 12px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; margin-left: 8px;">%${discountInfo.discountPercent} İndirim</span>` : ''}
                   </p>
                   <div style="border-top: 1px solid rgba(255,255,255,0.3); margin-top: 15px; padding-top: 15px;">
                     <p style="font-size: 14px; color: white; margin-bottom: 5px;">Toplam</p>
                     <p style="font-size: 32px; font-weight: bold; color: white; margin: 0;">
-                      ${discountInfo.totalPrice} ${bestPrice.price_currency}
+                      ${finalTotalPrice} ${finalCurrency}
                     </p>
                   </div>
                 ` : ''}
               </div>
               
               <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
-                Bu bildirim otomatik fiyat sistemi tarafından gönderilmiştir.
+                Bu bildirim otomatik fiyat sistemi tarafından gönderilmiştir.<br>
+                <strong>Not:</strong> Havalimanı ↔ Adres transferleri aynı fiyattır.
               </p>
             </div>
           </div>
@@ -295,7 +383,7 @@ const handler = async (req: Request): Promise<Response> => {
           'GBP': '£',
           'AED': 'د.إ',
         };
-        const currencySymbol = currencySymbols[bestPrice.price_currency] || bestPrice.price_currency;
+        const currencySymbol = currencySymbols[finalCurrency] || finalCurrency;
 
         const formatDate = (dateStr: string) => {
           const date = new Date(dateStr);
@@ -308,18 +396,18 @@ const handler = async (req: Request): Promise<Response> => {
           'mercedes-maybach': 'Mercedes Maybach',
         };
 
-        let priceHtml = `<p style="font-size: 28px; color: #1e3a8a; font-weight: bold; margin: 10px 0;">${currencySymbol}${discountInfo.price}</p>`;
+        let priceHtml = `<p style="font-size: 28px; color: #1e3a8a; font-weight: bold; margin: 10px 0;">${currencySymbol}${finalPrice}</p>`;
         
-        if (booking.has_return_trip && discountInfo.returnPrice) {
+        if (booking.has_return_trip && finalReturnPrice) {
           priceHtml += `
             <p style="margin-top: 15px; color: #666;">Return Transfer (${formatDate(booking.return_date)} - ${booking.return_time}):</p>
             ${discountInfo.discountApplied 
-              ? `<p style="font-size: 20px; color: #22c55e; font-weight: bold;"><span style="text-decoration: line-through; color: #999;">${currencySymbol}${discountInfo.price}</span> ${currencySymbol}${discountInfo.returnPrice} <span style="font-size: 12px; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">${discountInfo.discountPercent}% OFF</span></p>`
-              : `<p style="font-size: 20px; color: #1e3a8a; font-weight: bold;">${currencySymbol}${discountInfo.returnPrice}</p>`
+              ? `<p style="font-size: 20px; color: #22c55e; font-weight: bold;"><span style="text-decoration: line-through; color: #999;">${currencySymbol}${finalPrice}</span> ${currencySymbol}${finalReturnPrice} <span style="font-size: 12px; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">${discountInfo.discountPercent}% OFF</span></p>`
+              : `<p style="font-size: 20px; color: #1e3a8a; font-weight: bold;">${currencySymbol}${finalReturnPrice}</p>`
             }
             <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #1e3a8a;">
               <p style="color: #666;">Total Price:</p>
-              <p style="font-size: 28px; color: #1e3a8a; font-weight: bold;">${currencySymbol}${discountInfo.totalPrice}</p>
+              <p style="font-size: 28px; color: #1e3a8a; font-weight: bold;">${currencySymbol}${finalTotalPrice}</p>
             </div>
           `;
         }
@@ -375,6 +463,10 @@ const handler = async (req: Request): Promise<Response> => {
                 ⏰ This quote is valid for 24 hours
               </p>
               
+              <p style="margin-top: 10px; font-size: 12px; color: #94a3b8; text-align: center;">
+                ↔️ Airport transfers are the same price in both directions
+              </p>
+              
               <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
                 <p style="color: #64748b; font-size: 13px; margin: 0;">Questions? Contact us via WhatsApp</p>
                 <a href="https://wa.me/905332459932" style="color: #22c55e; font-weight: 600; text-decoration: none;">+90 533 245 99 32</a>
@@ -387,7 +479,7 @@ const handler = async (req: Request): Promise<Response> => {
         const { error: emailError } = await resend.emails.send({
           from: "Meet Transfer <no-reply@meettransfer.app>",
           to: [booking.customer_email],
-          subject: `Your Transfer Quote: ${currencySymbol}${discountInfo.price} - Meet Transfer`,
+          subject: `Your Transfer Quote: ${currencySymbol}${finalPrice} - Meet Transfer`,
           html: emailHtml,
         });
 
@@ -402,37 +494,17 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Notify admin about auto-priced booking
-    try {
-      await supabase.functions.invoke("notify-admin-quick-booking-new", {
-        body: {
-          booking_id: quick_booking_id,
-          pickup: booking.pickup,
-          dropoff: booking.dropoff,
-          pickup_date: booking.pickup_date,
-          pickup_time: booking.pickup_time,
-          vehicle_type: booking.vehicle_type,
-          auto_priced: true,
-          price: discountInfo.price,
-          currency: bestPrice.price_currency,
-          matched_city: city,
-          matched_district: district,
-          matched_airport: airport,
-        },
-      });
-    } catch (e) {
-      console.error("Failed to notify admin:", e);
-    }
-
     console.log("✅ Auto-pricing completed successfully");
 
     return new Response(
       JSON.stringify({
         matched: true,
-        price: discountInfo.price,
-        currency: bestPrice.price_currency,
-        returnPrice: discountInfo.returnPrice,
-        totalPrice: discountInfo.totalPrice,
+        price: finalPrice,
+        currency: finalCurrency,
+        baseCurrency: basePriceCurrency,
+        exchangeRate: exchangeRate !== 1 ? exchangeRate : null,
+        returnPrice: finalReturnPrice,
+        totalPrice: finalTotalPrice,
         discountApplied: discountInfo.discountApplied,
         emailSent,
         matchedCity: city,
@@ -440,6 +512,7 @@ const handler = async (req: Request): Promise<Response> => {
         matchedAirport: airport,
         direction,
         confidence,
+        bidirectional: true, // Airport transfers are same price both ways
       }),
       {
         headers: { "Content-Type": "application/json", ...corsHeaders },
