@@ -156,6 +156,7 @@ export default function QuickBookingConfirm() {
   const [selectedVehicleForModal, setSelectedVehicleForModal] = useState<typeof VEHICLE_TYPE_MAP[string] | null>(null);
 
   const token = searchParams.get("token");
+  const isNewRequest = searchParams.get("new") === "true"; // Flag for showing animation on initial load
   const urlHasReturn = searchParams.get("hasReturn") === "true";
   const urlReturnDate = searchParams.get("returnDate") || "";
   const urlReturnTime = searchParams.get("returnTime") || "";
@@ -201,14 +202,33 @@ export default function QuickBookingConfirm() {
     }
   }, [booking, selectedVehicle]);
 
+  // Show preparing animation on initial load for new requests
+  useEffect(() => {
+    if (isNewRequest && token) {
+      setShowPriceAnimation(true);
+      const timer = setTimeout(() => {
+        setShowPriceAnimation(false);
+      }, 3500); // Show for 3.5 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [isNewRequest, token]);
+
   useEffect(() => {
     if (token) {
-      fetchBooking(token);
+      // If it's a new request, delay fetching to show animation first
+      if (isNewRequest) {
+        const timer = setTimeout(() => {
+          fetchBooking(token);
+        }, 3500);
+        return () => clearTimeout(timer);
+      } else {
+        fetchBooking(token);
+      }
     } else {
       setError("No confirmation token provided");
       setLoading(false);
     }
-  }, [token]);
+  }, [token, isNewRequest]);
 
   // Fetch all vehicle prices when booking is loaded
   useEffect(() => {
@@ -653,40 +673,7 @@ export default function QuickBookingConfirm() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="max-w-md w-full mx-4">
-          <CardContent className="pt-6 text-center">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-            <h2 className="text-xl font-semibold mb-2">{t("qbLoadingPriceQuote")}</h2>
-            <p className="text-muted-foreground">{t("qbPleaseWait")}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="pt-6 text-center">
-            <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-              <XCircle className="h-8 w-8 text-destructive" />
-            </div>
-            <h2 className="text-xl font-semibold mb-2">{t("qbUnableToLoad")}</h2>
-            <p className="text-muted-foreground mb-6">{error}</p>
-            <Button onClick={() => navigate("/")}>{t("qbGoToHomepage")}</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!booking) return null;
-
-  // Preparing Best Price Animation
+  // Preparing Best Price Animation - MUST be checked first before loading
   if (showPriceAnimation) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-green-500/5 to-background p-4">
@@ -741,6 +728,40 @@ export default function QuickBookingConfirm() {
       </div>
     );
   }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="pt-6 text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+            <h2 className="text-xl font-semibold mb-2">{t("qbLoadingPriceQuote")}</h2>
+            <p className="text-muted-foreground">{t("qbPleaseWait")}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-6 text-center">
+            <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+              <XCircle className="h-8 w-8 text-destructive" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">{t("qbUnableToLoad")}</h2>
+            <p className="text-muted-foreground mb-6">{error}</p>
+            <Button onClick={() => navigate("/")}>{t("qbGoToHomepage")}</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!booking) return null;
+
 
   // Waiting for price state
   if (waitingForPrice) {
