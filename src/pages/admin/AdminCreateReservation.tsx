@@ -20,12 +20,8 @@ import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 
 // Airports list removed - pickup is now free text
-const vehicleTypes = [
-  { value: 'mercedes-vito', label: 'Mercedes-vito' },
-  { value: 'vip-mercedes', label: 'Vip Mercedes' },
-  { value: 'maybach-minibus', label: 'Maybach Minibus' },
-  { value: 'minibus', label: 'Minibus' },
-];
+// Use centralized vehicle types
+import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 const paymentTypes = [
   { value: 'cash', label: 'Şoföre Nakit' },
   { value: 'payment_link', label: 'Online Ödeme Linki' },

@@ -316,28 +316,8 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
 };
 
 // ==================== VEHICLE TYPE MAPPING ====================
-// SYNCED with src/lib/vehicleTypes.ts and AdminRegionPrices.tsx
-// Vehicle types: mercedes-vito, vip-mercedes, maybach-minibus, minibus
-export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
-  // Primary vehicle types (current - used in forms)
-  'mercedes-vito': ['mercedes-vito', 'vip-mercedes', 'minibus'],
-  'vip-mercedes': ['vip-mercedes', 'mercedes-vito', 'maybach-minibus', 'minibus'],
-  'maybach-minibus': ['maybach-minibus', 'vip-mercedes', 'mercedes-vito'],
-  'minibus': ['minibus', 'mercedes-vito', 'vip-mercedes'],
-  // Legacy vehicle type names (for backward compatibility with old data)
-  'mercedes-vclass': ['vip-mercedes', 'mercedes-vito', 'maybach-minibus'],
-  'maybach': ['maybach-minibus', 'vip-mercedes', 'mercedes-vito'],
-  'Mercedes Vito': ['mercedes-vito', 'vip-mercedes', 'minibus'],
-  'Mercedes Vito VIP': ['vip-mercedes', 'mercedes-vito', 'maybach-minibus'],
-  'VIP Vito': ['vip-mercedes', 'mercedes-vito', 'maybach-minibus'],
-  'Mercedes Sprinter': ['minibus', 'mercedes-vito'],
-  'Mercedes Sprinter VIP': ['minibus', 'vip-mercedes'],
-  'Mercedes Maybach': ['maybach-minibus', 'vip-mercedes'],
-  'Maybach Minivan': ['maybach-minibus', 'vip-mercedes'],
-  'VIP': ['vip-mercedes', 'maybach-minibus', 'mercedes-vito'],
-  'Minivan': ['mercedes-vito', 'vip-mercedes'],
-  'Minibus': ['minibus', 'mercedes-vito'],
-};
+// Import from shared vehicleConfig - kept here for backward compatibility
+export { VEHICLE_FALLBACK_ORDER, getVehicleFallbackList, getVehicleLabel, VEHICLE_LABELS } from "./vehicleConfig.ts";
 
 // ==================== NORMALIZATION ====================
 export function normalizeLocation(location: string): string {
@@ -662,24 +642,7 @@ export function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
   return result;
 }
 
-// ==================== VEHICLE TYPE MATCHING ====================
-export function getVehicleFallbackList(requestedVehicle: string): string[] {
-  // Direct match
-  if (VEHICLE_FALLBACK_ORDER[requestedVehicle]) {
-    return VEHICLE_FALLBACK_ORDER[requestedVehicle];
-  }
-  
-  // Partial match
-  const normalized = requestedVehicle.toLowerCase();
-  for (const [vehicle, fallbacks] of Object.entries(VEHICLE_FALLBACK_ORDER)) {
-    if (normalized.includes(vehicle.toLowerCase()) || vehicle.toLowerCase().includes(normalized)) {
-      return fallbacks;
-    }
-  }
-  
-  // Default fallback
-  return [requestedVehicle];
-}
+// Vehicle matching is now in vehicleConfig.ts - re-exported above
 
 // ==================== DISCOUNT CALCULATION ====================
 export const VALID_PROMO_CODES = ['MEET40RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30', 'MEET10', 'WELCOME10'];

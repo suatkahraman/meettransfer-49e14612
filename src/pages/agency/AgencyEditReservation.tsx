@@ -17,12 +17,8 @@ import { Badge } from '@/components/ui/badge';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 
-const vehicleTypes = [
-  { value: 'mercedes-vito', label: 'Mercedes-vito' },
-  { value: 'vip-mercedes', label: 'Vip Mercedes' },
-  { value: 'maybach-minibus', label: 'Maybach Minibus' },
-  { value: 'minibus', label: 'Minibus' },
-];
+// Use centralized vehicle types
+import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 
 interface Driver {
   id: string;

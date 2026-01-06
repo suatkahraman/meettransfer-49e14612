@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { getVehicleLabel, VEHICLE_LABELS } from "../_shared/vehicleConfig.ts";
+import { getCurrencySymbol } from "../_shared/currencyUtils.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -66,21 +68,8 @@ const handler = async (req: Request): Promise<Response> => {
     const baseUrl = "https://meettransfer.app";
     const confirmUrl = `${baseUrl}/quick-booking-confirm?token=${booking.confirmation_token}`;
 
-    // Format currency symbol
-    const currencySymbol =
-      currency === "EUR"
-        ? "€"
-        : currency === "USD"
-          ? "$"
-          : currency === "GBP"
-            ? "£"
-            : currency === "TRY"
-              ? "₺"
-              : currency === "AED"
-                ? "د.إ"
-                : currency === "AUD"
-                  ? "A$"
-                  : currency;
+    // Format currency symbol using shared utility
+    const currencySymbol = getCurrencySymbol(currency);
 
     // Format date
     const pickupDate = new Date(booking.pickup_date).toLocaleDateString("en-GB", {
@@ -100,15 +89,8 @@ const handler = async (req: Request): Promise<Response> => {
         })
       : null;
 
-    // Vehicle type labels
-    const vehicleLabels: Record<string, string> = {
-      "mercedes-vito": "Mercedes Vito",
-      "mercedes-vclass": "VIP Mercedes V-Class",
-      maybach: "Maybach Minivan",
-      minibus: "Mercedes Sprinter Minibus",
-    };
-
-    const vehicleName = vehicleLabels[booking.vehicle_type] || booking.vehicle_type;
+    // Vehicle type label using shared utility
+    const vehicleName = getVehicleLabel(booking.vehicle_type);
 
     // Calculate discount if promo code exists
     const hasReturnTrip = return_price !== undefined && return_date && return_time;
