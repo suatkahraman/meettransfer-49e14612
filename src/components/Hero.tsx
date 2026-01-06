@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare, Phone, Mail, Tag, CheckCircle, XCircle, Baby, AlertCircle } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare, Phone, Mail, Tag, CheckCircle, XCircle, Baby, AlertCircle, Snowflake, Wifi, BatteryCharging, Droplets, Sparkles, Tv, Crown, Wine, Armchair, Stars } from "lucide-react";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -30,6 +30,25 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { VEHICLE_TYPES, getAvailableVehicles, isMinibusRequired, VEHICLE_TYPE_MAP } from "@/lib/vehicleTypes";
+
+// Icon mapping for vehicle features with colors
+const getFeatureIconWithColor = (iconName: string) => {
+  const iconConfig: Record<string, { icon: typeof Snowflake; color: string }> = {
+    'snowflake': { icon: Snowflake, color: 'text-sky-500' },
+    'armchair': { icon: Armchair, color: 'text-amber-600' },
+    'wifi': { icon: Wifi, color: 'text-blue-500' },
+    'battery-charging': { icon: BatteryCharging, color: 'text-green-500' },
+    'droplets': { icon: Droplets, color: 'text-cyan-500' },
+    'luggage': { icon: Briefcase, color: 'text-orange-500' },
+    'stars': { icon: Stars, color: 'text-yellow-500' },
+    'wine': { icon: Wine, color: 'text-rose-500' },
+    'sparkles': { icon: Sparkles, color: 'text-purple-500' },
+    'crown': { icon: Crown, color: 'text-yellow-600' },
+    'tv': { icon: Tv, color: 'text-indigo-500' },
+    'champagne': { icon: Wine, color: 'text-pink-500' },
+  };
+  return iconConfig[iconName] || { icon: Sparkles, color: 'text-purple-500' };
+};
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -455,7 +474,7 @@ export const Hero = () => {
                       </h3>
                       
                       {/* Capacity Info */}
-                      <div className="flex items-center gap-3 text-xs text-white/70">
+                      <div className="flex items-center gap-3 text-xs text-white/70 mb-2">
                         <span className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
                           {v.passengers}
@@ -465,6 +484,22 @@ export const Hero = () => {
                           {v.luggage}
                         </span>
                       </div>
+                      
+                      {/* Vehicle Features with Colorful Icons */}
+                      <div className="flex flex-wrap gap-1">
+                        {v.features.slice(0, 4).map((feature, idx) => {
+                          const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
+                          return (
+                            <div 
+                              key={idx}
+                              className="flex items-center justify-center w-5 h-5 rounded-full bg-white/20"
+                              title={feature.label}
+                            >
+                              <FeatureIcon className={cn("h-2.5 w-2.5", color)} />
+                            </div>
+                          );
+                        })}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -473,7 +508,7 @@ export const Hero = () => {
               {/* Selected Vehicle Gallery */}
               {vehicleType && currentVehicle && (
                 <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <h4 className="text-white/90 text-sm font-medium">{currentVehicle.label}</h4>
                     <div className="flex items-center gap-3 text-xs text-white/70">
                       <span className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
@@ -485,6 +520,22 @@ export const Hero = () => {
                         {currentVehicle.luggage} {t("luggage") || "Luggage"}
                       </span>
                     </div>
+                  </div>
+                  
+                  {/* Vehicle Features with Colorful Icons */}
+                  <div className="flex flex-wrap gap-2">
+                    {currentVehicle.features.slice(0, 6).map((feature, idx) => {
+                      const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
+                      return (
+                        <div 
+                          key={idx}
+                          className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded-full text-xs text-white/80"
+                        >
+                          <FeatureIcon className={cn("h-3 w-3", color)} />
+                          <span>{feature.label}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                   
                   <Carousel 
