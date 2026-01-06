@@ -621,61 +621,113 @@ export function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
   const dropoffCity = findCity(dropoff);
   const pickupDistrict = findDistrict(pickup);
   const dropoffDistrict = findDistrict(dropoff);
-  
+
+  // Special rule: Istanbul (Europe/Asia side) → Bursa/Kocaeli/Sapanca should use
+  // Istanbul Airport / Sabiha Gokcen Airport price tables.
+  // This prevents wrong matches like Istanbul-district rows (e.g. Taksim) being used for intercity routes.
+  const ISTANBUL_ASIAN_DISTRICTS = new Set([
+    "Kadikoy",
+    "Uskudar",
+    "Atasehir",
+    "Pendik",
+    "Kartal",
+    "Maltepe",
+    "Umraniye",
+    "Beykoz",
+  ]);
+
+  const ISTANBUL_PROXY_DEST_CITIES = new Set(["Bursa", "Kocaeli", "Sapanca"]);
+
+  const DEFAULT_DEST_DISTRICT: Record<string, string> = {
+    Bursa: "Bursa Merkez",
+    Kocaeli: "Izmit",
+    Sapanca: "Kirkpinar",
+  };
+
+  const pickupCityValue = pickupCity?.value || pickupDistrict?.city || null;
+  const dropoffCityValue = dropoffCity?.value || dropoffDistrict?.city || null;
+
+  const getIstanbulProxyAirport = () => {
+    const pickupDistrictValue = pickupDistrict?.value || null;
+    return pickupDistrictValue && ISTANBUL_ASIAN_DISTRICTS.has(pickupDistrictValue)
+      ? "Sabiha Gokcen Airport (SAW)"
+      : "Istanbul Airport (IST)";
+  };
+
   let result: TransferInfo = {
     airport: null,
     city: null,
     district: null,
-    direction: 'unknown',
-    confidence: 'low',
+    direction: "unknown",
+    confidence: "low",
     pickupAnalysis: {
       airport: pickupAirport,
       city: pickupCity,
-      district: pickupDistrict
+      district: pickupDistrict,
     },
     dropoffAnalysis: {
       airport: dropoffAirport,
       city: dropoffCity,
-      district: dropoffDistrict
-    }
+      district: dropoffDistrict,
+    },
   };
-  
+
   // Case 1: Airport to destination (district/city)
   if (pickupAirport && (dropoffDistrict || dropoffCity)) {
     result.airport = pickupAirport.value;
     result.district = dropoffDistrict?.value || null;
     result.city = dropoffDistrict?.city || dropoffCity?.value || null;
-    result.direction = 'from_airport';
-    result.confidence = dropoffDistrict ? 'high' : 'medium';
+    result.direction = "from_airport";
+    result.confidence = dropoffDistrict ? "high" : "medium";
   }
   // Case 2: Destination (district/city) to airport
   else if (dropoffAirport && (pickupDistrict || pickupCity)) {
     result.airport = dropoffAirport.value;
     result.district = pickupDistrict?.value || null;
     result.city = pickupDistrict?.city || pickupCity?.value || null;
-    result.direction = 'to_airport';
-    result.confidence = pickupDistrict ? 'high' : 'medium';
+    result.direction = "to_airport";
+    result.confidence = pickupDistrict ? "high" : "medium";
   }
   // Case 3: City to city (no airport)
   else if (pickupCity && dropoffCity) {
     result.city = pickupCity.value;
     result.district = pickupDistrict?.value || dropoffDistrict?.value || null;
-    result.direction = 'city_to_city';
-    result.confidence = 'medium';
+    result.direction = "city_to_city";
+    result.confidence = "medium";
   }
   // Case 4: Only airport found (one side)
   else if (pickupAirport || dropoffAirport) {
     result.airport = pickupAirport?.value || dropoffAirport?.value || null;
-    result.direction = pickupAirport ? 'from_airport' : 'to_airport';
-    result.confidence = 'low';
+    result.direction = pickupAirport ? "from_airport" : "to_airport";
+    result.confidence = "low";
   }
   // Case 5: Only city/district found
   else if (pickupCity || dropoffCity || pickupDistrict || dropoffDistrict) {
-    result.city = pickupCity?.value || dropoffCity?.value || pickupDistrict?.city || dropoffDistrict?.city || null;
+    result.city =
+      pickupCity?.value ||
+      dropoffCity?.value ||
+      pickupDistrict?.city ||
+      dropoffDistrict?.city ||
+      null;
     result.district = pickupDistrict?.value || dropoffDistrict?.value || null;
-    result.confidence = 'low';
+    result.confidence = "low";
   }
-  
+
+  // Apply Istanbul proxy-airport override (requested business rule)
+  if (
+    !pickupAirport &&
+    !dropoffAirport &&
+    pickupCityValue === "Istanbul" &&
+    dropoffCityValue &&
+    ISTANBUL_PROXY_DEST_CITIES.has(dropoffCityValue)
+  ) {
+    result.airport = getIstanbulProxyAirport();
+    result.city = dropoffCityValue;
+    result.district = dropoffDistrict?.value || DEFAULT_DEST_DISTRICT[dropoffCityValue] || null;
+    result.direction = "from_airport";
+    result.confidence = "high";
+  }
+
   return result;
 }
 
