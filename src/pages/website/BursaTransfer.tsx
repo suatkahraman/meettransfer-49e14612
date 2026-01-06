@@ -24,13 +24,13 @@ const destinations = [
 
 // Istanbul-Bursa transfer and tour prices
 const prices = [
-  { from: "Istanbul Airport (IST)", to: "Bursa City Center", price: "From €185" },
-  { from: "Sabiha Gökçen (SAW)", to: "Bursa City Center", price: "From €165" },
+  { from: "Istanbul Airport (IST)", to: "Bursa City Center", price: "From €245" },
+  { from: "Sabiha Gökçen (SAW)", to: "Bursa City Center", price: "From €225" },
   { from: "Istanbul Airport (IST)", to: "Uludağ Ski Resort", price: "From €245" },
   { from: "Sabiha Gökçen (SAW)", to: "Uludağ Ski Resort", price: "From €225" },
-  { from: "Istanbul Airport (IST)", to: "Mudanya", price: "From €185" },
-  { from: "Sabiha Gökçen (SAW)", to: "Mudanya", price: "From €165" },
-  { from: "Istanbul", to: "Bursa Day Tour", price: "From €250" },
+  { from: "Istanbul Airport (IST)", to: "Mudanya", price: "From €245" },
+  { from: "Sabiha Gökçen (SAW)", to: "Mudanya", price: "From €225" },
+  { from: "Istanbul", to: "Bursa Day Tour", price: "From €300" },
 ];
 
 // Day tour packages
@@ -140,7 +140,7 @@ const BursaTransfer = () => {
             name: 'Istanbul to Bursa Transfer & Tour Service',
             description: 'Premium VIP private transfer and day tours from Istanbul to Bursa, Uludağ, and historic villages',
             image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '185', priceCurrency: 'EUR' },
+            offers: { price: '225', priceCurrency: 'EUR' },
           },
         ]}
       />
