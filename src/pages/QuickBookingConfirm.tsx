@@ -7,7 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase } from "lucide-react";
+import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase, ZoomIn, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -86,6 +91,11 @@ export default function QuickBookingConfirm() {
   
   // Payment method state
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "payment_link">("cash");
+  
+  // Vehicle image modal state
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedVehicleImages, setSelectedVehicleImages] = useState<{src: string; alt: string}[]>([]);
+  const [selectedVehicleLabel, setSelectedVehicleLabel] = useState("");
 
   const token = searchParams.get("token");
   const urlHasReturn = searchParams.get("hasReturn") === "true";
@@ -253,18 +263,8 @@ export default function QuickBookingConfirm() {
       if (error) throw error;
 
       if (data?.prices) {
-        // Filter vehicles based on passenger/luggage count
-        const passengerCount = booking.passengers || 1;
-        const luggageCount = booking.luggage_count || 1;
-        const minibusOnly = isMinibusRequired(passengerCount, luggageCount);
-
-        let filteredPrices = data.prices as VehiclePriceInfo[];
-        
-        if (minibusOnly) {
-          filteredPrices = filteredPrices.filter(v => v.vehicleType === 'minibus');
-        }
-
-        setAllVehiclePrices(filteredPrices);
+        // Show all vehicles to the guest - no filtering
+        setAllVehiclePrices(data.prices as VehiclePriceInfo[]);
       }
     } catch (err) {
       console.error("Failed to fetch vehicle prices:", err);
@@ -705,26 +705,42 @@ export default function QuickBookingConfirm() {
                       `}
                     >
                       <div className="flex items-start gap-4">
-                        {/* Vehicle Image Carousel */}
-                        <div className="w-28 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                        {/* Vehicle Image Carousel with click to enlarge */}
+                        <div 
+                          className="w-28 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0 relative group cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (vehicleImages.length > 0) {
+                              setSelectedVehicleImages(vehicleImages);
+                              setSelectedVehicleLabel(vehicleInfo?.label || vehicle.vehicleLabel);
+                              setImageModalOpen(true);
+                            }
+                          }}
+                        >
                           {vehicleImages.length > 0 ? (
-                            <Carousel 
-                              className="w-full h-full"
-                              plugins={[Autoplay({ delay: 3000, stopOnInteraction: false })]}
-                              opts={{ loop: true }}
-                            >
-                              <CarouselContent className="h-full">
-                                {vehicleImages.slice(0, 4).map((img, idx) => (
-                                  <CarouselItem key={idx} className="h-full">
-                                    <img
-                                      src={img.src}
-                                      alt={img.alt}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  </CarouselItem>
-                                ))}
-                              </CarouselContent>
-                            </Carousel>
+                            <>
+                              <Carousel 
+                                className="w-full h-full"
+                                plugins={[Autoplay({ delay: 3000, stopOnInteraction: false })]}
+                                opts={{ loop: true }}
+                              >
+                                <CarouselContent className="h-full">
+                                  {vehicleImages.slice(0, 4).map((img, idx) => (
+                                    <CarouselItem key={idx} className="h-full">
+                                      <img
+                                        src={img.src}
+                                        alt={img.alt}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </CarouselItem>
+                                  ))}
+                                </CarouselContent>
+                              </Carousel>
+                              {/* Zoom overlay on hover */}
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <ZoomIn className="h-5 w-5 text-white" />
+                              </div>
+                            </>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-muted">
                               <Car className="h-8 w-8 text-muted-foreground" />
@@ -1022,6 +1038,38 @@ export default function QuickBookingConfirm() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Vehicle Image Modal */}
+      <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
+        <DialogContent className="max-w-3xl p-0 overflow-hidden">
+          <div className="relative">
+            <div className="absolute top-4 left-4 z-10 bg-black/60 text-white px-3 py-1.5 rounded-lg font-semibold">
+              {selectedVehicleLabel}
+            </div>
+            <DialogClose className="absolute top-4 right-4 z-10 bg-black/60 text-white rounded-full p-2 hover:bg-black/80 transition-colors">
+              <X className="h-5 w-5" />
+            </DialogClose>
+            <Carousel className="w-full" opts={{ loop: true }}>
+              <CarouselContent>
+                {selectedVehicleImages.map((img, idx) => (
+                  <CarouselItem key={idx}>
+                    <div className="aspect-video">
+                      <img
+                        src={img.src}
+                        alt={img.alt}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-4" />
+              <CarouselNext className="right-4" />
+              <CarouselDots className="absolute bottom-4 left-1/2 -translate-x-1/2" />
+            </Carousel>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
