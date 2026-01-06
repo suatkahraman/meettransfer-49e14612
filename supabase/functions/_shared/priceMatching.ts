@@ -821,33 +821,113 @@ export function logAnalysis(
 }
 
 // ==================== PRICE SANITY CHECK ====================
-// Minimum price thresholds for intercity/long-distance routes
-// If matched price is below this, it's likely a wrong match
-interface RouteMinimumPrice {
-  minPrice: number;  // EUR
+// Dynamic price validation system based on route type and vehicle
+
+// City pairs with approximate distances and minimum prices (EUR, for Vito base)
+interface CityDistanceInfo {
+  distanceKm: number;
+  minPriceVito: number;
+  minPriceSprinter: number;
+  minPriceMaybach: number;
+  minPriceVip?: number;
   description: string;
 }
 
-// Define minimum prices for specific route patterns
-const ROUTE_MINIMUM_PRICES: Record<string, RouteMinimumPrice> = {
-  // Istanbul to other cities
-  'Istanbul->Bursa': { minPrice: 180, description: 'Istanbul - Bursa (250+ km)' },
-  'Istanbul->Kocaeli': { minPrice: 80, description: 'Istanbul - Kocaeli (100+ km)' },
-  'Istanbul->Sapanca': { minPrice: 120, description: 'Istanbul - Sapanca (150+ km)' },
-  'Istanbul->Sakarya': { minPrice: 130, description: 'Istanbul - Sakarya (160+ km)' },
-  
-  // Bursa routes
-  'Bursa->Istanbul': { minPrice: 180, description: 'Bursa - Istanbul (250+ km)' },
-  'Bursa->Kocaeli': { minPrice: 100, description: 'Bursa - Kocaeli (130+ km)' },
-  
-  // Antalya long-distance
-  'Antalya->Istanbul': { minPrice: 400, description: 'Antalya - Istanbul (700+ km)' },
-  'Antalya->Cappadocia': { minPrice: 250, description: 'Antalya - Cappadocia (500+ km)' },
-  
+// All city distance pairs - bidirectional lookup
+const CITY_DISTANCES: Record<string, CityDistanceInfo> = {
+  // Istanbul routes
+  'Istanbul|Bursa': { distanceKm: 250, minPriceVito: 160, minPriceSprinter: 260, minPriceMaybach: 320, minPriceVip: 180, description: 'Istanbul - Bursa (250 km)' },
+  'Istanbul|Kocaeli': { distanceKm: 100, minPriceVito: 70, minPriceSprinter: 120, minPriceMaybach: 150, minPriceVip: 80, description: 'Istanbul - Kocaeli (100 km)' },
+  'Istanbul|Sapanca': { distanceKm: 150, minPriceVito: 100, minPriceSprinter: 170, minPriceMaybach: 210, minPriceVip: 120, description: 'Istanbul - Sapanca (150 km)' },
+  'Istanbul|Sakarya': { distanceKm: 170, minPriceVito: 120, minPriceSprinter: 200, minPriceMaybach: 250, minPriceVip: 140, description: 'Istanbul - Sakarya (170 km)' },
+  'Istanbul|Antalya': { distanceKm: 700, minPriceVito: 400, minPriceSprinter: 650, minPriceMaybach: 800, minPriceVip: 450, description: 'Istanbul - Antalya (700 km)' },
+  'Istanbul|Cappadocia': { distanceKm: 750, minPriceVito: 420, minPriceSprinter: 680, minPriceMaybach: 850, minPriceVip: 480, description: 'Istanbul - Cappadocia (750 km)' },
+  'Istanbul|Izmir': { distanceKm: 570, minPriceVito: 320, minPriceSprinter: 520, minPriceMaybach: 650, minPriceVip: 360, description: 'Istanbul - Izmir (570 km)' },
+  'Istanbul|Bodrum': { distanceKm: 700, minPriceVito: 400, minPriceSprinter: 650, minPriceMaybach: 800, minPriceVip: 450, description: 'Istanbul - Bodrum (700 km)' },
+
+  // Bursa routes  
+  'Bursa|Kocaeli': { distanceKm: 130, minPriceVito: 90, minPriceSprinter: 150, minPriceMaybach: 190, minPriceVip: 100, description: 'Bursa - Kocaeli (130 km)' },
+  'Bursa|Sapanca': { distanceKm: 160, minPriceVito: 110, minPriceSprinter: 180, minPriceMaybach: 220, minPriceVip: 125, description: 'Bursa - Sapanca (160 km)' },
+  'Bursa|Sakarya': { distanceKm: 180, minPriceVito: 130, minPriceSprinter: 210, minPriceMaybach: 260, minPriceVip: 150, description: 'Bursa - Sakarya (180 km)' },
+
+  // Antalya routes
+  'Antalya|Cappadocia': { distanceKm: 530, minPriceVito: 280, minPriceSprinter: 450, minPriceMaybach: 560, minPriceVip: 320, description: 'Antalya - Cappadocia (530 km)' },
+  'Antalya|Izmir': { distanceKm: 450, minPriceVito: 250, minPriceSprinter: 400, minPriceMaybach: 500, minPriceVip: 280, description: 'Antalya - Izmir (450 km)' },
+  'Antalya|Bodrum': { distanceKm: 400, minPriceVito: 220, minPriceSprinter: 350, minPriceMaybach: 440, minPriceVip: 250, description: 'Antalya - Bodrum (400 km)' },
+
   // Cappadocia routes
-  'Cappadocia->Istanbul': { minPrice: 400, description: 'Cappadocia - Istanbul (750+ km)' },
-  'Cappadocia->Antalya': { minPrice: 250, description: 'Cappadocia - Antalya (500+ km)' },
+  'Cappadocia|Izmir': { distanceKm: 700, minPriceVito: 380, minPriceSprinter: 620, minPriceMaybach: 770, minPriceVip: 430, description: 'Cappadocia - Izmir (700 km)' },
+
+  // Izmir routes
+  'Izmir|Bodrum': { distanceKm: 250, minPriceVito: 140, minPriceSprinter: 230, minPriceMaybach: 280, minPriceVip: 160, description: 'Izmir - Bodrum (250 km)' },
+  'Izmir|Dalaman': { distanceKm: 200, minPriceVito: 110, minPriceSprinter: 180, minPriceMaybach: 220, minPriceVip: 125, description: 'Izmir - Dalaman (200 km)' },
+
+  // Bodrum routes
+  'Bodrum|Dalaman': { distanceKm: 200, minPriceVito: 110, minPriceSprinter: 180, minPriceMaybach: 220, minPriceVip: 125, description: 'Bodrum - Dalaman (200 km)' },
+
+  // Dalaman routes
+  'Dalaman|Antalya': { distanceKm: 220, minPriceVito: 120, minPriceSprinter: 200, minPriceMaybach: 250, minPriceVip: 140, description: 'Dalaman - Antalya (220 km)' },
 };
+
+// Airport to city minimum prices (for non-local transfers)
+// Local airport transfers (30-50 km) have different minimums than distant cities
+const AIRPORT_CITY_MIN_PRICES: Record<string, CityDistanceInfo> = {
+  // Istanbul Airport routes
+  'Istanbul Airport (IST)|Bursa': { distanceKm: 200, minPriceVito: 140, minPriceSprinter: 230, minPriceMaybach: 280, minPriceVip: 160, description: 'IST Airport - Bursa (200 km)' },
+  'Istanbul Airport (IST)|Kocaeli': { distanceKm: 70, minPriceVito: 55, minPriceSprinter: 90, minPriceMaybach: 110, minPriceVip: 65, description: 'IST Airport - Kocaeli (70 km)' },
+  'Istanbul Airport (IST)|Sapanca': { distanceKm: 120, minPriceVito: 85, minPriceSprinter: 140, minPriceMaybach: 170, minPriceVip: 100, description: 'IST Airport - Sapanca (120 km)' },
+  
+  // Sabiha Gokcen Airport routes
+  'Sabiha Gokcen Airport (SAW)|Bursa': { distanceKm: 180, minPriceVito: 120, minPriceSprinter: 200, minPriceMaybach: 250, minPriceVip: 140, description: 'SAW Airport - Bursa (180 km)' },
+  'Sabiha Gokcen Airport (SAW)|Kocaeli': { distanceKm: 50, minPriceVito: 40, minPriceSprinter: 70, minPriceMaybach: 85, minPriceVip: 50, description: 'SAW Airport - Kocaeli (50 km)' },
+  'Sabiha Gokcen Airport (SAW)|Sapanca': { distanceKm: 90, minPriceVito: 65, minPriceSprinter: 110, minPriceMaybach: 135, minPriceVip: 75, description: 'SAW Airport - Sapanca (90 km)' },
+};
+
+// Default fallback: km-based minimum price calculation
+function calculateKmBasedMinimum(distanceKm: number, vehicleType: string): number {
+  // Base rate per km (EUR)
+  const ratePerKm: Record<string, number> = {
+    'vito': 0.55,
+    'vito-vip': 0.65,
+    'sprinter': 0.90,
+    'maybach': 1.10,
+  };
+  
+  // Minimum base prices
+  const minBase: Record<string, number> = {
+    'vito': 35,
+    'vito-vip': 45,
+    'sprinter': 70,
+    'maybach': 100,
+  };
+  
+  const normalizedVehicle = vehicleType.toLowerCase().replace(/[_\s]/g, '-');
+  const rate = ratePerKm[normalizedVehicle] || ratePerKm['vito'];
+  const base = minBase[normalizedVehicle] || minBase['vito'];
+  
+  return Math.max(base, Math.round(distanceKm * rate));
+}
+
+// Get minimum price for a vehicle type from CityDistanceInfo
+function getMinPriceForVehicle(info: CityDistanceInfo, vehicleType: string): number {
+  const normalizedVehicle = vehicleType.toLowerCase().replace(/[_\s]/g, '-');
+  
+  if (normalizedVehicle.includes('maybach')) {
+    return info.minPriceMaybach;
+  } else if (normalizedVehicle.includes('sprinter')) {
+    return info.minPriceSprinter;
+  } else if (normalizedVehicle.includes('vip')) {
+    return info.minPriceVip || Math.round(info.minPriceVito * 1.15);
+  }
+  return info.minPriceVito;
+}
+
+// Create bidirectional lookup key
+function getCityPairKey(city1: string, city2: string): string {
+  // Sort alphabetically for consistent lookup
+  const sorted = [city1, city2].sort();
+  return `${sorted[0]}|${sorted[1]}`;
+}
 
 export interface PriceSanityResult {
   isValid: boolean;
@@ -855,39 +935,153 @@ export interface PriceSanityResult {
   minimumExpected?: number;
   actualPrice?: number;
   routeKey?: string;
+  routeDescription?: string;
+  vehicleType?: string;
+  confidence: 'high' | 'medium' | 'low';
 }
 
 export function checkPriceSanity(
   pickupCity: string | null,
   dropoffCity: string | null,
   price: number,
-  currency: string
+  currency: string,
+  vehicleType?: string,
+  airport?: string | null
 ): PriceSanityResult {
-  // Only check EUR prices for now (most prices are in EUR)
-  if (currency !== 'EUR') {
-    return { isValid: true };
+  // Convert TRY to EUR for comparison (approximate)
+  let priceInEur = price;
+  if (currency === 'TRY') {
+    priceInEur = price / 38; // Approximate TRY/EUR rate
+  } else if (currency === 'USD') {
+    priceInEur = price / 1.08; // Approximate USD/EUR rate
+  } else if (currency === 'GBP') {
+    priceInEur = price * 1.17; // Approximate GBP/EUR rate
   }
   
-  // Skip if we don't have both cities
-  if (!pickupCity || !dropoffCity) {
-    return { isValid: true };
+  const vehicle = vehicleType || 'vito';
+  
+  // Skip if we don't have location info
+  if (!pickupCity && !dropoffCity && !airport) {
+    return { isValid: true, confidence: 'low' };
   }
   
-  // Check both directions
-  const routeKey1 = `${pickupCity}->${dropoffCity}`;
-  const routeKey2 = `${dropoffCity}->${pickupCity}`;
+  // Case 1: Airport to City route
+  if (airport && (pickupCity || dropoffCity)) {
+    const city = pickupCity || dropoffCity;
+    if (city) {
+      // Check airport-specific minimum prices
+      const airportCityKey = `${airport}|${city}`;
+      const reverseAirportCityKey = `${city}|${airport}`;
+      
+      const airportInfo = AIRPORT_CITY_MIN_PRICES[airportCityKey] || AIRPORT_CITY_MIN_PRICES[reverseAirportCityKey];
+      
+      if (airportInfo) {
+        const minPrice = getMinPriceForVehicle(airportInfo, vehicle);
+        
+        if (priceInEur < minPrice * 0.85) { // 15% tolerance
+          return {
+            isValid: false,
+            reason: `Fiyat ${price}${currency} çok düşük. ${airportInfo.description} için minimum: ${minPrice}€ (${vehicle})`,
+            minimumExpected: minPrice,
+            actualPrice: price,
+            routeKey: airportCityKey,
+            routeDescription: airportInfo.description,
+            vehicleType: vehicle,
+            confidence: 'high',
+          };
+        }
+      }
+    }
+  }
   
-  const minPrice = ROUTE_MINIMUM_PRICES[routeKey1] || ROUTE_MINIMUM_PRICES[routeKey2];
+  // Case 2: City to City route
+  if (pickupCity && dropoffCity && pickupCity !== dropoffCity) {
+    const pairKey = getCityPairKey(pickupCity, dropoffCity);
+    const cityInfo = CITY_DISTANCES[pairKey];
+    
+    if (cityInfo) {
+      const minPrice = getMinPriceForVehicle(cityInfo, vehicle);
+      
+      // Check if price is significantly below minimum (20% tolerance for city-to-city)
+      if (priceInEur < minPrice * 0.80) {
+        return {
+          isValid: false,
+          reason: `Fiyat ${price}${currency} çok düşük. ${cityInfo.description} için minimum: ${minPrice}€ (${vehicle})`,
+          minimumExpected: minPrice,
+          actualPrice: price,
+          routeKey: pairKey,
+          routeDescription: cityInfo.description,
+          vehicleType: vehicle,
+          confidence: 'high',
+        };
+      }
+    } else {
+      // No predefined route - use heuristic based on city name differences
+      // If cities are different major regions, flag suspiciously low prices
+      const majorCities = new Set(['Istanbul', 'Ankara', 'Izmir', 'Antalya', 'Bursa', 'Cappadocia', 'Bodrum', 'Dalaman', 'Dubai', 'Cyprus']);
+      
+      if (majorCities.has(pickupCity) && majorCities.has(dropoffCity)) {
+        // Assume 300km average for unknown major city pairs
+        const estimatedMin = calculateKmBasedMinimum(300, vehicle);
+        
+        if (priceInEur < estimatedMin * 0.5) { // 50% tolerance for unknown routes
+          return {
+            isValid: false,
+            reason: `Fiyat ${price}${currency} şehirlerarası transfer için çok düşük görünüyor. ${pickupCity} - ${dropoffCity} (tahmini min: ${estimatedMin}€)`,
+            minimumExpected: estimatedMin,
+            actualPrice: price,
+            routeKey: `${pickupCity}->${dropoffCity}`,
+            routeDescription: `${pickupCity} - ${dropoffCity} (tahmini)`,
+            vehicleType: vehicle,
+            confidence: 'medium',
+          };
+        }
+      }
+    }
+  }
   
-  if (minPrice && price < minPrice.minPrice) {
+  // Case 3: Generic price floor check (absolute minimums)
+  const absoluteMinimums: Record<string, number> = {
+    'vito': 25,
+    'vito-vip': 35,
+    'sprinter': 50,
+    'maybach': 80,
+  };
+  
+  const normalizedVehicle = vehicle.toLowerCase().replace(/[_\s]/g, '-');
+  const absoluteMin = absoluteMinimums[normalizedVehicle] || absoluteMinimums['vito'];
+  
+  if (priceInEur < absoluteMin) {
     return {
       isValid: false,
-      reason: `Price ${price}€ is too low for ${minPrice.description}. Minimum expected: ${minPrice.minPrice}€`,
-      minimumExpected: minPrice.minPrice,
+      reason: `Fiyat ${price}${currency} tüm transferler için minimum değerin altında. Minimum: ${absoluteMin}€ (${vehicle})`,
+      minimumExpected: absoluteMin,
       actualPrice: price,
-      routeKey: routeKey1,
+      vehicleType: vehicle,
+      confidence: 'high',
     };
   }
   
-  return { isValid: true };
+  return { isValid: true, confidence: 'high' };
+}
+
+// Enhanced logging for sanity check
+export function logPriceSanityCheck(
+  type: 'reservation' | 'quick_booking',
+  id: string,
+  sanityResult: PriceSanityResult
+): void {
+  if (!sanityResult.isValid) {
+    console.log(`\n${'⚠️'.repeat(30)}`);
+    console.log(`🚨 PRICE SANITY CHECK FAILED - ${type.toUpperCase()}: ${id}`);
+    console.log(`${'⚠️'.repeat(30)}`);
+    console.log(`   Route: ${sanityResult.routeKey || 'N/A'}`);
+    console.log(`   Description: ${sanityResult.routeDescription || 'N/A'}`);
+    console.log(`   Actual Price: ${sanityResult.actualPrice}€`);
+    console.log(`   Minimum Expected: ${sanityResult.minimumExpected}€`);
+    console.log(`   Vehicle: ${sanityResult.vehicleType || 'N/A'}`);
+    console.log(`   Confidence: ${sanityResult.confidence}`);
+    console.log(`   Reason: ${sanityResult.reason}`);
+    console.log(`${'⚠️'.repeat(30)}\n`);
+  }
 }
