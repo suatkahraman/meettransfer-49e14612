@@ -309,7 +309,7 @@ export const Hero = () => {
         }
       }
 
-      let url = `/quick-booking-confirm?token=${data.confirmation_token}`;
+      let url = `/quick-booking-confirm?token=${data.confirmation_token}&new=true`;
       if (hasReturnTrip && returnDate && returnTime) {
         url += `&hasReturn=true&returnDate=${format(returnDate, "yyyy-MM-dd")}&returnTime=${returnTime}`;
         if (isPromoCodeValid && promoCode) {
