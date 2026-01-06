@@ -56,9 +56,9 @@ const IstanbulAirportToCityGuide = () => {
       rating: 5
     },
     {
-      method: "Taxi",
+      method: "Regular",
       duration: "40-60 min",
-      price: "€20-30",
+      price: "Variable",
       pros: ["Available at airport", "No booking needed"],
       cons: ["Variable pricing", "Language barrier", "No meet & greet", "Traffic issues"],
       rating: 3
@@ -196,9 +196,9 @@ const IstanbulAirportToCityGuide = () => {
                   <TableCell>Families, Business, Comfort</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Taxi</TableCell>
+                  <TableCell className="font-medium">Regular</TableCell>
                   <TableCell>40-60 min</TableCell>
-                  <TableCell>€20-30</TableCell>
+                  <TableCell>Variable</TableCell>
                   <TableCell>Solo travelers, Flexibility</TableCell>
                 </TableRow>
                 <TableRow>
@@ -283,47 +283,22 @@ const IstanbulAirportToCityGuide = () => {
             </Card>
           </div>
 
-          <h2>Option 2: Taxi from Istanbul Airport</h2>
+          <h2>Option 2: Regular Transport</h2>
           <p>
-            Taxis are readily available outside the arrivals hall at Istanbul Airport. While convenient, 
-            there are some important things to know before choosing this option.
+            Regular transport options are available outside the arrivals hall at Istanbul Airport. 
+            While convenient for solo travelers, there are some important things to consider.
           </p>
 
-          <h3>Official vs. Unofficial Taxis</h3>
+          <h3>Tips for Regular Transport</h3>
           <p>
-            Always use official yellow taxis with meters. Unofficial taxis may offer lower initial prices 
-            but often end up charging much more. Official taxis are located at the designated taxi stands 
-            outside the arrivals terminal.
-          </p>
-
-          <h3>Taxi Pricing</h3>
-          <p>
-            Taxi fares from Istanbul Airport use a metered system:
+            When using regular transport options, keep these points in mind:
           </p>
           <ul>
-            <li><strong>Base fare:</strong> 35 TL (~€1)</li>
-            <li><strong>Per km:</strong> 25-30 TL (~€0.70)</li>
-            <li><strong>To Taksim:</strong> 600-800 TL (€17-22)</li>
-            <li><strong>To Sultanahmet:</strong> 650-850 TL (€18-24)</li>
+            <li>Variable pricing depending on traffic and time</li>
+            <li>Communication may be challenging</li>
+            <li>No pre-arranged pickup or meet & greet service</li>
+            <li>Payment typically in local currency</li>
           </ul>
-
-          <div className="not-prose my-8">
-            <Card className="bg-amber-500/5 border-amber-500/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  Taxi Tips & Warnings
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>• Always insist the meter is running</p>
-                <p>• Have small bills ready - drivers may claim no change</p>
-                <p>• Night tariff (24:00-06:00) is 50% higher</p>
-                <p>• Traffic can significantly increase the fare</p>
-                <p>• Language barrier can be an issue</p>
-              </CardContent>
-            </Card>
-          </div>
 
           <h2>Option 3: Metro (M11 Line)</h2>
           <p>
@@ -393,10 +368,10 @@ const IstanbulAirportToCityGuide = () => {
             <li>You're unfamiliar with Istanbul</li>
           </ul>
 
-          <h3>Choose Taxi If:</h3>
+          <h3>Choose Regular Transport If:</h3>
           <ul>
             <li>You're traveling solo with light luggage</li>
-            <li>You're comfortable negotiating</li>
+            <li>You're comfortable with local transport</li>
             <li>You want flexibility without pre-booking</li>
           </ul>
 

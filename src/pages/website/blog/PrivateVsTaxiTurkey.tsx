@@ -162,7 +162,7 @@ const PrivateVsTaxiTurkey = () => {
 
             <Card className="border-amber-500/30">
               <CardHeader>
-                <CardTitle className="text-lg">Regular Taxi</CardTitle>
+                <CardTitle className="text-lg">Regular Transport</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-center gap-2 text-green-600">
@@ -227,11 +227,11 @@ const PrivateVsTaxiTurkey = () => {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-3">Regular Taxi</h4>
+                    <h4 className="font-semibold mb-3">Regular Transport</h4>
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                        <span>Licensed by municipality</span>
+                        <span>Licensed options available</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
@@ -240,10 +240,6 @@ const PrivateVsTaxiTurkey = () => {
                       <li className="flex items-start gap-2">
                         <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
                         <span>Vehicle condition varies</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
-                        <span>Unlicensed taxi risk at airports</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
@@ -259,7 +255,7 @@ const PrivateVsTaxiTurkey = () => {
           <p>
             <strong>The Verdict on Safety:</strong> Private transfers offer significantly better safety 
             assurances. You know your driver in advance, the company is accountable, and vehicles are 
-            regularly inspected. While official Turkish taxis are generally safe, the lack of 
+            regularly inspected. While regular transport options are generally safe, the lack of 
             pre-screening and variable conditions make private transfers the safer choice.
           </p>
 
@@ -278,13 +274,13 @@ const PrivateVsTaxiTurkey = () => {
             <li><strong>Personal space:</strong> Private vehicle, no sharing</li>
           </ul>
 
-          <h3>Taxi Comfort</h3>
+          <h3>Regular Transport Comfort</h3>
           <ul>
-            <li><strong>Vehicle quality:</strong> Standard sedan, condition varies widely</li>
-            <li><strong>Climate control:</strong> May or may not work properly</li>
-            <li><strong>Luggage space:</strong> Limited trunk space</li>
-            <li><strong>Amenities:</strong> Usually none</li>
-            <li><strong>Cleanliness:</strong> Highly variable</li>
+            <li><strong>Vehicle quality:</strong> Standard vehicles, condition varies</li>
+            <li><strong>Climate control:</strong> May vary</li>
+            <li><strong>Luggage space:</strong> Limited space</li>
+            <li><strong>Amenities:</strong> Usually minimal</li>
+            <li><strong>Cleanliness:</strong> Variable</li>
           </ul>
 
           <h2>Price Comparison</h2>
@@ -307,11 +303,9 @@ const PrivateVsTaxiTurkey = () => {
                     <p className="text-sm text-muted-foreground">Per person (4 travelers): ~$15</p>
                   </div>
                   <div className="p-4 bg-amber-500/5 rounded-lg">
-                    <h4 className="font-semibold mb-2">Taxi</h4>
-                    <p className="text-2xl font-bold mb-2">$20-30</p>
-                    <p className="text-sm text-muted-foreground">Variable, traffic dependent</p>
-                    <p className="text-sm text-muted-foreground mt-2">Night tariff: +50% ($30-45)</p>
-                    <p className="text-sm text-muted-foreground">Peak traffic: $35-40</p>
+                    <h4 className="font-semibold mb-2">Regular</h4>
+                    <p className="text-2xl font-bold mb-2">Variable</p>
+                    <p className="text-sm text-muted-foreground">Depends on traffic and time</p>
                   </div>
                 </div>
               </CardContent>
@@ -319,13 +313,13 @@ const PrivateVsTaxiTurkey = () => {
           </div>
 
           <p>
-            <strong>The Real Cost Analysis:</strong> While taxis appear cheaper, the true cost difference 
+            <strong>The Real Cost Analysis:</strong> While regular transport may appear cheaper, the true cost difference 
             narrows when you consider:
           </p>
           <ul>
             <li>For 2+ travelers, cost per person is nearly identical</li>
-            <li>Night arrivals: taxi night tariff vs. same private transfer price</li>
-            <li>Traffic delays: taxi meter keeps running, private transfer is fixed</li>
+            <li>Private transfer price is fixed regardless of time</li>
+            <li>Traffic delays don't affect private transfer pricing</li>
             <li>Value of time: no queue waiting with private transfer</li>
             <li>Peace of mind: priceless when traveling in unfamiliar territory</li>
           </ul>
@@ -352,13 +346,12 @@ const PrivateVsTaxiTurkey = () => {
                     </ol>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Taxi Experience</h4>
+                    <h4 className="font-semibold mb-2">Regular Transport Experience</h4>
                     <ol className="text-sm space-y-1 text-muted-foreground">
-                      <li>1. Navigate to taxi stand (5-10 min walk)</li>
-                      <li>2. Wait in queue (5-30 min depending on time)</li>
-                      <li>3. Explain destination to driver (language issues)</li>
-                      <li>4. May need to negotiate or insist on meter</li>
-                      <li>5. Total stress: Moderate to high</li>
+                      <li>1. Navigate to transport area (5-10 min walk)</li>
+                      <li>2. Wait for availability (varies)</li>
+                      <li>3. Explain destination to driver</li>
+                      <li>4. Total stress: Moderate to high</li>
                     </ol>
                   </div>
                 </div>
@@ -387,8 +380,8 @@ const PrivateVsTaxiTurkey = () => {
                 <div className="border-b pb-4">
                   <h4 className="font-semibold">Solo Budget Travelers</h4>
                   <p className="text-sm text-muted-foreground">
-                    <strong className="text-amber-500">Choose: Taxi or Metro</strong> - If you're comfortable 
-                    navigating, taxi offers lower cost. Metro is cheapest for daytime arrivals.
+                    <strong className="text-amber-500">Choose: Regular or Metro</strong> - If you're comfortable 
+                    navigating, regular transport offers lower cost. Metro is cheapest for daytime arrivals.
                   </p>
                 </div>
                 <div className="border-b pb-4">
@@ -409,23 +402,23 @@ const PrivateVsTaxiTurkey = () => {
                   <h4 className="font-semibold">Groups (4+ people)</h4>
                   <p className="text-sm text-muted-foreground">
                     <strong className="text-primary">Choose: Private Transfer</strong> - Cost per person is 
-                    excellent, everyone fits in one vehicle, much easier than splitting taxis.
+                    excellent, everyone fits in one vehicle, much easier than multiple vehicles.
                   </p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <h2>Common Taxi Problems in Turkey</h2>
+          <h2>Important Tips for Transport in Turkey</h2>
           <p>
-            While most taxi rides in Turkey go smoothly, travelers should be aware of potential issues:
+            When using transport options in Turkey, keep these tips in mind:
           </p>
           <ul>
-            <li><strong>Long route scam:</strong> Some drivers take unnecessary detours</li>
-            <li><strong>Meter tricks:</strong> Running on night tariff during day, or "broken" meter</li>
-            <li><strong>Currency confusion:</strong> Quick exchange at end with similar-looking notes</li>
-            <li><strong>No change:</strong> Driver claims no change available for large bills</li>
-            <li><strong>Wrong address:</strong> Communication issues lead to wrong destinations</li>
+            <li><strong>Pre-booking:</strong> Recommended for airport transfers</li>
+            <li><strong>Communication:</strong> Have your destination address ready</li>
+            <li><strong>Payment:</strong> Confirm payment method before departure</li>
+            <li><strong>Local currency:</strong> Keep some Turkish Lira available</li>
+            <li><strong>Phone:</strong> Get a local SIM for communication</li>
           </ul>
 
           <h2>Our Honest Verdict</h2>
@@ -445,18 +438,17 @@ const PrivateVsTaxiTurkey = () => {
             <li>Are traveling in a group of 2+</li>
           </ul>
           <p>
-            <strong>Choose Taxi</strong> if you:
+            <strong>Choose Regular Transport</strong> if you:
           </p>
           <ul>
             <li>Are an experienced traveler comfortable in Turkey</li>
             <li>Are traveling solo on a tight budget</li>
-            <li>Speak basic Turkish or are good at non-verbal communication</li>
             <li>Have minimal luggage</li>
           </ul>
 
           <h2>Conclusion</h2>
           <p>
-            While taxis have their place, the overall experience, safety, and value of 
+            While regular transport has its place, the overall experience, safety, and value of 
             <Link to={getLocalizedPath("/services")} className="text-primary hover:underline"> private 
             transfer services</Link> make them the recommended choice for most travelers to Turkey. 
             The price difference becomes negligible when traveling with others, and the peace of 
