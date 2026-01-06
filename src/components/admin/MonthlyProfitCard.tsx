@@ -40,7 +40,8 @@ export const MonthlyProfitCard = () => {
     const monthEnd = endOfMonth(currentMonth);
     
     try {
-      // Fetch completed agency reservations with driver_earning (Bütçe) filled
+      // Fetch ALL completed reservations with driver_earning (Bütçe) filled
+      // This includes both agency reservations AND guest reservations
       const { data: reservations, error: resError } = await supabase
         .from("reservations")
         .select(`
@@ -48,12 +49,13 @@ export const MonthlyProfitCard = () => {
           pickup_date,
           driver_earning,
           status,
-          agency_id
+          agency_id,
+          price,
+          price_currency
         `)
         .eq("status", "completed")
         .not("status", "eq", "deleted")
         .not("status", "eq", "cancelled_by_customer")
-        .not("agency_id", "is", null)
         .not("driver_earning", "is", null)
         .gt("driver_earning", 0)
         .gte("pickup_date", format(monthStart, "yyyy-MM-dd"))
@@ -67,18 +69,20 @@ export const MonthlyProfitCard = () => {
 
       // Get all reservation IDs
       const reservationIds = reservations?.map(r => r.id) || [];
+      const agencyReservationIds = reservations?.filter(r => r.agency_id).map(r => r.id) || [];
 
-      // Fetch agency reservation details with TRY converted amount
+      // Fetch agency reservation details with TRY converted amount (only for agency reservations)
       let totalAgencyIncome = 0;
       let totalDriverExpense = 0;
       let validReservationCount = 0;
       const pending: PendingConversion[] = [];
       
-      if (reservationIds.length > 0) {
+      // Process AGENCY reservations
+      if (agencyReservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
           .from("agency_reservation_details")
           .select("reservation_id, customer_price, agency_price_currency, exchange_rate_used")
-          .in("reservation_id", reservationIds);
+          .in("reservation_id", agencyReservationIds);
 
         if (!agencyError && agencyData) {
           // Create map of reservation_id -> { tryAmount, hasCustomerPrice, needsConversion }
@@ -109,8 +113,8 @@ export const MonthlyProfitCard = () => {
             return acc;
           }, {} as Record<string, { tryAmount: number; hasCustomerPrice: boolean; needsConversion: boolean }>);
 
-          // Only count reservations that have BOTH driver_earning AND customer_price
-          reservations?.forEach(res => {
+          // Count agency reservations that have BOTH driver_earning AND customer_price
+          reservations?.filter(r => r.agency_id).forEach(res => {
             const agencyInfo = agencyMap[res.id];
             if (agencyInfo?.hasCustomerPrice) {
               totalAgencyIncome += agencyInfo.tryAmount;
@@ -121,6 +125,28 @@ export const MonthlyProfitCard = () => {
           });
         }
       }
+      
+      // Process GUEST reservations (auto-priced) - use reservation price directly
+      reservations?.filter(r => !r.agency_id).forEach(res => {
+        // For guest reservations, income = price (otomatik fiyat veya admin fiyatı)
+        if (res.price && res.price > 0) {
+          // Convert to TRY if needed (most auto-prices are in EUR)
+          let incomeAmount = res.price;
+          if (res.price_currency && res.price_currency !== 'TRY') {
+            // For now, use a rough conversion rate (will be improved later)
+            // We should ideally fetch the exchange rate, but for simplicity:
+            pending.push({
+              reservationId: res.id,
+              currency: res.price_currency,
+              amount: res.price
+            });
+          } else {
+            totalAgencyIncome += incomeAmount;
+          }
+          totalDriverExpense += res.driver_earning || 0;
+          validReservationCount++;
+        }
+      });
 
       setPendingConversions(pending);
       setTotals({

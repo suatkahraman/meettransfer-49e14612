@@ -71,7 +71,8 @@ const AdminMonthlyProfit = () => {
     const monthEnd = endOfMonth(currentMonth);
     
     try {
-      // Fetch completed reservations with agency assigned for the month
+      // Fetch ALL completed reservations for the month
+      // Includes both agency reservations AND guest reservations
       // Must have driver_earning (Bütçe) filled
       const { data: reservations, error: resError } = await supabase
         .from("reservations")
@@ -93,7 +94,6 @@ const AdminMonthlyProfit = () => {
         .eq("status", "completed")
         .not("status", "eq", "deleted")
         .not("status", "eq", "cancelled_by_customer")
-        .not("agency_id", "is", null)
         .not("driver_earning", "is", null)
         .gt("driver_earning", 0)
         .gte("pickup_date", format(monthStart, "yyyy-MM-dd"))
@@ -105,8 +105,10 @@ const AdminMonthlyProfit = () => {
         return;
       }
 
-      // Get all reservation IDs
+      // Get all reservation IDs - separate agency and guest reservations
       const reservationIds = reservations?.map(r => r.id) || [];
+      const agencyReservationIds = reservations?.filter(r => r.agency_id).map(r => r.id) || [];
+      const guestReservations = reservations?.filter(r => !r.agency_id) || [];
       const driverIds = [...new Set(reservations?.filter(r => r.driver_id).map(r => r.driver_id) || [])];
 
       // Fetch drivers
@@ -139,11 +141,12 @@ const AdminMonthlyProfit = () => {
       
       let conversionsNeeded = 0;
       
-      if (reservationIds.length > 0) {
+      // Fetch agency reservation details only for agency reservations
+      if (agencyReservationIds.length > 0) {
         const { data: agencyData, error: agencyError } = await supabase
           .from("agency_reservation_details")
           .select("reservation_id, customer_price, agency_price_currency, exchange_rate_used")
-          .in("reservation_id", reservationIds);
+          .in("reservation_id", agencyReservationIds);
 
         if (!agencyError && agencyData) {
           agencyDetails = agencyData.reduce((acc, item) => {
@@ -181,6 +184,31 @@ const AdminMonthlyProfit = () => {
           }, {} as Record<string, { agencyIncome: number; originalAmount: number; currency: string; exchangeRate: number | null; needsConversion: boolean; reservationId: string; hasCustomerPrice: boolean }>);
         }
       }
+      
+      // Add guest reservations to agencyDetails (using price field as income)
+      guestReservations.forEach(res => {
+        if (res.price && res.price > 0) {
+          let agencyIncome = res.price;
+          let needsConversion = false;
+          
+          // If price is in foreign currency, mark for conversion
+          if (res.price_currency && res.price_currency !== 'TRY') {
+            needsConversion = true;
+            agencyIncome = 0; // Will be converted
+            conversionsNeeded++;
+          }
+          
+          agencyDetails[res.id] = {
+            agencyIncome,
+            originalAmount: res.price,
+            currency: res.price_currency || 'TRY',
+            exchangeRate: null,
+            needsConversion,
+            reservationId: res.id,
+            hasCustomerPrice: true // Guest reservation with price counts as having customer price
+          };
+        }
+      });
       
       setPendingConversions(conversionsNeeded);
 

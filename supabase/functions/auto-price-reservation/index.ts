@@ -426,6 +426,55 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`✅ Auto-priced reservation: ${finalPrice} ${bestPrice.price_currency}`);
 
+    // Send email notification to admin
+    const adminEmail = "sautkahraman@gmail.com";
+    try {
+      await resend.emails.send({
+        from: "Meet Transfer <no-reply@meet-transfer.com>",
+        to: adminEmail,
+        subject: `🤖 Otomatik Fiyat: ${reservation.customer_name} - ${finalPrice} ${bestPrice.price_currency}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 24px;">🤖 Otomatik Fiyat Verildi</h1>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px;">
+              <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #10b981;">
+                <h3 style="margin: 0 0 10px 0; color: #333;">Müşteri Bilgileri</h3>
+                <p style="margin: 5px 0; color: #666;"><strong>Müşteri:</strong> ${reservation.customer_name}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Telefon:</strong> ${reservation.customer_phone}</p>
+              </div>
+              
+              <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;">
+                <h3 style="margin: 0 0 10px 0; color: #333;">Transfer Detayları</h3>
+                <p style="margin: 5px 0; color: #666;"><strong>Alış:</strong> ${reservation.pickup}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Bırakış:</strong> ${reservation.dropoff}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Tarih:</strong> ${reservation.pickup_date}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Saat:</strong> ${reservation.pickup_time}</p>
+                <p style="margin: 5px 0; color: #666;"><strong>Araç:</strong> ${reservation.vehicle_type}</p>
+              </div>
+              
+              <div style="text-align: center; margin: 20px 0; padding: 20px; background: #10b981; border-radius: 8px;">
+                <p style="font-size: 14px; color: white; margin-bottom: 5px;">Otomatik Fiyat</p>
+                <p style="font-size: 32px; font-weight: bold; color: white; margin: 0;">
+                  ${finalPrice} ${bestPrice.price_currency}
+                </p>
+                ${discountApplied ? '<p style="color: #d1fae5; font-size: 14px; margin-top: 5px;">🎫 %30 Promo Kodu İndirimi Uygulandı</p>' : ''}
+              </div>
+              
+              <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
+                Bu bildirim otomatik fiyat sistemi tarafından gönderilmiştir.
+              </p>
+            </div>
+          </div>
+        `,
+      });
+      console.log("📧 Admin notification email sent");
+    } catch (adminEmailError) {
+      console.error("Failed to send admin notification email:", adminEmailError);
+    }
+
     // Get customer email for notification
     let customerEmail = null;
     if (reservation.customer_id) {
