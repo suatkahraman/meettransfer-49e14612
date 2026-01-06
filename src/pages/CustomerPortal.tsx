@@ -25,6 +25,8 @@ import {
   MessageCircle,
   Send,
   X,
+  Briefcase,
+  Baby,
 } from "lucide-react";
 
 interface Reservation {
@@ -45,6 +47,8 @@ interface Reservation {
   discount_percentage: number;
   discount_amount: number;
   reservation_code: string | null;
+  luggage_count: number | null;
+  baby_seat_count: number | null;
 }
 
 interface Message {
@@ -450,6 +454,18 @@ export default function CustomerPortal() {
                         <User className="h-4 w-4 text-muted-foreground" />
                         <span>{reservation.customer_name}</span>
                       </div>
+                      {(reservation.luggage_count && reservation.luggage_count > 0) && (
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-4 w-4 text-orange-500" />
+                          <span>{reservation.luggage_count} {t('luggage') || 'Valiz'}</span>
+                        </div>
+                      )}
+                      {(reservation.baby_seat_count && reservation.baby_seat_count > 0) && (
+                        <div className="flex items-center gap-2">
+                          <Baby className="h-4 w-4 text-pink-500" />
+                          <span>{reservation.baby_seat_count} {t('babySeat') || 'Bebek Koltuğu'}</span>
+                        </div>
+                      )}
                     </div>
 
                     {!reservation.is_return_transfer && 
