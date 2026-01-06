@@ -828,6 +828,25 @@ export default function QuickBookingConfirm() {
                               {vehicleInfo?.luggage || vehicle.luggage} {t("luggage") || "luggage"}
                             </span>
                           </div>
+                          
+                          {/* Feature Icons */}
+                          {vehicleInfo?.features && vehicleInfo.features.length > 0 && (
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                              {vehicleInfo.features.slice(0, 4).map((feature, idx) => {
+                                const FeatureIcon = getFeatureIcon(feature.icon);
+                                return (
+                                  <div 
+                                    key={idx}
+                                    className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/70 text-xs text-muted-foreground"
+                                    title={t("locale") === "tr" ? feature.labelTr : feature.label}
+                                  >
+                                    <FeatureIcon className="h-3 w-3" />
+                                    <span className="hidden sm:inline">{t("locale") === "tr" ? feature.labelTr : feature.label}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                         
                         {isSelected && (
