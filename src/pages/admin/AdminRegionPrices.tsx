@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -27,10 +27,13 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MoneyInput } from '@/components/ui/money-input';
+import { testPriceMatch, MatchResult } from '@/lib/priceMatching';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Türkiye şehirleri ve havalimanları
 const CITIES_DATA = {
@@ -114,6 +117,19 @@ const AdminRegionPrices = () => {
   const [formPrice, setFormPrice] = useState('');
   const [formCurrency, setFormCurrency] = useState('EUR');
   const [saving, setSaving] = useState(false);
+  
+  // Test state
+  const [testPickup, setTestPickup] = useState('');
+  const [testDropoff, setTestDropoff] = useState('');
+  const [testVehicle, setTestVehicle] = useState('mercedes-vito');
+  const [testResult, setTestResult] = useState<{
+    result: MatchResult;
+    analysis: {
+      pickup: { airport: string | null; city: string | null; district: string | null };
+      dropoff: { airport: string | null; city: string | null; district: string | null };
+    };
+  } | null>(null);
+  const [testing, setTesting] = useState(false);
 
   useEffect(() => {
     fetchPrices();
@@ -261,6 +277,30 @@ const AdminRegionPrices = () => {
 
   const availableAirports = formCity ? (CITIES_DATA as any)[formCity]?.airports || [] : [];
   const availableDistricts = formCity ? (CITIES_DATA as any)[formCity]?.districts || [] : [];
+  
+  const handleTest = async () => {
+    if (!testPickup || !testDropoff) {
+      toast.error('Alış ve bırakış konumlarını girin');
+      return;
+    }
+    
+    setTesting(true);
+    try {
+      const result = await testPriceMatch(testPickup, testDropoff, testVehicle);
+      setTestResult(result);
+      
+      if (result.result.found) {
+        toast.success(`Fiyat bulundu: ${formatPrice(result.result.price!, result.result.currency!)}`);
+      } else {
+        toast.warning('Bu güzergah için fiyat bulunamadı');
+      }
+    } catch (error) {
+      console.error('Test error:', error);
+      toast.error('Test sırasında hata oluştu');
+    } finally {
+      setTesting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -276,7 +316,124 @@ const AdminRegionPrices = () => {
         <h1 className="text-2xl font-serif">Bölge Fiyatları</h1>
       </header>
 
-      <main className="container mx-auto py-6 px-4 max-w-6xl">
+      <main className="container mx-auto py-6 px-4 max-w-6xl space-y-6">
+        {/* Test Panel */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <TestTube className="h-5 w-5" />
+              Fiyat Eşleştirme Testi
+            </CardTitle>
+            <CardDescription>
+              Google Maps'ten alış ve bırakış konumlarını yapıştırarak otomatik fiyat eşleştirmesini test edin
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="space-y-2 md:col-span-1">
+                <Label>Alış Konumu</Label>
+                <Input
+                  placeholder="Istanbul Airport (IST), Turkey"
+                  value={testPickup}
+                  onChange={(e) => setTestPickup(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2 md:col-span-1">
+                <Label>Bırakış Konumu</Label>
+                <Input
+                  placeholder="Taksim Square, Istanbul"
+                  value={testDropoff}
+                  onChange={(e) => setTestDropoff(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Araç Tipi</Label>
+                <Select value={testVehicle} onValueChange={setTestVehicle}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VEHICLE_TYPES.map(v => (
+                      <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-end">
+                <Button onClick={handleTest} disabled={testing} className="w-full">
+                  {testing ? 'Test Ediliyor...' : 'Test Et'}
+                </Button>
+              </div>
+            </div>
+            
+            {testResult && (
+              <div className="mt-4 p-4 rounded-lg border bg-muted/50">
+                <div className="flex items-center gap-2 mb-3">
+                  {testResult.result.found ? (
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-500" />
+                  )}
+                  <span className="font-medium">
+                    {testResult.result.found ? 'Fiyat Bulundu' : 'Fiyat Bulunamadı'}
+                  </span>
+                  {testResult.result.confidence && (
+                    <Badge variant={
+                      testResult.result.confidence === 'high' ? 'default' :
+                      testResult.result.confidence === 'medium' ? 'secondary' : 'outline'
+                    }>
+                      {testResult.result.confidence === 'high' ? 'Yüksek Güven' :
+                       testResult.result.confidence === 'medium' ? 'Orta Güven' : 'Düşük Güven'}
+                    </Badge>
+                  )}
+                </div>
+                
+                {testResult.result.found && (
+                  <div className="grid gap-2 md:grid-cols-2 mb-3">
+                    <div>
+                      <span className="text-muted-foreground text-sm">Fiyat:</span>
+                      <p className="text-2xl font-bold text-primary">
+                        {formatPrice(testResult.result.price!, testResult.result.currency!)}
+                      </p>
+                    </div>
+                    <div className="text-sm space-y-1">
+                      <p><span className="text-muted-foreground">Şehir:</span> {testResult.result.matchedCity}</p>
+                      <p><span className="text-muted-foreground">İlçe:</span> {testResult.result.matchedDistrict}</p>
+                      {testResult.result.matchedAirport && (
+                        <p><span className="text-muted-foreground">Havalimanı:</span> {testResult.result.matchedAirport}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="grid gap-4 md:grid-cols-2 text-sm">
+                  <div className="p-2 rounded bg-background">
+                    <p className="font-medium text-muted-foreground mb-1">Alış Analizi:</p>
+                    <p>Havalimanı: {testResult.analysis.pickup.airport || <span className="text-muted-foreground">-</span>}</p>
+                    <p>Şehir: {testResult.analysis.pickup.city || <span className="text-muted-foreground">-</span>}</p>
+                    <p>İlçe: {testResult.analysis.pickup.district || <span className="text-muted-foreground">-</span>}</p>
+                  </div>
+                  <div className="p-2 rounded bg-background">
+                    <p className="font-medium text-muted-foreground mb-1">Bırakış Analizi:</p>
+                    <p>Havalimanı: {testResult.analysis.dropoff.airport || <span className="text-muted-foreground">-</span>}</p>
+                    <p>Şehir: {testResult.analysis.dropoff.city || <span className="text-muted-foreground">-</span>}</p>
+                    <p>İlçe: {testResult.analysis.dropoff.district || <span className="text-muted-foreground">-</span>}</p>
+                  </div>
+                </div>
+                
+                {!testResult.result.found && (
+                  <div className="mt-3 p-2 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span>
+                      Bu güzergah için fiyat bulunamadı. Lütfen yukarıdan yeni bir fiyat kaydı ekleyin.
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
