@@ -113,6 +113,8 @@ const CustomerReservationDetail = () => {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [flightDelay, setFlightDelay] = useState<number | null>(null);
   const [flightStatus, setFlightStatus] = useState<string | null>(null);
+  const [canReject, setCanReject] = useState(true);
+  const [isDiscountedOffer, setIsDiscountedOffer] = useState(false);
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
@@ -151,6 +153,28 @@ const CustomerReservationDetail = () => {
     }
 
     setReservation(data);
+    
+    // Check price history to determine if this is a discounted offer
+    // and whether the reject button should be shown
+    const { data: priceHistory } = await supabase
+      .from('price_history')
+      .select('*')
+      .eq('reservation_id', id)
+      .in('action', ['rejected', 'auto_discount'])
+      .order('created_at', { ascending: false });
+    
+    if (priceHistory) {
+      const rejectionCount = priceHistory.filter(h => h.action === 'rejected').length;
+      const hasAutoDiscount = priceHistory.some(h => h.action === 'auto_discount');
+      
+      // If there's already been an auto_discount applied, this is the discounted offer
+      setIsDiscountedOffer(hasAutoDiscount);
+      
+      // Can only reject if no auto_discount has been applied yet
+      setCanReject(!hasAutoDiscount);
+      
+      console.log(`Rejection count: ${rejectionCount}, Has auto discount: ${hasAutoDiscount}, Can reject: ${!hasAutoDiscount}`);
+    }
     
     // Fetch linked reservation (return trip) if this is the outbound or if this has original_reservation_id
     if (data) {
@@ -306,14 +330,7 @@ const CustomerReservationDetail = () => {
     setActionLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('reservations')
-        .update({ status: 'customer_rejected' })
-        .eq('id', reservation.id);
-
-      if (error) throw error;
-
-      // Record in price history
+      // Record the rejection in price history first
       if (reservation.price) {
         try {
           await supabase.from('price_history').insert({
@@ -326,6 +343,50 @@ const CustomerReservationDetail = () => {
           console.error('Failed to record price history:', e);
         }
       }
+
+      // If this is the first rejection, apply auto discount instead of cancelling
+      if (canReject && !isDiscountedOffer) {
+        try {
+          const { data: discountResult, error: discountError } = await supabase.functions.invoke('apply-auto-discount', {
+            body: { reservation_id: reservation.id }
+          });
+
+          if (discountError) {
+            console.error('Auto discount error:', discountError);
+            throw discountError;
+          }
+
+          if (discountResult?.success) {
+            toast.success(
+              t('autoDiscountApplied') || 
+              `Fiyat indirildi! Yeni fiyat: ${discountResult.currency === 'EUR' ? '€' : discountResult.currency}${discountResult.new_price}`
+            );
+            
+            // Update local state
+            setReservation({ 
+              ...reservation, 
+              price: discountResult.new_price,
+              status: 'waiting_for_customer_approval',
+              discount_amount: discountResult.discount_amount,
+            });
+            setIsDiscountedOffer(true);
+            setCanReject(false);
+            
+            return; // Don't proceed to cancel
+          }
+        } catch (e) {
+          console.error('Failed to apply auto discount:', e);
+          // If auto discount fails, proceed with normal rejection
+        }
+      }
+
+      // If auto discount already applied or failed, proceed with cancellation
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'customer_rejected' })
+        .eq('id', reservation.id);
+
+      if (error) throw error;
 
       // Notify admin (in-app)
       try {
@@ -353,7 +414,7 @@ const CustomerReservationDetail = () => {
       toast.success('Reservation cancelled.');
       setReservation({ ...reservation, status: 'customer_rejected' });
     } catch (error: any) {
-      toast.error(error.message || 'Failed to cancel reservation');
+      toast.error(error.message || 'Failed to process request');
     } finally {
       setActionLoading(false);
     }
@@ -859,6 +920,18 @@ const CustomerReservationDetail = () => {
             {/* Customer Approval Section */}
             {reservation.status === 'waiting_for_customer_approval' && (
               <div className="space-y-4">
+                {/* Discounted Offer Badge */}
+                {isDiscountedOffer && (
+                  <div className="bg-green-50 dark:bg-green-950/30 p-3 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2 justify-center">
+                      <Tag className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                        {t('specialDiscountApplied') || 'İndirimli fiyat uygulandı!'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="bg-purple-50 dark:bg-purple-950/30 p-4 rounded-lg text-center">
                   <p className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-2">
                     {t('priceReady')}
@@ -867,24 +940,43 @@ const CustomerReservationDetail = () => {
                     {t('reviewPriceMessage')}
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Button 
-                    onClick={handleRejectPrice} 
-                    variant="outline" 
-                    className="border-destructive text-destructive hover:bg-destructive/10"
-                    disabled={actionLoading}
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    {t('reject')}
-                  </Button>
-                  <Button 
-                    onClick={handleAcceptPrice}
-                    disabled={actionLoading}
-                  >
-                    <Check className="h-4 w-4 mr-2" />
-                    {t('accept')}
-                  </Button>
-                </div>
+                
+                {/* Show both buttons if can reject, only Accept button otherwise */}
+                {canReject ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    <Button 
+                      onClick={handleRejectPrice} 
+                      variant="outline" 
+                      className="border-destructive text-destructive hover:bg-destructive/10"
+                      disabled={actionLoading}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      {t('reject')}
+                    </Button>
+                    <Button 
+                      onClick={handleAcceptPrice}
+                      disabled={actionLoading}
+                    >
+                      <Check className="h-4 w-4 mr-2" />
+                      {t('accept')}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={handleAcceptPrice}
+                      disabled={actionLoading}
+                      className="w-full"
+                      size="lg"
+                    >
+                      <Check className="h-5 w-5 mr-2" />
+                      {t('accept')}
+                    </Button>
+                    <p className="text-center text-sm text-muted-foreground">
+                      {t('finalOfferMessage') || 'Bu sizin için özel indirimli son teklifimizdir.'}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
