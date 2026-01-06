@@ -943,23 +943,28 @@ const CustomerReservationDetail = () => {
                 
                 {/* Show both buttons if can reject, only Accept button otherwise */}
                 {canReject ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button 
-                      onClick={handleRejectPrice} 
-                      variant="outline" 
-                      className="border-destructive text-destructive hover:bg-destructive/10"
-                      disabled={actionLoading}
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      {t('reject')}
-                    </Button>
-                    <Button 
-                      onClick={handleAcceptPrice}
-                      disabled={actionLoading}
-                    >
-                      <Check className="h-4 w-4 mr-2" />
-                      {t('accept')}
-                    </Button>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Button 
+                        onClick={handleRejectPrice} 
+                        variant="outline" 
+                        className="border-destructive text-destructive hover:bg-destructive/10"
+                        disabled={actionLoading}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        {t('reject')}
+                      </Button>
+                      <Button 
+                        onClick={handleAcceptPrice}
+                        disabled={actionLoading}
+                      >
+                        <Check className="h-4 w-4 mr-2" />
+                        {t('accept')}
+                      </Button>
+                    </div>
+                    <p className="text-center text-xs text-muted-foreground">
+                      {t('rejectExplanation') || 'Bu Fiyatları Beğenmediyseniz Reject Tuşuna Basarak iletin.'}
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-3">

@@ -1298,33 +1298,38 @@ export default function QuickBookingConfirm() {
 
           {/* Action Buttons */}
           {canReject ? (
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                onClick={handleReject}
-                disabled={rejecting || confirming}
-                className="h-12"
-              >
-                {rejecting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <XCircle className="h-4 w-4 mr-2" />
-                )}
-                {t("qbReject")}
-              </Button>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  variant="outline"
+                  onClick={handleReject}
+                  disabled={rejecting || confirming}
+                  className="h-12"
+                >
+                  {rejecting ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <XCircle className="h-4 w-4 mr-2" />
+                  )}
+                  {t("qbReject")}
+                </Button>
 
-              <Button
-                onClick={handleConfirm}
-                disabled={confirming || rejecting}
-                className="h-12"
-              >
-                {confirming ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                )}
-                {t("qbConfirmBooking")}
-              </Button>
+                <Button
+                  onClick={handleConfirm}
+                  disabled={confirming || rejecting}
+                  className="h-12"
+                >
+                  {confirming ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                  )}
+                  {t("qbConfirmBooking")}
+                </Button>
+              </div>
+              <p className="text-center text-xs text-muted-foreground">
+                {t("rejectExplanation") || "Bu Fiyatları Beğenmediyseniz Reject Tuşuna Basarak iletin."}
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
