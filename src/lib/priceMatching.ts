@@ -304,11 +304,11 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Nevsehir Center': { priority: 2, keywords: ['nevsehir center', 'nevşehir merkez', 'nevsehir merkez'], city: 'Cappadocia' },
   
   // Bursa
-  'Osmangazi': { priority: 1, keywords: ['osmangazi', 'bursa center', 'bursa merkez', 'heykel', 'bursa city'], city: 'Bursa' },
-  'Mudanya': { priority: 1, keywords: ['mudanya'], city: 'Bursa' },
-  'Uludag': { priority: 1, keywords: ['uludag', 'uludağ', 'mount uludag'], city: 'Bursa' },
-  'Cumalikizik': { priority: 1, keywords: ['cumalikizik', 'cumalıkızık'], city: 'Bursa' },
-  'Iznik': { priority: 2, keywords: ['iznik', 'nicaea'], city: 'Bursa' },
+  'Bursa Merkez': { priority: 1, keywords: ['bursa merkez', 'bursa center', 'bursa city', 'bursa şehir', 'bursa sehir', 'bursa', 'heykel', 'osmangazi'], city: 'Bursa' },
+  'Mudanya': { priority: 2, keywords: ['mudanya'], city: 'Bursa' },
+  'Uludag': { priority: 2, keywords: ['uludag', 'uludağ', 'mount uludag'], city: 'Bursa' },
+  'Cumalikizik': { priority: 2, keywords: ['cumalikizik', 'cumalıkızık'], city: 'Bursa' },
+  'Iznik': { priority: 3, keywords: ['iznik', 'nicaea'], city: 'Bursa' },
   
   // Kocaeli
   'Izmit': { priority: 1, keywords: ['izmit', 'İzmit', 'kocaeli center', 'kocaeli merkez', 'kocaeli city'], city: 'Kocaeli' },
