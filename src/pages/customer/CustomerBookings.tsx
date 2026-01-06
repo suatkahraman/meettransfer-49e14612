@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import NotificationBell from '@/components/NotificationBell';
@@ -45,6 +45,8 @@ interface Reservation {
   payment_type: string;
   status: string;
   driver_id: string | null;
+  luggage_count: number | null;
+  baby_seat_count: number | null;
   drivers?: {
     name: string;
     plate_number: string | null;
@@ -328,9 +330,21 @@ const CustomerBookings = () => {
                       </div>
                       
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <Car className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
+                          {reservation.luggage_count && reservation.luggage_count > 0 && (
+                            <Badge variant="outline" className="text-xs gap-1 text-orange-600 border-orange-300">
+                              <Briefcase className="h-3 w-3" />
+                              {reservation.luggage_count}
+                            </Badge>
+                          )}
+                          {reservation.baby_seat_count && reservation.baby_seat_count > 0 && (
+                            <Badge variant="outline" className="text-xs gap-1 text-pink-600 border-pink-300">
+                              <Baby className="h-3 w-3" />
+                              {reservation.baby_seat_count}
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           {reservation.price !== null && (
@@ -411,9 +425,21 @@ const CustomerBookings = () => {
                       </div>
                       
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <Car className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
+                          {reservation.luggage_count && reservation.luggage_count > 0 && (
+                            <Badge variant="outline" className="text-xs gap-1 text-orange-600 border-orange-300">
+                              <Briefcase className="h-3 w-3" />
+                              {reservation.luggage_count}
+                            </Badge>
+                          )}
+                          {reservation.baby_seat_count && reservation.baby_seat_count > 0 && (
+                            <Badge variant="outline" className="text-xs gap-1 text-pink-600 border-pink-300">
+                              <Baby className="h-3 w-3" />
+                              {reservation.baby_seat_count}
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           {reservation.price !== null ? (
