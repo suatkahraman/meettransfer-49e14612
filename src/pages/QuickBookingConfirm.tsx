@@ -1304,14 +1304,19 @@ export default function QuickBookingConfirm() {
                   variant="outline"
                   onClick={handleReject}
                   disabled={rejecting || confirming}
-                  className="h-12"
+                  className="h-12 flex-col py-2"
                 >
-                  {rejecting ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <XCircle className="h-4 w-4 mr-2" />
-                  )}
-                  {t("qbReject")}
+                  <div className="flex items-center">
+                    {rejecting ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <XCircle className="h-4 w-4 mr-2" />
+                    )}
+                    {t("qbReject")}
+                  </div>
+                  <span className="text-[10px] font-normal opacity-70">
+                    If you Don't Like Price Send Reject
+                  </span>
                 </Button>
 
                 <Button
