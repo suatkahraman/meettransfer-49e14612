@@ -921,46 +921,127 @@ export default function QuickBookingConfirm() {
               </div>
             ) : (
               /* Fallback: show only the booked vehicle */
-              <div className="border rounded-xl p-4 border-primary bg-primary/5">
-                <div className="flex items-start gap-4">
-                  {selectedVehicleInfo && (
-                    <div className="w-32 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                      <Carousel 
-                        className="w-full h-full"
-                        plugins={[Autoplay({ delay: 3000 })]}
-                        opts={{ loop: true }}
+              <div className="relative overflow-hidden rounded-2xl ring-2 ring-primary shadow-xl">
+                {/* Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-background" />
+                
+                {/* Border */}
+                <div className="absolute inset-0 rounded-2xl border-2 border-primary" />
+                
+                {/* Selection Indicator */}
+                <div className="absolute top-3 right-3 z-10">
+                  <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                    <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
+                  </div>
+                </div>
+                
+                <div className="relative p-4 sm:p-5">
+                  <div className="flex gap-4">
+                    {/* Vehicle Image */}
+                    {selectedVehicleInfo && (
+                      <div 
+                        className="w-32 sm:w-40 h-24 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 relative cursor-pointer shadow-md group"
+                        onClick={() => {
+                          if (selectedVehicleInfo.images.length > 0) {
+                            setSelectedVehicleImages(selectedVehicleInfo.images);
+                            setSelectedVehicleLabel(selectedVehicleInfo.label);
+                            setSelectedVehicleForModal(selectedVehicleInfo);
+                            setImageModalOpen(true);
+                          }
+                        }}
                       >
-                        <CarouselContent>
-                          {selectedVehicleInfo.images.slice(0, 3).map((img, idx) => (
-                            <CarouselItem key={idx}>
-                              <img
-                                src={img.src}
-                                alt={img.alt}
-                                className="w-full h-full object-cover"
-                              />
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                      </Carousel>
-                    </div>
-                  )}
-                  
-                  <div className="flex-1">
-                    <h4 className="font-semibold">{VEHICLE_LABELS[booking.vehicle_type]}</h4>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      {selectedVehicleInfo && (
-                        <>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            {selectedVehicleInfo.passengers} {t("passengers")}
+                        <Carousel 
+                          className="w-full h-full"
+                          plugins={[Autoplay({ delay: 3500, stopOnInteraction: false })]}
+                          opts={{ loop: true }}
+                        >
+                          <CarouselContent className="h-full">
+                            {selectedVehicleInfo.images.slice(0, 4).map((img, idx) => (
+                              <CarouselItem key={idx} className="h-full">
+                                <img
+                                  src={img.src}
+                                  alt={img.alt}
+                                  className="w-full h-full object-cover"
+                                />
+                              </CarouselItem>
+                            ))}
+                          </CarouselContent>
+                        </Carousel>
+                        {/* Zoom overlay on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-2">
+                          <span className="flex items-center gap-1 text-white text-xs font-medium">
+                            <ZoomIn className="h-3.5 w-3.5" />
+                            {t("qbViewGallery") || "View Gallery"}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Briefcase className="h-4 w-4" />
-                            {selectedVehicleInfo.luggage} {t("luggage") || "luggage"}
-                          </span>
-                        </>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Vehicle Details */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                      {/* Header: Name */}
+                      <div>
+                        <h4 className="font-bold text-base sm:text-lg leading-tight mb-2">
+                          {VEHICLE_LABELS[booking.vehicle_type]}
+                        </h4>
+                        
+                        {/* Capacity Pills */}
+                        {selectedVehicleInfo && (
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-semibold">
+                              <Users className="h-3.5 w-3.5" />
+                              {selectedVehicleInfo.passengers}
+                            </div>
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 text-accent-foreground text-xs font-semibold">
+                              <Briefcase className="h-3.5 w-3.5" />
+                              {selectedVehicleInfo.luggage}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Feature Icons */}
+                      {selectedVehicleInfo?.features && selectedVehicleInfo.features.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {selectedVehicleInfo.features.slice(0, 4).map((feature, idx) => {
+                            const FeatureIcon = getFeatureIcon(feature.icon);
+                            return (
+                              <div 
+                                key={idx}
+                                className="flex items-center gap-1 px-2 py-1 rounded-md bg-background/80 border border-border/50 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+                                title={t("locale") === "tr" ? feature.labelTr : feature.label}
+                              >
+                                <FeatureIcon className="h-3 w-3 flex-shrink-0" />
+                                <span className="hidden sm:inline truncate max-w-[80px]">
+                                  {t("locale") === "tr" ? feature.labelTr : feature.label}
+                                </span>
+                              </div>
+                            );
+                          })}
+                          {selectedVehicleInfo.features.length > 4 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{selectedVehicleInfo.features.length - 4}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
+                  </div>
+                  
+                  {/* Price Section - Full width at bottom */}
+                  <div className="mt-4 pt-3 border-t border-primary/20 flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      {t("qbOneWayPrice") || "One-way transfer"}
+                    </span>
+                    {selectedPrice ? (
+                      <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-primary">
+                        {currencySymbol}{selectedPrice}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-muted-foreground italic">
+                        {t("qbPriceNotAvailable") || "Not available"}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
