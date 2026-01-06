@@ -399,30 +399,94 @@ export const Hero = () => {
                 </div>
               </div>
 
-              {/* Vehicle Selection */}
-              <div className="relative">
-                <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("vehicleType")}</label>
+              {/* Vehicle Selection with Visual Cards */}
+              <div className="relative space-y-4">
+                <label className="text-white/90 text-sm font-medium block text-left">{t("vehicleType")}</label>
                 {minibusRequired && (
-                  <div className="flex items-center gap-2 text-amber-300 text-xs mb-2 bg-amber-500/20 p-2 rounded-lg">
+                  <div className="flex items-center gap-2 text-amber-300 text-xs bg-amber-500/20 p-2 rounded-lg">
                     <AlertCircle className="h-4 w-4" />
                     <span>{t("minibusRequiredInfo") || "For 7+ passengers or luggage, only Minibus is available"}</span>
                   </div>
                 )}
-                <Select value={vehicleType} onValueChange={setVehicleType} disabled={minibusRequired}>
-                  <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
-                    <div className="flex items-center"><Car className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectVehicle")} /></div>
-                  </SelectTrigger>
-                  <SelectContent className="bg-white z-50">
-                    {availableVehicles.map((v) => (
-                      <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                
+                {/* Vehicle Cards Grid */}
+                <div className={cn(
+                  "grid gap-3",
+                  availableVehicles.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                )}>
+                  {availableVehicles.map((v) => (
+                    <button
+                      key={v.value}
+                      type="button"
+                      disabled={minibusRequired && v.value !== 'minibus'}
+                      onClick={() => setVehicleType(v.value)}
+                      className={cn(
+                        "relative overflow-hidden rounded-xl p-3 transition-all duration-300 text-left",
+                        "border-2 hover:scale-[1.02] active:scale-[0.98]",
+                        vehicleType === v.value
+                          ? "border-accent bg-white/20 shadow-lg ring-2 ring-accent/50"
+                          : "border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/40",
+                        minibusRequired && v.value !== 'minibus' && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      {/* Selected indicator */}
+                      {vehicleType === v.value && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent flex items-center justify-center">
+                          <CheckCircle className="h-3 w-3 text-white" />
+                        </div>
+                      )}
+                      
+                      {/* Vehicle Image Thumbnail */}
+                      <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-black/20">
+                        <img
+                          src={v.images[0]?.src}
+                          alt={v.label}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      
+                      {/* Vehicle Name */}
+                      <h3 className={cn(
+                        "font-semibold text-sm mb-1",
+                        vehicleType === v.value ? "text-white" : "text-white/90"
+                      )}>
+                        {v.label}
+                      </h3>
+                      
+                      {/* Capacity Info */}
+                      <div className="flex items-center gap-3 text-xs text-white/70">
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          {v.passengers}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Briefcase className="h-3 w-3" />
+                          {v.luggage}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Vehicle Image Carousel */}
+              {/* Selected Vehicle Gallery */}
               {vehicleType && currentVehicle && (
                 <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-white/90 text-sm font-medium">{currentVehicle.label}</h4>
+                    <div className="flex items-center gap-3 text-xs text-white/70">
+                      <span className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
+                        <Users className="h-3 w-3 text-accent" />
+                        {currentVehicle.passengers} {t("passengers")}
+                      </span>
+                      <span className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
+                        <Briefcase className="h-3 w-3 text-accent" />
+                        {currentVehicle.luggage} {t("luggage") || "Luggage"}
+                      </span>
+                    </div>
+                  </div>
+                  
                   <Carousel 
                     className="w-full"
                     plugins={[
@@ -436,13 +500,14 @@ export const Hero = () => {
                     }}
                   >
                     <CarouselContent>
-                      {currentVehicle.images.map((img, idx) => (
+                      {currentVehicle.images.slice(0, 6).map((img, idx) => (
                         <CarouselItem key={idx}>
-                          <div className="overflow-hidden rounded-xl aspect-[4/3] bg-black/20">
+                          <div className="overflow-hidden rounded-xl aspect-[16/10] bg-black/20">
                             <img
                               src={img.src}
                               alt={img.alt}
-                              className="w-full h-full object-contain"
+                              className="w-full h-full object-cover"
+                              loading="lazy"
                             />
                           </div>
                         </CarouselItem>
@@ -452,18 +517,6 @@ export const Hero = () => {
                     <CarouselNext className="right-2 bg-white/80 hover:bg-white" />
                     <CarouselDots className="[&_button]:bg-white/40 [&_button.bg-primary]:bg-white" />
                   </Carousel>
-                  
-                  {/* Vehicle Info */}
-                  <div className="flex justify-center gap-6 text-sm text-white/90">
-                    <div className="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full">
-                      <Users className="h-4 w-4" />
-                      <span>{currentVehicle.passengers} {t("passengers")}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full">
-                      <Briefcase className="h-4 w-4" />
-                      <span>{currentVehicle.luggage} {t("luggage") || "Luggage"}</span>
-                    </div>
-                  </div>
                 </div>
               )}
 
