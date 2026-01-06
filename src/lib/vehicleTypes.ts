@@ -49,11 +49,11 @@ export interface VehicleTypeInfo {
   images: VehicleImage[];
 }
 
-// Central vehicle type configuration - SYNC WITH AdminRegionPrices.tsx VEHICLE_TYPES
+// Central vehicle type configuration - SYNC WITH AdminRegionPrices.tsx and priceMatching.ts
 export const VEHICLE_TYPES: VehicleTypeInfo[] = [
   {
     value: 'mercedes-vito',
-    label: 'Mercedes Vito',
+    label: 'Mercedes-vito',
     passengers: 6,
     luggage: 6,
     images: [
@@ -72,8 +72,8 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
   },
   {
-    value: 'mercedes-vclass',
-    label: 'VIP Vito',
+    value: 'vip-mercedes',
+    label: 'Vip Mercedes',
     passengers: 5,
     luggage: 5,
     images: [
@@ -89,8 +89,8 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
   },
   {
-    value: 'maybach',
-    label: 'Maybach Minivan',
+    value: 'maybach-minibus',
+    label: 'Maybach Minibus',
     passengers: 4,
     luggage: 4,
     images: [
