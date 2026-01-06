@@ -1116,6 +1116,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq6A: "Yes! All our tours are fully customizable based on your interests - history, nature, food, thermal baths, or a mix of everything.",
   },
   DE: {
+    // Reject button hint
+    rejectButtonHint: "Wenn Ihnen der Preis nicht gefällt, senden Sie Ablehnung",
     // Navigation
     home: "Startseite",
     cities: "Städte",
@@ -2121,6 +2123,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "Meet Transfer Team",
   },
   FR: {
+    // Reject button hint
+    rejectButtonHint: "Si le prix ne vous convient pas, envoyez un refus",
     // Navigation
     home: "Accueil",
     cities: "Villes",
@@ -3110,6 +3114,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "Équipe Meet Transfer",
   },
   RU: {
+    // Reject button hint
+    rejectButtonHint: "Если вас не устраивает цена, отправьте отказ",
     // Navigation
     home: "Главная",
     cities: "Города",
@@ -4042,6 +4048,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "Команда Meet Transfer",
   },
   IT: {
+    // Reject button hint
+    rejectButtonHint: "Se non ti piace il prezzo, invia rifiuto",
     // Navigation
     home: "Home",
     cities: "Città",
@@ -5027,6 +5035,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "Team Meet Transfer",
   },
   ES: {
+    // Reject button hint
+    rejectButtonHint: "Si no le gusta el precio, envíe rechazo",
     // Navigation
     home: "Inicio",
     cities: "Ciudades",
@@ -6012,6 +6022,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "Equipo Meet Transfer",
   },
   AR: {
+    // Reject button hint
+    rejectButtonHint: "إذا لم يعجبك السعر، أرسل رفض",
     // Navigation
     home: "الرئيسية",
     cities: "المدن",
@@ -6944,6 +6956,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogMeetTransferTeam: "فريق Meet Transfer",
   },
   TR: {
+    // Reject button hint
+    rejectButtonHint: "Fiyatı beğenmediyseniz reddet gönderin",
     // Navigation
     home: "Ana Sayfa",
     cities: "Şehirler",
@@ -8006,6 +8020,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq6A: "Evet! Kış Uludağ'da kayak için harikadır. Cumalıkızık ve tarihi mekanlar yıl boyunca ziyaret edilebilir.",
   },
   UK: {
+    // Reject button hint
+    rejectButtonHint: "Якщо вас не влаштовує ціна, надішліть відмову",
     // Navigation
     home: "Головна",
     cities: "Міста",
@@ -8959,6 +8975,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq6A: "Так! Зима ідеальна для катання на лижах на Улудаг. Село Куамликизик та історичні місця працюють цілий рік.",
   },
   JA: {
+    // Reject button hint
+    rejectButtonHint: "価格が気に入らない場合は拒否を送信してください",
     // Navigation
     home: "ホーム",
     cities: "都市",
