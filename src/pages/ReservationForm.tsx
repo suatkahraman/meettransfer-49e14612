@@ -48,12 +48,8 @@ const MAX_PASSENGERS = 15;
 
 // Airports list removed - pickup is now free text
 
-const vehicleTypes = [
-  { value: 'mercedes-vito', label: 'Mercedes-vito' },
-  { value: 'vip-mercedes', label: 'Vip Mercedes' },
-  { value: 'maybach-minibus', label: 'Maybach Minibus' },
-  { value: 'minibus', label: 'Minibus' },
-];
+// Use centralized vehicle types
+import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 
 const FORM_STORAGE_KEY = 'reservation_form_draft';
 

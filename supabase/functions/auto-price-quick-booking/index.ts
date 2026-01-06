@@ -5,8 +5,10 @@ import {
   analyzeTransfer,
   calculateDiscount,
   logAnalysis,
-  getVehicleFallbackList,
 } from "../_shared/priceMatching.ts";
+import { getVehicleFallbackList, getVehicleLabel } from "../_shared/vehicleConfig.ts";
+import { convertCurrency, getCurrencySymbol } from "../_shared/currencyUtils.ts";
+import { autoPriceSuccessEmail, manualPriceRequiredEmail } from "../_shared/emailTemplates.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -19,40 +21,6 @@ interface AutoPriceRequest {
   quick_booking_id: string;
 }
 
-// Currency conversion helper
-async function convertCurrency(
-  amount: number,
-  fromCurrency: string,
-  toCurrency: string
-): Promise<{ amount: number; rate: number }> {
-  if (fromCurrency === toCurrency) {
-    return { amount, rate: 1 };
-  }
-
-  try {
-    const response = await fetch(
-      `https://api.frankfurter.app/latest?from=${fromCurrency}&to=${toCurrency}`
-    );
-    if (response.ok) {
-      const data = await response.json();
-      const rate = data.rates[toCurrency];
-      return { amount: Math.round(amount * rate), rate };
-    }
-  } catch (e) {
-    console.error("Currency conversion error:", e);
-  }
-
-  // Fallback rates
-  const fallbackRates: Record<string, Record<string, number>> = {
-    'EUR': { 'USD': 1.08, 'TRY': 37.5, 'GBP': 0.85, 'AED': 3.97 },
-    'USD': { 'EUR': 0.93, 'TRY': 34.5, 'GBP': 0.79, 'AED': 3.67 },
-    'TRY': { 'EUR': 0.027, 'USD': 0.029, 'GBP': 0.023, 'AED': 0.11 },
-  };
-
-  const rate = fallbackRates[fromCurrency]?.[toCurrency] || 1;
-  return { amount: Math.round(amount * rate), rate };
-}
-
 // Send admin notification for manual pricing
 async function sendManualPriceRequestEmail(
   booking: any,
@@ -61,55 +29,23 @@ async function sendManualPriceRequestEmail(
   const adminEmail = "sautkahraman@gmail.com";
   
   try {
+    const emailHtml = manualPriceRequiredEmail(
+      booking,
+      {
+        airport: transferInfo.airport,
+        city: transferInfo.city,
+        district: transferInfo.district,
+        direction: transferInfo.direction,
+        confidence: transferInfo.confidence,
+      },
+      'quick_booking'
+    );
+
     await resend.emails.send({
       from: "Meet Transfer <no-reply@meet-transfer.com>",
       to: adminEmail,
       subject: `⚠️ Quick Booking Manuel Fiyat Gerekli: ${booking.customer_name || 'Misafir'}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">⚠️ Manuel Fiyat Gerekli</h1>
-            <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">Quick Booking - Otomatik fiyat eşleştirilemedi</p>
-          </div>
-          
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px;">
-            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
-              <h3 style="margin: 0 0 10px 0; color: #333;">Müşteri Bilgileri</h3>
-              <p style="margin: 5px 0; color: #666;"><strong>Müşteri:</strong> ${booking.customer_name || 'Henüz girilmedi'}</p>
-              <p style="margin: 5px 0; color: #666;"><strong>Email:</strong> ${booking.customer_email || 'Henüz girilmedi'}</p>
-              <p style="margin: 5px 0; color: #666;"><strong>Telefon:</strong> ${booking.customer_phone || 'Henüz girilmedi'}</p>
-            </div>
-            
-            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;">
-              <h3 style="margin: 0 0 10px 0; color: #333;">Transfer Detayları</h3>
-              <p style="margin: 5px 0; color: #666;"><strong>Alış:</strong> ${booking.pickup}</p>
-              <p style="margin: 5px 0; color: #666;"><strong>Bırakış:</strong> ${booking.dropoff}</p>
-              <p style="margin: 5px 0; color: #666;"><strong>Tarih:</strong> ${booking.pickup_date}</p>
-              <p style="margin: 5px 0; color: #666;"><strong>Saat:</strong> ${booking.pickup_time}</p>
-              <p style="margin: 5px 0; color: #666;"><strong>Araç:</strong> ${booking.vehicle_type}</p>
-              ${booking.has_return_trip ? `<p style="margin: 5px 0; color: #666;"><strong>Dönüş:</strong> ${booking.return_date} - ${booking.return_time}</p>` : ''}
-            </div>
-            
-            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ef4444;">
-              <h3 style="margin: 0 0 10px 0; color: #333;">Eşleşme Sonucu</h3>
-              <p style="margin: 5px 0; color: #666;"><strong>Bulunan Havalimanı:</strong> ${transferInfo.airport || 'Bulunamadı'}</p>
-              <p style="margin: 5px 0; color: #666;"><strong>Bulunan Şehir:</strong> ${transferInfo.city || 'Bulunamadı'}</p>
-              <p style="margin: 5px 0; color: #666;"><strong>Bulunan İlçe:</strong> ${transferInfo.district || 'Bulunamadı'}</p>
-              <p style="margin: 5px 0; color: #666;"><strong>Yön:</strong> ${transferInfo.direction}</p>
-            </div>
-            
-            <div style="text-align: center; margin: 20px 0; padding: 20px; background: #fef3c7; border-radius: 8px; border: 2px solid #f59e0b;">
-              <p style="font-size: 16px; color: #92400e; margin: 0; font-weight: bold;">
-                🔧 Lütfen admin panelinden manuel fiyat girin
-              </p>
-            </div>
-            
-            <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
-              Bu bildirim otomatik fiyat sistemi tarafından gönderilmiştir.
-            </p>
-          </div>
-        </div>
-      `,
+      html: emailHtml,
     });
     console.log("📧 Manual price request email sent to admin for quick booking");
   } catch (emailError) {

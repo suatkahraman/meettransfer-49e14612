@@ -76,12 +76,8 @@ const CITIES_DATA = {
 };
 
 // Vehicle types - synced with src/lib/vehicleTypes.ts
-const VEHICLE_TYPES = [
-  { value: 'mercedes-vito', label: 'Mercedes-vito' },
-  { value: 'vip-mercedes', label: 'Vip Mercedes' },
-  { value: 'maybach-minibus', label: 'Maybach Minibus' },
-  { value: 'minibus', label: 'Minibus' },
-];
+// Use centralized vehicle types from lib
+import { VEHICLE_TYPE_OPTIONS as VEHICLE_TYPES } from '@/lib/vehicleTypes';
 
 const CURRENCIES = [
   { value: 'EUR', label: '€ EUR' },

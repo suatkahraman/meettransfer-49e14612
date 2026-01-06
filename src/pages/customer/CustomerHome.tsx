@@ -27,12 +27,8 @@ const reservationSchema = z.object({
 });
 
 // Vehicle types without prices - prices set by admin
-const vehicleTypes = [
-  { value: 'mercedes-vito', label: 'Mercedes-vito' },
-  { value: 'vip-mercedes', label: 'Vip Mercedes' },
-  { value: 'maybach-minibus', label: 'Maybach Minibus' },
-  { value: 'minibus', label: 'Minibus' },
-];
+// Use centralized vehicle types
+import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 
 const paymentTypes = [
   { value: 'cash', label: 'Cash to Driver' },
