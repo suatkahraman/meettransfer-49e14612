@@ -7,10 +7,20 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote } from "lucide-react";
-import { format, parseISO, addDays } from "date-fns";
+import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase } from "lucide-react";
+import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { VEHICLE_TYPES, VEHICLE_LABELS, VEHICLE_TYPE_MAP, isMinibusRequired } from "@/lib/vehicleTypes";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+  CarouselDots,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 interface BookingRequest {
   id: string;
@@ -26,20 +36,24 @@ interface BookingRequest {
   confirmation_token: string;
   payment_method?: string;
   payment_link?: string;
-  // Return trip fields from database
   has_return_trip?: boolean;
   return_date?: string;
   return_time?: string;
   return_price?: number | null;
   promo_code?: string;
+  luggage_count?: number;
+  baby_seat_count?: number;
 }
 
-const vehicleLabels: Record<string, string> = {
-  "mercedes-vito": "Mercedes Vito",
-  "mercedes-vclass": "VIP Vito",
-  maybach: "Maybach Minivan",
-  minibus: "Minibus",
-};
+interface VehiclePriceInfo {
+  vehicleType: string;
+  vehicleLabel: string;
+  price: number | null;
+  currency: string;
+  passengers: number;
+  luggage: number;
+  available: boolean;
+}
 
 const VALID_PROMO_CODE = "Meet40Return";
 
@@ -53,6 +67,11 @@ export default function QuickBookingConfirm() {
   const [confirming, setConfirming] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [waitingForPrice, setWaitingForPrice] = useState(false);
+  
+  // All vehicle prices
+  const [allVehiclePrices, setAllVehiclePrices] = useState<VehiclePriceInfo[]>([]);
+  const [selectedVehicle, setSelectedVehicle] = useState<string>("");
+  const [loadingPrices, setLoadingPrices] = useState(false);
   
   // Return trip state
   const [hasReturnTrip, setHasReturnTrip] = useState(false);
@@ -74,9 +93,8 @@ export default function QuickBookingConfirm() {
   const urlReturnTime = searchParams.get("returnTime") || "";
   const urlPromoCode = searchParams.get("promoCode") || "";
 
-  // Pre-fill return trip and promo code from URL params or database
+  // Pre-fill return trip and promo code from URL params
   useEffect(() => {
-    // First try from URL params
     if (urlHasReturn) {
       setHasReturnTrip(true);
       setReturnTripData({
@@ -92,7 +110,7 @@ export default function QuickBookingConfirm() {
     }
   }, [urlHasReturn, urlReturnDate, urlReturnTime, urlPromoCode]);
 
-  // Pre-fill from database if available (when admin has sent price with return info)
+  // Pre-fill from database if available
   useEffect(() => {
     if (booking) {
       if (booking.has_return_trip && booking.return_date && booking.return_time) {
@@ -108,8 +126,12 @@ export default function QuickBookingConfirm() {
           setIsPromoCodeValid(true);
         }
       }
+      // Set initial selected vehicle
+      if (!selectedVehicle) {
+        setSelectedVehicle(booking.vehicle_type);
+      }
     }
-  }, [booking]);
+  }, [booking, selectedVehicle]);
 
   useEffect(() => {
     if (token) {
@@ -120,12 +142,17 @@ export default function QuickBookingConfirm() {
     }
   }, [token]);
 
+  // Fetch all vehicle prices when booking is loaded
+  useEffect(() => {
+    if (booking && booking.status === "price_sent") {
+      fetchAllVehiclePrices();
+    }
+  }, [booking?.id, booking?.status]);
+
   // Realtime subscription for price updates
   useEffect(() => {
     if (!token || !waitingForPrice) return;
 
-    console.log("Setting up realtime subscription for token:", token);
-    
     const channel = supabase
       .channel(`quick-booking-${token}`)
       .on(
@@ -137,7 +164,6 @@ export default function QuickBookingConfirm() {
           filter: `confirmation_token=eq.${token}`,
         },
         (payload) => {
-          console.log("Realtime update received:", payload);
           const newData = payload.new as BookingRequest;
           
           if (newData.status === "price_sent" && newData.price) {
@@ -154,12 +180,9 @@ export default function QuickBookingConfirm() {
           }
         }
       )
-      .subscribe((status) => {
-        console.log("Realtime subscription status:", status);
-      });
+      .subscribe();
 
     return () => {
-      console.log("Removing realtime subscription");
       supabase.removeChannel(channel);
     };
   }, [token, waitingForPrice]);
@@ -194,7 +217,6 @@ export default function QuickBookingConfirm() {
         return;
       }
 
-      // If price not set yet OR price was rejected, show waiting state with realtime updates
       if (data.status === "pending" || data.status === "price_rejected") {
         setBooking(data as BookingRequest);
         setWaitingForPrice(true);
@@ -215,6 +237,43 @@ export default function QuickBookingConfirm() {
     }
   };
 
+  const fetchAllVehiclePrices = async () => {
+    if (!booking) return;
+    
+    setLoadingPrices(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
+        body: {
+          pickup: booking.pickup,
+          dropoff: booking.dropoff,
+          customerCurrency: booking.price_currency,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.prices) {
+        // Filter vehicles based on passenger/luggage count
+        const passengerCount = booking.passengers || 1;
+        const luggageCount = booking.luggage_count || 1;
+        const minibusOnly = isMinibusRequired(passengerCount, luggageCount);
+
+        let filteredPrices = data.prices as VehiclePriceInfo[];
+        
+        if (minibusOnly) {
+          filteredPrices = filteredPrices.filter(v => v.vehicleType === 'minibus');
+        }
+
+        setAllVehiclePrices(filteredPrices);
+      }
+    } catch (err) {
+      console.error("Failed to fetch vehicle prices:", err);
+      // Don't show error - just use the original price
+    } finally {
+      setLoadingPrices(false);
+    }
+  };
+
   const handlePromoCodeChange = (value: string) => {
     setPromoCode(value);
     if (value.trim() === "") {
@@ -226,48 +285,62 @@ export default function QuickBookingConfirm() {
     }
   };
 
-  // Calculate return price - apply discount if promo code is valid
-  // Note: booking.return_price from DB is the ORIGINAL price (before discount)
+  // Get price for selected vehicle
+  const getSelectedPrice = (): number | null => {
+    if (!booking?.price) return null;
+    
+    // If we have all vehicle prices and a different vehicle is selected
+    if (allVehiclePrices.length > 0 && selectedVehicle) {
+      const selectedPriceInfo = allVehiclePrices.find(v => v.vehicleType === selectedVehicle);
+      if (selectedPriceInfo?.price) {
+        return selectedPriceInfo.price;
+      }
+    }
+    
+    // Default to booking's original price
+    return booking.price;
+  };
+
+  // Calculate return price
   const getReturnPrice = () => {
     if (!hasReturnTrip) return null;
+    const price = getSelectedPrice();
+    if (!price) return null;
     
-    // If admin has set return_price in database, use that as base
-    if (booking?.return_price != null) {
-      // Apply discount if promo code is valid
+    // Check if admin set a specific return price
+    if (booking?.return_price != null && selectedVehicle === booking.vehicle_type) {
       if (isPromoCodeValid) {
-        return Math.round(booking.return_price * 0.7); // 30% discount
+        return Math.round(booking.return_price * 0.7);
       }
       return booking.return_price;
     }
     
-    // Fallback: calculate from outbound price
-    if (!booking?.price) return null;
+    // Calculate based on selected vehicle price
     if (isPromoCodeValid) {
-      return Math.round(booking.price * 0.7); // 30% discount
+      return Math.round(price * 0.7);
     }
-    return booking.price;
+    return price;
   };
 
-  // Get original return price (before discount) for display
   const getOriginalReturnPrice = () => {
     if (!hasReturnTrip) return null;
+    const price = getSelectedPrice();
+    if (!price) return null;
     
-    // If admin set return_price, that's the original
-    if (booking?.return_price != null) {
+    if (booking?.return_price != null && selectedVehicle === booking.vehicle_type) {
       return booking.return_price;
     }
     
-    // Fallback to outbound price
-    return booking?.price || null;
+    return price;
   };
 
   const getTotalPrice = () => {
-    if (!booking?.price) return null;
+    const price = getSelectedPrice();
+    if (!price) return null;
     const returnPrice = getReturnPrice();
-    return booking.price + (returnPrice || 0);
+    return price + (returnPrice || 0);
   };
 
-  // Calculate discount amount for display
   const getDiscountAmount = () => {
     if (!hasReturnTrip || !isPromoCodeValid) return null;
     const originalReturn = getOriginalReturnPrice();
@@ -278,10 +351,21 @@ export default function QuickBookingConfirm() {
     return null;
   };
 
+  const getCurrencySymbol = (currency: string) => {
+    const symbols: Record<string, string> = {
+      'EUR': '€',
+      'USD': '$',
+      'TRY': '₺',
+      'GBP': '£',
+      'AED': 'د.إ',
+      'AUD': 'A$',
+    };
+    return symbols[currency] || currency;
+  };
+
   const handleConfirm = async () => {
     if (!booking) return;
 
-    // Validate return trip if enabled
     if (hasReturnTrip) {
       if (!returnTripData.date) {
         toast.error("Please select a return date");
@@ -295,11 +379,9 @@ export default function QuickBookingConfirm() {
 
     setConfirming(true);
     try {
-      // Calculate prices
+      const selectedPrice = getSelectedPrice();
       const returnPrice = getReturnPrice();
-      const totalPrice = getTotalPrice();
 
-      // Use edge function to create reservation (bypasses RLS for anonymous users)
       const { data: result, error: fnError } = await supabase.functions.invoke(
         "create-quick-booking-reservation",
         {
@@ -309,9 +391,9 @@ export default function QuickBookingConfirm() {
             dropoff: booking.dropoff,
             pickupDate: booking.pickup_date,
             pickupTime: booking.pickup_time,
-            vehicleType: booking.vehicle_type,
+            vehicleType: selectedVehicle || booking.vehicle_type,
             passengers: booking.passengers,
-            price: booking.price,
+            price: selectedPrice,
             priceCurrency: booking.price_currency,
             paymentMethod,
             hasReturnTrip,
@@ -329,12 +411,12 @@ export default function QuickBookingConfirm() {
       const reservation = result.reservation;
       const returnReservationCode = result.returnReservation?.reservationCode || null;
 
-      // Record price acceptance in history
-      if (booking.price) {
+      // Record price acceptance
+      if (selectedPrice) {
         try {
           await supabase.from("price_history").insert({
             quick_booking_id: booking.id,
-            price: booking.price,
+            price: selectedPrice,
             price_currency: booking.price_currency,
             action: "accepted",
           });
@@ -343,10 +425,6 @@ export default function QuickBookingConfirm() {
         }
       }
 
-      // Admin notification is sent server-side from create-quick-booking-reservation
-      // (avoids missed emails due to client network / navigation issues)
-
-      // Navigate to customer info page to collect details
       const params = new URLSearchParams();
       params.set("reservationId", reservation.id);
       params.set("reservationCode", reservation.reservationCode || "");
@@ -370,7 +448,6 @@ export default function QuickBookingConfirm() {
 
     setRejecting(true);
     try {
-      // Update status to price_rejected instead of rejected - allows admin to send new price
       const { error } = await supabase
         .from("quick_booking_requests")
         .update({
@@ -380,7 +457,6 @@ export default function QuickBookingConfirm() {
 
       if (error) throw error;
 
-      // Record price rejection in history
       if (booking.price) {
         try {
           await supabase.from("price_history").insert({
@@ -394,7 +470,6 @@ export default function QuickBookingConfirm() {
         }
       }
 
-      // Notify admin about the rejection so they can send a new price
       try {
         await supabase.functions.invoke("notify-admin-quick-booking-rejected", {
           body: {
@@ -407,15 +482,13 @@ export default function QuickBookingConfirm() {
             passengers: booking.passengers,
             price: booking.price,
             priceCurrency: booking.price_currency,
-            priceRejected: true, // Flag to indicate price was rejected, not booking
+            priceRejected: true,
           },
         });
       } catch (notifyError) {
         console.error("Failed to notify admin about rejection:", notifyError);
-        // Don't block the flow if notification fails
       }
 
-      // Show waiting state - customer waits for new price
       setBooking({ ...booking, status: "price_rejected", price: null });
       setWaitingForPrice(true);
       toast.info("Price rejected. Admin will send you a new offer soon.");
@@ -466,7 +539,6 @@ export default function QuickBookingConfirm() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
         <Card className="max-w-lg w-full">
           <CardContent className="pt-6">
-            {/* Header */}
             <div className="text-center mb-6">
               <div className="h-16 w-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-4 animate-pulse">
                 <Clock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
@@ -477,7 +549,6 @@ export default function QuickBookingConfirm() {
               </p>
             </div>
 
-            {/* Transfer Details */}
             <div className="bg-muted/50 rounded-lg p-4 mb-6 space-y-3">
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary mt-0.5" />
@@ -514,27 +585,8 @@ export default function QuickBookingConfirm() {
                   </div>
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Car className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t("qbVehicle")}</p>
-                    <p className="font-medium">{vehicleLabels[booking.vehicle_type]}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t("qbPassengers")}</p>
-                    <p className="font-medium">{booking.passengers}</p>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* Waiting indicator */}
             <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <RefreshCw className="h-5 w-5 text-amber-600 dark:text-amber-400 animate-spin" />
@@ -546,19 +598,19 @@ export default function QuickBookingConfirm() {
                 {t("qbPageAutoUpdate")}
               </p>
             </div>
-
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              {t("qbKeepPageOpen")}
-            </p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
+  const currencySymbol = getCurrencySymbol(booking.price_currency);
+  const selectedPrice = getSelectedPrice();
+  const selectedVehicleInfo = VEHICLE_TYPE_MAP[selectedVehicle || booking.vehicle_type];
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
-      <Card className="max-w-lg w-full">
+      <Card className="max-w-2xl w-full">
         <CardContent className="pt-6">
           {/* Header */}
           <div className="text-center mb-6">
@@ -609,23 +661,141 @@ export default function QuickBookingConfirm() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2">
-                <Car className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t("qbVehicle")}</p>
-                  <p className="font-medium">{vehicleLabels[booking.vehicle_type]}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t("qbPassengers")}</p>
-                  <p className="font-medium">{booking.passengers}</p>
-                </div>
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">{t("qbPassengers")}</p>
+                <p className="font-medium">{booking.passengers}</p>
               </div>
             </div>
+          </div>
+
+          {/* Vehicle Selection */}
+          <div className="mb-6">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Car className="h-5 w-5" />
+              {t("qbSelectVehicle") || "Select Your Vehicle"}
+            </h3>
+            
+            {loadingPrices ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <span className="ml-2 text-muted-foreground">Loading vehicle options...</span>
+              </div>
+            ) : allVehiclePrices.length > 0 ? (
+              <div className="grid gap-3">
+                {allVehiclePrices.map((vehicle) => {
+                  const isSelected = (selectedVehicle || booking.vehicle_type) === vehicle.vehicleType;
+                  const vehicleInfo = VEHICLE_TYPE_MAP[vehicle.vehicleType];
+                  
+                  return (
+                    <div
+                      key={vehicle.vehicleType}
+                      onClick={() => vehicle.available && setSelectedVehicle(vehicle.vehicleType)}
+                      className={`
+                        relative border rounded-xl p-4 cursor-pointer transition-all duration-200
+                        ${isSelected 
+                          ? 'border-primary bg-primary/5 ring-2 ring-primary shadow-lg' 
+                          : vehicle.available 
+                            ? 'border-border hover:border-primary/50 hover:bg-muted/50' 
+                            : 'border-border opacity-50 cursor-not-allowed bg-muted/30'
+                        }
+                      `}
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* Vehicle Image */}
+                        {vehicleInfo && (
+                          <div className="w-24 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                            <img
+                              src={vehicleInfo.images[0]?.src}
+                              alt={vehicle.vehicleLabel}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold">{vehicle.vehicleLabel}</h4>
+                            {vehicle.available && vehicle.price ? (
+                              <span className="text-xl font-bold text-primary">
+                                {currencySymbol}{vehicle.price}
+                              </span>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">
+                                {t("qbPriceNotAvailable") || "Not available"}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Users className="h-4 w-4" />
+                              {vehicle.passengers} {t("passengers")}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Briefcase className="h-4 w-4" />
+                              {vehicle.luggage} {t("luggage") || "luggage"}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {isSelected && (
+                          <div className="absolute top-3 right-3">
+                            <CheckCircle className="h-6 w-6 text-primary" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Fallback: show only the booked vehicle */
+              <div className="border rounded-xl p-4 border-primary bg-primary/5">
+                <div className="flex items-start gap-4">
+                  {selectedVehicleInfo && (
+                    <div className="w-32 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                      <Carousel 
+                        className="w-full h-full"
+                        plugins={[Autoplay({ delay: 3000 })]}
+                        opts={{ loop: true }}
+                      >
+                        <CarouselContent>
+                          {selectedVehicleInfo.images.slice(0, 3).map((img, idx) => (
+                            <CarouselItem key={idx}>
+                              <img
+                                src={img.src}
+                                alt={img.alt}
+                                className="w-full h-full object-cover"
+                              />
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                      </Carousel>
+                    </div>
+                  )}
+                  
+                  <div className="flex-1">
+                    <h4 className="font-semibold">{VEHICLE_LABELS[booking.vehicle_type]}</h4>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                      {selectedVehicleInfo && (
+                        <>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            {selectedVehicleInfo.passengers} {t("passengers")}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Briefcase className="h-4 w-4" />
+                            {selectedVehicleInfo.luggage} {t("luggage") || "luggage"}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Return Trip Option */}
@@ -666,7 +836,7 @@ export default function QuickBookingConfirm() {
                   </div>
                 </div>
 
-                {/* Promo Code Section */}
+                {/* Promo Code */}
                 <div className="space-y-2">
                   <Label htmlFor="promoCode" className="flex items-center gap-2">
                     <Tag className="h-4 w-4" />
@@ -696,11 +866,6 @@ export default function QuickBookingConfirm() {
                       {t("qbDiscountApplied")}
                     </p>
                   )}
-                  {isPromoCodeValid === false && (
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      {t("qbInvalidPromoCode")}
-                    </p>
-                  )}
                 </div>
 
                 <div className="bg-primary/5 rounded p-3 text-sm">
@@ -718,13 +883,7 @@ export default function QuickBookingConfirm() {
               <>
                 <p className="text-sm text-muted-foreground mb-2">{t("qbYourTransferPrice")}</p>
                 <p className="text-4xl font-bold text-primary">
-                  {booking.price_currency === "EUR" && "€"}
-                  {booking.price_currency === "USD" && "$"}
-                  {booking.price_currency === "GBP" && "£"}
-                  {booking.price_currency === "TRY" && "₺"}
-                  {booking.price_currency === "AED" && "د.إ"}
-                  {booking.price_currency === "AUD" && "A$"}
-                  {booking.price}
+                  {currencySymbol}{selectedPrice}
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
                   {booking.price_currency}
@@ -735,13 +894,7 @@ export default function QuickBookingConfirm() {
                 <div className="flex justify-between items-center text-sm">
                   <span>{t("qbOutboundTransfer")}</span>
                   <span className="font-medium">
-                    {booking.price_currency === "EUR" && "€"}
-                    {booking.price_currency === "USD" && "$"}
-                    {booking.price_currency === "GBP" && "£"}
-                    {booking.price_currency === "TRY" && "₺"}
-                    {booking.price_currency === "AED" && "د.إ"}
-                    {booking.price_currency === "AUD" && "A$"}
-                    {booking.price}
+                    {currencySymbol}{selectedPrice}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
@@ -756,22 +909,10 @@ export default function QuickBookingConfirm() {
                   <span className="font-medium">
                     {isPromoCodeValid && getOriginalReturnPrice() && (
                       <span className="line-through text-muted-foreground mr-2">
-                        {booking.price_currency === "EUR" && "€"}
-                        {booking.price_currency === "USD" && "$"}
-                        {booking.price_currency === "GBP" && "£"}
-                        {booking.price_currency === "TRY" && "₺"}
-                        {booking.price_currency === "AED" && "د.إ"}
-                        {booking.price_currency === "AUD" && "A$"}
-                        {getOriginalReturnPrice()}
+                        {currencySymbol}{getOriginalReturnPrice()}
                       </span>
                     )}
-                    {booking.price_currency === "EUR" && "€"}
-                    {booking.price_currency === "USD" && "$"}
-                    {booking.price_currency === "GBP" && "£"}
-                    {booking.price_currency === "TRY" && "₺"}
-                    {booking.price_currency === "AED" && "د.إ"}
-                    {booking.price_currency === "AUD" && "A$"}
-                    {getReturnPrice()?.toFixed(0)}
+                    {currencySymbol}{getReturnPrice()?.toFixed(0)}
                   </span>
                 </div>
                 {isPromoCodeValid && getDiscountAmount() && (
@@ -781,13 +922,7 @@ export default function QuickBookingConfirm() {
                       {t("qbDiscountWithCode")} ({promoCode})
                     </span>
                     <span className="font-medium">
-                      -{booking.price_currency === "EUR" && "€"}
-                      {booking.price_currency === "USD" && "$"}
-                      {booking.price_currency === "GBP" && "£"}
-                      {booking.price_currency === "TRY" && "₺"}
-                      {booking.price_currency === "AED" && "د.إ"}
-                      {booking.price_currency === "AUD" && "A$"}
-                      {getDiscountAmount()?.toFixed(0)}
+                      -{currencySymbol}{getDiscountAmount()?.toFixed(0)}
                     </span>
                   </div>
                 )}
@@ -795,13 +930,7 @@ export default function QuickBookingConfirm() {
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">{t("qbTotal")}</span>
                     <span className="text-2xl font-bold text-primary">
-                      {booking.price_currency === "EUR" && "€"}
-                      {booking.price_currency === "USD" && "$"}
-                      {booking.price_currency === "GBP" && "£"}
-                      {booking.price_currency === "TRY" && "₺"}
-                      {booking.price_currency === "AED" && "د.إ"}
-                      {booking.price_currency === "AUD" && "A$"}
-                      {getTotalPrice()?.toFixed(0)}
+                      {currencySymbol}{getTotalPrice()?.toFixed(0)}
                     </span>
                   </div>
                 </div>
@@ -809,7 +938,7 @@ export default function QuickBookingConfirm() {
             )}
           </div>
 
-          {/* Payment Method Selection */}
+          {/* Payment Method */}
           <div className="bg-muted/50 rounded-lg p-4 mb-6">
             <Label className="text-base font-medium mb-4 block">{t("qbPaymentMethod")}</Label>
             <RadioGroup

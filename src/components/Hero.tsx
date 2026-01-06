@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare, Phone, Mail, Tag, CheckCircle, XCircle } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, Car, Users, Loader2, ArrowLeftRight, Coins, Briefcase, MessageSquare, Phone, Mail, Tag, CheckCircle, XCircle, Baby, AlertCircle } from "lucide-react";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -29,110 +29,7 @@ import {
   CarouselDots,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-
-// Vehicle images - only landscape orientation images
-import vitoAirportAnime from "@/assets/vito-airport-anime.jpg";
-import vitoAirportWelcome from "@/assets/vito-airport-welcome.jpg";
-import vitoCappadociaBalloon from "@/assets/vito-cappadocia-balloon.jpg";
-import vitoFamilyInterior from "@/assets/vito-family-interior.jpg";
-import vitoInteriorLeather from "@/assets/vito-interior-leather.jpg";
-import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
-import vitoPassengerOrange from "@/assets/vito-passenger-orange.jpg";
-import vitoExteriorOpendoor from "@/assets/vito-exterior-opendoor.jpg";
-import vitoPassengerNight from "@/assets/vito-passenger-night.jpg";
-import vitoPassengerCouple from "@/assets/vito-passenger-couple.jpg";
-import vitoVipPassengers1 from "@/assets/vito-vip-passengers-1.jpg";
-import vitoVipPassengers2 from "@/assets/vito-vip-passengers-2.jpg";
-import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
-import vitoVipStarlightRoof from "@/assets/vito-vip-starlight-roof.jpg";
-import vitoVipLuxuryWhite from "@/assets/vito-vip-luxury-white.jpg";
-import vitoVipCoupleStarlight from "@/assets/vito-vip-couple-starlight.jpg";
-import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
-import maybachInterior from "@/assets/maybach-interior-starlight.jpg";
-import maybachPassengersBlue from "@/assets/maybach-passengers-blue.jpg";
-import maybachInteriorPurple from "@/assets/maybach-interior-purple.jpg";
-import maybachInteriorOrange from "@/assets/maybach-interior-orange.jpg";
-import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
-import sprinterExteriorVip from "@/assets/sprinter-exterior-vip.jpg";
-import sprinterAirportFront from "@/assets/sprinter-airport-front.jpg";
-import sprinterInteriorGrey from "@/assets/sprinter-interior-grey.jpg";
-import sprinterInteriorTv from "@/assets/sprinter-interior-tv.jpg";
-import sprinterInteriorRed from "@/assets/sprinter-interior-red.jpg";
-import sprinterInteriorStarlight from "@/assets/sprinter-interior-starlight.jpg";
-import sprinterInteriorBlue from "@/assets/sprinter-interior-blue.jpg";
-import sprinterExteriorDark from "@/assets/sprinter-exterior-dark.jpg";
-import sprinterInteriorNeon from "@/assets/sprinter-interior-neon.jpg";
-import sprinterAirportNight from "@/assets/sprinter-airport-night.jpg";
-import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
-import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
-
-// Vehicle data with images and SEO-friendly alt texts - landscape only
-const vehicleImageData: Record<string, { images: { src: string; alt: string }[]; passengers: number; luggage: number }> = {
-  "mercedes-vito": {
-    images: [
-      { src: vitoAirportAnime, alt: "Mercedes Vito private transfer at airport terminal" },
-      { src: vitoAirportWelcome, alt: "Mercedes Vito airport pickup with welcome service" },
-      { src: meetTransferCyprus, alt: "Meet Transfer VIP service in Cyprus" },
-      { src: vitoCappadociaBalloon, alt: "Mercedes Vito transfer to Cappadocia hot air balloons" },
-      { src: vitoFamilyInterior, alt: "Mercedes Vito spacious family interior with leather seats" },
-      { src: vitoInteriorLeather, alt: "Mercedes Vito premium leather interior detail" },
-      { src: meetTransferDubai, alt: "Meet Transfer luxury service in Dubai" },
-      { src: vitoExteriorBlack, alt: "Mercedes Vito black exterior professional transfer" },
-      { src: vitoPassengerOrange, alt: "Mercedes Vito passengers enjoying comfortable ride" },
-      { src: vitoExteriorOpendoor, alt: "Mercedes Vito with open door welcoming passengers" },
-      { src: vitoPassengerNight, alt: "Mercedes Vito night transfer service with ambient lighting" },
-      { src: vitoPassengerCouple, alt: "Mercedes Vito romantic transfer for couples" },
-    ],
-    passengers: 6,
-    luggage: 6,
-  },
-  "mercedes-vclass": {
-    images: [
-      { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple starlight roof interior" },
-      { src: meetTransferDubai, alt: "Meet Transfer VIP service in Dubai UAE" },
-      { src: vitoVipStarlightRoof, alt: "Mercedes VIP Vito starlight ceiling ambient lighting" },
-      { src: vitoVipPassengers1, alt: "VIP passengers enjoying Mercedes Vito luxury transfer" },
-      { src: vitoVipLuxuryWhite, alt: "Mercedes VIP Vito white leather luxury interior" },
-      { src: meetTransferCyprus, alt: "Meet Transfer VIP chauffeur service Cyprus" },
-      { src: vitoVipCoupleStarlight, alt: "Couple enjoying Mercedes VIP Vito starlight transfer" },
-      { src: vitoVipPassengers2, alt: "Business travelers in Mercedes VIP Vito" },
-      { src: vitoVipPassengersDay, alt: "Mercedes VIP Vito daytime luxury transfer service" },
-    ],
-    passengers: 5,
-    luggage: 5,
-  },
-  "maybach": {
-    images: [
-      { src: meetTransferCyprus, alt: "Meet Transfer Maybach service in Cyprus" },
-      { src: maybachInterior, alt: "Mercedes Maybach starlight ceiling luxury interior" },
-      { src: maybachPassengersBlue, alt: "VIP passengers in Mercedes Maybach blue ambient lighting" },
-      { src: meetTransferDubai, alt: "Meet Transfer Maybach luxury service Dubai" },
-      { src: maybachInteriorPurple, alt: "Mercedes Maybach purple starlight ceiling with TV entertainment" },
-      { src: maybachInteriorOrange, alt: "Mercedes Maybach orange leather interior with starlight roof" },
-    ],
-    passengers: 4,
-    luggage: 4,
-  },
-  "minibus": {
-    images: [
-      { src: sprinterExteriorVip, alt: "Mercedes Sprinter VIP exterior luxury design" },
-      { src: sprinterInteriorGrey, alt: "Mercedes Sprinter grey leather interior design" },
-      { src: meetTransferDubai, alt: "Meet Transfer Sprinter minibus Dubai" },
-      { src: sprinterInteriorTv, alt: "Mercedes Sprinter entertainment TV system" },
-      { src: sprinterLuggage, alt: "Mercedes Sprinter large luggage capacity for groups" },
-      { src: sprinterInteriorRed, alt: "Mercedes Sprinter red ambient lighting interior" },
-      { src: sprinterInteriorStarlight, alt: "Mercedes Sprinter starlight ceiling luxury" },
-      { src: meetTransferCyprus, alt: "Meet Transfer Sprinter minibus Cyprus" },
-      { src: sprinterInteriorBlue, alt: "Mercedes Sprinter blue LED interior lighting" },
-      { src: sprinterExteriorDark, alt: "Mercedes Sprinter black exterior professional service" },
-      { src: sprinterAirportFront, alt: "Mercedes Sprinter airport transfer front view" },
-      { src: sprinterInteriorNeon, alt: "Mercedes Sprinter neon interior party atmosphere" },
-      { src: sprinterAirportNight, alt: "Mercedes Sprinter night airport transfer service" },
-    ],
-    passengers: 16,
-    luggage: 16,
-  },
-};
+import { VEHICLE_TYPES, getAvailableVehicles, isMinibusRequired, VEHICLE_TYPE_MAP } from "@/lib/vehicleTypes";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -147,13 +44,6 @@ const generateTimeOptions = () => {
 };
 
 const timeOptions = generateTimeOptions();
-
-const vehicleTypes = [
-  { value: 'mercedes-vito', label: 'Mercedes Vito' },
-  { value: 'mercedes-vclass', label: 'VIP Vito' },
-  { value: 'maybach', label: 'Maybach Minivan' },
-  { value: 'minibus', label: 'Minibus' },
-];
 
 const getSessionId = () => {
   let sessionId = localStorage.getItem('quick_booking_session_id');
@@ -179,6 +69,8 @@ export const Hero = () => {
   const [time, setTime] = useState("");
   const [vehicleType, setVehicleType] = useState("mercedes-vito");
   const [passengers, setPassengers] = useState("1");
+  const [luggageCount, setLuggageCount] = useState("1");
+  const [babySeatCount, setBabySeatCount] = useState("0");
   const [preferredCurrency, setPreferredCurrency] = useState("EUR");
   const [submitting, setSubmitting] = useState(false);
   
@@ -189,6 +81,22 @@ export const Hero = () => {
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [phoneError, setPhoneError] = useState(false);
+
+  // Computed: available vehicles based on passengers and luggage
+  const passengerNum = parseInt(passengers) || 1;
+  const luggageNum = parseInt(luggageCount) || 1;
+  const availableVehicles = getAvailableVehicles(passengerNum, luggageNum);
+  const minibusRequired = isMinibusRequired(passengerNum, luggageNum);
+
+  // Auto-select minibus if required
+  useEffect(() => {
+    if (minibusRequired && vehicleType !== 'minibus') {
+      setVehicleType('minibus');
+    }
+  }, [minibusRequired, vehicleType]);
+
+  // Get current vehicle info
+  const currentVehicle = VEHICLE_TYPE_MAP[vehicleType];
   
   // Promo code state for return trip
   const [promoCode, setPromoCode] = useState("");
@@ -314,7 +222,9 @@ export const Hero = () => {
         pickup_date: format(date, "yyyy-MM-dd"),
         pickup_time: time,
         vehicle_type: vehicleType,
-        passengers: parseInt(passengers),
+        passengers: passengerNum,
+        luggage_count: luggageNum,
+        baby_seat_count: parseInt(babySeatCount) || 0,
         customer_session_id: sessionId,
         price_currency: preferredCurrency,
         customer_notes: customerNotes.trim() || null,
@@ -489,19 +399,29 @@ export const Hero = () => {
                 </div>
               </div>
 
-              {/* Vehicle & Passengers */}
+              {/* Vehicle Selection */}
               <div className="relative">
                 <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("vehicleType")}</label>
-                <Select value={vehicleType} onValueChange={setVehicleType}>
+                {minibusRequired && (
+                  <div className="flex items-center gap-2 text-amber-300 text-xs mb-2 bg-amber-500/20 p-2 rounded-lg">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{t("minibusRequiredInfo") || "For 7+ passengers or luggage, only Minibus is available"}</span>
+                  </div>
+                )}
+                <Select value={vehicleType} onValueChange={setVehicleType} disabled={minibusRequired}>
                   <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
                     <div className="flex items-center"><Car className="mr-2 h-5 w-5 text-primary" /><SelectValue placeholder={t("selectVehicle")} /></div>
                   </SelectTrigger>
-                  <SelectContent className="bg-white z-50">{vehicleTypes.map((v) => <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>)}</SelectContent>
+                  <SelectContent className="bg-white z-50">
+                    {availableVehicles.map((v) => (
+                      <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
 
               {/* Vehicle Image Carousel */}
-              {vehicleType && vehicleImageData[vehicleType] && (
+              {vehicleType && currentVehicle && (
                 <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                   <Carousel 
                     className="w-full"
@@ -516,7 +436,7 @@ export const Hero = () => {
                     }}
                   >
                     <CarouselContent>
-                      {vehicleImageData[vehicleType].images.map((img, idx) => (
+                      {currentVehicle.images.map((img, idx) => (
                         <CarouselItem key={idx}>
                           <div className="overflow-hidden rounded-xl aspect-[4/3] bg-black/20">
                             <img
@@ -537,16 +457,17 @@ export const Hero = () => {
                   <div className="flex justify-center gap-6 text-sm text-white/90">
                     <div className="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full">
                       <Users className="h-4 w-4" />
-                      <span>{vehicleImageData[vehicleType].passengers} {t("passengers")}</span>
+                      <span>{currentVehicle.passengers} {t("passengers")}</span>
                     </div>
                     <div className="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full">
                       <Briefcase className="h-4 w-4" />
-                      <span>{vehicleImageData[vehicleType].luggage} {t("luggage") || "Luggage"}</span>
+                      <span>{currentVehicle.luggage} {t("luggage") || "Luggage"}</span>
                     </div>
                   </div>
                 </div>
               )}
 
+              {/* Passengers */}
               <div className="relative">
                 <label className="text-white/90 text-sm font-medium mb-2 block text-left">{t("passengers")}</label>
                 <Select value={passengers} onValueChange={setPassengers}>
@@ -555,6 +476,42 @@ export const Hero = () => {
                   </SelectTrigger>
                   <SelectContent className="bg-white z-50 max-h-[300px]">{Array.from({ length: 19 }, (_, i) => i + 1).map((num) => <SelectItem key={num} value={num.toString()}>{num} {num === 1 ? t("passenger") : t("passengers")}</SelectItem>)}</SelectContent>
                 </Select>
+              </div>
+
+              {/* Luggage & Baby Seat */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="relative">
+                  <label className="text-white/90 text-sm font-medium mb-2 block text-left flex items-center gap-2">
+                    <Briefcase className="h-4 w-4 text-accent" />
+                    {t("luggageCount") || "Luggage"}
+                  </label>
+                  <Select value={luggageCount} onValueChange={setLuggageCount}>
+                    <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
+                      <SelectValue placeholder={t("selectLuggage") || "Luggage"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white z-50 max-h-[300px]">
+                      {Array.from({ length: 20 }, (_, i) => i).map((num) => (
+                        <SelectItem key={num} value={num.toString()}>{num} {t("luggage") || "Luggage"}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="relative">
+                  <label className="text-white/90 text-sm font-medium mb-2 block text-left flex items-center gap-2">
+                    <Baby className="h-4 w-4 text-accent" />
+                    {t("babySeat") || "Baby Seat"}
+                  </label>
+                  <Select value={babySeatCount} onValueChange={setBabySeatCount}>
+                    <SelectTrigger className="w-full h-12 bg-white border-0 text-foreground rounded-lg shadow-md">
+                      <SelectValue placeholder={t("selectBabySeat") || "Baby Seat"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white z-50">
+                      {Array.from({ length: 4 }, (_, i) => i).map((num) => (
+                        <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Return Trip Option */}
