@@ -688,6 +688,10 @@ export default function QuickBookingConfirm() {
                   const isSelected = (selectedVehicle || booking.vehicle_type) === vehicle.vehicleType;
                   const vehicleInfo = VEHICLE_TYPE_MAP[vehicle.vehicleType];
                   
+                  // Get first image or fallback
+                  const vehicleImage = vehicleInfo?.images?.[0]?.src;
+                  const vehicleAlt = vehicleInfo?.images?.[0]?.alt || vehicle.vehicleLabel;
+                  
                   return (
                     <div
                       key={vehicle.vehicleType}
@@ -704,19 +708,23 @@ export default function QuickBookingConfirm() {
                     >
                       <div className="flex items-start gap-4">
                         {/* Vehicle Image */}
-                        {vehicleInfo && (
-                          <div className="w-24 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                        <div className="w-24 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                          {vehicleImage ? (
                             <img
-                              src={vehicleInfo.images[0]?.src}
-                              alt={vehicle.vehicleLabel}
+                              src={vehicleImage}
+                              alt={vehicleAlt}
                               className="w-full h-full object-cover"
                             />
-                          </div>
-                        )}
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-muted">
+                              <Car className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-semibold">{vehicle.vehicleLabel}</h4>
+                            <h4 className="font-semibold">{vehicleInfo?.label || vehicle.vehicleLabel}</h4>
                             {vehicle.available && vehicle.price ? (
                               <span className="text-xl font-bold text-primary">
                                 {currencySymbol}{vehicle.price}
@@ -731,11 +739,11 @@ export default function QuickBookingConfirm() {
                           <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Users className="h-4 w-4" />
-                              {vehicle.passengers} {t("passengers")}
+                              {vehicleInfo?.passengers || vehicle.passengers} {t("passengers")}
                             </span>
                             <span className="flex items-center gap-1">
                               <Briefcase className="h-4 w-4" />
-                              {vehicle.luggage} {t("luggage") || "luggage"}
+                              {vehicleInfo?.luggage || vehicle.luggage} {t("luggage") || "luggage"}
                             </span>
                           </div>
                         </div>
