@@ -28,9 +28,9 @@ const reservationSchema = z.object({
 
 // Vehicle types without prices - prices set by admin
 const vehicleTypes = [
-  { value: 'mercedes-vito', label: 'Mercedes Vito' },
-  { value: 'mercedes-vclass', label: 'Mercedes Vip Vito' },
-  { value: 'maybach', label: 'Maybach' },
+  { value: 'mercedes-vito', label: 'Mercedes-vito' },
+  { value: 'vip-mercedes', label: 'Vip Mercedes' },
+  { value: 'maybach-minibus', label: 'Maybach Minibus' },
   { value: 'minibus', label: 'Minibus' },
 ];
 

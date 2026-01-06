@@ -17,10 +17,13 @@ import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
 
 const vehicleTypeLabels: Record<string, string> = {
-  'mercedes-vito': 'Mercedes Vito',
-  'mercedes-vclass': 'Mercedes Vip Vito',
-  'maybach': 'Maybach',
+  'mercedes-vito': 'Mercedes-vito',
+  'vip-mercedes': 'Vip Mercedes',
+  'maybach-minibus': 'Maybach Minibus',
   'minibus': 'Minibus',
+  // Legacy support
+  'mercedes-vclass': 'Vip Mercedes',
+  'maybach': 'Maybach Minibus',
 };
 
 interface Reservation {

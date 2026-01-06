@@ -73,6 +73,8 @@ interface QuickBookingRequest {
   pickup_time: string;
   vehicle_type: string;
   passengers: number;
+  luggage_count: number | null;
+  baby_seat_count: number | null;
   status: string;
   price: number | null;
   price_currency: string;
@@ -100,10 +102,13 @@ interface QuickBookingRequest {
 }
 
 const vehicleLabels: Record<string, string> = {
-  "mercedes-vito": "Vito",
+  "mercedes-vito": "Mercedes-vito",
+  "vip-mercedes": "Vip Mercedes",
+  "maybach-minibus": "Maybach Minibus",
+  minibus: "Minibus",
+  // Legacy support
   "mercedes-vclass": "VIP Vito",
   maybach: "Maybach",
-  minibus: "Minibus",
 };
 
 const statusConfig: Record<string, { color: string; bgColor: string; label: string; icon: any }> = {
@@ -585,10 +590,16 @@ export default function AdminQuickBookings() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Car className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-sm">{vehicleLabels[request.vehicle_type] || request.vehicle_type}</span>
-                              <span className="text-xs text-muted-foreground">({request.passengers})</span>
+                            <div className="flex flex-col text-sm">
+                              <div className="flex items-center gap-1">
+                                <Car className="h-3 w-3 text-muted-foreground" />
+                                <span>{vehicleLabels[request.vehicle_type] || request.vehicle_type}</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {request.passengers} yolcu
+                                {request.luggage_count ? ` • ${request.luggage_count} valiz` : ''}
+                                {request.baby_seat_count ? ` • ${request.baby_seat_count} 👶` : ''}
+                              </span>
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
@@ -656,14 +667,18 @@ export default function AdminQuickBookings() {
                       </div>
 
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Car className="h-3 w-3" />
                             {vehicleLabels[request.vehicle_type] || request.vehicle_type}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {request.passengers}
+                          <span className="flex items-center gap-2">
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              {request.passengers}
+                            </span>
+                            {request.luggage_count ? <span>🧳 {request.luggage_count}</span> : null}
+                            {request.baby_seat_count ? <span>👶 {request.baby_seat_count}</span> : null}
                           </span>
                         </div>
                         {request.price && (
@@ -751,7 +766,11 @@ export default function AdminQuickBookings() {
                         <Car className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="font-medium">{vehicleLabels[selectedRequest.vehicle_type] || selectedRequest.vehicle_type}</p>
-                          <p className="text-xs text-muted-foreground">{selectedRequest.passengers} yolcu</p>
+                          <p className="text-xs text-muted-foreground">
+                            {selectedRequest.passengers} yolcu
+                            {selectedRequest.luggage_count ? ` • ${selectedRequest.luggage_count} valiz` : ''}
+                            {selectedRequest.baby_seat_count ? ` • ${selectedRequest.baby_seat_count} bebek koltuğu` : ''}
+                          </p>
                         </div>
                       </div>
                     </CardContent>

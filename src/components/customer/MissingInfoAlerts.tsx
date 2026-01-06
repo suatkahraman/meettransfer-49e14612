@@ -18,10 +18,13 @@ interface MissingInfoAlertsProps {
 const getExpectedPassengers = (vehicleType: string): number => {
   switch (vehicleType) {
     case 'mercedes-vito':
-    case 'mercedes-vclass':
       return 6;
-    case 'maybach':
-      return 3;
+    case 'vip-mercedes':
+    case 'mercedes-vclass': // Legacy
+      return 5;
+    case 'maybach-minibus':
+    case 'maybach': // Legacy
+      return 4;
     case 'minibus':
       return 12;
     default:
