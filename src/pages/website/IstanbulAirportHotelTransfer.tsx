@@ -9,12 +9,12 @@ import { Link } from "react-router-dom";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const prices = [
-  { from: "Istanbul Airport", to: "Taksim Hotels", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Sultanahmet Hotels", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Beşiktaş Hotels", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Galataport Hotels", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Kadıköy Hotels", price: "Request Price" },
-  { from: "Istanbul Airport", to: "Sisli Hotels", price: "Request Price" },
+  { from: "Istanbul Airport", to: "Taksim Hotels", price: "From €50" },
+  { from: "Istanbul Airport", to: "Sultanahmet Hotels", price: "From €50" },
+  { from: "Istanbul Airport", to: "Beşiktaş Hotels", price: "From €50" },
+  { from: "Istanbul Airport", to: "Galataport Hotels", price: "From €50" },
+  { from: "Istanbul Airport", to: "Kadıköy Hotels", price: "From €65" },
+  { from: "Istanbul Airport", to: "Sisli Hotels", price: "From €50" },
 ];
 
 const faqItems = [
@@ -29,7 +29,7 @@ const IstanbulAirportHotelTransfer = () => {
     <WebsiteLayout>
       <SEOHead
         title="Istanbul Airport to Hotel Transfer | Direct Door-to-Door Service | Meet Transfer"
-        description="Book Istanbul Airport to hotel private transfer from $45. Direct delivery to Taksim, Sultanahmet & all Istanbul hotels. Meet & greet, fixed prices. Book now!"
+        description="Book Istanbul Airport to hotel private transfer from €50. Direct delivery to Taksim, Sultanahmet & all Istanbul hotels. Meet & greet, fixed prices. Book now!"
         keywords="Istanbul Airport hotel transfer, IST to hotel, Istanbul Airport to Taksim hotel, airport hotel shuttle Istanbul, Istanbul hotel pickup"
         canonicalPath="/istanbul-airport-hotel-transfer"
       />

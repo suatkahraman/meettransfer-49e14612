@@ -9,11 +9,11 @@ import { Link } from "react-router-dom";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const prices = [
-  { from: "IST Airport", to: "Taksim VIP", price: "Request Price" },
-  { from: "IST Airport", to: "Sultanahmet VIP", price: "Request Price" },
-  { from: "IST Airport", to: "Nişantaşı VIP", price: "Request Price" },
-  { from: "IST Airport", to: "Levent VIP", price: "Request Price" },
-  { from: "IST Airport", to: "Maslak VIP", price: "Request Price" },
+  { from: "IST Airport", to: "Taksim VIP", price: "From €55" },
+  { from: "IST Airport", to: "Sultanahmet VIP", price: "From €55" },
+  { from: "IST Airport", to: "Nişantaşı VIP", price: "From €55" },
+  { from: "IST Airport", to: "Levent VIP", price: "From €55" },
+  { from: "IST Airport", to: "Maslak VIP", price: "From €60" },
 ];
 
 const faqItems = [
@@ -28,7 +28,7 @@ const IstCityCenterVipTransfer = () => {
     <WebsiteLayout>
       <SEOHead
         title="IST City Center VIP Transfer | Luxury Airport Service Istanbul | Meet Transfer"
-        description="Book IST Airport VIP transfer to Istanbul city center from $50. Premium Mercedes, professional chauffeur, executive service. Corporate accounts available."
+        description="Book IST Airport VIP transfer to Istanbul city center from €55. Premium Mercedes, professional chauffeur, executive service. Corporate accounts available."
         keywords="IST VIP transfer, Istanbul Airport VIP, luxury airport transfer Istanbul, executive transfer IST, business transfer Istanbul Airport"
         canonicalPath="/ist-city-center-vip-transfer"
       />

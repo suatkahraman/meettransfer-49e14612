@@ -19,19 +19,24 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "IST Airport", to: "Taksim", price: "Request Price" },
-  { from: "IST Airport", to: "Sultanahmet", price: "Request Price" },
-  { from: "IST Airport", to: "Beşiktaş", price: "Request Price" },
-  { from: "IST Airport", to: "Levent", price: "Request Price" },
-  { from: "IST Airport", to: "Kadıköy", price: "Request Price" },
-  { from: "IST Airport", to: "Üsküdar", price: "Request Price" },
-  { from: "IST Airport", to: "Galataport", price: "Request Price" },
-  { from: "SAW Airport", to: "Taksim", price: "Request Price" },
-  { from: "SAW Airport", to: "Sultanahmet", price: "Request Price" },
-  { from: "SAW Airport", to: "Beşiktaş", price: "Request Price" },
-  { from: "SAW Airport", to: "Kadıköy", price: "Request Price" },
-  { from: "SAW Airport", to: "Üsküdar", price: "Request Price" },
-  { from: "SAW Airport", to: "Galataport", price: "Request Price" },
+  { from: "IST Airport", to: "Taksim", price: "From €50" },
+  { from: "IST Airport", to: "Sultanahmet", price: "From €50" },
+  { from: "IST Airport", to: "Beşiktaş", price: "From €50" },
+  { from: "IST Airport", to: "Levent", price: "From €50" },
+  { from: "IST Airport", to: "Kadıköy", price: "From €65" },
+  { from: "IST Airport", to: "Üsküdar", price: "From €60" },
+  { from: "IST Airport", to: "Galataport", price: "From €50" },
+  { from: "SAW Airport", to: "Taksim", price: "From €65" },
+  { from: "SAW Airport", to: "Sultanahmet", price: "From €65" },
+  { from: "SAW Airport", to: "Beşiktaş", price: "From €65" },
+  { from: "SAW Airport", to: "Kadıköy", price: "From €45" },
+  { from: "SAW Airport", to: "Üsküdar", price: "From €45" },
+  { from: "IST Airport", to: "Bursa", price: "From €185" },
+  { from: "SAW Airport", to: "Bursa", price: "From €165" },
+  { from: "IST Airport", to: "Sapanca", price: "From €245" },
+  { from: "SAW Airport", to: "Sapanca", price: "From €225" },
+  { from: "IST Airport", to: "Kartepe", price: "From €255" },
+  { from: "SAW Airport", to: "Kartepe", price: "From €235" },
 ];
 
 const faqItems = [
@@ -101,7 +106,7 @@ const IstanbulTransfer = () => {
             name: 'Istanbul Airport Transfer Service',
             description: 'Premium VIP airport transfer from Istanbul Airport (IST) and Sabiha Gökçen (SAW)',
             image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
-            offers: { price: '45', priceCurrency: 'USD' },
+            offers: { price: '50', priceCurrency: 'EUR' },
           },
         ]}
       />

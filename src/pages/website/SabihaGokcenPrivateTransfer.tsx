@@ -9,17 +9,20 @@ import { Link } from "react-router-dom";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 
 const prices = [
-  { from: "Sabiha Gökçen", to: "Taksim", price: "Request Price" },
-  { from: "Sabiha Gökçen", to: "Sultanahmet", price: "Request Price" },
-  { from: "Sabiha Gökçen", to: "Kadıköy", price: "Request Price" },
-  { from: "Sabiha Gökçen", to: "Üsküdar", price: "Request Price" },
-  { from: "Sabiha Gökçen", to: "Beşiktaş", price: "Request Price" },
+  { from: "Sabiha Gökçen", to: "Taksim", price: "From €65" },
+  { from: "Sabiha Gökçen", to: "Sultanahmet", price: "From €65" },
+  { from: "Sabiha Gökçen", to: "Kadıköy", price: "From €45" },
+  { from: "Sabiha Gökçen", to: "Üsküdar", price: "From €45" },
+  { from: "Sabiha Gökçen", to: "Beşiktaş", price: "From €65" },
+  { from: "Sabiha Gökçen", to: "Bursa", price: "From €165" },
+  { from: "Sabiha Gökçen", to: "Sapanca", price: "From €225" },
+  { from: "Sabiha Gökçen", to: "Kartepe", price: "From €235" },
 ];
 
 const faqItems = [
   { question: "How far is Sabiha Gökçen from Istanbul center?", answer: "SAW is about 40 km from Taksim on the Asian side. Transfer takes 45-75 minutes depending on traffic." },
   { question: "Is Sabiha Gökçen cheaper than Istanbul Airport?", answer: "Flights to SAW can be cheaper, but it's farther from European Istanbul. Our fixed-price transfer makes it easy." },
-  { question: "Do you offer transfers to the Asian side from SAW?", answer: "Yes! SAW is ideal for Asian side destinations like Kadıköy ($35) and Üsküdar ($40) - much quicker than from IST." },
+  { question: "Do you offer transfers to the Asian side from SAW?", answer: "Yes! SAW is ideal for Asian side destinations like Kadıköy (€45) and Üsküdar (€45) - much quicker than from IST." },
   { question: "What about late night SAW arrivals?", answer: "We operate 24/7. Many budget airlines arrive late at SAW - we're always there for pickup." },
 ];
 
@@ -28,7 +31,7 @@ const SabihaGokcenPrivateTransfer = () => {
     <WebsiteLayout>
       <SEOHead
         title="Sabiha Gökçen Private Transfer | SAW Airport Shuttle Service | Meet Transfer"
-        description="Book Sabiha Gökçen Airport (SAW) private transfer from $35. Direct service to Taksim, Kadıköy & all Istanbul. Meet & greet, fixed prices. Book now!"
+        description="Book Sabiha Gökçen Airport (SAW) private transfer from €45. Direct service to Taksim, Kadıköy & all Istanbul. Meet & greet, fixed prices. Book now!"
         keywords="Sabiha Gökçen transfer, SAW airport transfer, Sabiha Gökçen taxi, SAW to Taksim, Sabiha Gökçen private transfer, SAW airport shuttle"
         canonicalPath="/sabiha-gokcen-private-transfer"
       />

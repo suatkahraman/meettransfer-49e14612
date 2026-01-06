@@ -29,20 +29,22 @@ const IstanbulTransferPriceGuide = () => {
   ];
 
   const priceData = [
-    { destination: "Taksim / Beyoğlu", taxi: "600-800 TL ($20-25)", private: "$55-65", bus: "150 TL ($5)" },
-    { destination: "Sultanahmet", taxi: "650-850 TL ($21-27)", private: "$55-65", bus: "150 TL ($5)" },
-    { destination: "Kadıköy", taxi: "800-1000 TL ($26-32)", private: "$70-85", bus: "180 TL ($6)" },
-    { destination: "Beşiktaş", taxi: "600-750 TL ($19-24)", private: "$55-65", bus: "150 TL ($5)" },
-    { destination: "Galataport Cruise Terminal", taxi: "600-800 TL ($20-25)", private: "$55-65", bus: "N/A" },
-    { destination: "Sabiha Gökçen Airport", taxi: "1500-2000 TL ($48-65)", private: "$120-150", bus: "N/A" },
-    { destination: "Bursa (via ferry)", taxi: "N/A", private: "$180-220", bus: "N/A" },
+    { destination: "Taksim / Beyoğlu", taxi: "600-800 TL ($20-25)", private: "€50-55", bus: "150 TL ($5)" },
+    { destination: "Sultanahmet", taxi: "650-850 TL ($21-27)", private: "€50-55", bus: "150 TL ($5)" },
+    { destination: "Kadıköy", taxi: "800-1000 TL ($26-32)", private: "€65-70", bus: "180 TL ($6)" },
+    { destination: "Beşiktaş", taxi: "600-750 TL ($19-24)", private: "€50-55", bus: "150 TL ($5)" },
+    { destination: "Galataport Cruise Terminal", taxi: "600-800 TL ($20-25)", private: "€50-55", bus: "N/A" },
+    { destination: "Sabiha Gökçen Airport", taxi: "1500-2000 TL ($48-65)", private: "€110-130", bus: "N/A" },
+    { destination: "Bursa (Osmangazi)", taxi: "N/A", private: "€185-195", bus: "N/A" },
+    { destination: "Sapanca", taxi: "N/A", private: "€245-255", bus: "N/A" },
+    { destination: "Kartepe Kayak Merkezi", taxi: "N/A", private: "€255-275", bus: "N/A" },
   ];
 
   const vehiclePrices = [
-    { vehicle: "Mercedes Vito (up to 6 pax)", toTaksim: "$55-65", toKadikoy: "$70-85", toBursa: "$180-220" },
-    { vehicle: "Mercedes V-Class VIP (up to 6 pax)", toTaksim: "$75-90", toKadikoy: "$90-110", toBursa: "$220-280" },
-    { vehicle: "Mercedes Maybach (up to 3 pax)", toTaksim: "$150-200", toKadikoy: "$180-220", toBursa: "$350-450" },
-    { vehicle: "Mercedes Sprinter (up to 16 pax)", toTaksim: "$120-150", toKadikoy: "$140-180", toBursa: "$300-380" },
+    { vehicle: "Mercedes Vito (up to 6 pax)", toTaksim: "€50", toKadikoy: "€65", toBursa: "€185" },
+    { vehicle: "Mercedes Vito VIP (up to 6 pax)", toTaksim: "€55", toKadikoy: "€70", toBursa: "€195" },
+    { vehicle: "Mercedes Maybach (up to 3 pax)", toTaksim: "€65", toKadikoy: "€80", toBursa: "€210" },
+    { vehicle: "Mercedes Sprinter (up to 16 pax)", toTaksim: "€85", toKadikoy: "€105", toBursa: "€220" },
   ];
 
   return (
