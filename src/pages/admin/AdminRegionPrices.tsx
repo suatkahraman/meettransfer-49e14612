@@ -75,10 +75,12 @@ const CITIES_DATA = {
   }
 };
 
+// Vehicle types - synced with src/lib/vehicleTypes.ts
 const VEHICLE_TYPES = [
   { value: 'mercedes-vito', label: 'Mercedes Vito' },
-  { value: 'mercedes-sprinter', label: 'Mercedes Sprinter' },
-  { value: 'mercedes-maybach', label: 'Mercedes Maybach' },
+  { value: 'mercedes-vclass', label: 'VIP Vito' },
+  { value: 'maybach', label: 'Maybach Minivan' },
+  { value: 'minibus', label: 'Minibus' },
 ];
 
 const CURRENCIES = [

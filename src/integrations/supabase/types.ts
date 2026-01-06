@@ -865,6 +865,7 @@ export type Database = {
           admin_message: string | null
           agency_id: string | null
           agency_user_id: string | null
+          baby_seat_count: number | null
           confirmation_token: string
           confirmed_at: string | null
           created_at: string | null
@@ -877,6 +878,7 @@ export type Database = {
           expires_at: string | null
           has_return_trip: boolean | null
           id: string
+          luggage_count: number | null
           passengers: number
           payment_link: string | null
           payment_method: string | null
@@ -897,6 +899,7 @@ export type Database = {
           admin_message?: string | null
           agency_id?: string | null
           agency_user_id?: string | null
+          baby_seat_count?: number | null
           confirmation_token?: string
           confirmed_at?: string | null
           created_at?: string | null
@@ -909,6 +912,7 @@ export type Database = {
           expires_at?: string | null
           has_return_trip?: boolean | null
           id?: string
+          luggage_count?: number | null
           passengers?: number
           payment_link?: string | null
           payment_method?: string | null
@@ -929,6 +933,7 @@ export type Database = {
           admin_message?: string | null
           agency_id?: string | null
           agency_user_id?: string | null
+          baby_seat_count?: number | null
           confirmation_token?: string
           confirmed_at?: string | null
           created_at?: string | null
@@ -941,6 +946,7 @@ export type Database = {
           expires_at?: string | null
           has_return_trip?: boolean | null
           id?: string
+          luggage_count?: number | null
           passengers?: number
           payment_link?: string | null
           payment_method?: string | null
