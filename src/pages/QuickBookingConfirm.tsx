@@ -676,48 +676,87 @@ export default function QuickBookingConfirm() {
   // Preparing Best Price Animation - MUST be checked first before loading
   if (showPriceAnimation) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-green-500/5 to-background p-4">
-        <Card className="max-w-lg w-full overflow-hidden relative">
-          {/* Animated gradient border */}
-          <div className="absolute inset-0 bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 opacity-20 animate-pulse" />
-          <CardContent className="pt-8 pb-8 relative">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950/30 dark:via-green-950/30 dark:to-teal-950/30 p-4 overflow-hidden">
+        {/* Animated background particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 rounded-full bg-green-400/30 animate-ping"
+              style={{
+                left: `${15 + i * 15}%`,
+                top: `${20 + (i % 3) * 25}%`,
+                animationDelay: `${i * 0.3}s`,
+                animationDuration: '2s',
+              }}
+            />
+          ))}
+        </div>
+        
+        <Card className="max-w-md w-full overflow-hidden relative border-0 shadow-2xl">
+          {/* Animated gradient border effect */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-xl opacity-75 blur-sm animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-xl opacity-20" />
+          
+          <CardContent className="pt-10 pb-10 relative bg-background/95 backdrop-blur-sm rounded-xl m-0.5">
             <div className="text-center">
-              {/* Animated icon container */}
-              <div className="relative mx-auto mb-6 w-24 h-24">
-                {/* Outer rotating ring */}
-                <div className="absolute inset-0 rounded-full border-4 border-green-200 dark:border-green-800 animate-spin" style={{ animationDuration: '3s' }} />
-                {/* Middle pulsing ring */}
-                <div className="absolute inset-2 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 animate-pulse" />
-                {/* Inner icon */}
-                <div className="absolute inset-4 rounded-full bg-background flex items-center justify-center shadow-lg">
-                  <Sparkles className="h-10 w-10 text-green-500 animate-bounce" />
+              {/* Premium animated icon */}
+              <div className="relative mx-auto mb-8 w-28 h-28">
+                {/* Outer glow */}
+                <div className="absolute -inset-4 bg-green-400/20 rounded-full blur-xl animate-pulse" />
+                {/* Rotating outer ring */}
+                <div 
+                  className="absolute inset-0 rounded-full border-4 border-dashed border-green-300 dark:border-green-700"
+                  style={{ animation: 'spin 8s linear infinite' }}
+                />
+                {/* Counter-rotating middle ring */}
+                <div 
+                  className="absolute inset-2 rounded-full border-2 border-emerald-400 dark:border-emerald-600"
+                  style={{ animation: 'spin 4s linear infinite reverse' }}
+                />
+                {/* Pulsing gradient fill */}
+                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-green-400 via-emerald-500 to-teal-500 animate-pulse shadow-lg" />
+                {/* Center icon */}
+                <div className="absolute inset-6 rounded-full bg-background flex items-center justify-center shadow-inner">
+                  <Sparkles className="h-10 w-10 text-emerald-500" style={{ animation: 'bounce 1s ease-in-out infinite' }} />
                 </div>
               </div>
               
-              {/* Main title with gradient */}
-              <h1 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+              {/* Main title with shimmer effect */}
+              <h1 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_2s_linear_infinite]">
                 {t("preparingBestPrice")}
               </h1>
               
               {/* Subtitle */}
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-8 text-sm">
                 {t("preparingBestPriceDesc")}
               </p>
               
-              {/* Loading dots animation */}
-              <div className="flex justify-center gap-2 mb-6">
-                <div className="w-3 h-3 rounded-full bg-green-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-3 h-3 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-3 h-3 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+              {/* Progress bar animation */}
+              <div className="w-full max-w-xs mx-auto mb-6">
+                <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-full"
+                    style={{
+                      animation: 'progressSlide 3.5s ease-out forwards'
+                    }}
+                  />
+                </div>
               </div>
               
-              {/* Feature badges */}
+              {/* Feature badges with stagger animation */}
               <div className="flex flex-wrap justify-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium">
+                <span 
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-sm font-medium shadow-sm"
+                  style={{ animation: 'fadeInUp 0.5s ease-out 0.3s both' }}
+                >
                   <CheckCircle2 className="h-4 w-4" />
                   {t("bestPriceGuarantee")}
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-medium">
+                <span 
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-sm font-medium shadow-sm"
+                  style={{ animation: 'fadeInUp 0.5s ease-out 0.5s both' }}
+                >
                   <ThumbsUp className="h-4 w-4" />
                   {t("noHiddenFees")}
                 </span>
@@ -725,6 +764,22 @@ export default function QuickBookingConfirm() {
             </div>
           </CardContent>
         </Card>
+        
+        {/* Custom keyframes */}
+        <style>{`
+          @keyframes shimmer {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+          }
+          @keyframes progressSlide {
+            0% { width: 0%; }
+            100% { width: 100%; }
+          }
+          @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
       </div>
     );
   }
