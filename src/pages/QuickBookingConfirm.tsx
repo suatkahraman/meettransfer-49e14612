@@ -125,6 +125,10 @@ export default function QuickBookingConfirm() {
   const [isDiscountedOffer, setIsDiscountedOffer] = useState(false);
   const [discountJustApplied, setDiscountJustApplied] = useState(false);
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
+  const [previousVehiclePrices, setPreviousVehiclePrices] = useState<Record<string, number>>({});
+  
+  // Best price preparing animation state
+  const [showPriceAnimation, setShowPriceAnimation] = useState(false);
   
   // All vehicle prices
   const [allVehiclePrices, setAllVehiclePrices] = useState<VehiclePriceInfo[]>([]);
@@ -231,10 +235,15 @@ export default function QuickBookingConfirm() {
           const newData = payload.new as BookingRequest;
           
           if (newData.status === "price_sent" && newData.price) {
-            toast.success("New price received! You can now review and confirm.");
-            setBooking(newData);
-            setWaitingForPrice(false);
-            setError(null);
+            // Show preparing animation for 3 seconds before revealing price
+            setShowPriceAnimation(true);
+            setTimeout(() => {
+              setShowPriceAnimation(false);
+              toast.success(t("qbNewPriceReceived") || "New price received! You can now review and confirm.");
+              setBooking(newData);
+              setWaitingForPrice(false);
+              setError(null);
+            }, 3000);
           } else if (newData.status === "rejected") {
             setError("This booking has been rejected");
             setWaitingForPrice(false);
@@ -553,8 +562,13 @@ export default function QuickBookingConfirm() {
               `Fiyat indirildi! Yeni fiyat: ${currencySymbol}${newPrice}`
             );
             
-            // Store previous price for animation
+            // Store previous prices for animation (including all vehicles)
             setPreviousPrice(oldPrice);
+            const oldPricesMap: Record<string, number> = {};
+            allVehiclePrices.forEach(v => {
+              if (v.price) oldPricesMap[v.vehicleType] = v.price;
+            });
+            setPreviousVehiclePrices(oldPricesMap);
             setDiscountJustApplied(true);
             
             // Update booking state with new price
@@ -584,11 +598,12 @@ export default function QuickBookingConfirm() {
             setIsDiscountedOffer(true);
             setCanReject(false);
             
-            // Clear animation after 3 seconds
+            // Clear animation after 4 seconds
             setTimeout(() => {
               setDiscountJustApplied(false);
               setPreviousPrice(null);
-            }, 3000);
+              setPreviousVehiclePrices({});
+            }, 4000);
             
             return; // Don't proceed to waiting state
           }
@@ -670,6 +685,62 @@ export default function QuickBookingConfirm() {
   }
 
   if (!booking) return null;
+
+  // Preparing Best Price Animation
+  if (showPriceAnimation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-green-500/5 to-background p-4">
+        <Card className="max-w-lg w-full overflow-hidden relative">
+          {/* Animated gradient border */}
+          <div className="absolute inset-0 bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 opacity-20 animate-pulse" />
+          <CardContent className="pt-8 pb-8 relative">
+            <div className="text-center">
+              {/* Animated icon container */}
+              <div className="relative mx-auto mb-6 w-24 h-24">
+                {/* Outer rotating ring */}
+                <div className="absolute inset-0 rounded-full border-4 border-green-200 dark:border-green-800 animate-spin" style={{ animationDuration: '3s' }} />
+                {/* Middle pulsing ring */}
+                <div className="absolute inset-2 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 animate-pulse" />
+                {/* Inner icon */}
+                <div className="absolute inset-4 rounded-full bg-background flex items-center justify-center shadow-lg">
+                  <Sparkles className="h-10 w-10 text-green-500 animate-bounce" />
+                </div>
+              </div>
+              
+              {/* Main title with gradient */}
+              <h1 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+                {t("preparingBestPrice")}
+              </h1>
+              
+              {/* Subtitle */}
+              <p className="text-muted-foreground mb-6">
+                {t("preparingBestPriceDesc")}
+              </p>
+              
+              {/* Loading dots animation */}
+              <div className="flex justify-center gap-2 mb-6">
+                <div className="w-3 h-3 rounded-full bg-green-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-3 h-3 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-3 h-3 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+              
+              {/* Feature badges */}
+              <div className="flex flex-wrap justify-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium">
+                  <CheckCircle2 className="h-4 w-4" />
+                  {t("bestPriceGuarantee")}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-medium">
+                  <ThumbsUp className="h-4 w-4" />
+                  {t("noHiddenFees")}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Waiting for price state
   if (waitingForPrice) {
@@ -988,20 +1059,35 @@ export default function QuickBookingConfirm() {
                         
                         {/* Price Section - Full width at bottom */}
                         <div className={`
-                          mt-4 pt-3 border-t flex items-center justify-between
+                          mt-4 pt-3 border-t flex items-center justify-between transition-all duration-500
                           ${isSelected ? 'border-primary/20' : 'border-border/40'}
+                          ${discountJustApplied && previousVehiclePrices[vehicle.vehicleType] ? 'bg-green-50 dark:bg-green-900/20 rounded-lg px-2 -mx-2' : ''}
                         `}>
                           <span className="text-sm text-muted-foreground">
                             {t("qbOneWayPrice") || "One-way transfer"}
                           </span>
                           {vehicle.available && vehicle.price ? (
-                            <div className="text-right">
+                            <div className="text-right flex items-center gap-2">
+                              {/* Show old price strikethrough when discount just applied */}
+                              {discountJustApplied && previousVehiclePrices[vehicle.vehicleType] && previousVehiclePrices[vehicle.vehicleType] > vehicle.price && (
+                                <span className="text-lg line-through text-muted-foreground">
+                                  {currencySymbol}{previousVehiclePrices[vehicle.vehicleType]}
+                                </span>
+                              )}
                               <span className={`
-                                text-2xl sm:text-3xl font-extrabold tracking-tight
-                                ${isSelected ? 'text-primary' : 'text-foreground'}
+                                text-2xl sm:text-3xl font-extrabold tracking-tight transition-all duration-300
+                                ${discountJustApplied && previousVehiclePrices[vehicle.vehicleType] 
+                                  ? 'text-green-600 dark:text-green-400 scale-110' 
+                                  : isSelected ? 'text-primary' : 'text-foreground'}
                               `}>
                                 {currencySymbol}{vehicle.price}
                               </span>
+                              {/* Discount badge */}
+                              {discountJustApplied && previousVehiclePrices[vehicle.vehicleType] && previousVehiclePrices[vehicle.vehicleType] > vehicle.price && (
+                                <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded-full animate-pulse">
+                                  -€3
+                                </span>
+                              )}
                             </div>
                           ) : (
                             <span className="text-sm text-muted-foreground italic">
