@@ -6,6 +6,7 @@ import {
   calculateDiscount,
   logAnalysis,
   checkPriceSanity,
+  logPriceSanityCheck,
 } from "../_shared/priceMatching.ts";
 import { getVehicleFallbackList, getVehicleLabel } from "../_shared/vehicleConfig.ts";
 import { convertCurrency, getCurrencySymbol } from "../_shared/currencyUtils.ts";
@@ -231,12 +232,19 @@ const handler = async (req: Request): Promise<Response> => {
       pickupCityForCheck,
       dropoffCityForCheck,
       bestPrice.price,
-      bestPrice.price_currency || 'EUR'
+      bestPrice.price_currency || 'EUR',
+      reservation.vehicle_type, // Vehicle type for accurate minimums
+      airport // Airport for airport-city route checks
     );
+
+    // Log sanity check result
+    logPriceSanityCheck('reservation', reservation_id, sanityCheck);
 
     if (!sanityCheck.isValid) {
       console.log(`⚠️ Price sanity check FAILED: ${sanityCheck.reason}`);
-      console.log(`   Route: ${sanityCheck.routeKey}, Price: ${sanityCheck.actualPrice}€, Minimum: ${sanityCheck.minimumExpected}€`);
+      console.log(`   Route: ${sanityCheck.routeKey || 'N/A'}`);
+      console.log(`   Price: ${sanityCheck.actualPrice}€, Min Expected: ${sanityCheck.minimumExpected}€`);
+      console.log(`   Vehicle: ${sanityCheck.vehicleType}, Confidence: ${sanityCheck.confidence}`);
       
       // Send email to admin for manual pricing with reason
       await sendManualPriceRequestEmail(reservation, transferInfo, sanityCheck.reason);
@@ -244,14 +252,20 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(JSON.stringify({ 
         matched: false, 
         reason: "price_sanity_failed",
-        sanityCheck,
+        sanityCheck: {
+          reason: sanityCheck.reason,
+          minimumExpected: sanityCheck.minimumExpected,
+          actualPrice: sanityCheck.actualPrice,
+          vehicleType: sanityCheck.vehicleType,
+          confidence: sanityCheck.confidence,
+        },
         searchedParams: { airport, city, district, vehicles: vehicleFallbacks }
       }), {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    console.log(`✅ Price sanity check passed`);
+    console.log(`✅ Price sanity check passed (confidence: ${sanityCheck.confidence})`);
 
     // Admin enters price in EUR - check if customer requested different currency
     // Price in region_prices is base price (EUR)
