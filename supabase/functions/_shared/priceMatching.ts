@@ -9,7 +9,7 @@ export const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: nu
       'istanbul airport', 'ist airport', 'istanbul havalimanı', 'istanbul havalimani', 
       'ist', 'new istanbul airport', 'yeni istanbul havalimanı', 'arnavutköy', 'arnavutkoy',
       'istanbul new airport', 'istanbul uluslararasi havalimani', 'istanbul international',
-      'istanbul havaalani', 'iğa', 'iga'
+      'istanbul havaalani', 'iğa', 'iga', 'istanbul ist', 'ist istanbul'
     ]
   },
   'Sabiha Gokcen Airport (SAW)': {
@@ -17,14 +17,14 @@ export const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: nu
     keywords: [
       'sabiha', 'saw', 'sabiha gökçen', 'sabiha gokcen', 'sabiha gokçen', 
       'sabiha gokcen airport', 'saw airport', 'sabiha gökçen havalimanı', 'kurtköy', 'kurtkoy',
-      'sabiha gokcen havalimani', 'sabiha gocken'
+      'sabiha gokcen havalimani', 'sabiha gocken', 'pendik airport', 'asian side airport'
     ]
   },
   'Antalya Airport (AYT)': {
     priority: 1,
     keywords: [
       'antalya airport', 'ayt', 'antalya havalimanı', 'antalya havalimani',
-      'antalya international', 'ayt airport', 'antalya havaalani'
+      'antalya international', 'ayt airport', 'antalya havaalani', 'antalya ayt'
     ]
   },
   'Bodrum-Milas Airport (BJV)': {
@@ -32,13 +32,13 @@ export const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: nu
     keywords: [
       'bodrum airport', 'milas airport', 'bjv', 'bodrum milas', 'milas bodrum',
       'bodrum havalimanı', 'milas havalimanı', 'bodrum milas havalimani',
-      'milas bodrum airport'
+      'milas bodrum airport', 'bodrum bjv'
     ]
   },
   'Dalaman Airport (DLM)': {
     priority: 1,
     keywords: [
-      'dalaman airport', 'dlm', 'dalaman havalimanı', 'dalaman havalimani'
+      'dalaman airport', 'dlm', 'dalaman havalimanı', 'dalaman havalimani', 'dalaman dlm'
     ]
   },
   'Izmir Adnan Menderes Airport (ADB)': {
@@ -52,14 +52,15 @@ export const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: nu
     priority: 1,
     keywords: [
       'kayseri airport', 'asr', 'kayseri havalimanı', 'kayseri havalimani',
-      'erkilet', 'erkilet airport'
+      'erkilet', 'erkilet airport', 'kayseri asr'
     ]
   },
   'Nevsehir-Kapadokya Airport (NAV)': {
     priority: 1,
     keywords: [
       'nevsehir airport', 'nevşehir havalimanı', 'kapadokya airport', 'nav',
-      'cappadocia airport', 'kapadokya havalimanı', 'kapadokya havalimani'
+      'cappadocia airport', 'kapadokya havalimanı', 'kapadokya havalimani',
+      'nevsehir nav', 'goreme airport'
     ]
   },
   'Dubai International Airport (DXB)': {
@@ -115,7 +116,12 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'kartal', 'sariyer', 'sarıyer', 'zeytinburnu', 'mecidiyekoy', 'mecidiyeköy',
       'levent', 'maslak', 'yenikoy', 'yeniköy', 'bebek', 'ortakoy', 'ortaköy',
       'nisantasi', 'nişantaşı', 'cihangir', 'galata', 'karakoy', 'karaköy',
-      'eminonu', 'eminönü', 'balat', 'eyup', 'eyüp', 'florya', 'yesilkoy', 'yeşilköy'
+      'eminonu', 'eminönü', 'balat', 'eyup', 'eyüp', 'florya', 'yesilkoy', 'yeşilköy',
+      'bagcilar', 'bağcılar', 'bahcelievler', 'bahçelievler', 'bayrampasa', 'bayrampaşa',
+      'esenyurt', 'avcilar', 'avcılar', 'kucukcekmece', 'küçükçekmece', 'buyukcekmece',
+      'silivri', 'catalca', 'çatalca', 'arnavutkoy', 'basaksehir', 'başakşehir',
+      'beylikduzu', 'beylikdüzü', 'cekmekoy', 'çekmeköy', 'sancaktepe', 'sultanbeyli',
+      'umraniye', 'ümraniye', 'beykoz', 'sile', 'şile', 'adalar', 'princes islands'
     ]
   },
   'Antalya': {
@@ -126,7 +132,8 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'serik', 'kundu', 'beldibi', 'goynuk', 'göynük', 'tekirova', 'cirali', 'çıralı',
       'olympos', 'kadriye', 'bogazkent', 'boğazkent', 'kumkoy', 'kumköy',
       'colakli', 'çolaklı', 'evrenseki', 'titreyengol', 'mahmutlar', 'okurcalar',
-      'avsallar', 'konakli', 'konaklı', 'incekum'
+      'avsallar', 'konakli', 'konaklı', 'incekum', 'titreyen gol', 'titreyen göl',
+      'aksu', 'dosemealti', 'döşemealtı', 'kepez', 'muratpasa', 'muratpaşa'
     ]
   },
   'Bodrum': {
@@ -135,7 +142,8 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'bodrum', 'yalikavak', 'yalıkavak', 'turgutreis', 'gumbet', 'gümbet', 
       'bitez', 'turkbuku', 'türkbükü', 'golturkbuku', 'göltürkbükü',
       'ortakent', 'gumusluk', 'gümüşlük', 'akyarlar', 'gundogan', 'gündoğan',
-      'kadikalesi', 'torba', 'gulluk', 'güllük', 'konacik', 'konacık'
+      'kadikalesi', 'torba', 'gulluk', 'güllük', 'konacik', 'konacık',
+      'yahsi', 'yahşi', 'palmarina'
     ]
   },
   'Dalaman': {
@@ -145,7 +153,8 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'marmaris', 'gocek', 'göcek', 'dalyan', 'koycegiz', 'köyceğiz',
       'icmeler', 'içmeler', 'turunc', 'turunç', 'akyaka', 'ortaca',
       'ovacik', 'ovacık', 'calis', 'çalış', 'kayakoy', 'kayaköy',
-      'saklikent', 'saklıkent', 'sarigerme', 'sarıgerme', 'ekincik'
+      'saklikent', 'saklıkent', 'sarigerme', 'sarıgerme', 'ekincik',
+      'uzumlu', 'üzümlü', 'mugla', 'muğla'
     ]
   },
   'Izmir': {
@@ -155,7 +164,8 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'kusadasi', 'kuşadası', 'selcuk', 'selçuk', 'ephesus', 'efes',
       'urla', 'seferihisar', 'dikili', 'foca', 'foça', 'bergama',
       'sirince', 'şirince', 'konak', 'karsiyaka', 'karşıyaka', 'alsancak',
-      'bornova', 'buca', 'guzelbahce', 'güzelbahçe', 'ildir', 'ildır'
+      'bornova', 'buca', 'guzelbahce', 'güzelbahçe', 'ildir', 'ildır',
+      'ozdere', 'özdere', 'pamukkale', 'pamucak'
     ]
   },
   'Cappadocia': {
@@ -164,7 +174,8 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'cappadocia', 'kapadokya', 'goreme', 'göreme', 'urgup', 'ürgüp', 
       'uchisar', 'uçhisar', 'avanos', 'ortahisar', 'cavusin', 'çavuşin',
       'zelve', 'pasabag', 'paşabağ', 'devrent', 'derinkuyu', 'kaymakli',
-      'kaymaklı', 'ihlara', 'guzelyurt', 'güzelyurt', 'mustafapasa', 'mustafapaşa'
+      'kaymaklı', 'ihlara', 'guzelyurt', 'güzelyurt', 'mustafapasa', 'mustafapaşa',
+      'nevsehir', 'nevşehir', 'kayseri'
     ]
   },
   'Bursa': {
@@ -181,7 +192,8 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'dubai', 'dubayy', 'palm jumeirah', 'dubai marina', 'downtown dubai', 
       'jbr', 'deira', 'bur dubai', 'business bay', 'difc', 'jumeirah',
       'jumeirah beach', 'al barsha', 'dubai hills', 'emirates hills',
-      'arabian ranches', 'dubai creek', 'al quoz', 'jlt', 'motor city'
+      'arabian ranches', 'dubai creek', 'al quoz', 'jlt', 'motor city',
+      'silicon oasis', 'sports city', 'mirdif', 'al nahda', 'sharjah'
     ]
   },
   'Cyprus': {
@@ -190,7 +202,7 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'cyprus', 'kıbrıs', 'kibris', 'nicosia', 'lefkosa', 'lefkoşa', 
       'limassol', 'larnaca', 'paphos', 'famagusta', 'magusa', 'mağusa',
       'kyrenia', 'girne', 'ayia napa', 'protaras', 'paralimni', 'polis',
-      'coral bay', 'latchi', 'troodos', 'platres'
+      'coral bay', 'latchi', 'troodos', 'platres', 'bafra', 'iskele', 'karpaz'
     ]
   },
   // Kayseri and Nevsehir redirect to Cappadocia
@@ -207,97 +219,121 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
 // ==================== DISTRICT KEYWORDS ====================
 export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; priority: number }> = {
   // Istanbul - Avrupa Yakası (High Priority)
-  'Taksim': { priority: 1, keywords: ['taksim', 'taksim square', 'taksim meydanı', 'taksim meydani'], city: 'Istanbul' },
-  'Sultanahmet': { priority: 1, keywords: ['sultanahmet', 'blue mosque', 'hagia sophia', 'ayasofya', 'topkapi', 'topkapı', 'hippodrome'], city: 'Istanbul' },
-  'Beyoglu': { priority: 1, keywords: ['beyoglu', 'beyoğlu', 'galata', 'karakoy', 'karaköy', 'cihangir', 'istiklal', 'pera'], city: 'Istanbul' },
-  'Sisli': { priority: 1, keywords: ['sisli', 'şişli', 'mecidiyekoy', 'mecidiyeköy', 'nisantasi', 'nişantaşı', 'osmanbey', 'bomonti'], city: 'Istanbul' },
-  'Besiktas': { priority: 1, keywords: ['besiktas', 'beşiktaş', 'ortakoy', 'ortaköy', 'bebek', 'etiler', 'levent'], city: 'Istanbul' },
-  'Fatih': { priority: 1, keywords: ['fatih', 'aksaray', 'laleli', 'eminonu', 'eminönü', 'sirkeci', 'balat', 'fener'], city: 'Istanbul' },
-  'Levent': { priority: 2, keywords: ['levent', 'maslak', '4. levent', 'zorlu', 'kanyon', 'sapphire'], city: 'Istanbul' },
-  'Bakirkoy': { priority: 1, keywords: ['bakirkoy', 'bakırköy', 'florya', 'yesilkoy', 'yeşilköy', 'atakoy', 'ataköy'], city: 'Istanbul' },
-  'Sariyer': { priority: 2, keywords: ['sariyer', 'sarıyer', 'istinye', 'tarabya', 'yenikoy', 'yeniköy', 'emirgan'], city: 'Istanbul' },
+  'Taksim': { priority: 1, keywords: ['taksim', 'taksim square', 'taksim meydanı', 'taksim meydani', 'talimhane', 'harbiye', 'elmadağ', 'elmadag'], city: 'Istanbul' },
+  'Sultanahmet': { priority: 1, keywords: ['sultanahmet', 'blue mosque', 'hagia sophia', 'ayasofya', 'topkapi', 'topkapı', 'hippodrome', 'sultanahmet meydanı', 'grand bazaar', 'kapali carsi'], city: 'Istanbul' },
+  'Beyoglu': { priority: 1, keywords: ['beyoglu', 'beyoğlu', 'galata', 'karakoy', 'karaköy', 'cihangir', 'istiklal', 'pera', 'tunel', 'tünel', 'galata tower', 'galata kulesi'], city: 'Istanbul' },
+  'Sisli': { priority: 1, keywords: ['sisli', 'şişli', 'mecidiyekoy', 'mecidiyeköy', 'nisantasi', 'nişantaşı', 'osmanbey', 'bomonti', 'esentepe', 'fulya', 'tesvikiye', 'teşvikiye'], city: 'Istanbul' },
+  'Besiktas': { priority: 1, keywords: ['besiktas', 'beşiktaş', 'ortakoy', 'ortaköy', 'bebek', 'etiler', 'levent', 'akaretler', 'ciragan', 'çırağan', 'yildiz', 'yıldız'], city: 'Istanbul' },
+  'Fatih': { priority: 1, keywords: ['fatih', 'aksaray', 'laleli', 'eminonu', 'eminönü', 'sirkeci', 'balat', 'fener', 'unkapani', 'vefa', 'carsamba', 'çarşamba'], city: 'Istanbul' },
+  'Levent': { priority: 2, keywords: ['levent', 'maslak', '4. levent', 'zorlu', 'kanyon', 'sapphire', '1. levent', '2. levent', '3. levent', 'levazim', 'levazım'], city: 'Istanbul' },
+  'Bakirkoy': { priority: 1, keywords: ['bakirkoy', 'bakırköy', 'florya', 'yesilkoy', 'yeşilköy', 'atakoy', 'ataköy', 'bahcelievler', 'bahçelievler', 'yenibosna'], city: 'Istanbul' },
+  'Sariyer': { priority: 2, keywords: ['sariyer', 'sarıyer', 'istinye', 'tarabya', 'yenikoy', 'yeniköy', 'emirgan', 'maslak', 'rumeli', 'rumeli feneri'], city: 'Istanbul' },
+  'Zeytinburnu': { priority: 2, keywords: ['zeytinburnu', 'kazlicesme', 'kazlıçeşme', 'veliefendi'], city: 'Istanbul' },
+  'Eyup': { priority: 2, keywords: ['eyup', 'eyüp', 'eyup sultan', 'pierre loti', 'sutluce', 'sütlüce'], city: 'Istanbul' },
   
   // Istanbul - Anadolu Yakası
-  'Kadikoy': { priority: 1, keywords: ['kadikoy', 'kadıköy', 'caferaga', 'caferağa', 'moda', 'fenerbahce', 'fenerbahçe', 'bostanci', 'bostancı'], city: 'Istanbul' },
-  'Uskudar': { priority: 1, keywords: ['uskudar', 'üsküdar', 'cengelkoy', 'çengelköy', 'kuzguncuk', 'beylerbeyi'], city: 'Istanbul' },
-  'Atasehir': { priority: 1, keywords: ['atasehir', 'ataşehir', 'finance center', 'finans merkezi', 'watergarden'], city: 'Istanbul' },
-  'Pendik': { priority: 2, keywords: ['pendik', 'tuzla'], city: 'Istanbul' },
-  'Kartal': { priority: 2, keywords: ['kartal', 'soganlik', 'soğanlık'], city: 'Istanbul' },
-  'Maltepe': { priority: 2, keywords: ['maltepe', 'altaycesme', 'dragos'], city: 'Istanbul' },
+  'Kadikoy': { priority: 1, keywords: ['kadikoy', 'kadıköy', 'caferaga', 'caferağa', 'moda', 'fenerbahce', 'fenerbahçe', 'bostanci', 'bostancı', 'caddebostan', 'suadiye', 'goztepe', 'göztepe', 'kozyatagi', 'kozyatağı'], city: 'Istanbul' },
+  'Uskudar': { priority: 1, keywords: ['uskudar', 'üsküdar', 'cengelkoy', 'çengelköy', 'kuzguncuk', 'beylerbeyi', 'salacak', 'kandilli', 'vanikoy', 'vaniköy', 'anadolu hisari', 'anadolu hisarı'], city: 'Istanbul' },
+  'Atasehir': { priority: 1, keywords: ['atasehir', 'ataşehir', 'finance center', 'finans merkezi', 'watergarden', 'batikent', 'barbaros', 'istmarina'], city: 'Istanbul' },
+  'Pendik': { priority: 2, keywords: ['pendik', 'tuzla', 'kaynarca', 'tersane', 'guzelyali', 'güzelyalı'], city: 'Istanbul' },
+  'Kartal': { priority: 2, keywords: ['kartal', 'soganlik', 'soğanlık', 'kordonboyu'], city: 'Istanbul' },
+  'Maltepe': { priority: 2, keywords: ['maltepe', 'altaycesme', 'dragos', 'ideal tepe', 'idealtepe', 'kucukyali', 'küçükyalı'], city: 'Istanbul' },
+  'Umraniye': { priority: 2, keywords: ['umraniye', 'ümraniye', 'dudullu', 'cekmekoy', 'çekmeköy'], city: 'Istanbul' },
+  'Beykoz': { priority: 2, keywords: ['beykoz', 'pasabahce', 'paşabahçe', 'kavacik', 'kavacık', 'riva', 'anadolu kavagi', 'anadolu kavağı'], city: 'Istanbul' },
   
   // Antalya
-  'Kaleici': { priority: 1, keywords: ['kaleici', 'kaleiçi', 'old town antalya', 'old city antalya', 'antalya old town'], city: 'Antalya' },
-  'Konyaalti': { priority: 1, keywords: ['konyaalti', 'konyaaltı', 'konyaalti beach', 'konyaaltı plajı', 'konyaalti plaji'], city: 'Antalya' },
-  'Lara': { priority: 1, keywords: ['lara', 'lara beach', 'kundu', 'lara plaji', 'lara plajı'], city: 'Antalya' },
-  'Belek': { priority: 1, keywords: ['belek', 'kadriye', 'bogazkent', 'boğazkent', 'belek golf'], city: 'Antalya' },
-  'Side': { priority: 1, keywords: ['side', 'kumkoy', 'kumköy', 'colakli', 'çolaklı', 'manavgat', 'evrenseki', 'titreyengol', 'titreyen gol'], city: 'Antalya' },
-  'Alanya': { priority: 1, keywords: ['alanya', 'mahmutlar', 'okurcalar', 'avsallar', 'konakli', 'konaklı', 'incekum', 'alanya castle'], city: 'Antalya' },
-  'Kemer': { priority: 1, keywords: ['kemer', 'beldibi', 'goynuk', 'göynük', 'tekirova', 'cirali', 'çıralı', 'olympos', 'phaselis', 'camyuva'], city: 'Antalya' },
-  'Kas': { priority: 1, keywords: ['kas', 'kaş', 'kalkan', 'patara'], city: 'Antalya' },
+  'Kaleici': { priority: 1, keywords: ['kaleici', 'kaleiçi', 'old town antalya', 'old city antalya', 'antalya old town', 'antalya marina', 'yat limani'], city: 'Antalya' },
+  'Konyaalti': { priority: 1, keywords: ['konyaalti', 'konyaaltı', 'konyaalti beach', 'konyaaltı plajı', 'konyaalti plaji', 'hurma', 'liman'], city: 'Antalya' },
+  'Lara': { priority: 1, keywords: ['lara', 'lara beach', 'kundu', 'lara plaji', 'lara plajı', 'lower lara', 'upper lara'], city: 'Antalya' },
+  'Belek': { priority: 1, keywords: ['belek', 'kadriye', 'bogazkent', 'boğazkent', 'belek golf', 'the land of legends', 'land of legends'], city: 'Antalya' },
+  'Side': { priority: 1, keywords: ['side', 'kumkoy', 'kumköy', 'colakli', 'çolaklı', 'manavgat', 'evrenseki', 'titreyengol', 'titreyen gol', 'sorgun', 'gundogdu'], city: 'Antalya' },
+  'Alanya': { priority: 1, keywords: ['alanya', 'mahmutlar', 'okurcalar', 'avsallar', 'konakli', 'konaklı', 'incekum', 'alanya castle', 'cleopatra beach', 'kleopatra plaji', 'kestel', 'oba', 'tosmur'], city: 'Antalya' },
+  'Kemer': { priority: 1, keywords: ['kemer', 'beldibi', 'goynuk', 'göynük', 'tekirova', 'cirali', 'çıralı', 'olympos', 'phaselis', 'camyuva', 'kiriş', 'kiris'], city: 'Antalya' },
+  'Kas': { priority: 1, keywords: ['kas', 'kaş', 'kalkan', 'patara', 'saklikent', 'saklıkent', 'xanthos', 'letoon'], city: 'Antalya' },
   
   // Bodrum
-  'Bodrum Center': { priority: 1, keywords: ['bodrum center', 'bodrum merkez', 'bodrum centrum', 'bodrum city', 'bodrum town', 'bodrum castle', 'bodrum marina'], city: 'Bodrum' },
-  'Yalikavak': { priority: 1, keywords: ['yalikavak', 'yalıkavak', 'palmarina', 'yalikavak marina'], city: 'Bodrum' },
-  'Turgutreis': { priority: 1, keywords: ['turgutreis', 'turgut reis', 'turgutreis marina'], city: 'Bodrum' },
-  'Gumbet': { priority: 1, keywords: ['gumbet', 'gümbet'], city: 'Bodrum' },
-  'Turkbuku': { priority: 1, keywords: ['turkbuku', 'türkbükü', 'golturkbuku', 'göltürkbükü'], city: 'Bodrum' },
+  'Bodrum Center': { priority: 1, keywords: ['bodrum center', 'bodrum merkez', 'bodrum centrum', 'bodrum city', 'bodrum town', 'bodrum castle', 'bodrum marina', 'bodrum kalesi', 'bodrum bar street', 'barlar sokagi'], city: 'Bodrum' },
+  'Yalikavak': { priority: 1, keywords: ['yalikavak', 'yalıkavak', 'palmarina', 'yalikavak marina', 'yalıkavak marina'], city: 'Bodrum' },
+  'Turgutreis': { priority: 1, keywords: ['turgutreis', 'turgut reis', 'turgutreis marina', 'akyarlar', 'guvercinlik', 'güvercinlik'], city: 'Bodrum' },
+  'Gumbet': { priority: 1, keywords: ['gumbet', 'gümbet', 'gumbet beach'], city: 'Bodrum' },
+  'Turkbuku': { priority: 1, keywords: ['turkbuku', 'türkbükü', 'golturkbuku', 'göltürkbükü', 'gol turkbuku'], city: 'Bodrum' },
   'Bitez': { priority: 1, keywords: ['bitez', 'bitez beach'], city: 'Bodrum' },
-  'Ortakent': { priority: 2, keywords: ['ortakent', 'ortakent yahsi', 'yahsi'], city: 'Bodrum' },
-  'Gumusluk': { priority: 1, keywords: ['gumusluk', 'gümüşlük', 'rabbit island'], city: 'Bodrum' },
+  'Ortakent': { priority: 2, keywords: ['ortakent', 'ortakent yahsi', 'yahsi', 'yahşi', 'ortakent yahşi'], city: 'Bodrum' },
+  'Gumusluk': { priority: 1, keywords: ['gumusluk', 'gümüşlük', 'rabbit island', 'tavsan adasi', 'tavşan adası'], city: 'Bodrum' },
+  'Gundogan': { priority: 2, keywords: ['gundogan', 'gündoğan', 'farilya'], city: 'Bodrum' },
+  'Torba': { priority: 2, keywords: ['torba', 'torba bay', 'torba koy', 'torba koyu'], city: 'Bodrum' },
   
   // Dalaman / Fethiye / Marmaris
-  'Fethiye': { priority: 1, keywords: ['fethiye', 'fethiye marina', 'calis', 'çalış', 'calis beach'], city: 'Dalaman' },
-  'Oludeniz': { priority: 1, keywords: ['oludeniz', 'ölüdeniz', 'blue lagoon', 'hisaronu', 'hisarönü', 'ovacik', 'ovacık'], city: 'Dalaman' },
-  'Marmaris': { priority: 1, keywords: ['marmaris', 'icmeler', 'içmeler', 'turunc', 'turunç', 'marmaris marina', 'marmaris center'], city: 'Dalaman' },
-  'Gocek': { priority: 1, keywords: ['gocek', 'göcek', 'gocek marina'], city: 'Dalaman' },
-  'Dalyan': { priority: 1, keywords: ['dalyan', 'koycegiz', 'köyceğiz', 'iztuzu', 'turtle beach'], city: 'Dalaman' },
+  'Fethiye': { priority: 1, keywords: ['fethiye', 'fethiye marina', 'calis', 'çalış', 'calis beach', 'fethiye center', 'fethiye merkez'], city: 'Dalaman' },
+  'Oludeniz': { priority: 1, keywords: ['oludeniz', 'ölüdeniz', 'blue lagoon', 'hisaronu', 'hisarönü', 'ovacik', 'ovacık', 'belcekiz', 'belceğiz'], city: 'Dalaman' },
+  'Marmaris': { priority: 1, keywords: ['marmaris', 'icmeler', 'içmeler', 'turunc', 'turunç', 'marmaris marina', 'marmaris center', 'marmaris merkez', 'marmaris bar street', 'armutalan', 'siteler'], city: 'Dalaman' },
+  'Gocek': { priority: 1, keywords: ['gocek', 'göcek', 'gocek marina', 'd-marin', 'marinturk'], city: 'Dalaman' },
+  'Dalyan': { priority: 1, keywords: ['dalyan', 'koycegiz', 'köyceğiz', 'iztuzu', 'turtle beach', 'dalyan river', 'mud baths', 'camur banyolari'], city: 'Dalaman' },
+  'Sarigerme': { priority: 2, keywords: ['sarigerme', 'sarıgerme', 'sarigerme beach'], city: 'Dalaman' },
   
   // Izmir
-  'Cesme': { priority: 1, keywords: ['cesme', 'çeşme', 'ilica', 'ılıca', 'cesme marina'], city: 'Izmir' },
-  'Alacati': { priority: 1, keywords: ['alacati', 'alaçatı'], city: 'Izmir' },
-  'Kusadasi': { priority: 1, keywords: ['kusadasi', 'kuşadası', 'ladies beach', 'kadınlar denizi', 'kusadasi marina'], city: 'Izmir' },
-  'Selcuk': { priority: 1, keywords: ['selcuk', 'selçuk', 'ephesus', 'efes', 'sirince', 'şirince'], city: 'Izmir' },
-  'Alsancak': { priority: 1, keywords: ['alsancak', 'konak', 'kordon', 'pasaport', 'izmir center'], city: 'Izmir' },
+  'Cesme': { priority: 1, keywords: ['cesme', 'çeşme', 'ilica', 'ılıca', 'cesme marina', 'boyalik', 'boyalık'], city: 'Izmir' },
+  'Alacati': { priority: 1, keywords: ['alacati', 'alaçatı', 'alacati windmill', 'alacati stone houses', 'alacati tas evler'], city: 'Izmir' },
+  'Kusadasi': { priority: 1, keywords: ['kusadasi', 'kuşadası', 'ladies beach', 'kadınlar denizi', 'kusadasi marina', 'kusadasi merkez', 'pigeons island', 'guvercin adasi', 'güvercin adası'], city: 'Izmir' },
+  'Selcuk': { priority: 1, keywords: ['selcuk', 'selçuk', 'ephesus', 'efes', 'sirince', 'şirince', 'ephesus ancient city', 'efes antik kenti'], city: 'Izmir' },
+  'Alsancak': { priority: 1, keywords: ['alsancak', 'konak', 'kordon', 'pasaport', 'izmir center', 'izmir merkez', 'karsiyaka', 'karşıyaka', 'bornova'], city: 'Izmir' },
   
   // Cappadocia
-  'Goreme': { priority: 1, keywords: ['goreme', 'göreme', 'goreme town'], city: 'Cappadocia' },
-  'Urgup': { priority: 1, keywords: ['urgup', 'ürgüp'], city: 'Cappadocia' },
-  'Uchisar': { priority: 1, keywords: ['uchisar', 'uçhisar', 'uchisar castle'], city: 'Cappadocia' },
-  'Avanos': { priority: 1, keywords: ['avanos'], city: 'Cappadocia' },
-  'Ortahisar': { priority: 2, keywords: ['ortahisar'], city: 'Cappadocia' },
-  'Nevsehir Center': { priority: 2, keywords: ['nevsehir center', 'nevşehir merkez', 'nevsehir merkez'], city: 'Cappadocia' },
+  'Goreme': { priority: 1, keywords: ['goreme', 'göreme', 'goreme town', 'goreme open air museum', 'goreme acik hava muzesi'], city: 'Cappadocia' },
+  'Urgup': { priority: 1, keywords: ['urgup', 'ürgüp', 'urgup center', 'urgup merkez'], city: 'Cappadocia' },
+  'Uchisar': { priority: 1, keywords: ['uchisar', 'uçhisar', 'uchisar castle', 'uchisar kalesi', 'uçhisar kalesi'], city: 'Cappadocia' },
+  'Avanos': { priority: 1, keywords: ['avanos', 'avanos pottery', 'kizilirmak', 'kızılırmak'], city: 'Cappadocia' },
+  'Ortahisar': { priority: 2, keywords: ['ortahisar', 'ortahisar castle', 'ortahisar kalesi'], city: 'Cappadocia' },
+  'Nevsehir Center': { priority: 2, keywords: ['nevsehir center', 'nevşehir merkez', 'nevsehir merkez', 'nevsehir city'], city: 'Cappadocia' },
+  'Mustafapasa': { priority: 2, keywords: ['mustafapasa', 'mustafapaşa', 'sinasos'], city: 'Cappadocia' },
   
   // Bursa
-  'Osmangazi': { priority: 1, keywords: ['osmangazi', 'bursa center', 'bursa merkez', 'heykel', 'bursa city'], city: 'Bursa' },
-  'Mudanya': { priority: 1, keywords: ['mudanya'], city: 'Bursa' },
-  'Uludag': { priority: 1, keywords: ['uludag', 'uludağ', 'mount uludag'], city: 'Bursa' },
-  'Cumalikizik': { priority: 1, keywords: ['cumalikizik', 'cumalıkızık'], city: 'Bursa' },
-  'Iznik': { priority: 2, keywords: ['iznik', 'nicaea'], city: 'Bursa' },
+  'Osmangazi': { priority: 1, keywords: ['osmangazi', 'bursa center', 'bursa merkez', 'heykel', 'bursa city', 'setbasi', 'setbaşı', 'altiparmak', 'altıparmak', 'ulucami', 'ulu cami'], city: 'Bursa' },
+  'Mudanya': { priority: 1, keywords: ['mudanya', 'guzelyali', 'güzelyalı', 'tirilye', 'trilye', 'mudanya iskele'], city: 'Bursa' },
+  'Uludag': { priority: 1, keywords: ['uludag', 'uludağ', 'mount uludag', 'uludag ski', 'uludag kayak', 'oteller bolgesi', 'hotels region'], city: 'Bursa' },
+  'Cumalikizik': { priority: 1, keywords: ['cumalikizik', 'cumalıkızık', 'cumalikizik village', 'cumalikizik koyu'], city: 'Bursa' },
+  'Iznik': { priority: 2, keywords: ['iznik', 'nicaea', 'iznik lake', 'iznik golu', 'iznik gölü'], city: 'Bursa' },
+  'Nilufer': { priority: 2, keywords: ['nilufer', 'nilüfer', 'gorukle', 'görükle', 'ozluece', 'özlüce'], city: 'Bursa' },
   
   // Dubai
-  'Downtown Dubai': { priority: 1, keywords: ['downtown', 'downtown dubai', 'burj khalifa', 'dubai mall', 'boulevard'], city: 'Dubai' },
-  'Dubai Marina': { priority: 1, keywords: ['marina', 'dubai marina', 'jbr', 'jumeirah beach residence', 'the walk'], city: 'Dubai' },
-  'Palm Jumeirah': { priority: 1, keywords: ['palm', 'palm jumeirah', 'atlantis', 'the palm'], city: 'Dubai' },
-  'Deira': { priority: 2, keywords: ['deira', 'gold souk', 'spice souk', 'naif'], city: 'Dubai' },
-  'Jumeirah': { priority: 1, keywords: ['jumeirah', 'jumeira', 'jumeirah beach', 'umm suqeim'], city: 'Dubai' },
-  'Business Bay': { priority: 2, keywords: ['business bay', 'bay square'], city: 'Dubai' },
+  'Downtown Dubai': { priority: 1, keywords: ['downtown', 'downtown dubai', 'burj khalifa', 'dubai mall', 'boulevard', 'dubai fountain'], city: 'Dubai' },
+  'Dubai Marina': { priority: 1, keywords: ['marina', 'dubai marina', 'jbr', 'jumeirah beach residence', 'the walk', 'marina walk', 'marina mall'], city: 'Dubai' },
+  'Palm Jumeirah': { priority: 1, keywords: ['palm', 'palm jumeirah', 'atlantis', 'the palm', 'atlantis the palm', 'palm beach'], city: 'Dubai' },
+  'Deira': { priority: 2, keywords: ['deira', 'gold souk', 'spice souk', 'naif', 'al ras', 'creek side'], city: 'Dubai' },
+  'Jumeirah': { priority: 1, keywords: ['jumeirah', 'jumeira', 'jumeirah beach', 'umm suqeim', 'burj al arab', 'madinat jumeirah'], city: 'Dubai' },
+  'Business Bay': { priority: 2, keywords: ['business bay', 'bay square', 'executive towers', 'canal walk'], city: 'Dubai' },
+  'Al Barsha': { priority: 2, keywords: ['al barsha', 'barsha', 'mall of emirates', 'mall of the emirates', 'moe'], city: 'Dubai' },
   
   // Cyprus
-  'Nicosia': { priority: 1, keywords: ['nicosia', 'lefkosa', 'lefkoşa', 'north nicosia', 'south nicosia'], city: 'Cyprus' },
-  'Limassol': { priority: 1, keywords: ['limassol', 'lemesos', 'limassol marina'], city: 'Cyprus' },
-  'Larnaca City': { priority: 1, keywords: ['larnaca city', 'larnaca center', 'larnaka', 'larnaca'], city: 'Cyprus' },
-  'Paphos City': { priority: 1, keywords: ['paphos', 'pafos', 'kato paphos', 'coral bay'], city: 'Cyprus' },
-  'Ayia Napa': { priority: 1, keywords: ['ayia napa', 'agia napa', 'nissi beach', 'napa'], city: 'Cyprus' },
-  'Kyrenia': { priority: 1, keywords: ['kyrenia', 'girne', 'bellapais'], city: 'Cyprus' },
-  'Protaras': { priority: 1, keywords: ['protaras', 'fig tree bay', 'paralimni'], city: 'Cyprus' },
+  'Nicosia': { priority: 1, keywords: ['nicosia', 'lefkosa', 'lefkoşa', 'north nicosia', 'south nicosia', 'ledra street'], city: 'Cyprus' },
+  'Limassol': { priority: 1, keywords: ['limassol', 'lemesos', 'limassol marina', 'limassol old town'], city: 'Cyprus' },
+  'Larnaca City': { priority: 1, keywords: ['larnaca city', 'larnaca center', 'larnaka', 'larnaca', 'larnaca marina', 'finikoudes'], city: 'Cyprus' },
+  'Paphos City': { priority: 1, keywords: ['paphos', 'pafos', 'kato paphos', 'coral bay', 'paphos harbor', 'paphos marina'], city: 'Cyprus' },
+  'Ayia Napa': { priority: 1, keywords: ['ayia napa', 'agia napa', 'nissi beach', 'napa', 'ayia napa marina'], city: 'Cyprus' },
+  'Kyrenia': { priority: 1, keywords: ['kyrenia', 'girne', 'bellapais', 'kyrenia harbor', 'girne limani', 'girne limanı', 'alsancak', 'lapta'], city: 'Cyprus' },
+  'Protaras': { priority: 1, keywords: ['protaras', 'fig tree bay', 'paralimni', 'cape greco', 'kapparis'], city: 'Cyprus' },
+  'Famagusta': { priority: 2, keywords: ['famagusta', 'gazimagusa', 'gazimağusa', 'magosa', 'mağosa', 'salamis'], city: 'Cyprus' },
+};
+
+// ==================== VEHICLE TYPE MAPPING ====================
+export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
+  'Mercedes Vito VIP': ['Mercedes Vito VIP', 'Mercedes Vito', 'VIP', 'Minivan'],
+  'Mercedes Vito': ['Mercedes Vito', 'Mercedes Vito VIP', 'Minivan'],
+  'Mercedes Sprinter VIP': ['Mercedes Sprinter VIP', 'Mercedes Sprinter', 'VIP Minibus', 'Minibus'],
+  'Mercedes Sprinter': ['Mercedes Sprinter', 'Mercedes Sprinter VIP', 'Minibus'],
+  'Mercedes Maybach': ['Mercedes Maybach', 'Mercedes S-Class', 'Luxury Sedan', 'Sedan'],
+  'VIP': ['VIP', 'Mercedes Vito VIP', 'Mercedes Sprinter VIP'],
+  'Sedan': ['Sedan', 'Mercedes Maybach', 'Mercedes S-Class'],
+  'Minivan': ['Minivan', 'Mercedes Vito', 'Mercedes Vito VIP'],
+  'Minibus': ['Minibus', 'Mercedes Sprinter', 'Mercedes Sprinter VIP'],
 };
 
 // ==================== NORMALIZATION ====================
 export function normalizeLocation(location: string): string {
   return location
     .toLowerCase()
-    .replace(/türkiye|turkey|türkei|turkiye/gi, '')
-    .replace(/,\s*(tr|turkey)$/i, '')
+    .replace(/türkiye|turkey|türkei|turkiye|türkei|tuerkei/gi, '')
+    .replace(/,\s*(tr|turkey|türkiye|turkiye)$/i, '')
     .replace(/\(.*?\)/g, '') // Remove parentheses content
     .replace(/[,.\-_\/\\#&]/g, ' ')
     .replace(/\s+/g, ' ')
@@ -314,7 +350,78 @@ export function normalizeLocation(location: string): string {
     .replace(/Ş/g, 's')
     .replace(/Ö/g, 'o')
     .replace(/Ç/g, 'c')
+    // Common typos and variations
+    .replace(/air\s*port/g, 'airport')
+    .replace(/havaalani/g, 'havalimani')
+    .replace(/hava\s*limani/g, 'havalimani')
+    .replace(/hava\s*alani/g, 'havalimani')
     .trim();
+}
+
+// ==================== FUZZY MATCHING ====================
+function levenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+  
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+  
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  
+  return matrix[b.length][a.length];
+}
+
+function fuzzyMatch(text: string, keyword: string, threshold: number = 0.8): boolean {
+  const normalizedText = normalizeLocation(text);
+  const normalizedKeyword = normalizeLocation(keyword);
+  
+  // Exact match
+  if (normalizedText.includes(normalizedKeyword)) {
+    return true;
+  }
+  
+  // Word-by-word match for multi-word keywords
+  const keywordWords = normalizedKeyword.split(' ').filter(w => w.length > 2);
+  const textWords = normalizedText.split(' ');
+  
+  for (const kw of keywordWords) {
+    let found = false;
+    for (const tw of textWords) {
+      if (tw.includes(kw) || kw.includes(tw)) {
+        found = true;
+        break;
+      }
+      // Levenshtein for short words
+      if (kw.length >= 4 && tw.length >= 4) {
+        const distance = levenshteinDistance(kw, tw);
+        const maxLen = Math.max(kw.length, tw.length);
+        if (1 - (distance / maxLen) >= threshold) {
+          found = true;
+          break;
+        }
+      }
+    }
+    if (!found && kw.length > 3) {
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 // ==================== MATCHING FUNCTIONS ====================
@@ -333,8 +440,8 @@ export function findAirport(location: string): MatchResult | null {
     for (const keyword of data.keywords) {
       const keywordNorm = normalizeLocation(keyword);
       
+      // Direct include check
       if (normalized.includes(keywordNorm)) {
-        // Calculate confidence based on keyword length and specificity
         const confidence = Math.min(1, 0.7 + (keywordNorm.length / 30));
         
         if (!bestMatch || 
@@ -345,6 +452,19 @@ export function findAirport(location: string): MatchResult | null {
             confidence,
             priority: data.priority,
             matchedKeyword: keyword
+          };
+        }
+      }
+      // Fuzzy match for longer keywords
+      else if (keywordNorm.length >= 6 && fuzzyMatch(normalized, keywordNorm, 0.85)) {
+        const confidence = Math.min(0.8, 0.5 + (keywordNorm.length / 40));
+        
+        if (!bestMatch || confidence > bestMatch.confidence) {
+          bestMatch = {
+            value: airport,
+            confidence,
+            priority: data.priority,
+            matchedKeyword: keyword + ' (fuzzy)'
           };
         }
       }
@@ -373,6 +493,19 @@ export function findCity(location: string): MatchResult | null {
             confidence,
             priority: data.priority,
             matchedKeyword: keyword
+          };
+        }
+      }
+      // Fuzzy match
+      else if (keywordNorm.length >= 5 && fuzzyMatch(normalized, keywordNorm, 0.85)) {
+        const confidence = Math.min(0.7, 0.4 + (keywordNorm.length / 25));
+        
+        if (!bestMatch || confidence > bestMatch.confidence) {
+          bestMatch = {
+            value: city,
+            confidence,
+            priority: data.priority,
+            matchedKeyword: keyword + ' (fuzzy)'
           };
         }
       }
@@ -414,6 +547,20 @@ export function findDistrict(location: string): DistrictMatchResult | null {
           };
         }
       }
+      // Fuzzy match for districts
+      else if (keywordNorm.length >= 5 && fuzzyMatch(normalized, keywordNorm, 0.85)) {
+        const confidence = Math.min(0.75, 0.5 + (keywordNorm.length / 30));
+        
+        if (!bestMatch || confidence > bestMatch.confidence) {
+          bestMatch = {
+            value: district,
+            city: data.city,
+            confidence,
+            priority: data.priority,
+            matchedKeyword: keyword + ' (fuzzy)'
+          };
+        }
+      }
     }
   }
   
@@ -427,6 +574,16 @@ export interface TransferInfo {
   district: string | null;
   direction: 'from_airport' | 'to_airport' | 'city_to_city' | 'unknown';
   confidence: 'high' | 'medium' | 'low';
+  pickupAnalysis: {
+    airport: MatchResult | null;
+    city: MatchResult | null;
+    district: DistrictMatchResult | null;
+  };
+  dropoffAnalysis: {
+    airport: MatchResult | null;
+    city: MatchResult | null;
+    district: DistrictMatchResult | null;
+  };
 }
 
 export function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
@@ -442,7 +599,17 @@ export function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
     city: null,
     district: null,
     direction: 'unknown',
-    confidence: 'low'
+    confidence: 'low',
+    pickupAnalysis: {
+      airport: pickupAirport,
+      city: pickupCity,
+      district: pickupDistrict
+    },
+    dropoffAnalysis: {
+      airport: dropoffAirport,
+      city: dropoffCity,
+      district: dropoffDistrict
+    }
   };
   
   // Case 1: Airport to destination (district/city)
@@ -464,16 +631,63 @@ export function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
   // Case 3: City to city (no airport)
   else if (pickupCity && dropoffCity) {
     result.city = pickupCity.value;
-    result.district = pickupDistrict?.value || null;
+    result.district = pickupDistrict?.value || dropoffDistrict?.value || null;
     result.direction = 'city_to_city';
     result.confidence = 'medium';
+  }
+  // Case 4: Only airport found (one side)
+  else if (pickupAirport || dropoffAirport) {
+    result.airport = pickupAirport?.value || dropoffAirport?.value || null;
+    result.direction = pickupAirport ? 'from_airport' : 'to_airport';
+    result.confidence = 'low';
+  }
+  // Case 5: Only city/district found
+  else if (pickupCity || dropoffCity || pickupDistrict || dropoffDistrict) {
+    result.city = pickupCity?.value || dropoffCity?.value || pickupDistrict?.city || dropoffDistrict?.city || null;
+    result.district = pickupDistrict?.value || dropoffDistrict?.value || null;
+    result.confidence = 'low';
   }
   
   return result;
 }
 
+// ==================== VEHICLE TYPE MATCHING ====================
+export function getVehicleFallbackList(requestedVehicle: string): string[] {
+  // Direct match
+  if (VEHICLE_FALLBACK_ORDER[requestedVehicle]) {
+    return VEHICLE_FALLBACK_ORDER[requestedVehicle];
+  }
+  
+  // Partial match
+  const normalized = requestedVehicle.toLowerCase();
+  for (const [vehicle, fallbacks] of Object.entries(VEHICLE_FALLBACK_ORDER)) {
+    if (normalized.includes(vehicle.toLowerCase()) || vehicle.toLowerCase().includes(normalized)) {
+      return fallbacks;
+    }
+  }
+  
+  // Default fallback
+  return [requestedVehicle];
+}
+
 // ==================== DISCOUNT CALCULATION ====================
-export const VALID_PROMO_CODES = ['MEET40RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30'];
+export const VALID_PROMO_CODES = ['MEET40RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30', 'MEET10', 'WELCOME10'];
+
+export interface PromoCodeInfo {
+  code: string;
+  discountPercent: number;
+  appliesToReturn: boolean;
+  appliesToTotal: boolean;
+}
+
+export const PROMO_CODE_CONFIG: Record<string, PromoCodeInfo> = {
+  'MEET40RETURN': { code: 'MEET40RETURN', discountPercent: 40, appliesToReturn: true, appliesToTotal: false },
+  'GIDISDONUS': { code: 'GIDISDONUS', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
+  'RETURN30': { code: 'RETURN30', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
+  'MEET30': { code: 'MEET30', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
+  'MEET10': { code: 'MEET10', discountPercent: 10, appliesToReturn: false, appliesToTotal: true },
+  'WELCOME10': { code: 'WELCOME10', discountPercent: 10, appliesToReturn: false, appliesToTotal: true },
+};
 
 export function calculateDiscount(
   basePrice: number,
@@ -483,22 +697,35 @@ export function calculateDiscount(
   let discountApplied = false;
   let discountPercent = 0;
   let returnPrice: number | null = null;
+  let price = basePrice;
+  
+  const promoConfig = promoCode ? PROMO_CODE_CONFIG[promoCode.toUpperCase()] : null;
   
   if (hasReturnTrip) {
     returnPrice = basePrice;
     
-    // Apply 30% discount for return trip with valid promo code
-    if (promoCode && VALID_PROMO_CODES.includes(promoCode.toUpperCase())) {
-      returnPrice = Math.round(basePrice * 0.7);
+    // Apply discount for return trip with valid promo code
+    if (promoConfig && promoConfig.appliesToReturn) {
+      returnPrice = Math.round(basePrice * (1 - promoConfig.discountPercent / 100));
       discountApplied = true;
-      discountPercent = 30;
+      discountPercent = promoConfig.discountPercent;
     }
   }
   
-  const totalPrice = hasReturnTrip && returnPrice ? basePrice + returnPrice : basePrice;
+  // Apply discount to total if applicable
+  if (promoConfig && promoConfig.appliesToTotal && !discountApplied) {
+    price = Math.round(basePrice * (1 - promoConfig.discountPercent / 100));
+    if (returnPrice !== null) {
+      returnPrice = Math.round(returnPrice * (1 - promoConfig.discountPercent / 100));
+    }
+    discountApplied = true;
+    discountPercent = promoConfig.discountPercent;
+  }
+  
+  const totalPrice = hasReturnTrip && returnPrice !== null ? price + returnPrice : price;
   
   return {
-    price: basePrice,
+    price,
     returnPrice,
     totalPrice,
     discountApplied,
@@ -514,8 +741,23 @@ export function logAnalysis(
   dropoff: string,
   transferInfo: TransferInfo
 ): void {
-  console.log(`🚗 Auto-pricing ${type}: ${id}`);
-  console.log(`📍 Pickup: ${pickup}`);
-  console.log(`📍 Dropoff: ${dropoff}`);
-  console.log(`🎯 Analysis:`, JSON.stringify(transferInfo, null, 2));
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`🚗 AUTO-PRICING ${type.toUpperCase()}: ${id}`);
+  console.log(`${'='.repeat(60)}`);
+  console.log(`📍 PICKUP: ${pickup}`);
+  console.log(`   → Airport: ${transferInfo.pickupAnalysis.airport?.value || 'NOT FOUND'} ${transferInfo.pickupAnalysis.airport ? `(${transferInfo.pickupAnalysis.airport.matchedKeyword})` : ''}`);
+  console.log(`   → City: ${transferInfo.pickupAnalysis.city?.value || 'NOT FOUND'} ${transferInfo.pickupAnalysis.city ? `(${transferInfo.pickupAnalysis.city.matchedKeyword})` : ''}`);
+  console.log(`   → District: ${transferInfo.pickupAnalysis.district?.value || 'NOT FOUND'} ${transferInfo.pickupAnalysis.district ? `(${transferInfo.pickupAnalysis.district.matchedKeyword})` : ''}`);
+  console.log(`📍 DROPOFF: ${dropoff}`);
+  console.log(`   → Airport: ${transferInfo.dropoffAnalysis.airport?.value || 'NOT FOUND'} ${transferInfo.dropoffAnalysis.airport ? `(${transferInfo.dropoffAnalysis.airport.matchedKeyword})` : ''}`);
+  console.log(`   → City: ${transferInfo.dropoffAnalysis.city?.value || 'NOT FOUND'} ${transferInfo.dropoffAnalysis.city ? `(${transferInfo.dropoffAnalysis.city.matchedKeyword})` : ''}`);
+  console.log(`   → District: ${transferInfo.dropoffAnalysis.district?.value || 'NOT FOUND'} ${transferInfo.dropoffAnalysis.district ? `(${transferInfo.dropoffAnalysis.district.matchedKeyword})` : ''}`);
+  console.log(`${'─'.repeat(60)}`);
+  console.log(`🎯 RESULT:`);
+  console.log(`   → Airport: ${transferInfo.airport || 'N/A'}`);
+  console.log(`   → City: ${transferInfo.city || 'N/A'}`);
+  console.log(`   → District: ${transferInfo.district || 'N/A'}`);
+  console.log(`   → Direction: ${transferInfo.direction}`);
+  console.log(`   → Confidence: ${transferInfo.confidence}`);
+  console.log(`${'='.repeat(60)}\n`);
 }

@@ -5,6 +5,7 @@ import {
   analyzeTransfer,
   calculateDiscount,
   logAnalysis,
+  getVehicleFallbackList,
 } from "../_shared/priceMatching.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -168,70 +169,108 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Get vehicle fallback list for flexible matching
+    const vehicleFallbacks = getVehicleFallbackList(booking.vehicle_type);
+    console.log(`🚗 Vehicle requested: ${booking.vehicle_type}, Fallbacks: ${vehicleFallbacks.join(', ')}`);
+
     // Query for matching price - bidirectional (airport->address OR address->airport same price)
     let bestPrice = null;
+    let matchType = '';
 
-    // 1. Try exact match (airport + city + district + vehicle)
-    if (airport && city && district) {
-      const { data: exactMatch } = await supabase
-        .from("region_prices")
-        .select("*")
-        .eq("city", city)
-        .eq("airport", airport)
-        .eq("district", district)
-        .eq("vehicle_type", booking.vehicle_type)
-        .eq("is_active", true)
-        .limit(1);
+    // Try each vehicle type in fallback order
+    for (const vehicleType of vehicleFallbacks) {
+      if (bestPrice) break;
+      
+      // 1. Try exact match (airport + city + district + vehicle)
+      if (airport && city && district) {
+        const { data: exactMatch } = await supabase
+          .from("region_prices")
+          .select("*")
+          .eq("city", city)
+          .eq("airport", airport)
+          .eq("district", district)
+          .eq("vehicle_type", vehicleType)
+          .eq("is_active", true)
+          .limit(1);
 
-      if (exactMatch && exactMatch.length > 0) {
-        bestPrice = exactMatch[0];
-        console.log("✅ Exact match found:", bestPrice);
+        if (exactMatch && exactMatch.length > 0) {
+          bestPrice = exactMatch[0];
+          matchType = `exact (${airport} → ${city}/${district}) [${vehicleType}]`;
+          console.log(`✅ Exact match found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        }
       }
-    }
 
-    // 2. Try airport + city match (any district)
-    if (!bestPrice && airport && city) {
-      const { data: cityMatch } = await supabase
-        .from("region_prices")
-        .select("*")
-        .eq("city", city)
-        .eq("airport", airport)
-        .eq("vehicle_type", booking.vehicle_type)
-        .eq("is_active", true)
-        .order("price", { ascending: true })
-        .limit(1);
+      // 2. Try airport + city match (any district)
+      if (!bestPrice && airport && city) {
+        const { data: cityMatch } = await supabase
+          .from("region_prices")
+          .select("*")
+          .eq("city", city)
+          .eq("airport", airport)
+          .eq("vehicle_type", vehicleType)
+          .eq("is_active", true)
+          .order("price", { ascending: true })
+          .limit(1);
 
-      if (cityMatch && cityMatch.length > 0) {
-        bestPrice = cityMatch[0];
-        console.log("✅ City+Airport fallback match found:", bestPrice);
+        if (cityMatch && cityMatch.length > 0) {
+          bestPrice = cityMatch[0];
+          matchType = `city+airport (${airport} → ${city}) [${vehicleType}]`;
+          console.log(`✅ City+Airport match found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        }
       }
-    }
 
-    // 3. Try city only match (any airport)
-    if (!bestPrice && city) {
-      const { data: cityOnlyMatch } = await supabase
-        .from("region_prices")
-        .select("*")
-        .eq("city", city)
-        .eq("vehicle_type", booking.vehicle_type)
-        .eq("is_active", true)
-        .order("price", { ascending: true })
-        .limit(1);
+      // 3. Try city only match (any airport)
+      if (!bestPrice && city) {
+        const { data: cityOnlyMatch } = await supabase
+          .from("region_prices")
+          .select("*")
+          .eq("city", city)
+          .eq("vehicle_type", vehicleType)
+          .eq("is_active", true)
+          .order("price", { ascending: true })
+          .limit(1);
 
-      if (cityOnlyMatch && cityOnlyMatch.length > 0) {
-        bestPrice = cityOnlyMatch[0];
-        console.log("✅ City-only fallback match found:", bestPrice);
+        if (cityOnlyMatch && cityOnlyMatch.length > 0) {
+          bestPrice = cityOnlyMatch[0];
+          matchType = `city-only (${city}) [${vehicleType}]`;
+          console.log(`✅ City-only match found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        }
+      }
+
+      // 4. Try airport only match (if we have airport but city matching failed)
+      if (!bestPrice && airport) {
+        const { data: airportOnlyMatch } = await supabase
+          .from("region_prices")
+          .select("*")
+          .eq("airport", airport)
+          .eq("vehicle_type", vehicleType)
+          .eq("is_active", true)
+          .order("price", { ascending: true })
+          .limit(1);
+
+        if (airportOnlyMatch && airportOnlyMatch.length > 0) {
+          bestPrice = airportOnlyMatch[0];
+          matchType = `airport-only (${airport}) [${vehicleType}]`;
+          console.log(`✅ Airport-only match found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        }
       }
     }
 
     if (!bestPrice) {
-      console.log("❌ No price found for this route - sending manual price request to admin");
+      console.log("❌ No price found for this route after trying all vehicle fallbacks");
+      console.log(`   Searched: Airport=${airport}, City=${city}, District=${district}, Vehicles=${vehicleFallbacks.join(', ')}`);
       // Send email to admin for manual pricing
       await sendManualPriceRequestEmail(booking, transferInfo);
-      return new Response(JSON.stringify({ matched: false, reason: "no_price_found" }), {
+      return new Response(JSON.stringify({ 
+        matched: false, 
+        reason: "no_price_found",
+        searchedParams: { airport, city, district, vehicles: vehicleFallbacks }
+      }), {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
+
+    console.log(`🎯 Best price found: ${bestPrice.price} ${bestPrice.price_currency} | Match type: ${matchType}`);
 
     // Admin enters price in EUR - check if customer requested different currency
     const basePriceCurrency = bestPrice.price_currency || 'EUR';
