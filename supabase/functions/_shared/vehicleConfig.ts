@@ -29,29 +29,32 @@ export function getVehicleLabel(vehicleType: string): string {
 // Vehicle fallback order for price matching
 // When exact vehicle not found, try these in order
 export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
-  // Primary matches
-  'mercedes-vito': ['mercedes-vito', 'vip-mercedes', 'minibus'],
-  'vip-mercedes': ['vip-mercedes', 'mercedes-vito', 'maybach-minibus', 'minibus'],
-  'maybach-minibus': ['maybach-minibus', 'vip-mercedes', 'mercedes-vito', 'minibus'],
-  'minibus': ['minibus', 'vip-mercedes', 'mercedes-vito'],
+  // Primary vehicle types (new naming convention)
+  'mercedes-vito': ['mercedes-vito'],
+  'mercedes-vito-vip': ['mercedes-vito-vip'],
+  'mercedes-maybach': ['mercedes-maybach'],
+  'mercedes-sprinter': ['mercedes-sprinter'],
   
-  // Legacy vehicle type mappings (for backward compatibility)
-  'mercedes-vclass': ['vip-mercedes', 'mercedes-vito', 'maybach-minibus'],
-  'maybach': ['maybach-minibus', 'vip-mercedes'],
+  // Legacy vehicle type mappings (for backward compatibility with old DB entries)
+  'vip-mercedes': ['mercedes-vito-vip', 'vip-mercedes'],
+  'maybach-minibus': ['mercedes-maybach', 'maybach-minibus'],
+  'minibus': ['mercedes-sprinter', 'minibus'],
+  'mercedes-vclass': ['mercedes-vito-vip', 'vip-mercedes'],
+  'maybach': ['mercedes-maybach', 'maybach-minibus'],
   
   // Common aliases
-  'Mercedes Vito': ['mercedes-vito', 'vip-mercedes', 'minibus'],
-  'Mercedes Vito VIP': ['vip-mercedes', 'mercedes-vito', 'maybach-minibus'],
-  'VIP Vito': ['vip-mercedes', 'mercedes-vito', 'maybach-minibus'],
-  'Mercedes V-Class': ['vip-mercedes', 'mercedes-vito', 'maybach-minibus'],
-  'V-Class': ['vip-mercedes', 'mercedes-vito', 'maybach-minibus'],
-  'Mercedes Sprinter': ['minibus', 'mercedes-vito'],
-  'Mercedes Sprinter VIP': ['minibus', 'vip-mercedes'],
-  'Mercedes Maybach': ['maybach-minibus', 'vip-mercedes'],
-  'Maybach Minivan': ['maybach-minibus', 'vip-mercedes'],
-  'VIP': ['vip-mercedes', 'maybach-minibus', 'mercedes-vito'],
-  'Minivan': ['mercedes-vito', 'vip-mercedes'],
-  'Minibus': ['minibus', 'mercedes-vito'],
+  'Mercedes Vito': ['mercedes-vito'],
+  'Mercedes Vito VIP': ['mercedes-vito-vip', 'vip-mercedes'],
+  'VIP Vito': ['mercedes-vito-vip', 'vip-mercedes'],
+  'Mercedes V-Class': ['mercedes-vito-vip', 'vip-mercedes'],
+  'V-Class': ['mercedes-vito-vip', 'vip-mercedes'],
+  'Mercedes Sprinter': ['mercedes-sprinter', 'minibus'],
+  'Mercedes Sprinter VIP': ['mercedes-sprinter', 'minibus'],
+  'Mercedes Maybach': ['mercedes-maybach', 'maybach-minibus'],
+  'Maybach Minivan': ['mercedes-maybach', 'maybach-minibus'],
+  'VIP': ['mercedes-vito-vip', 'vip-mercedes'],
+  'Minivan': ['mercedes-vito'],
+  'Minibus': ['mercedes-sprinter', 'minibus'],
 };
 
 // Get vehicle fallback list for price matching
