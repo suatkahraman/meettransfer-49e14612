@@ -113,7 +113,7 @@ const AdminEditReservation = () => {
   const returnToParam = searchParams.get('returnTo');
   const returnTo = returnToParam ? decodeURIComponent(returnToParam) : '/admin/reservations';
   const { logAction } = useAuditLog();
-  const { emailCustomerPriceSet, emailDriverAssigned, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed, emailAgencyApproved, emailAgencyRejected, emailAgencyPriceSet } = useEmailNotifications();
+  const { emailCustomerPriceSet, emailDriverAssigned, emailDriverReservationUpdated, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed, emailAgencyApproved, emailAgencyRejected, emailAgencyPriceSet } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sendingPrice, setSendingPrice] = useState(false);
@@ -1096,6 +1096,66 @@ const AdminEditReservation = () => {
       }
     } catch (e) {
       console.error('Failed to convert agency price to TRY:', e);
+    }
+
+    // Send email notification to driver if reservation was updated and driver is assigned
+    // This covers: changes to an already assigned reservation OR new driver assignment that wasn't caught by shouldSendDriverEmail
+    try {
+      const prevDriverId = (originalData?.driver_id as string | undefined) || '';
+      const newDriverId = formData.driver_id || '';
+      const newStatus = formData.status;
+      
+      // Check if there are meaningful changes that the driver should know about
+      const hasReservationChanges = 
+        formData.pickup !== originalData?.pickup ||
+        formData.dropoff !== originalData?.dropoff ||
+        formData.pickup_date !== originalData?.pickup_date ||
+        formData.pickup_time !== originalData?.pickup_time ||
+        formData.vehicle_type !== originalData?.vehicle_type ||
+        formData.payment_type !== originalData?.payment_type ||
+        formData.passenger_cash_amount !== (originalData?.passenger_cash_amount?.toString() || '') ||
+        passengerNames.join(',') !== ((originalData as any)?.passenger_names || []).join(',');
+
+      // Send update email if:
+      // 1. Driver is assigned (newDriverId exists)
+      // 2. It's the same driver (not a new assignment - new assignments get driver_assigned_driver email)
+      // 3. There are meaningful changes
+      // 4. Status is active/sent_to_driver/confirmed (driver should be aware of the job)
+      const driverActiveStatuses = ['sent_to_driver', 'active', 'confirmed'];
+      const shouldSendUpdateEmail = 
+        Boolean(newDriverId) && 
+        prevDriverId === newDriverId && // Same driver (not a new assignment)
+        hasReservationChanges &&
+        driverActiveStatuses.includes(newStatus);
+
+      if (shouldSendUpdateEmail) {
+        console.log('Sending reservation update email to driver:', newDriverId);
+        
+        const selectedDriver = drivers.find(d => d.id === newDriverId);
+        
+        // Get driver email
+        let resolvedDriverEmail: string | undefined = undefined;
+        const { data: emailData, error: emailError } = await supabase.functions.invoke('get-driver-email', {
+          body: { driver_id: newDriverId },
+        });
+
+        if (emailError) {
+          console.error('Failed to fetch driver email for update:', emailError);
+        } else if ((emailData as any)?.email) {
+          resolvedDriverEmail = (emailData as any).email as string;
+        }
+
+        if (resolvedDriverEmail) {
+          const updateEmailResult = await emailDriverReservationUpdated(id!, resolvedDriverEmail, selectedDriver?.name);
+          if (!updateEmailResult.success) {
+            console.error('Failed to send driver update email:', updateEmailResult.error);
+          } else {
+            console.log('Driver update email sent successfully');
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Failed to send driver update email:', e);
     }
 
     toast.success('Reservation updated');
