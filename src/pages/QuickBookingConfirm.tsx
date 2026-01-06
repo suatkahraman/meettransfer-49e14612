@@ -688,9 +688,7 @@ export default function QuickBookingConfirm() {
                   const isSelected = (selectedVehicle || booking.vehicle_type) === vehicle.vehicleType;
                   const vehicleInfo = VEHICLE_TYPE_MAP[vehicle.vehicleType];
                   
-                  // Get first image or fallback
-                  const vehicleImage = vehicleInfo?.images?.[0]?.src;
-                  const vehicleAlt = vehicleInfo?.images?.[0]?.alt || vehicle.vehicleLabel;
+                  const vehicleImages = vehicleInfo?.images || [];
                   
                   return (
                     <div
@@ -707,14 +705,26 @@ export default function QuickBookingConfirm() {
                       `}
                     >
                       <div className="flex items-start gap-4">
-                        {/* Vehicle Image */}
-                        <div className="w-24 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                          {vehicleImage ? (
-                            <img
-                              src={vehicleImage}
-                              alt={vehicleAlt}
-                              className="w-full h-full object-cover"
-                            />
+                        {/* Vehicle Image Carousel */}
+                        <div className="w-28 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                          {vehicleImages.length > 0 ? (
+                            <Carousel 
+                              className="w-full h-full"
+                              plugins={[Autoplay({ delay: 3000, stopOnInteraction: false })]}
+                              opts={{ loop: true }}
+                            >
+                              <CarouselContent className="h-full">
+                                {vehicleImages.slice(0, 4).map((img, idx) => (
+                                  <CarouselItem key={idx} className="h-full">
+                                    <img
+                                      src={img.src}
+                                      alt={img.alt}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </CarouselItem>
+                                ))}
+                              </CarouselContent>
+                            </Carousel>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-muted">
                               <Car className="h-8 w-8 text-muted-foreground" />
