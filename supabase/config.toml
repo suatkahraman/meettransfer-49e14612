@@ -119,3 +119,9 @@ verify_jwt = false
 
 [functions.convert-agency-price-to-try]
 verify_jwt = true
+
+[functions.auto-price-quick-booking]
+verify_jwt = false
+
+[functions.auto-price-reservation]
+verify_jwt = true

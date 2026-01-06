@@ -531,6 +531,23 @@ const ReservationForm = () => {
         // Don't block the user - reservation was created successfully
       }
 
+      // Try auto-pricing for logged-in customer reservations (not from quick booking)
+      if (!isFromQuickBooking && !hasPendingReservation) {
+        try {
+          const { data: autoPriceResult } = await supabase.functions.invoke('auto-price-reservation', {
+            body: { reservation_id: reservation.id }
+          });
+          
+          if (autoPriceResult?.matched) {
+            console.log('Auto-pricing successful:', autoPriceResult);
+            toast.success(`Fiyat: ${autoPriceResult.price} ${autoPriceResult.currency}`);
+          }
+        } catch (autoPriceError) {
+          console.error('Auto-pricing failed:', autoPriceError);
+          // Continue with normal flow - admin will price manually
+        }
+      }
+
       // Send email notification to admin
       try {
         await emailAdminNewReservation(reservation.id);
