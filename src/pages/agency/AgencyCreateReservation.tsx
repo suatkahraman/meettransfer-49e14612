@@ -43,6 +43,8 @@ const AgencyCreateReservation = () => {
     vehicle_type: 'mercedes-vito',
     payment_type: 'agency_pay',
     customer_notes: '',
+    luggage_count: '',
+    baby_seat_count: '',
     // Place details
     pickup_place_name: '',
     pickup_lat: null as number | null,
@@ -137,6 +139,8 @@ const AgencyCreateReservation = () => {
           agency_id: agencyId,
           passenger_names: validPassengerNames,
           customer_notes: formData.customer_notes || null,
+          luggage_count: formData.luggage_count ? parseInt(formData.luggage_count) : null,
+          baby_seat_count: formData.baby_seat_count ? parseInt(formData.baby_seat_count) : null,
           // Place details
           pickup_place_name: formData.pickup_place_name || null,
           pickup_lat: formData.pickup_lat,
@@ -384,6 +388,36 @@ const AgencyCreateReservation = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>{t('luggageCount') || 'Valiz Sayısı'}</Label>
+                    <Select value={formData.luggage_count} onValueChange={(v) => setFormData({...formData, luggage_count: v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectLuggage') || 'Valiz seçin'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">{t('none') || 'Yok'}</SelectItem>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                          <SelectItem key={n} value={n.toString()}>{n} {t('luggage') || 'Valiz'}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>{t('babySeatCount') || 'Bebek Koltuğu'}</Label>
+                    <Select value={formData.baby_seat_count} onValueChange={(v) => setFormData({...formData, baby_seat_count: v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectBabySeat') || 'Bebek koltuğu seçin'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">{t('none') || 'Yok'}</SelectItem>
+                        <SelectItem value="1">1 {t('babySeat') || 'Bebek Koltuğu'}</SelectItem>
+                        <SelectItem value="2">2 {t('babySeat') || 'Bebek Koltuğu'}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
