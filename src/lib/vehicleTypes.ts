@@ -120,7 +120,7 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
   },
   {
     value: 'maybach-minibus',
-    label: 'Maybach Minibus',
+    label: 'Maybach Minivan',
     passengers: 4,
     luggage: 4,
     description: 'Ultra-luxury Maybach class minivan with exclusive starlight roof, entertainment system, and first-class seating. The pinnacle of private transfers.',
@@ -136,10 +136,8 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'sparkles', label: 'RGB Ambient Lighting', labelTr: 'RGB Ambiyans' },
     ],
     images: [
-      { src: meetTransferCyprus, alt: "Meet Transfer Maybach service in Cyprus" },
       { src: maybachInterior, alt: "Mercedes Maybach starlight ceiling luxury interior" },
       { src: maybachPassengersBlue, alt: "VIP passengers in Mercedes Maybach blue ambient lighting" },
-      { src: meetTransferDubai, alt: "Meet Transfer Maybach luxury service Dubai" },
       { src: maybachInteriorPurple, alt: "Mercedes Maybach purple starlight ceiling with TV entertainment" },
       { src: maybachInteriorOrange, alt: "Mercedes Maybach orange leather interior with starlight roof" },
     ],
