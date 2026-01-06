@@ -1091,6 +1091,7 @@ export type Database = {
           admin_set_price: number | null
           agency_id: string | null
           agency_user_id: string | null
+          baby_seat_count: number | null
           created_at: string | null
           customer_id: string | null
           customer_name: string
@@ -1116,6 +1117,7 @@ export type Database = {
           id: string
           is_return_transfer: boolean | null
           last_notified_arrival_time: string | null
+          luggage_count: number | null
           original_reservation_id: string | null
           passenger_cash_amount: number | null
           passenger_cash_currency: string | null
@@ -1141,6 +1143,7 @@ export type Database = {
           admin_set_price?: number | null
           agency_id?: string | null
           agency_user_id?: string | null
+          baby_seat_count?: number | null
           created_at?: string | null
           customer_id?: string | null
           customer_name: string
@@ -1166,6 +1169,7 @@ export type Database = {
           id?: string
           is_return_transfer?: boolean | null
           last_notified_arrival_time?: string | null
+          luggage_count?: number | null
           original_reservation_id?: string | null
           passenger_cash_amount?: number | null
           passenger_cash_currency?: string | null
@@ -1191,6 +1195,7 @@ export type Database = {
           admin_set_price?: number | null
           agency_id?: string | null
           agency_user_id?: string | null
+          baby_seat_count?: number | null
           created_at?: string | null
           customer_id?: string | null
           customer_name?: string
@@ -1216,6 +1221,7 @@ export type Database = {
           id?: string
           is_return_transfer?: boolean | null
           last_notified_arrival_time?: string | null
+          luggage_count?: number | null
           original_reservation_id?: string | null
           passenger_cash_amount?: number | null
           passenger_cash_currency?: string | null
