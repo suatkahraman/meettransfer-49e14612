@@ -32,7 +32,7 @@ const SabihaGokcenPrivateTransfer = () => {
       <SEOHead
         title="Sabiha Gökçen Private Transfer | SAW Airport Shuttle Service | Meet Transfer"
         description="Book Sabiha Gökçen Airport (SAW) private transfer from €45. Direct service to Taksim, Kadıköy & all Istanbul. Meet & greet, fixed prices. Book now!"
-        keywords="Sabiha Gökçen transfer, SAW airport transfer, Sabiha Gökçen taxi, SAW to Taksim, Sabiha Gökçen private transfer, SAW airport shuttle"
+        keywords="Sabiha Gökçen transfer, SAW airport transfer, SAW to Taksim, Sabiha Gökçen private transfer, SAW airport shuttle"
         canonicalPath="/sabiha-gokcen-private-transfer"
       />
       <SchemaOrg schemas={[

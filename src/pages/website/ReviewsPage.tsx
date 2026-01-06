@@ -89,7 +89,7 @@ const tripAdvisorReviews = [
     location: "",
     rating: 5,
     title: "Excellent Service",
-    text: "A good reliable transportation service. After dealing with unscrupulous taxi drivers and other hassles this service was a godsend.",
+    text: "A good reliable transportation service. After dealing with other hassles this service was a godsend.",
     date: "December 2024",
     type: "Family",
   },

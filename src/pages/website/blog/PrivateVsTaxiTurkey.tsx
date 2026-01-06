@@ -13,24 +13,24 @@ const PrivateVsTaxiTurkey = () => {
 
   const faqItems = [
     {
-      question: "Is private transfer safer than taxi in Turkey?",
+      question: "Is private transfer safer than regular transport in Turkey?",
       answer: "Yes, private transfers are generally safer. Vehicles are regularly maintained, drivers are professionally trained and vetted, and companies are fully licensed and insured. You also know exactly who is picking you up."
     },
     {
-      question: "How much more expensive is private transfer than taxi?",
-      answer: "Private transfers typically cost 2-3 times more than taxi for short distances. However, when traveling with 2+ people, the per-person cost becomes comparable. For longer distances, the difference is smaller."
+      question: "How much more expensive is private transfer than regular transport?",
+      answer: "Private transfers typically cost 2-3 times more than regular transport for short distances. However, when traveling with 2+ people, the per-person cost becomes comparable. For longer distances, the difference is smaller."
     },
     {
-      question: "Can I get a taxi at Turkish airports 24/7?",
-      answer: "Yes, taxis are available 24/7 at all major Turkish airports. However, late-night availability may be limited, and night tariffs (50% extra) apply between midnight and 6 AM."
+      question: "Can I get transport at Turkish airports 24/7?",
+      answer: "Yes, transport options are available 24/7 at all major Turkish airports. However, late-night availability may be limited, and night tariffs (50% extra) apply between midnight and 6 AM."
     },
     {
-      question: "Do Turkish taxi drivers speak English?",
+      question: "Do Turkish drivers speak English?",
       answer: "English proficiency varies widely. Drivers in tourist areas like Istanbul, Antalya, and Bodrum may have basic English, but communication can still be challenging. Private transfer drivers are typically fluent in English."
     },
     {
       question: "What happens if my flight is delayed?",
-      answer: "With private transfer, your driver monitors your flight and adjusts accordingly - no extra charge. With a taxi, you simply take whatever is available when you arrive, but there's no pre-arranged pickup."
+      answer: "With private transfer, your driver monitors your flight and adjusts accordingly - no extra charge. With regular transport, you simply take whatever is available when you arrive, but there's no pre-arranged pickup."
     },
     {
       question: "Which option is better for families with children?",
@@ -43,7 +43,7 @@ const PrivateVsTaxiTurkey = () => {
       <SEOHead
         title={t('blogPrivateTaxiTitle')}
         description={t('blogPrivateTaxiDesc')}
-        keywords="private transfer vs taxi Turkey, Turkey airport taxi, private car Turkey, Turkish taxi tips, airport transfer comparison, is private transfer worth it"
+        keywords="private transfer Turkey, Turkey airport transfer, private car Turkey, Turkish transport tips, airport transfer comparison, is private transfer worth it"
         canonicalPath="/blog/private-vs-taxi-transfer-turkey"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
         ogType="article"

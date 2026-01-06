@@ -729,35 +729,35 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Blog 1: Istanbul Airport to City
     blogIstanbul1Title: "Best Way to Get from Istanbul Airport to City Center (2025 Guide)",
-    blogIstanbul1Desc: "Complete guide to Istanbul Airport transportation. Compare private transfers, taxis, metro & buses. Find the safest, fastest way to reach Taksim, Sultanahmet. Updated prices & tips.",
+    blogIstanbul1Desc: "Complete guide to Istanbul Airport transportation. Compare private transfers, metro & buses. Find the safest, fastest way to reach Taksim, Sultanahmet. Updated prices & tips.",
     blogIstanbul1H1: "Best Way to Get from Istanbul Airport to City Center",
-    blogIstanbul1Intro: "Complete guide to Istanbul Airport transportation options. Compare private transfers, taxis, metro, and buses. Find the safest, fastest, and most comfortable way to reach Taksim, Sultanahmet, or your hotel.",
+    blogIstanbul1Intro: "Complete guide to Istanbul Airport transportation options. Compare private transfers, metro, and buses. Find the safest, fastest, and most comfortable way to reach Taksim, Sultanahmet, or your hotel.",
     
     // Blog 2: Istanbul Transfer Price Guide
     blogIstanbul2Title: "Istanbul Airport Transfer Prices 2025 | Complete Price Guide",
-    blogIstanbul2Desc: "Complete guide to Istanbul Airport transfer prices. Compare private transfer, taxi, and bus costs. Fixed prices to Taksim, Sultanahmet, Kadıköy and more.",
+    blogIstanbul2Desc: "Complete guide to Istanbul Airport transfer prices. Compare private transfer and bus costs. Fixed prices to Taksim, Sultanahmet, Kadıköy and more.",
     blogIstanbul2H1: "Istanbul Airport Transfer Prices 2025",
-    blogIstanbul2Intro: "Complete guide to Istanbul Airport transfer costs. Compare prices for private transfers, taxis, and public transport to all major destinations.",
+    blogIstanbul2Intro: "Complete guide to Istanbul Airport transfer costs. Compare prices for private transfers and public transport to all major destinations.",
     
-    // Blog 3: Private vs Taxi Turkey
-    blogPrivateTaxiTitle: "Private Transfer vs Taxi in Turkey: Honest Comparison (2025)",
-    blogPrivateTaxiDesc: "Detailed comparison of private airport transfers and taxis in Turkey. We analyze safety, comfort, pricing, and reliability. Make the best choice for your trip.",
-    blogPrivateTaxiH1: "Private Transfer vs Taxi in Turkey: Which is Better?",
-    blogPrivateTaxiIntro: "An honest comparison of private airport transfers and regular taxis in Turkey. We analyze safety, comfort, pricing, and reliability to help you make the best choice for your trip.",
+    // Blog 3: Private vs Regular Turkey
+    blogPrivateTaxiTitle: "Private Transfer vs Regular Transport in Turkey: Honest Comparison (2025)",
+    blogPrivateTaxiDesc: "Detailed comparison of private airport transfers and regular transport in Turkey. We analyze safety, comfort, pricing, and reliability. Make the best choice for your trip.",
+    blogPrivateTaxiH1: "Private Transfer vs Regular Transport in Turkey: Which is Better?",
+    blogPrivateTaxiIntro: "An honest comparison of private airport transfers and regular transport in Turkey. We analyze safety, comfort, pricing, and reliability to help you make the best choice for your trip.",
     
     // Blog 4: Antalya Airport Transfer Guide
     blogAntalyaTitle: "Antalya Airport Transfer Guide 2025 | Prices, Options & Tips",
-    blogAntalyaDesc: "Complete guide to Antalya Airport transfers. Prices to Belek, Side, Alanya, Kemer. Compare private transfers, taxis, and buses. Book your VIP transfer.",
+    blogAntalyaDesc: "Complete guide to Antalya Airport transfers. Prices to Belek, Side, Alanya, Kemer. Compare private transfers and buses. Book your VIP transfer.",
     
     // Blog 5: Is Private Transfer Worth It
     blogWorthItTitle: "Is Private Transfer Worth It in Turkey? (Honest Analysis 2025)",
-    blogWorthItDesc: "We break down the real costs and benefits of private airport transfers in Turkey. From safety to convenience, discover why thousands choose VIP transfers over taxis.",
+    blogWorthItDesc: "We break down the real costs and benefits of private airport transfers in Turkey. From safety to convenience, discover why thousands choose VIP transfers.",
     blogWorthItH1: "Is Private Transfer Worth It in Turkey?",
     blogWorthItIntro: "We break down the real costs and benefits of private airport transfers in Turkey. From safety to convenience, discover why thousands of travelers choose VIP transfers over other options.",
     
     // Blog 6: Dubai Airport Transfer Guide
     blogDubaiTitle: "Dubai Airport Transfer Guide 2025 | Prices, Options & Tips",
-    blogDubaiDesc: "Complete guide to Dubai Airport transfers. Prices to Palm Jumeirah, Downtown, Marina. Compare private transfers, taxis, and metro. Book your VIP transfer.",
+    blogDubaiDesc: "Complete guide to Dubai Airport transfers. Prices to Palm Jumeirah, Downtown, Marina. Compare private transfers and metro. Book your VIP transfer.",
     
     // Blog 7: Cyprus Airport Transfer Guide
     blogCyprusTitle: "Cyprus Airport Transfer Guide 2025 | Larnaca, Paphos, Ercan",
@@ -792,9 +792,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Istanbul Transfer Price Guide - Detailed
     blogPriceSeoTitle: "Istanbul Airport Transfer Price Guide 2025 | Compare All Options",
-    blogPriceSeoDesc: "Updated Istanbul Airport transfer prices for 2025. Compare private transfer, taxi, and bus costs. Fixed pricing, no hidden fees. Prices to Taksim, Sultanahmet, Kadıköy and more.",
+    blogPriceSeoDesc: "Updated Istanbul Airport transfer prices for 2025. Compare private transfer and bus costs. Fixed pricing, no hidden fees. Prices to Taksim, Sultanahmet, Kadıköy and more.",
     blogPriceH1: "Istanbul Airport Transfer Price Guide 2025",
-    blogPriceIntro: "Complete pricing breakdown for Istanbul Airport transfers. Compare private transfers, taxis, and shuttle buses. Updated prices for all major destinations with no hidden fees.",
+    blogPriceIntro: "Complete pricing breakdown for Istanbul Airport transfers. Compare private transfers and shuttle buses. Updated prices for all major destinations with no hidden fees.",
     blogPriceBadge: "Price Guide",
     blogPriceSection1Title: "Understanding Istanbul Airport Transfer Pricing",
     blogPriceSection1P1: "Planning your transportation from Istanbul Airport (IST) to the city? Understanding the true cost of different transfer options is crucial for budgeting your trip.",
@@ -802,10 +802,10 @@ const translations: Record<Language, Record<string, string>> = {
     blogPriceSection2Title: "Complete Price Comparison by Destination",
     blogPriceSection2Intro: "Here's a detailed breakdown of prices from Istanbul Airport to all major destinations:",
     blogPriceTableDestination: "Destination",
-    blogPriceTableTaxi: "Taxi (Metered)",
+    blogPriceTableTaxi: "Regular (Metered)",
     blogPriceTablePrivate: "Private Transfer",
     blogPriceTableBus: "Havaist Bus",
-    blogPriceTableNote: "*Prices are approximate and may vary. Taxi prices are estimates based on typical traffic conditions. Private transfer prices are fixed regardless of traffic.",
+    blogPriceTableNote: "*Prices are approximate and may vary. Regular transport prices are estimates based on typical traffic conditions. Private transfer prices are fixed regardless of traffic.",
     blogPriceSection3Title: "Private Transfer Pricing by Vehicle Type",
     blogPriceSection3Intro: "We offer a range of vehicles to suit every need and budget. Here's our complete vehicle pricing:",
     blogPriceTableVehicle: "Vehicle",
@@ -823,7 +823,7 @@ const translations: Record<Language, Record<string, string>> = {
     blogPriceInclude7: "Up to 60 min free waiting time",
     blogPriceInclude8: "Child seats (on request)",
     blogPriceSection5Title: "Hidden Costs to Watch For",
-    blogPriceSection5Intro: "When comparing prices, be aware of potential hidden costs with taxis: night tariffs, traffic delays, and bridge tolls.",
+    blogPriceSection5Intro: "When comparing prices, be aware of potential hidden costs: night tariffs, traffic delays, and bridge tolls.",
     blogPriceSection6Title: "When is Private Transfer Most Cost-Effective?",
     blogPriceSection6Intro: "Private transfers become more economical for groups of 2+, night arrivals, peak traffic times, and distant destinations.",
     blogPriceConclusion: "Conclusion: Getting the Best Value",
@@ -836,8 +836,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogPriceFaq1A: "Private transfer prices from Istanbul Airport range from $55-75 for standard destinations like Taksim or Sultanahmet. Prices vary based on vehicle type and destination distance.",
     blogPriceFaq2Q: "Are Istanbul Airport transfer prices fixed?",
     blogPriceFaq2A: "Yes, reputable transfer companies offer fixed prices with no hidden fees. The price you're quoted is the price you pay, regardless of traffic conditions.",
-    blogPriceFaq3Q: "Is it cheaper to take a taxi or private transfer?",
-    blogPriceFaq3A: "Taxis appear cheaper at first ($20-30) but can vary with traffic. Private transfers ($55-75) offer fixed pricing, better service, and are more cost-effective for groups.",
+    blogPriceFaq3Q: "Is it cheaper to take regular transport or private transfer?",
+    blogPriceFaq3A: "Regular transport appears cheaper at first ($20-30) but can vary with traffic. Private transfers ($55-75) offer fixed pricing, better service, and are more cost-effective for groups.",
     blogPriceFaq4Q: "Do private transfers include all fees?",
     blogPriceFaq4A: "Yes, our prices include meet & greet service, luggage assistance, parking fees, tolls, and complimentary water. There are no additional charges.",
     blogPriceFaq5Q: "What factors affect transfer prices?",
