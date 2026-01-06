@@ -163,13 +163,14 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
 
-      // 3. Try city + district match (without airport - for intercity transfers)
+      // 3. Try city + district match (ONLY when airport is null - true intercity rows)
       if (!bestPrice && city && district) {
         const { data: cityDistrictMatch } = await supabase
           .from("region_prices")
           .select("*")
           .eq("city", city)
           .eq("district", district)
+          .is("airport", null)
           .eq("vehicle_type", vehicleType)
           .eq("is_active", true)
           .limit(1);
