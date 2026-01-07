@@ -49,6 +49,7 @@ interface BookingRequest {
   promo_code?: string;
   luggage_count?: number;
   baby_seat_count?: number;
+  all_vehicle_prices?: Record<string, number> | null; // Admin's manual prices for all vehicles
 }
 
 interface VehiclePriceInfo {
@@ -351,6 +352,34 @@ export default function QuickBookingConfirm() {
     
     setLoadingPrices(true);
     try {
+      // First check if admin set manual prices for all vehicles
+      if (booking.all_vehicle_prices && Object.keys(booking.all_vehicle_prices).length > 0) {
+        console.log("Using admin's manual vehicle prices:", booking.all_vehicle_prices);
+        
+        // Convert admin's manual prices to VehiclePriceInfo format
+        const VEHICLE_CONFIG: Record<string, { label: string; passengers: number; luggage: number }> = {
+          'mercedes-vito': { label: 'Mercedes Vito', passengers: 6, luggage: 6 },
+          'vip-mercedes': { label: 'VIP Mercedes', passengers: 5, luggage: 5 },
+          'maybach-minibus': { label: 'Maybach Minibus', passengers: 4, luggage: 4 },
+          'minibus': { label: 'Mercedes Sprinter', passengers: 16, luggage: 16 },
+        };
+        
+        const manualPrices: VehiclePriceInfo[] = Object.entries(VEHICLE_CONFIG).map(([vehicleType, config]) => ({
+          vehicleType,
+          vehicleLabel: config.label,
+          price: booking.all_vehicle_prices?.[vehicleType] || null,
+          currency: booking.price_currency,
+          passengers: config.passengers,
+          luggage: config.luggage,
+          available: !!booking.all_vehicle_prices?.[vehicleType],
+        }));
+        
+        setAllVehiclePrices(manualPrices);
+        setLoadingPrices(false);
+        return;
+      }
+      
+      // Fallback to fetching from region_prices
       const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
         body: {
           pickup: booking.pickup,

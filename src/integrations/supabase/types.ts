@@ -865,6 +865,7 @@ export type Database = {
           admin_message: string | null
           agency_id: string | null
           agency_user_id: string | null
+          all_vehicle_prices: Json | null
           baby_seat_count: number | null
           confirmation_token: string
           confirmed_at: string | null
@@ -899,6 +900,7 @@ export type Database = {
           admin_message?: string | null
           agency_id?: string | null
           agency_user_id?: string | null
+          all_vehicle_prices?: Json | null
           baby_seat_count?: number | null
           confirmation_token?: string
           confirmed_at?: string | null
@@ -933,6 +935,7 @@ export type Database = {
           admin_message?: string | null
           agency_id?: string | null
           agency_user_id?: string | null
+          all_vehicle_prices?: Json | null
           baby_seat_count?: number | null
           confirmation_token?: string
           confirmed_at?: string | null

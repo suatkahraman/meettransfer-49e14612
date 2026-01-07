@@ -145,6 +145,14 @@ export default function AdminQuickBookings() {
   });
   const [deleting, setDeleting] = useState(false);
   
+  // Multi-vehicle pricing state
+  const [allVehiclePrices, setAllVehiclePrices] = useState<Record<string, string>>({
+    "mercedes-vito": "",
+    "vip-mercedes": "",
+    "maybach-minibus": "",
+    "minibus": "",
+  });
+  
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<TabValue>("all");
@@ -227,32 +235,62 @@ export default function AdminQuickBookings() {
   }), [requests]);
 
   const sendPrice = async () => {
-    if (!selectedRequest || !price) {
-      toast.error("Please enter a price");
+    if (!selectedRequest) return;
+
+    // Check if any vehicle price is entered
+    const hasAnyVehiclePrice = Object.values(allVehiclePrices).some(p => p && parseFloat(p) > 0);
+    const hasSinglePrice = price && parseFloat(price) > 0;
+
+    if (!hasAnyVehiclePrice && !hasSinglePrice) {
+      toast.error("En az bir araç için fiyat giriniz");
       return;
     }
 
-    // Check if return trip exists and return price is required
-    if (selectedRequest.has_return_trip && !returnPrice) {
+    // Check if return trip exists and return price is required (only for single price mode)
+    if (selectedRequest.has_return_trip && hasSinglePrice && !hasAnyVehiclePrice && !returnPrice) {
       toast.error("Dönüş transferi için fiyat giriniz");
       return;
     }
 
     setSendingPrice(true);
     try {
-      const priceValue = parseFloat(price);
+      // Build all vehicle prices object (only non-empty values)
+      const vehiclePricesJson: Record<string, number> = {};
+      Object.entries(allVehiclePrices).forEach(([vehicle, priceStr]) => {
+        if (priceStr && parseFloat(priceStr) > 0) {
+          vehiclePricesJson[vehicle] = parseFloat(priceStr);
+        }
+      });
+
+      // Determine primary price (for selected vehicle or first entered price)
+      let priceValue: number;
+      if (hasSinglePrice && !hasAnyVehiclePrice) {
+        // Single price mode
+        priceValue = parseFloat(price);
+      } else {
+        // Multi-vehicle mode - use price for requested vehicle, or first available
+        priceValue = vehiclePricesJson[selectedRequest.vehicle_type] || Object.values(vehiclePricesJson)[0] || 0;
+      }
+
       const returnPriceValue = returnPrice ? parseFloat(returnPrice) : null;
       
       // Store the original return price - discount will be calculated on client side
       // This allows the customer to see the original price with strikethrough
+      const updateData: any = {
+        price: priceValue,
+        price_currency: currency,
+        status: "price_sent",
+        return_price: returnPriceValue,
+      };
+
+      // Add all vehicle prices if multi-vehicle mode is used
+      if (Object.keys(vehiclePricesJson).length > 0) {
+        updateData.all_vehicle_prices = vehiclePricesJson;
+      }
+
       const { error: updateError } = await supabase
         .from("quick_booking_requests")
-        .update({
-          price: priceValue,
-          price_currency: currency,
-          status: "price_sent",
-          return_price: returnPriceValue, // Store original price, not discounted
-        })
+        .update(updateData)
         .eq("id", selectedRequest.id);
 
       if (updateError) throw updateError;
@@ -263,6 +301,9 @@ export default function AdminQuickBookings() {
           price: priceValue,
           price_currency: currency,
           action: "sent",
+          customer_note: Object.keys(vehiclePricesJson).length > 0 
+            ? `Manuel fiyat (${Object.keys(vehiclePricesJson).length} araç): ${Object.entries(vehiclePricesJson).map(([v, p]) => `${vehicleLabels[v] || v}: ${p}${getCurrencySymbol(currency)}`).join(', ')}`
+            : undefined,
         });
       } catch (e) {
         console.error("Failed to record price history:", e);
@@ -289,6 +330,8 @@ export default function AdminQuickBookings() {
               return_date: selectedRequest.return_date ?? undefined,
               return_time: selectedRequest.return_time ?? undefined,
               promo_code: selectedRequest.promo_code ?? undefined,
+              // All vehicle prices for customer display
+              all_vehicle_prices: Object.keys(vehiclePricesJson).length > 0 ? vehiclePricesJson : undefined,
             },
           }
         );
@@ -309,6 +352,12 @@ export default function AdminQuickBookings() {
       setDetailDialogOpen(false);
       setPrice("");
       setReturnPrice("");
+      setAllVehiclePrices({
+        "mercedes-vito": "",
+        "vip-mercedes": "",
+        "maybach-minibus": "",
+        "minibus": "",
+      });
       setSelectedRequest(null);
       fetchRequests();
     } catch (error: any) {
@@ -969,6 +1018,14 @@ export default function AdminQuickBookings() {
                           setPrice("");
                           setCurrency(selectedRequest.price_currency || "EUR");
                         }
+                        // Reset all vehicle prices
+                        setAllVehiclePrices({
+                          "mercedes-vito": "",
+                          "vip-mercedes": "",
+                          "maybach-minibus": "",
+                          "minibus": "",
+                        });
+                        setReturnPrice("");
                         setPriceDialogOpen(true);
                       }}
                     >
@@ -1022,11 +1079,33 @@ export default function AdminQuickBookings() {
 
       {/* Send Price Dialog */}
       <Dialog open={priceDialogOpen} onOpenChange={setPriceDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Fiyat Gönder</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Fiyat Gönder
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Route info */}
+            {selectedRequest && (
+              <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
+                <p className="font-medium">{selectedRequest.pickup}</p>
+                <p className="text-muted-foreground">↓</p>
+                <p className="font-medium">{selectedRequest.dropoff}</p>
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t">
+                  <Badge variant="outline" className="bg-primary/10">
+                    <Car className="h-3 w-3 mr-1" />
+                    {vehicleLabels[selectedRequest.vehicle_type] || selectedRequest.vehicle_type}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    <Users className="h-3 w-3 inline mr-1" />
+                    {selectedRequest.passengers} yolcu
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Return trip info badge */}
             {selectedRequest?.has_return_trip && (
               <div className="bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-3">
@@ -1046,32 +1125,87 @@ export default function AdminQuickBookings() {
               </div>
             )}
 
-            {/* Outbound price */}
+            {/* Currency selector */}
             <div className="space-y-2">
-              <Label className="font-medium">
-                {selectedRequest?.has_return_trip ? "➡️ Gidiş Fiyatı" : "Fiyat"}
+              <Label className="font-medium">Para Birimi</Label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EUR">€ EUR</SelectItem>
+                  <SelectItem value="USD">$ USD</SelectItem>
+                  <SelectItem value="GBP">£ GBP</SelectItem>
+                  <SelectItem value="TRY">₺ TRY</SelectItem>
+                  <SelectItem value="AED">د.إ AED</SelectItem>
+                  <SelectItem value="AUD">$ AUD</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* All vehicle prices - 4 vehicles at once */}
+            <div className="space-y-3">
+              <Label className="font-medium flex items-center gap-2">
+                🚗 Tüm Araçlar İçin Fiyat
+                <span className="text-xs font-normal text-muted-foreground">(En az 1 araç için girin)</span>
               </Label>
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="0"
-                />
-                <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EUR">€ EUR</SelectItem>
-                    <SelectItem value="USD">$ USD</SelectItem>
-                    <SelectItem value="GBP">£ GBP</SelectItem>
-                    <SelectItem value="TRY">₺ TRY</SelectItem>
-                    <SelectItem value="AED">د.إ AED</SelectItem>
-                    <SelectItem value="AUD">$ AUD</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-3">
+                {Object.entries(vehicleLabels)
+                  .filter(([key]) => ["mercedes-vito", "vip-mercedes", "maybach-minibus", "minibus"].includes(key))
+                  .map(([vehicleKey, label]) => (
+                    <div key={vehicleKey} className="space-y-1">
+                      <Label className={cn(
+                        "text-xs font-medium",
+                        selectedRequest?.vehicle_type === vehicleKey && "text-primary"
+                      )}>
+                        {label}
+                        {selectedRequest?.vehicle_type === vehicleKey && (
+                          <span className="ml-1 text-primary">✓</span>
+                        )}
+                      </Label>
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          value={allVehiclePrices[vehicleKey] || ""}
+                          onChange={(e) => setAllVehiclePrices(prev => ({
+                            ...prev,
+                            [vehicleKey]: e.target.value
+                          }))}
+                          placeholder="0"
+                          className={cn(
+                            "text-sm",
+                            selectedRequest?.vehicle_type === vehicleKey && "border-primary"
+                          )}
+                        />
+                        <span className="text-xs text-muted-foreground w-8">{getCurrencySymbol(currency)}</span>
+                      </div>
+                    </div>
+                  ))}
               </div>
+            </div>
+
+            {/* Divider */}
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">veya</span>
+              </div>
+            </div>
+
+            {/* Single price input (legacy/simple mode) */}
+            <div className="space-y-2">
+              <Label className="font-medium text-sm text-muted-foreground">
+                Sadece Seçilen Araç İçin Fiyat ({vehicleLabels[selectedRequest?.vehicle_type || ""] || selectedRequest?.vehicle_type})
+              </Label>
+              <Input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0"
+                className="text-sm"
+              />
             </div>
 
             {/* Return price - only shown if has return trip */}
@@ -1101,14 +1235,6 @@ export default function AdminQuickBookings() {
                         İndirimli: {Math.round(parseFloat(returnPrice) * 0.7)} {currency}
                       </span>
                     </div>
-                    <div className="text-green-700 font-medium mt-1">
-                      Toplam: {parseFloat(price || "0") + Math.round(parseFloat(returnPrice) * 0.7)} {currency}
-                    </div>
-                  </div>
-                )}
-                {returnPrice && !selectedRequest.promo_code && (
-                  <div className="text-sm text-muted-foreground">
-                    Toplam: {parseFloat(price || "0") + parseFloat(returnPrice || "0")} {currency}
                   </div>
                 )}
               </div>
@@ -1116,7 +1242,7 @@ export default function AdminQuickBookings() {
 
             <Button
               onClick={sendPrice}
-              disabled={sendingPrice || !price || (selectedRequest?.has_return_trip && !returnPrice)}
+              disabled={sendingPrice || (!price && !Object.values(allVehiclePrices).some(p => p && parseFloat(p) > 0))}
               className="w-full"
             >
               {sendingPrice ? (
