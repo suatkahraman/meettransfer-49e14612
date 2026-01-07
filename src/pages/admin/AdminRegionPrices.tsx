@@ -868,12 +868,12 @@ const AdminRegionPrices = () => {
 
                         <div className="space-y-2">
                           <Label>Başlangıç Bölge</Label>
-                          <Select value={intercityFromDistrict} onValueChange={setIntercityFromDistrict} disabled={!intercityFromCity}>
+                          <Select value={intercityFromDistrict || "__none__"} onValueChange={(val) => setIntercityFromDistrict(val === "__none__" ? "" : val)} disabled={!intercityFromCity}>
                             <SelectTrigger>
                               <SelectValue placeholder="Bölge seçin (opsiyonel)" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">Tümü (Şehir Geneli)</SelectItem>
+                              <SelectItem value="__none__">Tümü (Şehir Geneli)</SelectItem>
                               {intercityFromDistricts.map((district: string) => (
                                 <SelectItem key={district} value={district}>{district}</SelectItem>
                               ))}
@@ -902,12 +902,12 @@ const AdminRegionPrices = () => {
 
                         <div className="space-y-2">
                           <Label>Varış Bölge</Label>
-                          <Select value={intercityToDistrict} onValueChange={setIntercityToDistrict} disabled={!intercityToCity}>
+                          <Select value={intercityToDistrict || "__none__"} onValueChange={(val) => setIntercityToDistrict(val === "__none__" ? "" : val)} disabled={!intercityToCity}>
                             <SelectTrigger>
                               <SelectValue placeholder="Bölge seçin (opsiyonel)" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">Tümü (Şehir Geneli)</SelectItem>
+                              <SelectItem value="__none__">Tümü (Şehir Geneli)</SelectItem>
                               {intercityToDistricts.map((district: string) => (
                                 <SelectItem key={district} value={district}>{district}</SelectItem>
                               ))}
