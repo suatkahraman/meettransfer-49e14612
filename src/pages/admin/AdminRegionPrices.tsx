@@ -441,9 +441,15 @@ const AdminRegionPrices = () => {
   const availableAirports = formCity ? (CITIES_DATA as any)[formCity]?.airports || [] : [];
   const availableDistricts = formCity ? (CITIES_DATA as any)[formCity]?.districts || [] : [];
   
-  // Intercity districts
-  const intercityFromDistricts = intercityFromCity ? (CITIES_DATA as any)[intercityFromCity]?.districts || [] : [];
-  const intercityToDistricts = intercityToCity ? (CITIES_DATA as any)[intercityToCity]?.districts || [] : [];
+  // Intercity districts (including airports)
+  const intercityFromDistricts = intercityFromCity ? [
+    ...((CITIES_DATA as any)[intercityFromCity]?.airports || []),
+    ...((CITIES_DATA as any)[intercityFromCity]?.districts || [])
+  ] : [];
+  const intercityToDistricts = intercityToCity ? [
+    ...((CITIES_DATA as any)[intercityToCity]?.airports || []),
+    ...((CITIES_DATA as any)[intercityToCity]?.districts || [])
+  ] : [];
   
   const handleTest = async () => {
     if (!testPickup || !testDropoff) {
