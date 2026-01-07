@@ -117,6 +117,13 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Check if this is a city-to-city transfer (no airport involved)
+    const pickupCity = transferInfo.pickupAnalysis.city?.value || transferInfo.pickupAnalysis.district?.city || null;
+    const dropoffCity = transferInfo.dropoffAnalysis.city?.value || transferInfo.dropoffAnalysis.district?.city || null;
+    const isIntercity = direction === 'city_to_city' && pickupCity && dropoffCity && pickupCity !== dropoffCity;
+
+    console.log("🔍 Route type:", isIntercity ? "intercity" : "airport transfer", { pickupCity, dropoffCity });
+
     // Get vehicle fallback list for flexible matching
     const vehicleFallbacks = getVehicleFallbackList(reservation.vehicle_type);
     console.log(`🚗 Vehicle requested: ${reservation.vehicle_type}, Fallbacks: ${vehicleFallbacks.join(', ')}`);
@@ -129,8 +136,26 @@ const handler = async (req: Request): Promise<Response> => {
     for (const vehicleType of vehicleFallbacks) {
       if (bestPrice) break;
       
+      // 0. For intercity routes, first check intercity_prices table
+      if (isIntercity && pickupCity && dropoffCity) {
+        // Try both directions (A→B and B→A)
+        const { data: intercityData } = await supabase
+          .from("intercity_prices")
+          .select("*")
+          .eq("vehicle_type", vehicleType)
+          .eq("is_active", true)
+          .or(`and(from_city.eq.${pickupCity},to_city.eq.${dropoffCity}),and(from_city.eq.${dropoffCity},to_city.eq.${pickupCity})`)
+          .limit(1);
+
+        if (intercityData && intercityData.length > 0) {
+          bestPrice = intercityData[0];
+          matchType = `intercity (${pickupCity} → ${dropoffCity}) [${vehicleType}]`;
+          console.log(`✅ Intercity price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        }
+      }
+      
       // 1. Try exact match (airport + city + district + vehicle)
-      if (airport && city && district) {
+      if (!bestPrice && airport && city && district) {
         const { data: exactMatch } = await supabase
           .from("region_prices")
           .select("*")
