@@ -459,6 +459,17 @@ function levenshteinDistance(a: string, b: string): number {
   return matrix[b.length][a.length];
 }
 
+// Common address stopwords that should not trigger matches
+const ADDRESS_STOPWORDS = new Set([
+  'mah', 'mahalle', 'mahallesi', 'cad', 'cadde', 'caddesi', 'cd',
+  'sk', 'sok', 'sokak', 'sokagi', 'no', 'apt', 'apartman', 'daire',
+  'kat', 'blok', 'site', 'sitesi', 'konut', 'konutlari', 'evleri',
+  'plaza', 'is', 'merkezi', 'center', 'bulvar', 'bulvari', 'yolu',
+  'hotel', 'otel', 'resort', 'luxury', 'beach', 'garden', 'park',
+  'magic', 'life', 'club', 'spa', 'villa', 'residence', 'suites',
+  'havalimanı', 'havalimani', 'airport', 'terminal', 'ege'
+]);
+
 function fuzzyMatch(text: string, keyword: string, threshold: number = 0.8): boolean {
   const normalizedText = normalizeLocation(text);
   const normalizedKeyword = normalizeLocation(keyword);
@@ -469,8 +480,10 @@ function fuzzyMatch(text: string, keyword: string, threshold: number = 0.8): boo
   }
   
   // Word-by-word match for multi-word keywords
-  const keywordWords = normalizedKeyword.split(' ').filter(w => w.length > 2);
-  const textWords = normalizedText.split(' ');
+  // CRITICAL FIX: Filter out short words (1-2 chars) AND common address stopwords
+  // This prevents false matches like "L HOTEL" matching "Istanbul" via single letters
+  const keywordWords = normalizedKeyword.split(' ').filter(w => w.length > 2 && !ADDRESS_STOPWORDS.has(w));
+  const textWords = normalizedText.split(' ').filter(w => w.length > 2 && !ADDRESS_STOPWORDS.has(w));
   
   for (const kw of keywordWords) {
     let found = false;
