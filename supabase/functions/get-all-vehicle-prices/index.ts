@@ -107,6 +107,13 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Check if this is a city-to-city transfer (no airport involved)
+    const pickupCity = transferInfo.pickupAnalysis.city?.value || transferInfo.pickupAnalysis.district?.city || null;
+    const dropoffCity = transferInfo.dropoffAnalysis.city?.value || transferInfo.dropoffAnalysis.district?.city || null;
+    const isIntercity = direction === 'city_to_city' && pickupCity && dropoffCity && pickupCity !== dropoffCity;
+
+    console.log("🔍 Route type:", isIntercity ? "intercity" : "airport transfer", { pickupCity, dropoffCity });
+
     // Get all prices for this route
     const vehiclePrices: VehiclePriceInfo[] = [];
     let baseCurrency = 'EUR';
@@ -114,6 +121,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     for (const vehicleType of VEHICLE_TYPES) {
       let foundPrice: { price: number; currency: string } | null = null;
+
+      // For intercity routes, first check intercity_prices table
+      if (isIntercity && pickupCity && dropoffCity) {
+        // Try both directions (A→B and B→A)
+        const { data: intercityData } = await supabase
+          .from("intercity_prices")
+          .select("price, price_currency")
+          .eq("vehicle_type", vehicleType)
+          .eq("is_active", true)
+          .or(`and(from_city.eq.${pickupCity},to_city.eq.${dropoffCity}),and(from_city.eq.${dropoffCity},to_city.eq.${pickupCity})`)
+          .limit(1);
+
+        if (intercityData && intercityData.length > 0) {
+          foundPrice = { price: intercityData[0].price, currency: intercityData[0].price_currency };
+          console.log(`✅ Intercity price found for ${vehicleType}: ${foundPrice.price} ${foundPrice.currency}`);
+        }
+      }
 
       // Try exact match (airport + city + district + vehicle)
       if (!foundPrice && airport && city && district) {
