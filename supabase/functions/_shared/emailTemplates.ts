@@ -2,6 +2,9 @@
 import { getVehicleLabel } from "./vehicleConfig.ts";
 import { getCurrencySymbol, formatPrice } from "./currencyUtils.ts";
 
+// Supported languages
+export type SupportedLanguage = 'en' | 'tr' | 'de' | 'ru' | 'ar';
+
 // Company branding constants
 const LOGO_URL = "https://meettransfer.app/images/meet-transfer-logo.png";
 const COMPANY_NAME = "Meet Transfer";
@@ -32,11 +35,201 @@ const SERVICE_REGIONS = [
   { name: "Cyprus", flag: "🌺" },
 ];
 
+// Multi-language translations
+const TRANSLATIONS: Record<SupportedLanguage, {
+  serviceTitle: string;
+  needHelp: string;
+  whatsappChat: string;
+  reviewsOn: string;
+  allRightsReserved: string;
+  // Customer email specific
+  quoteReady: string;
+  thankYouBooking: string;
+  transferDetails: string;
+  from: string;
+  to: string;
+  date: string;
+  time: string;
+  vehicle: string;
+  returnTransfer: string;
+  yourPrice: string;
+  outboundTransfer: string;
+  totalPrice: string;
+  whatsIncluded: string;
+  professionalDriver: string;
+  flightTracking: string;
+  freeWaiting: string;
+  meetGreet: string;
+  support247: string;
+  freeCancellation: string;
+  confirmBook: string;
+  quoteValid: string;
+  samePrice: string;
+  off: string;
+}> = {
+  en: {
+    serviceTitle: "We Serve All Major Destinations",
+    needHelp: "Need Help? Contact Us 24/7",
+    whatsappChat: "WhatsApp Chat",
+    reviewsOn: "reviews on TripAdvisor",
+    allRightsReserved: "All rights reserved.",
+    quoteReady: "Your Transfer Quote is Ready!",
+    thankYouBooking: "Thank you for your booking request",
+    transferDetails: "Transfer Details",
+    from: "From",
+    to: "To",
+    date: "Date",
+    time: "Time",
+    vehicle: "Vehicle",
+    returnTransfer: "Return Transfer",
+    yourPrice: "Your Transfer Price",
+    outboundTransfer: "Outbound Transfer",
+    totalPrice: "Total Price",
+    whatsIncluded: "What's Included",
+    professionalDriver: "Professional English-speaking driver",
+    flightTracking: "Real-time flight tracking",
+    freeWaiting: "60 min free waiting at airport",
+    meetGreet: "Meet & greet with name sign",
+    support247: "24/7 customer support",
+    freeCancellation: "Free cancellation up to 24h before",
+    confirmBook: "Confirm & Book Now",
+    quoteValid: "This quote is valid for 24 hours",
+    samePrice: "Airport transfers are the same price in both directions",
+    off: "OFF",
+  },
+  tr: {
+    serviceTitle: "Tüm Önemli Destinasyonlara Hizmet Veriyoruz",
+    needHelp: "Yardıma mı İhtiyacınız Var? 7/24 Bize Ulaşın",
+    whatsappChat: "WhatsApp Sohbet",
+    reviewsOn: "TripAdvisor değerlendirmesi",
+    allRightsReserved: "Tüm hakları saklıdır.",
+    quoteReady: "Transfer Fiyatınız Hazır!",
+    thankYouBooking: "Rezervasyon talebiniz için teşekkür ederiz",
+    transferDetails: "Transfer Detayları",
+    from: "Alış",
+    to: "Bırakış",
+    date: "Tarih",
+    time: "Saat",
+    vehicle: "Araç",
+    returnTransfer: "Dönüş Transferi",
+    yourPrice: "Transfer Fiyatınız",
+    outboundTransfer: "Gidiş Transferi",
+    totalPrice: "Toplam Fiyat",
+    whatsIncluded: "Dahil Olanlar",
+    professionalDriver: "Profesyonel İngilizce konuşan sürücü",
+    flightTracking: "Gerçek zamanlı uçuş takibi",
+    freeWaiting: "Havalimanında 60 dk ücretsiz bekleme",
+    meetGreet: "İsim tabelası ile karşılama",
+    support247: "7/24 müşteri desteği",
+    freeCancellation: "24 saat öncesine kadar ücretsiz iptal",
+    confirmBook: "Onayla ve Rezervasyon Yap",
+    quoteValid: "Bu fiyat teklifi 24 saat geçerlidir",
+    samePrice: "Havalimanı transferleri her iki yönde aynı fiyattır",
+    off: "İNDİRİM",
+  },
+  de: {
+    serviceTitle: "Wir bedienen alle wichtigen Reiseziele",
+    needHelp: "Brauchen Sie Hilfe? Kontaktieren Sie uns 24/7",
+    whatsappChat: "WhatsApp Chat",
+    reviewsOn: "Bewertungen auf TripAdvisor",
+    allRightsReserved: "Alle Rechte vorbehalten.",
+    quoteReady: "Ihr Transferangebot ist fertig!",
+    thankYouBooking: "Vielen Dank für Ihre Buchungsanfrage",
+    transferDetails: "Transferdetails",
+    from: "Von",
+    to: "Nach",
+    date: "Datum",
+    time: "Uhrzeit",
+    vehicle: "Fahrzeug",
+    returnTransfer: "Rücktransfer",
+    yourPrice: "Ihr Transferpreis",
+    outboundTransfer: "Hintransfer",
+    totalPrice: "Gesamtpreis",
+    whatsIncluded: "Inklusive",
+    professionalDriver: "Professioneller englischsprachiger Fahrer",
+    flightTracking: "Echtzeit-Flugverfolgung",
+    freeWaiting: "60 Min. kostenlose Wartezeit am Flughafen",
+    meetGreet: "Begrüßung mit Namensschild",
+    support247: "24/7 Kundenservice",
+    freeCancellation: "Kostenlose Stornierung bis 24h vorher",
+    confirmBook: "Bestätigen & Jetzt Buchen",
+    quoteValid: "Dieses Angebot ist 24 Stunden gültig",
+    samePrice: "Flughafentransfers kosten in beide Richtungen gleich",
+    off: "RABATT",
+  },
+  ru: {
+    serviceTitle: "Мы обслуживаем все основные направления",
+    needHelp: "Нужна помощь? Свяжитесь с нами 24/7",
+    whatsappChat: "WhatsApp Чат",
+    reviewsOn: "отзывов на TripAdvisor",
+    allRightsReserved: "Все права защищены.",
+    quoteReady: "Ваше предложение по трансферу готово!",
+    thankYouBooking: "Спасибо за ваш запрос на бронирование",
+    transferDetails: "Детали трансфера",
+    from: "Откуда",
+    to: "Куда",
+    date: "Дата",
+    time: "Время",
+    vehicle: "Транспорт",
+    returnTransfer: "Обратный трансфер",
+    yourPrice: "Цена трансфера",
+    outboundTransfer: "Трансфер туда",
+    totalPrice: "Общая цена",
+    whatsIncluded: "Что включено",
+    professionalDriver: "Профессиональный англоговорящий водитель",
+    flightTracking: "Отслеживание рейса в реальном времени",
+    freeWaiting: "60 мин бесплатного ожидания в аэропорту",
+    meetGreet: "Встреча с табличкой с именем",
+    support247: "Поддержка 24/7",
+    freeCancellation: "Бесплатная отмена за 24 часа",
+    confirmBook: "Подтвердить и забронировать",
+    quoteValid: "Это предложение действительно 24 часа",
+    samePrice: "Трансферы из аэропорта стоят одинаково в обе стороны",
+    off: "СКИДКА",
+  },
+  ar: {
+    serviceTitle: "نخدم جميع الوجهات الرئيسية",
+    needHelp: "هل تحتاج مساعدة؟ تواصل معنا 24/7",
+    whatsappChat: "محادثة واتساب",
+    reviewsOn: "تقييم على TripAdvisor",
+    allRightsReserved: "جميع الحقوق محفوظة.",
+    quoteReady: "عرض النقل الخاص بك جاهز!",
+    thankYouBooking: "شكراً لطلب الحجز الخاص بك",
+    transferDetails: "تفاصيل النقل",
+    from: "من",
+    to: "إلى",
+    date: "التاريخ",
+    time: "الوقت",
+    vehicle: "المركبة",
+    returnTransfer: "رحلة العودة",
+    yourPrice: "سعر النقل",
+    outboundTransfer: "رحلة الذهاب",
+    totalPrice: "السعر الإجمالي",
+    whatsIncluded: "ما هو مشمول",
+    professionalDriver: "سائق محترف يتحدث الإنجليزية",
+    flightTracking: "تتبع الرحلات في الوقت الحقيقي",
+    freeWaiting: "60 دقيقة انتظار مجاني في المطار",
+    meetGreet: "استقبال بلوحة الاسم",
+    support247: "دعم العملاء 24/7",
+    freeCancellation: "إلغاء مجاني حتى 24 ساعة قبل",
+    confirmBook: "تأكيد والحجز الآن",
+    quoteValid: "هذا العرض صالح لمدة 24 ساعة",
+    samePrice: "تكلفة النقل من المطار متساوية في كلا الاتجاهين",
+    off: "خصم",
+  },
+};
+
+// Get translation helper
+export function getTranslation(lang: string): typeof TRANSLATIONS.en {
+  const supportedLang = (lang || 'en').substring(0, 2).toLowerCase() as SupportedLanguage;
+  return TRANSLATIONS[supportedLang] || TRANSLATIONS.en;
+}
+
 // Professional email header with logo
-export function getEmailHeader(title: string, subtitle?: string): string {
+export function getEmailHeader(title: string, subtitle?: string, lang: string = 'en'): string {
   return `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="${lang}">
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,7 +249,8 @@ export function getEmailHeader(title: string, subtitle?: string): string {
 }
 
 // Professional email footer with contact info, social media, and service regions
-export function getEmailFooter(): string {
+export function getEmailFooter(lang: string = 'en'): string {
+  const t = getTranslation(lang);
   const serviceRegionsHtml = SERVICE_REGIONS.map(r => 
     `<span style="display: inline-block; margin: 3px 6px; font-size: 12px; color: #64748b;">${r.flag} ${r.name}</span>`
   ).join('');
@@ -65,7 +259,7 @@ export function getEmailFooter(): string {
         <!-- Service Regions -->
         <tr>
           <td style="background: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
-            <p style="margin: 0 0 10px; color: #1e293b; font-size: 13px; font-weight: bold;">✈️ We Serve All Major Destinations</p>
+            <p style="margin: 0 0 10px; color: #1e293b; font-size: 13px; font-weight: bold;">✈️ ${t.serviceTitle}</p>
             <div style="line-height: 2;">
               ${serviceRegionsHtml}
             </div>
@@ -75,9 +269,9 @@ export function getEmailFooter(): string {
         <!-- Contact Section -->
         <tr>
           <td style="background: #1a1a2e; padding: 25px 20px; text-align: center;">
-            <p style="margin: 0 0 15px; color: #fdd835; font-size: 15px; font-weight: bold;">Need Help? Contact Us 24/7</p>
+            <p style="margin: 0 0 15px; color: #fdd835; font-size: 15px; font-weight: bold;">${t.needHelp}</p>
             <div style="margin-bottom: 15px;">
-              <a href="${WHATSAPP_URL}" style="display: inline-block; background: #25D366; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin: 5px;">💬 WhatsApp Chat</a>
+              <a href="${WHATSAPP_URL}" style="display: inline-block; background: #25D366; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin: 5px;">💬 ${t.whatsappChat}</a>
               <a href="mailto:${COMPANY_EMAIL}" style="display: inline-block; background: #fdd835; color: #1a1a2e; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin: 5px;">✉️ ${COMPANY_EMAIL}</a>
             </div>
             
@@ -93,7 +287,7 @@ export function getEmailFooter(): string {
             <!-- TripAdvisor Rating -->
             <div style="background: rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 8px; display: inline-block; margin-top: 10px;">
               <span style="color: #00af87; font-weight: bold; font-size: 16px;">⭐ 4.7</span>
-              <span style="color: #94a3b8; font-size: 13px; margin-left: 8px;">492 reviews on TripAdvisor</span>
+              <span style="color: #94a3b8; font-size: 13px; margin-left: 8px;">492 ${t.reviewsOn}</span>
             </div>
           </td>
         </tr>
@@ -102,7 +296,7 @@ export function getEmailFooter(): string {
         <tr>
           <td style="background: #0f0f1a; padding: 15px 20px; text-align: center;">
             <p style="margin: 0; color: #64748b; font-size: 11px;">
-              © 2025 ${COMPANY_NAME}. All rights reserved.<br/>
+              © 2025 ${COMPANY_NAME}. ${t.allRightsReserved}<br/>
               <a href="${WEBSITE_URL}" style="color: #fdd835; text-decoration: none;">meettransfer.app</a>
             </p>
           </td>
@@ -117,16 +311,161 @@ export function getEmailFooter(): string {
 export function customerEmailTemplate(
   title: string,
   subtitle: string | undefined,
-  bodyContent: string
+  bodyContent: string,
+  lang: string = 'en'
 ): string {
   return `
-    ${getEmailHeader(title, subtitle)}
+    ${getEmailHeader(title, subtitle, lang)}
     <tr>
       <td style="padding: 30px 25px;">
         ${bodyContent}
       </td>
     </tr>
-    ${getEmailFooter()}
+    ${getEmailFooter(lang)}
+  `;
+}
+
+// Generate customer price quote email with language support
+export function generateCustomerPriceQuoteEmail(
+  booking: {
+    pickup: string;
+    dropoff: string;
+    pickup_date: string;
+    pickup_time: string;
+    vehicle_type: string;
+    has_return_trip?: boolean;
+    return_date?: string;
+    return_time?: string;
+  },
+  priceInfo: {
+    price: number;
+    returnPrice?: number | null;
+    totalPrice?: number;
+    currency: string;
+    discountApplied?: boolean;
+    discountPercent?: number;
+  },
+  confirmUrl: string,
+  lang: string = 'en'
+): string {
+  const t = getTranslation(lang);
+  
+  const currencySymbols: Record<string, string> = {
+    'EUR': '€',
+    'USD': '$',
+    'TRY': '₺',
+    'GBP': '£',
+    'AED': 'د.إ',
+  };
+  const currencySymbol = currencySymbols[priceInfo.currency] || priceInfo.currency;
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const locales: Record<SupportedLanguage, string> = {
+      en: 'en-GB',
+      tr: 'tr-TR',
+      de: 'de-DE',
+      ru: 'ru-RU',
+      ar: 'ar-SA',
+    };
+    const locale = locales[(lang?.substring(0, 2) as SupportedLanguage) || 'en'] || 'en-GB';
+    return date.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const vehicleNames: Record<string, string> = {
+    'mercedes-vito': 'Mercedes Vito VIP',
+    'mercedes-sprinter': 'Mercedes Sprinter VIP',
+    'mercedes-maybach': 'Mercedes Maybach',
+  };
+
+  let priceHtml = `<p style="font-size: 28px; color: white; font-weight: bold; margin: 10px 0;">${currencySymbol}${priceInfo.price}</p>`;
+  
+  if (booking.has_return_trip && priceInfo.returnPrice) {
+    priceHtml += `
+      <p style="margin-top: 15px; color: rgba(255,255,255,0.9); font-size: 13px;">${t.returnTransfer} (${formatDate(booking.return_date || '')} - ${booking.return_time}):</p>
+      ${priceInfo.discountApplied 
+        ? `<p style="font-size: 20px; color: #a7f3d0; font-weight: bold;"><span style="text-decoration: line-through; color: rgba(255,255,255,0.5);">${currencySymbol}${priceInfo.price}</span> ${currencySymbol}${priceInfo.returnPrice} <span style="font-size: 12px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">${priceInfo.discountPercent}% ${t.off}</span></p>`
+        : `<p style="font-size: 20px; color: white; font-weight: bold;">${currencySymbol}${priceInfo.returnPrice}</p>`
+      }
+      <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);">
+        <p style="color: rgba(255,255,255,0.9); font-size: 13px;">${t.totalPrice}:</p>
+        <p style="font-size: 28px; color: white; font-weight: bold;">${currencySymbol}${priceInfo.totalPrice}</p>
+      </div>
+    `;
+  }
+
+  return `
+${getEmailHeader(`🚗 ${t.quoteReady}`, t.thankYouBooking, lang)}
+<tr>
+  <td style="padding:30px 25px;">
+    <!-- Transfer Details Card -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;margin-bottom:20px;border:1px solid #e2e8f0;">
+      <tr><td style="padding:20px;">
+        <p style="margin:0 0 15px;color:#1e293b;font-weight:bold;font-size:15px;">📍 ${t.transferDetails}</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;width:100px;">${t.from}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${booking.pickup}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.to}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${booking.dropoff}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.date}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${formatDate(booking.pickup_date)}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.time}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${booking.pickup_time}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.vehicle}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">🚐 ${vehicleNames[booking.vehicle_type] || booking.vehicle_type}</td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+    
+    <!-- Price Box -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);border-radius:12px;margin:25px 0;">
+      <tr>
+        <td style="padding:25px;text-align:center;">
+          <p style="color:rgba(255,255,255,0.9);margin:0;font-size:14px;text-transform:uppercase;letter-spacing:1px;">${booking.has_return_trip ? t.outboundTransfer : t.yourPrice}</p>
+          ${priceHtml}
+        </td>
+      </tr>
+    </table>
+
+    <!-- What's Included -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eff6ff;border-radius:12px;margin:20px 0;border:1px solid #bfdbfe;">
+      <tr><td style="padding:20px;">
+        <p style="margin:0 0 12px;color:#1e40af;font-weight:bold;font-size:14px;">✨ ${t.whatsIncluded}</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ ${t.professionalDriver}</td></tr>
+          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ ${t.flightTracking}</td></tr>
+          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ ${t.freeWaiting}</td></tr>
+          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ ${t.meetGreet}</td></tr>
+          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ ${t.support247}</td></tr>
+          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ ${t.freeCancellation}</td></tr>
+        </table>
+      </td></tr>
+    </table>
+
+    <!-- CTA Button -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="text-align:center;padding:25px 0;">
+          <a href="${confirmUrl}" style="display:inline-block;background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);color:#1a1a2e;text-decoration:none;padding:16px 40px;border-radius:10px;font-size:17px;font-weight:bold;box-shadow:0 4px 15px rgba(251,191,36,0.3);">${t.confirmBook}</a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="text-align:center;color:#94a3b8;font-size:12px;margin:15px 0 0;">⏰ ${t.quoteValid}</p>
+    <p style="text-align:center;color:#94a3b8;font-size:12px;margin:8px 0 0;">↔️ ${t.samePrice}</p>
+  </td>
+</tr>
+${getEmailFooter(lang)}
   `;
 }
 

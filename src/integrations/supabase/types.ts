@@ -924,6 +924,7 @@ export type Database = {
           expires_at: string | null
           has_return_trip: boolean | null
           id: string
+          language: string | null
           luggage_count: number | null
           passengers: number
           payment_link: string | null
@@ -959,6 +960,7 @@ export type Database = {
           expires_at?: string | null
           has_return_trip?: boolean | null
           id?: string
+          language?: string | null
           luggage_count?: number | null
           passengers?: number
           payment_link?: string | null
@@ -994,6 +996,7 @@ export type Database = {
           expires_at?: string | null
           has_return_trip?: boolean | null
           id?: string
+          language?: string | null
           luggage_count?: number | null
           passengers?: number
           payment_link?: string | null

@@ -10,7 +10,7 @@ import {
 } from "../_shared/priceMatching.ts";
 import { getVehicleFallbackList, getVehicleLabel } from "../_shared/vehicleConfig.ts";
 import { convertCurrency, getCurrencySymbol } from "../_shared/currencyUtils.ts";
-import { autoPriceSuccessEmail, manualPriceRequiredEmail, getEmailHeader, getEmailFooter } from "../_shared/emailTemplates.ts";
+import { autoPriceSuccessEmail, manualPriceRequiredEmail, generateCustomerPriceQuoteEmail } from "../_shared/emailTemplates.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -449,6 +449,10 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         const baseUrl = "https://meettransfer.app";
         const confirmUrl = `${baseUrl}/quick-booking-confirm?token=${booking.confirmation_token}`;
+        
+        // Get customer language preference (default to English)
+        const customerLang = booking.language || 'en';
+        console.log("📧 Sending email in language:", customerLang);
 
         const currencySymbols: Record<string, string> = {
           'EUR': '€',
@@ -459,117 +463,50 @@ const handler = async (req: Request): Promise<Response> => {
         };
         const currencySymbol = currencySymbols[finalCurrency] || finalCurrency;
 
-        const formatDate = (dateStr: string) => {
-          const date = new Date(dateStr);
-          return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+        // Subject translations
+        const subjectTranslations: Record<string, string> = {
+          en: `Your Transfer Quote: ${currencySymbol}${finalPrice} - Meet Transfer`,
+          tr: `Transfer Teklifiniz: ${currencySymbol}${finalPrice} - Meet Transfer`,
+          de: `Ihr Transferangebot: ${currencySymbol}${finalPrice} - Meet Transfer`,
+          ru: `Ваше предложение по трансферу: ${currencySymbol}${finalPrice} - Meet Transfer`,
+          ar: `عرض النقل الخاص بك: ${currencySymbol}${finalPrice} - Meet Transfer`,
         };
+        const emailSubject = subjectTranslations[customerLang.substring(0, 2)] || subjectTranslations.en;
 
-        const vehicleNames: Record<string, string> = {
-          'mercedes-vito': 'Mercedes Vito VIP',
-          'mercedes-sprinter': 'Mercedes Sprinter VIP',
-          'mercedes-maybach': 'Mercedes Maybach',
-        };
-
-        let priceHtml = `<p style="font-size: 28px; color: #1e3a8a; font-weight: bold; margin: 10px 0;">${currencySymbol}${finalPrice}</p>`;
-        
-        if (booking.has_return_trip && finalReturnPrice) {
-          priceHtml += `
-            <p style="margin-top: 15px; color: #666;">Return Transfer (${formatDate(booking.return_date)} - ${booking.return_time}):</p>
-            ${discountInfo.discountApplied 
-              ? `<p style="font-size: 20px; color: #22c55e; font-weight: bold;"><span style="text-decoration: line-through; color: #999;">${currencySymbol}${finalPrice}</span> ${currencySymbol}${finalReturnPrice} <span style="font-size: 12px; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">${discountInfo.discountPercent}% OFF</span></p>`
-              : `<p style="font-size: 20px; color: #1e3a8a; font-weight: bold;">${currencySymbol}${finalReturnPrice}</p>`
-            }
-            <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #1e3a8a;">
-              <p style="color: #666;">Total Price:</p>
-              <p style="font-size: 28px; color: #1e3a8a; font-weight: bold;">${currencySymbol}${finalTotalPrice}</p>
-            </div>
-          `;
-        }
-
-        const emailHtml = `
-${getEmailHeader('🚗 Your Transfer Quote is Ready!', 'Thank you for your booking request')}
-<tr>
-  <td style="padding:30px 25px;">
-    <!-- Transfer Details Card -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;margin-bottom:20px;border:1px solid #e2e8f0;">
-      <tr><td style="padding:20px;">
-        <p style="margin:0 0 15px;color:#1e293b;font-weight:bold;font-size:15px;">📍 Transfer Details</p>
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr>
-            <td style="padding:8px 0;color:#64748b;font-size:13px;width:100px;">From</td>
-            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${booking.pickup}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 0;color:#64748b;font-size:13px;">To</td>
-            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${booking.dropoff}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 0;color:#64748b;font-size:13px;">Date</td>
-            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${formatDate(booking.pickup_date)}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 0;color:#64748b;font-size:13px;">Time</td>
-            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${booking.pickup_time}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 0;color:#64748b;font-size:13px;">Vehicle</td>
-            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">🚐 ${vehicleNames[booking.vehicle_type] || booking.vehicle_type}</td>
-          </tr>
-        </table>
-      </td></tr>
-    </table>
-    
-    <!-- Price Box -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);border-radius:12px;margin:25px 0;">
-      <tr>
-        <td style="padding:25px;text-align:center;">
-          <p style="color:rgba(255,255,255,0.9);margin:0;font-size:14px;text-transform:uppercase;letter-spacing:1px;">${booking.has_return_trip ? 'Outbound Transfer' : 'Your Transfer Price'}</p>
-          ${priceHtml}
-        </td>
-      </tr>
-    </table>
-
-    <!-- What's Included -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eff6ff;border-radius:12px;margin:20px 0;border:1px solid #bfdbfe;">
-      <tr><td style="padding:20px;">
-        <p style="margin:0 0 12px;color:#1e40af;font-weight:bold;font-size:14px;">✨ What's Included</p>
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ Professional English-speaking driver</td></tr>
-          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ Real-time flight tracking</td></tr>
-          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ 60 min free waiting at airport</td></tr>
-          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ Meet & greet with name sign</td></tr>
-          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ 24/7 customer support</td></tr>
-          <tr><td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ Free cancellation up to 24h before</td></tr>
-        </table>
-      </td></tr>
-    </table>
-
-    <!-- CTA Button -->
-    <table width="100%" cellpadding="0" cellspacing="0">
-      <tr>
-        <td style="text-align:center;padding:25px 0;">
-          <a href="${confirmUrl}" style="display:inline-block;background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);color:#1a1a2e;text-decoration:none;padding:16px 40px;border-radius:10px;font-size:17px;font-weight:bold;box-shadow:0 4px 15px rgba(251,191,36,0.3);">Confirm & Book Now</a>
-        </td>
-      </tr>
-    </table>
-
-    <p style="text-align:center;color:#94a3b8;font-size:12px;margin:15px 0 0;">⏰ This quote is valid for 24 hours</p>
-    <p style="text-align:center;color:#94a3b8;font-size:12px;margin:8px 0 0;">↔️ Airport transfers are the same price in both directions</p>
-  </td>
-</tr>
-${getEmailFooter()}
-        `;
+        // Use the new multi-language email template
+        const emailHtml = generateCustomerPriceQuoteEmail(
+          {
+            pickup: booking.pickup,
+            dropoff: booking.dropoff,
+            pickup_date: booking.pickup_date,
+            pickup_time: booking.pickup_time,
+            vehicle_type: booking.vehicle_type,
+            has_return_trip: booking.has_return_trip,
+            return_date: booking.return_date,
+            return_time: booking.return_time,
+          },
+          {
+            price: finalPrice,
+            returnPrice: finalReturnPrice,
+            totalPrice: finalTotalPrice,
+            currency: finalCurrency,
+            discountApplied: discountInfo.discountApplied,
+            discountPercent: discountInfo.discountPercent,
+          },
+          confirmUrl,
+          customerLang
+        );
 
         const { error: emailError } = await resend.emails.send({
           from: "Meet Transfer <no-reply@meettransfer.app>",
           to: [booking.customer_email],
-          subject: `Your Transfer Quote: ${currencySymbol}${finalPrice} - Meet Transfer`,
+          subject: emailSubject,
           html: emailHtml,
         });
 
         if (!emailError) {
           emailSent = true;
-          console.log("📧 Auto-price email sent to:", booking.customer_email);
+          console.log("📧 Auto-price email sent to:", booking.customer_email, "in language:", customerLang);
         } else {
           console.error("❌ Email send error:", emailError);
         }
