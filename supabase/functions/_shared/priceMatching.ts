@@ -265,15 +265,21 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Umraniye': { priority: 2, keywords: ['umraniye', 'ümraniye', 'dudullu', 'cekmekoy', 'çekmeköy'], city: 'Istanbul' },
   'Beykoz': { priority: 2, keywords: ['beykoz', 'pasabahce', 'paşabahçe', 'kavacik', 'kavacık', 'riva', 'anadolu kavagi', 'anadolu kavağı'], city: 'Istanbul' },
   
-  // Antalya
+  // Antalya - Each district matches DB exactly (Beldibi, Goynuk, Tekirova, Cirali, Olympos are separate from Kemer)
   'Kaleici': { priority: 1, keywords: ['kaleici', 'kaleiçi', 'old town antalya', 'old city antalya', 'antalya old town', 'antalya marina', 'yat limani'], city: 'Antalya' },
   'Konyaalti': { priority: 1, keywords: ['konyaalti', 'konyaaltı', 'konyaalti beach', 'konyaaltı plajı', 'konyaalti plaji', 'hurma', 'liman'], city: 'Antalya' },
   'Lara': { priority: 1, keywords: ['lara', 'lara beach', 'kundu', 'lara plaji', 'lara plajı', 'lower lara', 'upper lara'], city: 'Antalya' },
   'Belek': { priority: 1, keywords: ['belek', 'kadriye', 'bogazkent', 'boğazkent', 'belek golf', 'the land of legends', 'land of legends'], city: 'Antalya' },
   'Side': { priority: 1, keywords: ['side', 'kumkoy', 'kumköy', 'colakli', 'çolaklı', 'manavgat', 'evrenseki', 'titreyengol', 'titreyen gol', 'sorgun', 'gundogdu'], city: 'Antalya' },
   'Alanya': { priority: 1, keywords: ['alanya', 'mahmutlar', 'okurcalar', 'avsallar', 'konakli', 'konaklı', 'incekum', 'alanya castle', 'cleopatra beach', 'kleopatra plaji', 'kestel', 'oba', 'tosmur'], city: 'Antalya' },
-  'Kemer': { priority: 1, keywords: ['kemer', 'beldibi', 'goynuk', 'göynük', 'tekirova', 'cirali', 'çıralı', 'olympos', 'phaselis', 'camyuva', 'kiriş', 'kiris'], city: 'Antalya' },
-  'Kas': { priority: 1, keywords: ['kas', 'kaş', 'kalkan', 'patara', 'saklikent', 'saklıkent', 'xanthos', 'letoon'], city: 'Antalya' },
+  'Kemer': { priority: 1, keywords: ['kemer', 'kemer center', 'kemer merkez', 'kemer marina', 'camyuva', 'kiriş', 'kiris'], city: 'Antalya' },
+  'Beldibi': { priority: 1, keywords: ['beldibi', 'beldib'], city: 'Antalya' },
+  'Goynuk': { priority: 1, keywords: ['goynuk', 'göynük', 'goynuk canyon', 'göynük kanyonu'], city: 'Antalya' },
+  'Tekirova': { priority: 1, keywords: ['tekirova', 'phaselis', 'faselis'], city: 'Antalya' },
+  'Cirali': { priority: 1, keywords: ['cirali', 'çıralı', 'chimaera', 'yanartaş'], city: 'Antalya' },
+  'Olympos': { priority: 1, keywords: ['olympos', 'olimpos'], city: 'Antalya' },
+  'Kas': { priority: 1, keywords: ['kas', 'kaş', 'patara'], city: 'Antalya' },
+  'Kalkan': { priority: 1, keywords: ['kalkan', 'saklikent', 'saklıkent', 'xanthos', 'letoon'], city: 'Antalya' },
   
   // Bodrum
   'Bodrum Center': { priority: 1, keywords: ['bodrum center', 'bodrum merkez', 'bodrum centrum', 'bodrum city', 'bodrum town', 'bodrum castle', 'bodrum marina', 'bodrum kalesi', 'bodrum bar street', 'barlar sokagi'], city: 'Bodrum' },
