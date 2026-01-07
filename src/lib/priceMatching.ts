@@ -451,6 +451,26 @@ const DISTRICT_NAMES_BY_CITY_NORM: Record<string, Set<string>> = (() => {
   return map;
 })();
 
+// ==================== AIRPORT TO CITY MAPPING ====================
+// When an airport is found, this determines the correct city for price matching
+// This prevents false positives from district keywords matching wrong cities
+const AIRPORT_TO_CITY: Record<string, string> = {
+  'Istanbul Airport (IST)': 'Istanbul',
+  'Sabiha Gokcen Airport (SAW)': 'Istanbul',
+  'Antalya Airport (AYT)': 'Antalya',
+  'Bodrum-Milas Airport (BJV)': 'Bodrum',
+  'Dalaman Airport (DLM)': 'Dalaman',
+  'Izmir Adnan Menderes Airport (ADB)': 'Izmir',
+  'Kayseri Airport (ASR)': 'Cappadocia',
+  'Nevsehir-Kapadokya Airport (NAV)': 'Cappadocia',
+  'Dubai International Airport (DXB)': 'Dubai',
+  'Al Maktoum International Airport (DWC)': 'Dubai',
+  'Larnaca Airport (LCA)': 'Cyprus',
+  'Paphos Airport (PFO)': 'Cyprus',
+  'Ercan Airport (ECN)': 'Cyprus',
+  'Bursa Yenisehir Airport (YEI)': 'Bursa',
+};
+
 // ==================== MATCHING FUNCTIONS ====================
 interface InternalMatchResult {
   value: string;
@@ -596,8 +616,19 @@ function parseGoogleMapsLocation(location: string): ParsedLocation {
   const parts = location.split(',').map(p => p.trim());
   
   const airportMatch = findAirport(location);
-  const cityMatch = findCity(location);
-  const districtMatch = findDistrict(location, cityMatch?.value || null);
+  
+  // CRITICAL FIX: When airport is found, derive city from airport to prevent false positives
+  // Example: "Antalya Havalimanı, Yeşilköy" should NOT match Istanbul/Bakirkoy because of "Yeşilköy"
+  const airportDerivedCity = airportMatch ? AIRPORT_TO_CITY[airportMatch.value] || null : null;
+  
+  // Only use findCity if no airport was found for that location
+  const cityMatch = airportMatch && airportDerivedCity 
+    ? { value: airportDerivedCity, confidence: 1, priority: 1, matchedKeyword: 'airport-derived' }
+    : findCity(location);
+  
+  // For district search, use the airport-derived city as hint to constrain the search
+  const cityHint = airportDerivedCity || cityMatch?.value || null;
+  const districtMatch = findDistrict(location, cityHint);
   
   return {
     airport: airportMatch?.value || null,
