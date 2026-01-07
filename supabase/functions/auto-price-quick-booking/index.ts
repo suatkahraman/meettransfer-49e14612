@@ -551,6 +551,13 @@ const handler = async (req: Request): Promise<Response> => {
                     ✉️ info@meettransfer.app
                   </a>
                 </div>
+                <div style="margin-top: 15px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                  <a href="https://www.instagram.com/meettransfer" style="display: inline-block; width: 36px; height: 36px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); border-radius: 8px; text-align: center; line-height: 36px; text-decoration: none; color: white; font-size: 18px;" title="Instagram">📷</a>
+                  <a href="https://www.facebook.com/share/17w6b51DcX/" style="display: inline-block; width: 36px; height: 36px; background: #1877f2; border-radius: 8px; text-align: center; line-height: 36px; text-decoration: none; color: white; font-size: 18px;" title="Facebook">📘</a>
+                  <a href="https://x.com/MeetTransfer" style="display: inline-block; width: 36px; height: 36px; background: #000; border-radius: 8px; text-align: center; line-height: 36px; text-decoration: none; color: white; font-size: 18px;" title="X (Twitter)">𝕏</a>
+                  <a href="https://www.youtube.com/@meettransfer" style="display: inline-block; width: 36px; height: 36px; background: #ff0000; border-radius: 8px; text-align: center; line-height: 36px; text-decoration: none; color: white; font-size: 18px;" title="YouTube">▶️</a>
+                </div>
+                <p style="margin: 15px 0 0 0; color: #94a3b8; font-size: 11px;">© 2025 Meet Transfer. All rights reserved.</p>
               </div>
             </div>
           </body>
