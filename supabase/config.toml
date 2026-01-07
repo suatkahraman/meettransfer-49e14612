@@ -131,3 +131,6 @@ verify_jwt = false
 
 [functions.apply-auto-discount]
 verify_jwt = true
+
+[functions.test-email-template]
+verify_jwt = false

@@ -74,7 +74,7 @@ const getSessionId = () => {
 };
 
 export const Hero = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -249,6 +249,7 @@ export const Hero = () => {
         customer_notes: customerNotes.trim() || null,
         customer_phone: customerPhone.trim() || null,
         customer_email: customerEmail.trim() || null,
+        language: language.toLowerCase(), // Add customer language preference for emails
         // Return trip info
         has_return_trip: hasReturnTrip && returnDate && returnTime ? true : false,
         return_date: hasReturnTrip && returnDate ? format(returnDate, "yyyy-MM-dd") : null,
