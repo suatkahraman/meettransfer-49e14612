@@ -602,11 +602,13 @@ export type Database = {
           created_at: string
           created_by: string | null
           from_city: string
+          from_district: string | null
           id: string
           is_active: boolean
           price: number
           price_currency: string
           to_city: string
+          to_district: string | null
           updated_at: string
           vehicle_type: string
         }
@@ -614,11 +616,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           from_city: string
+          from_district?: string | null
           id?: string
           is_active?: boolean
           price: number
           price_currency?: string
           to_city: string
+          to_district?: string | null
           updated_at?: string
           vehicle_type?: string
         }
@@ -626,11 +630,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           from_city?: string
+          from_district?: string | null
           id?: string
           is_active?: boolean
           price?: number
           price_currency?: string
           to_city?: string
+          to_district?: string | null
           updated_at?: string
           vehicle_type?: string
         }
