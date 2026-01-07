@@ -425,6 +425,34 @@ const DriverJobDetails = () => {
             }
           }
 
+          // Calculate and add driver earnings to balance
+          // Driver earns: budget (price) - cash collected from passenger
+          const budget = reservation?.price || 0;
+          const cashCollected = reservation?.driver_cash_amount || 0;
+          const driverEarning = budget - cashCollected;
+          
+          if (driverEarning > 0 && driverId) {
+            try {
+              // Add to driver_payments table (trigger will update balance)
+              const { error: paymentError } = await supabase
+                .from('driver_payments')
+                .insert({
+                  driver_id: driverId,
+                  amount: driverEarning,
+                  payment_type: 'to_driver',
+                  notes: `${reservation?.reservation_code || id.slice(0, 8)} - İş alacağı (Bütçe: ₺${budget}, Nakit: ₺${cashCollected})`
+                });
+              
+              if (paymentError) {
+                console.error('Failed to add driver earning:', paymentError);
+              } else {
+                console.log(`Driver earning added: ₺${driverEarning}`);
+              }
+            } catch (earningError) {
+              console.error('Driver earning calculation failed:', earningError);
+            }
+          }
+
           // Notify admins (in-app + push)
           await supabase.functions.invoke('create-notification', {
             body: {
