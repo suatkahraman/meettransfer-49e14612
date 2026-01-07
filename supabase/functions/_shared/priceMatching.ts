@@ -281,10 +281,12 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Kas': { priority: 1, keywords: ['kas', 'kaş', 'patara'], city: 'Antalya' },
   'Kalkan': { priority: 1, keywords: ['kalkan', 'saklikent', 'saklıkent', 'xanthos', 'letoon'], city: 'Antalya' },
   
-  // Bodrum
+  // Bodrum - Each district separate for exact matching
   'Bodrum Center': { priority: 1, keywords: ['bodrum center', 'bodrum merkez', 'bodrum centrum', 'bodrum city', 'bodrum town', 'bodrum castle', 'bodrum marina', 'bodrum kalesi', 'bodrum bar street', 'barlar sokagi'], city: 'Bodrum' },
   'Yalikavak': { priority: 1, keywords: ['yalikavak', 'yalıkavak', 'palmarina', 'yalikavak marina', 'yalıkavak marina'], city: 'Bodrum' },
-  'Turgutreis': { priority: 1, keywords: ['turgutreis', 'turgut reis', 'turgutreis marina', 'akyarlar', 'guvercinlik', 'güvercinlik'], city: 'Bodrum' },
+  'Turgutreis': { priority: 1, keywords: ['turgutreis', 'turgut reis', 'turgutreis marina'], city: 'Bodrum' },
+  'Akyarlar': { priority: 1, keywords: ['akyarlar'], city: 'Bodrum' },
+  'Guvercinlik': { priority: 2, keywords: ['guvercinlik', 'güvercinlik'], city: 'Bodrum' },
   'Gumbet': { priority: 1, keywords: ['gumbet', 'gümbet', 'gumbet beach'], city: 'Bodrum' },
   'Turkbuku': { priority: 1, keywords: ['turkbuku', 'türkbükü', 'golturkbuku', 'göltürkbükü', 'gol turkbuku'], city: 'Bodrum' },
   'Bitez': { priority: 1, keywords: ['bitez', 'bitez beach'], city: 'Bodrum' },
@@ -293,22 +295,32 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Gundogan': { priority: 2, keywords: ['gundogan', 'gündoğan', 'farilya'], city: 'Bodrum' },
   'Torba': { priority: 2, keywords: ['torba', 'torba bay', 'torba koy', 'torba koyu'], city: 'Bodrum' },
   
-  // Dalaman / Fethiye / Marmaris
-  'Fethiye': { priority: 1, keywords: ['fethiye', 'fethiye marina', 'calis', 'çalış', 'calis beach', 'fethiye center', 'fethiye merkez'], city: 'Dalaman' },
-  'Oludeniz': { priority: 1, keywords: ['oludeniz', 'ölüdeniz', 'blue lagoon', 'hisaronu', 'hisarönü', 'ovacik', 'ovacık', 'belcekiz', 'belceğiz'], city: 'Dalaman' },
-  'Marmaris': { priority: 1, keywords: ['marmaris', 'icmeler', 'içmeler', 'turunc', 'turunç', 'marmaris marina', 'marmaris center', 'marmaris merkez', 'marmaris bar street', 'armutalan', 'siteler'], city: 'Dalaman' },
+  // Dalaman / Fethiye / Marmaris - Each district separate
+  'Fethiye': { priority: 1, keywords: ['fethiye', 'fethiye marina', 'fethiye center', 'fethiye merkez'], city: 'Dalaman' },
+  'Calis': { priority: 1, keywords: ['calis', 'çalış', 'calis beach', 'çalış plajı'], city: 'Dalaman' },
+  'Oludeniz': { priority: 1, keywords: ['oludeniz', 'ölüdeniz', 'blue lagoon', 'belcekiz', 'belceğiz'], city: 'Dalaman' },
+  'Hisaronu': { priority: 1, keywords: ['hisaronu', 'hisarönü'], city: 'Dalaman' },
+  'Ovacik': { priority: 1, keywords: ['ovacik', 'ovacık'], city: 'Dalaman' },
+  'Marmaris': { priority: 1, keywords: ['marmaris', 'marmaris marina', 'marmaris center', 'marmaris merkez', 'marmaris bar street', 'armutalan', 'siteler'], city: 'Dalaman' },
+  'Icmeler': { priority: 1, keywords: ['icmeler', 'içmeler'], city: 'Dalaman' },
+  'Turunc': { priority: 1, keywords: ['turunc', 'turunç'], city: 'Dalaman' },
   'Gocek': { priority: 1, keywords: ['gocek', 'göcek', 'gocek marina', 'd-marin', 'marinturk'], city: 'Dalaman' },
-  'Dalyan': { priority: 1, keywords: ['dalyan', 'koycegiz', 'köyceğiz', 'iztuzu', 'turtle beach', 'dalyan river', 'mud baths', 'camur banyolari'], city: 'Dalaman' },
+  'Dalyan': { priority: 1, keywords: ['dalyan', 'iztuzu', 'turtle beach', 'dalyan river', 'mud baths', 'camur banyolari'], city: 'Dalaman' },
+  'Koycegiz': { priority: 1, keywords: ['koycegiz', 'köyceğiz', 'koycegiz lake'], city: 'Dalaman' },
   'Sarigerme': { priority: 2, keywords: ['sarigerme', 'sarıgerme', 'sarigerme beach'], city: 'Dalaman' },
   
-  // Izmir
-  'Cesme': { priority: 1, keywords: ['cesme', 'çeşme', 'ilica', 'ılıca', 'cesme marina', 'boyalik', 'boyalık'], city: 'Izmir' },
+  // Izmir - Each district separate
+  'Cesme': { priority: 1, keywords: ['cesme', 'çeşme', 'cesme marina', 'boyalik', 'boyalık'], city: 'Izmir' },
+  'Ilica': { priority: 1, keywords: ['ilica', 'ılıca', 'ilica beach'], city: 'Izmir' },
   'Alacati': { priority: 1, keywords: ['alacati', 'alaçatı', 'alacati windmill', 'alacati stone houses', 'alacati tas evler'], city: 'Izmir' },
   'Kusadasi': { priority: 1, keywords: ['kusadasi', 'kuşadası', 'ladies beach', 'kadınlar denizi', 'kusadasi marina', 'kusadasi merkez', 'pigeons island', 'guvercin adasi', 'güvercin adası'], city: 'Izmir' },
-  'Selcuk': { priority: 1, keywords: ['selcuk', 'selçuk', 'ephesus', 'efes', 'sirince', 'şirince', 'ephesus ancient city', 'efes antik kenti'], city: 'Izmir' },
-  'Alsancak': { priority: 1, keywords: ['alsancak', 'konak', 'kordon', 'pasaport', 'izmir center', 'izmir merkez', 'karsiyaka', 'karşıyaka', 'bornova'], city: 'Izmir' },
+  'Selcuk': { priority: 1, keywords: ['selcuk', 'selçuk', 'ephesus', 'efes', 'ephesus ancient city', 'efes antik kenti'], city: 'Izmir' },
+  'Sirince': { priority: 1, keywords: ['sirince', 'şirince'], city: 'Izmir' },
+  'Alsancak': { priority: 1, keywords: ['alsancak', 'konak', 'kordon', 'pasaport', 'izmir center', 'izmir merkez'], city: 'Izmir' },
+  'Karsiyaka': { priority: 2, keywords: ['karsiyaka', 'karşıyaka'], city: 'Izmir' },
+  'Bornova': { priority: 2, keywords: ['bornova'], city: 'Izmir' },
   
-  // Cappadocia
+  // Cappadocia - Each district separate
   'Goreme': { priority: 1, keywords: ['goreme', 'göreme', 'goreme town', 'goreme open air museum', 'goreme acik hava muzesi'], city: 'Cappadocia' },
   'Urgup': { priority: 1, keywords: ['urgup', 'ürgüp', 'urgup center', 'urgup merkez'], city: 'Cappadocia' },
   'Uchisar': { priority: 1, keywords: ['uchisar', 'uçhisar', 'uchisar castle', 'uchisar kalesi', 'uçhisar kalesi'], city: 'Cappadocia' },
@@ -316,26 +328,35 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Ortahisar': { priority: 2, keywords: ['ortahisar', 'ortahisar castle', 'ortahisar kalesi'], city: 'Cappadocia' },
   'Nevsehir Center': { priority: 2, keywords: ['nevsehir center', 'nevşehir merkez', 'nevsehir merkez', 'nevsehir city'], city: 'Cappadocia' },
   'Mustafapasa': { priority: 2, keywords: ['mustafapasa', 'mustafapaşa', 'sinasos'], city: 'Cappadocia' },
+  'Cavusin': { priority: 2, keywords: ['cavusin', 'çavuşin'], city: 'Cappadocia' },
   
-  // Bursa
+  // Bursa - Each district separate
   'Osmangazi': { priority: 1, keywords: ['osmangazi', 'bursa center', 'bursa merkez', 'heykel', 'bursa city', 'setbasi', 'setbaşı', 'altiparmak', 'altıparmak', 'ulucami', 'ulu cami'], city: 'Bursa' },
+  'Nilufer': { priority: 2, keywords: ['nilufer', 'nilüfer', 'gorukle', 'görükle', 'ozluece', 'özlüce'], city: 'Bursa' },
+  'Yildirim': { priority: 2, keywords: ['yildirim', 'yıldırım'], city: 'Bursa' },
   'Mudanya': { priority: 1, keywords: ['mudanya', 'guzelyali', 'güzelyalı', 'tirilye', 'trilye', 'mudanya iskele'], city: 'Bursa' },
   'Uludag': { priority: 1, keywords: ['uludag', 'uludağ', 'mount uludag', 'uludag ski', 'uludag kayak', 'oteller bolgesi', 'hotels region'], city: 'Bursa' },
   'Cumalikizik': { priority: 1, keywords: ['cumalikizik', 'cumalıkızık', 'cumalikizik village', 'cumalikizik koyu'], city: 'Bursa' },
   'Iznik': { priority: 2, keywords: ['iznik', 'nicaea', 'iznik lake', 'iznik golu', 'iznik gölü'], city: 'Bursa' },
-  'Nilufer': { priority: 2, keywords: ['nilufer', 'nilüfer', 'gorukle', 'görükle', 'ozluece', 'özlüce'], city: 'Bursa' },
+  'Gemlik': { priority: 2, keywords: ['gemlik', 'gemlik zeytini'], city: 'Bursa' },
+  'Orhangazi': { priority: 2, keywords: ['orhangazi'], city: 'Bursa' },
   
-  // Kocaeli
+  // Kocaeli - Each district separate
   'Izmit': { priority: 1, keywords: ['izmit', 'İzmit', 'kocaeli center', 'kocaeli merkez', 'kocaeli city'], city: 'Kocaeli' },
-  'Kartepe': { priority: 1, keywords: ['kartepe', 'masukiye', 'maşukiye', 'kuzuyayla', 'sogucak', 'soğucak', 'kartepe ski', 'kartepe kayak'], city: 'Kocaeli' },
-  'Gebze': { priority: 1, keywords: ['gebze', 'cayirova', 'çayırova', 'darica', 'darıca', 'dilovasi', 'dilovası'], city: 'Kocaeli' },
+  'Kartepe': { priority: 1, keywords: ['kartepe', 'kartepe ski', 'kartepe kayak'], city: 'Kocaeli' },
+  'Masukiye': { priority: 1, keywords: ['masukiye', 'maşukiye', 'kuzuyayla', 'sogucak', 'soğucak'], city: 'Kocaeli' },
+  'Gebze': { priority: 1, keywords: ['gebze'], city: 'Kocaeli' },
+  'Cayirova': { priority: 2, keywords: ['cayirova', 'çayırova'], city: 'Kocaeli' },
+  'Darica': { priority: 2, keywords: ['darica', 'darıca'], city: 'Kocaeli' },
+  'Dilovasi': { priority: 2, keywords: ['dilovasi', 'dilovası'], city: 'Kocaeli' },
   'Golcuk': { priority: 2, keywords: ['golcuk', 'gölcük', 'degirmendere', 'değirmendere'], city: 'Kocaeli' },
   'Derince': { priority: 2, keywords: ['derince', 'korfez', 'körfez'], city: 'Kocaeli' },
   'Kandira': { priority: 2, keywords: ['kandira', 'kandıra', 'kerpe', 'cebeci'], city: 'Kocaeli' },
   
-  // Sapanca / Sakarya
+  // Sapanca / Sakarya - Each district separate
   'Sapanca Center': { priority: 1, keywords: ['sapanca', 'sapanca merkez', 'sapanca golu', 'sapanca gölü', 'sapanca lake'], city: 'Sapanca' },
-  'Kirkpinar': { priority: 1, keywords: ['kirkpinar', 'kırkpınar', 'mahmudiye', 'hasanpasa', 'hasanpaşa'], city: 'Sapanca' },
+  'Kirkpinar': { priority: 1, keywords: ['kirkpinar', 'kırkpınar'], city: 'Sapanca' },
+  'Mahmudiye': { priority: 2, keywords: ['mahmudiye', 'hasanpasa', 'hasanpaşa'], city: 'Sapanca' },
   'Adapazari': { priority: 1, keywords: ['adapazari', 'adapazarı', 'sakarya center', 'sakarya merkez'], city: 'Sakarya' },
   'Serdivan': { priority: 2, keywords: ['serdivan', 'bahcesehir', 'bahçeşehir'], city: 'Sakarya' },
   
