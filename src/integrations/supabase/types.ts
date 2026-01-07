@@ -597,6 +597,45 @@ export type Database = {
         }
         Relationships: []
       }
+      intercity_prices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          from_city: string
+          id: string
+          is_active: boolean
+          price: number
+          price_currency: string
+          to_city: string
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          from_city: string
+          id?: string
+          is_active?: boolean
+          price: number
+          price_currency?: string
+          to_city: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          from_city?: string
+          id?: string
+          is_active?: boolean
+          price?: number
+          price_currency?: string
+          to_city?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           company_address: string | null
