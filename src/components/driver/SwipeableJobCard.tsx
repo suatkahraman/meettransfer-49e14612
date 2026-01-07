@@ -329,6 +329,11 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                 <CreditCard className="h-3 w-3" />
                 <span>{getPaymentTypeLabel(reservation.payment_type)}</span>
               </div>
+              {reservation.price && reservation.price > 0 && (
+                <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded text-xs text-amber-700 dark:text-amber-400 font-semibold">
+                  <span>B {getCurrencySymbol(reservation.price_currency)}{reservation.price.toLocaleString('tr-TR')}</span>
+                </div>
+              )}
             </div>
 
             {/* Passenger Cash Amount - Prominent Display */}
