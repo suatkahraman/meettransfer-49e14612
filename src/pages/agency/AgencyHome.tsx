@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LocationDisplay } from '@/components/ui/location-display';
 import ReservationSearch from '@/components/ReservationSearch';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface Driver {
   id: string;
@@ -382,7 +383,7 @@ const AgencyHome = () => {
               <div className="flex items-center gap-2">
                 <span className="text-lg">💵</span>
                 <span className="font-semibold text-green-700">
-                  {reservation.passenger_cash_currency || 'TRY'} {reservation.passenger_cash_amount.toLocaleString()}
+                  {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString()}
                 </span>
                 <span className="text-xs text-muted-foreground">({t('cashToCollect') || 'Alınacak Nakit'})</span>
               </div>
