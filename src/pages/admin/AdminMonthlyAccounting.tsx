@@ -126,21 +126,19 @@ const AdminMonthlyAccounting = () => {
       .from('driver_payments')
       .select('*');
 
-    // Fetch ALL completed reservations with driver_earning for carry-over calculation
-    // Only completed jobs with budget (driver_earning) are counted for driver accounting
+    // Fetch ALL completed reservations for carry-over calculation
+    // Earnings = price - cash collected (hakediş = bütçe - nakit)
     // Exclude cancelled and deleted reservations
     const { data: allReservationsData } = await supabase
       .from('reservations')
-      .select('driver_id, driver_earning, driver_cash_amount, status')
+      .select('driver_id, price, driver_cash_amount, status')
       .not('driver_id', 'is', null)
-      .eq('status', 'completed')
-      .not('driver_earning', 'is', null)
-      .gt('driver_earning', 0);
+      .eq('status', 'completed');
 
     // Calculate all-time data per driver
     const allTimeMap = new Map<string, AllTimeDriverData>();
 
-    // Sum up all reservations earnings
+    // Sum up all reservations earnings: price - driver_cash_amount
     if (allReservationsData) {
       allReservationsData.forEach(res => {
         if (!res.driver_id) return;
@@ -150,7 +148,8 @@ const AdminMonthlyAccounting = () => {
           totalPaymentsToDriver: 0,
           totalPaymentsFromDriver: 0
         };
-        existing.totalEarnings += (res.driver_earning || 0) - (res.driver_cash_amount || 0);
+        // Hakediş = Bütçe (price) - Nakit (driver_cash_amount)
+        existing.totalEarnings += (res.price || 0) - (res.driver_cash_amount || 0);
         allTimeMap.set(res.driver_id, existing);
       });
     }
@@ -375,7 +374,10 @@ const AdminMonthlyAccounting = () => {
                           const totalPaymentsToDriver = allTimeData?.totalPaymentsToDriver || 0;
                           const totalPaymentsFromDriver = allTimeData?.totalPaymentsFromDriver || 0;
                           
-                          // Net balance = earnings - payments to driver + payments from driver
+                          // Net balance = Hakediş - Ödenen + Alınan
+                          // Hakediş = Tüm tamamlanan işlerde (price - driver_cash_amount)
+                          // Pozitif = Şoföre borçluyuz (alacak)
+                          // Negatif = Şoför bize borçlu (verecek)
                           const netBalance = totalAllTimeEarnings - totalPaymentsToDriver + totalPaymentsFromDriver;
                           const balanceColor = netBalance > 0 ? 'text-amber-600' : netBalance < 0 ? 'text-blue-600' : 'text-green-600';
                           return (
@@ -388,6 +390,9 @@ const AdminMonthlyAccounting = () => {
                                 <div className="text-sm text-muted-foreground">
                                   {summary.transferCount} transfer | Ödenen: ₺{totalPaymentsToDriver.toFixed(2)}
                                 </div>
+                                <div className="text-xs text-muted-foreground mt-0.5">
+                                  Toplam Hakediş: ₺{totalAllTimeEarnings.toFixed(2)}
+                                </div>
                               </div>
                               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                                 <div className="text-right">
@@ -397,6 +402,9 @@ const AdminMonthlyAccounting = () => {
                                   <div className={`font-semibold ${balanceColor}`}>
                                     Devir: ₺{Math.abs(netBalance).toFixed(2)}
                                     {netBalance > 0 ? ' (alacak)' : netBalance < 0 ? ' (verecek)' : ' (kapalı)'}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    Hakediş - Ödenen + Alınan
                                   </div>
                                 </div>
                                 <div className="flex gap-2">
