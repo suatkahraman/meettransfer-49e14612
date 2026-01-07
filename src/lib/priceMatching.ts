@@ -441,6 +441,16 @@ function normalizeLocation(location: string): string {
     .trim();
 }
 
+// Normalized district names per city (frontend mirror of backend guard)
+const DISTRICT_NAMES_BY_CITY_NORM: Record<string, Set<string>> = (() => {
+  const map: Record<string, Set<string>> = {};
+  for (const [district, data] of Object.entries(DISTRICT_KEYWORDS)) {
+    const city = data.city;
+    (map[city] ??= new Set()).add(normalizeLocation(district));
+  }
+  return map;
+})();
+
 // ==================== MATCHING FUNCTIONS ====================
 interface InternalMatchResult {
   value: string;
@@ -509,32 +519,68 @@ function findCity(location: string): InternalMatchResult | null {
   return bestMatch;
 }
 
-function findDistrict(location: string): DistrictInternalMatch | null {
+function findDistrict(location: string, cityHint?: string | null): DistrictInternalMatch | null {
   const normalized = normalizeLocation(location);
   let bestMatch: DistrictInternalMatch | null = null;
-  
+
   for (const [district, data] of Object.entries(DISTRICT_KEYWORDS)) {
-    for (const keyword of data.keywords) {
+    if (cityHint && data.city !== cityHint) continue;
+
+    const thisDistrictNorm = normalizeLocation(district);
+    const districtNamesForCity = DISTRICT_NAMES_BY_CITY_NORM[data.city];
+
+    // Prefer direct match on district name
+    if (normalized.includes(thisDistrictNorm)) {
+      const confidence = Math.min(1, 0.85 + (thisDistrictNorm.length / 40));
+      if (
+        !bestMatch ||
+        confidence > bestMatch.confidence ||
+        (confidence === bestMatch.confidence && data.priority < bestMatch.priority)
+      ) {
+        bestMatch = {
+          value: district,
+          city: data.city,
+          confidence,
+          priority: data.priority,
+          matchedKeyword: district,
+        };
+      }
+    }
+
+    const keywords = data.keywords.includes(district) ? data.keywords : [district, ...data.keywords];
+
+    for (const keyword of keywords) {
       const keywordNorm = normalizeLocation(keyword);
-      
+
+      // Guard: ignore keywords that equal another district name in same city
+      if (
+        districtNamesForCity &&
+        keywordNorm !== thisDistrictNorm &&
+        districtNamesForCity.has(keywordNorm)
+      ) {
+        continue;
+      }
+
       if (normalized.includes(keywordNorm)) {
         const confidence = Math.min(1, 0.7 + (keywordNorm.length / 25));
-        
-        if (!bestMatch || 
-            confidence > bestMatch.confidence || 
-            (confidence === bestMatch.confidence && data.priority < bestMatch.priority)) {
+
+        if (
+          !bestMatch ||
+          confidence > bestMatch.confidence ||
+          (confidence === bestMatch.confidence && data.priority < bestMatch.priority)
+        ) {
           bestMatch = {
             value: district,
             city: data.city,
             confidence,
             priority: data.priority,
-            matchedKeyword: keyword
+            matchedKeyword: keyword,
           };
         }
       }
     }
   }
-  
+
   return bestMatch;
 }
 
@@ -551,7 +597,7 @@ function parseGoogleMapsLocation(location: string): ParsedLocation {
   
   const airportMatch = findAirport(location);
   const cityMatch = findCity(location);
-  const districtMatch = findDistrict(location);
+  const districtMatch = findDistrict(location, cityMatch?.value || null);
   
   return {
     airport: airportMatch?.value || null,

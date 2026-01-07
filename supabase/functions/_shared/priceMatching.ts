@@ -418,6 +418,19 @@ export function normalizeLocation(location: string): string {
     .trim();
 }
 
+// Build a normalized set of district names per city.
+// This is used as a safety guard: if a district's keyword accidentally equals another district name
+// in the SAME city (e.g. Side keywords containing "manavgat"), we ignore that keyword to prevent
+// misclassification and missing price matches.
+const DISTRICT_NAMES_BY_CITY_NORM: Record<string, Set<string>> = (() => {
+  const map: Record<string, Set<string>> = {};
+  for (const [district, data] of Object.entries(DISTRICT_KEYWORDS)) {
+    const city = data.city;
+    (map[city] ??= new Set()).add(normalizeLocation(district));
+  }
+  return map;
+})();
+
 // ==================== FUZZY MATCHING ====================
 function levenshteinDistance(a: string, b: string): number {
   const matrix: number[][] = [];
@@ -584,30 +597,68 @@ export interface DistrictMatchResult extends MatchResult {
   city: string;
 }
 
-export function findDistrict(location: string): DistrictMatchResult | null {
+export function findDistrict(location: string, cityHint?: string | null): DistrictMatchResult | null {
   const normalized = normalizeLocation(location);
   let bestMatch: DistrictMatchResult | null = null;
-  
+
   // Skip fuzzy matching for very short inputs (likely just city names)
-  const isShortInput = normalized.split(' ').filter(w => w.length > 2).length <= 1;
-  
+  const isShortInput = normalized.split(' ').filter((w) => w.length > 2).length <= 1;
+
   for (const [district, data] of Object.entries(DISTRICT_KEYWORDS)) {
-    for (const keyword of data.keywords) {
+    if (cityHint && data.city !== cityHint) continue;
+
+    const thisDistrictNorm = normalizeLocation(district);
+    const districtNamesForCity = DISTRICT_NAMES_BY_CITY_NORM[data.city];
+
+    // Always prefer direct match on the district name itself
+    if (normalized.includes(thisDistrictNorm)) {
+      const confidence = Math.min(1, 0.85 + (thisDistrictNorm.length / 40));
+      if (
+        !bestMatch ||
+        confidence > bestMatch.confidence ||
+        (confidence === bestMatch.confidence && data.priority < bestMatch.priority)
+      ) {
+        bestMatch = {
+          value: district,
+          city: data.city,
+          confidence,
+          priority: data.priority,
+          matchedKeyword: district,
+        };
+      }
+    }
+
+    // Ensure the district's own name is always a keyword (defensive)
+    const keywords = data.keywords.includes(district) ? data.keywords : [district, ...data.keywords];
+
+    for (const keyword of keywords) {
       const keywordNorm = normalizeLocation(keyword);
-      
+
+      // Safety guard: if a keyword equals ANOTHER district name in the same city, ignore it.
+      // This prevents wrong matches when keyword lists overlap.
+      if (
+        districtNamesForCity &&
+        keywordNorm !== thisDistrictNorm &&
+        districtNamesForCity.has(keywordNorm)
+      ) {
+        continue;
+      }
+
       // Only do exact substring match
       if (normalized.includes(keywordNorm)) {
         const confidence = Math.min(1, 0.7 + (keywordNorm.length / 25));
-        
-        if (!bestMatch || 
-            confidence > bestMatch.confidence || 
-            (confidence === bestMatch.confidence && data.priority < bestMatch.priority)) {
+
+        if (
+          !bestMatch ||
+          confidence > bestMatch.confidence ||
+          (confidence === bestMatch.confidence && data.priority < bestMatch.priority)
+        ) {
           bestMatch = {
             value: district,
             city: data.city,
             confidence,
             priority: data.priority,
-            matchedKeyword: keyword
+            matchedKeyword: keyword,
           };
         }
       }
@@ -615,20 +666,20 @@ export function findDistrict(location: string): DistrictMatchResult | null {
       // Skip fuzzy for short inputs like "Bursa, Türkiye"
       else if (!isShortInput && keywordNorm.length >= 6 && fuzzyMatch(normalized, keywordNorm, 0.9)) {
         const confidence = Math.min(0.7, 0.4 + (keywordNorm.length / 35));
-        
+
         if (!bestMatch || confidence > bestMatch.confidence) {
           bestMatch = {
             value: district,
             city: data.city,
             confidence,
             priority: data.priority,
-            matchedKeyword: keyword + ' (fuzzy)'
+            matchedKeyword: keyword + ' (fuzzy)',
           };
         }
       }
     }
   }
-  
+
   return bestMatch;
 }
 
@@ -656,8 +707,8 @@ export function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
   const dropoffAirport = findAirport(dropoff);
   const pickupCity = findCity(pickup);
   const dropoffCity = findCity(dropoff);
-  const pickupDistrict = findDistrict(pickup);
-  const dropoffDistrict = findDistrict(dropoff);
+  const pickupDistrict = findDistrict(pickup, pickupCity?.value || null);
+  const dropoffDistrict = findDistrict(dropoff, dropoffCity?.value || null);
 
   // Special rule: Istanbul (Europe/Asia side) → Bursa/Kocaeli/Sapanca should use
   // Istanbul Airport / Sabiha Gokcen Airport price tables.
