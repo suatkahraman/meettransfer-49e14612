@@ -359,7 +359,7 @@ const CustomerReservationDetail = () => {
           if (discountResult?.success) {
             toast.success(
               t('autoDiscountApplied') || 
-              `Fiyat indirildi! Yeni fiyat: ${discountResult.currency === 'EUR' ? '€' : discountResult.currency}${discountResult.new_price}`
+              `Fiyat indirildi! Yeni fiyat: ${getCurrencySymbol(discountResult.currency)}${discountResult.new_price}`
             );
             
             // Update local state

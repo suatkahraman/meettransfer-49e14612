@@ -15,7 +15,7 @@ import { ArrowLeft, Building2, Calendar, MapPin, Car, User, DollarSign, Clock, P
 import { MonthNavigator } from '@/components/accounting/MonthNavigator';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 import { toast } from 'sonner';
-
+import { getCurrencySymbol, CURRENCY_OPTIONS } from '@/lib/currency';
 interface Agency {
   id: string;
   agency_name: string;
@@ -92,14 +92,7 @@ const statusLabels: Record<string, string> = {
   'cancelled_by_customer': 'Müşteri İptal Etti',
 };
 
-const currencies: Record<string, string> = {
-  'TRY': '₺',
-  'EUR': '€',
-  'USD': '$',
-  'GBP': '£',
-  'AED': 'د.إ',
-  'AUD': 'A$',
-};
+// Using centralized currency utilities from @/lib/currency
 
 const AdminAgencyAccounting = () => {
   const navigate = useNavigate();
@@ -333,7 +326,7 @@ const AdminAgencyAccounting = () => {
     return driver?.name || 'Bilinmiyor';
   };
 
-  const getCurrencySymbol = (currency: string | null) => currencies[currency || 'TRY'] || currency;
+  // Use centralized getCurrencySymbol - no local redefinition needed
 
   const getAgencyPrice = (reservationId: string) => {
     const detail = agencyDetails.find(d => d.reservation_id === reservationId);
@@ -901,7 +894,7 @@ const AdminAgencyAccounting = () => {
                                         <div>
                                           <div className="text-xs text-muted-foreground">Yolcu Nakit</div>
                                           <div className="text-sm font-medium text-orange-600">
-                                            {res.passenger_cash_currency === 'EUR' ? '€' : res.passenger_cash_currency === 'USD' ? '$' : '₺'}
+                                            {getCurrencySymbol(res.passenger_cash_currency)}
                                             {res.passenger_cash_amount.toFixed(2)}
                                           </div>
                                         </div>
@@ -965,9 +958,9 @@ const AdminAgencyAccounting = () => {
                     <SelectValue placeholder="Para birimi seçin" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(currencies).map(([code, symbol]) => (
-                      <SelectItem key={code} value={code}>
-                        {symbol} {code}
+                    {CURRENCY_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.symbol} {opt.value}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1043,7 +1036,7 @@ const AdminAgencyAccounting = () => {
                   </TableHeader>
                   <TableBody>
                     {currentMonthPaymentsList.map((payment) => {
-                      const paymentSymbol = currencies[payment.currency || 'TRY'] || '₺';
+                      const paymentSymbol = getCurrencySymbol(payment.currency);
                       return (
                         <TableRow key={payment.id}>
                           <TableCell>{format(new Date(payment.payment_date), 'dd MMM yyyy')}</TableCell>
@@ -1093,7 +1086,7 @@ const AdminAgencyAccounting = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Ödeme Sil</AlertDialogTitle>
             <AlertDialogDescription>
-              {currencies[deletingPayment?.currency || 'TRY'] || '₺'}{deletingPayment?.amount.toFixed(2)} tutarındaki bu ödemeyi silmek istediğinizden emin misiniz? 
+              {getCurrencySymbol(deletingPayment?.currency)}{deletingPayment?.amount.toFixed(2)} tutarındaki bu ödemeyi silmek istediğinizden emin misiniz? 
               Bu tutar acenta bakiyesine geri eklenecektir.
             </AlertDialogDescription>
           </AlertDialogHeader>

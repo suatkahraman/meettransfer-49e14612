@@ -24,6 +24,7 @@ import PriceHistoryCard from '@/components/admin/PriceHistoryCard';
 // Airports list removed - pickup is now free text
 // Use centralized vehicle types
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
+import { getCurrencySymbol, CURRENCY_OPTIONS as currencies } from '@/lib/currency';
 const paymentTypes = [
   { value: 'cash', label: 'Şoföre Nakit' },
   { value: 'payment_link', label: 'Online Ödeme Linki' },
@@ -76,15 +77,7 @@ const statusLabels: Record<string, string> = {
   'cancelled': 'İptal Edildi',
 };
 
-// Currency options
-const currencies = [
-  { value: 'EUR', label: '€ EUR', symbol: '€' },
-  { value: 'USD', label: '$ USD', symbol: '$' },
-  { value: 'GBP', label: '£ GBP', symbol: '£' },
-  { value: 'TRY', label: '₺ TRY', symbol: '₺' },
-  { value: 'AED', label: 'د.إ AED', symbol: 'د.إ' },
-  { value: 'AUD', label: '$ AUD', symbol: '$' },
-];
+// Currency options now imported from @/lib/currency as CURRENCY_OPTIONS
 
 interface Driver {
   id: string;
@@ -274,9 +267,7 @@ const AdminEditReservation = () => {
     );
   };
 
-  const getCurrencySymbol = (currency: string) => {
-    return currencies.find(c => c.value === currency)?.symbol || currency;
-  };
+  // Using centralized getCurrencySymbol from @/lib/currency
 
   // Safe number parsing that handles empty strings and NaN
   const safeParseFloat = (value: string | undefined | null): number | null => {

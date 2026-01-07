@@ -16,6 +16,7 @@ import {
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getCurrencySymbol } from "@/lib/currency";
 import { VEHICLE_TYPES, VEHICLE_LABELS, VEHICLE_TYPE_MAP, isMinibusRequired } from "@/lib/vehicleTypes";
 import {
   Carousel,
@@ -449,17 +450,7 @@ export default function QuickBookingConfirm() {
     return null;
   };
 
-  const getCurrencySymbol = (currency: string) => {
-    const symbols: Record<string, string> = {
-      'EUR': '€',
-      'USD': '$',
-      'TRY': '₺',
-      'GBP': '£',
-      'AED': 'د.إ',
-      'AUD': 'A$',
-    };
-    return symbols[currency] || currency;
-  };
+  // Use centralized getCurrencySymbol from @/lib/currency - imported at top
 
   const handleConfirm = async () => {
     if (!booking) return;
