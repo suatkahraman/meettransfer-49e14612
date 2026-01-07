@@ -19,6 +19,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface Driver {
   id: string;
@@ -503,7 +504,7 @@ const AgencyReservationDetail = () => {
       reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
       `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
       '',
-      reservation.passenger_cash_amount ? `Passenger Cash: ${reservation.passenger_cash_currency || 'USD'} ${reservation.passenger_cash_amount}` : null,
+      reservation.passenger_cash_amount ? `Passenger Cash: ${getCurrencySymbol(reservation.passenger_cash_currency)}${reservation.passenger_cash_amount}` : null,
       '',
       reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
       reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
@@ -571,13 +572,7 @@ const AgencyReservationDetail = () => {
               <div className="text-center py-4">
                 <p className="text-sm text-purple-600 dark:text-purple-400 mb-2">{t('proposedPrice')}</p>
                 <p className="text-4xl font-bold text-purple-700 dark:text-purple-300">
-                  {reservation.price_currency === 'EUR' && '€'}
-                  {reservation.price_currency === 'USD' && '$'}
-                  {reservation.price_currency === 'GBP' && '£'}
-                  {reservation.price_currency === 'TRY' && '₺'}
-                  {reservation.price_currency === 'AED' && 'د.إ'}
-                  {!['EUR', 'USD', 'GBP', 'TRY', 'AED'].includes(reservation.price_currency || '') && (reservation.price_currency || '₺')}
-                  {reservation.price}
+                  {getCurrencySymbol(reservation.price_currency)}{reservation.price}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -851,13 +846,7 @@ const AgencyReservationDetail = () => {
                   <div>
                     <div className="text-sm text-muted-foreground">{t('passengerCash')}</div>
                     <div className="font-medium text-green-600">
-                      {reservation.passenger_cash_currency === 'EUR' && '€'}
-                      {reservation.passenger_cash_currency === 'USD' && '$'}
-                      {reservation.passenger_cash_currency === 'GBP' && '£'}
-                      {reservation.passenger_cash_currency === 'TRY' && '₺'}
-                      {reservation.passenger_cash_currency === 'AED' && 'د.إ'}
-                      {!['EUR', 'USD', 'GBP', 'TRY', 'AED'].includes(reservation.passenger_cash_currency || '') && (reservation.passenger_cash_currency || '')}
-                      {reservation.passenger_cash_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                      {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                     </div>
                   </div>
                 </div>
