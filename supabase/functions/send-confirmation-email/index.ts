@@ -207,6 +207,12 @@ const handler = async (req: Request): Promise<Response> => {
               <a href="https://wa.me/15558051101" style="display: inline-block; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">💬 WhatsApp Chat</a>
               <a href="mailto:info@meettransfer.app" style="display: inline-block; background: #fdd835; color: #111; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">✉️ info@meettransfer.app</a>
             </div>
+            <div style="margin-top: 15px;">
+              <a href="https://www.instagram.com/meettransfer" style="display: inline-block; width: 32px; height: 32px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); border-radius: 6px; text-align: center; line-height: 32px; text-decoration: none; color: white; font-size: 16px; margin: 0 4px;" title="Instagram">📷</a>
+              <a href="https://www.facebook.com/share/17w6b51DcX/" style="display: inline-block; width: 32px; height: 32px; background: #1877f2; border-radius: 6px; text-align: center; line-height: 32px; text-decoration: none; color: white; font-size: 16px; margin: 0 4px;" title="Facebook">📘</a>
+              <a href="https://x.com/MeetTransfer" style="display: inline-block; width: 32px; height: 32px; background: #000; border-radius: 6px; text-align: center; line-height: 32px; text-decoration: none; color: white; font-size: 16px; margin: 0 4px;" title="X (Twitter)">𝕏</a>
+              <a href="https://www.youtube.com/@meettransfer" style="display: inline-block; width: 32px; height: 32px; background: #ff0000; border-radius: 6px; text-align: center; line-height: 32px; text-decoration: none; color: white; font-size: 16px; margin: 0 4px;" title="YouTube">▶️</a>
+            </div>
           </div>
 
           <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
