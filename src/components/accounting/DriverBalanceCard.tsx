@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Wallet, TrendingUp, TrendingDown, Scale } from 'lucide-react';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface DriverBalanceCardProps {
   balance: number;
@@ -27,7 +28,7 @@ export const DriverBalanceCard = ({ balance, totalPayments, totalEarnings }: Dri
               <TrendingUp className="h-4 w-4" />
               Toplam Kazanç
             </div>
-            <div className="text-xl font-bold">₺{totalEarnings.toFixed(2)}</div>
+            <div className="text-xl font-bold">{getCurrencySymbol('TRY')}{totalEarnings.toFixed(2)}</div>
           </div>
           
           <div className="p-4 rounded-lg bg-muted/50">
@@ -35,7 +36,7 @@ export const DriverBalanceCard = ({ balance, totalPayments, totalEarnings }: Dri
               <TrendingDown className="h-4 w-4" />
               Toplam Ödeme
             </div>
-            <div className="text-xl font-bold">₺{totalPayments.toFixed(2)}</div>
+            <div className="text-xl font-bold">{getCurrencySymbol('TRY')}{totalPayments.toFixed(2)}</div>
           </div>
           
           <div className={`p-4 rounded-lg ${isPositive ? 'bg-amber-100 dark:bg-amber-950' : isNegative ? 'bg-blue-100 dark:bg-blue-950' : 'bg-green-100 dark:bg-green-950'}`}>
@@ -44,7 +45,7 @@ export const DriverBalanceCard = ({ balance, totalPayments, totalEarnings }: Dri
               Bakiye
             </div>
             <div className={`text-xl font-bold ${isPositive ? 'text-amber-600' : isNegative ? 'text-blue-600' : 'text-green-600'}`}>
-              ₺{Math.abs(netBalance).toFixed(2)}
+              {getCurrencySymbol('TRY')}{Math.abs(netBalance).toFixed(2)}
               <span className="text-sm font-normal ml-1">
                 {isPositive ? '(alacak)' : isNegative ? '(verecek)' : '(kapalı)'}
               </span>

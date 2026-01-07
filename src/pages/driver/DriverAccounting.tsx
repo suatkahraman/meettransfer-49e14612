@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, LogOut, Briefcase, DollarSign, Banknote } from 'lucide-react';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface AccountingData {
   totalJobs: number;
@@ -95,7 +96,7 @@ const DriverAccounting = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">₺{data.totalRevenue.toFixed(2)}</div>
+                <div className="text-3xl font-bold text-green-600">{getCurrencySymbol('TRY')}{data.totalRevenue.toFixed(2)}</div>
                 <p className="text-sm text-muted-foreground mt-1">{t('valueOfCompletedJobs')}</p>
               </CardContent>
             </Card>
@@ -108,7 +109,7 @@ const DriverAccounting = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">₺{data.cashCollected.toFixed(2)}</div>
+                <div className="text-3xl font-bold">{getCurrencySymbol('TRY')}{data.cashCollected.toFixed(2)}</div>
               </CardContent>
             </Card>
           </div>
