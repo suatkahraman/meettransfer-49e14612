@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getEmailHeader, getEmailFooter } from "../_shared/emailTemplates.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -138,89 +139,108 @@ const handler = async (req: Request): Promise<Response> => {
       `;
 
     const emailHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Reservation Confirmed - Meet Transfer</title>
-      </head>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #fdd835 0%, #f9a825 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-          <h1 style="color: #111; margin: 0; font-size: 28px;">Reservation Confirmed</h1>
-          <p style="color: #333; margin-top: 10px; font-size: 16px;">Thank you for choosing Meet Transfer!</p>
-        </div>
-        
-        <div style="background: #fff; padding: 30px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 10px 10px;">
-          <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-            <p style="margin: 0; color: #666; font-size: 14px;">Reservation Code</p>
-            <p style="margin: 5px 0 0; font-size: 28px; font-weight: bold; color: #111; letter-spacing: 2px;">${reservation.reservation_code || 'N/A'}</p>
-          </div>
+${getEmailHeader('✅ Reservation Confirmed', `Thank you for choosing Meet Transfer!`)}
+<tr>
+  <td style="padding:30px 25px;">
+    <!-- Reservation Code -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);border-radius:12px;margin-bottom:25px;">
+      <tr>
+        <td style="padding:25px;text-align:center;">
+          <p style="color:#94a3b8;margin:0;font-size:13px;text-transform:uppercase;letter-spacing:2px;">Reservation Code</p>
+          <p style="color:#fdd835;margin:10px 0 0;font-size:32px;font-weight:bold;letter-spacing:4px;">${reservation.reservation_code || 'N/A'}</p>
+        </td>
+      </tr>
+    </table>
 
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Date & Time:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;">${reservation.pickup_date} at ${reservation.pickup_time}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Pick-up:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;">${pickupDisplay}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Drop-off:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;">${dropoffDisplay}</td>
-            </tr>
-            ${reservation.flight_number ? `
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Flight Number:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;">${reservation.flight_number}</td>
-            </tr>
-            ` : ''}
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Vehicle:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;">${getVehicleLabel(reservation.vehicle_type)}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Price:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #2e7d32;">${priceDisplay}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Passengers:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;">${passengersList}</td>
-            </tr>
-            ${driverInfo}
-            ${reservation.driver_notes ? `
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Notes:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #eee;">${reservation.driver_notes}</td>
-            </tr>
-            ` : ''}
-          </table>
+    <!-- Transfer Details -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;margin-bottom:20px;border:1px solid #e2e8f0;">
+      <tr><td style="padding:20px;">
+        <p style="margin:0 0 15px;color:#1e293b;font-weight:bold;font-size:15px;">📍 Transfer Details</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;width:120px;">Date & Time</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${reservation.pickup_date} at ${reservation.pickup_time}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Pick-up</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${pickupDisplay}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Drop-off</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${dropoffDisplay}</td>
+          </tr>
+          ${reservation.flight_number ? `
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Flight</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">✈️ ${reservation.flight_number}</td>
+          </tr>
+          ` : ''}
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Vehicle</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">🚐 ${getVehicleLabel(reservation.vehicle_type)}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Passengers</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">👥 ${passengersList}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Price</td>
+            <td style="padding:8px 0;color:#10b981;font-size:16px;font-weight:bold;">${priceDisplay}</td>
+          </tr>
+          ${reservation.driver_notes ? `
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Notes</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;">${reservation.driver_notes}</td>
+          </tr>
+          ` : ''}
+        </table>
+      </td></tr>
+    </table>
 
-          <div style="margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 8px; text-align: center;">
-            <p style="margin: 0; color: #2e7d32; font-weight: bold;">Your transfer is confirmed!</p>
-            <p style="margin: 10px 0 0; color: #555; font-size: 14px;">Please save your reservation code for reference.</p>
-          </div>
+    ${reservation.drivers ? `
+    <!-- Driver Info -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eff6ff;border-radius:12px;margin-bottom:20px;border:1px solid #bfdbfe;">
+      <tr><td style="padding:20px;">
+        <p style="margin:0 0 12px;color:#1e40af;font-weight:bold;font-size:14px;">🚗 Your Driver</p>
+        <p style="margin:5px 0;color:#1e3a8a;font-size:14px;"><strong>Name:</strong> ${reservation.drivers.name}</p>
+        <p style="margin:5px 0;color:#1e3a8a;font-size:14px;"><strong>Vehicle:</strong> ${reservation.drivers.vehicle_model || '-'} ${reservation.drivers.plate_number ? `(${reservation.drivers.plate_number})` : ''}</p>
+      </td></tr>
+    </table>
+    ` : `
+    <!-- Driver Pending -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef3c7;border-radius:12px;margin-bottom:20px;border:1px solid #fbbf24;">
+      <tr><td style="padding:20px;text-align:center;">
+        <p style="margin:0;color:#92400e;font-size:14px;">🚗 Driver will be assigned soon. We'll notify you!</p>
+      </td></tr>
+    </table>
+    `}
 
-          <div style="margin-top: 25px; padding: 20px; background: #111; border-radius: 8px; text-align: center;">
-            <p style="margin: 0 0 15px; color: #fdd835; font-size: 14px; font-weight: bold;">Need Help? Contact Us</p>
-            <div>
-              <a href="https://wa.me/15558051101" style="display: inline-block; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">💬 WhatsApp Chat</a>
-              <a href="mailto:info@meettransfer.app" style="display: inline-block; background: #fdd835; color: #111; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">✉️ info@meettransfer.app</a>
-            </div>
-            <div style="margin-top: 15px;">
-              <a href="https://www.instagram.com/meettransfer" style="display: inline-block; width: 32px; height: 32px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); border-radius: 6px; text-align: center; line-height: 32px; text-decoration: none; color: white; font-size: 16px; margin: 0 4px;" title="Instagram">📷</a>
-              <a href="https://www.facebook.com/share/17w6b51DcX/" style="display: inline-block; width: 32px; height: 32px; background: #1877f2; border-radius: 6px; text-align: center; line-height: 32px; text-decoration: none; color: white; font-size: 16px; margin: 0 4px;" title="Facebook">📘</a>
-              <a href="https://x.com/MeetTransfer" style="display: inline-block; width: 32px; height: 32px; background: #000; border-radius: 6px; text-align: center; line-height: 32px; text-decoration: none; color: white; font-size: 16px; margin: 0 4px;" title="X (Twitter)">𝕏</a>
-              <a href="https://www.youtube.com/@meettransfer" style="display: inline-block; width: 32px; height: 32px; background: #ff0000; border-radius: 6px; text-align: center; line-height: 32px; text-decoration: none; color: white; font-size: 16px; margin: 0 4px;" title="YouTube">▶️</a>
-            </div>
-          </div>
+    <!-- Confirmation Banner -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);border-radius:12px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:25px;text-align:center;">
+          <p style="color:#fff;margin:0;font-size:18px;font-weight:bold;">✅ Your transfer is confirmed!</p>
+          <p style="color:rgba(255,255,255,0.9);margin:10px 0 0;font-size:14px;">Please save your reservation code for reference.</p>
+        </td>
+      </tr>
+    </table>
 
-          <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
-            <p>© 2025 Meet Transfer. All rights reserved.</p>
-          </div>
-        </div>
-      </body>
-      </html>
+    <!-- What's Included -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0fdf4;border-radius:12px;border:1px solid #bbf7d0;">
+      <tr><td style="padding:20px;">
+        <p style="margin:0 0 12px;color:#166534;font-weight:bold;font-size:14px;">✨ What's Included</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr><td style="padding:4px 0;color:#15803d;font-size:13px;">✓ Professional English-speaking driver</td></tr>
+          <tr><td style="padding:4px 0;color:#15803d;font-size:13px;">✓ Real-time flight tracking</td></tr>
+          <tr><td style="padding:4px 0;color:#15803d;font-size:13px;">✓ 60 min free waiting at airport</td></tr>
+          <tr><td style="padding:4px 0;color:#15803d;font-size:13px;">✓ Meet & greet with name sign</td></tr>
+          <tr><td style="padding:4px 0;color:#15803d;font-size:13px;">✓ 24/7 customer support</td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </td>
+</tr>
+${getEmailFooter()}
     `;
 
     const emailResponse = await fetch("https://api.resend.com/emails", {
