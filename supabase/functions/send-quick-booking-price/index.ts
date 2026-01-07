@@ -3,6 +3,7 @@ import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { getVehicleLabel, VEHICLE_LABELS } from "../_shared/vehicleConfig.ts";
 import { getCurrencySymbol } from "../_shared/currencyUtils.ts";
+import { getEmailHeader, getEmailFooter } from "../_shared/emailTemplates.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -195,83 +196,98 @@ Best regards,
 Meet Transfer Team
           `.trim(),
           html: `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f5f5f5;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background-color:#ffffff;">
-    <tr>
-      <td style="background-color:#1a365d;padding:20px;text-align:center;">
-        <h1 style="color:#ffffff;margin:0;font-size:24px;">Meet Transfer</h1>
-        ${hasReturnTrip ? '<p style="color:#48bb78;margin:5px 0 0;font-size:14px;">Round Trip Quote</p>' : ''}
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:30px 20px;">
-        <p style="color:#333;font-size:16px;margin:0 0 20px;">Thank you for your transfer request. Here is your quote:</p>
-        
-        ${!hasReturnTrip ? `
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#48bb78;border-radius:8px;margin:20px 0;">
-          <tr>
-            <td style="padding:20px;text-align:center;">
-              <p style="color:#fff;margin:0;font-size:14px;">Your Price</p>
-              <p style="color:#fff;margin:5px 0 0;font-size:36px;font-weight:bold;">${currencySymbol}${price}</p>
-            </td>
-          </tr>
-        </table>
-        ` : ''}
+${getEmailHeader(hasReturnTrip ? '🚗 Round Trip Quote' : '🚗 Your Transfer Quote', 'Thank you for your transfer request!')}
+<tr>
+  <td style="padding:30px 25px;">
+    <p style="color:#333;font-size:16px;margin:0 0 25px;line-height:1.6;">We're delighted to provide you with a personalized quote for your upcoming transfer.</p>
+    
+    ${!hasReturnTrip ? `
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);border-radius:12px;margin:25px 0;">
+      <tr>
+        <td style="padding:25px;text-align:center;">
+          <p style="color:rgba(255,255,255,0.9);margin:0;font-size:14px;text-transform:uppercase;letter-spacing:1px;">Your Transfer Price</p>
+          <p style="color:#fff;margin:10px 0 0;font-size:42px;font-weight:bold;">${currencySymbol}${price}</p>
+        </td>
+      </tr>
+    </table>
+    ` : ''}
 
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7fafc;border-radius:8px;margin:20px 0;">
-          <tr><td style="padding:15px;">
-            <p style="margin:0 0 10px;color:#1a365d;font-weight:bold;">${hasReturnTrip ? '➡️ Outbound Transfer' : 'Transfer Details'}</p>
-            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>From:</strong> ${booking.pickup}</p>
-            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>To:</strong> ${booking.dropoff}</p>
-            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Date:</strong> ${pickupDate}</p>
-            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Time:</strong> ${booking.pickup_time}</p>
-            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Vehicle:</strong> ${vehicleName}</p>
-            <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Passengers:</strong> ${booking.passengers}</p>
-            ${hasReturnTrip ? `<p style="margin:10px 0 0;color:#1a365d;font-size:16px;font-weight:bold;">Price: ${currencySymbol}${price}</p>` : ''}
-          </td></tr>
-        </table>
-
-        ${returnTripHtml}
-
+    <!-- Transfer Details Card -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;margin:20px 0;border:1px solid #e2e8f0;">
+      <tr><td style="padding:20px;">
+        <p style="margin:0 0 15px;color:#1e293b;font-weight:bold;font-size:15px;">${hasReturnTrip ? '➡️ Outbound Transfer' : '📍 Transfer Details'}</p>
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
-            <td style="text-align:center;padding:20px 0;">
-              <a href="${confirmUrl}" style="display:inline-block;background-color:#1a365d;color:#ffffff;text-decoration:none;padding:14px 30px;border-radius:6px;font-size:16px;font-weight:bold;">Confirm Booking</a>
-            </td>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;width:100px;">From</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${booking.pickup}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">To</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${booking.dropoff}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Date</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${pickupDate}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Time</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${booking.pickup_time}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Vehicle</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">🚐 ${vehicleName}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">Passengers</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">👥 ${booking.passengers}</td>
           </tr>
         </table>
+        ${hasReturnTrip ? `<p style="margin:15px 0 0;color:#10b981;font-size:18px;font-weight:bold;">Price: ${currencySymbol}${price}</p>` : ''}
+      </td></tr>
+    </table>
 
-        <p style="color:#666;font-size:13px;margin:20px 0 0;">
-          Professional driver • Flight tracking • Free waiting time • 24/7 support
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td style="background-color:#1a365d;padding:25px;text-align:center;">
-        <p style="color:#fff;margin:0 0 15px;font-size:14px;font-weight:bold;">Need Help? Contact Us</p>
-        <div>
-          <a href="https://wa.me/15558051101" style="display:inline-block;background:#25D366;color:white;padding:10px 20px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:13px;margin:5px;">💬 WhatsApp Chat</a>
-          <a href="mailto:info@meettransfer.app" style="display:inline-block;background:#48bb78;color:white;padding:10px 20px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:13px;margin:5px;">✉️ info@meettransfer.app</a>
-        </div>
-        <div style="margin-top:15px;">
-          <a href="https://www.instagram.com/meettransfer" style="display:inline-block;width:32px;height:32px;background:linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);border-radius:6px;text-align:center;line-height:32px;text-decoration:none;color:white;font-size:16px;margin:0 4px;" title="Instagram">📷</a>
-          <a href="https://www.facebook.com/share/17w6b51DcX/" style="display:inline-block;width:32px;height:32px;background:#1877f2;border-radius:6px;text-align:center;line-height:32px;text-decoration:none;color:white;font-size:16px;margin:0 4px;" title="Facebook">📘</a>
-          <a href="https://x.com/MeetTransfer" style="display:inline-block;width:32px;height:32px;background:#000;border-radius:6px;text-align:center;line-height:32px;text-decoration:none;color:white;font-size:16px;margin:0 4px;" title="X (Twitter)">𝕏</a>
-          <a href="https://www.youtube.com/@meettransfer" style="display:inline-block;width:32px;height:32px;background:#ff0000;border-radius:6px;text-align:center;line-height:32px;text-decoration:none;color:white;font-size:16px;margin:0 4px;" title="YouTube">▶️</a>
-        </div>
-        <p style="color:#94a3b8;margin:15px 0 0;font-size:11px;">© 2025 Meet Transfer. All rights reserved.</p>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-          `.trim(),
+    ${returnTripHtml}
+
+    <!-- What's Included -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eff6ff;border-radius:12px;margin:20px 0;border:1px solid #bfdbfe;">
+      <tr><td style="padding:20px;">
+        <p style="margin:0 0 12px;color:#1e40af;font-weight:bold;font-size:14px;">✨ What's Included</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ Professional English-speaking driver</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ Real-time flight tracking</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ 60 min free waiting at airport</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ Meet & greet with name sign</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ 24/7 customer support</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;color:#1e3a8a;font-size:13px;">✓ Free cancellation up to 24h before</td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+
+    <!-- CTA Button -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="text-align:center;padding:25px 0;">
+          <a href="${confirmUrl}" style="display:inline-block;background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);color:#1a1a2e;text-decoration:none;padding:16px 40px;border-radius:10px;font-size:17px;font-weight:bold;box-shadow:0 4px 15px rgba(251,191,36,0.3);">Confirm & Book Now</a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="text-align:center;color:#94a3b8;font-size:12px;margin:15px 0 0;">⏰ This quote is valid for 24 hours</p>
+  </td>
+</tr>
+${getEmailFooter()}`.trim(),
         });
 
         if ((emailResponse as any)?.error) throw (emailResponse as any).error;
