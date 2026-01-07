@@ -35,6 +35,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface DriverPayment {
   id: string;
@@ -168,7 +169,7 @@ export const DriverPaymentsTable = ({
                     </Badge>
                   </TableCell>
                   <TableCell className={`text-right font-medium ${isFromDriver ? 'text-green-600' : 'text-red-600'}`}>
-                    {isFromDriver ? '+' : '-'}₺{payment.amount.toFixed(2)}
+                    {isFromDriver ? '+' : '-'}{getCurrencySymbol('TRY')}{payment.amount.toFixed(2)}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {payment.notes || '-'}
@@ -246,7 +247,7 @@ export const DriverPaymentsTable = ({
               <MoneyInput
                 value={editAmount}
                 onValueChange={setEditAmount}
-                currencySymbol="₺"
+                currencySymbol={getCurrencySymbol('TRY')}
                 placeholder="0.00"
               />
             </div>

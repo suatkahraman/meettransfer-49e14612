@@ -14,6 +14,7 @@ import { MonthlyAccountingTable } from '@/components/accounting/MonthlyAccountin
 import { DriverBalanceCard } from '@/components/accounting/DriverBalanceCard';
 import { DriverPaymentsTable } from '@/components/accounting/DriverPaymentsTable';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface Reservation {
   id: string;
@@ -283,13 +284,13 @@ const DriverMonthlyAccounting = () => {
                       <div>
                         <div className="text-sm text-muted-foreground">{t('receivedFromCompany')}</div>
                         <div className="text-2xl font-bold text-green-600">
-                          ₺{thisMonthPaymentsToDriver.toFixed(2)}
+                          {getCurrencySymbol('TRY')}{thisMonthPaymentsToDriver.toFixed(2)}
                         </div>
                       </div>
                       <div>
                         <div className="text-sm text-muted-foreground">{t('paidToCompany')}</div>
                         <div className="text-2xl font-bold text-blue-600">
-                          ₺{thisMonthPaymentsFromDriver.toFixed(2)}
+                          {getCurrencySymbol('TRY')}{thisMonthPaymentsFromDriver.toFixed(2)}
                         </div>
                       </div>
                     </div>
@@ -306,7 +307,7 @@ const DriverMonthlyAccounting = () => {
                   </CardHeader>
                   <CardContent>
                     <div className={`text-3xl font-bold ${netBalance > 0 ? 'text-amber-600' : netBalance < 0 ? 'text-blue-600' : 'text-green-600'}`}>
-                      ₺{Math.abs(netBalance).toFixed(2)}
+                      {getCurrencySymbol('TRY')}{Math.abs(netBalance).toFixed(2)}
                       <span className="text-sm font-normal ml-2">
                         {netBalance > 0 ? '(alacak)' : netBalance < 0 ? '(verecek)' : '(kapalı)'}
                       </span>
