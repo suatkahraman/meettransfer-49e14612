@@ -66,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailSubject = subjectTranslations[language.substring(0, 2)] || subjectTranslations.en;
 
     const { error: emailError, data } = await resend.emails.send({
-      from: "Meet Transfer <no-reply@meettransfer.app>",
+      from: "Meet Transfer <onboarding@resend.dev>",
       to: [adminEmail],
       subject: emailSubject,
       html: emailHtml,
