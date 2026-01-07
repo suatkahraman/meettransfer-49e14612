@@ -27,7 +27,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -98,8 +98,22 @@ interface RegionPrice {
   created_at: string;
 }
 
+interface IntercityPrice {
+  id: string;
+  from_city: string;
+  to_city: string;
+  vehicle_type: string;
+  price: number;
+  price_currency: string;
+  is_active: boolean;
+  created_at: string;
+}
+
 const AdminRegionPrices = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'airport' | 'intercity'>('airport');
+  
+  // Airport transfer prices state
   const [prices, setPrices] = useState<RegionPrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,7 +121,7 @@ const AdminRegionPrices = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPrice, setEditingPrice] = useState<RegionPrice | null>(null);
   
-  // Form state
+  // Airport form state
   const [formCity, setFormCity] = useState('');
   const [formAirport, setFormAirport] = useState('');
   const [formDistrict, setFormDistrict] = useState('');
@@ -128,9 +142,25 @@ const AdminRegionPrices = () => {
     };
   } | null>(null);
   const [testing, setTesting] = useState(false);
+  
+  // Intercity prices state
+  const [intercityPrices, setIntercityPrices] = useState<IntercityPrice[]>([]);
+  const [intercityLoading, setIntercityLoading] = useState(true);
+  const [intercitySearchTerm, setIntercitySearchTerm] = useState('');
+  const [isIntercityDialogOpen, setIsIntercityDialogOpen] = useState(false);
+  const [editingIntercityPrice, setEditingIntercityPrice] = useState<IntercityPrice | null>(null);
+  
+  // Intercity form state
+  const [intercityFromCity, setIntercityFromCity] = useState('');
+  const [intercityToCity, setIntercityToCity] = useState('');
+  const [intercityVehicleType, setIntercityVehicleType] = useState('mercedes-vito');
+  const [intercityPrice, setIntercityPrice] = useState('');
+  const [intercityCurrency, setIntercityCurrency] = useState('EUR');
+  const [intericitySaving, setIntercitySaving] = useState(false);
 
   useEffect(() => {
     fetchPrices();
+    fetchIntercityPrices();
   }, []);
 
   const fetchPrices = async () => {
@@ -148,6 +178,24 @@ const AdminRegionPrices = () => {
       toast.error('Fiyatlar yüklenirken hata oluştu');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchIntercityPrices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('intercity_prices')
+        .select('*')
+        .order('from_city', { ascending: true })
+        .order('to_city', { ascending: true });
+
+      if (error) throw error;
+      setIntercityPrices(data || []);
+    } catch (error) {
+      console.error('Error fetching intercity prices:', error);
+      toast.error('Şehirler arası fiyatlar yüklenirken hata oluştu');
+    } finally {
+      setIntercityLoading(false);
     }
   };
 
@@ -248,6 +296,106 @@ const AdminRegionPrices = () => {
     }
   };
 
+  // Intercity functions
+  const resetIntercityForm = () => {
+    setIntercityFromCity('');
+    setIntercityToCity('');
+    setIntercityVehicleType('mercedes-vito');
+    setIntercityPrice('');
+    setIntercityCurrency('EUR');
+    setEditingIntercityPrice(null);
+  };
+
+  const openEditIntercityDialog = (price: IntercityPrice) => {
+    setEditingIntercityPrice(price);
+    setIntercityFromCity(price.from_city);
+    setIntercityToCity(price.to_city);
+    setIntercityVehicleType(price.vehicle_type);
+    setIntercityPrice(price.price.toString());
+    setIntercityCurrency(price.price_currency);
+    setIsIntercityDialogOpen(true);
+  };
+
+  const openNewIntercityDialog = () => {
+    resetIntercityForm();
+    setIsIntercityDialogOpen(true);
+  };
+
+  const handleIntercitySave = async () => {
+    const priceValue = parseFloat(intercityPrice) || 0;
+    if (!intercityFromCity || !intercityToCity || priceValue <= 0) {
+      toast.error('Lütfen tüm zorunlu alanları doldurun');
+      return;
+    }
+
+    if (intercityFromCity === intercityToCity) {
+      toast.error('Başlangıç ve varış şehirleri farklı olmalı');
+      return;
+    }
+
+    setIntercitySaving(true);
+    try {
+      const priceData = {
+        from_city: intercityFromCity,
+        to_city: intercityToCity,
+        vehicle_type: intercityVehicleType,
+        price: priceValue,
+        price_currency: intercityCurrency,
+        is_active: true,
+      };
+
+      if (editingIntercityPrice) {
+        const { error } = await supabase
+          .from('intercity_prices')
+          .update(priceData)
+          .eq('id', editingIntercityPrice.id);
+
+        if (error) throw error;
+        toast.success('Şehirler arası fiyat güncellendi');
+      } else {
+        const { error } = await supabase
+          .from('intercity_prices')
+          .insert([priceData]);
+
+        if (error) {
+          if (error.code === '23505') {
+            toast.error('Bu kombinasyon için fiyat zaten mevcut');
+            return;
+          }
+          throw error;
+        }
+        toast.success('Şehirler arası fiyat eklendi');
+      }
+
+      setIsIntercityDialogOpen(false);
+      resetIntercityForm();
+      fetchIntercityPrices();
+    } catch (error) {
+      console.error('Error saving intercity price:', error);
+      toast.error('Fiyat kaydedilirken hata oluştu');
+    } finally {
+      setIntercitySaving(false);
+    }
+  };
+
+  const handleIntercityDelete = async (id: string) => {
+    if (!confirm('Bu fiyatı silmek istediğinizden emin misiniz?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('intercity_prices')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      toast.success('Şehirler arası fiyat silindi');
+      fetchIntercityPrices();
+    } catch (error) {
+      console.error('Error deleting intercity price:', error);
+      toast.error('Fiyat silinirken hata oluştu');
+    }
+  };
+
   const getVehicleLabel = (type: string) => {
     return VEHICLE_TYPES.find(v => v.value === type)?.label || type;
   };
@@ -271,6 +419,11 @@ const AdminRegionPrices = () => {
     const matchesCity = filterCity === 'all' || price.city === filterCity;
     
     return matchesSearch && matchesCity;
+  });
+
+  const filteredIntercityPrices = intercityPrices.filter(price => {
+    return price.from_city.toLowerCase().includes(intercitySearchTerm.toLowerCase()) ||
+      price.to_city.toLowerCase().includes(intercitySearchTerm.toLowerCase());
   });
 
   const availableAirports = formCity ? (CITIES_DATA as any)[formCity]?.airports || [] : [];
@@ -432,214 +585,414 @@ const AdminRegionPrices = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Fiyat Listesi
-            </CardTitle>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={openNewDialog}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Yeni Fiyat Ekle
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingPrice ? 'Fiyat Düzenle' : 'Yeni Fiyat Ekle'}
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label>Şehir *</Label>
-                    <Select value={formCity} onValueChange={(val) => {
-                      setFormCity(val);
-                      setFormAirport('');
-                      setFormDistrict('');
-                    }}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Şehir seçin" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.keys(CITIES_DATA).map(city => (
-                          <SelectItem key={city} value={city}>{city}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+        {/* Tabs for Airport and Intercity */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'airport' | 'intercity')}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="airport" className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Havalimanı Transferleri
+            </TabsTrigger>
+            <TabsTrigger value="intercity" className="flex items-center gap-2">
+              <ArrowRightLeft className="h-4 w-4" />
+              Şehirler Arası
+            </TabsTrigger>
+          </TabsList>
 
-                  <div className="space-y-2">
-                    <Label>Havalimanı</Label>
-                    <Select value={formAirport} onValueChange={setFormAirport} disabled={!formCity}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Havalimanı seçin" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableAirports.map((airport: string) => (
-                          <SelectItem key={airport} value={airport}>{airport}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+          {/* Airport Transfers Tab */}
+          <TabsContent value="airport">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Havalimanı Transfer Fiyatları
+                </CardTitle>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={openNewDialog}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Yeni Fiyat Ekle
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingPrice ? 'Fiyat Düzenle' : 'Yeni Fiyat Ekle'}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Şehir *</Label>
+                        <Select value={formCity} onValueChange={(val) => {
+                          setFormCity(val);
+                          setFormAirport('');
+                          setFormDistrict('');
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Şehir seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.keys(CITIES_DATA).map(city => (
+                              <SelectItem key={city} value={city}>{city}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label>İlçe/Bölge *</Label>
-                    <Select value={formDistrict} onValueChange={setFormDistrict} disabled={!formCity}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="İlçe seçin" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableDistricts.map((district: string) => (
-                          <SelectItem key={district} value={district}>{district}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      <div className="space-y-2">
+                        <Label>Havalimanı</Label>
+                        <Select value={formAirport} onValueChange={setFormAirport} disabled={!formCity}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Havalimanı seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableAirports.map((airport: string) => (
+                              <SelectItem key={airport} value={airport}>{airport}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label>Araç Tipi *</Label>
-                    <Select value={formVehicleType} onValueChange={setFormVehicleType}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {VEHICLE_TYPES.map(v => (
-                          <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      <div className="space-y-2">
+                        <Label>İlçe/Bölge *</Label>
+                        <Select value={formDistrict} onValueChange={setFormDistrict} disabled={!formCity}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="İlçe seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableDistricts.map((district: string) => (
+                              <SelectItem key={district} value={district}>{district}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Fiyat *</Label>
-                      <MoneyInput
-                        value={formPrice}
-                        onValueChange={setFormPrice}
-                        placeholder="0"
-                      />
+                      <div className="space-y-2">
+                        <Label>Araç Tipi *</Label>
+                        <Select value={formVehicleType} onValueChange={setFormVehicleType}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {VEHICLE_TYPES.map(v => (
+                              <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Fiyat *</Label>
+                          <MoneyInput
+                            value={formPrice}
+                            onValueChange={setFormPrice}
+                            placeholder="0"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Para Birimi</Label>
+                          <Select value={formCurrency} onValueChange={setFormCurrency}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CURRENCIES.map(c => (
+                                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Para Birimi</Label>
-                      <Select value={formCurrency} onValueChange={setFormCurrency}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CURRENCIES.map(c => (
-                            <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                        İptal
+                      </Button>
+                      <Button onClick={handleSave} disabled={saving}>
+                        {saving ? 'Kaydediliyor...' : 'Kaydet'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                {/* Filters */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Şehir, ilçe veya havalimanı ara..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select value={filterCity} onValueChange={setFilterCity}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Şehir filtrele" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tüm Şehirler</SelectItem>
+                      {Object.keys(CITIES_DATA).map(city => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Table */}
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : filteredPrices.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {prices.length === 0 
+                      ? 'Henüz fiyat eklenmemiş. Yeni fiyat eklemek için butona tıklayın.'
+                      : 'Arama kriterlerine uygun fiyat bulunamadı.'}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Şehir</TableHead>
+                          <TableHead>Havalimanı</TableHead>
+                          <TableHead>İlçe/Bölge</TableHead>
+                          <TableHead>Araç</TableHead>
+                          <TableHead className="text-right">Fiyat</TableHead>
+                          <TableHead className="text-right">İşlemler</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredPrices.map((price) => (
+                          <TableRow key={price.id}>
+                            <TableCell className="font-medium">{price.city}</TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {price.airport || '-'}
+                            </TableCell>
+                            <TableCell>{price.district}</TableCell>
+                            <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
+                            <TableCell className="text-right font-bold text-accent">
+                              {formatPrice(price.price, price.price_currency)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => openEditDialog(price)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDelete(price.id)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+
+                {/* Summary */}
+                <div className="mt-4 text-sm text-muted-foreground">
+                  Toplam {filteredPrices.length} fiyat kaydı
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Intercity Transfers Tab */}
+          <TabsContent value="intercity">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <ArrowRightLeft className="h-5 w-5" />
+                  Şehirler Arası Fiyatlar
+                </CardTitle>
+                <Dialog open={isIntercityDialogOpen} onOpenChange={setIsIntercityDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={openNewIntercityDialog}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Yeni Fiyat Ekle
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingIntercityPrice ? 'Şehirler Arası Fiyat Düzenle' : 'Yeni Şehirler Arası Fiyat'}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Başlangıç Şehri *</Label>
+                        <Select value={intercityFromCity} onValueChange={setIntercityFromCity}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Şehir seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.keys(CITIES_DATA).map(city => (
+                              <SelectItem key={city} value={city}>{city}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Varış Şehri *</Label>
+                        <Select value={intercityToCity} onValueChange={setIntercityToCity}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Şehir seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.keys(CITIES_DATA).map(city => (
+                              <SelectItem key={city} value={city} disabled={city === intercityFromCity}>{city}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Araç Tipi *</Label>
+                        <Select value={intercityVehicleType} onValueChange={setIntercityVehicleType}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {VEHICLE_TYPES.map(v => (
+                              <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Fiyat *</Label>
+                          <MoneyInput
+                            value={intercityPrice}
+                            onValueChange={setIntercityPrice}
+                            placeholder="0"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Para Birimi</Label>
+                          <Select value={intercityCurrency} onValueChange={setIntercityCurrency}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CURRENCIES.map(c => (
+                                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsIntercityDialogOpen(false)}>
+                        İptal
+                      </Button>
+                      <Button onClick={handleIntercitySave} disabled={intericitySaving}>
+                        {intericitySaving ? 'Kaydediliyor...' : 'Kaydet'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                {/* Search */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Şehir ara..."
+                      value={intercitySearchTerm}
+                      onChange={(e) => setIntercitySearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
                 </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    İptal
-                  </Button>
-                  <Button onClick={handleSave} disabled={saving}>
-                    {saving ? 'Kaydediliyor...' : 'Kaydet'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </CardHeader>
-          <CardContent>
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Şehir, ilçe veya havalimanı ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={filterCity} onValueChange={setFilterCity}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Şehir filtrele" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tüm Şehirler</SelectItem>
-                  {Object.keys(CITIES_DATA).map(city => (
-                    <SelectItem key={city} value={city}>{city}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
-            {/* Table */}
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : filteredPrices.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {prices.length === 0 
-                  ? 'Henüz fiyat eklenmemiş. Yeni fiyat eklemek için butona tıklayın.'
-                  : 'Arama kriterlerine uygun fiyat bulunamadı.'}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Şehir</TableHead>
-                      <TableHead>Havalimanı</TableHead>
-                      <TableHead>İlçe/Bölge</TableHead>
-                      <TableHead>Araç</TableHead>
-                      <TableHead className="text-right">Fiyat</TableHead>
-                      <TableHead className="text-right">İşlemler</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredPrices.map((price) => (
-                      <TableRow key={price.id}>
-                        <TableCell className="font-medium">{price.city}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {price.airport || '-'}
-                        </TableCell>
-                        <TableCell>{price.district}</TableCell>
-                        <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
-                        <TableCell className="text-right font-bold text-accent">
-                          {formatPrice(price.price, price.price_currency)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openEditDialog(price)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(price.id)}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+                {/* Table */}
+                {intercityLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : filteredIntercityPrices.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {intercityPrices.length === 0 
+                      ? 'Henüz şehirler arası fiyat eklenmemiş. Yeni fiyat eklemek için butona tıklayın.'
+                      : 'Arama kriterlerine uygun fiyat bulunamadı.'}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Başlangıç</TableHead>
+                          <TableHead></TableHead>
+                          <TableHead>Varış</TableHead>
+                          <TableHead>Araç</TableHead>
+                          <TableHead className="text-right">Fiyat</TableHead>
+                          <TableHead className="text-right">İşlemler</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredIntercityPrices.map((price) => (
+                          <TableRow key={price.id}>
+                            <TableCell className="font-medium">{price.from_city}</TableCell>
+                            <TableCell className="text-center">
+                              <ArrowRightLeft className="h-4 w-4 text-muted-foreground mx-auto" />
+                            </TableCell>
+                            <TableCell className="font-medium">{price.to_city}</TableCell>
+                            <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
+                            <TableCell className="text-right font-bold text-accent">
+                              {formatPrice(price.price, price.price_currency)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => openEditIntercityDialog(price)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleIntercityDelete(price.id)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
 
-            {/* Summary */}
-            <div className="mt-4 text-sm text-muted-foreground">
-              Toplam {filteredPrices.length} fiyat kaydı
-            </div>
-          </CardContent>
-        </Card>
+                {/* Summary */}
+                <div className="mt-4 text-sm text-muted-foreground">
+                  Toplam {filteredIntercityPrices.length} şehirler arası fiyat kaydı
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
