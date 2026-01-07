@@ -66,6 +66,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import PriceHistoryCard from "@/components/admin/PriceHistoryCard";
 import { cn } from "@/lib/utils";
+import { getCurrencySymbol } from "@/lib/currency";
 
 interface QuickBookingRequest {
   id: string;
@@ -620,7 +621,7 @@ export default function AdminQuickBookings() {
                           <TableCell className="text-right">
                             {request.price ? (
                               <span className="font-semibold text-green-600">
-                                {request.price} {request.price_currency}
+                                {getCurrencySymbol(request.price_currency)}{request.price}
                               </span>
                             ) : (
                               <span className="text-muted-foreground text-sm">-</span>
@@ -708,7 +709,7 @@ export default function AdminQuickBookings() {
                         </div>
                         {request.price && (
                           <span className="font-semibold text-green-600">
-                            {request.price} {request.price_currency}
+                            {getCurrencySymbol(request.price_currency)}{request.price}
                           </span>
                         )}
                       </div>
@@ -847,7 +848,7 @@ export default function AdminQuickBookings() {
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-muted-foreground">Dönüş Fiyatı</span>
                             <span className="font-bold text-green-600">
-                              {selectedRequest.return_price} {selectedRequest.price_currency}
+                              {getCurrencySymbol(selectedRequest.price_currency)}{selectedRequest.return_price}
                             </span>
                           </div>
                         </div>
@@ -865,7 +866,7 @@ export default function AdminQuickBookings() {
                           {selectedRequest.has_return_trip ? "Gidiş Fiyatı" : "Fiyat"}
                         </span>
                         <span className="text-lg font-bold text-green-600">
-                          {selectedRequest.price} {selectedRequest.price_currency}
+                          {getCurrencySymbol(selectedRequest.price_currency)}{selectedRequest.price}
                         </span>
                       </div>
                       {selectedRequest.has_return_trip && selectedRequest.return_price && (
@@ -873,7 +874,7 @@ export default function AdminQuickBookings() {
                           <div className="flex justify-between items-center text-sm">
                             <span className="text-muted-foreground">Toplam</span>
                             <span className="text-lg font-bold text-primary">
-                              {selectedRequest.price + selectedRequest.return_price} {selectedRequest.price_currency}
+                              {getCurrencySymbol(selectedRequest.price_currency)}{selectedRequest.price + selectedRequest.return_price}
                             </span>
                           </div>
                         </div>

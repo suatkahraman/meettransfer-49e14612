@@ -156,7 +156,7 @@ const AdminDriverJobs = () => {
                       )}
                     </div>
                     {reservation.price && (
-                      <span className="font-semibold text-lg">${reservation.price}</span>
+                      <span className="font-semibold text-lg">{getCurrencySymbol(reservation.price_currency)}{reservation.price}</span>
                     )}
                   </div>
 
@@ -190,7 +190,7 @@ const AdminDriverJobs = () => {
                     {reservation.driver_earning && (
                       <div className="pt-2 border-t mt-2">
                         <span className="text-muted-foreground">Şoför Kazancı:</span>{' '}
-                        <span className="font-medium text-green-600">${reservation.driver_earning}</span>
+                        <span className="font-medium text-green-600">₺{reservation.driver_earning}</span>
                       </div>
                     )}
 
