@@ -35,9 +35,13 @@ interface Reservation {
   price_currency: string | null;
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
+  driver_cash_amount: number | null;
+  reservation_code: string | null;
   status: string;
   driver_confirmed: boolean | null;
   agency_id: string | null;
+  luggage_count: number | null;
+  baby_seat_count: number | null;
   // Place details
   pickup_place_name: string | null;
   dropoff_place_name: string | null;
@@ -377,6 +381,34 @@ const DriverHome = () => {
             console.log('Agency balance deduction triggered');
           } catch (balanceError) {
             console.error('Balance deduction failed:', balanceError);
+          }
+        }
+
+        // Calculate and add driver earnings to balance
+        // Driver earns: budget (price) - cash collected from passenger
+        const budget = reservation?.price || 0;
+        const cashCollected = reservation?.driver_cash_amount || 0;
+        const driverEarning = budget - cashCollected;
+        
+        if (driverEarning > 0 && driverId) {
+          try {
+            // Add to driver_payments table (trigger will update balance)
+            const { error: paymentError } = await supabase
+              .from('driver_payments')
+              .insert({
+                driver_id: driverId,
+                amount: driverEarning,
+                payment_type: 'to_driver',
+                notes: `${reservation?.reservation_code || id.slice(0, 8)} - İş alacağı (Bütçe: ₺${budget}, Nakit: ₺${cashCollected})`
+              });
+            
+            if (paymentError) {
+              console.error('Failed to add driver earning:', paymentError);
+            } else {
+              console.log(`Driver earning added: ₺${driverEarning}`);
+            }
+          } catch (earningError) {
+            console.error('Driver earning calculation failed:', earningError);
           }
         }
 
