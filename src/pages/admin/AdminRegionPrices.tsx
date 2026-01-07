@@ -101,7 +101,9 @@ interface RegionPrice {
 interface IntercityPrice {
   id: string;
   from_city: string;
+  from_district: string | null;
   to_city: string;
+  to_district: string | null;
   vehicle_type: string;
   price: number;
   price_currency: string;
@@ -152,7 +154,9 @@ const AdminRegionPrices = () => {
   
   // Intercity form state
   const [intercityFromCity, setIntercityFromCity] = useState('');
+  const [intercityFromDistrict, setIntercityFromDistrict] = useState('');
   const [intercityToCity, setIntercityToCity] = useState('');
+  const [intercityToDistrict, setIntercityToDistrict] = useState('');
   const [intercityVehicleType, setIntercityVehicleType] = useState('mercedes-vito');
   const [intercityPrice, setIntercityPrice] = useState('');
   const [intercityCurrency, setIntercityCurrency] = useState('EUR');
@@ -299,7 +303,9 @@ const AdminRegionPrices = () => {
   // Intercity functions
   const resetIntercityForm = () => {
     setIntercityFromCity('');
+    setIntercityFromDistrict('');
     setIntercityToCity('');
+    setIntercityToDistrict('');
     setIntercityVehicleType('mercedes-vito');
     setIntercityPrice('');
     setIntercityCurrency('EUR');
@@ -309,7 +315,9 @@ const AdminRegionPrices = () => {
   const openEditIntercityDialog = (price: IntercityPrice) => {
     setEditingIntercityPrice(price);
     setIntercityFromCity(price.from_city);
+    setIntercityFromDistrict(price.from_district || '');
     setIntercityToCity(price.to_city);
+    setIntercityToDistrict(price.to_district || '');
     setIntercityVehicleType(price.vehicle_type);
     setIntercityPrice(price.price.toString());
     setIntercityCurrency(price.price_currency);
@@ -328,8 +336,8 @@ const AdminRegionPrices = () => {
       return;
     }
 
-    if (intercityFromCity === intercityToCity) {
-      toast.error('Başlangıç ve varış şehirleri farklı olmalı');
+    if (intercityFromCity === intercityToCity && intercityFromDistrict === intercityToDistrict) {
+      toast.error('Başlangıç ve varış konumları farklı olmalı');
       return;
     }
 
@@ -337,7 +345,9 @@ const AdminRegionPrices = () => {
     try {
       const priceData = {
         from_city: intercityFromCity,
+        from_district: intercityFromDistrict || null,
         to_city: intercityToCity,
+        to_district: intercityToDistrict || null,
         vehicle_type: intercityVehicleType,
         price: priceValue,
         price_currency: intercityCurrency,
@@ -423,11 +433,17 @@ const AdminRegionPrices = () => {
 
   const filteredIntercityPrices = intercityPrices.filter(price => {
     return price.from_city.toLowerCase().includes(intercitySearchTerm.toLowerCase()) ||
-      price.to_city.toLowerCase().includes(intercitySearchTerm.toLowerCase());
+      price.to_city.toLowerCase().includes(intercitySearchTerm.toLowerCase()) ||
+      (price.from_district && price.from_district.toLowerCase().includes(intercitySearchTerm.toLowerCase())) ||
+      (price.to_district && price.to_district.toLowerCase().includes(intercitySearchTerm.toLowerCase()));
   });
 
   const availableAirports = formCity ? (CITIES_DATA as any)[formCity]?.airports || [] : [];
   const availableDistricts = formCity ? (CITIES_DATA as any)[formCity]?.districts || [] : [];
+  
+  // Intercity districts
+  const intercityFromDistricts = intercityFromCity ? (CITIES_DATA as any)[intercityFromCity]?.districts || [] : [];
+  const intercityToDistricts = intercityToCity ? (CITIES_DATA as any)[intercityToCity]?.districts || [] : [];
   
   const handleTest = async () => {
     if (!testPickup || !testDropoff) {
@@ -832,32 +848,72 @@ const AdminRegionPrices = () => {
                       </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label>Başlangıç Şehri *</Label>
-                        <Select value={intercityFromCity} onValueChange={setIntercityFromCity}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Şehir seçin" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.keys(CITIES_DATA).map(city => (
-                              <SelectItem key={city} value={city}>{city}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Başlangıç Şehri *</Label>
+                          <Select value={intercityFromCity} onValueChange={(val) => {
+                            setIntercityFromCity(val);
+                            setIntercityFromDistrict('');
+                          }}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Şehir seçin" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.keys(CITIES_DATA).map(city => (
+                                <SelectItem key={city} value={city}>{city}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Başlangıç Bölge</Label>
+                          <Select value={intercityFromDistrict} onValueChange={setIntercityFromDistrict} disabled={!intercityFromCity}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Bölge seçin (opsiyonel)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Tümü (Şehir Geneli)</SelectItem>
+                              {intercityFromDistricts.map((district: string) => (
+                                <SelectItem key={district} value={district}>{district}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <Label>Varış Şehri *</Label>
-                        <Select value={intercityToCity} onValueChange={setIntercityToCity}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Şehir seçin" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.keys(CITIES_DATA).map(city => (
-                              <SelectItem key={city} value={city} disabled={city === intercityFromCity}>{city}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Varış Şehri *</Label>
+                          <Select value={intercityToCity} onValueChange={(val) => {
+                            setIntercityToCity(val);
+                            setIntercityToDistrict('');
+                          }}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Şehir seçin" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.keys(CITIES_DATA).map(city => (
+                                <SelectItem key={city} value={city}>{city}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Varış Bölge</Label>
+                          <Select value={intercityToDistrict} onValueChange={setIntercityToDistrict} disabled={!intercityToCity}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Bölge seçin (opsiyonel)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Tümü (Şehir Geneli)</SelectItem>
+                              {intercityToDistricts.map((district: string) => (
+                                <SelectItem key={district} value={district}>{district}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
                       <div className="space-y-2">
@@ -950,11 +1006,21 @@ const AdminRegionPrices = () => {
                       <TableBody>
                         {filteredIntercityPrices.map((price) => (
                           <TableRow key={price.id}>
-                            <TableCell className="font-medium">{price.from_city}</TableCell>
+                            <TableCell className="font-medium">
+                              <div>{price.from_city}</div>
+                              {price.from_district && (
+                                <div className="text-xs text-muted-foreground">{price.from_district}</div>
+                              )}
+                            </TableCell>
                             <TableCell className="text-center">
                               <ArrowRightLeft className="h-4 w-4 text-muted-foreground mx-auto" />
                             </TableCell>
-                            <TableCell className="font-medium">{price.to_city}</TableCell>
+                            <TableCell className="font-medium">
+                              <div>{price.to_city}</div>
+                              {price.to_district && (
+                                <div className="text-xs text-muted-foreground">{price.to_district}</div>
+                              )}
+                            </TableCell>
                             <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
                             <TableCell className="text-right font-bold text-accent">
                               {formatPrice(price.price, price.price_currency)}

@@ -120,9 +120,11 @@ const handler = async (req: Request): Promise<Response> => {
     // Check if this is a city-to-city transfer (no airport involved)
     const pickupCity = transferInfo.pickupAnalysis.city?.value || transferInfo.pickupAnalysis.district?.city || null;
     const dropoffCity = transferInfo.dropoffAnalysis.city?.value || transferInfo.dropoffAnalysis.district?.city || null;
+    const pickupDistrict = transferInfo.pickupAnalysis.district?.value || null;
+    const dropoffDistrict = transferInfo.dropoffAnalysis.district?.value || null;
     const isIntercity = direction === 'city_to_city' && pickupCity && dropoffCity && pickupCity !== dropoffCity;
 
-    console.log("🔍 Route type:", isIntercity ? "intercity" : "airport transfer", { pickupCity, dropoffCity });
+    console.log("🔍 Route type:", isIntercity ? "intercity" : "airport transfer", { pickupCity, pickupDistrict, dropoffCity, dropoffDistrict });
 
     // Get vehicle fallback list for flexible matching
     const vehicleFallbacks = getVehicleFallbackList(reservation.vehicle_type);
@@ -138,19 +140,40 @@ const handler = async (req: Request): Promise<Response> => {
       
       // 0. For intercity routes, first check intercity_prices table
       if (isIntercity && pickupCity && dropoffCity) {
-        // Try both directions (A→B and B→A)
-        const { data: intercityData } = await supabase
-          .from("intercity_prices")
-          .select("*")
-          .eq("vehicle_type", vehicleType)
-          .eq("is_active", true)
-          .or(`and(from_city.eq.${pickupCity},to_city.eq.${dropoffCity}),and(from_city.eq.${dropoffCity},to_city.eq.${pickupCity})`)
-          .limit(1);
+        // Try exact district match first (both directions)
+        if (pickupDistrict && dropoffDistrict) {
+          const { data: exactIntercityData } = await supabase
+            .from("intercity_prices")
+            .select("*")
+            .eq("vehicle_type", vehicleType)
+            .eq("is_active", true)
+            .or(`and(from_city.eq.${pickupCity},from_district.eq.${pickupDistrict},to_city.eq.${dropoffCity},to_district.eq.${dropoffDistrict}),and(from_city.eq.${dropoffCity},from_district.eq.${dropoffDistrict},to_city.eq.${pickupCity},to_district.eq.${pickupDistrict})`)
+            .limit(1);
 
-        if (intercityData && intercityData.length > 0) {
-          bestPrice = intercityData[0];
-          matchType = `intercity (${pickupCity} → ${dropoffCity}) [${vehicleType}]`;
-          console.log(`✅ Intercity price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+          if (exactIntercityData && exactIntercityData.length > 0) {
+            bestPrice = exactIntercityData[0];
+            matchType = `intercity exact (${pickupCity}/${pickupDistrict} → ${dropoffCity}/${dropoffDistrict}) [${vehicleType}]`;
+            console.log(`✅ Intercity exact price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+          }
+        }
+        
+        // Try city-only match (no district specified in price)
+        if (!bestPrice) {
+          const { data: intercityData } = await supabase
+            .from("intercity_prices")
+            .select("*")
+            .eq("vehicle_type", vehicleType)
+            .eq("is_active", true)
+            .is("from_district", null)
+            .is("to_district", null)
+            .or(`and(from_city.eq.${pickupCity},to_city.eq.${dropoffCity}),and(from_city.eq.${dropoffCity},to_city.eq.${pickupCity})`)
+            .limit(1);
+
+          if (intercityData && intercityData.length > 0) {
+            bestPrice = intercityData[0];
+            matchType = `intercity city-only (${pickupCity} → ${dropoffCity}) [${vehicleType}]`;
+            console.log(`✅ Intercity city price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+          }
         }
       }
       
