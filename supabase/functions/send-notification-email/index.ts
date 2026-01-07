@@ -295,8 +295,15 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 Click the button above to review and accept your transfer price.
               </p>
 
-              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
-                <p>If you have questions, contact us via WhatsApp.</p>
+              <div style="margin-top: 25px; padding: 20px; background: #111; border-radius: 8px; text-align: center;">
+                <p style="margin: 0 0 15px; color: #fdd835; font-size: 14px; font-weight: bold;">Need Help? Contact Us</p>
+                <div>
+                  <a href="https://wa.me/15558051101" style="display: inline-block; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">💬 WhatsApp Chat</a>
+                  <a href="mailto:info@meettransfer.app" style="display: inline-block; background: #fdd835; color: #111; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">✉️ info@meettransfer.app</a>
+                </div>
+              </div>
+
+              <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
                 <p>© 2025 Meet Transfer. All rights reserved.</p>
               </div>
             </div>
@@ -532,18 +539,19 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 </tr>
               </table>
 
-              <div style="text-align: center; margin: 30px 0;">
-                <p style="color: #666; margin-bottom: 15px; font-size: 14px;">Need help? Contact us via WhatsApp</p>
-                <a href="https://wa.me/905321748390" style="display: inline-block; background: #25D366; color: #fff; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
-                  💬 WhatsApp Support
-                </a>
+              <div style="margin-top: 25px; padding: 20px; background: #111; border-radius: 8px; text-align: center;">
+                <p style="margin: 0 0 15px; color: #4caf50; font-size: 14px; font-weight: bold;">Need Help? Contact Us</p>
+                <div>
+                  <a href="https://wa.me/15558051101" style="display: inline-block; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">💬 WhatsApp Chat</a>
+                  <a href="mailto:info@meettransfer.app" style="display: inline-block; background: #4caf50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">✉️ info@meettransfer.app</a>
+                </div>
               </div>
 
               <div style="text-align: center; margin-top: 25px;">
                 <a href="${baseUrl}/customer/reservation/${data.reservation_id}" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">View Reservation</a>
               </div>
 
-              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+              <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
                 <p>Thank you for choosing Meet Transfer!</p>
                 <p>© 2025 Meet Transfer. All rights reserved.</p>
               </div>
@@ -616,8 +624,15 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 Click the button above or copy the link to complete your secure payment.
               </p>
 
-              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
-                <p>If you have questions, contact us via WhatsApp.</p>
+              <div style="margin-top: 25px; padding: 20px; background: #111; border-radius: 8px; text-align: center;">
+                <p style="margin: 0 0 15px; color: #2196f3; font-size: 14px; font-weight: bold;">Need Help? Contact Us</p>
+                <div>
+                  <a href="https://wa.me/15558051101" style="display: inline-block; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">💬 WhatsApp Chat</a>
+                  <a href="mailto:info@meettransfer.app" style="display: inline-block; background: #2196f3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">✉️ info@meettransfer.app</a>
+                </div>
+              </div>
+
+              <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
                 <p>© 2025 Meet Transfer. All rights reserved.</p>
               </div>
             </div>
@@ -683,7 +698,15 @@ const getEmailTemplate = (type: EmailType, data: any) => {
                 <a href="${baseUrl}/customer/reservations" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">View My Reservations</a>
               </div>
 
-              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+              <div style="margin-top: 25px; padding: 20px; background: #111; border-radius: 8px; text-align: center;">
+                <p style="margin: 0 0 15px; color: #4caf50; font-size: 14px; font-weight: bold;">Need Help? Contact Us</p>
+                <div>
+                  <a href="https://wa.me/15558051101" style="display: inline-block; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">💬 WhatsApp Chat</a>
+                  <a href="mailto:info@meettransfer.app" style="display: inline-block; background: #4caf50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">✉️ info@meettransfer.app</a>
+                </div>
+              </div>
+
+              <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
                 <p>Thank you for choosing Meet Transfer!</p>
                 <p>© 2025 Meet Transfer. All rights reserved.</p>
               </div>

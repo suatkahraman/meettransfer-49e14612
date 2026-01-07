@@ -201,8 +201,15 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="margin: 10px 0 0; color: #555; font-size: 14px;">Please save your reservation code for reference.</p>
           </div>
 
+          <div style="margin-top: 25px; padding: 20px; background: #111; border-radius: 8px; text-align: center;">
+            <p style="margin: 0 0 15px; color: #fdd835; font-size: 14px; font-weight: bold;">Need Help? Contact Us</p>
+            <div>
+              <a href="https://wa.me/15558051101" style="display: inline-block; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">💬 WhatsApp Chat</a>
+              <a href="mailto:info@meettransfer.app" style="display: inline-block; background: #fdd835; color: #111; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">✉️ info@meettransfer.app</a>
+            </div>
+          </div>
+
           <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
-            <p>If you have any questions, please contact us via WhatsApp.</p>
             <p>© 2025 Meet Transfer. All rights reserved.</p>
           </div>
         </div>

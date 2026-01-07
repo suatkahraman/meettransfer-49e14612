@@ -253,8 +253,13 @@ Meet Transfer Team
       </td>
     </tr>
     <tr>
-      <td style="background-color:#f0f0f0;padding:15px;text-align:center;">
-        <p style="color:#666;margin:0;font-size:12px;">Meet Transfer | info@meettransfer.app</p>
+      <td style="background-color:#1a365d;padding:25px;text-align:center;">
+        <p style="color:#fff;margin:0 0 15px;font-size:14px;font-weight:bold;">Need Help? Contact Us</p>
+        <div>
+          <a href="https://wa.me/15558051101" style="display:inline-block;background:#25D366;color:white;padding:10px 20px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:13px;margin:5px;">💬 WhatsApp Chat</a>
+          <a href="mailto:info@meettransfer.app" style="display:inline-block;background:#48bb78;color:white;padding:10px 20px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:13px;margin:5px;">✉️ info@meettransfer.app</a>
+        </div>
+        <p style="color:#94a3b8;margin:15px 0 0;font-size:11px;">© 2025 Meet Transfer. All rights reserved.</p>
       </td>
     </tr>
   </table>
