@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-
+import { getCurrencySymbol } from '@/lib/currency';
 interface Reservation {
   id: string;
   pickup_date: string;
@@ -36,7 +36,7 @@ const getStatusColor = (status: string) => {
 
 const formatCurrency = (amount: number | null, currency: string | null) => {
   if (amount === null) return '-';
-  const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency === 'AED' ? 'د.إ' : currency === 'AUD' ? 'A$' : '₺';
+  const symbol = getCurrencySymbol(currency);
   return `${symbol}${amount.toFixed(2)}`;
 };
 

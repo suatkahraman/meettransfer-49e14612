@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Key, Mail, Phone } from 'lucide-react';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface Agency {
   id: string;
@@ -551,7 +552,7 @@ const AdminAgencies = () => {
                       {agency.currencyBalances
                         .filter(cb => cb.netAgencyDebt !== 0 || cb.totalAgencyPrice !== 0)
                         .map((cb) => {
-                          const symbol = cb.currency === 'EUR' ? '€' : cb.currency === 'USD' ? '$' : cb.currency === 'GBP' ? '£' : cb.currency === 'AED' ? 'د.إ' : cb.currency === 'AUD' ? 'A$' : '₺';
+                          const symbol = getCurrencySymbol(cb.currency);
                           return (
                             <div key={cb.currency} className="space-y-2 p-3 bg-muted rounded-lg">
                               <div className="flex items-center gap-2 mb-2">
