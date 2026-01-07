@@ -7,9 +7,10 @@ export const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: nu
     priority: 1,
     keywords: [
       'istanbul airport', 'ist airport', 'istanbul havalimanı', 'istanbul havalimani', 
-      'ist', 'new istanbul airport', 'yeni istanbul havalimanı', 'arnavutköy', 'arnavutkoy',
+      'new istanbul airport', 'yeni istanbul havalimanı', 'arnavutköy', 'arnavutkoy',
       'istanbul new airport', 'istanbul uluslararasi havalimani', 'istanbul international',
       'istanbul havaalani', 'iğa', 'iga', 'istanbul ist', 'ist istanbul'
+      // Note: Removed 'ist' - too short, matches any Istanbul address
     ]
   },
   'Sabiha Gokcen Airport (SAW)': {
@@ -556,10 +557,14 @@ export function findDistrict(location: string): DistrictMatchResult | null {
   const normalized = normalizeLocation(location);
   let bestMatch: DistrictMatchResult | null = null;
   
+  // Skip fuzzy matching for very short inputs (likely just city names)
+  const isShortInput = normalized.split(' ').filter(w => w.length > 2).length <= 1;
+  
   for (const [district, data] of Object.entries(DISTRICT_KEYWORDS)) {
     for (const keyword of data.keywords) {
       const keywordNorm = normalizeLocation(keyword);
       
+      // Only do exact substring match
       if (normalized.includes(keywordNorm)) {
         const confidence = Math.min(1, 0.7 + (keywordNorm.length / 25));
         
@@ -575,9 +580,10 @@ export function findDistrict(location: string): DistrictMatchResult | null {
           };
         }
       }
-      // Fuzzy match for districts
-      else if (keywordNorm.length >= 5 && fuzzyMatch(normalized, keywordNorm, 0.85)) {
-        const confidence = Math.min(0.75, 0.5 + (keywordNorm.length / 30));
+      // Fuzzy match for districts - BUT only for longer inputs to avoid false positives
+      // Skip fuzzy for short inputs like "Bursa, Türkiye"
+      else if (!isShortInput && keywordNorm.length >= 6 && fuzzyMatch(normalized, keywordNorm, 0.9)) {
+        const confidence = Math.min(0.7, 0.4 + (keywordNorm.length / 35));
         
         if (!bestMatch || confidence > bestMatch.confidence) {
           bestMatch = {
