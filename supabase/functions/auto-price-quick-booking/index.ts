@@ -541,9 +541,16 @@ const handler = async (req: Request): Promise<Response> => {
                 ↔️ Airport transfers are the same price in both directions
               </p>
               
-              <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
-                <p style="color: #64748b; font-size: 13px; margin: 0;">Questions? Contact us via WhatsApp</p>
-                <a href="https://wa.me/905332459932" style="color: #22c55e; font-weight: 600; text-decoration: none;">+90 533 245 99 32</a>
+              <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; background: #f8fafc; padding: 20px; border-radius: 8px;">
+                <p style="color: #1e3a8a; font-size: 15px; font-weight: bold; margin: 0 0 15px 0;">Need Help? Contact Us</p>
+                <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                  <a href="https://wa.me/15558051101" style="display: inline-flex; align-items: center; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">
+                    💬 WhatsApp Chat
+                  </a>
+                  <a href="mailto:info@meettransfer.app" style="display: inline-flex; align-items: center; background: #1e3a8a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">
+                    ✉️ info@meettransfer.app
+                  </a>
+                </div>
               </div>
             </div>
           </body>
