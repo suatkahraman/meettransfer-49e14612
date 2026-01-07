@@ -497,6 +497,26 @@ function fuzzyMatch(text: string, keyword: string, threshold: number = 0.8): boo
   return true;
 }
 
+// ==================== AIRPORT TO CITY MAPPING ====================
+// When an airport is found, this determines the correct city for price matching
+// This prevents false positives from district keywords matching wrong cities
+export const AIRPORT_TO_CITY: Record<string, string> = {
+  'Istanbul Airport (IST)': 'Istanbul',
+  'Sabiha Gokcen Airport (SAW)': 'Istanbul',
+  'Antalya Airport (AYT)': 'Antalya',
+  'Bodrum-Milas Airport (BJV)': 'Bodrum',
+  'Dalaman Airport (DLM)': 'Dalaman',
+  'Izmir Adnan Menderes Airport (ADB)': 'Izmir',
+  'Kayseri Airport (ASR)': 'Cappadocia',
+  'Nevsehir-Kapadokya Airport (NAV)': 'Cappadocia',
+  'Dubai International Airport (DXB)': 'Dubai',
+  'Al Maktoum International Airport (DWC)': 'Dubai',
+  'Larnaca Airport (LCA)': 'Cyprus',
+  'Paphos Airport (PFO)': 'Cyprus',
+  'Ercan Airport (ECN)': 'Cyprus',
+  'Bursa Yenisehir Airport (YEI)': 'Bursa',
+};
+
 // ==================== MATCHING FUNCTIONS ====================
 export interface MatchResult {
   value: string;
@@ -705,10 +725,23 @@ export interface TransferInfo {
 export function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
   const pickupAirport = findAirport(pickup);
   const dropoffAirport = findAirport(dropoff);
-  const pickupCity = findCity(pickup);
-  const dropoffCity = findCity(dropoff);
-  const pickupDistrict = findDistrict(pickup, pickupCity?.value || null);
-  const dropoffDistrict = findDistrict(dropoff, dropoffCity?.value || null);
+  
+  // CRITICAL FIX: When airport is found, derive city from airport to prevent false positives
+  // Example: "Antalya Havalimanı, Yeşilköy" should NOT match Istanbul/Bakirkoy because of "Yeşilköy"
+  const pickupAirportCity = pickupAirport ? AIRPORT_TO_CITY[pickupAirport.value] || null : null;
+  const dropoffAirportCity = dropoffAirport ? AIRPORT_TO_CITY[dropoffAirport.value] || null : null;
+  
+  // Only use findCity if no airport was found for that location
+  // This prevents district keywords from other cities causing wrong city matches
+  const pickupCity = pickupAirport ? (pickupAirportCity ? { value: pickupAirportCity, confidence: 1, priority: 1, matchedKeyword: 'airport-derived' } : null) : findCity(pickup);
+  const dropoffCity = dropoffAirport ? (dropoffAirportCity ? { value: dropoffAirportCity, confidence: 1, priority: 1, matchedKeyword: 'airport-derived' } : null) : findCity(dropoff);
+  
+  // For district search, use the airport-derived city as hint to constrain the search
+  const pickupCityHint = pickupAirportCity || pickupCity?.value || null;
+  const dropoffCityHint = dropoffAirportCity || dropoffCity?.value || null;
+  
+  const pickupDistrict = findDistrict(pickup, pickupCityHint);
+  const dropoffDistrict = findDistrict(dropoff, dropoffCityHint);
 
   // Special rule: Istanbul (Europe/Asia side) → Bursa/Kocaeli/Sapanca should use
   // Istanbul Airport / Sabiha Gokcen Airport price tables.
