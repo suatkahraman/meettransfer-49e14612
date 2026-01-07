@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText, Building2, Banknote } from 'lucide-react';
+import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText, Building2, Banknote, Luggage, Baby } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
@@ -30,6 +30,8 @@ interface Reservation {
   status: string;
   driver_confirmed: boolean | null;
   agency_id?: string | null;
+  luggage_count?: number | null;
+  baby_seat_count?: number | null;
   // Place details
   pickup_place_name?: string | null;
   dropoff_place_name?: string | null;
@@ -332,6 +334,18 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
               {reservation.price && reservation.price > 0 && (
                 <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded text-xs text-amber-700 dark:text-amber-400 font-semibold">
                   <span>B {getCurrencySymbol(reservation.price_currency)}{reservation.price.toLocaleString('tr-TR')}</span>
+                </div>
+              )}
+              {reservation.luggage_count && reservation.luggage_count > 0 && (
+                <div className="flex items-center gap-1 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded text-xs text-blue-700 dark:text-blue-400 font-medium">
+                  <Luggage className="h-3 w-3" />
+                  <span>{reservation.luggage_count}</span>
+                </div>
+              )}
+              {reservation.baby_seat_count && reservation.baby_seat_count > 0 && (
+                <div className="flex items-center gap-1 bg-pink-100 dark:bg-pink-900/30 px-2 py-1 rounded text-xs text-pink-700 dark:text-pink-400 font-medium">
+                  <Baby className="h-3 w-3" />
+                  <span>{reservation.baby_seat_count}</span>
                 </div>
               )}
             </div>
