@@ -38,11 +38,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     const samplePriceInfo = {
       price: 85,
-      returnPrice: 51, // 40% discount on return
-      totalPrice: 136,
+      returnPrice: 60, // 30% discount on return (85 * 0.70 ≈ 60)
+      totalPrice: 145,
       currency: 'EUR',
       discountApplied: true,
-      discountPercent: 40,
+      discountPercent: 30,
     };
 
     const confirmUrl = "https://meettransfer.app/quick-booking-confirm?token=test-token";
