@@ -18,13 +18,13 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "Antalya Airport", to: "Lara Beach", price: "Request Price" },
-  { from: "Antalya Airport", to: "Konyaaltı", price: "Request Price" },
-  { from: "Antalya Airport", to: "Belek", price: "Request Price" },
-  { from: "Antalya Airport", to: "Side", price: "Request Price" },
-  { from: "Antalya Airport", to: "Alanya", price: "Request Price" },
-  { from: "Antalya Airport", to: "Kemer", price: "Request Price" },
-  { from: "Antalya Airport", to: "Kaş", price: "Request Price" },
+  { from: "Antalya Airport", to: "Lara / Kundu", price: "€50" },
+  { from: "Antalya Airport", to: "Kaleici (Old Town)", price: "€50" },
+  { from: "Antalya Airport", to: "Belek", price: "€65" },
+  { from: "Antalya Airport", to: "Side", price: "€72" },
+  { from: "Antalya Airport", to: "Alanya", price: "€84" },
+  { from: "Antalya Airport", to: "Kemer", price: "€65" },
+  { from: "Antalya Airport", to: "Kaş / Kalkan", price: "€170" },
 ];
 
 const faqItems = [
@@ -34,7 +34,7 @@ const faqItems = [
   },
   {
     question: "How much does Antalya Airport transfer cost?",
-    answer: "Our Antalya Airport transfer prices start from $25 for nearby areas like Lara and Konyaaltı. Belek transfers are $40, Side is $55, and Alanya is $85. All prices are fixed with no hidden fees and include meet & greet service.",
+    answer: "Our Antalya Airport transfer prices start from €50 for nearby areas like Lara, Kundu and Kaleici. Belek transfers are €65, Side is €72, and Alanya is €84. All prices are fixed with no hidden fees and include meet & greet service.",
   },
   {
     question: "How far is Antalya Airport from Belek?",
@@ -42,7 +42,7 @@ const faqItems = [
   },
   {
     question: "Is there transfer from Antalya Airport to Alanya?",
-    answer: "Yes, private transfer is the best option for the long journey to Alanya. Regular transport can be expensive and uncomfortable for the 130 km trip. Our fixed-price transfer at $85 offers a luxury Mercedes with AC, WiFi, and professional driver.",
+    answer: "Yes, private transfer is the best option for the long journey to Alanya. Regular transport can be expensive and uncomfortable for the 130 km trip. Our fixed-price transfer at €84 offers a luxury Mercedes with AC, WiFi, and professional driver.",
   },
   {
     question: "Can I book Antalya Airport transfer for late night arrival?",
