@@ -1644,7 +1644,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Meet Transfer <noreply@mail.meettransfer.app>",
+        from: "Meet Transfer <info@meettransfer.app>",
         reply_to: "info@meettransfer.app",
         to: [recipient],
         subject: template.subject,

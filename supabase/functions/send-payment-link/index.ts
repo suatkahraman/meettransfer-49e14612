@@ -98,7 +98,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Meet Transfer <noreply@mail.meettransfer.app>",
+        from: "Meet Transfer <info@meettransfer.app>",
         to: [customerEmail],
         subject: `Payment Link for Your Transfer - ${pickup} → ${dropoff}`,
         html: `
