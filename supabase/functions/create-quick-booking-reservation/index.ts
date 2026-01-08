@@ -358,7 +358,7 @@ Meet Transfer Team
           `.trim();
 
           await resend.emails.send({
-            from: "Meet Transfer <info@meettransfer.app>",
+            from: "Meet Transfer <noreply@mail.meettransfer.app>",
             to: [customerEmail],
             reply_to: "info@meettransfer.app",
             subject: `Booking Confirmed - ${reservation.reservation_code}`,
