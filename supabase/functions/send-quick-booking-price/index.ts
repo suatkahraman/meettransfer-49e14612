@@ -113,7 +113,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (toEmail) {
       console.log("Sending email to:", toEmail);
 
-      const fromEmail = "Meet Transfer <info@meettransfer.app>";
+      const fromEmail = "Meet Transfer <noreply@mail.meettransfer.app>";
 
       // Build return trip text for plain text email
       const returnTripText = hasReturnTrip ? `
