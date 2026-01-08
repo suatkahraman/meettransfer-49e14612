@@ -40,8 +40,9 @@ interface Reservation {
   payment_type: string;
   price: number | null;
   price_currency: string | null;
+  driver_earning: number | null; // Şoför maliyeti (TRY)
   status: string;
-  driver_cash_amount: number | null;
+  driver_cash_amount: number | null; // Şoförün aldığı nakit (TRY)
 }
 
 
@@ -102,9 +103,9 @@ const DriverHistory = () => {
     }
   }, [driverId, dateFrom, dateTo]);
 
-  // Calculate totals
+  // Calculate totals - TL bazlı (driver_earning ve driver_cash_amount)
   const totalTrips = reservations.length;
-  const totalEarnings = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
+  const totalEarnings = reservations.reduce((sum, r) => sum + (r.driver_earning || 0), 0);
   const totalCashCollected = reservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
 
   const clearFilters = () => {

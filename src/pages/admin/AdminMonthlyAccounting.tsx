@@ -28,7 +28,8 @@ interface Reservation {
   dropoff: string;
   price: number | null;
   price_currency: string | null;
-  driver_cash_amount: number | null;
+  driver_earning: number | null; // Şoför maliyeti (TRY)
+  driver_cash_amount: number | null; // Şoförün aldığı nakit (TRY)
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
   status: string;
@@ -127,18 +128,18 @@ const AdminMonthlyAccounting = () => {
       .select('*');
 
     // Fetch ALL completed reservations for carry-over calculation
-    // Earnings = price - cash collected (hakediş = bütçe - nakit)
+    // Earnings = driver_earning - cash collected (hakediş = şoför maliyeti - nakit) - TL bazlı
     // Exclude cancelled and deleted reservations
     const { data: allReservationsData } = await supabase
       .from('reservations')
-      .select('driver_id, price, driver_cash_amount, status')
+      .select('driver_id, driver_earning, driver_cash_amount, status')
       .not('driver_id', 'is', null)
       .eq('status', 'completed');
 
     // Calculate all-time data per driver
     const allTimeMap = new Map<string, AllTimeDriverData>();
 
-    // Sum up all reservations earnings: price - driver_cash_amount
+    // Sum up all reservations earnings: driver_earning - driver_cash_amount (TL bazlı)
     if (allReservationsData) {
       allReservationsData.forEach(res => {
         if (!res.driver_id) return;
@@ -148,8 +149,8 @@ const AdminMonthlyAccounting = () => {
           totalPaymentsToDriver: 0,
           totalPaymentsFromDriver: 0
         };
-        // Hakediş = Bütçe (price) - Nakit (driver_cash_amount)
-        existing.totalEarnings += (res.price || 0) - (res.driver_cash_amount || 0);
+        // Hakediş = Şoför Maliyeti (driver_earning) - Nakit (driver_cash_amount) - TL
+        existing.totalEarnings += (res.driver_earning || 0) - (res.driver_cash_amount || 0);
         allTimeMap.set(res.driver_id, existing);
       });
     }
@@ -233,7 +234,8 @@ const AdminMonthlyAccounting = () => {
             netBalance: 0
           };
 
-          existing.totalPrice += res.price || 0;
+          // TL bazlı: driver_earning ve driver_cash_amount kullan
+          existing.totalPrice += res.driver_earning || 0;
           existing.totalCash += res.driver_cash_amount || 0;
           existing.transferCount += 1;
           existing.balance = existing.totalPrice - existing.totalCash;
@@ -253,7 +255,8 @@ const AdminMonthlyAccounting = () => {
     }
   }, [currentMonth, selectedDriver, selectedStatus, drivers]);
 
-  const totalPrice = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
+  // TL bazlı hesaplamalar: driver_earning (şoför maliyeti) ve driver_cash_amount (aldığı nakit)
+  const totalPrice = reservations.reduce((sum, r) => sum + (r.driver_earning || 0), 0);
   const totalCash = reservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
   
   // Separate payments by type
