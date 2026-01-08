@@ -472,8 +472,6 @@ const DriverJobDetails = () => {
       : `  1. ${reservation.customer_name}`;
 
     const formattedDate = format(new Date(reservation.pickup_date), 'dd MMM yyyy');
-    const cashCurrency = reservation.passenger_cash_currency || reservation.price_currency || 'TRY';
-    const currencySymbol = getCurrencySymbol(cashCurrency);
 
     // Format location with place name + address
     const formatLocation = (placeName: string | null, address: string) => {
@@ -501,7 +499,7 @@ ${dropoffFormatted}
 
 ${reservation.flight_number ? `${t('flightNumber')}: ${reservation.flight_number}\n` : ''}
 ${t('vehicle')}: ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}
-${reservation.passenger_cash_amount ? `${t('cashToCollect')}: ${getCurrencySymbol(reservation.passenger_cash_currency)}${reservation.passenger_cash_amount}\n` : ''}${t('cashCollectedLabel')}: ${reservation.driver_cash_amount ? `${currencySymbol}${reservation.driver_cash_amount}` : '—'}
+${reservation.passenger_cash_amount ? `${t('cashToCollect')}: ${getCurrencySymbol(reservation.passenger_cash_currency)}${reservation.passenger_cash_amount}\n` : ''}${t('cashCollectedLabel')}: ${reservation.driver_cash_amount ? `${getCurrencySymbol('TRY')}${reservation.driver_cash_amount}` : '—'}
 
 ${t('phone')}: ${reservation.customer_phone}
 ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reservation.driver_notes || '—'}
@@ -531,8 +529,7 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
     );
   }
 
-  const cashCurrency = reservation.passenger_cash_currency || reservation.price_currency || 'TRY';
-  const currencySymbol = getCurrencySymbol(cashCurrency);
+  const driverCurrencySymbol = getCurrencySymbol('TRY');
 
   return (
     <div className="min-h-screen bg-background">
@@ -842,15 +839,15 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
             <div className="space-y-2">
               <Label htmlFor="driver_cash" className="text-base font-semibold flex items-center gap-2">
                 <Banknote className="h-4 w-4 text-green-600" />
-                {t('cashCollectedLabel')} ({currencySymbol})
+                {t('cashCollectedLabel')} ({driverCurrencySymbol})
               </Label>
               <MoneyInput
                 id="driver_cash"
-                currencySymbol={currencySymbol}
+                currencySymbol={driverCurrencySymbol}
                 placeholder={t('enterCashAmount')}
                 value={driverCashAmount}
                 onValueChange={setDriverCashAmount}
-                aria-label={`${t('cashCollectedLabel')} (${currencySymbol})`}
+                aria-label={`${t('cashCollectedLabel')} (${driverCurrencySymbol})`}
                 maxLength={16}
               />
               <p className="text-xs text-muted-foreground">
