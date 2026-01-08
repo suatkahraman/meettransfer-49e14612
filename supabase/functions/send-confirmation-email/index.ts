@@ -250,7 +250,7 @@ ${getEmailFooter()}
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Meet Transfer <noreply@mail.meettransfer.app>",
+        from: "Meet Transfer <info@meettransfer.app>",
         reply_to: "info@meettransfer.app",
         to: [customerEmail],
         subject: `Reservation Confirmed - ${reservation.reservation_code || 'Meet Transfer'}`,

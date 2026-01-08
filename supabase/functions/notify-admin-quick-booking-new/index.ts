@@ -186,8 +186,8 @@ serve(async (req) => {
              </div>`
           : "";
 
-        const primaryFrom = "Meet Transfer <noreply@mail.meettransfer.app>";
-        const fallbackFrom = "Meet Transfer <onboarding@resend.dev>";
+        const primaryFrom = "Meet Transfer <info@meettransfer.app>";
+        const fallbackFrom = "Meet Transfer <info@meettransfer.app>";
 
         const sendEmail = async (from: string) => {
           const res = await fetch("https://api.resend.com/emails", {

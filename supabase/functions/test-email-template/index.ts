@@ -141,7 +141,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const { error: emailError, data } = await resend.emails.send({
-      from: "Meet Transfer <onboarding@resend.dev>",
+      from: "Meet Transfer <info@meettransfer.app>",
       to: [adminEmail],
       subject: `[TEST] ${emailSubject}`,
       html: emailHtml,

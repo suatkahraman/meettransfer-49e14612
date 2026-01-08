@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
     // Send rejection email
     try {
       await resend.emails.send({
-        from: 'Meet Transfer <onboarding@resend.dev>',
+        from: 'Meet Transfer <info@meettransfer.app>',
         to: [application.email],
         subject: '❌ Acenta Başvurunuz Hakkında - Meet Transfer',
         html: `

@@ -448,7 +448,7 @@ Deno.serve(async (req) => {
         `
         
         const { error: sendError } = await resend.emails.send({
-          from: 'Meet Transfer <onboarding@resend.dev>',
+          from: 'Meet Transfer <info@meettransfer.app>',
           to: [adminEmail],
           subject: `🚗 New Price Request - ${customer_name} (${pickup_date})`,
           html: emailHtml,
