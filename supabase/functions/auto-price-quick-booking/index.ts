@@ -45,8 +45,8 @@ async function sendManualPriceRequestEmail(
       'quick_booking'
     );
 
-    await resend.emails.send({
-      from: "Meet Transfer <no-reply@meettransfer.app>",
+      await resend.emails.send({
+        from: "Meet Transfer <info@meettransfer.app>",
       to: adminEmail,
       subject: `⚠️ Quick Booking Manuel Fiyat Gerekli: ${booking.customer_name || 'Misafir'}`,
       html: emailHtml,
@@ -374,7 +374,7 @@ const handler = async (req: Request): Promise<Response> => {
     const adminEmail = "sautkahraman@gmail.com";
     try {
       await resend.emails.send({
-        from: "Meet Transfer <no-reply@meettransfer.app>",
+        from: "Meet Transfer <info@meettransfer.app>",
         to: adminEmail,
         subject: `🤖 Quick Booking Otomatik Fiyat: ${booking.customer_name || 'Misafir'} - ${finalTotalPrice} ${finalCurrency}`,
         html: `
@@ -498,7 +498,7 @@ const handler = async (req: Request): Promise<Response> => {
         );
 
         const { error: emailError } = await resend.emails.send({
-          from: "Meet Transfer <no-reply@meettransfer.app>",
+          from: "Meet Transfer <info@meettransfer.app>",
           to: [booking.customer_email],
           subject: emailSubject,
           html: emailHtml,
