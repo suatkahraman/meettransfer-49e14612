@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     const adminEmail = 'sautkahraman@gmail.com'
 
     const emailResponse = await resend.emails.send({
-      from: 'Meet Transfer <info@meettransfer.app>',
+      from: 'Meet Transfer <noreply@mail.meettransfer.app>',
       to: [adminEmail],
       subject: `🏢 Yeni Acenta Başvurusu: ${agency_name}`,
       html: `

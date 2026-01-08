@@ -220,7 +220,7 @@ Deno.serve(async (req) => {
     
     try {
       await resend.emails.send({
-        from: 'Meet Transfer <info@meettransfer.app>',
+        from: 'Meet Transfer <noreply@mail.meettransfer.app>',
         to: [application.email],
         subject: '✅ Acenta Başvurunuz Onaylandı - Meet Transfer',
         html: `

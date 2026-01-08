@@ -114,7 +114,7 @@ async function sendAdminEmailNotification(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Meet Transfer <info@meettransfer.app>",
+        from: "Meet Transfer <noreply@mail.meettransfer.app>",
         to: [ADMIN_EMAIL],
         subject: subject,
         html: htmlContent,
