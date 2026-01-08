@@ -315,7 +315,7 @@ const DriverHistory = () => {
                       <div className="text-right">
                         {reservation.driver_cash_amount && reservation.driver_cash_amount > 0 && (
                           <p className="text-sm text-green-600 font-medium">
-                            {t('cash')}: {formatPrice(reservation.driver_cash_amount, reservation.price_currency)}
+                            {t('cash')}: {formatPrice(reservation.driver_cash_amount, 'TRY')}
                           </p>
                         )}
                       </div>
