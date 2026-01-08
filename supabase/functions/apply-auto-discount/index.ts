@@ -455,7 +455,7 @@ serve(async (req) => {
         console.log(`📧 Sending discount email to: ${customerEmail} in language: ${customerLang}`);
 
         const { error: emailError } = await resend.emails.send({
-          from: "Meet Transfer <info@meettransfer.app>",
+          from: "Meet Transfer <noreply@mail.meettransfer.app>",
           to: [customerEmail],
           subject: emailSubject,
           html: emailHtml,
