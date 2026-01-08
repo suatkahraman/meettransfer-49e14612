@@ -29,14 +29,14 @@ const AntalyaAirportTransferGuide = () => {
   ];
 
   const destinations = [
-    { area: "Antalya City Center", distance: "13 km", time: "20-25 min", price: "$35-45" },
-    { area: "Lara Beach / Kundu", distance: "18 km", time: "20-30 min", price: "$35-45" },
-    { area: "Belek", distance: "35 km", time: "35-45 min", price: "$40-55" },
-    { area: "Side", distance: "65 km", time: "60-75 min", price: "$55-70" },
-    { area: "Alanya", distance: "130 km", time: "120-150 min", price: "$95-120" },
-    { area: "Kemer", distance: "60 km", time: "50-65 min", price: "$55-70" },
-    { area: "Kaş", distance: "190 km", time: "180-210 min", price: "$140-180" },
-    { area: "Kalkan", distance: "220 km", time: "210-240 min", price: "$160-200" },
+    { area: "Kaleici (Old Town)", distance: "13 km", time: "20-25 min", price: "€50" },
+    { area: "Lara Beach / Kundu", distance: "18 km", time: "20-30 min", price: "€50" },
+    { area: "Belek", distance: "35 km", time: "35-45 min", price: "€65" },
+    { area: "Side", distance: "65 km", time: "60-75 min", price: "€72" },
+    { area: "Alanya", distance: "130 km", time: "120-150 min", price: "€84" },
+    { area: "Kemer / Göynük", distance: "60 km", time: "50-65 min", price: "€65" },
+    { area: "Kaş", distance: "190 km", time: "180-210 min", price: "€170" },
+    { area: "Kalkan", distance: "220 km", time: "210-240 min", price: "€170" },
   ];
 
   return (
