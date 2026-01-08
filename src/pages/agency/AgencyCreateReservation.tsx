@@ -393,12 +393,12 @@ const AgencyCreateReservation = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>{t('luggageCount') || 'Valiz Sayısı'}</Label>
-                    <Select value={formData.luggage_count} onValueChange={(v) => setFormData({...formData, luggage_count: v})}>
+                    <Select value={formData.luggage_count} onValueChange={(v) => setFormData({...formData, luggage_count: v === 'none' ? '' : v})}>
                       <SelectTrigger>
                         <SelectValue placeholder={t('selectLuggage') || 'Valiz seçin'} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t('none') || 'Yok'}</SelectItem>
+                        <SelectItem value="none">{t('none') || 'Yok'}</SelectItem>
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
                           <SelectItem key={n} value={n.toString()}>{n} {t('luggage') || 'Valiz'}</SelectItem>
                         ))}
@@ -407,12 +407,12 @@ const AgencyCreateReservation = () => {
                   </div>
                   <div>
                     <Label>{t('babySeatCount') || 'Bebek Koltuğu'}</Label>
-                    <Select value={formData.baby_seat_count} onValueChange={(v) => setFormData({...formData, baby_seat_count: v})}>
+                    <Select value={formData.baby_seat_count} onValueChange={(v) => setFormData({...formData, baby_seat_count: v === 'none' ? '' : v})}>
                       <SelectTrigger>
                         <SelectValue placeholder={t('selectBabySeat') || 'Bebek koltuğu seçin'} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t('none') || 'Yok'}</SelectItem>
+                        <SelectItem value="none">{t('none') || 'Yok'}</SelectItem>
                         <SelectItem value="1">1 {t('babySeat') || 'Bebek Koltuğu'}</SelectItem>
                         <SelectItem value="2">2 {t('babySeat') || 'Bebek Koltuğu'}</SelectItem>
                       </SelectContent>
