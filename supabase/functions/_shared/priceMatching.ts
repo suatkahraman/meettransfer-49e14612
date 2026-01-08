@@ -538,15 +538,29 @@ export interface MatchResult {
   matchedKeyword: string;
 }
 
+// Airport indicator words - location must contain at least one of these for fuzzy matching
+const AIRPORT_INDICATOR_WORDS = [
+  'airport', 'havalimanı', 'havalimani', 'havaalani', 'havaalanı',
+  'terminal', 'arrivals', 'departures', 'gelen', 'giden',
+  'ist', 'saw', 'ayt', 'bjv', 'dlm', 'adb', 'asr', 'nav', 'dxb', 'dwc', 'lca', 'pfo', 'ecn', 'yei'
+];
+
+function hasAirportIndicator(normalized: string): boolean {
+  return AIRPORT_INDICATOR_WORDS.some(indicator => normalized.includes(indicator));
+}
+
 export function findAirport(location: string): MatchResult | null {
   const normalized = normalizeLocation(location);
   let bestMatch: MatchResult | null = null;
+  
+  // Check if location has any airport indicator words
+  const hasIndicator = hasAirportIndicator(normalized);
   
   for (const [airport, data] of Object.entries(AIRPORT_KEYWORDS)) {
     for (const keyword of data.keywords) {
       const keywordNorm = normalizeLocation(keyword);
       
-      // Direct include check
+      // Direct include check - always allowed
       if (normalized.includes(keywordNorm)) {
         const confidence = Math.min(1, 0.7 + (keywordNorm.length / 30));
         
@@ -561,8 +575,9 @@ export function findAirport(location: string): MatchResult | null {
           };
         }
       }
-      // Fuzzy match for longer keywords
-      else if (keywordNorm.length >= 6 && fuzzyMatch(normalized, keywordNorm, 0.85)) {
+      // Fuzzy match for longer keywords - ONLY if location has airport indicator
+      // This prevents false positives like "baf havalimanı" matching random addresses
+      else if (hasIndicator && keywordNorm.length >= 6 && fuzzyMatch(normalized, keywordNorm, 0.85)) {
         const confidence = Math.min(0.8, 0.5 + (keywordNorm.length / 40));
         
         if (!bestMatch || confidence > bestMatch.confidence) {
