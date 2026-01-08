@@ -52,12 +52,12 @@ export const MonthlySummaryCard = ({
         <CardHeader className="pb-2">
           <CardTitle className="text-xs text-muted-foreground flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
-            Bütçe
+            Şoför Maliyeti (₺)
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-primary">
-            {symbol}{totalPrice.toFixed(2)}
+            ₺{totalPrice.toFixed(2)}
           </div>
         </CardContent>
       </Card>
@@ -66,12 +66,12 @@ export const MonthlySummaryCard = ({
         <CardHeader className="pb-2">
           <CardTitle className="text-xs text-muted-foreground flex items-center gap-2">
             <Banknote className="h-4 w-4" />
-            Şoför Nakit Aldı
+            Şoför Nakit Aldı (₺)
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {symbol}{totalCashCollected.toFixed(2)}
+            ₺{totalCashCollected.toFixed(2)}
           </div>
         </CardContent>
       </Card>
@@ -80,12 +80,12 @@ export const MonthlySummaryCard = ({
         <CardHeader className="pb-2">
           <CardTitle className="text-xs text-muted-foreground flex items-center gap-2">
             <Scale className="h-4 w-4" />
-            Bakiye
+            Bakiye (₺)
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className={`text-2xl font-bold ${balanceStatus.color}`}>
-            {symbol}{Math.abs(balance).toFixed(2)}
+            ₺{Math.abs(balance).toFixed(2)}
           </div>
           <p className="text-xs text-muted-foreground mt-1">{balanceStatus.text}</p>
         </CardContent>

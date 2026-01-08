@@ -29,18 +29,19 @@ const AdminAccounting = () => {
         .from('drivers')
         .select('id, name');
 
-      // Get all completed reservations with driver financial data
+      // Get all completed reservations with driver financial data - TL bazlı
       const { data: reservations } = await supabase
         .from('reservations')
-        .select('driver_id, price, driver_cash_amount')
+        .select('driver_id, driver_earning, driver_cash_amount')
         .eq('status', 'completed');
 
       if (drivers && reservations) {
         const driverAccounting: DriverAccounting[] = drivers.map(driver => {
           const driverReservations = reservations.filter(r => r.driver_id === driver.id);
-          const totalRevenue = driverReservations.reduce((sum, r) => sum + (r.price || 0), 0);
+          // TL bazlı: driver_earning (şoför maliyeti)
+          const totalRevenue = driverReservations.reduce((sum, r) => sum + (r.driver_earning || 0), 0);
           
-          // Use actual driver_cash_amount entered by drivers
+          // TL bazlı: driver_cash_amount (şoförün aldığı nakit)
           const cashCollected = driverReservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
 
           return {
@@ -53,8 +54,8 @@ const AdminAccounting = () => {
 
         setDriverData(driverAccounting);
 
-        // Calculate totals
-        const totalRevenue = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
+        // Calculate totals - TL bazlı
+        const totalRevenue = reservations.reduce((sum, r) => sum + (r.driver_earning || 0), 0);
         const totalCash = driverAccounting.reduce((sum, d) => sum + d.cashCollected, 0);
 
         setTotals({
@@ -88,7 +89,7 @@ const AdminAccounting = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                     <TrendingUp className="h-4 w-4" />
-                    Total Revenue
+                    Toplam Şoför Maliyeti (₺)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -100,7 +101,7 @@ const AdminAccounting = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                     <Banknote className="h-4 w-4" />
-                    Cash Collected
+                    Şoför Nakit Aldı (₺)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -121,9 +122,9 @@ const AdminAccounting = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Driver</TableHead>
-                      <TableHead className="text-right">Revenue</TableHead>
-                      <TableHead className="text-right">Cash Collected</TableHead>
+                      <TableHead>Şoför</TableHead>
+                      <TableHead className="text-right">Maliyet (₺)</TableHead>
+                      <TableHead className="text-right">Nakit Aldı (₺)</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

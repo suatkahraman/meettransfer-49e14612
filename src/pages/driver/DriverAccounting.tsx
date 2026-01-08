@@ -31,16 +31,18 @@ const DriverAccounting = () => {
     const fetchData = async () => {
       if (!driverId) return;
 
-      // Get completed reservations
+      // Get completed reservations - TL bazlı (driver_earning ve driver_cash_amount)
       const { data: reservations } = await supabase
         .from('reservations')
-        .select('price, driver_cash_amount')
+        .select('driver_earning, driver_cash_amount')
         .eq('driver_id', driverId)
         .eq('status', 'completed');
 
       if (reservations) {
         const totalJobs = reservations.length;
-        const totalRevenue = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
+        // TL bazlı hesaplama: driver_earning (şoför maliyeti)
+        const totalRevenue = reservations.reduce((sum, r) => sum + (r.driver_earning || 0), 0);
+        // TL bazlı hesaplama: driver_cash_amount (şoförün aldığı nakit)
         const cashCollected = reservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
 
         setData({
@@ -92,11 +94,11 @@ const DriverAccounting = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
-                  {t('totalRevenue')}
+                  {t('totalRevenue')} (₺)
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">{getCurrencySymbol('TRY')}{data.totalRevenue.toFixed(2)}</div>
+                <div className="text-3xl font-bold text-green-600">₺{data.totalRevenue.toFixed(2)}</div>
                 <p className="text-sm text-muted-foreground mt-1">{t('valueOfCompletedJobs')}</p>
               </CardContent>
             </Card>
@@ -105,11 +107,11 @@ const DriverAccounting = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                   <Banknote className="h-4 w-4" />
-                  {t('totalCashCollected')}
+                  {t('totalCashCollected')} (₺)
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{getCurrencySymbol('TRY')}{data.cashCollected.toFixed(2)}</div>
+                <div className="text-3xl font-bold">₺{data.cashCollected.toFixed(2)}</div>
               </CardContent>
             </Card>
           </div>

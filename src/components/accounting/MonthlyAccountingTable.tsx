@@ -10,11 +10,13 @@ interface Reservation {
   dropoff: string;
   price: number | null;
   price_currency: string | null;
-  driver_cash_amount: number | null;
+  driver_earning?: number | null; // Şoför maliyeti (TRY) - optional for backward compatibility
+  driver_cash_amount: number | null; // Şoförün aldığı nakit (TRY)
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
   status: string;
   customer_name: string;
+  driver_id?: string | null; // Optional for admin view
 }
 
 interface MonthlyAccountingTableProps {
@@ -56,9 +58,9 @@ export const MonthlyAccountingTable = ({ reservations, showActions, onEdit }: Mo
           <TableRow>
             <TableHead>Tarih</TableHead>
             <TableHead>Güzergah</TableHead>
-            <TableHead className="text-right">Bütçe</TableHead>
+            <TableHead className="text-right">Şoför Maliyeti (₺)</TableHead>
             <TableHead className="text-right">Yolcu Nakit</TableHead>
-            <TableHead className="text-right">Şoför Aldı</TableHead>
+            <TableHead className="text-right">Şoför Aldı (₺)</TableHead>
             <TableHead>Durum</TableHead>
             {showActions && <TableHead></TableHead>}
           </TableRow>
@@ -81,7 +83,8 @@ export const MonthlyAccountingTable = ({ reservations, showActions, onEdit }: Mo
                 </div>
               </TableCell>
               <TableCell className="text-right font-medium">
-                {formatCurrency(reservation.price, reservation.price_currency)}
+                {/* Şoför Maliyeti - TRY */}
+                {reservation.driver_earning ? `₺${reservation.driver_earning.toFixed(2)}` : '-'}
               </TableCell>
               <TableCell className="text-right">
                 {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 ? (
@@ -91,7 +94,8 @@ export const MonthlyAccountingTable = ({ reservations, showActions, onEdit }: Mo
                 ) : '-'}
               </TableCell>
               <TableCell className="text-right">
-                {formatCurrency(reservation.driver_cash_amount, reservation.price_currency)}
+                {/* Şoförün Aldığı Nakit - TRY */}
+                {reservation.driver_cash_amount ? `₺${reservation.driver_cash_amount.toFixed(2)}` : '-'}
               </TableCell>
               <TableCell>
                 <Badge variant="outline" className={getStatusColor(reservation.status)}>

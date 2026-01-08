@@ -24,7 +24,8 @@ interface Reservation {
   dropoff: string;
   price: number | null;
   price_currency: string | null;
-  driver_cash_amount: number | null;
+  driver_earning: number | null; // Şoför maliyeti (TRY)
+  driver_cash_amount: number | null; // Şoförün aldığı nakit (TRY)
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
   status: string;
@@ -104,15 +105,15 @@ const DriverMonthlyAccounting = () => {
       // Exclude cancelled and deleted
       const { data: previousReservations } = await supabase
         .from('reservations')
-        .select('price, driver_cash_amount, pickup_date, status')
+        .select('driver_earning, driver_cash_amount, pickup_date, status')
         .eq('driver_id', driverId)
         .lt('pickup_date', monthStart)
         .eq('status', 'completed');
 
-      // Calculate previous months earnings (price - cash collected)
+      // Calculate previous months earnings (driver_earning - cash collected) - TL bazlı
       let prevEarnings = 0;
       previousReservations?.forEach(r => {
-        prevEarnings += (r.price || 0) - (r.driver_cash_amount || 0);
+        prevEarnings += (r.driver_earning || 0) - (r.driver_cash_amount || 0);
       });
       setPreviousMonthsEarnings(prevEarnings);
 
@@ -157,7 +158,8 @@ const DriverMonthlyAccounting = () => {
     }
   }, [driverId, currentMonth]);
 
-  const totalPrice = reservations.reduce((sum, r) => sum + (r.price || 0), 0);
+  // TL bazlı hesaplamalar: driver_earning (şoför maliyeti) ve driver_cash_amount (aldığı nakit)
+  const totalPrice = reservations.reduce((sum, r) => sum + (r.driver_earning || 0), 0);
   const totalCash = reservations.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0);
   
   // Calculate payments by type
