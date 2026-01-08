@@ -18,13 +18,13 @@ const destinations = [
 ];
 
 const prices = [
-  { from: "Bodrum Airport", to: "Bodrum Center", price: "Request Price" },
-  { from: "Bodrum Airport", to: "Gümbet", price: "Request Price" },
-  { from: "Bodrum Airport", to: "Bitez", price: "Request Price" },
-  { from: "Bodrum Airport", to: "Yalıkavak", price: "Request Price" },
-  { from: "Bodrum Airport", to: "Türkbükü", price: "Request Price" },
-  { from: "Bodrum Airport", to: "Torba", price: "Request Price" },
-  { from: "Bodrum Airport", to: "Turgutreis", price: "Request Price" },
+  { from: "Bodrum Airport", to: "Bodrum Center", price: "€60" },
+  { from: "Bodrum Airport", to: "Torba", price: "€60" },
+  { from: "Bodrum Airport", to: "Yalıkavak", price: "€76" },
+  { from: "Bodrum Airport", to: "Türkbükü", price: "€65" },
+  { from: "Bodrum Airport", to: "Turgutreis", price: "€75" },
+  { from: "Bodrum Airport", to: "Akyarlar", price: "€74" },
+  { from: "Bodrum Airport", to: "Güllük", price: "€50" },
 ];
 
 const faqItems = [
@@ -34,7 +34,7 @@ const faqItems = [
   },
   {
     question: "How much is transfer from Bodrum Airport to Yalıkavak?",
-    answer: "Our fixed-price Bodrum Airport transfer to Yalıkavak is $55. This includes meet & greet service, luxury Mercedes vehicle, and door-to-door delivery. We offer better comfort and fixed pricing compared to other options.",
+    answer: "Our fixed-price Bodrum Airport transfer to Yalıkavak is €76. This includes meet & greet service, luxury Mercedes vehicle, and door-to-door delivery. We offer better comfort and fixed pricing compared to other options.",
   },
   {
     question: "Is there public transport from Bodrum Airport?",
@@ -78,7 +78,7 @@ const BodrumAirportTransfer = () => {
     <WebsiteLayout>
       <SEOHead
         title="Bodrum Airport Transfer | Private Shuttle to Hotels & Marinas | Meet Transfer"
-        description="Book Bodrum Airport (BJV) private transfer from $45. Direct service to Bodrum, Yalıkavak, Türkbükü, Gümbet & all areas. Meet & greet included. Book now!"
+        description="Book Bodrum Airport (BJV) private transfer from €50. Direct service to Bodrum, Yalıkavak, Türkbükü, Gümbet & all areas. Meet & greet included. Book now!"
         keywords="Bodrum Airport transfer, BJV airport transfer, Bodrum to Yalıkavak transfer, Bodrum Airport shuttle, Bodrum hotel transfer, Bodrum Airport to Türkbükü, Bodrum marina transfer"
         canonicalPath="/bodrum-airport-transfer"
       />
@@ -99,7 +99,7 @@ const BodrumAirportTransfer = () => {
             name: 'Bodrum Airport Transfer Service',
             description: 'Private transfer from Bodrum Airport to hotels and marinas across the Bodrum Peninsula',
             image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '45', priceCurrency: 'USD' },
+            offers: { price: '50', priceCurrency: 'EUR' },
           },
         ]}
       />
