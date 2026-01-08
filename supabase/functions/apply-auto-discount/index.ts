@@ -250,7 +250,7 @@ function generateDiscountEmail(
                 💬 WhatsApp Chat
               </a>
               <p style="color: #64748b; font-size: 12px; margin: 15px 0 0 0;">
-                📧 info@meettransfer.app | 📞 +90 850 308 3215
+                📧 info@meettransfer.app
               </p>
             </td>
           </tr>
