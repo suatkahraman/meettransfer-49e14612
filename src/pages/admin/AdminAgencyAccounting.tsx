@@ -795,105 +795,182 @@ const AdminAgencyAccounting = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-slate-700 dark:text-slate-300">{totalReservations}</div>
-                        {currentMonthDebt > 0 && (
-                          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                            <TrendingUp className="h-3 w-3" />
-                            Bu ay borç: ₺{currentMonthDebt.toFixed(2)}
-                          </p>
-                        )}
-                        {currentMonthDebt === 0 && (
+                        {/* Show debt for each currency */}
+                        {currencyBalances.length > 0 ? (
+                          <div className="space-y-1 mt-2">
+                            {currencyBalances.filter(cb => cb.netDebt !== 0).map(cb => (
+                              <p key={cb.currency} className="text-xs text-muted-foreground flex items-center gap-1">
+                                <TrendingUp className="h-3 w-3" />
+                                Bu ay borç: {getCurrencySymbol(cb.currency)}{cb.netDebt.toFixed(2)}
+                              </p>
+                            ))}
+                          </div>
+                        ) : (
                           <p className="text-xs text-muted-foreground mt-2">Aktif borç yok</p>
                         )}
                       </CardContent>
                     </Card>
 
-                    {/* This Month Payments Card - Only show if payments exist */}
-                    {totalPaymentsReceived > 0 && (
-                      <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 border-emerald-300 dark:border-emerald-700">
-                        <div className="absolute top-0 right-0 p-3 opacity-10">
-                          <CreditCard className="h-16 w-16" />
-                        </div>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium flex items-center gap-2">
-                            <div className="p-2 rounded-full bg-emerald-500/20">
-                              <CreditCard className="h-4 w-4 text-emerald-600" />
-                            </div>
-                            Bu Ay Ödemeler
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">₺{totalPaymentsReceived.toFixed(2)}</div>
-                          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-                            Alınan ödeme
-                          </p>
-                        </CardContent>
-                      </Card>
-                    )}
-
-                    {/* Current Balance Card - Acenta Para Birimi */}
-                    <Card className={`relative overflow-hidden ${
-                      agencyCurrencyTotalBalance > 0 
-                        ? 'bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900 border-amber-400 dark:border-amber-600 border-2' 
-                        : agencyCurrencyTotalBalance < 0 
-                          ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-400 dark:border-green-600 border-2' 
-                          : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800'
-                    }`}>
-                      <div className="absolute top-0 right-0 p-3 opacity-10">
-                        <Banknote className="h-16 w-16" />
-                      </div>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium flex items-center gap-2">
-                          <div className={`p-2 rounded-full ${agencyCurrencyTotalBalance > 0 ? 'bg-amber-500/20' : agencyCurrencyTotalBalance < 0 ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
-                            <Banknote className={`h-4 w-4 ${agencyCurrencyTotalBalance > 0 ? 'text-amber-600' : agencyCurrencyTotalBalance < 0 ? 'text-green-600' : 'text-gray-600'}`} />
+                    {/* This Month Payments Card - Only show if payments exist, grouped by currency */}
+                    {(() => {
+                      const currentMonthPaymentsByCurrency: Record<string, number> = {};
+                      payments
+                        .filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd)
+                        .forEach(p => {
+                          const currency = p.currency || 'TRY';
+                          if (!currentMonthPaymentsByCurrency[currency]) {
+                            currentMonthPaymentsByCurrency[currency] = 0;
+                          }
+                          currentMonthPaymentsByCurrency[currency] += p.amount;
+                        });
+                      
+                      const paymentEntries = Object.entries(currentMonthPaymentsByCurrency).filter(([_, amount]) => amount > 0);
+                      
+                      if (paymentEntries.length === 0) return null;
+                      
+                      return (
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 border-emerald-300 dark:border-emerald-700">
+                          <div className="absolute top-0 right-0 p-3 opacity-10">
+                            <CreditCard className="h-16 w-16" />
                           </div>
-                          Güncel Bakiye ({agencyCurrency})
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className={`text-3xl font-bold ${agencyCurrencyTotalBalance > 0 ? 'text-amber-700 dark:text-amber-400' : agencyCurrencyTotalBalance < 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-400'}`}>
-                          {getCurrencySymbol(agencyCurrency)}{Math.abs(agencyCurrencyTotalBalance).toFixed(2)}
-                        </div>
-                        <p className="text-xs mt-2 flex items-center gap-1">
-                          <span className={`inline-block w-2 h-2 rounded-full ${agencyCurrencyTotalBalance > 0 ? 'bg-amber-500 animate-pulse' : agencyCurrencyTotalBalance < 0 ? 'bg-green-500' : 'bg-gray-400'}`}></span>
-                          <span className={`font-medium ${agencyCurrencyTotalBalance > 0 ? 'text-amber-600 dark:text-amber-400' : agencyCurrencyTotalBalance < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-600'}`}>
-                            {agencyCurrencyTotalBalance > 0 ? 'Acenta borçlu' : agencyCurrencyTotalBalance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
-                          </span>
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    {/* TRY Equivalent Summary Card - Only show for non-TRY agencies */}
-                    {agencyCurrency !== 'TRY' && (
-                      <Card className={`relative overflow-hidden ${
-                        totalTRYEquivalent > 0 
-                          ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-300 dark:border-blue-700' 
-                          : totalTRYEquivalent < 0 
-                            ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-300 dark:border-green-700' 
-                            : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800'
-                      }`}>
-                        <div className="absolute top-0 right-0 p-3 opacity-10">
-                          <TrendingUp className="h-16 w-16" />
-                        </div>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium flex items-center gap-2">
-                            <div className={`p-2 rounded-full ${totalTRYEquivalent > 0 ? 'bg-blue-500/20' : totalTRYEquivalent < 0 ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
-                              <TrendingUp className={`h-4 w-4 ${totalTRYEquivalent > 0 ? 'text-blue-600' : totalTRYEquivalent < 0 ? 'text-green-600' : 'text-gray-600'}`} />
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium flex items-center gap-2">
+                              <div className="p-2 rounded-full bg-emerald-500/20">
+                                <CreditCard className="h-4 w-4 text-emerald-600" />
+                              </div>
+                              Bu Ay Ödemeler
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-1">
+                              {paymentEntries.map(([currency, amount]) => (
+                                <div key={currency} className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">
+                                  {getCurrencySymbol(currency)}{amount.toFixed(2)}
+                                </div>
+                              ))}
                             </div>
-                            TRY Karşılığı
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className={`text-3xl font-bold ${totalTRYEquivalent > 0 ? 'text-blue-700 dark:text-blue-400' : totalTRYEquivalent < 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-400'}`}>
-                            {loadingConversion ? '...' : `₺${Math.abs(totalTRYEquivalent).toFixed(0)}`}
+                            <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                              Alınan ödeme
+                            </p>
+                          </CardContent>
+                        </Card>
+                      );
+                    })()}
+
+                    {/* Current Balance Cards - Para birimi bazlı */}
+                    {(() => {
+                      // Calculate balances for all currencies
+                      const allCurrencies = new Set([
+                        ...Object.keys(carryoverBalances),
+                        ...currencyBalances.map(cb => cb.currency),
+                      ]);
+                      
+                      // Calculate current month payments by currency
+                      const currentMonthPaymentsByCurrency: Record<string, number> = {};
+                      payments
+                        .filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd)
+                        .forEach(p => {
+                          const currency = p.currency || 'TRY';
+                          if (!currentMonthPaymentsByCurrency[currency]) {
+                            currentMonthPaymentsByCurrency[currency] = 0;
+                          }
+                          currentMonthPaymentsByCurrency[currency] += p.amount;
+                        });
+                      
+                      // Build total balance per currency
+                      const totalBalancesByCurrency: Array<{ currency: string; balance: number }> = [];
+                      allCurrencies.forEach(currency => {
+                        const carryover = carryoverBalances[currency] || 0;
+                        const currentMonthDebt = currencyBalances.find(cb => cb.currency === currency)?.netDebt || 0;
+                        const currentMonthPaid = currentMonthPaymentsByCurrency[currency] || 0;
+                        const totalBalance = carryover + currentMonthDebt - currentMonthPaid;
+                        
+                        if (totalBalance !== 0 || currency === agencyCurrency) {
+                          totalBalancesByCurrency.push({ currency, balance: totalBalance });
+                        }
+                      });
+                      
+                      // Sort: agency currency first
+                      totalBalancesByCurrency.sort((a, b) => {
+                        if (a.currency === agencyCurrency) return -1;
+                        if (b.currency === agencyCurrency) return 1;
+                        return 0;
+                      });
+                      
+                      return totalBalancesByCurrency.map(({ currency, balance }) => (
+                        <Card key={`balance-${currency}`} className={`relative overflow-hidden ${
+                          balance > 0 
+                            ? 'bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900 border-amber-400 dark:border-amber-600 border-2' 
+                            : balance < 0 
+                              ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-400 dark:border-green-600 border-2' 
+                              : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800'
+                        }`}>
+                          <div className="absolute top-0 right-0 p-3 opacity-10">
+                            <Banknote className="h-16 w-16" />
                           </div>
-                          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                            <span className={`inline-block w-2 h-2 rounded-full ${totalTRYEquivalent > 0 ? 'bg-blue-500' : totalTRYEquivalent < 0 ? 'bg-green-500' : 'bg-gray-400'}`}></span>
-                            Otomatik kur çevrimi
-                          </p>
-                        </CardContent>
-                      </Card>
-                    )}
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium flex items-center gap-2">
+                              <div className={`p-2 rounded-full ${balance > 0 ? 'bg-amber-500/20' : balance < 0 ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
+                                <Banknote className={`h-4 w-4 ${balance > 0 ? 'text-amber-600' : balance < 0 ? 'text-green-600' : 'text-gray-600'}`} />
+                              </div>
+                              Güncel Bakiye ({currency})
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className={`text-3xl font-bold ${balance > 0 ? 'text-amber-700 dark:text-amber-400' : balance < 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-400'}`}>
+                              {getCurrencySymbol(currency)}{Math.abs(balance).toFixed(2)}
+                            </div>
+                            <p className="text-xs mt-2 flex items-center gap-1">
+                              <span className={`inline-block w-2 h-2 rounded-full ${balance > 0 ? 'bg-amber-500 animate-pulse' : balance < 0 ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                              <span className={`font-medium ${balance > 0 ? 'text-amber-600 dark:text-amber-400' : balance < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-600'}`}>
+                                {balance > 0 ? 'Acenta borçlu' : balance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
+                              </span>
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ));
+                    })()}
+
+                    {/* TRY Equivalent Summary Card - Show when there are non-TRY balances */}
+                    {(() => {
+                      // Check if there are any non-TRY balances
+                      const hasNonTRYBalances = Object.keys(carryoverBalances).some(c => c !== 'TRY') ||
+                        currencyBalances.some(cb => cb.currency !== 'TRY' && cb.netDebt !== 0);
+                      
+                      if (!hasNonTRYBalances) return null;
+                      
+                      return (
+                        <Card className={`relative overflow-hidden ${
+                          totalTRYEquivalent > 0 
+                            ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-300 dark:border-blue-700' 
+                            : totalTRYEquivalent < 0 
+                              ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-300 dark:border-green-700' 
+                              : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800'
+                        }`}>
+                          <div className="absolute top-0 right-0 p-3 opacity-10">
+                            <TrendingUp className="h-16 w-16" />
+                          </div>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium flex items-center gap-2">
+                              <div className={`p-2 rounded-full ${totalTRYEquivalent > 0 ? 'bg-blue-500/20' : totalTRYEquivalent < 0 ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
+                                <TrendingUp className={`h-4 w-4 ${totalTRYEquivalent > 0 ? 'text-blue-600' : totalTRYEquivalent < 0 ? 'text-green-600' : 'text-gray-600'}`} />
+                              </div>
+                              Toplam TRY Karşılığı
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className={`text-3xl font-bold ${totalTRYEquivalent > 0 ? 'text-blue-700 dark:text-blue-400' : totalTRYEquivalent < 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-400'}`}>
+                              {loadingConversion ? '...' : `₺${Math.abs(totalTRYEquivalent).toLocaleString('tr-TR')}`}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                              <span className={`inline-block w-2 h-2 rounded-full ${totalTRYEquivalent > 0 ? 'bg-blue-500' : totalTRYEquivalent < 0 ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                              {totalTRYEquivalent > 0 ? 'Toplam borç (TRY)' : totalTRYEquivalent < 0 ? 'Toplam alacak (TRY)' : 'Hesap sıfır'}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      );
+                    })()}
                   </div>
                   
                   {/* Multi-Currency Balances */}
