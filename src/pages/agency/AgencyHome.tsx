@@ -492,7 +492,7 @@ const AgencyHome = () => {
                             ? "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800"
                             : "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
                       )}
-                      onClick={() => navigate('/agency/reports')}
+                      onClick={() => navigate(`/agency/currency/${cb.currency}`)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">

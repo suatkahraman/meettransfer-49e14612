@@ -83,6 +83,7 @@ const AgencyReservationDetail = lazy(() => import("./pages/agency/AgencyReservat
 const AgencyEditReservation = lazy(() => import("./pages/agency/AgencyEditReservation"));
 const AgencyCreateReservation = lazy(() => import("./pages/agency/AgencyCreateReservation"));
 const AgencyTransactionHistory = lazy(() => import("./pages/agency/AgencyTransactionHistory"));
+const AgencyCurrencyDetail = lazy(() => import("./pages/agency/AgencyCurrencyDetail"));
 
 // Website Pages - lazy loaded
 const IstanbulTransfer = lazy(() => import("./pages/website/IstanbulTransfer"));
@@ -276,6 +277,7 @@ const App = () => (
               <Route path="/agency/create-reservation" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyCreateReservation /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               <Route path="/agency/reports" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReports /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               <Route path="/agency/transactions" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyTransactionHistory /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
+              <Route path="/agency/currency/:currency" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyCurrencyDetail /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               <Route path="/agency/reservation/:id" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReservationDetail /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               <Route path="/agency/reservation/:id/edit" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyEditReservation /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               
