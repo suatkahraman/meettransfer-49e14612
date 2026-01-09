@@ -309,28 +309,28 @@ const AgencyHome = () => {
 
   const ReservationCard = ({ reservation }: { reservation: Reservation }) => (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow"
+      className="cursor-pointer hover:shadow-md active:scale-[0.98] transition-all touch-manipulation"
       onClick={() => navigate(`/agency/reservation/${reservation.id}`)}
     >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex items-start justify-between gap-2 mb-2 sm:mb-3">
+          <div className="min-w-0 flex-1">
             {reservation.reservation_code && (
-              <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded">
+              <span className="text-[10px] sm:text-xs font-mono bg-muted px-1.5 sm:px-2 py-0.5 rounded">
                 {reservation.reservation_code}
               </span>
             )}
-            <div className="flex items-center gap-2 mt-1">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{reservation.customer_name}</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
+              <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
+              <span className="font-medium text-sm sm:text-base truncate">{reservation.customer_name}</span>
             </div>
           </div>
-          <div className="flex flex-col gap-1 items-end">
-            <Badge className={statusColors[reservation.status] || 'bg-muted'}>
+          <div className="flex flex-col gap-1 items-end flex-shrink-0">
+            <Badge className={cn("text-[10px] sm:text-xs px-1.5 sm:px-2", statusColors[reservation.status] || 'bg-muted')}>
               {statusLabels[reservation.status] || reservation.status}
             </Badge>
             {reservation.status === 'customer_approved' && !reservation.driver_id && (
-              <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50 text-xs">
+              <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50 text-[10px] px-1.5">
                 {t('awaitingDriverInfo')}
               </Badge>
             )}
@@ -343,7 +343,7 @@ const AgencyHome = () => {
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
               >
-                <Badge className="bg-red-500 text-white border-red-600 text-xs animate-pulse">
+                <Badge className="bg-red-500 text-white border-red-600 text-[10px] px-1.5 animate-pulse">
                   💵 {t('cashRequired') || 'Nakit Girin'}
                 </Badge>
               </motion.div>
@@ -351,11 +351,11 @@ const AgencyHome = () => {
           </div>
         </div>
 
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+        <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
             <span>{format(new Date(reservation.pickup_date), 'dd MMM yyyy', { locale })}</span>
-            <Clock className="h-4 w-4 text-muted-foreground ml-2" />
+            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground ml-1 sm:ml-2 flex-shrink-0" />
             <span>{reservation.pickup_time}</span>
           </div>
 
@@ -373,22 +373,22 @@ const AgencyHome = () => {
           />
 
           {reservation.drivers && (
-            <div className="pt-2 border-t space-y-1">
-              <div className="flex items-center gap-2">
-                <Car className="h-4 w-4 text-green-600" />
-                <span className="font-medium text-green-700">{reservation.drivers.name}</span>
+            <div className="pt-1.5 sm:pt-2 border-t space-y-0.5 sm:space-y-1">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Car className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
+                <span className="font-medium text-green-700 text-xs sm:text-sm">{reservation.drivers.name}</span>
               </div>
               {reservation.drivers.plate_number && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span className="text-xs">{t('plate')}:</span>
-                  <span className="font-mono text-xs">{reservation.drivers.plate_number}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground flex-wrap">
+                  <span className="text-[10px] sm:text-xs">{t('plate')}:</span>
+                  <span className="font-mono text-[10px] sm:text-xs">{reservation.drivers.plate_number}</span>
                   {reservation.drivers.vehicle_color && (
-                    <span className="text-xs">• {reservation.drivers.vehicle_color}</span>
+                    <span className="text-[10px] sm:text-xs">• {reservation.drivers.vehicle_color}</span>
                   )}
                 </div>
               )}
               {reservation.drivers.vehicle_model && (
-                <div className="text-xs text-muted-foreground">
+                <div className="text-[10px] sm:text-xs text-muted-foreground">
                   {reservation.drivers.vehicle_model}
                 </div>
               )}
@@ -397,13 +397,13 @@ const AgencyHome = () => {
 
           {/* Cash amount display */}
           {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
-            <div className="pt-2 border-t">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">💵</span>
-                <span className="font-semibold text-green-700">
+            <div className="pt-1.5 sm:pt-2 border-t">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-base sm:text-lg">💵</span>
+                <span className="font-semibold text-green-700 text-sm sm:text-base">
                   {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString()}
                 </span>
-                <span className="text-xs text-muted-foreground">({t('cashToCollect') || 'Alınacak Nakit'})</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">({t('cashToCollect') || 'Alınacak Nakit'})</span>
               </div>
             </div>
           )}
@@ -413,22 +413,22 @@ const AgencyHome = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-4 flex justify-between items-center sticky top-0 z-10">
-        <div>
-          <h1 className="text-xl font-serif font-bold">{t('agencyPanel')}</h1>
+    <div className="min-h-screen bg-background pb-safe">
+      <header className="bg-primary text-primary-foreground py-3 px-3 sm:py-4 sm:px-4 flex justify-between items-center sticky top-0 z-10 safe-area-inset-top">
+        <div className="min-w-0 flex-1 mr-2">
+          <h1 className="text-lg sm:text-xl font-serif font-bold truncate">{t('agencyPanel')}</h1>
           {agency && (
-            <p className="text-sm opacity-80">{agency.agency_name}</p>
+            <p className="text-xs sm:text-sm opacity-80 truncate">{agency.agency_name}</p>
           )}
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-0.5 sm:gap-1.5 flex-shrink-0">
           <AgencyLanguageSelector />
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={() => toggleSection('notificationHistory')}
             className={cn(
-              "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9",
+              "text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9",
               expandedSections.notificationHistory && "bg-primary-foreground/20"
             )}
             title={t('notificationHistory') || 'Bildirim Geçmişi'}
@@ -439,7 +439,7 @@ const AgencyHome = () => {
             variant="ghost" 
             size="icon" 
             onClick={() => toggleSection('notificationSettings')}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9"
             title={t('notificationSettings') || 'Bildirim Ayarları'}
           >
             <Volume2 className="h-4 w-4" />
@@ -450,7 +450,7 @@ const AgencyHome = () => {
               size="icon" 
               onClick={isSubscribed ? unsubscribe : subscribe}
               disabled={pushLoading || permission === 'denied'}
-              className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
+              className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9"
               title={isSubscribed ? t('notificationsOn') : t('enableNotifications')}
             >
               {pushLoading ? (
@@ -467,7 +467,7 @@ const AgencyHome = () => {
             size="icon" 
             onClick={handleRefresh}
             disabled={refreshing}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9"
           >
             <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
           </Button>
@@ -475,7 +475,7 @@ const AgencyHome = () => {
             variant="ghost" 
             size="icon" 
             onClick={() => navigate('/agency/reports')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9 hidden sm:flex"
           >
             <BarChart3 className="h-4 w-4" />
           </Button>
@@ -483,7 +483,7 @@ const AgencyHome = () => {
             variant="ghost" 
             size="icon" 
             onClick={signOut} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9"
           >
             <LogOut className="h-4 w-4" />
           </Button>
@@ -492,8 +492,8 @@ const AgencyHome = () => {
 
       {/* Balance Warning - show if any currency has positive balance (debt) */}
       {accountingSummary.currencyBalances.some(cb => cb.netBalance > 0) && (
-        <div className="bg-destructive/10 border-l-4 border-destructive p-4">
-          <p className="text-destructive font-medium">
+        <div className="bg-destructive/10 border-l-4 border-destructive p-3 sm:p-4">
+          <p className="text-destructive font-medium text-sm sm:text-base">
             ⚠️ {t('insufficientBalance')} 
             {accountingSummary.currencyBalances
               .filter(cb => cb.netBalance > 0)
@@ -503,13 +503,13 @@ const AgencyHome = () => {
         </div>
       )}
 
-      <main className="container mx-auto py-6 px-4 max-w-2xl">
+      <main className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-2xl">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Notification Settings Panel */}
             <AnimatePresence>
               {expandedSections.notificationSettings && (
