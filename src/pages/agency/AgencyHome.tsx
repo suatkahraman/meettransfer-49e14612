@@ -22,6 +22,8 @@ import AgencyNotificationHistory from '@/components/agency/AgencyNotificationHis
 import AgencyReservationFilters, { ReservationFilters } from '@/components/agency/AgencyReservationFilters';
 import AgencyBottomNav from '@/components/agency/AgencyBottomNav';
 import SwipeableReservationCard from '@/components/agency/SwipeableReservationCard';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import PullToRefreshIndicator from '@/components/agency/PullToRefreshIndicator';
 
 interface Driver {
   id: string;
@@ -219,6 +221,17 @@ const AgencyHome = () => {
     setLoading(false);
     setRefreshing(false);
   }, [agencyId]);
+
+  // Pull to refresh handler
+  const handlePullRefresh = useCallback(async () => {
+    await fetchData(true);
+  }, [fetchData]);
+
+  const { pullDistance, isRefreshing: isPullRefreshing, isPulling, handlers: pullHandlers } = usePullToRefresh({
+    onRefresh: handlePullRefresh,
+    threshold: 80,
+    disabled: loading,
+  });
 
   useEffect(() => {
     if (agencyId) {
@@ -425,7 +438,17 @@ const AgencyHome = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-safe">
+    <div 
+      className="min-h-screen bg-background pb-safe"
+      {...pullHandlers}
+    >
+      {/* Pull to Refresh Indicator */}
+      <PullToRefreshIndicator
+        pullDistance={pullDistance}
+        isRefreshing={isPullRefreshing}
+        isPulling={isPulling}
+        threshold={80}
+      />
       <header className="bg-primary text-primary-foreground py-3 px-3 sm:py-4 sm:px-4 flex justify-between items-center sticky top-0 z-10 safe-area-inset-top">
         <div className="min-w-0 flex-1 mr-2">
           <h1 className="text-lg sm:text-xl font-serif font-bold truncate">{t('agencyPanel')}</h1>
