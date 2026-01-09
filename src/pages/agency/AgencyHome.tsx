@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LocationDisplay } from '@/components/ui/location-display';
 import ReservationSearch from '@/components/ReservationSearch';
-import { getCurrencySymbol } from '@/lib/currency';
+import { getCurrencySymbol, calculateCurrencyBalances, CurrencyBalance } from '@/lib/currency';
 
 interface Driver {
   id: string;
@@ -85,15 +85,6 @@ const statusLabels: Record<string, string> = {
   'cancelled_by_agency': 'Cancelled by Agency',
   'customer_rejected': 'Rejected',
 };
-
-// Para birimi bazlı bakiye hesaplama
-interface CurrencyBalance {
-  currency: string;
-  totalCompanyAmount: number;
-  totalPassengerCash: number;
-  totalPaid: number;
-  netBalance: number;
-}
 
 interface AccountingSummary {
   currencyBalances: CurrencyBalance[];
@@ -164,48 +155,17 @@ const AgencyHome = () => {
       .select('amount, currency')
       .eq('agency_id', agencyId);
 
-    // PARA BİRİMİ BAZLI HESAPLAMA
-    // Tamamlanan rezervasyonların para birimlerine göre grupla
-    const currencyData: Record<string, { companyAmount: number; passengerCash: number; paid: number }> = {};
-
-    // Her tamamlanan rezervasyon için para birimi bazlı toplam
-    completedRes?.forEach((r) => {
-      const detail = r.agency_reservation_details as unknown as { customer_price: number; company_amount: number; agency_price_currency: string | null };
-      const currency = detail?.agency_price_currency || 'TRY';
-      
-      if (!currencyData[currency]) {
-        currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
+    // Calculate currency balances using shared helper (no EUR fallback)
+    const reservationData = (completedRes || []).map((r) => ({
+      passenger_cash_amount: r.passenger_cash_amount,
+      passenger_cash_currency: r.passenger_cash_currency,
+      agency_reservation_details: r.agency_reservation_details as unknown as {
+        company_amount: number | null;
+        agency_price_currency: string | null;
       }
-      
-      currencyData[currency].companyAmount += detail?.company_amount || 0;
-      
-      // Passenger cash - aynı para birimi ile eşleşiyorsa düş
-      const passengerCashCurrency = r.passenger_cash_currency || 'TRY';
-      if (passengerCashCurrency === currency) {
-        currencyData[currency].passengerCash += r.passenger_cash_amount || 0;
-      }
-    });
-
-    // Ödemeleri para birimine göre ekle
-    payments?.forEach((p) => {
-      const currency = p.currency || 'EUR';
-      if (!currencyData[currency]) {
-        currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
-      }
-      currencyData[currency].paid += p.amount || 0;
-    });
-
-    // CurrencyBalance dizisi oluştur
-    const currencyBalances: CurrencyBalance[] = Object.entries(currencyData)
-      .filter(([_, data]) => data.companyAmount > 0 || data.paid > 0)
-      .map(([currency, data]) => ({
-        currency,
-        totalCompanyAmount: data.companyAmount,
-        totalPassengerCash: data.passengerCash,
-        totalPaid: data.paid,
-        netBalance: data.companyAmount - data.passengerCash - data.paid
-      }))
-      .sort((a, b) => b.netBalance - a.netBalance);
+    }));
+    
+    const currencyBalances = calculateCurrencyBalances(reservationData, payments || []);
 
     setAccountingSummary({
       currencyBalances,
