@@ -72,7 +72,9 @@ const DriverJobList = () => {
         // Driver should still see the job and be able to accept it again
         return ['sent_to_driver', 'assigned', 'confirmed'];
       case 'active':
-        return ['active'];
+        // Include cancelled statuses so driver can still see cancelled jobs
+        // Only actually deleted reservations will disappear
+        return ['active', 'cancelled', 'cancelled_by_customer', 'cancelled_by_agency'];
       case 'completed':
         return ['completed'];
       default:
