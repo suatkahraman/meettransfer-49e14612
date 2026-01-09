@@ -68,17 +68,16 @@ const DriverJobList = () => {
   const getStatusFilter = useCallback(() => {
     switch (jobType) {
       case 'pending':
-        // Include 'confirmed' status - when admin edits and approves, status becomes 'confirmed'
-        // Driver should still see the job and be able to accept it again
-        return ['sent_to_driver', 'assigned', 'confirmed'];
+        // Include all pending-like statuses - driver should see jobs waiting for action
+        return ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed'];
       case 'active':
         // Include cancelled statuses so driver can still see cancelled jobs
         // Only actually deleted reservations will disappear
-        return ['active', 'cancelled', 'cancelled_by_customer', 'cancelled_by_agency'];
+        return ['active', 'cancelled', 'cancelled_by_customer', 'cancelled_by_agency', 'no_show'];
       case 'completed':
         return ['completed'];
       default:
-        return ['sent_to_driver', 'assigned', 'confirmed'];
+        return ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed'];
     }
   }, [jobType]);
 

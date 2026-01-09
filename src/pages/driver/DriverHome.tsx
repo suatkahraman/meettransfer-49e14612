@@ -82,7 +82,7 @@ const DriverHome = () => {
       .from('reservations')
       .select('*, agencies (id, agency_name)')
       .eq('driver_id', driverId)
-      .in('status', ['sent_to_driver', 'assigned', 'confirmed', 'active', 'completed', 'cancelled', 'cancelled_by_customer', 'cancelled_by_agency'])
+      .in('status', ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active', 'completed', 'cancelled', 'cancelled_by_customer', 'cancelled_by_agency', 'no_show'])
       .order('pickup_date', { ascending: true })
       .order('pickup_time', { ascending: true });
 
