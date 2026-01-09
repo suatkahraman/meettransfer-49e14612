@@ -611,12 +611,6 @@ const AdminAgencies = () => {
                     </div>
                   )}
 
-                  {/* Currency Display */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>Varsayılan Para Birimi:</span>
-                    <Badge variant="outline" className="font-mono">{agency.currency || 'EUR'}</Badge>
-                  </div>
-
                   {/* Multi-Currency Balances - Only show currencies with non-zero balance */}
                   {agency.currencyBalances && agency.currencyBalances.filter(cb => cb.netAgencyDebt !== 0 || cb.totalAgencyPrice !== 0).length > 0 && (
                     <div className="space-y-3">
