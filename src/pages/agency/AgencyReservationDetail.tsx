@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
-import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
+
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -103,7 +103,6 @@ const AgencyReservationDetail = () => {
   const { id } = useParams();
   const { agencyId } = useUserRole();
   const { t, locale } = useAgencyTranslations();
-  const { currencySymbol } = useAgencyLanguage();
   const { emailAdminAgencyPriceApproved, emailAdminAgencyPriceRejected, emailAdminReservationCancelled } = useEmailNotifications();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState<Reservation | null>(null);
@@ -617,7 +616,7 @@ const AgencyReservationDetail = () => {
             <CardContent>
               <div className="text-center py-2">
                 <p className="text-3xl font-bold text-green-700 dark:text-green-300">
-                  {currencySymbol}{agencyDetails.company_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                  {getCurrencySymbol(reservation?.price_currency)}{agencyDetails.company_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-sm text-green-600/80 dark:text-green-400/80 mt-1">
                   {t('agencyExpense') || 'Agency Expense'}
