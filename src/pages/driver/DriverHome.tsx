@@ -8,7 +8,7 @@ import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History, Settings, Volume2 } from 'lucide-react';
+import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History, Settings, Volume2, Search, Star } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ReservationSearch from '@/components/ReservationSearch';
 import DriverInfoEditor from '@/components/driver/DriverInfoEditor';
+import DriverStatsCard from '@/components/driver/DriverStatsCard';
 interface Reservation {
   id: string;
   customer_id: string;
@@ -69,7 +70,8 @@ const DriverHome = () => {
     active: true,
     completed: false,
     settings: false,
-    notificationSettings: false
+    notificationSettings: false,
+    search: false
   });
   
   const pullY = useMotionValue(0);
@@ -405,7 +407,7 @@ const DriverHome = () => {
     }
   };
 
-  const toggleSection = (section: 'pending' | 'active' | 'completed' | 'settings' | 'notificationSettings') => {
+  const toggleSection = (section: 'pending' | 'active' | 'completed' | 'settings' | 'notificationSettings' | 'search') => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -427,22 +429,22 @@ const DriverHome = () => {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Mobile-optimized sticky header */}
-      <header className="bg-primary text-primary-foreground py-3 px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg">
+      {/* Compact mobile-optimized header */}
+      <header className="bg-primary text-primary-foreground py-2 px-3 flex justify-between items-center flex-shrink-0 z-20 shadow-lg">
         <div className="flex items-center gap-2">
-          <h1 className="text-lg font-serif font-bold">{t('driverPanel')}</h1>
+          <h1 className="text-base font-serif font-bold">{t('driverPanel')}</h1>
           {activeJobs.length > 0 && (
-            <Badge variant="secondary" className="bg-green-500 text-white hover:bg-green-600">
-              {activeJobs.length} {t('active')}
+            <Badge variant="secondary" className="bg-green-500 text-white hover:bg-green-600 h-5 px-1.5 text-xs">
+              {activeJobs.length}
             </Badge>
           )}
           {pendingJobs.length > 0 && (
-            <Badge variant="secondary" className="bg-amber-500 text-white hover:bg-amber-600">
-              {pendingJobs.length} {t('pending')}
+            <Badge variant="secondary" className="bg-amber-500 text-white hover:bg-amber-600 h-5 px-1.5 text-xs">
+              {pendingJobs.length}
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <Button 
             variant="ghost" 
             onClick={() => {
@@ -450,24 +452,33 @@ const DriverHome = () => {
               fetchReservations(true);
             }}
             disabled={refreshing}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0"
           >
-            <RefreshCw className={cn("h-5 w-5", refreshing && "animate-spin")} />
+            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+          </Button>
+          <Button 
+            variant="ghost" 
+            onClick={() => toggleSection('search')} 
+            className={cn(
+              "text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0",
+              expandedSections.search && "bg-primary-foreground/20"
+            )}
+          >
+            <Search className="h-4 w-4" />
           </Button>
           <PushNotificationToggle compact />
           <NotificationBell />
           <Button 
             variant="ghost" 
             onClick={() => navigate('/driver/history')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2 gap-1"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 px-2 gap-1"
           >
-            <History className="h-5 w-5" />
-            <span className="text-xs">{t('history')}</span>
+            <History className="h-4 w-4" />
           </Button>
           <Button 
             variant="ghost" 
             onClick={() => toggleSection('notificationSettings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0"
             title="Bildirim Ayarları"
           >
             <Volume2 className="h-4 w-4" />
@@ -476,7 +487,7 @@ const DriverHome = () => {
             variant="ghost" 
             onClick={() => toggleSection('settings')} 
             className={cn(
-              "text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2",
+              "text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0",
               expandedSections.settings && "bg-primary-foreground/20"
             )}
             title={t('updateInfo')}
@@ -486,10 +497,9 @@ const DriverHome = () => {
           <Button 
             variant="ghost" 
             onClick={signOut} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2 gap-1"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0"
           >
-            <LogOut className="h-5 w-5" />
-            <span className="text-xs">{t('logout')}</span>
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </header>
@@ -547,6 +557,36 @@ const DriverHome = () => {
           )}
         </AnimatePresence>
 
+        {/* Search Section */}
+        <AnimatePresence>
+          {expandedSections.search && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden mb-4 mt-4"
+            >
+              <Card>
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-muted-foreground">{t('searchByCode') || 'Kod ile Ara'}</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleSection('search')}
+                      className="h-6 w-6 p-0 text-muted-foreground"
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                  <ReservationSearch userType="driver" driverId={driverId || undefined} placeholder="MT123456" />
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -555,31 +595,65 @@ const DriverHome = () => {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center py-16"
+            className="text-center py-16 space-y-6"
           >
-            <Car className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <p className="text-lg text-muted-foreground">{t('noJobsAssigned')}</p>
-            <p className="text-sm text-muted-foreground mt-2">{t('completedTransfersWillAppear')}</p>
+            {/* Stats Card even when no jobs */}
+            {driverId && (
+              <div className="mb-6">
+                <DriverStatsCard driverId={driverId} />
+              </div>
+            )}
+            <Car className="h-16 w-16 mx-auto text-muted-foreground" />
+            <div>
+              <p className="text-lg text-muted-foreground">{t('noJobsAssigned')}</p>
+              <p className="text-sm text-muted-foreground mt-2">{t('completedTransfersWillAppear')}</p>
+            </div>
+            {/* Quick Actions */}
+            <div className="flex flex-col gap-2 px-4">
+              <Button
+                variant="outline"
+                className="w-full h-11 gap-2"
+                onClick={() => navigate('/driver/monthly-accounting')}
+              >
+                <Calculator className="h-4 w-4" />
+                {t('monthlyAccounting')}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full h-11 gap-2"
+                onClick={() => navigate('/driver/history')}
+              >
+                <History className="h-4 w-4" />
+                {t('history')}
+              </Button>
+            </div>
           </motion.div>
         ) : (
           <div className="space-y-4 pt-4">
-            {/* Reservation Code Search */}
-            <Card className="mb-2">
-              <CardContent className="p-3">
-                <p className="text-xs text-muted-foreground mb-2">Kod ile Ara</p>
-                <ReservationSearch userType="driver" driverId={driverId || undefined} placeholder="MT123456" />
-              </CardContent>
-            </Card>
+            {/* Driver Stats Card */}
+            {driverId && (
+              <DriverStatsCard driverId={driverId} />
+            )}
 
-            {/* Monthly Accounting Button */}
-            <Button
-              variant="outline"
-              className="w-full mb-4 h-12 gap-2"
-              onClick={() => navigate('/driver/monthly-accounting')}
-            >
-              <Calculator className="h-5 w-5" />
-              {t('monthlyAccounting')}
-            </Button>
+            {/* Quick Actions Row */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1 h-10 gap-2 text-sm"
+                onClick={() => navigate('/driver/monthly-accounting')}
+              >
+                <Calculator className="h-4 w-4" />
+                {t('monthlyAccounting')}
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 h-10 gap-2 text-sm"
+                onClick={() => navigate('/driver/history')}
+              >
+                <History className="h-4 w-4" />
+                {t('history')}
+              </Button>
+            </div>
 
             {/* Pending Jobs Section */}
             {pendingJobs.length > 0 && (
