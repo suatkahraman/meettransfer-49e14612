@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from '
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, User, Car, Edit, X, AlertTriangle, Ban } from 'lucide-react';
+import { Calendar, Clock, User, Car, Edit, X, AlertTriangle, Ban, ChevronRight } from 'lucide-react';
 import { format, Locale, isToday, parseISO, startOfDay, isSameDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { LocationDisplay } from '@/components/ui/location-display';
@@ -335,27 +335,38 @@ export const SwipeableReservationCard = ({
                 )}
               </div>
 
-              {/* Swipe hints */}
-              {canSwipe && (
-                <div className="pt-2 mt-2 border-t border-dashed">
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                    {canCancelStatus && (
-                      <span className={cn(
-                        "flex items-center gap-1",
-                        isSameDayReservation ? "text-muted-foreground/50 line-through" : "text-destructive/70"
-                      )}>
-                        ← {t('cancel') || 'İptal'}
-                        {isSameDayReservation && <Ban className="h-3 w-3" />}
-                      </span>
-                    )}
-                    {canEdit && (
-                      <span className="flex items-center gap-1 text-primary/70 ml-auto">
-                        {t('edit') || 'Düzenle'} →
-                      </span>
-                    )}
-                  </div>
+              {/* Click indicator & Swipe hints */}
+              <div className="pt-2 mt-2 border-t border-dashed">
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                  {/* Left: Cancel hint (if swipeable) */}
+                  {canSwipe && canCancelStatus ? (
+                    <span className={cn(
+                      "flex items-center gap-1",
+                      isSameDayReservation ? "text-muted-foreground/50 line-through" : "text-destructive/70"
+                    )}>
+                      ← {t('cancel') || 'İptal'}
+                      {isSameDayReservation && <Ban className="h-3 w-3" />}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+
+                  {/* Center: Click for details indicator */}
+                  <span className="flex items-center gap-1 text-primary font-medium">
+                    {t('viewDetails') || 'Detaylar'}
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </span>
+
+                  {/* Right: Edit hint (if swipeable) */}
+                  {canSwipe && canEdit ? (
+                    <span className="flex items-center gap-1 text-primary/70">
+                      {t('edit') || 'Düzenle'} →
+                    </span>
+                  ) : (
+                    <span />
+                  )}
                 </div>
-              )}
+              </div>
             </CardContent>
           </Card>
         </motion.div>
