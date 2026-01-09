@@ -72,6 +72,10 @@ const CITIES_DATA = {
   'Cyprus': {
     airports: ['Larnaca Airport (LCA)', 'Paphos Airport (PFO)', 'Ercan Airport (ECN)'],
     districts: ['Nicosia', 'Limassol', 'Larnaca', 'Paphos', 'Famagusta', 'Kyrenia', 'Ayia Napa', 'Protaras', 'Paralimni', 'Polis', 'Coral Bay', 'Latchi', 'Troodos', 'Platres', 'Lefkara', 'Kakopetria', 'Kourion', 'Kolossi', 'Pissouri', 'Pervolia', 'Voroklini', 'Oroklini', 'Dekelia', 'Mazotos', 'Zygi']
+  },
+  'Aydin': {
+    airports: [],
+    districts: ['Aydin Center', 'Kusadasi', 'Didim', 'Altinkum', 'Akbuk', 'Soke', 'Nazilli', 'Germencik', 'Incirliova', 'Kocarli', 'Sultanhisar', 'Aydinlar', 'Davutlar', 'Guzelcamli', 'Karacasu', 'Kuyucak', 'Buharkent', 'Yenipazar', 'Bozdogan', 'Cine', 'Kosk', 'Umurlu']
   }
 };
 
