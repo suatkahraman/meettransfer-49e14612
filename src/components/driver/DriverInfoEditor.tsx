@@ -67,6 +67,7 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
   const [driverInfo, setDriverInfo] = useState<DriverInfo | null>(null);
   const [email, setEmail] = useState('');
   const [formData, setFormData] = useState({
+    name: '',
     phone: '',
     plate_number: '',
     vehicle_model: '',
@@ -93,6 +94,7 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
 
       setDriverInfo(data);
       setFormData({
+        name: data.name || '',
         phone: data.phone || '',
         plate_number: data.plate_number || '',
         vehicle_model: data.vehicle_model || '',
@@ -120,10 +122,11 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
     setSaving(true);
 
     try {
-      // Update driver info
+      // Update driver info in drivers table
       const { error: driverError } = await supabase
         .from('drivers')
         .update({
+          name: formData.name.trim(),
           phone: formData.phone,
           plate_number: formData.plate_number || null,
           vehicle_model: formData.vehicle_model || null,
@@ -133,6 +136,17 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
         .eq('id', driverId);
 
       if (driverError) throw driverError;
+
+      // Also update profile table for consistency
+      if (user) {
+        await supabase
+          .from('profiles')
+          .update({
+            full_name: formData.name.trim(),
+            phone: formData.phone,
+          })
+          .eq('id', user.id);
+      }
 
       // Update email if changed
       if (email && user) {
@@ -177,12 +191,27 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
           <div>
             <span className="block">{t('updateInfo')}</span>
             <span className="text-xs font-normal text-muted-foreground">
-              {driverInfo?.name || '-'}
+              {formData.name || driverInfo?.name || '-'}
             </span>
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-4">
+        {/* Name field - full width */}
+        <div className="space-y-1.5">
+          <Label htmlFor="name" className="flex items-center gap-1.5 text-xs">
+            <User className="h-3.5 w-3.5 text-muted-foreground" />
+            {t('name') || 'Ad Soyad'}
+          </Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Ad Soyad"
+            className="h-9 text-sm"
+          />
+        </div>
+
         {/* Two-column grid for compact layout */}
         <div className="grid grid-cols-2 gap-3">
           {/* Phone */}
