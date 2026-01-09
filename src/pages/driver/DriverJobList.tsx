@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Loader2, AlertCircle, Car, CheckCircle2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Car, CheckCircle2, RefreshCw, ArrowDown } from 'lucide-react';
 import SwipeableJobCard from '@/components/driver/SwipeableJobCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -55,6 +55,13 @@ const DriverJobList = () => {
   const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Pull-to-refresh state
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isPulling, setIsPulling] = useState(false);
+  const touchStartY = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const PULL_THRESHOLD = 80;
 
   const jobType = type as JobType || 'pending';
 
@@ -300,8 +307,42 @@ const DriverJobList = () => {
   const config = getPageConfig();
   const PageIcon = config.icon;
 
+  // Pull-to-refresh handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (containerRef.current && containerRef.current.scrollTop === 0) {
+      touchStartY.current = e.touches[0].clientY;
+      setIsPulling(true);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isPulling || refreshing) return;
+    
+    const currentY = e.touches[0].clientY;
+    const distance = Math.max(0, currentY - touchStartY.current);
+    
+    // Apply resistance for smoother feel
+    const resistedDistance = Math.min(distance * 0.5, 120);
+    setPullDistance(resistedDistance);
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDistance >= PULL_THRESHOLD && !refreshing) {
+      setRefreshing(true);
+      fetchReservations(true);
+    }
+    setPullDistance(0);
+    setIsPulling(false);
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      ref={containerRef}
+      className="min-h-screen bg-background overflow-auto"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Header */}
       <header className={cn(
         "bg-gradient-to-r py-4 px-4 sticky top-0 z-10",
@@ -338,6 +379,49 @@ const DriverJobList = () => {
           </Button>
         </div>
       </header>
+
+      {/* Pull-to-refresh indicator */}
+      <AnimatePresence>
+        {(pullDistance > 0 || refreshing) && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ 
+              opacity: 1, 
+              height: refreshing ? 60 : pullDistance 
+            }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-center justify-center bg-gradient-to-b from-muted/50 to-transparent overflow-hidden"
+          >
+            <motion.div
+              animate={{ 
+                rotate: refreshing ? 360 : (pullDistance / PULL_THRESHOLD) * 180,
+                scale: pullDistance >= PULL_THRESHOLD ? 1.2 : 1
+              }}
+              transition={{ 
+                rotate: refreshing ? { duration: 1, repeat: Infinity, ease: "linear" } : { duration: 0 }
+              }}
+              className={cn(
+                "flex items-center justify-center rounded-full p-2",
+                pullDistance >= PULL_THRESHOLD ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              )}
+            >
+              {refreshing ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <ArrowDown className={cn(
+                  "h-5 w-5 transition-transform",
+                  pullDistance >= PULL_THRESHOLD && "rotate-180"
+                )} />
+              )}
+            </motion.div>
+            {pullDistance >= PULL_THRESHOLD && !refreshing && (
+              <span className="ml-2 text-sm text-primary font-medium">
+                {t('releaseToRefresh') || 'Yenilemek için bırakın'}
+              </span>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Content */}
       <main className="px-4 py-4 max-w-lg mx-auto">

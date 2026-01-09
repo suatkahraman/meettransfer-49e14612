@@ -41,6 +41,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noJobsAssigned: 'Atanmış iş yok',
     newJobAssigned: 'Yeni iş atandı!',
     jobsRefreshed: 'İşler yenilendi',
+    releaseToRefresh: 'Yenilemek için bırakın',
+    pullToRefresh: 'Yenilemek için aşağı çekin',
     
     // Job Details
     jobDetails: 'İş Detayı',
@@ -249,6 +251,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noJobsAssigned: 'No jobs assigned',
     newJobAssigned: 'New job assigned!',
     jobsRefreshed: 'Jobs refreshed',
+    releaseToRefresh: 'Release to refresh',
+    pullToRefresh: 'Pull down to refresh',
     
     jobDetails: 'Job Details',
     reservationCode: 'Reservation Code',
@@ -443,6 +447,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noJobsAssigned: 'Keine Aufträge zugewiesen',
     newJobAssigned: 'Neuer Auftrag zugewiesen!',
     jobsRefreshed: 'Aufträge aktualisiert',
+    releaseToRefresh: 'Zum Aktualisieren loslassen',
+    pullToRefresh: 'Zum Aktualisieren nach unten ziehen',
     
     jobDetails: 'Auftragsdetails',
     reservationCode: 'Reservierungscode',
@@ -637,6 +643,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noJobsAssigned: 'Aucune tâche assignée',
     newJobAssigned: 'Nouvelle tâche assignée!',
     jobsRefreshed: 'Tâches actualisées',
+    releaseToRefresh: 'Relâcher pour actualiser',
+    pullToRefresh: 'Tirer vers le bas pour actualiser',
     
     jobDetails: 'Détails de la tâche',
     reservationCode: 'Code de réservation',
@@ -831,6 +839,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noJobsAssigned: 'Нет назначенных заказов',
     newJobAssigned: 'Новый заказ назначен!',
     jobsRefreshed: 'Заказы обновлены',
+    releaseToRefresh: 'Отпустите для обновления',
+    pullToRefresh: 'Потяните вниз для обновления',
     
     jobDetails: 'Детали заказа',
     reservationCode: 'Код бронирования',
@@ -1025,6 +1035,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noJobsAssigned: 'لا توجد وظائف معينة',
     newJobAssigned: 'تم تعيين وظيفة جديدة!',
     jobsRefreshed: 'تم تحديث الوظائف',
+    releaseToRefresh: 'حرر للتحديث',
+    pullToRefresh: 'اسحب لأسفل للتحديث',
     
     jobDetails: 'تفاصيل الوظيفة',
     reservationCode: 'رمز الحجز',
