@@ -201,22 +201,30 @@ const AgencyReservationDetail = () => {
     setSaving(true);
 
     try {
+      // Get current user ID for RLS policy
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       // Update agency reservation details - set payment status to customer_pay_cash for cash payments
-      const detailsData = {
-        reservation_id: id,
+      const updateData = {
         payment_status: isCashPayment ? 'customer_pay_cash' : paymentStatus,
       };
 
       if (agencyDetails) {
         const { error } = await supabase
           .from('agency_reservation_details')
-          .update(detailsData)
+          .update(updateData)
           .eq('id', agencyDetails.id);
         if (error) throw error;
       } else {
+        // Insert requires agency_user_id for RLS policy
         const { error } = await supabase
           .from('agency_reservation_details')
-          .insert(detailsData);
+          .insert({
+            reservation_id: id,
+            agency_user_id: user.id,
+            payment_status: isCashPayment ? 'customer_pay_cash' : paymentStatus,
+          });
         if (error) throw error;
       }
 
