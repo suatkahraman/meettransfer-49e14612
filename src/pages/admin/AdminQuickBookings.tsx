@@ -274,13 +274,20 @@ export default function AdminQuickBookings() {
 
       const returnPriceValue = returnPrice ? parseFloat(returnPrice) : null;
       
-      // Store the original return price - discount will be calculated on client side
-      // This allows the customer to see the original price with strikethrough
+      // Calculate discounted return price if promo code exists
+      // The admin enters the NORMAL price, and we calculate the discounted price
+      let discountedReturnPrice = returnPriceValue;
+      if (returnPriceValue && selectedRequest.promo_code) {
+        discountedReturnPrice = Math.round(returnPriceValue * 0.7); // Apply 30% discount
+      }
+      
+      // Store the DISCOUNTED return price in database
+      // This is the actual price the customer will pay
       const updateData: any = {
         price: priceValue,
         price_currency: currency,
         status: "price_sent",
-        return_price: returnPriceValue,
+        return_price: discountedReturnPrice, // Store discounted price
       };
 
       // Add all vehicle prices if multi-vehicle mode is used
@@ -310,11 +317,8 @@ export default function AdminQuickBookings() {
       }
 
       try {
-        // Calculate discounted return price for email display
-        let emailReturnPrice = returnPriceValue;
-        if (returnPriceValue && selectedRequest.promo_code) {
-          emailReturnPrice = Math.round(returnPriceValue * 0.7);
-        }
+        // discountedReturnPrice is already calculated above with 30% discount if promo code exists
+        // returnPriceValue is the original price admin entered
         
         const { data, error: fnError } = await supabase.functions.invoke(
           "send-quick-booking-price",
@@ -325,8 +329,8 @@ export default function AdminQuickBookings() {
               currency,
               customer_email: selectedRequest.customer_email ?? undefined,
               // Return trip info for email - send both original and discounted for email
-              return_price: emailReturnPrice ?? undefined,
-              original_return_price: returnPriceValue ?? undefined,
+              return_price: discountedReturnPrice ?? undefined,
+              original_return_price: returnPriceValue ?? undefined, // Original price for strikethrough display
               return_date: selectedRequest.return_date ?? undefined,
               return_time: selectedRequest.return_time ?? undefined,
               promo_code: selectedRequest.promo_code ?? undefined,
