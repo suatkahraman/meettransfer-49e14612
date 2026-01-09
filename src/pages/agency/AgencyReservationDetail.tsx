@@ -699,11 +699,20 @@ const AgencyReservationDetail = () => {
                 {/* Quick Cash Entry Button */}
                 <div className="mt-4 flex justify-end">
                   <Button
-                    onClick={() => setIsEditing(true)}
+                    onClick={() => {
+                      setIsEditing(true);
+                      // Scroll to the cash payment details card after a small delay for render
+                      setTimeout(() => {
+                        const cashCard = document.getElementById('cash-payment-card');
+                        if (cashCard) {
+                          cashCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                      }, 100);
+                    }}
                     className="bg-amber-600 hover:bg-amber-700"
                   >
                     <DollarSign className="h-4 w-4 mr-2" />
-                    {t('enterCashNow') || 'Nakit Tutarı Gir'}
+                    {t('enterCashNow')}
                   </Button>
                 </div>
               </CardContent>
@@ -1013,7 +1022,7 @@ const AgencyReservationDetail = () => {
 
         {/* Payment Status Card - Show for cash payment reservations (payment_type === 'cash') */}
         {isCashPayment && ['customer_approved', 'confirmed', 'sent_to_driver', 'active', 'completed'].includes(reservation.status) && (
-          <Card className={needsCashAmountEntry() ? 'border-2 border-amber-500' : ''}>
+          <Card id="cash-payment-card" className={needsCashAmountEntry() ? 'border-2 border-amber-500' : ''}>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />
