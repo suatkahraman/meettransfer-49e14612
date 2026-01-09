@@ -140,3 +140,9 @@ verify_jwt = false
 
 [functions.verify-2fa-otp]
 verify_jwt = false
+
+[functions.check-trusted-device]
+verify_jwt = false
+
+[functions.register-trusted-device]
+verify_jwt = false

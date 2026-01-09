@@ -1354,6 +1354,42 @@ export type Database = {
           },
         ]
       }
+      trusted_devices: {
+        Row: {
+          created_at: string
+          device_fingerprint: string
+          device_name: string | null
+          id: string
+          ip_address: string | null
+          is_active: boolean
+          last_used_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_fingerprint: string
+          device_name?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          last_used_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_fingerprint?: string
+          device_name?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          last_used_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       two_factor_otp: {
         Row: {
           created_at: string
@@ -1571,6 +1607,7 @@ export type Database = {
         Returns: Json
       }
       cleanup_expired_otps: { Args: never; Returns: undefined }
+      cleanup_old_trusted_devices: { Args: never; Returns: undefined }
       generate_otp: {
         Args: {
           p_email: string
@@ -1588,6 +1625,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_device_trusted: {
+        Args: { p_device_fingerprint: string; p_user_id: string }
+        Returns: boolean
+      }
       log_login_attempt: {
         Args: {
           p_email: string
@@ -1599,6 +1640,16 @@ export type Database = {
           p_user_id?: string
         }
         Returns: undefined
+      }
+      register_trusted_device: {
+        Args: {
+          p_device_fingerprint: string
+          p_device_name?: string
+          p_ip_address?: string
+          p_user_agent?: string
+          p_user_id: string
+        }
+        Returns: string
       }
       verify_otp: {
         Args: { p_otp_code: string; p_user_id: string }
