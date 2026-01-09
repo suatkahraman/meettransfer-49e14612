@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText, Building2, Banknote, Luggage, Baby } from 'lucide-react';
 import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { toast } from 'sonner';
@@ -225,7 +226,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{format(new Date(reservation.pickup_date), 'EEE, d MMM')}</span>
+                  <span>{format(new Date(reservation.pickup_date), 'EEEE, d MMMM', { locale: tr })}</span>
                 </div>
                 <div className="flex items-center gap-2 text-lg font-bold">
                   <Clock className="h-4 w-4 text-primary" />

@@ -17,6 +17,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare, Building2, Briefcase, Baby } from 'lucide-react';
 import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
@@ -557,7 +558,7 @@ ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reser
               )}
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                {format(new Date(reservation.pickup_date), 'PPPP')}
+                {format(new Date(reservation.pickup_date), 'EEEE, d MMMM yyyy', { locale: tr })}
               </CardTitle>
             </div>
           </CardHeader>

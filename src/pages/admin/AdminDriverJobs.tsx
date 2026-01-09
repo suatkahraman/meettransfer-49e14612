@@ -6,6 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, Clock, MapPin, Phone, User, Car, Building2 } from 'lucide-react';
 import { getCurrencySymbol } from '@/lib/currency';
+import { format, parseISO } from 'date-fns';
+import { tr } from 'date-fns/locale';
 
 interface Reservation {
   id: string;
@@ -92,11 +94,7 @@ const AdminDriverJobs = () => {
   }, [driverId]);
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+    return format(parseISO(date), 'EEEE, d MMMM yyyy', { locale: tr });
   };
 
   return (
