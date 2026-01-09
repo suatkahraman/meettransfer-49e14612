@@ -393,7 +393,8 @@ const AdminAgencyAccounting = () => {
 
   const getAgencyPriceCurrency = (reservationId: string) => {
     const detail = agencyDetails.find(d => d.reservation_id === reservationId);
-    return detail?.agency_price_currency || agencyCurrency;
+    // Tamamlanmış rezervasyonun para birimini kullan - fallback yok
+    return detail?.agency_price_currency || 'TRY';
   };
 
   // HESAPLAMA: Tüm hesaplamalar SADECE agency_price (customer_price) üzerinden yapılmalı
