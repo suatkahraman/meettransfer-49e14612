@@ -931,7 +931,8 @@ const DriverJobDetails = () => {
         {/* Action Buttons Card */}
         <Card>
           <CardContent className="pt-6 space-y-3">
-            {reservation.status === 'sent_to_driver' && !reservation.driver_confirmed && (
+            {/* Show confirm button for: sent_to_driver, assigned, OR confirmed with driver_confirmed=false (updated reservation) */}
+            {((reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && !reservation.driver_confirmed) && (
               <Button 
                 className="w-full" 
                 size="lg"
@@ -944,6 +945,23 @@ const DriverJobDetails = () => {
                   <CheckCircle className="h-5 w-5 mr-2" />
                 )}
                 {t('confirmJob')}
+              </Button>
+            )}
+            
+            {/* Show confirm button for updated reservations (confirmed but driver_confirmed=false) */}
+            {(reservation.status === 'confirmed' && reservation.driver_confirmed === false) && (
+              <Button 
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600" 
+                size="lg"
+                onClick={confirmJob}
+                disabled={updating}
+              >
+                {updating ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-5 w-5 mr-2" />
+                )}
+                {t('confirmUpdate') || 'Güncellemeyi Onayla'}
               </Button>
             )}
 
