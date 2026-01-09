@@ -469,15 +469,15 @@ const DriverJobDetails = () => {
     if (!reservation) return;
 
     const passengerList = reservation.passenger_names && reservation.passenger_names.length > 0
-      ? reservation.passenger_names.map((name, index) => `  ${index + 1}. ${name}`).join('\n')
-      : `  1. ${reservation.customer_name}`;
+      ? reservation.passenger_names.map((name, index) => `   ${index + 1}. ${name}`).join('\n')
+      : `   1. ${reservation.customer_name}`;
 
     const formattedDate = format(new Date(reservation.pickup_date), 'dd MMM yyyy');
 
     // Format location with place name + address
     const formatLocation = (placeName: string | null, address: string) => {
       if (placeName && placeName.trim() && !address.toLowerCase().startsWith(placeName.toLowerCase())) {
-        return `${placeName}\n${address}`;
+        return `${placeName}\n📍 ${address}`;
       }
       return address;
     };
@@ -485,29 +485,41 @@ const DriverJobDetails = () => {
     const pickupFormatted = formatLocation(reservation.pickup_place_name, reservation.pickup);
     const dropoffFormatted = formatLocation(reservation.dropoff_place_name, reservation.dropoff);
     
-    const text = `---------------------------------
-${t('reservationCode')}: ${reservation.reservation_code || reservation.id.slice(0, 8)}
-${t('date')} & ${t('time')}: ${formattedDate} – ${reservation.pickup_time}
-
-${t('passengers')}:
-${passengerList}
-
-${t('pickupPoint')}:
-${pickupFormatted}
-
-${t('dropoffPoint')}:
-${dropoffFormatted}
-
-${reservation.flight_number ? `${t('flightNumber')}: ${reservation.flight_number}\n` : ''}
-${t('vehicle')}: ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}
-${reservation.luggage_count ? `${t('luggageCount')}: ${reservation.luggage_count}\n` : ''}${reservation.baby_seat_count ? `${t('babySeat')}: ${reservation.baby_seat_count}\n` : ''}${reservation.passenger_cash_amount ? `${t('cashToCollect')}: ${getCurrencySymbol(reservation.passenger_cash_currency)}${reservation.passenger_cash_amount}\n` : ''}${t('cashCollectedLabel')}: ${reservation.driver_cash_amount ? `${getCurrencySymbol('TRY')}${reservation.driver_cash_amount}` : '—'}
-
-${t('phone')}: ${reservation.customer_phone}
-${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reservation.driver_notes || '—'}
----------------------------------`;
+    const lines = [
+      `🚖 *TRANSFER DETAYLARI*`,
+      `━━━━━━━━━━━━━━━━━`,
+      ``,
+      `🎫 *Kod:* ${reservation.reservation_code || reservation.id.slice(0, 8)}`,
+      `📅 *Tarih:* ${formattedDate}`,
+      `🕐 *Saat:* ${reservation.pickup_time}`,
+      ``,
+      `👥 *Yolcular:*`,
+      passengerList,
+      ``,
+      `📞 *Telefon:* ${reservation.customer_phone}`,
+      ``,
+      `🟢 *Alış Noktası:*`,
+      pickupFormatted,
+      ``,
+      `🔴 *Varış Noktası:*`,
+      dropoffFormatted,
+      ``,
+      reservation.flight_number ? `✈️ *Uçuş:* ${reservation.flight_number}` : null,
+      `🚗 *Araç:* ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}`,
+      reservation.luggage_count ? `🧳 *Valiz:* ${reservation.luggage_count}` : null,
+      reservation.baby_seat_count ? `👶 *Bebek Koltuğu:* ${reservation.baby_seat_count}` : null,
+      ``,
+      reservation.passenger_cash_amount ? `💵 *Tahsil Edilecek:* ${getCurrencySymbol(reservation.passenger_cash_currency)}${reservation.passenger_cash_amount}` : null,
+      reservation.driver_cash_amount ? `✅ *Tahsil Edilen:* ${getCurrencySymbol('TRY')}${reservation.driver_cash_amount}` : null,
+      ``,
+      adminNotes ? `📝 *Admin Notu:* ${adminNotes}` : null,
+      reservation.driver_notes ? `📋 *Notlar:* ${reservation.driver_notes}` : null,
+      ``,
+      `━━━━━━━━━━━━━━━━━`,
+    ].filter(Boolean).join('\n');
 
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(lines);
       toast.success(t('detailsCopied'));
     } catch (err) {
       toast.error(t('copyFailed'));
