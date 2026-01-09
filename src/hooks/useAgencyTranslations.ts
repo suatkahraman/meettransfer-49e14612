@@ -137,6 +137,17 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     changesSaved: 'Changes saved successfully',
     saveFailed: 'Failed to save',
     detailsCopied: 'Reservation details copied',
+    // Cash payment flow translations
+    enterCashAmount: 'Enter Cash Amount!',
+    cashAmountRequiredAfterApproval: 'You approved the price. Now you need to enter the cash amount to be collected from the passenger.',
+    approvedPrice: 'Approved Price',
+    enterCashNow: 'Enter Cash Amount',
+    cashPaymentDetails: 'Cash Payment Details',
+    approvedAgencyPrice: 'Approved Agency Price',
+    cashToBeCollected: 'Cash to be Collected from Passenger',
+    cashCollectionInfo: 'This amount will be collected in cash from the passenger. It can be more or less than the approved price.',
+    debtReduction: 'Will be deducted from your balance',
+    debtIncrease: 'Will be added to your balance',
     
     // Approval Flow
     priceWillBeSetByAdmin: 'Price will be determined by admin',
@@ -353,6 +364,17 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     changesSaved: 'Değişiklikler kaydedildi',
     saveFailed: 'Kaydetme başarısız',
     detailsCopied: 'Rezervasyon detayları kopyalandı',
+    // Cash payment flow translations
+    enterCashAmount: 'Nakit Alınacak Tutarı Girin!',
+    cashAmountRequiredAfterApproval: 'Fiyatı onayladınız. Şimdi yolcudan alınacak nakit tutarını girmeniz gerekmektedir.',
+    approvedPrice: 'Onaylanan Fiyat',
+    enterCashNow: 'Nakit Tutarı Gir',
+    cashPaymentDetails: 'Nakit Ödeme Detayları',
+    approvedAgencyPrice: 'Onaylanan Acenta Fiyatı',
+    cashToBeCollected: 'Yolcudan Alınacak Nakit',
+    cashCollectionInfo: 'Bu tutar yolcudan nakit olarak alınacaktır. Onaylanan fiyattan fazla veya eksik olabilir.',
+    debtReduction: 'Bakiyenizden düşülecek',
+    debtIncrease: 'Bakiyenize eklenecek',
     
     // Approval Flow
     priceWillBeSetByAdmin: 'Fiyat admin tarafından belirlenecektir',
