@@ -1,4 +1,4 @@
-import { Check, Clock, Plane, Car, Shield, Phone } from "lucide-react";
+import { Check, Clock, Plane, Car, Shield, Phone, XCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const FeatureList = () => {
@@ -9,10 +9,11 @@ const FeatureList = () => {
     { icon: Plane, label: t("flightTracking") },
     { icon: Car, label: t("doorToDoor") },
     { icon: Shield, label: t("professionalDrivers") },
+    { icon: XCircle, label: t("freeCancellation") },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
       {features.map((feature, index) => (
         <div
           key={index}
