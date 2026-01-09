@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
 import { supabase } from '@/integrations/supabase/client';
-import { getCurrencySymbol } from '@/lib/currency';
+import { getCurrencySymbol, calculateCurrencyBalances, CurrencyBalance } from '@/lib/currency';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,14 +25,7 @@ interface Transaction {
   currency: string;
 }
 
-// Para birimi bazlı bakiye hesaplama
-interface CurrencyBalance {
-  currency: string;
-  totalCompanyAmount: number;
-  totalPassengerCash: number;
-  totalPaid: number;
-  netBalance: number;
-}
+// CurrencyBalance interface imported from @/lib/currency
 
 const AgencyTransactionHistory = () => {
   const { agencyId } = useUserRole();
@@ -67,43 +60,17 @@ const AgencyTransactionHistory = () => {
       .select('amount, currency')
       .eq('agency_id', agencyId);
 
-    // PARA BİRİMİ BAZLI HESAPLAMA
-    const currencyData: Record<string, { companyAmount: number; passengerCash: number; paid: number }> = {};
-
-    completedRes?.forEach((r) => {
-      const detail = r.agency_reservation_details as unknown as { company_amount: number; agency_price_currency: string | null };
-      const currency = detail?.agency_price_currency || 'TRY';
-      
-      if (!currencyData[currency]) {
-        currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
+    // Calculate currency balances using shared helper (no EUR fallback)
+    const reservationData = (completedRes || []).map((r) => ({
+      passenger_cash_amount: r.passenger_cash_amount,
+      passenger_cash_currency: r.passenger_cash_currency,
+      agency_reservation_details: r.agency_reservation_details as unknown as {
+        company_amount: number | null;
+        agency_price_currency: string | null;
       }
-      
-      currencyData[currency].companyAmount += detail?.company_amount || 0;
-      
-      const passengerCashCurrency = r.passenger_cash_currency || 'TRY';
-      if (passengerCashCurrency === currency) {
-        currencyData[currency].passengerCash += r.passenger_cash_amount || 0;
-      }
-    });
-
-    payments?.forEach((p) => {
-      const currency = p.currency || 'EUR';
-      if (!currencyData[currency]) {
-        currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
-      }
-      currencyData[currency].paid += p.amount || 0;
-    });
-
-    const balances: CurrencyBalance[] = Object.entries(currencyData)
-      .filter(([_, data]) => data.companyAmount > 0 || data.paid > 0)
-      .map(([currency, data]) => ({
-        currency,
-        totalCompanyAmount: data.companyAmount,
-        totalPassengerCash: data.passengerCash,
-        totalPaid: data.paid,
-        netBalance: data.companyAmount - data.passengerCash - data.paid
-      }))
-      .sort((a, b) => b.netBalance - a.netBalance);
+    }));
+    
+    const balances = calculateCurrencyBalances(reservationData, payments || []);
 
     setCurrencyBalances(balances);
 

@@ -75,3 +75,93 @@ export function getCurrencyOption(currency: string | null | undefined): Currency
   if (!currency) return undefined;
   return CURRENCY_OPTIONS.find(c => c.value === currency);
 }
+
+/**
+ * Currency balance calculation result
+ */
+export interface CurrencyBalance {
+  currency: string;
+  totalCompanyAmount: number;
+  totalPassengerCash: number;
+  totalPaid: number;
+  netBalance: number;
+}
+
+/**
+ * Completed reservation data for balance calculation
+ */
+export interface CompletedReservationData {
+  passenger_cash_amount: number | null;
+  passenger_cash_currency: string | null;
+  agency_reservation_details: {
+    company_amount: number | null;
+    agency_price_currency: string | null;
+  } | null;
+}
+
+/**
+ * Payment data for balance calculation
+ */
+export interface PaymentData {
+  amount: number;
+  currency: string | null;
+}
+
+/**
+ * Calculate currency-based balances from completed reservations and payments.
+ * Uses the actual currency from each completed reservation - NO EUR FALLBACK.
+ * 
+ * @param completedReservations - Array of completed reservations with agency details
+ * @param payments - Array of payments with currency
+ * @returns Array of CurrencyBalance sorted by netBalance descending
+ */
+export function calculateCurrencyBalances(
+  completedReservations: CompletedReservationData[],
+  payments: PaymentData[]
+): CurrencyBalance[] {
+  const currencyData: Record<string, { companyAmount: number; passengerCash: number; paid: number }> = {};
+
+  // Process completed reservations - use agency_price_currency (TRY fallback for very old data)
+  completedReservations.forEach((r) => {
+    const detail = r.agency_reservation_details;
+    if (!detail) return;
+    
+    // Use the reservation's actual currency, fallback to TRY only for legacy data
+    const currency = detail.agency_price_currency || 'TRY';
+    
+    if (!currencyData[currency]) {
+      currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
+    }
+    
+    currencyData[currency].companyAmount += detail.company_amount || 0;
+    
+    // Passenger cash - only subtract if same currency
+    const passengerCashCurrency = r.passenger_cash_currency || 'TRY';
+    if (passengerCashCurrency === currency) {
+      currencyData[currency].passengerCash += r.passenger_cash_amount || 0;
+    }
+  });
+
+  // Process payments - use the payment's actual currency
+  payments.forEach((p) => {
+    // Use TRY fallback for legacy payments without currency
+    const currency = p.currency || 'TRY';
+    
+    if (!currencyData[currency]) {
+      currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
+    }
+    currencyData[currency].paid += p.amount || 0;
+  });
+
+  // Build and return CurrencyBalance array
+  return Object.entries(currencyData)
+    .filter(([_, data]) => data.companyAmount > 0 || data.paid > 0)
+    .map(([currency, data]) => ({
+      currency,
+      totalCompanyAmount: data.companyAmount,
+      totalPassengerCash: data.passengerCash,
+      totalPaid: data.paid,
+      netBalance: data.companyAmount - data.passengerCash - data.paid
+    }))
+    .sort((a, b) => b.netBalance - a.netBalance);
+}
