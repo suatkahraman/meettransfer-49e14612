@@ -267,7 +267,11 @@ const AgencyReports = () => {
             combinedBalances.map(cb => {
               const symbol = getCurrencySymbol(cb.currency);
               return (
-                <Card key={`current-${cb.currency}`} className={cb.netBalance > 0 ? 'border-orange-500/50 border-2' : 'border-green-500/50 border-2'}>
+                <Card 
+                  key={`current-${cb.currency}`} 
+                  className={`cursor-pointer hover:shadow-lg transition-shadow ${cb.netBalance > 0 ? 'border-orange-500/50 border-2' : 'border-green-500/50 border-2'}`}
+                  onClick={() => navigate(`/agency/currency/${cb.currency}`)}
+                >
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3 mb-2">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${cb.netBalance > 0 ? 'bg-orange-100' : 'bg-green-100'}`}>

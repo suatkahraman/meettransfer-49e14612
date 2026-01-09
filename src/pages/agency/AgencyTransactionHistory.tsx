@@ -273,12 +273,14 @@ const AgencyTransactionHistory = () => {
               <Card 
                 key={cb.currency}
                 className={cn(
+                  "cursor-pointer hover:shadow-lg transition-shadow",
                   cb.netBalance > 0 
                     ? "bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-red-200 dark:border-red-800" 
                     : cb.netBalance < 0 
                       ? "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800"
                       : "bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20"
                 )}
+                onClick={() => navigate(`/agency/currency/${cb.currency}`)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
