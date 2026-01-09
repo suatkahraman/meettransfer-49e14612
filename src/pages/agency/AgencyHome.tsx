@@ -390,8 +390,8 @@ const AgencyHome = () => {
               )}
               {/* Currency Badge */}
               {reservation.agency_reservation_details?.agency_price_currency && reservation.agency_reservation_details?.company_amount && reservation.agency_reservation_details.company_amount > 0 && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 font-mono bg-primary/5 border-primary/20 text-primary">
-                  {getCurrencySymbol(reservation.agency_reservation_details.agency_price_currency)}{reservation.agency_reservation_details.company_amount}
+                <Badge variant="outline" className="text-[10px] px-1 py-0 h-5 font-mono bg-primary/5 border-primary/20 text-primary">
+                  {getCurrencySymbol(reservation.agency_reservation_details.agency_price_currency)}
                 </Badge>
               )}
             </div>
