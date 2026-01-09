@@ -168,63 +168,67 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="border-primary/20 shadow-lg">
+      <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 to-primary/10 rounded-t-lg">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <User className="h-5 w-5" />
-          {t('updateInfo')}
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <User className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <span className="block">{t('updateInfo')}</span>
+            <span className="text-xs font-normal text-muted-foreground">
+              {driverInfo?.name || '-'}
+            </span>
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Name (Read-only) */}
-        <div className="space-y-1.5">
-          <Label className="text-muted-foreground text-sm">{t('name')}</Label>
-          <div className="px-3 py-2 bg-muted/50 rounded-md text-sm font-medium">
-            {driverInfo?.name || '-'}
+      <CardContent className="space-y-4 pt-4">
+        {/* Two-column grid for compact layout */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Phone */}
+          <div className="space-y-1.5">
+            <Label htmlFor="phone" className="flex items-center gap-1.5 text-xs">
+              <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+              {t('phone')}
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              placeholder="+90 5XX XXX XX XX"
+              className="h-9 text-sm"
+            />
+          </div>
+
+          {/* Email */}
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className="flex items-center gap-1.5 text-xs">
+              <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+              {t('email')}
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="email@example.com"
+              className="h-9 text-sm"
+            />
           </div>
         </div>
 
-        {/* Phone */}
+        {/* Region */}
         <div className="space-y-1.5">
-          <Label htmlFor="phone" className="flex items-center gap-1.5">
-            <Phone className="h-4 w-4 text-muted-foreground" />
-            {t('phone')}
-          </Label>
-          <Input
-            id="phone"
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            placeholder="+90 5XX XXX XX XX"
-          />
-        </div>
-
-        {/* Email */}
-        <div className="space-y-1.5">
-          <Label htmlFor="email" className="flex items-center gap-1.5">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            {t('email')}
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="email@example.com"
-          />
-        </div>
-
-        {/* Region (Select from options) */}
-        <div className="space-y-1.5">
-          <Label htmlFor="region" className="flex items-center gap-1.5">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
+          <Label htmlFor="region" className="flex items-center gap-1.5 text-xs">
+            <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
             {t('region') || 'Bölge'}
           </Label>
           <Select
             value={formData.region || ''}
             onValueChange={(value) => setFormData({ ...formData, region: value })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-9 text-sm">
               <SelectValue placeholder={t('selectRegion') || 'Bölge seçin'} />
             </SelectTrigger>
             <SelectContent>
@@ -237,33 +241,63 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
           </Select>
         </div>
 
-        {/* Vehicle Model (Select from options) */}
-        <div className="space-y-1.5">
-          <Label htmlFor="vehicle" className="flex items-center gap-1.5">
-            <Car className="h-4 w-4 text-muted-foreground" />
-            {t('vehicleType')}
-          </Label>
-          <Select
-            value={formData.vehicle_model || ''}
-            onValueChange={(value) => setFormData({ ...formData, vehicle_model: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t('selectVehicle')} />
-            </SelectTrigger>
-            <SelectContent>
-              {vehicleTypes.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Vehicle Info Header */}
+        <div className="flex items-center gap-2 pt-2">
+          <Car className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium">{t('vehicleInfo') || 'Araç Bilgileri'}</span>
         </div>
 
-        {/* Plate Number */}
+        {/* Vehicle Details - Two Column */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Vehicle Model */}
+          <div className="space-y-1.5">
+            <Label htmlFor="vehicle" className="text-xs text-muted-foreground">
+              {t('vehicleType')}
+            </Label>
+            <Select
+              value={formData.vehicle_model || ''}
+              onValueChange={(value) => setFormData({ ...formData, vehicle_model: value })}
+            >
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder={t('selectVehicle')} />
+              </SelectTrigger>
+              <SelectContent>
+                {vehicleTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Vehicle Color */}
+          <div className="space-y-1.5">
+            <Label htmlFor="color" className="text-xs text-muted-foreground">
+              {t('vehicleColor')}
+            </Label>
+            <Select
+              value={formData.vehicle_color || ''}
+              onValueChange={(value) => setFormData({ ...formData, vehicle_color: value })}
+            >
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder={t('vehicleColorPlaceholder') || 'Renk'} />
+              </SelectTrigger>
+              <SelectContent>
+                {vehicleColors.map((color) => (
+                  <SelectItem key={color.value} value={color.value}>
+                    {color.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Plate Number - Full Width */}
         <div className="space-y-1.5">
-          <Label htmlFor="plate" className="flex items-center gap-1.5">
-            <Car className="h-4 w-4 text-muted-foreground" />
+          <Label htmlFor="plate" className="flex items-center gap-1.5 text-xs">
+            <Car className="h-3.5 w-3.5 text-muted-foreground" />
             {t('plateNumber')}
           </Label>
           <Input
@@ -271,38 +305,15 @@ const DriverInfoEditor = ({ onClose }: DriverInfoEditorProps) => {
             value={formData.plate_number}
             onChange={(e) => setFormData({ ...formData, plate_number: e.target.value.toUpperCase() })}
             placeholder="34 ABC 123"
-            className="font-mono"
+            className="font-mono h-9 text-sm tracking-wider"
           />
-        </div>
-
-        {/* Vehicle Color (Select from options) */}
-        <div className="space-y-1.5">
-          <Label htmlFor="color" className="flex items-center gap-1.5">
-            <Palette className="h-4 w-4 text-muted-foreground" />
-            {t('vehicleColor')}
-          </Label>
-          <Select
-            value={formData.vehicle_color || ''}
-            onValueChange={(value) => setFormData({ ...formData, vehicle_color: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t('vehicleColorPlaceholder') || 'Renk seçin'} />
-            </SelectTrigger>
-            <SelectContent>
-              {vehicleColors.map((color) => (
-                <SelectItem key={color.value} value={color.value}>
-                  {color.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Save Button */}
         <Button 
           onClick={handleSave} 
           disabled={saving} 
-          className="w-full mt-4"
+          className="w-full mt-4 h-11 text-base font-semibold"
         >
           {saving ? (
             <>

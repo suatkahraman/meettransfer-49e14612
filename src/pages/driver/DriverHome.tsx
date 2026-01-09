@@ -475,7 +475,11 @@ const DriverHome = () => {
           <Button 
             variant="ghost" 
             onClick={() => toggleSection('settings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2"
+            className={cn(
+              "text-primary-foreground hover:bg-primary-foreground/10 h-9 px-2",
+              expandedSections.settings && "bg-primary-foreground/20"
+            )}
+            title={t('updateInfo')}
           >
             <Settings className="h-4 w-4" />
           </Button>
@@ -518,16 +522,27 @@ const DriverHome = () => {
           )}
         </AnimatePresence>
 
-        {/* Settings Section - Always visible when expanded */}
+        {/* Settings Section - Driver Info Editor */}
         <AnimatePresence>
           {expandedSections.settings && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden mb-4"
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden mb-4 mt-4"
             >
-              <DriverInfoEditor onClose={() => toggleSection('settings')} />
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleSection('settings')}
+                  className="absolute top-2 right-2 z-10 h-8 w-8 p-0"
+                >
+                  ✕
+                </Button>
+                <DriverInfoEditor onClose={() => toggleSection('settings')} />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
