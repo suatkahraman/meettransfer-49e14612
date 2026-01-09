@@ -86,11 +86,17 @@ const statusLabels: Record<string, string> = {
   'customer_rejected': 'Rejected',
 };
 
-interface AccountingSummary {
-  totalRevenue: number;
-  totalPaid: number;
+// Para birimi bazlı bakiye hesaplama
+interface CurrencyBalance {
+  currency: string;
+  totalCompanyAmount: number;
   totalPassengerCash: number;
-  balance: number;
+  totalPaid: number;
+  netBalance: number;
+}
+
+interface AccountingSummary {
+  currencyBalances: CurrencyBalance[];
   monthlyReservations: number;
   completedReservations: number;
 }
@@ -99,7 +105,7 @@ const AgencyHome = () => {
   const { signOut } = useAuth();
   const { agencyId } = useUserRole();
   const { t, locale } = useAgencyTranslations();
-  const { currencySymbol, language: agencyLang } = useAgencyLanguage();
+  const { language: agencyLang } = useAgencyLanguage();
   const { isSupported, isSubscribed, isLoading: pushLoading, permission, subscribe, unsubscribe } = usePushNotifications();
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -107,10 +113,7 @@ const AgencyHome = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [agency, setAgency] = useState<{ agency_name: string; balance: number } | null>(null);
   const [accountingSummary, setAccountingSummary] = useState<AccountingSummary>({
-    totalRevenue: 0,
-    totalPaid: 0,
-    totalPassengerCash: 0,
-    balance: 0,
+    currencyBalances: [],
     monthlyReservations: 0,
     completedReservations: 0
   });
@@ -128,7 +131,7 @@ const AgencyHome = () => {
     // Fetch agency info
     const { data: agencyData } = await supabase
       .from('agencies')
-      .select('agency_name, balance, currency')
+      .select('agency_name, balance')
       .eq('id', agencyId)
       .single();
 
@@ -143,7 +146,7 @@ const AgencyHome = () => {
     // Get completed reservations with agency details and passenger cash
     const { data: completedRes } = await supabase
       .from('reservations')
-      .select('id, status, passenger_cash_amount, agency_reservation_details!inner(customer_price, company_amount, agency_price_currency)')
+      .select('id, status, passenger_cash_amount, passenger_cash_currency, agency_reservation_details!inner(customer_price, company_amount, agency_price_currency)')
       .eq('agency_id', agencyId)
       .eq('status', 'completed');
 
@@ -155,49 +158,57 @@ const AgencyHome = () => {
       .gte('pickup_date', monthStart)
       .lte('pickup_date', monthEnd);
 
-    // Get payments
+    // Get payments with currency
     const { data: payments } = await supabase
       .from('agency_payments')
-      .select('amount')
+      .select('amount, currency')
       .eq('agency_id', agencyId);
 
-    // Get agency currency from context or DB
-    const agencyCurrencyCode = agencyData?.currency || 'EUR';
+    // PARA BİRİMİ BAZLI HESAPLAMA
+    // Tamamlanan rezervasyonların para birimlerine göre grupla
+    const currencyData: Record<string, { companyAmount: number; passengerCash: number; paid: number }> = {};
 
-    const totalRevenue = completedRes?.reduce((sum, r) => {
+    // Her tamamlanan rezervasyon için para birimi bazlı toplam
+    completedRes?.forEach((r) => {
       const detail = r.agency_reservation_details as unknown as { customer_price: number; company_amount: number; agency_price_currency: string | null };
-      // Only count if currency matches agency's currency
-      if (detail?.agency_price_currency && detail.agency_price_currency !== agencyCurrencyCode) {
-        return sum;
+      const currency = detail?.agency_price_currency || 'TRY';
+      
+      if (!currencyData[currency]) {
+        currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
       }
-      return sum + (detail?.customer_price || 0);
-    }, 0) || 0;
-
-    // Calculate total company amount (agency debt)
-    const totalCompanyAmount = completedRes?.reduce((sum, r) => {
-      const detail = r.agency_reservation_details as unknown as { customer_price: number; company_amount: number; agency_price_currency: string | null };
-      // Only count if currency matches agency's currency
-      if (detail?.agency_price_currency && detail.agency_price_currency !== agencyCurrencyCode) {
-        return sum;
+      
+      currencyData[currency].companyAmount += detail?.company_amount || 0;
+      
+      // Passenger cash - aynı para birimi ile eşleşiyorsa düş
+      const passengerCashCurrency = r.passenger_cash_currency || 'TRY';
+      if (passengerCashCurrency === currency) {
+        currencyData[currency].passengerCash += r.passenger_cash_amount || 0;
       }
-      return sum + (detail?.company_amount || 0);
-    }, 0) || 0;
+    });
 
-    // Calculate total passenger cash collected
-    const totalPassengerCash = completedRes?.reduce((sum, r) => {
-      return sum + (r.passenger_cash_amount || 0);
-    }, 0) || 0;
+    // Ödemeleri para birimine göre ekle
+    payments?.forEach((p) => {
+      const currency = p.currency || 'EUR';
+      if (!currencyData[currency]) {
+        currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
+      }
+      currencyData[currency].paid += p.amount || 0;
+    });
 
-    const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-
-    // Net agency debt = company amount - passenger cash collected
-    const netAgencyDebt = totalCompanyAmount - totalPassengerCash;
+    // CurrencyBalance dizisi oluştur
+    const currencyBalances: CurrencyBalance[] = Object.entries(currencyData)
+      .filter(([_, data]) => data.companyAmount > 0 || data.paid > 0)
+      .map(([currency, data]) => ({
+        currency,
+        totalCompanyAmount: data.companyAmount,
+        totalPassengerCash: data.passengerCash,
+        totalPaid: data.paid,
+        netBalance: data.companyAmount - data.passengerCash - data.paid
+      }))
+      .sort((a, b) => b.netBalance - a.netBalance);
 
     setAccountingSummary({
-      totalRevenue,
-      totalPaid,
-      totalPassengerCash,
-      balance: netAgencyDebt - totalPaid,
+      currencyBalances,
       monthlyReservations: monthlyRes?.length || 0,
       completedReservations: completedRes?.length || 0
     });
@@ -460,11 +471,15 @@ const AgencyHome = () => {
         </div>
       </header>
 
-      {/* Balance Warning */}
-      {agency && agency.balance < 0 && (
+      {/* Balance Warning - show if any currency has positive balance (debt) */}
+      {accountingSummary.currencyBalances.some(cb => cb.netBalance > 0) && (
         <div className="bg-destructive/10 border-l-4 border-destructive p-4">
           <p className="text-destructive font-medium">
-            ⚠️ {t('insufficientBalance')} ({currencySymbol}{Math.abs(agency.balance).toFixed(2)})
+            ⚠️ {t('insufficientBalance')} 
+            {accountingSummary.currencyBalances
+              .filter(cb => cb.netBalance > 0)
+              .map(cb => ` ${getCurrencySymbol(cb.currency)}${cb.netBalance.toFixed(2)}`)
+              .join(', ')}
           </p>
         </div>
       )}
@@ -498,75 +513,105 @@ const AgencyHome = () => {
               </CardContent>
             </Card>
 
-            {/* Accounting Summary Card - Clickable */}
-            <Card 
-              className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
-              onClick={() => navigate('/agency/reports')}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-full bg-primary/10">
-                      <Wallet className="h-5 w-5 text-primary" />
+            {/* Para Birimi Bazlı Bakiye Kartları */}
+            {accountingSummary.currencyBalances.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-primary" />
+                  <h2 className="font-semibold">{t('accountingDetails')}</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {accountingSummary.currencyBalances.map((cb) => (
+                    <Card 
+                      key={cb.currency}
+                      className={cn(
+                        "cursor-pointer hover:shadow-md transition-shadow",
+                        cb.netBalance > 0 
+                          ? "bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-red-200 dark:border-red-800" 
+                          : cb.netBalance < 0 
+                            ? "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800"
+                            : "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
+                      )}
+                      onClick={() => navigate('/agency/reports')}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="outline" className="font-mono">
+                            {cb.currency}
+                          </Badge>
+                          <ChevronDown className="h-4 w-4 text-muted-foreground -rotate-90" />
+                        </div>
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-xs text-muted-foreground">{t('agencyDebt')}</span>
+                            <p className={cn(
+                              "text-2xl font-bold",
+                              cb.netBalance > 0 ? "text-destructive" : cb.netBalance < 0 ? "text-green-600" : ""
+                            )}>
+                              {getCurrencySymbol(cb.currency)}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="text-muted-foreground">{t('agencyExpense')}</span>
+                              <p className="font-medium">{getCurrencySymbol(cb.currency)}{cb.totalCompanyAmount.toLocaleString('tr-TR')}</p>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">{t('paid')}</span>
+                              <p className="font-medium text-blue-600">{getCurrencySymbol(cb.currency)}{cb.totalPaid.toLocaleString('tr-TR')}</p>
+                            </div>
+                          </div>
+                          {cb.totalPassengerCash > 0 && (
+                            <p className="text-xs text-muted-foreground">
+                              {t('passengerCash')}: -{getCurrencySymbol(cb.currency)}{cb.totalPassengerCash.toLocaleString('tr-TR')}
+                            </p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                {/* Completed Transfers Summary */}
+                <Card 
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedSections(prev => ({ ...prev, completed: true }));
+                    setTimeout(() => {
+                      document.getElementById('completed-section')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  }}
+                >
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-full bg-green-500/20">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{t('completed') || 'Completed'}</p>
+                        <p className="text-2xl font-bold text-green-600">
+                          {accountingSummary.completedReservations} <span className="text-sm font-normal">{t('transfer')}</span>
+                        </p>
+                      </div>
                     </div>
-                    <CardTitle className="text-lg">{t('accountingDetails')}</CardTitle>
-                  </div>
-                  <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
-                </div>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Agency Debt */}
-                  <div className="space-y-1">
-                    <span className="text-xs text-muted-foreground">{t('agencyDebt')}</span>
-                    <p className={cn(
-                      "text-xl font-bold",
-                      accountingSummary.balance > 0 ? "text-destructive" : accountingSummary.balance < 0 ? "text-green-600" : ""
-                    )}>
-                      {currencySymbol}{Math.abs(accountingSummary.balance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                    </p>
-                    {accountingSummary.totalPassengerCash > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        {t('passengerCash')}: -{currencySymbol}{accountingSummary.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                      </p>
-                    )}
-                  </div>
+                    <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
-                  {/* Agency Expense / Revenue */}
-                  <div className="space-y-1">
-                    <span className="text-xs text-muted-foreground">{t('agencyExpense')}</span>
-                    <p className="text-xl font-bold text-green-600">
-                      {currencySymbol}{accountingSummary.totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-
-                  {/* Paid */}
-                  <div className="space-y-1">
-                    <span className="text-xs text-muted-foreground">{t('paid')}</span>
-                    <p className="text-xl font-bold text-blue-600">
-                      {currencySymbol}{accountingSummary.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-
-                  {/* Completed - Clickable */}
-                  <div 
-                    className="space-y-1 cursor-pointer hover:bg-green-50 dark:hover:bg-green-950/30 rounded-lg p-2 -m-2 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedSections(prev => ({ ...prev, completed: true }));
-                      setTimeout(() => {
-                        document.getElementById('completed-section')?.scrollIntoView({ behavior: 'smooth' });
-                      }, 100);
-                    }}
-                  >
-                    <span className="text-xs text-muted-foreground">{t('completed') || 'Completed'}</span>
-                    <p className="text-xl font-bold text-green-600">
-                      {accountingSummary.completedReservations} <span className="text-sm font-normal">{t('transfer')}</span>
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* No completed reservations yet - show simple summary */}
+            {accountingSummary.currencyBalances.length === 0 && (
+              <Card 
+                className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
+                onClick={() => navigate('/agency/reports')}
+              >
+                <CardContent className="p-6 text-center">
+                  <Wallet className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-muted-foreground">{t('noCompletedReservations') || 'Henüz tamamlanmış rezervasyon yok'}</p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -2,8 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
-import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrencySymbol } from '@/lib/currency';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,17 +22,26 @@ interface Transaction {
   balance_after: number;
   reservation_id: string | null;
   created_at: string;
+  currency: string;
+}
+
+// Para birimi bazlı bakiye hesaplama
+interface CurrencyBalance {
+  currency: string;
+  totalCompanyAmount: number;
+  totalPassengerCash: number;
+  totalPaid: number;
+  netBalance: number;
 }
 
 const AgencyTransactionHistory = () => {
   const { agencyId } = useUserRole();
   const { t, locale } = useAgencyTranslations();
-  const { currencySymbol } = useAgencyLanguage();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentBalance, setCurrentBalance] = useState(0);
+  const [currencyBalances, setCurrencyBalances] = useState<CurrencyBalance[]>([]);
   
   // Filter states
   const [startDate, setStartDate] = useState('');
@@ -45,18 +54,60 @@ const AgencyTransactionHistory = () => {
     
     if (showRefresh) setRefreshing(true);
 
-    // Fetch agency balance
-    const { data: agencyData } = await supabase
-      .from('agencies')
-      .select('balance')
-      .eq('id', agencyId)
-      .single();
+    // Fetch completed reservations with agency details
+    const { data: completedRes } = await supabase
+      .from('reservations')
+      .select('id, passenger_cash_amount, passenger_cash_currency, agency_reservation_details!inner(company_amount, agency_price_currency)')
+      .eq('agency_id', agencyId)
+      .eq('status', 'completed');
 
-    if (agencyData) {
-      setCurrentBalance(agencyData.balance || 0);
-    }
+    // Fetch payments with currency
+    const { data: payments } = await supabase
+      .from('agency_payments')
+      .select('amount, currency')
+      .eq('agency_id', agencyId);
 
-    // Fetch transactions
+    // PARA BİRİMİ BAZLI HESAPLAMA
+    const currencyData: Record<string, { companyAmount: number; passengerCash: number; paid: number }> = {};
+
+    completedRes?.forEach((r) => {
+      const detail = r.agency_reservation_details as unknown as { company_amount: number; agency_price_currency: string | null };
+      const currency = detail?.agency_price_currency || 'TRY';
+      
+      if (!currencyData[currency]) {
+        currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
+      }
+      
+      currencyData[currency].companyAmount += detail?.company_amount || 0;
+      
+      const passengerCashCurrency = r.passenger_cash_currency || 'TRY';
+      if (passengerCashCurrency === currency) {
+        currencyData[currency].passengerCash += r.passenger_cash_amount || 0;
+      }
+    });
+
+    payments?.forEach((p) => {
+      const currency = p.currency || 'EUR';
+      if (!currencyData[currency]) {
+        currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
+      }
+      currencyData[currency].paid += p.amount || 0;
+    });
+
+    const balances: CurrencyBalance[] = Object.entries(currencyData)
+      .filter(([_, data]) => data.companyAmount > 0 || data.paid > 0)
+      .map(([currency, data]) => ({
+        currency,
+        totalCompanyAmount: data.companyAmount,
+        totalPassengerCash: data.passengerCash,
+        totalPaid: data.paid,
+        netBalance: data.companyAmount - data.passengerCash - data.paid
+      }))
+      .sort((a, b) => b.netBalance - a.netBalance);
+
+    setCurrencyBalances(balances);
+
+    // Fetch transactions with currency
     const { data, error } = await supabase
       .from('agency_transactions')
       .select('*')
@@ -248,26 +299,59 @@ const AgencyTransactionHistory = () => {
           </Card>
         )}
 
-        {/* Current Balance Card */}
-        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-          <CardContent className="p-6">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-2">{t('currentBalance') || 'Mevcut Bakiye'}</p>
-              <p className={cn(
-                "text-3xl font-bold",
-                currentBalance > 0 ? "text-destructive" : currentBalance < 0 ? "text-green-600" : ""
-              )}>
-                {currentBalance > 0 ? '+' : ''}{currencySymbol}{Math.abs(currentBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-              </p>
-              {currentBalance > 0 && (
-                <p className="text-sm text-destructive mt-1">{t('amountOwed') || 'Borçlu tutar'}</p>
-              )}
-              {currentBalance < 0 && (
-                <p className="text-sm text-green-600 mt-1">{t('creditBalance') || 'Alacak bakiyesi'}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Para Birimi Bazlı Bakiye Kartları */}
+        {currencyBalances.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {currencyBalances.map((cb) => (
+              <Card 
+                key={cb.currency}
+                className={cn(
+                  cb.netBalance > 0 
+                    ? "bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-red-200 dark:border-red-800" 
+                    : cb.netBalance < 0 
+                      ? "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800"
+                      : "bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20"
+                )}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline" className="font-mono text-sm">
+                      {cb.currency}
+                    </Badge>
+                  </div>
+                  <p className={cn(
+                    "text-2xl font-bold",
+                    cb.netBalance > 0 ? "text-destructive" : cb.netBalance < 0 ? "text-green-600" : ""
+                  )}>
+                    {getCurrencySymbol(cb.currency)}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                  </p>
+                  {cb.netBalance > 0 && (
+                    <p className="text-xs text-destructive mt-1">{t('amountOwed') || 'Borçlu tutar'}</p>
+                  )}
+                  {cb.netBalance < 0 && (
+                    <p className="text-xs text-green-600 mt-1">{t('creditBalance') || 'Alacak bakiyesi'}</p>
+                  )}
+                  <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-muted-foreground">
+                    <div>
+                      <span>Toplam: </span>
+                      <span className="font-medium">{getCurrencySymbol(cb.currency)}{cb.totalCompanyAmount.toLocaleString('tr-TR')}</span>
+                    </div>
+                    <div>
+                      <span>Ödenen: </span>
+                      <span className="font-medium text-blue-600">{getCurrencySymbol(cb.currency)}{cb.totalPaid.toLocaleString('tr-TR')}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardContent className="p-6 text-center">
+              <p className="text-muted-foreground">{t('noCompletedReservations') || 'Henüz tamamlanmış rezervasyon yok'}</p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Transactions List */}
         <Card>
@@ -317,7 +401,7 @@ const AgencyTransactionHistory = () => {
                         "font-bold text-lg",
                         transaction.amount > 0 ? "text-destructive" : "text-green-600"
                       )}>
-                        {transaction.amount > 0 ? '+' : ''}{currencySymbol}{transaction.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        {transaction.amount > 0 ? '+' : ''}{getCurrencySymbol(transaction.currency)}{transaction.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                     
@@ -330,7 +414,7 @@ const AgencyTransactionHistory = () => {
                         <Calendar className="h-3 w-3" />
                         <span>{format(new Date(transaction.created_at), 'dd MMM yyyy HH:mm', { locale })}</span>
                       </div>
-                      <span>{t('balanceAfter') || 'Bakiye'}: {currencySymbol}{transaction.balance_after.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                      <span>{t('balanceAfter') || 'Bakiye'}: {getCurrencySymbol(transaction.currency)}{transaction.balance_after.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
                     </div>
                     
                     {transaction.reservation_id && (
