@@ -117,10 +117,11 @@ const AgencyHome = () => {
     completedReservations: 0
   });
   const [expandedSections, setExpandedSections] = useState({
-    upcoming: true,
-    active: true,
+    upcoming: false,
+    active: false,
     pastIncomplete: false,
     completed: false,
+    accounting: false,
     notificationSettings: false,
     notificationHistory: false
   });
@@ -272,7 +273,7 @@ const AgencyHome = () => {
     await fetchData(true);
   };
 
-  const toggleSection = (section: 'upcoming' | 'active' | 'pastIncomplete' | 'completed' | 'notificationSettings' | 'notificationHistory') => {
+  const toggleSection = (section: 'upcoming' | 'active' | 'pastIncomplete' | 'completed' | 'accounting' | 'notificationSettings' | 'notificationHistory') => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -627,105 +628,155 @@ const AgencyHome = () => {
               activeFilterCount={activeFilterCount} 
             />
 
-            {/* Para Birimi Bazlı Bakiye Kartları */}
-            {accountingSummary.currencyBalances.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-5 w-5 text-primary" />
-                  <h2 className="font-semibold">{t('accountingDetails')}</h2>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {accountingSummary.currencyBalances.map((cb) => (
-                    <Card 
-                      key={cb.currency}
-                      className={cn(
-                        "cursor-pointer hover:shadow-md transition-shadow",
-                        cb.netBalance > 0 
-                          ? "bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-red-200 dark:border-red-800" 
-                          : cb.netBalance < 0 
-                            ? "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800"
-                            : "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
-                      )}
-                      onClick={() => navigate(`/agency/currency/${cb.currency}`)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="font-mono">
-                            {cb.currency}
-                          </Badge>
-                          <ChevronDown className="h-4 w-4 text-muted-foreground -rotate-90" />
-                        </div>
-                        <div className="space-y-2">
-                          <div>
-                            <span className="text-xs text-muted-foreground">{t('agencyDebt')}</span>
-                            <p className={cn(
-                              "text-2xl font-bold",
-                              cb.netBalance > 0 ? "text-destructive" : cb.netBalance < 0 ? "text-green-600" : ""
-                            )}>
-                              {getCurrencySymbol(cb.currency)}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                            </p>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div>
-                              <span className="text-muted-foreground">{t('agencyExpense')}</span>
-                              <p className="font-medium">{getCurrencySymbol(cb.currency)}{cb.totalCompanyAmount.toLocaleString('tr-TR')}</p>
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">{t('paid')}</span>
-                              <p className="font-medium text-blue-600">{getCurrencySymbol(cb.currency)}{cb.totalPaid.toLocaleString('tr-TR')}</p>
-                            </div>
-                          </div>
-                          {cb.totalPassengerCash > 0 && (
-                            <p className="text-xs text-muted-foreground">
-                              {t('passengerCash')}: -{getCurrencySymbol(cb.currency)}{cb.totalPassengerCash.toLocaleString('tr-TR')}
-                            </p>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-                {/* Completed Transfers Summary */}
-                <Card 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setExpandedSections(prev => ({ ...prev, completed: true }));
-                    setTimeout(() => {
-                      document.getElementById('completed-section')?.scrollIntoView({ behavior: 'smooth' });
-                    }, 100);
-                  }}
-                >
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-green-500/20">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{t('completed') || 'Completed'}</p>
-                        <p className="text-2xl font-bold text-green-600">
-                          {accountingSummary.completedReservations} <span className="text-sm font-normal">{t('transfer')}</span>
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* No completed reservations yet - show simple summary */}
-            {accountingSummary.currencyBalances.length === 0 && (
-              <Card 
-                className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
-                onClick={() => navigate('/agency/reports')}
+            {/* Muhasebe Detayları - Collapsible Card */}
+            <Card 
+              className={cn(
+                "cursor-pointer transition-all duration-200 hover:shadow-lg",
+                expandedSections.accounting 
+                  ? "ring-2 ring-amber-500/30 shadow-lg" 
+                  : "hover:border-amber-500/30"
+              )}
+            >
+              <CardContent 
+                className="p-4"
+                onClick={() => toggleSection('accounting')}
               >
-                <CardContent className="p-6 text-center">
-                  <Wallet className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-muted-foreground">{t('noCompletedReservations') || 'Henüz tamamlanmış rezervasyon yok'}</p>
-                </CardContent>
-              </Card>
-            )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-full bg-amber-500/10">
+                      <Wallet className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">{t('accountingDetails')}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {accountingSummary.currencyBalances.length > 0 
+                          ? `${accountingSummary.currencyBalances.length} ${t('currency') || 'para birimi'}`
+                          : t('noCompletedReservations') || 'Henüz tamamlanmış rezervasyon yok'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {accountingSummary.currencyBalances.length > 0 && (
+                      <Badge className="bg-amber-500/20 text-amber-700 border-amber-300">
+                        {accountingSummary.completedReservations} {t('transfer')}
+                      </Badge>
+                    )}
+                    <motion.div
+                      animate={{ rotate: expandedSections.accounting ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    </motion.div>
+                  </div>
+                </div>
+              </CardContent>
+              
+              {/* Expanded Content */}
+              <AnimatePresence>
+                {expandedSections.accounting && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-4 pb-4 space-y-3 border-t pt-4">
+                      {accountingSummary.currencyBalances.length > 0 ? (
+                        <>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {accountingSummary.currencyBalances.map((cb) => (
+                              <Card 
+                                key={cb.currency}
+                                className={cn(
+                                  "cursor-pointer hover:shadow-md transition-shadow",
+                                  cb.netBalance > 0 
+                                    ? "bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-red-200 dark:border-red-800" 
+                                    : cb.netBalance < 0 
+                                      ? "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800"
+                                      : "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
+                                )}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/agency/currency/${cb.currency}`);
+                                }}
+                              >
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <Badge variant="outline" className="font-mono">
+                                      {cb.currency}
+                                    </Badge>
+                                    <ChevronDown className="h-4 w-4 text-muted-foreground -rotate-90" />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <div>
+                                      <span className="text-xs text-muted-foreground">{t('agencyDebt')}</span>
+                                      <p className={cn(
+                                        "text-2xl font-bold",
+                                        cb.netBalance > 0 ? "text-destructive" : cb.netBalance < 0 ? "text-green-600" : ""
+                                      )}>
+                                        {getCurrencySymbol(cb.currency)}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                      </p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                      <div>
+                                        <span className="text-muted-foreground">{t('agencyExpense')}</span>
+                                        <p className="font-medium">{getCurrencySymbol(cb.currency)}{cb.totalCompanyAmount.toLocaleString('tr-TR')}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">{t('paid')}</span>
+                                        <p className="font-medium text-blue-600">{getCurrencySymbol(cb.currency)}{cb.totalPaid.toLocaleString('tr-TR')}</p>
+                                      </div>
+                                    </div>
+                                    {cb.totalPassengerCash > 0 && (
+                                      <p className="text-xs text-muted-foreground">
+                                        {t('passengerCash')}: -{getCurrencySymbol(cb.currency)}{cb.totalPassengerCash.toLocaleString('tr-TR')}
+                                      </p>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                          {/* Completed Transfers Summary */}
+                          <Card 
+                            className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedSections(prev => ({ ...prev, completed: true }));
+                              setTimeout(() => {
+                                document.getElementById('completed-section')?.scrollIntoView({ behavior: 'smooth' });
+                              }, 100);
+                            }}
+                          >
+                            <CardContent className="p-4 flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-full bg-green-500/20">
+                                  <CheckCircle className="h-5 w-5 text-green-600" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{t('completed') || 'Completed'}</p>
+                                  <p className="text-2xl font-bold text-green-600">
+                                    {accountingSummary.completedReservations} <span className="text-sm font-normal">{t('transfer')}</span>
+                                  </p>
+                                </div>
+                              </div>
+                              <ChevronDown className="h-5 w-5 text-muted-foreground -rotate-90" />
+                            </CardContent>
+                          </Card>
+                        </>
+                      ) : (
+                        <div className="text-center py-4">
+                          <Wallet className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                          <p className="text-muted-foreground">{t('noCompletedReservations') || 'Henüz tamamlanmış rezervasyon yok'}</p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
