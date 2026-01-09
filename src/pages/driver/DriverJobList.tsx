@@ -68,13 +68,15 @@ const DriverJobList = () => {
   const getStatusFilter = useCallback(() => {
     switch (jobType) {
       case 'pending':
-        return ['sent_to_driver', 'assigned'];
+        // Include 'confirmed' status - when admin edits and approves, status becomes 'confirmed'
+        // Driver should still see the job and be able to accept it again
+        return ['sent_to_driver', 'assigned', 'confirmed'];
       case 'active':
         return ['active'];
       case 'completed':
         return ['completed'];
       default:
-        return ['sent_to_driver', 'assigned'];
+        return ['sent_to_driver', 'assigned', 'confirmed'];
     }
   }, [jobType]);
 
