@@ -33,6 +33,37 @@ const TermsPage = () => {
       <div className="max-w-4xl mx-auto px-4 py-8 prose prose-sm max-w-none">
         <h1 className="text-3xl font-bold mb-6 text-foreground">Meet Transfer - Terms & Conditions</h1>
 
+        {/* Prominent Cancellation Policy Banner */}
+        <div className="not-prose mb-8 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-2 border-green-500 rounded-2xl p-6 shadow-lg">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-2xl">
+              ✓
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-green-700 dark:text-green-400 m-0">Free Cancellation Policy</h2>
+              <p className="text-green-600 dark:text-green-500 text-sm m-0">Flexible booking with peace of mind</p>
+            </div>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-4 mt-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-green-200 dark:border-green-800 text-center">
+              <div className="text-3xl mb-2">🆓</div>
+              <p className="font-bold text-green-700 dark:text-green-400 text-lg mb-1">FREE</p>
+              <p className="text-sm text-muted-foreground">Up to 24 hours before pickup</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-yellow-200 dark:border-yellow-800 text-center">
+              <div className="text-3xl mb-2">⚠️</div>
+              <p className="font-bold text-yellow-600 dark:text-yellow-400 text-lg mb-1">50% Charge</p>
+              <p className="text-sm text-muted-foreground">Within 24 hours of pickup</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-red-200 dark:border-red-800 text-center">
+              <div className="text-3xl mb-2">❌</div>
+              <p className="font-bold text-red-600 dark:text-red-400 text-lg mb-1">100% Charge</p>
+              <p className="text-sm text-muted-foreground">No-shows or within 2 hours</p>
+            </div>
+          </div>
+        </div>
+
         <h2>1. Booking & Confirmation</h2>
         <p>
           All bookings are subject to availability. Upon successful booking,
@@ -50,10 +81,13 @@ const TermsPage = () => {
         </p>
 
         <h2>3. Cancellation Policy</h2>
+        <p>
+          Our cancellation policy is designed to be fair and flexible:
+        </p>
         <ul>
-          <li>Free cancellation up to 24 hours before pickup</li>
-          <li>50% charge for cancellations within 24 hours</li>
-          <li>100% charge for no-shows or cancellations within 2 hours</li>
+          <li><strong className="text-green-600">Free cancellation</strong> up to 24 hours before pickup</li>
+          <li><strong className="text-yellow-600">50% charge</strong> for cancellations within 24 hours</li>
+          <li><strong className="text-red-600">100% charge</strong> for no-shows or cancellations within 2 hours</li>
         </ul>
 
         <h2>4. Waiting Time</h2>
