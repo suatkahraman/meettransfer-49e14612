@@ -775,85 +775,49 @@ const AgencyHome = () => {
               </div>
             ) : (
               <>
-            {/* Upcoming Section */}
+            {/* Upcoming Section - Card Layout */}
             {upcomingJobs.length > 0 && (
               <section>
-                <button 
-                  onClick={() => toggleSection('upcoming')}
-                  className="flex items-center justify-between w-full py-2 mb-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{t('upcomingTransfers')}</span>
-                    <Badge variant="secondary">{upcomingJobs.length}</Badge>
-                  </div>
-                  <ChevronDown className={cn(
-                    "h-5 w-5 text-muted-foreground transition-transform",
-                    expandedSections.upcoming && "rotate-180"
-                  )} />
-                </button>
-                <AnimatePresence>
-                  {expandedSections.upcoming && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="space-y-3 overflow-hidden"
-                    >
-                      {upcomingJobs.map((res) => (
-                        <SwipeableReservationCard 
-                          key={res.id} 
-                          reservation={res}
-                          statusColors={statusColors}
-                          statusLabels={statusLabels}
-                          locale={locale}
-                          onView={() => navigate(`/agency/reservation/${res.id}`)}
-                          onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
-                          onCancel={() => handleCancelReservation(res.id)}
-                        />
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className="flex items-center gap-2 py-2 mb-3">
+                  <span className="font-semibold">{t('upcomingTransfers')}</span>
+                  <Badge variant="secondary">{upcomingJobs.length}</Badge>
+                </div>
+                <div className="space-y-3">
+                  {upcomingJobs.map((res) => (
+                    <SwipeableReservationCard 
+                      key={res.id} 
+                      reservation={res}
+                      statusColors={statusColors}
+                      statusLabels={statusLabels}
+                      locale={locale}
+                      onView={() => navigate(`/agency/reservation/${res.id}`)}
+                      onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
+                      onCancel={() => handleCancelReservation(res.id)}
+                    />
+                  ))}
+                </div>
               </section>
             )}
 
-            {/* Active Section */}
+            {/* Active Section - Card Layout */}
             {activeJobs.length > 0 && (
               <section>
-                <button 
-                  onClick={() => toggleSection('active')}
-                  className="flex items-center justify-between w-full py-2 mb-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">Active Transfers</span>
-                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-700">{activeJobs.length}</Badge>
-                  </div>
-                  <ChevronDown className={cn(
-                    "h-5 w-5 text-muted-foreground transition-transform",
-                    expandedSections.active && "rotate-180"
-                  )} />
-                </button>
-                <AnimatePresence>
-                  {expandedSections.active && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="space-y-3 overflow-hidden"
-                    >
-                      {activeJobs.map((res) => (
-                        <SwipeableReservationCard 
-                          key={res.id} 
-                          reservation={res}
-                          statusColors={statusColors}
-                          statusLabels={statusLabels}
-                          locale={locale}
-                          onView={() => navigate(`/agency/reservation/${res.id}`)}
-                        />
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className="flex items-center gap-2 py-2 mb-3">
+                  <span className="font-semibold">{t('activeTransfers') || 'Active Transfers'}</span>
+                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-700">{activeJobs.length}</Badge>
+                </div>
+                <div className="space-y-3">
+                  {activeJobs.map((res) => (
+                    <SwipeableReservationCard 
+                      key={res.id} 
+                      reservation={res}
+                      statusColors={statusColors}
+                      statusLabels={statusLabels}
+                      locale={locale}
+                      onView={() => navigate(`/agency/reservation/${res.id}`)}
+                    />
+                  ))}
+                </div>
               </section>
             )}
 
