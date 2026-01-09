@@ -224,10 +224,12 @@ export const SwipeableReservationCard = ({
         >
           <Card 
             className={cn(
-              "cursor-pointer active:shadow-lg transition-shadow touch-manipulation",
+              "cursor-pointer transition-all duration-200 touch-manipulation",
+              "hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30 hover:-translate-y-0.5",
+              "active:scale-[0.98] active:shadow-md",
               isProcessing && "opacity-50 pointer-events-none",
-              swipeDirection === 'left' && "border-primary border-2",
-              swipeDirection === 'right' && !isSameDayReservation && "border-destructive border-2",
+              swipeDirection === 'left' && "border-primary border-2 shadow-lg shadow-primary/20",
+              swipeDirection === 'right' && !isSameDayReservation && "border-destructive border-2 shadow-lg shadow-destructive/20",
               swipeDirection === 'right' && isSameDayReservation && "border-muted-foreground border-2"
             )}
             onClick={onView}
