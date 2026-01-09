@@ -258,14 +258,20 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
       >
         <Card 
           className={cn(
-            "cursor-pointer active:shadow-lg transition-shadow border-l-4",
+            "cursor-pointer active:shadow-lg transition-shadow border-l-4 relative overflow-hidden",
             // Agency reservations get purple border, guest reservations get status color
             reservation.agency_id ? "border-purple-500" : config.bgColor.replace('bg-', 'border-'),
-            isProcessing && "opacity-50 pointer-events-none"
+            isProcessing && "opacity-50 pointer-events-none",
+            // Greyed out appearance for cancelled/inactive reservations
+            isCancelledOrInactive && "opacity-60 grayscale-[30%]"
           )}
           onClick={onClick}
         >
-          <CardContent className="p-4 space-y-3">
+          {/* Read-only overlay for cancelled reservations */}
+          {isCancelledOrInactive && reservation.status !== 'completed' && (
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-transparent pointer-events-none z-10" />
+          )}
+          <CardContent className={cn("p-4 space-y-3", isCancelledOrInactive && reservation.status !== 'completed' && "relative")}>
             {/* Header: Date, Time & Status */}
             <div className="flex justify-between items-start">
               <div className="space-y-1">
