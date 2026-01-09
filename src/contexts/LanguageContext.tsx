@@ -352,6 +352,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryService: "Luxury Chauffeur Service",
     flightTracking: "Flight Tracking",
     doorToDoor: "Door-to-Door Service",
+    freeCancellation: "Free Cancellation 24h Before",
     learnMore: "Learn More",
     whatsappOnly: "WhatsApp Only",
     
@@ -1440,6 +1441,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryService: "Luxus-Chauffeurservice",
     flightTracking: "Flugverfolgung",
     doorToDoor: "Tür-zu-Tür-Service",
+    freeCancellation: "Kostenlose Stornierung 24h vorher",
     learnMore: "Mehr erfahren",
     whatsappOnly: "Nur WhatsApp",
     
@@ -2454,6 +2456,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryService: "Service de Chauffeur de Luxe",
     flightTracking: "Suivi de vol",
     doorToDoor: "Service Porte-à-Porte",
+    freeCancellation: "Annulation gratuite 24h avant",
     learnMore: "En savoir plus",
     whatsappOnly: "WhatsApp uniquement",
     
@@ -3452,6 +3455,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryService: "Люкс трансфер",
     flightTracking: "Отслеживание рейса",
     doorToDoor: "От двери до двери",
+    freeCancellation: "Бесплатная отмена за 24ч",
     learnMore: "Узнать больше",
     whatsappOnly: "Только WhatsApp",
     
@@ -4393,6 +4397,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryService: "Servizio Autista di Lusso",
     flightTracking: "Tracciamento volo",
     doorToDoor: "Servizio Porta a Porta",
+    freeCancellation: "Cancellazione gratuita 24h prima",
     learnMore: "Scopri di più",
     whatsappOnly: "Solo WhatsApp",
     
@@ -5387,6 +5392,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryService: "Servicio de Chófer de Lujo",
     flightTracking: "Seguimiento de vuelo",
     doorToDoor: "Servicio Puerta a Puerta",
+    freeCancellation: "Cancelación gratuita 24h antes",
     learnMore: "Más información",
     whatsappOnly: "Solo WhatsApp",
     
@@ -6381,6 +6387,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryService: "خدمة السائق الفاخرة",
     flightTracking: "تتبع الرحلة",
     doorToDoor: "خدمة من الباب للباب",
+    freeCancellation: "إلغاء مجاني قبل 24 ساعة",
     learnMore: "اعرف المزيد",
     whatsappOnly: "واتساب فقط",
     
@@ -7322,6 +7329,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryService: "Lüks Şoför Hizmeti",
     flightTracking: "Uçuş Takibi",
     doorToDoor: "Kapıdan Kapıya Hizmet",
+    freeCancellation: "24 Saat Önce Ücretsiz İptal",
     learnMore: "Daha Fazla Bilgi",
     whatsappOnly: "Sadece WhatsApp",
     
@@ -8346,6 +8354,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryService: "Люкс трансфер",
     flightTracking: "Відстеження рейсу",
     doorToDoor: "Від дверей до дверей",
+    freeCancellation: "Безкоштовне скасування за 24г",
     learnMore: "Дізнатися більше",
     whatsappOnly: "Тільки WhatsApp",
     
@@ -9355,6 +9364,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryService: "高級シャトルサービス",
     flightTracking: "フライト追跡",
     doorToDoor: "ドアツードアサービス",
+    freeCancellation: "24時間前まで無料キャンセル",
     learnMore: "詳細を見る",
     whatsappOnly: "WhatsAppのみ",
     
