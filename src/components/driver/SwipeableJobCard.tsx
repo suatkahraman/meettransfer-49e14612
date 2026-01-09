@@ -258,15 +258,22 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
       >
         <Card 
           className={cn(
-            "cursor-pointer active:shadow-lg transition-shadow border-l-4 relative overflow-hidden",
-            // Agency reservations get purple border, guest reservations get status color
-            reservation.agency_id ? "border-purple-500" : config.bgColor.replace('bg-', 'border-'),
+            "cursor-pointer active:shadow-lg transition-all duration-300 border-l-4 relative overflow-hidden",
+            // Updated reservation awaiting re-confirmation - special amber glow
+            reservation.status === 'confirmed' && reservation.driver_confirmed === false 
+              ? "border-amber-500 ring-2 ring-amber-400/50 shadow-lg shadow-amber-500/20 bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-950/30 dark:to-transparent" 
+              // Agency reservations get purple border, guest reservations get status color
+              : reservation.agency_id ? "border-purple-500" : config.bgColor.replace('bg-', 'border-'),
             isProcessing && "opacity-50 pointer-events-none",
             // Greyed out appearance for cancelled/inactive reservations
             isCancelledOrInactive && "opacity-60 grayscale-[30%]"
           )}
           onClick={onClick}
         >
+          {/* Glow overlay for updated reservations */}
+          {reservation.status === 'confirmed' && reservation.driver_confirmed === false && (
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent pointer-events-none z-0 animate-pulse" />
+          )}
           {/* Read-only overlay for cancelled reservations */}
           {isCancelledOrInactive && reservation.status !== 'completed' && (
             <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-transparent pointer-events-none z-10" />
