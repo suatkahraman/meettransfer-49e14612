@@ -21,6 +21,7 @@ interface Agency {
   agency_name: string;
   comments: string | null;
   balance: number | null;
+  currency: string;
 }
 
 interface Driver {
@@ -129,7 +130,7 @@ const AdminAgencyAccounting = () => {
   useEffect(() => {
     const fetchBaseData = async () => {
       const [agenciesRes, driversRes] = await Promise.all([
-        supabase.from('agencies').select('*').order('agency_name'),
+        supabase.from('agencies').select('id, agency_name, comments, balance, currency').order('agency_name'),
         supabase.from('drivers').select('id, name'),
       ]);
       setAllAgencies(agenciesRes.data || []);
@@ -149,6 +150,13 @@ const AdminAgencyAccounting = () => {
   // State for carryover balance from previous months - now currency-based
   const [carryoverBalances, setCarryoverBalances] = useState<Record<string, number>>({});
   const [carryoverPayments, setCarryoverPayments] = useState<Record<string, number>>({});
+  
+  // TRY conversion states
+  const [tryConvertedBalances, setTryConvertedBalances] = useState<Record<string, { amount: number; rate: number }>>({});
+  const [loadingConversion, setLoadingConversion] = useState(false);
+
+  // Get agency's default currency
+  const agencyCurrency = agency?.currency || 'EUR';
 
   // Fetch reservations, agency details, and payments
   const fetchData = async () => {
@@ -320,6 +328,56 @@ const AdminAgencyAccounting = () => {
     };
   }, [agencyId, currentMonth, selectedStatus]);
 
+  // Fetch exchange rates and convert foreign currency balances to TRY
+  useEffect(() => {
+    const convertToTRY = async () => {
+      const foreignCurrencies = Object.entries(carryoverBalances)
+        .filter(([currency, _]) => currency !== 'TRY')
+        .concat(
+          currencyBalances
+            .filter(cb => cb.currency !== 'TRY' && cb.netDebt !== 0)
+            .map(cb => [cb.currency, cb.netDebt] as [string, number])
+        );
+
+      if (foreignCurrencies.length === 0) {
+        setTryConvertedBalances({});
+        return;
+      }
+
+      setLoadingConversion(true);
+      const conversions: Record<string, { amount: number; rate: number }> = {};
+
+      for (const [currency, amount] of foreignCurrencies) {
+        if (amount === 0) continue;
+        try {
+          const response = await fetch(
+            `https://api.frankfurter.app/latest?from=${currency}&to=TRY`,
+            { signal: AbortSignal.timeout(3000) }
+          );
+          if (response.ok) {
+            const data = await response.json();
+            const rate = data.rates?.TRY;
+            if (rate) {
+              conversions[currency] = { amount: Math.round(amount * rate), rate };
+            }
+          }
+        } catch (e) {
+          // Use fallback rates
+          const fallbackRates: Record<string, number> = {
+            'EUR': 37.5, 'USD': 34.5, 'GBP': 44.1, 'AED': 9.4, 'AUD': 22.5
+          };
+          const rate = fallbackRates[currency] || 1;
+          conversions[currency] = { amount: Math.round(amount * rate), rate };
+        }
+      }
+
+      setTryConvertedBalances(conversions);
+      setLoadingConversion(false);
+    };
+
+    convertToTRY();
+  }, [carryoverBalances, reservations.length]);
+
   const getDriverName = (driverId: string | null) => {
     if (!driverId) return 'Atanmadı';
     const driver = drivers.find(d => d.id === driverId);
@@ -335,14 +393,14 @@ const AdminAgencyAccounting = () => {
 
   const getAgencyPriceCurrency = (reservationId: string) => {
     const detail = agencyDetails.find(d => d.reservation_id === reservationId);
-    return detail?.agency_price_currency || 'TRY';
+    return detail?.agency_price_currency || agencyCurrency;
   };
 
   // HESAPLAMA: Tüm hesaplamalar SADECE agency_price (customer_price) üzerinden yapılmalı
   // Hiçbir eski hesaplama mantığı veya eski alan kullanılmamalı
   const totalReservations = reservations.length;
   
-  // Calculate currency-wise totals
+  // Calculate currency-wise totals - grouped by agency's default currency and other currencies
   const currencyTotals: Record<string, { agencyPrice: number; passengerCash: number }> = {};
   reservations.forEach(r => {
     const currency = getAgencyPriceCurrency(r.id);
@@ -368,6 +426,10 @@ const AdminAgencyAccounting = () => {
     passengerCash: totals.passengerCash,
     netDebt: totals.agencyPrice - totals.passengerCash,
   }));
+
+  // Get balance for agency's default currency
+  const agencyCurrencyBalance = currencyBalances.find(cb => cb.currency === agencyCurrency);
+  const agencyCurrencyNetDebt = agencyCurrencyBalance?.netDebt || 0;
   
   // Legacy totals for backward compatibility
   // Toplam Acenta Fiyatı = Tüm rezervasyonların customer_price toplamı (TEK KAYNAK)
@@ -375,9 +437,16 @@ const AdminAgencyAccounting = () => {
   // Toplam Yolcu Nakit = Yolcudan alınacak nakit tutarı (acenta borcundan düşülür)
   const totalPassengerCash = reservations.reduce((sum, r) => sum + (r.passenger_cash_amount || 0), 0);
   
-  // Current month payments only
+  // Current month payments only - grouped by currency
   const monthStart = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
   const monthEnd = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
+  
+  // Payments for agency's currency
+  const agencyCurrencyPayments = payments
+    .filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd && (p.currency || 'TRY') === agencyCurrency)
+    .reduce((sum, p) => sum + p.amount, 0);
+  
+  // All payments this month
   const currentMonthPayments = payments
     .filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd)
     .reduce((sum, p) => sum + p.amount, 0);
@@ -388,14 +457,41 @@ const AdminAgencyAccounting = () => {
   // Net Acenta Borcu bu ay = Toplam Acenta Fiyatı - Yolcu Nakit
   const currentMonthDebt = totalAgencyPrice - totalPassengerCash;
   
-  // TRY cinsinden toplam bakiye hesapla (sadece TRY için)
-  const tryCarryover = carryoverBalances['TRY'] || 0;
-  const tryCurrentMonthPayments = payments
-    .filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd && (p.currency || 'TRY') === 'TRY')
-    .reduce((sum, p) => sum + p.amount, 0);
+  // Acente para birimi bakiyesi
+  const agencyCurrencyCarryover = carryoverBalances[agencyCurrency] || 0;
+  const agencyCurrencyTotalBalance = agencyCurrencyCarryover + agencyCurrencyNetDebt - agencyCurrencyPayments;
   
-  // TRY bakiye (sadece TRY para birimli işlemler için)
-  const tryBalance = tryCarryover + currentMonthDebt - tryCurrentMonthPayments;
+  // Calculate total TRY equivalent (for summary)
+  const calculateTRYEquivalent = () => {
+    let totalTRY = 0;
+    
+    // Add TRY balances directly
+    const tryCarryover = carryoverBalances['TRY'] || 0;
+    const tryCurrentMonth = currencyBalances.find(cb => cb.currency === 'TRY')?.netDebt || 0;
+    const tryPayments = payments
+      .filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd && (p.currency || 'TRY') === 'TRY')
+      .reduce((sum, p) => sum + p.amount, 0);
+    totalTRY += tryCarryover + tryCurrentMonth - tryPayments;
+    
+    // Add converted foreign currency balances
+    Object.entries(tryConvertedBalances).forEach(([currency, data]) => {
+      if (currency !== 'TRY') {
+        const currencyCarryover = carryoverBalances[currency] || 0;
+        const currencyCurrentMonth = currencyBalances.find(cb => cb.currency === currency)?.netDebt || 0;
+        const currencyPayments = payments
+          .filter(p => p.payment_date >= monthStart && p.payment_date <= monthEnd && (p.currency || 'TRY') === currency)
+          .reduce((sum, p) => sum + p.amount, 0);
+        const currencyBalance = currencyCarryover + currencyCurrentMonth - currencyPayments;
+        if (data.rate) {
+          totalTRY += currencyBalance * data.rate;
+        }
+      }
+    });
+    
+    return Math.round(totalTRY);
+  };
+  
+  const totalTRYEquivalent = calculateTRYEquivalent();
 
   const handleAgencyChange = (newAgencyId: string) => {
     navigate(`/admin/agency-accounting/${newAgencyId}`);
@@ -735,11 +831,11 @@ const AdminAgencyAccounting = () => {
                       </Card>
                     )}
 
-                    {/* Current Balance Card - TRY için */}
+                    {/* Current Balance Card - Acenta Para Birimi */}
                     <Card className={`relative overflow-hidden ${
-                      tryBalance > 0 
+                      agencyCurrencyTotalBalance > 0 
                         ? 'bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900 border-amber-400 dark:border-amber-600 border-2' 
-                        : tryBalance < 0 
+                        : agencyCurrencyTotalBalance < 0 
                           ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-400 dark:border-green-600 border-2' 
                           : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800'
                     }`}>
@@ -748,24 +844,56 @@ const AdminAgencyAccounting = () => {
                       </div>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium flex items-center gap-2">
-                          <div className={`p-2 rounded-full ${tryBalance > 0 ? 'bg-amber-500/20' : tryBalance < 0 ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
-                            <Banknote className={`h-4 w-4 ${tryBalance > 0 ? 'text-amber-600' : tryBalance < 0 ? 'text-green-600' : 'text-gray-600'}`} />
+                          <div className={`p-2 rounded-full ${agencyCurrencyTotalBalance > 0 ? 'bg-amber-500/20' : agencyCurrencyTotalBalance < 0 ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
+                            <Banknote className={`h-4 w-4 ${agencyCurrencyTotalBalance > 0 ? 'text-amber-600' : agencyCurrencyTotalBalance < 0 ? 'text-green-600' : 'text-gray-600'}`} />
                           </div>
-                          Güncel Bakiye (TRY)
+                          Güncel Bakiye ({agencyCurrency})
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className={`text-3xl font-bold ${tryBalance > 0 ? 'text-amber-700 dark:text-amber-400' : tryBalance < 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-400'}`}>
-                          ₺{Math.abs(tryBalance).toFixed(2)}
+                        <div className={`text-3xl font-bold ${agencyCurrencyTotalBalance > 0 ? 'text-amber-700 dark:text-amber-400' : agencyCurrencyTotalBalance < 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-400'}`}>
+                          {getCurrencySymbol(agencyCurrency)}{Math.abs(agencyCurrencyTotalBalance).toFixed(2)}
                         </div>
                         <p className="text-xs mt-2 flex items-center gap-1">
-                          <span className={`inline-block w-2 h-2 rounded-full ${tryBalance > 0 ? 'bg-amber-500 animate-pulse' : tryBalance < 0 ? 'bg-green-500' : 'bg-gray-400'}`}></span>
-                          <span className={`font-medium ${tryBalance > 0 ? 'text-amber-600 dark:text-amber-400' : tryBalance < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-600'}`}>
-                            {tryBalance > 0 ? 'Acenta borçlu' : tryBalance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
+                          <span className={`inline-block w-2 h-2 rounded-full ${agencyCurrencyTotalBalance > 0 ? 'bg-amber-500 animate-pulse' : agencyCurrencyTotalBalance < 0 ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                          <span className={`font-medium ${agencyCurrencyTotalBalance > 0 ? 'text-amber-600 dark:text-amber-400' : agencyCurrencyTotalBalance < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-600'}`}>
+                            {agencyCurrencyTotalBalance > 0 ? 'Acenta borçlu' : agencyCurrencyTotalBalance < 0 ? 'Fazla ödendi' : 'Hesaplaşıldı'}
                           </span>
                         </p>
                       </CardContent>
                     </Card>
+
+                    {/* TRY Equivalent Summary Card - Only show for non-TRY agencies */}
+                    {agencyCurrency !== 'TRY' && (
+                      <Card className={`relative overflow-hidden ${
+                        totalTRYEquivalent > 0 
+                          ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-300 dark:border-blue-700' 
+                          : totalTRYEquivalent < 0 
+                            ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-300 dark:border-green-700' 
+                            : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800'
+                      }`}>
+                        <div className="absolute top-0 right-0 p-3 opacity-10">
+                          <TrendingUp className="h-16 w-16" />
+                        </div>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium flex items-center gap-2">
+                            <div className={`p-2 rounded-full ${totalTRYEquivalent > 0 ? 'bg-blue-500/20' : totalTRYEquivalent < 0 ? 'bg-green-500/20' : 'bg-gray-500/20'}`}>
+                              <TrendingUp className={`h-4 w-4 ${totalTRYEquivalent > 0 ? 'text-blue-600' : totalTRYEquivalent < 0 ? 'text-green-600' : 'text-gray-600'}`} />
+                            </div>
+                            TRY Karşılığı
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className={`text-3xl font-bold ${totalTRYEquivalent > 0 ? 'text-blue-700 dark:text-blue-400' : totalTRYEquivalent < 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-400'}`}>
+                            {loadingConversion ? '...' : `₺${Math.abs(totalTRYEquivalent).toFixed(0)}`}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                            <span className={`inline-block w-2 h-2 rounded-full ${totalTRYEquivalent > 0 ? 'bg-blue-500' : totalTRYEquivalent < 0 ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                            Otomatik kur çevrimi
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                   
                   {/* Multi-Currency Balances */}

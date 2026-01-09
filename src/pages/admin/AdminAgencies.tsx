@@ -123,24 +123,35 @@ const AdminAgencies = () => {
           });
         }
 
-        // Get total payments received for this agency (TODO: add currency to payments table for full support)
+        // Get total payments received for this agency - grouped by currency
         const { data: payments } = await supabase
           .from('agency_payments')
-          .select('amount')
+          .select('amount, currency')
           .eq('agency_id', agency.id);
+
+        // Group payments by currency
+        const paymentsByCurrency: Record<string, number> = {};
+        payments?.forEach(p => {
+          const currency = p.currency || 'TRY';
+          if (!paymentsByCurrency[currency]) {
+            paymentsByCurrency[currency] = 0;
+          }
+          paymentsByCurrency[currency] += parseFloat(String(p.amount)) || 0;
+        });
 
         const totalPayments = payments?.reduce((sum, p) => sum + (parseFloat(String(p.amount)) || 0), 0) || 0;
 
-        // Calculate currency balances
+        // Calculate currency balances with payments deducted
         const currencyBalances: CurrencyBalance[] = Object.entries(currencyTotals).map(([currency, totals]) => {
           const netDebt = totals.agencyPrice - totals.passengerCash;
+          const currencyPayments = paymentsByCurrency[currency] || 0;
           return {
             currency,
             totalAgencyPrice: totals.agencyPrice,
             totalPassengerCash: totals.passengerCash,
             netAgencyDebt: netDebt,
-            totalPayments: 0, // Payments will be shown separately for now
-            calculatedBalance: netDebt,
+            totalPayments: currencyPayments,
+            calculatedBalance: netDebt - currencyPayments,
           };
         });
 
@@ -568,10 +579,16 @@ const AdminAgencies = () => {
                                   <span className="font-medium text-orange-600">-{symbol}{cb.totalPassengerCash.toFixed(2)}</span>
                                 </div>
                               )}
+                              {cb.totalPayments > 0 && (
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm text-muted-foreground">Alınan Ödeme</span>
+                                  <span className="font-medium text-green-600">-{symbol}{cb.totalPayments.toFixed(2)}</span>
+                                </div>
+                              )}
                               <div className="flex items-center justify-between border-t pt-2">
-                                <span className="text-sm font-medium">Net Borç</span>
-                                <span className={`font-bold ${cb.netAgencyDebt > 0 ? 'text-primary' : cb.netAgencyDebt < 0 ? 'text-green-600' : ''}`}>
-                                  {symbol}{cb.netAgencyDebt.toFixed(2)}
+                                <span className="text-sm font-medium">Bakiye</span>
+                                <span className={`font-bold ${cb.calculatedBalance > 0 ? 'text-primary' : cb.calculatedBalance < 0 ? 'text-green-600' : ''}`}>
+                                  {symbol}{cb.calculatedBalance.toFixed(2)}
                                 </span>
                               </div>
                             </div>
@@ -580,12 +597,12 @@ const AdminAgencies = () => {
                     </div>
                   )}
 
-                  {/* Total Summary with Payments */}
-                  {agency.totalPayments > 0 && (
+                  {/* Total Payments Summary - shown only if there are payments not yet grouped by currency */}
+                  {agency.totalPayments > 0 && agency.currencyBalances?.every(cb => cb.totalPayments === 0) && (
                     <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Toplam Alınan Ödemeler</span>
-                        <span className="font-medium text-green-600">₺{agency.totalPayments.toFixed(2)}</span>
+                        <span className="text-sm text-muted-foreground">Toplam Alınan Ödemeler (tüm para birimleri)</span>
+                        <span className="font-medium text-green-600">{getCurrencySymbol(agency.currency)}{agency.totalPayments.toFixed(2)}</span>
                       </div>
                     </div>
                   )}
