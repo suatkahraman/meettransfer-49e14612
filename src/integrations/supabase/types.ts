@@ -681,6 +681,42 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempts: {
+        Row: {
+          attempted_at: string
+          email: string
+          failure_reason: string | null
+          id: string
+          ip_address: string | null
+          role: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attempted_at?: string
+          email: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          role?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attempted_at?: string
+          email?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          role?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       monthly_budgets: {
         Row: {
           amount: number
@@ -1491,6 +1527,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_login_rate_limit: {
+        Args: { p_email: string; p_ip_address?: string }
+        Returns: Json
+      }
       generate_reservation_code: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -1498,6 +1538,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_login_attempt: {
+        Args: {
+          p_email: string
+          p_failure_reason?: string
+          p_ip_address?: string
+          p_role?: string
+          p_success: boolean
+          p_user_agent?: string
+          p_user_id?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
