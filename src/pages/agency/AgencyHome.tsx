@@ -311,6 +311,24 @@ const AgencyHome = () => {
     });
   }, [reservations, filters]);
 
+  // Cancel reservation handler
+  const handleCancelReservation = useCallback(async (reservationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'cancelled_by_agency' })
+        .eq('id', reservationId);
+
+      if (error) throw error;
+
+      toast.success(t('reservationCancelled') || 'Rezervasyon iptal edildi');
+      fetchData(); // Refresh data
+    } catch (error) {
+      console.error('Cancel error:', error);
+      toast.error(t('cancelError') || 'İptal işlemi başarısız');
+    }
+  }, [fetchData, t]);
+
   const now = new Date();
   const startOfToday = new Date(now);
   startOfToday.setHours(0, 0, 0, 0);
@@ -759,10 +777,7 @@ const AgencyHome = () => {
                           locale={locale}
                           onView={() => navigate(`/agency/reservation/${res.id}`)}
                           onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
-                          onCancel={() => {
-                            toast.error(t('confirmCancelFromDetail') || 'İptal için detay sayfasına gidin');
-                            navigate(`/agency/reservation/${res.id}`);
-                          }}
+                          onCancel={() => handleCancelReservation(res.id)}
                         />
                       ))}
                     </motion.div>
@@ -828,10 +843,7 @@ const AgencyHome = () => {
                       locale={locale}
                       onView={() => navigate(`/agency/reservation/${res.id}`)}
                       onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
-                      onCancel={() => {
-                        toast.error(t('confirmCancelFromDetail') || 'İptal için detay sayfasına gidin');
-                        navigate(`/agency/reservation/${res.id}`);
-                      }}
+                      onCancel={() => handleCancelReservation(res.id)}
                     />
                   ))}
                 </div>
