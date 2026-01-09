@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy, ChevronDown, MessageSquare, AlertTriangle, Briefcase, Baby } from 'lucide-react';
+import { ArrowLeft, Save, Send, DollarSign, UserCheck, X, UserPlus, Building2, CheckCircle, Loader2, Link, CreditCard, Banknote, Mail, Car, User, Copy, ChevronDown, MessageSquare, AlertTriangle, Briefcase, Baby, RefreshCw, Percent } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -159,6 +159,10 @@ const AdminEditReservation = () => {
     // Luggage and baby seat
     luggage_count: 0,
     baby_seat_count: 0,
+    // Return transfer info
+    is_return_transfer: false,
+    original_reservation_id: null as string | null,
+    promo_code: null as string | null,
   });
 
   // Critical field detection for price-affecting changes
@@ -354,6 +358,10 @@ const AdminEditReservation = () => {
         // Luggage and baby seat
         luggage_count: (r as any).luggage_count || 0,
         baby_seat_count: (r as any).baby_seat_count || 0,
+        // Return transfer info
+        is_return_transfer: r.is_return_transfer || false,
+        original_reservation_id: r.original_reservation_id || null,
+        promo_code: r.promo_code || null,
       };
       
       setOriginalData(initialData);
@@ -2045,6 +2053,57 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                   </p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Return Transfer Discount Card */}
+        {formData.is_return_transfer && formData.promo_code && (
+          <Card className="border-green-300 bg-green-50 dark:bg-green-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                <RefreshCw className="h-5 w-5" />
+                Dönüş Transferi - İndirimli
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Dönüş Transferi
+                </Badge>
+                <Badge className="bg-emerald-200 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                  <Percent className="h-3 w-3 mr-1" />
+                  {formData.promo_code} - %30 İndirim
+                </Badge>
+              </div>
+              
+              {formData.price && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Normal Fiyat:</span>
+                    <span className="line-through text-muted-foreground">
+                      {getCurrencySymbol(formData.price_currency)}{(parseFloat(formData.price) / 0.7).toFixed(0)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">İndirim (%30):</span>
+                    <span className="text-green-600 font-medium">
+                      -{getCurrencySymbol(formData.price_currency)}{((parseFloat(formData.price) / 0.7) - parseFloat(formData.price)).toFixed(0)}
+                    </span>
+                  </div>
+                  <div className="border-t pt-2 flex items-center justify-between">
+                    <span className="font-medium">İndirimli Fiyat:</span>
+                    <span className="text-lg font-bold text-green-600">
+                      {getCurrencySymbol(formData.price_currency)}{formData.price}
+                    </span>
+                  </div>
+                </div>
+              )}
+              
+              <p className="text-xs text-green-600 dark:text-green-400">
+                Bu rezervasyon dönüş transferi olduğu için promo kod indirimi uygulanmıştır.
+              </p>
             </CardContent>
           </Card>
         )}
