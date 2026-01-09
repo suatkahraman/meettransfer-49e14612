@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Star, TrendingUp, Wallet, CheckCircle, Calendar, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { tr } from 'date-fns/locale';
 
 interface DriverStats {
   name: string;
@@ -142,7 +143,7 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
             <div>
               <h3 className="font-bold text-lg">{t('welcome') || 'Hoş geldin'}, {stats.name.split(' ')[0]}!</h3>
               <p className="text-sm text-muted-foreground">
-                {format(new Date(), 'EEEE, d MMMM')}
+                {format(new Date(), 'EEEE, d MMMM', { locale: tr })}
               </p>
             </div>
             
