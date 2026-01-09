@@ -49,6 +49,7 @@ interface Reservation {
   price_currency: string | null;
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
+  luggage_count: number | null;
   drivers?: Driver | null;
 }
 
@@ -131,7 +132,7 @@ const AgencyReservationDetail = () => {
           pickup_place_name, dropoff_place_name,
           pickup_date, pickup_time, flight_number, vehicle_type, status,
           passenger_names, driver_id, price, price_currency,
-          passenger_cash_amount, passenger_cash_currency,
+          passenger_cash_amount, passenger_cash_currency, luggage_count,
           drivers:driver_id (id, name, plate_number, vehicle_model, vehicle_color)
         `)
         .eq('id', id)
@@ -502,6 +503,7 @@ const AgencyReservationDetail = () => {
       dropoffFormatted,
       reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
       `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
+      reservation.luggage_count ? `Luggage: ${reservation.luggage_count}` : null,
       '',
       reservation.passenger_cash_amount ? `Passenger Cash: ${getCurrencySymbol(reservation.passenger_cash_currency)}${reservation.passenger_cash_amount}` : null,
       '',
