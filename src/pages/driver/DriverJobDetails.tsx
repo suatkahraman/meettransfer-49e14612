@@ -500,7 +500,7 @@ ${dropoffFormatted}
 
 ${reservation.flight_number ? `${t('flightNumber')}: ${reservation.flight_number}\n` : ''}
 ${t('vehicle')}: ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}
-${reservation.passenger_cash_amount ? `${t('cashToCollect')}: ${getCurrencySymbol(reservation.passenger_cash_currency)}${reservation.passenger_cash_amount}\n` : ''}${t('cashCollectedLabel')}: ${reservation.driver_cash_amount ? `${getCurrencySymbol('TRY')}${reservation.driver_cash_amount}` : '—'}
+${reservation.luggage_count ? `${t('luggageCount')}: ${reservation.luggage_count}\n` : ''}${reservation.passenger_cash_amount ? `${t('cashToCollect')}: ${getCurrencySymbol(reservation.passenger_cash_currency)}${reservation.passenger_cash_amount}\n` : ''}${t('cashCollectedLabel')}: ${reservation.driver_cash_amount ? `${getCurrencySymbol('TRY')}${reservation.driver_cash_amount}` : '—'}
 
 ${t('phone')}: ${reservation.customer_phone}
 ${adminNotes ? `${t('adminNotes')}: ${adminNotes}\n` : ''}${t('notes')}: ${reservation.driver_notes || '—'}
