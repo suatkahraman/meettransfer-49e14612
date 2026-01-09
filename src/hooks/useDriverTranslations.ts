@@ -208,6 +208,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     // Luggage & Baby Seat
     luggage: 'Bavul',
     babySeat: 'Bebek Koltuğu',
+    
+    // Stats Card
+    welcome: 'Hoş geldin',
+    reviews: 'değerlendirme',
+    thisMonth: 'Bu Ay',
+    nextJob: 'Sonraki Transfer',
+    companyOwesYou: 'Şirket size borçlu',
+    youOweCompany: 'Şirkete borcunuz',
+    searchByCode: 'Kod ile Ara',
+    region: 'Bölge',
+    selectRegion: 'Bölge seçin',
+    vehicleInfo: 'Araç Bilgileri',
   },
   EN: {
     driverPanel: 'Driver Panel',
@@ -382,6 +394,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     // Luggage & Baby Seat
     luggage: 'Luggage',
     babySeat: 'Baby Seat',
+    
+    // Stats Card
+    welcome: 'Welcome',
+    reviews: 'reviews',
+    thisMonth: 'This Month',
+    nextJob: 'Next Transfer',
+    companyOwesYou: 'Company owes you',
+    youOweCompany: 'You owe company',
+    searchByCode: 'Search by Code',
+    region: 'Region',
+    selectRegion: 'Select region',
+    vehicleInfo: 'Vehicle Info',
   },
   DE: {
     driverPanel: 'Fahrer-Panel',
@@ -556,6 +580,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     // Luggage & Baby Seat
     luggage: 'Gepäck',
     babySeat: 'Kindersitz',
+    
+    // Stats Card
+    welcome: 'Willkommen',
+    reviews: 'Bewertungen',
+    thisMonth: 'Diesen Monat',
+    nextJob: 'Nächster Transfer',
+    companyOwesYou: 'Firma schuldet Ihnen',
+    youOweCompany: 'Sie schulden der Firma',
+    searchByCode: 'Nach Code suchen',
+    region: 'Region',
+    selectRegion: 'Region auswählen',
+    vehicleInfo: 'Fahrzeuginfo',
   },
   FR: {
     driverPanel: 'Panneau Chauffeur',
@@ -730,6 +766,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     // Luggage & Baby Seat
     luggage: 'Bagages',
     babySeat: 'Siège Bébé',
+    
+    // Stats Card
+    welcome: 'Bienvenue',
+    reviews: 'avis',
+    thisMonth: 'Ce Mois',
+    nextJob: 'Prochain Transfert',
+    companyOwesYou: 'L\'entreprise vous doit',
+    youOweCompany: 'Vous devez à l\'entreprise',
+    searchByCode: 'Rechercher par code',
+    region: 'Région',
+    selectRegion: 'Sélectionner la région',
+    vehicleInfo: 'Info Véhicule',
   },
   RU: {
     driverPanel: 'Панель Водителя',
@@ -904,6 +952,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     // Luggage & Baby Seat
     luggage: 'Багаж',
     babySeat: 'Детское Кресло',
+    
+    // Stats Card
+    welcome: 'Добро пожаловать',
+    reviews: 'отзывов',
+    thisMonth: 'Этот месяц',
+    nextJob: 'Следующий трансфер',
+    companyOwesYou: 'Компания вам должна',
+    youOweCompany: 'Вы должны компании',
+    searchByCode: 'Поиск по коду',
+    region: 'Регион',
+    selectRegion: 'Выберите регион',
+    vehicleInfo: 'Информация о транспорте',
   },
   AR: {
     driverPanel: 'لوحة السائق',
@@ -1078,6 +1138,18 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     // Luggage & Baby Seat
     luggage: 'أمتعة',
     babySeat: 'مقعد طفل',
+    
+    // Stats Card
+    welcome: 'مرحباً',
+    reviews: 'تقييمات',
+    thisMonth: 'هذا الشهر',
+    nextJob: 'النقل التالي',
+    companyOwesYou: 'الشركة مدينة لك',
+    youOweCompany: 'أنت مدين للشركة',
+    searchByCode: 'البحث بالرمز',
+    region: 'المنطقة',
+    selectRegion: 'اختر المنطقة',
+    vehicleInfo: 'معلومات المركبة',
   },
 };
 
