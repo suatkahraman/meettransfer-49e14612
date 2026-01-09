@@ -91,14 +91,26 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
   
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { label: string; color: string; bgColor: string; icon: React.ReactNode }> = {
+      pending: { 
+        label: t('pending') || 'Beklemede', 
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-500',
+        icon: <AlertCircle className="h-4 w-4" />
+      },
+      pending_admin_review: { 
+        label: t('pendingReview') || 'İncelemede', 
+        color: 'text-purple-600',
+        bgColor: 'bg-purple-500',
+        icon: <AlertCircle className="h-4 w-4" />
+      },
       sent_to_driver: { 
-        label: t('pending'), 
+        label: t('sentToDriver') || 'Şoföre Gönderildi', 
         color: 'text-orange-600',
         bgColor: 'bg-orange-500',
         icon: <AlertCircle className="h-4 w-4" />
       },
       assigned: { 
-        label: t('assigned'), 
+        label: t('assigned') || 'Atandı', 
         color: 'text-orange-600',
         bgColor: 'bg-orange-500',
         icon: <AlertCircle className="h-4 w-4" />
@@ -110,13 +122,13 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
         icon: <RefreshCw className="h-4 w-4" />
       },
       active: { 
-        label: t('inProgress'), 
+        label: t('inProgress') || 'Devam Ediyor', 
         color: 'text-blue-600',
         bgColor: 'bg-blue-500',
         icon: <Loader2 className="h-4 w-4" />
       },
       completed: { 
-        label: t('completed'), 
+        label: t('completed') || 'Tamamlandı', 
         color: 'text-green-600',
         bgColor: 'bg-green-500',
         icon: <CheckCircle className="h-4 w-4" />
@@ -139,8 +151,14 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
         bgColor: 'bg-red-500',
         icon: <Ban className="h-4 w-4" />
       },
+      no_show: { 
+        label: t('noShow') || 'Gelmedi', 
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-500',
+        icon: <Ban className="h-4 w-4" />
+      },
     };
-    return configs[status] || configs.sent_to_driver;
+    return configs[status] || configs.pending;
   };
   
   const config = getStatusConfig(reservation.status);
@@ -259,11 +277,14 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
               </div>
               <Badge className={cn(
                 "flex items-center gap-1 px-3 py-1",
+                (reservation.status === 'pending') && "bg-gray-500/20 text-gray-700 border-gray-500",
+                (reservation.status === 'pending_admin_review') && "bg-purple-500/20 text-purple-700 border-purple-500",
                 (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && "bg-orange-500/20 text-orange-700 border-orange-500",
                 reservation.status === 'confirmed' && "bg-amber-500/20 text-amber-700 border-amber-500 animate-pulse",
                 reservation.status === 'active' && "bg-blue-500/20 text-blue-700 border-blue-500",
                 reservation.status === 'completed' && "bg-green-500/20 text-green-700 border-green-500",
-                (reservation.status === 'cancelled' || reservation.status === 'cancelled_by_customer' || reservation.status === 'cancelled_by_agency') && "bg-red-500/20 text-red-700 border-red-500"
+                (reservation.status === 'cancelled' || reservation.status === 'cancelled_by_customer' || reservation.status === 'cancelled_by_agency') && "bg-red-500/20 text-red-700 border-red-500",
+                reservation.status === 'no_show' && "bg-gray-500/20 text-gray-700 border-gray-500"
               )}>
                 {config.icon}
                 <span className="ml-1">{config.label}</span>
