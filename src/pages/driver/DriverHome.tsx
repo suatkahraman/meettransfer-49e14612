@@ -4,22 +4,21 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
-import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, ChevronDown, RefreshCw, History, Settings, Volume2, Search, Star } from 'lucide-react';
+import { LogOut, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, RefreshCw, History, Settings, Volume2, Search } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { toast } from 'sonner';
-import SwipeableJobCard from '@/components/driver/SwipeableJobCard';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import ReservationSearch from '@/components/ReservationSearch';
 import DriverInfoEditor from '@/components/driver/DriverInfoEditor';
 import DriverStatsCard from '@/components/driver/DriverStatsCard';
+import JobCategoryCard from '@/components/driver/JobCategoryCard';
 interface Reservation {
   id: string;
   customer_id: string;
@@ -66,9 +65,6 @@ const DriverHome = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { playSound } = useNotificationSound();
   const [expandedSections, setExpandedSections] = useState({
-    pending: true,
-    active: true,
-    completed: false,
     settings: false,
     notificationSettings: false,
     search: false
@@ -203,211 +199,7 @@ const DriverHome = () => {
     };
   }, [driverId]);
 
-  const handleAcceptJob = async (id: string) => {
-    const reservation = reservations.find(r => r.id === id);
-    
-    const { error } = await supabase
-      .from('reservations')
-      .update({ driver_confirmed: true, status: 'active' })
-      .eq('id', id);
-
-    if (error) {
-      toast.error(t('failedToAccept'));
-      return;
-    }
-
-    toast.success(t('jobAccepted'));
-    setReservations(prev => 
-      prev.map(r => r.id === id ? { ...r, driver_confirmed: true, status: 'active' } : r)
-    );
-
-    // Notify customer that driver accepted their reservation
-    if (reservation) {
-      try {
-        // Get driver name, plate number and vehicle model
-        const { data: driverData } = await supabase
-          .from('drivers')
-          .select('name, plate_number, vehicle_model')
-          .eq('id', driverId)
-          .maybeSingle();
-
-        const driverName = driverData?.name || 'Your driver';
-        const plateNumber = driverData?.plate_number || '';
-        const vehicleModel = driverData?.vehicle_model || '';
-        
-        const vehicleInfo = vehicleModel ? `\n🚗 ${vehicleModel}${plateNumber ? ` (${plateNumber})` : ''}` : (plateNumber ? `\n🚗 Plate: ${plateNumber}` : '');
-
-        // Create notification for customer
-        await supabase.from('notifications').insert({
-          user_id: reservation.customer_id,
-          reservation_id: id,
-          type: 'driver_accepted',
-          title: '✅ Driver Confirmed',
-          message: `Your driver: ${driverName}${vehicleInfo}`
-        });
-
-        // Try to send push notification to customer
-        try {
-          const pushBody = vehicleModel 
-            ? `Your driver: ${driverName} - ${vehicleModel}${plateNumber ? ` (${plateNumber})` : ''}`
-            : `Your driver: ${driverName}${plateNumber ? ` (${plateNumber})` : ''}`;
-          
-          await supabase.functions.invoke('send-push-notification', {
-            body: {
-              user_id: reservation.customer_id,
-              title: '✅ Driver Confirmed',
-              body: pushBody,
-              data: { reservation_id: id }
-            }
-          });
-        } catch (pushError) {
-          console.log('Push notification failed (customer may not have enabled push):', pushError);
-        }
-
-        // Notify admins that driver accepted the job
-        await supabase.functions.invoke('create-notification', {
-          body: {
-            type: 'driver_accepted',
-            title: '✅ Driver Accepted Job',
-            message: `${driverName} has accepted job #${id.slice(0, 8)}.`,
-            notify_admins: true,
-            reservation_id: id,
-          }
-        });
-      } catch (notifyError) {
-        console.error('Failed to notify customer:', notifyError);
-        // Don't show error to driver - the main action succeeded
-      }
-    }
-  };
-
-  const handleCompleteJob = async (id: string) => {
-    const reservation = reservations.find(r => r.id === id);
-    if (!reservation) {
-      toast.error(t('reservationNotFound'));
-      return;
-    }
-
-    // Validate completion eligibility
-    const validation = checkCompletionEligibility(reservation);
-    if (!validation.canComplete) {
-      if (validation.isCompleted) {
-        toast.error(t('alreadyCompleted'));
-      } else {
-        toast.error(validation.reason || t('cannotCompleteNow'));
-      }
-      return;
-    }
-    
-    const { error } = await supabase
-      .from('reservations')
-      .update({ 
-        status: 'completed',
-        updated_at: new Date().toISOString() // Store completion timestamp
-      })
-      .eq('id', id);
-
-    if (error) {
-      toast.error(t('failedToComplete'));
-    } else {
-      toast.success(t('jobCompleted'));
-      setReservations(prev => 
-        prev.map(r => r.id === id ? { ...r, status: 'completed' } : r)
-      );
-
-      // Notify customer that trip is completed
-      try {
-        // Get driver name
-        const { data: driverData } = await supabase
-          .from('drivers')
-          .select('name')
-          .eq('id', driverId)
-          .maybeSingle();
-
-        // Get full reservation data to check if agency
-        const { data: resData } = await supabase
-          .from('reservations')
-          .select('customer_id, agency_id, reservation_code, pickup_date, pickup, dropoff')
-          .eq('id', id)
-          .single();
-
-        // Create notification for customer (if customer exists)
-        if (resData?.customer_id) {
-          await supabase.from('notifications').insert({
-            user_id: resData.customer_id,
-            reservation_id: id,
-            type: 'trip_completed',
-            title: '🎉 Trip Completed',
-            message: 'Your trip has been completed. Thank you for choosing Meet Transfer!'
-          });
-
-          // Try to send push notification to customer
-          try {
-            await supabase.functions.invoke('send-push-notification', {
-              body: {
-                user_id: resData.customer_id,
-                title: '🎉 Trip Completed',
-                body: 'Your trip has been completed. Thank you for choosing Meet Transfer!',
-                data: { reservation_id: id }
-              }
-            });
-          } catch (pushError) {
-            console.log('Push notification failed:', pushError);
-          }
-
-          // Send review request email to customer
-          try {
-            await supabase.functions.invoke('send-review-request', {
-              body: {
-                reservationId: id,
-                customerName: reservation.customer_name || 'Customer',
-                driverName: driverData?.name || 'Your Driver',
-                reservationCode: resData.reservation_code || id.slice(0, 8),
-                pickupDate: resData.pickup_date,
-                pickup: resData.pickup,
-                dropoff: resData.dropoff
-              }
-            });
-            console.log('Review request email sent');
-          } catch (emailError) {
-            console.log('Review request email failed:', emailError);
-          }
-        }
-
-        // If agency reservation, deduct balance (same as DriverJobDetails)
-        if (resData?.agency_id) {
-          try {
-            await supabase.functions.invoke('deduct-agency-balance', {
-              body: { reservation_id: id }
-            });
-            console.log('Agency balance deduction triggered');
-          } catch (balanceError) {
-            console.error('Balance deduction failed:', balanceError);
-          }
-        }
-
-        // Driver earnings are calculated from completed reservations (price - cash)
-        // No driver_payment inserted here - payments are only for admin-initiated transactions
-        console.log(`Job completed. Earning will be calculated from reservation: price=${reservation?.price}, cash=${reservation?.driver_cash_amount}`);
-
-        // Notify admins (push + in-app)
-        await supabase.functions.invoke('create-notification', {
-          body: {
-            type: 'trip_completed',
-            title: '✅ Trip Completed',
-            message: `${driverData?.name || 'Driver'} completed trip #${id.slice(0, 8)}.`,
-            notify_admins: true,
-            reservation_id: id,
-            send_push: true
-          }
-        });
-      } catch (notifyError) {
-        console.error('Failed to send notifications:', notifyError);
-      }
-    }
-  };
-
-  const toggleSection = (section: 'pending' | 'active' | 'completed' | 'settings' | 'notificationSettings' | 'search') => {
+  const toggleSection = (section: 'settings' | 'notificationSettings' | 'search') => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -655,157 +447,46 @@ const DriverHome = () => {
               </Button>
             </div>
 
-            {/* Pending Jobs Section */}
-            {pendingJobs.length > 0 && (
-              <section>
-                <button 
-                  onClick={() => toggleSection('pending')}
-                  className="flex items-center justify-between w-full py-2 mb-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
-                      <AlertCircle className="h-4 w-4 text-orange-600" />
-                    </div>
-                    <span className="font-semibold">{t('pendingJobs')}</span>
-                    <Badge variant="secondary" className="bg-orange-500/20 text-orange-700">
-                      {pendingJobs.length}
-                    </Badge>
-                  </div>
-                  <ChevronDown className={cn(
-                    "h-5 w-5 text-muted-foreground transition-transform",
-                    expandedSections.pending && "rotate-180"
-                  )} />
-                </button>
-                <AnimatePresence>
-                  {expandedSections.pending && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="space-y-3 overflow-hidden"
-                    >
-                      {pendingJobs.map((reservation, index) => (
-                        <motion.div
-                          key={reservation.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                        >
-                          <SwipeableJobCard
-                            reservation={reservation}
-                            adminNotes={adminNotesMap[reservation.id]}
-                            onAccept={() => handleAcceptJob(reservation.id)}
-                            onClick={() => navigate(`/driver/job/${reservation.id}`)}
-                          />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </section>
-            )}
+            {/* Job Category Cards */}
+            <div className="space-y-3">
+              {/* Pending Jobs Card */}
+              <JobCategoryCard
+                icon={AlertCircle}
+                title={t('pendingJobs')}
+                count={pendingJobs.length}
+                colorClass="orange"
+                subtitle={pendingJobs.length > 0 ? t('tapToView') || 'Görüntülemek için dokun' : t('noPendingJobs') || 'Bekleyen iş yok'}
+                nextJob={pendingJobs.length > 0 ? {
+                  time: pendingJobs[0].pickup_time.slice(0, 5),
+                  route: `${pendingJobs[0].pickup_place_name || pendingJobs[0].pickup.slice(0, 20)} → ${pendingJobs[0].dropoff_place_name || pendingJobs[0].dropoff.slice(0, 20)}`
+                } : undefined}
+                onClick={() => navigate('/driver/jobs/pending')}
+              />
 
-            {/* Active Jobs Section */}
-            {activeJobs.length > 0 && (
-              <section>
-                <button 
-                  onClick={() => toggleSection('active')}
-                  className="flex items-center justify-between w-full py-2 mb-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                      <Loader2 className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <span className="font-semibold">{t('activeJobs')}</span>
-                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-700">
-                      {activeJobs.length}
-                    </Badge>
-                  </div>
-                  <ChevronDown className={cn(
-                    "h-5 w-5 text-muted-foreground transition-transform",
-                    expandedSections.active && "rotate-180"
-                  )} />
-                </button>
-                <AnimatePresence>
-                  {expandedSections.active && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="space-y-3 overflow-hidden"
-                    >
-                      {activeJobs.map((reservation, index) => (
-                        <motion.div
-                          key={reservation.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                        >
-                          <SwipeableJobCard
-                            reservation={reservation}
-                            adminNotes={adminNotesMap[reservation.id]}
-                            onComplete={() => handleCompleteJob(reservation.id)}
-                            onClick={() => navigate(`/driver/job/${reservation.id}`)}
-                          />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </section>
-            )}
+              {/* Active Jobs Card */}
+              <JobCategoryCard
+                icon={Car}
+                title={t('activeJobs')}
+                count={activeJobs.length}
+                colorClass="blue"
+                subtitle={activeJobs.length > 0 ? t('tapToView') || 'Görüntülemek için dokun' : t('noActiveJobs') || 'Aktif iş yok'}
+                nextJob={activeJobs.length > 0 ? {
+                  time: activeJobs[0].pickup_time.slice(0, 5),
+                  route: `${activeJobs[0].pickup_place_name || activeJobs[0].pickup.slice(0, 20)} → ${activeJobs[0].dropoff_place_name || activeJobs[0].dropoff.slice(0, 20)}`
+                } : undefined}
+                onClick={() => navigate('/driver/jobs/active')}
+              />
 
-            {/* Completed Jobs Section */}
-            {completedJobs.length > 0 && (
-              <section>
-                <button 
-                  onClick={() => toggleSection('completed')}
-                  className="flex items-center justify-between w-full py-2 mb-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    </div>
-                    <span className="font-semibold">{t('completedJobs')}</span>
-                    <Badge variant="outline" className="text-xs text-muted-foreground border-muted-foreground/30">
-                      {t('transfers')}
-                    </Badge>
-                    <Badge variant="secondary" className="bg-green-500/20 text-green-700">
-                      {completedJobs.length}
-                    </Badge>
-                  </div>
-                  <ChevronDown className={cn(
-                    "h-5 w-5 text-muted-foreground transition-transform",
-                    expandedSections.completed && "rotate-180"
-                  )} />
-                </button>
-                <AnimatePresence>
-                  {expandedSections.completed && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="space-y-3 overflow-hidden"
-                    >
-                      {completedJobs.map((reservation, index) => (
-                        <motion.div
-                          key={reservation.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                        >
-                          <SwipeableJobCard
-                            reservation={reservation}
-                            adminNotes={adminNotesMap[reservation.id]}
-                            onClick={() => navigate(`/driver/job/${reservation.id}`)}
-                          />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </section>
-            )}
+              {/* Completed Jobs Card */}
+              <JobCategoryCard
+                icon={CheckCircle2}
+                title={t('completedJobs')}
+                count={completedJobs.length}
+                colorClass="green"
+                subtitle={completedJobs.length > 0 ? `${t('thisMonth') || 'Bu ay'} - ${t('tapToView') || 'Görüntülemek için dokun'}` : t('noCompletedJobs') || 'Bu ay tamamlanan iş yok'}
+                onClick={() => navigate('/driver/jobs/completed')}
+              />
+            </div>
 
           </div>
         )}
