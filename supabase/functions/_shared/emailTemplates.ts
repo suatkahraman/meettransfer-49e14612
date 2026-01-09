@@ -452,6 +452,11 @@ ${getEmailHeader(`🚗 ${t.quoteReady}`, t.thankYouBooking, lang)}
       </td></tr>
     </table>
 
+    <!-- Cancellation Policy Banner -->
+    <div style="background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);padding:16px 20px;border-radius:10px;margin:20px 0;border:2px solid #22c55e;text-align:center;">
+      <p style="margin:0;color:#15803d;font-size:15px;font-weight:bold;">🔄 ${t.freeCancellation}</p>
+    </div>
+
     <!-- CTA Button -->
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
@@ -877,6 +882,11 @@ ${getEmailHeader(`🚗 ${nt.driverAssigned}`, nt.driverAssignedSubtitle, lang)}
     <div style="background:#eff6ff;padding:15px;border-radius:8px;text-align:center;">
       <p style="margin:0;color:#1e40af;font-size:14px;">${nt.yourTransferReady}</p>
     </div>
+
+    <!-- Cancellation Policy Banner -->
+    <div style="background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);padding:16px 20px;border-radius:10px;margin:20px 0 0;border:2px solid #22c55e;text-align:center;">
+      <p style="margin:0;color:#15803d;font-size:14px;font-weight:bold;">🔄 ${t.freeCancellation}</p>
+    </div>
   </td>
 </tr>
 ${getEmailFooter(lang)}
@@ -961,6 +971,11 @@ ${getEmailHeader(`💳 ${nt.paymentRequired}`, nt.paymentRequiredSubtitle, lang)
       <a href="${paymentUrl}" style="color:#2196f3;word-break:break-all;">${paymentUrl}</a>
     </p>
     <p style="text-align:center;color:#888;font-size:12px;">${nt.securePayment}</p>
+
+    <!-- Cancellation Policy Banner -->
+    <div style="background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);padding:16px 20px;border-radius:10px;margin:20px 0 0;border:2px solid #22c55e;text-align:center;">
+      <p style="margin:0;color:#15803d;font-size:14px;font-weight:bold;">🔄 ${t.freeCancellation}</p>
+    </div>
   </td>
 </tr>
 ${getEmailFooter(lang)}
@@ -1045,6 +1060,11 @@ ${getEmailHeader(`✅ ${nt.paymentConfirmed}`, nt.paymentConfirmedSubtitle, lang
     </table>
 
     <p style="text-align:center;color:#4caf50;font-size:14px;font-weight:bold;">${nt.thankYouChoosing}</p>
+
+    <!-- Cancellation Policy Banner -->
+    <div style="background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);padding:16px 20px;border-radius:10px;margin:20px 0 0;border:2px solid #22c55e;text-align:center;">
+      <p style="margin:0;color:#15803d;font-size:14px;font-weight:bold;">🔄 ${t.freeCancellation}</p>
+    </div>
   </td>
 </tr>
 ${getEmailFooter(lang)}
@@ -1150,6 +1170,11 @@ ${getEmailHeader(`💰 ${nt.priceReady}`, nt.priceReadySubtitle, lang)}
     </table>
 
     <p style="text-align:center;color:#888;font-size:13px;">${nt.reviewAccept}</p>
+
+    <!-- Cancellation Policy Banner -->
+    <div style="background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);padding:16px 20px;border-radius:10px;margin:20px 0 0;border:2px solid #22c55e;text-align:center;">
+      <p style="margin:0;color:#15803d;font-size:14px;font-weight:bold;">🔄 ${t.freeCancellation}</p>
+    </div>
   </td>
 </tr>
 ${getEmailFooter(lang)}
