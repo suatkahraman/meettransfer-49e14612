@@ -1347,20 +1347,16 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                 {agencyName || 'Acenta'} tarafÄ±ndan bir rezervasyon talebi gÃ¶nderildi. Fiyat belirleyip acentanÄ±n onayÄ±na gÃ¶nderin veya talebi reddedin.
               </p>
               
-              {/* Price Input for Agency */}
+              {/* Price Input for Agency - Currency is fixed by agency */}
               <div className="grid grid-cols-2 gap-4 bg-white dark:bg-background p-4 rounded-lg border">
                 <div className="space-y-2">
-                  <Label>Para Birimi</Label>
-                  <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies.map(c => (
-                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label>Para Birimi (Acenta Belirledi)</Label>
+                  <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted/50">
+                    <Badge variant="outline" className="text-base font-medium">
+                      {getCurrencySymbol(formData.price_currency)} {formData.price_currency}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">(DeÄŸiÅŸtirilemez)</span>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Fiyat</Label>
@@ -1391,10 +1387,10 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                     try {
                       const priceValue = parseFloat(formData.price);
 
-                      // Resolve agency user id and currency (used for notification + linking agency details + currency conversion)
+                      // Get agency user_id for notification
                       const { data: agencyData, error: agencyFetchError } = await supabase
                         .from('agencies')
-                        .select('user_id, currency')
+                        .select('user_id')
                         .eq('id', formData.agency_id)
                         .maybeSingle();
 
@@ -1402,46 +1398,17 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                         console.error('Failed to fetch agency:', agencyFetchError);
                       }
 
-                      const agencyCurrency = agencyData?.currency || 'EUR';
-                      let convertedPrice = priceValue;
-                      let exchangeRateUsed: number | null = null;
-                      let finalCurrency = formData.price_currency;
-
-                      // Convert price to agency's preferred currency if different
-                      if (agencyCurrency !== formData.price_currency) {
-                        try {
-                          // First convert admin currency to agency currency
-                          const { data: rateData, error: rateError } = await supabase.functions.invoke('get-exchange-rate', {
-                            body: {
-                              from_currency: formData.price_currency,
-                              to_currency: agencyCurrency,
-                              amount: priceValue
-                            }
-                          });
-
-                          if (rateError) {
-                            console.error('Exchange rate fetch error:', rateError);
-                            toast.error(`DÃ¶viz kuru alÄ±namadÄ±, ${formData.price_currency} ile devam ediliyor`);
-                          } else if (rateData?.converted_amount && rateData?.rate) {
-                            convertedPrice = Math.round(rateData.converted_amount * 100) / 100; // Round to 2 decimals
-                            exchangeRateUsed = rateData.rate;
-                            finalCurrency = agencyCurrency;
-                            console.log(`Converted ${priceValue} ${formData.price_currency} to ${convertedPrice} ${agencyCurrency} (rate: ${exchangeRateUsed})`);
-                          }
-                        } catch (e) {
-                          console.error('Failed to convert currency:', e);
-                          toast.error(`DÃ¶viz Ã§evirisi baÅŸarÄ±sÄ±z, ${formData.price_currency} ile devam ediliyor`);
-                        }
-                      }
+                      // Use the currency that agency selected when creating the reservation
+                      // No currency conversion needed - price stays in agency's selected currency
+                      const agencySelectedCurrency = formData.price_currency;
 
                       // Set price and change status to waiting_for_agency_approval
-                      // Store the original admin price in admin_set_price
                       const { error } = await supabase
                         .from('reservations')
                         .update({ 
-                          price: convertedPrice,
-                          price_currency: finalCurrency,
-                          admin_set_price: priceValue, // Original admin price for reference
+                          price: priceValue,
+                          price_currency: agencySelectedCurrency,
+                          admin_set_price: priceValue,
                           status: 'waiting_for_agency_approval' 
                         })
                         .eq('id', id);
@@ -1449,7 +1416,6 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
 
                       // IMPORTANT: Keep agency_reservation_details in sync
                       // company_amount = admin set price (what we charge agency)
-                      // customer_price = converted price shown to agency
                       try {
                         const { data: existingAgencyDetail } = await supabase
                           .from('agency_reservation_details')
@@ -1458,11 +1424,9 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                           .maybeSingle();
 
                         const agencyDetailPayload = {
-                          customer_price: convertedPrice,
-                          company_amount: convertedPrice, // Agency's expense = converted price
-                          agency_price_currency: finalCurrency,
-                          exchange_rate_used: exchangeRateUsed,
-                          conversion_date: exchangeRateUsed ? new Date().toISOString().split('T')[0] : null,
+                          customer_price: priceValue,
+                          company_amount: priceValue,
+                          agency_price_currency: agencySelectedCurrency,
                         };
 
                         if (existingAgencyDetail) {
@@ -1484,28 +1448,25 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                         console.error('Failed to sync agency_reservation_details:', e);
                       }
 
-                      // Record price in history (original admin price)
+                      // Record price in history
                       try {
                         await supabase.from('price_history').insert({
                           reservation_id: id,
                           price: priceValue,
-                          price_currency: formData.price_currency,
+                          price_currency: agencySelectedCurrency,
                           action: 'sent_to_agency',
-                          customer_note: exchangeRateUsed 
-                            ? `Converted to ${convertedPrice} ${finalCurrency} (rate: ${exchangeRateUsed})`
-                            : null,
                         });
                       } catch (e) {
                         console.error('Failed to record price history:', e);
                       }
 
                       // Get currency symbol for notification
-                      const agencyCurrencySymbol = currencies.find(c => c.value === finalCurrency)?.symbol || finalCurrency;
+                      const agencyCurrencySymbol = getCurrencySymbol(agencySelectedCurrency);
 
-                      // Send email to agency with converted price
+                      // Send email to agency
                       try {
                         console.log('Sending agency price set email for reservation:', id);
-                        const emailResult = await emailAgencyPriceSet(id!, convertedPrice, finalCurrency);
+                        const emailResult = await emailAgencyPriceSet(id!, priceValue, agencySelectedCurrency);
                         if (!emailResult.success) {
                           console.error('Agency price email failed:', emailResult.error);
                         } else {
@@ -1515,7 +1476,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                         console.error('Failed to send agency price email:', e);
                       }
 
-                      // Notify agency user in-app with converted price
+                      // Notify agency user in-app
                       if (agencyData?.user_id) {
                         try {
                           await supabase.functions.invoke('create-notification', {
@@ -1523,7 +1484,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                               user_id: agencyData.user_id,
                               reservation_id: id,
                               title: 'Fiyat Belirlendi',
-                              message: `Rezervasyon iÃ§in fiyat belirlendi: ${agencyCurrencySymbol}${convertedPrice.toFixed(2)}. LÃ¼tfen onaylayÄ±n veya reddedin.`,
+                              message: `Rezervasyon iÃ§in fiyat belirlendi: ${agencyCurrencySymbol}${priceValue.toFixed(2)}. LÃ¼tfen onaylayÄ±n veya reddedin.`,
                               type: 'price_ready',
                               send_push: true
                             }
@@ -2450,7 +2411,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                       <Label className="text-sm">Acentadan AlÄ±nacak Tutar</Label>
                       <div className="flex gap-2">
                         <div className="relative flex-1">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{getCurrencySymbol(agencyDetails.agency_price_currency || formData.price_currency)}</span>
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{getCurrencySymbol(formData.price_currency)}</span>
                           <Input
                             type="number"
                             step="0.01"
@@ -2461,20 +2422,16 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                             className="pl-8"
                           />
                         </div>
-                        <Select 
-                          value={agencyDetails.agency_price_currency || formData.price_currency} 
-                          onValueChange={(v) => setAgencyDetails({...agencyDetails, agency_price_currency: v})}
-                        >
-                          <SelectTrigger className="w-28">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {currencies.map(c => (
-                              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        {/* Currency is fixed by agency - read only */}
+                        <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted/50 min-w-[100px]">
+                          <Badge variant="outline" className="text-sm font-medium">
+                            {formData.price_currency}
+                          </Badge>
+                        </div>
                       </div>
+                      <p className="text-xs text-muted-foreground">
+                        Para birimi acenta tarafÄ±ndan rezervasyon oluÅŸturulurken belirlendi
+                      </p>
                     </div>
 
                     <Button
@@ -2497,12 +2454,15 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                             .maybeSingle();
 
                           let error;
+                          // Use the fixed currency from the reservation (set by agency)
+                          const fixedCurrency = formData.price_currency;
+                          
                           if (existingRecord) {
                           const result = await supabase
                               .from('agency_reservation_details')
                               .update({
                                 customer_price: agencyPrice,
-                                agency_price_currency: agencyDetails.agency_price_currency || formData.price_currency,
+                                agency_price_currency: fixedCurrency,
                                 company_amount: driverFee,
                                 agency_profit: profit,
                               })
@@ -2514,7 +2474,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                               .insert({
                                 reservation_id: id,
                                 customer_price: agencyPrice,
-                                agency_price_currency: agencyDetails.agency_price_currency || formData.price_currency,
+                                agency_price_currency: fixedCurrency,
                                 company_amount: driverFee,
                                 agency_profit: profit,
                               });
@@ -2528,7 +2488,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                             setAgencyDetails({
                               ...agencyDetails,
                               customer_price: agencyPrice.toString(),
-                              agency_price_currency: agencyDetails.agency_price_currency || formData.price_currency
+                              agency_price_currency: fixedCurrency
                             });
                             setAgencyPriceSaved(true);
                             toast.success('Acenta fiyatÄ± kaydedildi');
@@ -2549,7 +2509,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || 'â
                         <div className="flex justify-between items-center font-bold">
                           <span>Kaydedilen Tutar:</span>
                           <span className="text-blue-600">
-                            {getCurrencySymbol(agencyDetails.agency_price_currency || formData.price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
+                            {getCurrencySymbol(formData.price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
                           </span>
                         </div>
                       </div>
