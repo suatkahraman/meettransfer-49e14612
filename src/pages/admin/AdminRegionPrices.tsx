@@ -84,6 +84,14 @@ const CITIES_DATA = {
   'Denizli': {
     airports: ['Denizli Cardak Airport (DNZ)'],
     districts: ['Denizli Center', 'Pamukkale', 'Hierapolis', 'Laodikeia', 'Karahayit', 'Merkezefendi', 'Saraykoy', 'Acipayam', 'Buldan', 'Civril', 'Tavas', 'Honaz', 'Kaklik', 'Colossae', 'Tripolis', 'Babadag', 'Bekilli', 'Bozkurt', 'Cal', 'Cardak', 'Guney', 'Kale', 'Serinhisar']
+  },
+  'Adana': {
+    airports: ['Adana Sakirpasa Airport (ADA)'],
+    districts: ['Adana Center', 'Seyhan', 'Cukurova', 'Yuregir', 'Saricam', 'Karaisali', 'Pozanti', 'Tarsus', 'Ceyhan', 'Kozan', 'Imamoglu', 'Kadirli', 'Aladag', 'Feke', 'Saimbeyli', 'Tufanbeyli', 'Yumurtalik', 'Karatas']
+  },
+  'Ankara': {
+    airports: ['Ankara Esenboga Airport (ESB)'],
+    districts: ['Ankara Center', 'Cankaya', 'Kizilay', 'Ulus', 'Kavaklidere', 'Tunali', 'Bahcelievler', 'Emek', 'Ayranci', 'GOP', 'Dikmen', 'Oran', 'Cayyolu', 'Yasamkent', 'Batikent', 'Kecioren', 'Etimesgut', 'Sincan', 'Yenimahalle', 'Mamak', 'Altindag', 'Pursaklar', 'Golbasi', 'Beypazari', 'Polatli', 'Haymana', 'Cubuk', 'Kazan', 'Akyurt', 'Elmadag']
   }
 };
 
