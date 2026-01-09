@@ -27,6 +27,7 @@ const AgencyLoginScreen = lazy(() => import("./pages/auth/AgencyLoginScreen"));
 const DriverLoginScreen = lazy(() => import("./pages/auth/DriverLoginScreen"));
 const ReservationForm = lazy(() => import("./pages/ReservationForm"));
 const InstallApp = lazy(() => import("./pages/InstallApp"));
+const SecuritySettings = lazy(() => import("./pages/SecuritySettings"));
 
 // Customer Pages - lazy loaded
 const CustomerHome = lazy(() => import("./pages/customer/CustomerHome"));
@@ -289,6 +290,9 @@ const App = () => (
               <Route path="/confirm-booking" element={<LazyRoute><ConfirmBooking /></LazyRoute>} />
               <Route path="/quick-booking-confirm" element={<LazyRoute><QuickBookingConfirm /></LazyRoute>} />
               <Route path="/quick-booking-info" element={<LazyRoute><QuickBookingCustomerInfo /></LazyRoute>} />
+              
+              {/* Security Settings - Protected (all authenticated users) */}
+              <Route path="/security-settings" element={<LazyRoute><SecuritySettings /></LazyRoute>} />
               
                 <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
               </Routes>
