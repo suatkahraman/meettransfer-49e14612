@@ -565,18 +565,6 @@ const AgencyHome = () => {
         </div>
       </header>
 
-      {/* Balance Warning - show if any currency has positive balance (debt) */}
-      {accountingSummary.currencyBalances.some(cb => cb.netBalance > 0) && (
-        <div className="bg-destructive/10 border-l-4 border-destructive p-3 sm:p-4">
-          <p className="text-destructive font-medium text-sm sm:text-base">
-            ⚠️ {t('insufficientBalance')} 
-            {accountingSummary.currencyBalances
-              .filter(cb => cb.netBalance > 0)
-              .map(cb => ` ${getCurrencySymbol(cb.currency)}${cb.netBalance.toFixed(2)}`)
-              .join(', ')}
-          </p>
-        </div>
-      )}
 
       <main className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-2xl">
         {loading ? (
