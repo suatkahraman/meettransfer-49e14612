@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText, Building2, Banknote, Luggage, Baby } from 'lucide-react';
+import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText, Building2, Banknote, Luggage, Baby, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -103,6 +103,12 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
         bgColor: 'bg-orange-500',
         icon: <AlertCircle className="h-4 w-4" />
       },
+      confirmed: { 
+        label: t('updated') || 'Güncellendi', 
+        color: 'text-amber-600',
+        bgColor: 'bg-amber-500',
+        icon: <RefreshCw className="h-4 w-4" />
+      },
       active: { 
         label: t('inProgress'), 
         color: 'text-blue-600',
@@ -156,14 +162,14 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
       setIsProcessing(true);
       await onComplete();
       setIsProcessing(false);
-    } else if (offset > SWIPE_THRESHOLD && (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && onAccept) {
+    } else if (offset > SWIPE_THRESHOLD && (reservation.status === 'sent_to_driver' || reservation.status === 'assigned' || reservation.status === 'confirmed') && onAccept) {
       setIsProcessing(true);
       await onAccept();
       setIsProcessing(false);
     }
   };
 
-  const canSwipeRight = (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && onAccept;
+  const canSwipeRight = (reservation.status === 'sent_to_driver' || reservation.status === 'assigned' || reservation.status === 'confirmed') && onAccept;
   // Only allow swipe left if validation passes
   const canSwipeLeft = reservation.status === 'active' && onComplete && completionValidation.canComplete;
 
@@ -236,6 +242,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
               <Badge className={cn(
                 "flex items-center gap-1 px-3 py-1",
                 (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && "bg-orange-500/20 text-orange-700 border-orange-500",
+                reservation.status === 'confirmed' && "bg-amber-500/20 text-amber-700 border-amber-500 animate-pulse",
                 reservation.status === 'active' && "bg-blue-500/20 text-blue-700 border-blue-500",
                 reservation.status === 'completed' && "bg-green-500/20 text-green-700 border-green-500"
               )}>
