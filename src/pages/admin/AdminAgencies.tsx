@@ -11,8 +11,18 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Key, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Key, Mail, Phone, RefreshCw } from 'lucide-react';
 import { getCurrencySymbol } from '@/lib/currency';
+
+// Fallback exchange rates
+const FALLBACK_RATES: Record<string, number> = {
+  'EUR': 37.5,
+  'USD': 34.5,
+  'GBP': 44.1,
+  'AED': 9.4,
+  'AUD': 22.5,
+  'TRY': 1,
+};
 
 interface Agency {
   id: string;
@@ -33,6 +43,8 @@ interface CurrencyBalance {
   netAgencyDebt: number;
   totalPayments: number;
   calculatedBalance: number;
+  tryEquivalent: number;
+  exchangeRate: number;
 }
 
 interface AgencyWithCalculatedBalance extends Agency {
@@ -46,6 +58,7 @@ interface AgencyWithCalculatedBalance extends Agency {
   contactName: string | null;
   // Multi-currency balances
   currencyBalances: CurrencyBalance[];
+  totalTryEquivalent: number;
 }
 
 const AdminAgencies = () => {
@@ -69,6 +82,28 @@ const AdminAgencies = () => {
     comments: '',
     currency: 'EUR',
   });
+
+  // Fetch exchange rate for a currency to TRY
+  const getExchangeRate = async (currency: string): Promise<number> => {
+    if (currency === 'TRY') return 1;
+    
+    try {
+      const response = await fetch(
+        `https://api.frankfurter.app/latest?from=${currency}&to=TRY`,
+        { signal: AbortSignal.timeout(3000) }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (data.rates?.TRY) {
+          return data.rates.TRY;
+        }
+      }
+    } catch (e) {
+      console.error(`Exchange rate fetch error for ${currency}:`, e);
+    }
+    
+    return FALLBACK_RATES[currency] || 1;
+  };
 
   const fetchAgencies = async () => {
     // Fetch agencies
@@ -141,17 +176,41 @@ const AdminAgencies = () => {
 
         const totalPayments = payments?.reduce((sum, p) => sum + (parseFloat(String(p.amount)) || 0), 0) || 0;
 
-        // Calculate currency balances with payments deducted
-        const currencyBalances: CurrencyBalance[] = Object.entries(currencyTotals).map(([currency, totals]) => {
+        // Get all unique currencies
+        const allCurrencies = new Set([
+          ...Object.keys(currencyTotals),
+          ...Object.keys(paymentsByCurrency),
+        ]);
+
+        // Fetch exchange rates for all currencies
+        const exchangeRates: Record<string, number> = {};
+        await Promise.all(
+          Array.from(allCurrencies).map(async (currency) => {
+            exchangeRates[currency] = await getExchangeRate(currency);
+          })
+        );
+
+        // Calculate currency balances with payments deducted and TRY equivalent
+        let totalTryEquivalent = 0;
+        const currencyBalances: CurrencyBalance[] = Array.from(allCurrencies).map((currency) => {
+          const totals = currencyTotals[currency] || { agencyPrice: 0, passengerCash: 0 };
           const netDebt = totals.agencyPrice - totals.passengerCash;
           const currencyPayments = paymentsByCurrency[currency] || 0;
+          const calculatedBalance = netDebt - currencyPayments;
+          const exchangeRate = exchangeRates[currency] || 1;
+          const tryEquivalent = calculatedBalance * exchangeRate;
+          
+          totalTryEquivalent += tryEquivalent;
+
           return {
             currency,
             totalAgencyPrice: totals.agencyPrice,
             totalPassengerCash: totals.passengerCash,
             netAgencyDebt: netDebt,
             totalPayments: currencyPayments,
-            calculatedBalance: netDebt - currencyPayments,
+            calculatedBalance,
+            tryEquivalent,
+            exchangeRate,
           };
         });
 
@@ -209,6 +268,7 @@ const AdminAgencies = () => {
           contactPhone,
           contactName,
           currencyBalances,
+          totalTryEquivalent,
         };
       })
     );
@@ -564,10 +624,17 @@ const AdminAgencies = () => {
                         .filter(cb => cb.netAgencyDebt !== 0 || cb.totalAgencyPrice !== 0)
                         .map((cb) => {
                           const symbol = getCurrencySymbol(cb.currency);
+                          const showTryEquivalent = cb.currency !== 'TRY' && cb.calculatedBalance !== 0;
                           return (
                             <div key={cb.currency} className="space-y-2 p-3 bg-muted rounded-lg">
-                              <div className="flex items-center gap-2 mb-2">
+                              <div className="flex items-center justify-between mb-2">
                                 <Badge variant="secondary" className="font-mono">{cb.currency}</Badge>
+                                {showTryEquivalent && (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <RefreshCw className="h-3 w-3" />
+                                    1 {cb.currency} = ₺{cb.exchangeRate.toFixed(2)}
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground">Acenta Fiyatı</span>
@@ -587,13 +654,32 @@ const AdminAgencies = () => {
                               )}
                               <div className="flex items-center justify-between border-t pt-2">
                                 <span className="text-sm font-medium">Bakiye</span>
-                                <span className={`font-bold ${cb.calculatedBalance > 0 ? 'text-primary' : cb.calculatedBalance < 0 ? 'text-green-600' : ''}`}>
-                                  {symbol}{cb.calculatedBalance.toFixed(2)}
-                                </span>
+                                <div className="text-right">
+                                  <span className={`font-bold ${cb.calculatedBalance > 0 ? 'text-primary' : cb.calculatedBalance < 0 ? 'text-green-600' : ''}`}>
+                                    {symbol}{cb.calculatedBalance.toFixed(2)}
+                                  </span>
+                                  {showTryEquivalent && (
+                                    <div className="text-xs text-muted-foreground">
+                                      ≈ ₺{cb.tryEquivalent.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           );
                         })}
+                      
+                      {/* Total TRY Equivalent Summary */}
+                      {agency.currencyBalances.filter(cb => cb.currency !== 'TRY' && cb.calculatedBalance !== 0).length > 0 && (
+                        <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Toplam TRY Karşılığı</span>
+                            <span className={`font-bold text-lg ${agency.totalTryEquivalent > 0 ? 'text-primary' : agency.totalTryEquivalent < 0 ? 'text-green-600' : ''}`}>
+                              ₺{agency.totalTryEquivalent.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
