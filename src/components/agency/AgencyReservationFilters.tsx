@@ -81,24 +81,24 @@ export const AgencyReservationFilters = ({
   };
 
   return (
-    <Card>
-      <CardContent className="p-3">
+    <Card className="touch-manipulation">
+      <CardContent className="p-2.5 sm:p-3">
         {/* Search Bar */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={filters.searchQuery}
               onChange={(e) => updateFilter('searchQuery', e.target.value)}
               placeholder={t('searchPlaceholder') || 'Kod, müşteri veya adres ara...'}
-              className="pl-9"
+              className="pl-8 sm:pl-9 h-9 sm:h-10 text-sm"
             />
           </div>
           <Button
             variant={isExpanded ? 'secondary' : 'outline'}
             size="icon"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="relative"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0"
           >
             <Filter className="h-4 w-4" />
             {activeFilterCount > 0 && (
@@ -114,11 +114,11 @@ export const AgencyReservationFilters = ({
 
         {/* Expanded Filters */}
         {isExpanded && (
-          <div className="mt-3 pt-3 border-t space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t space-y-2.5 sm:space-y-3">
+            <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
               {/* Status Filter */}
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">
+                <label className="text-[10px] sm:text-xs text-muted-foreground mb-1 block">
                   {t('status') || 'Durum'}
                 </label>
                 <Select 
@@ -140,25 +140,25 @@ export const AgencyReservationFilters = ({
 
               {/* Customer Name */}
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">
+                <label className="text-[10px] sm:text-xs text-muted-foreground mb-1 block">
                   {t('customer') || 'Müşteri'}
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <User className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     value={filters.customerName}
                     onChange={(e) => updateFilter('customerName', e.target.value)}
                     placeholder={t('customerName') || 'Müşteri adı'}
-                    className="pl-9 h-9"
+                    className="pl-8 sm:pl-9 h-9"
                   />
                 </div>
               </div>
             </div>
 
             {/* Date Range */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">
+                <label className="text-[10px] sm:text-xs text-muted-foreground mb-1 block">
                   {t('dateFrom') || 'Başlangıç'}
                 </label>
                 <Popover>
@@ -166,15 +166,15 @@ export const AgencyReservationFilters = ({
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal h-9",
+                        "w-full justify-start text-left font-normal h-9 text-xs sm:text-sm px-2 sm:px-3",
                         !filters.dateFrom && "text-muted-foreground"
                       )}
                     >
-                      <Calendar className="mr-2 h-4 w-4" />
+                      <Calendar className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                       {filters.dateFrom ? (
-                        format(filters.dateFrom, 'dd MMM yyyy', { locale })
+                        <span className="truncate">{format(filters.dateFrom, 'dd MMM', { locale })}</span>
                       ) : (
-                        <span>{t('selectDate') || 'Tarih seçin'}</span>
+                        <span className="truncate">{t('selectDate') || 'Tarih'}</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -191,7 +191,7 @@ export const AgencyReservationFilters = ({
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">
+                <label className="text-[10px] sm:text-xs text-muted-foreground mb-1 block">
                   {t('dateTo') || 'Bitiş'}
                 </label>
                 <Popover>
@@ -199,15 +199,15 @@ export const AgencyReservationFilters = ({
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal h-9",
+                        "w-full justify-start text-left font-normal h-9 text-xs sm:text-sm px-2 sm:px-3",
                         !filters.dateTo && "text-muted-foreground"
                       )}
                     >
-                      <Calendar className="mr-2 h-4 w-4" />
+                      <Calendar className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                       {filters.dateTo ? (
-                        format(filters.dateTo, 'dd MMM yyyy', { locale })
+                        <span className="truncate">{format(filters.dateTo, 'dd MMM', { locale })}</span>
                       ) : (
-                        <span>{t('selectDate') || 'Tarih seçin'}</span>
+                        <span className="truncate">{t('selectDate') || 'Tarih'}</span>
                       )}
                     </Button>
                   </PopoverTrigger>

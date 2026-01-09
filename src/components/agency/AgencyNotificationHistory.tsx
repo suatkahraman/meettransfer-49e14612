@@ -153,24 +153,24 @@ export const AgencyNotificationHistory = () => {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+    <Card className="touch-manipulation">
+      <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
           <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">{t('notificationHistory') || 'Bildirim Geçmişi'}</CardTitle>
+            <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <CardTitle className="text-base sm:text-lg">{t('notificationHistory') || 'Bildirim Geçmişi'}</CardTitle>
             {unreadCount > 0 && (
               <Badge variant="destructive" className="h-5 px-1.5 text-xs">
                 {unreadCount}
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <div className="flex rounded-lg border overflow-hidden">
               <Button
                 variant={filter === 'all' ? 'secondary' : 'ghost'}
                 size="sm"
-                className="rounded-none h-7 text-xs"
+                className="rounded-none h-7 text-[10px] sm:text-xs px-2 sm:px-3"
                 onClick={() => setFilter('all')}
               >
                 {t('all') || 'Tümü'}
@@ -178,7 +178,7 @@ export const AgencyNotificationHistory = () => {
               <Button
                 variant={filter === 'unread' ? 'secondary' : 'ghost'}
                 size="sm"
-                className="rounded-none h-7 text-xs"
+                className="rounded-none h-7 text-[10px] sm:text-xs px-2 sm:px-3"
                 onClick={() => setFilter('unread')}
               >
                 {t('unread') || 'Okunmamış'}
@@ -188,21 +188,22 @@ export const AgencyNotificationHistory = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 text-xs"
+                className="h-7 text-[10px] sm:text-xs px-2 sm:px-3"
                 onClick={markAllAsRead}
               >
                 <Check className="h-3 w-3 mr-1" />
-                {t('markAllRead') || 'Tümünü Okundu Yap'}
+                <span className="hidden sm:inline">{t('markAllRead') || 'Tümünü Okundu Yap'}</span>
+                <span className="sm:hidden">✓</span>
               </Button>
             )}
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 px-3 sm:px-6">
         {notifications.length === 0 ? (
-          <div className="text-center py-8">
-            <Bell className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-            <p className="text-muted-foreground">
+          <div className="text-center py-6 sm:py-8">
+            <Bell className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-3 text-muted-foreground/50" />
+            <p className="text-sm sm:text-base text-muted-foreground">
               {filter === 'unread' 
                 ? (t('noUnreadNotifications') || 'Okunmamış bildirim yok')
                 : (t('noNotifications') || 'Bildirim bulunamadı')
@@ -210,7 +211,7 @@ export const AgencyNotificationHistory = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             <AnimatePresence>
               {notifications.map((notification) => (
                 <motion.div
@@ -219,33 +220,33 @@ export const AgencyNotificationHistory = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   className={cn(
-                    "group relative p-3 rounded-lg border cursor-pointer transition-colors",
+                    "group relative p-2.5 sm:p-3 rounded-lg border cursor-pointer transition-colors active:scale-[0.98]",
                     !notification.read 
                       ? "bg-primary/5 border-primary/20 hover:bg-primary/10" 
                       : "bg-muted/30 hover:bg-muted/50"
                   )}
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="text-xl flex-shrink-0">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <span className="text-lg sm:text-xl flex-shrink-0">
                       {notificationIcons[notification.type] || '🔔'}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
                         {!notification.read && (
-                          <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 animate-pulse" />
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full flex-shrink-0 animate-pulse" />
                         )}
-                        <span className="font-medium text-sm truncate">{notification.title}</span>
+                        <span className="font-medium text-xs sm:text-sm truncate">{notification.title}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2 mt-0.5">
                         {notification.message}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
+                        <span className="text-[10px] sm:text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale })}
                         </span>
-                        <span className="text-xs text-muted-foreground">•</span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">•</span>
+                        <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">
                           {format(new Date(notification.created_at), 'dd MMM HH:mm', { locale })}
                         </span>
                       </div>
@@ -254,16 +255,16 @@ export const AgencyNotificationHistory = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-6 w-6 sm:h-7 sm:w-7 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteNotification(notification.id);
                         }}
                       >
-                        <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                        <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground hover:text-destructive" />
                       </Button>
                       {notification.reservation_id && (
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                       )}
                     </div>
                   </div>
