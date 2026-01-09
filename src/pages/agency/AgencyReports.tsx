@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
-import { useAgencyLanguage, AGENCY_CURRENCIES } from '@/contexts/AgencyLanguageContext';
+import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -158,30 +158,54 @@ const AgencyReports = () => {
     fetchData();
   }, [fetchData]);
 
-  // Calculate totals - only count reservations where agency_price_currency matches agency's currency
-  const agencyCurrencyCode = agency?.currency || agencyCurrency || 'EUR';
-  
+  // Calculate totals - para birimi bazlı hesaplama
   const totalReservations = reservations.length;
   const completedReservations = reservations.filter(r => r.status === 'completed').length;
-  
-  // Filter to only include details in agency's currency
-  const matchingDetails = agencyDetails.filter(d => 
-    !d.agency_price_currency || d.agency_price_currency === agencyCurrencyCode
-  );
-  
-  const totalCompanyAmount = matchingDetails.reduce((sum, d) => sum + (d.company_amount || 0), 0);
   const paidCount = agencyDetails.filter(d => d.payment_status === 'paid').length;
   const pendingPayments = agencyDetails.filter(d => d.payment_status !== 'paid').length;
   
-  // Calculate passenger cash amounts (reduces agency debt)
+  // Para birimi bazlı hesaplama - HER para birimini ayrı hesapla
+  const currencyTotals: Record<string, { companyAmount: number; passengerCash: number }> = {};
+  
+  // Agency detaylarını para birimine göre grupla
+  agencyDetails.forEach(d => {
+    const currency = d.agency_price_currency || 'TRY';
+    if (!currencyTotals[currency]) {
+      currencyTotals[currency] = { companyAmount: 0, passengerCash: 0 };
+    }
+    currencyTotals[currency].companyAmount += d.company_amount || 0;
+  });
+  
+  // Yolcu nakit ödemelerini para birimine göre ekle
+  reservations
+    .filter(r => r.status === 'completed')
+    .forEach(r => {
+      const currency = r.passenger_cash_currency || 'TRY';
+      if (!currencyTotals[currency]) {
+        currencyTotals[currency] = { companyAmount: 0, passengerCash: 0 };
+      }
+      currencyTotals[currency].passengerCash += r.passenger_cash_amount || 0;
+    });
+  
+  // Para birimi bazlı bakiyeler
+  const currencyBalances = Object.entries(currencyTotals).map(([currency, totals]) => ({
+    currency,
+    companyAmount: totals.companyAmount,
+    passengerCash: totals.passengerCash,
+    netDebt: totals.companyAmount - totals.passengerCash,
+  })).filter(cb => cb.netDebt !== 0);
+  
+  // En büyük bakiyeyi göster (ana gösterim için)
+  const primaryBalance = currencyBalances.length > 0 
+    ? currencyBalances.reduce((max, cb) => Math.abs(cb.netDebt) > Math.abs(max.netDebt) ? cb : max, currencyBalances[0])
+    : null;
+  
+  // Legacy hesaplama (geriye dönük uyumluluk)
+  const totalCompanyAmount = agencyDetails.reduce((sum, d) => sum + (d.company_amount || 0), 0);
   const totalPassengerCash = reservations
     .filter(r => r.status === 'completed')
     .reduce((sum, r) => sum + (r.passenger_cash_amount || 0), 0);
-  
-  // Current month debt = company amount - passenger cash
   const currentMonthDebt = totalCompanyAmount - totalPassengerCash;
-  
-  // Total balance = carryover + current month debt
   const totalBalance = carryoverBalance + currentMonthDebt;
 
   if (loading) {
@@ -270,21 +294,41 @@ const AgencyReports = () => {
             </CardContent>
           </Card>
 
-          <Card className={totalBalance > 0 ? 'border-orange-500 border-2' : ''}>
-            <CardContent className="pt-6 text-center">
-              <DollarSign className="h-8 w-8 mx-auto text-orange-500 mb-2" />
-              <p className="text-2xl font-bold text-orange-600">{currencySymbol}{totalBalance.toFixed(0)}</p>
-              <p className="text-sm text-muted-foreground">{t('totalDebt') || 'Güncel Bakiye'}</p>
-              {totalPassengerCash > 0 && (
-                <p className="text-xs text-green-600 mt-1">
-                  -{currencySymbol}{totalPassengerCash.toFixed(0)} {t('passengerCash')}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          {/* Para birimi bazlı bakiye kartları */}
+          {currencyBalances.length > 0 ? (
+            currencyBalances.map(cb => {
+              const symbol = cb.currency === 'TRY' ? '₺' : cb.currency === 'EUR' ? '€' : cb.currency === 'USD' ? '$' : cb.currency === 'GBP' ? '£' : cb.currency;
+              return (
+                <Card key={cb.currency} className={cb.netDebt > 0 ? 'border-orange-500 border-2' : ''}>
+                  <CardContent className="pt-6 text-center">
+                    <DollarSign className="h-8 w-8 mx-auto text-orange-500 mb-2" />
+                    <p className={`text-2xl font-bold ${cb.netDebt > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {symbol}{Math.abs(cb.netDebt).toFixed(0)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {cb.netDebt > 0 ? (t('totalDebt') || 'Borç') : (t('credit') || 'Alacak')} ({cb.currency})
+                    </p>
+                    {cb.passengerCash > 0 && (
+                      <p className="text-xs text-green-600 mt-1">
+                        -{symbol}{cb.passengerCash.toFixed(0)} {t('passengerCash')}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })
+          ) : (
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <CheckCircle className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                <p className="text-2xl font-bold text-gray-500">{t('settled') || 'Hesaplaşıldı'}</p>
+                <p className="text-sm text-muted-foreground">{t('noDebt') || 'Bakiye yok'}</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
-        {/* Financial Summary */}
+        {/* Financial Summary - Para birimi bazlı */}
         <Card>
           <CardHeader>
             <CardTitle>{t('financialSummary')}</CardTitle>
@@ -298,26 +342,39 @@ const AgencyReports = () => {
                 </span>
               </div>
             )}
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">{t('agencyExpense')} ({t('thisMonth') || 'Bu Ay'})</span>
-              <span className="font-semibold">{currencySymbol}{totalCompanyAmount.toFixed(2)}</span>
-            </div>
-            {totalPassengerCash > 0 && (
+            
+            {/* Para birimi bazlı detaylar */}
+            {currencyBalances.map(cb => {
+              const symbol = cb.currency === 'TRY' ? '₺' : cb.currency === 'EUR' ? '€' : cb.currency === 'USD' ? '$' : cb.currency === 'GBP' ? '£' : cb.currency;
+              return (
+                <div key={cb.currency} className="space-y-2 py-2 border-b">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('agencyExpense')} ({cb.currency})</span>
+                    <span className="font-semibold">{symbol}{cb.companyAmount.toFixed(2)}</span>
+                  </div>
+                  {cb.passengerCash > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t('passengerCashDeducted')} ({cb.currency})</span>
+                      <span className="font-semibold text-green-600">-{symbol}{cb.passengerCash.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="font-medium">{t('netDebt') || 'Net Borç'} ({cb.currency})</span>
+                    <span className={`font-bold ${cb.netDebt > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {symbol}{cb.netDebt.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            
+            {currencyBalances.length === 0 && (
               <div className="flex justify-between py-2 border-b">
-                <span className="text-muted-foreground">{t('passengerCashDeducted')}</span>
-                <span className="font-semibold text-green-600">-{currencySymbol}{totalPassengerCash.toFixed(2)}</span>
+                <span className="text-muted-foreground">{t('thisMonthDebt') || 'Bu Ay Borç'}</span>
+                <span className="font-semibold text-gray-500">0.00</span>
               </div>
             )}
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">{t('thisMonthDebt') || 'Bu Ay Borç'}</span>
-              <span className="font-semibold text-orange-600">{currencySymbol}{currentMonthDebt.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between py-2 border-b bg-muted/30 px-2 -mx-2 rounded">
-              <span className="font-medium">{t('totalDebt') || 'Güncel Bakiye'}</span>
-              <span className={`font-bold text-lg ${totalBalance > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                {currencySymbol}{totalBalance.toFixed(2)}
-              </span>
-            </div>
+            
             <div className="flex justify-between py-2">
               <span className="text-muted-foreground">{t('pendingPayments')}</span>
               <div className="flex items-center gap-2">
