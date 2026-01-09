@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLoginRateLimit } from '@/hooks/useLoginRateLimit';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Building2, User, KeyRound, Share2, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Loader2, Building2, User, KeyRound, Share2, Copy, Check, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
@@ -31,10 +32,26 @@ const AgencyLoginScreen = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
+  const [lockoutCountdown, setLockoutCountdown] = useState<number | null>(null);
   const { signIn, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { t } = useLanguage();
+  const { rateLimitStatus, checkRateLimit, logLoginAttempt, formatLockoutTime } = useLoginRateLimit();
   const navigate = useNavigate();
+
+  // Lockout countdown timer
+  useEffect(() => {
+    if (rateLimitStatus.locked && rateLimitStatus.remainingSeconds) {
+      setLockoutCountdown(rateLimitStatus.remainingSeconds);
+      const interval = setInterval(() => {
+        setLockoutCountdown(prev => {
+          if (prev && prev > 1) return prev - 1;
+          return null;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [rateLimitStatus.locked, rateLimitStatus.remainingSeconds]);
 
   const handleShare = async () => {
     const shareUrl = window.location.origin + '/login/agency';
@@ -105,6 +122,14 @@ const AgencyLoginScreen = () => {
     try {
       const validation = loginSchema.parse({ email: email.trim(), password });
       
+      // Check rate limit before attempting login
+      const rateLimit = await checkRateLimit(validation.email);
+      if (rateLimit.locked) {
+        toast.error(`Hesabınız geçici olarak kilitlendi. ${formatLockoutTime(rateLimit.remainingSeconds || 0)} sonra tekrar deneyin.`);
+        setIsLoading(false);
+        return;
+      }
+      
       // Save or clear email based on remember me
       if (rememberMe) {
         localStorage.setItem('agencyRememberMe', 'true');
@@ -117,6 +142,9 @@ const AgencyLoginScreen = () => {
       const { error } = await signIn(validation.email, validation.password);
       
       if (error) {
+        // Log failed login attempt
+        await logLoginAttempt(validation.email, false, error.message, undefined, 'agency');
+        
         // Handle specific Supabase auth errors
         if (error.message?.includes('Invalid login credentials')) {
           setErrors({ password: t('invalidCredentials') || 'Invalid email or password' });
@@ -127,6 +155,9 @@ const AgencyLoginScreen = () => {
         } else {
           toast.error(error.message || t('loginFailed') || 'Login failed');
         }
+      } else {
+        // Log successful login attempt
+        await logLoginAttempt(validation.email, true, undefined, undefined, 'agency');
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

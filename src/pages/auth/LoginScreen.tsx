@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { usePWADetect } from '@/hooks/usePWADetect';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLoginRateLimit } from '@/hooks/useLoginRateLimit';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Separator } from '@/components/ui/separator';
 import { z } from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle, Share2, Check } from 'lucide-react';
+import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle, Share2, Check, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
 
@@ -80,11 +81,27 @@ const LoginScreen = () => {
     return localStorage.getItem('guestSavedEmail') || '';
   });
   const [copied, setCopied] = useState(false);
+  const [lockoutCountdown, setLockoutCountdown] = useState<number | null>(null);
   const { signIn, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { isIOS, isStandalone } = usePWADetect();
   const { t } = useLanguage();
+  const { rateLimitStatus, checkRateLimit, logLoginAttempt, formatLockoutTime } = useLoginRateLimit();
   const navigate = useNavigate();
+
+  // Lockout countdown timer
+  useEffect(() => {
+    if (rateLimitStatus.locked && rateLimitStatus.remainingSeconds) {
+      setLockoutCountdown(rateLimitStatus.remainingSeconds);
+      const interval = setInterval(() => {
+        setLockoutCountdown(prev => {
+          if (prev && prev > 1) return prev - 1;
+          return null;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [rateLimitStatus.locked, rateLimitStatus.remainingSeconds]);
 
   const handleShare = async () => {
     const shareUrl = window.location.origin + '/login';
@@ -219,6 +236,14 @@ const LoginScreen = () => {
     try {
       const validation = loginSchema.parse({ email: email.trim(), password });
       
+      // Check rate limit before attempting login
+      const rateLimit = await checkRateLimit(validation.email);
+      if (rateLimit.locked) {
+        toast.error(`Hesabınız geçici olarak kilitlendi. ${formatLockoutTime(rateLimit.remainingSeconds || 0)} sonra tekrar deneyin.`);
+        setIsLoading(false);
+        return;
+      }
+      
       // Save remember me preference
       if (rememberMe) {
         localStorage.setItem('guestRememberMe', 'true');
@@ -228,7 +253,21 @@ const LoginScreen = () => {
         localStorage.removeItem('guestSavedEmail');
       }
       
-      await signIn(validation.email, validation.password);
+      const { error } = await signIn(validation.email, validation.password);
+      
+      if (error) {
+        // Log failed login attempt
+        await logLoginAttempt(validation.email, false, error.message);
+        
+        if (error.message?.includes('Invalid login credentials')) {
+          setErrors({ password: 'Geçersiz email veya şifre' });
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        // Log successful login attempt
+        await logLoginAttempt(validation.email, true, undefined, undefined, 'customer');
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
