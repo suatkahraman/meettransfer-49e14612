@@ -773,109 +773,272 @@ const AgencyHome = () => {
               </div>
             ) : (
               <>
-            {/* Upcoming Section - Card Layout */}
-            {upcomingJobs.length > 0 && (
-              <section>
-                <div className="flex items-center gap-2 py-2 mb-3">
-                  <span className="font-semibold">{t('upcomingTransfers')}</span>
-                  <Badge variant="secondary">{upcomingJobs.length}</Badge>
-                </div>
-                <div className="space-y-3">
-                  {upcomingJobs.map((res) => (
-                    <SwipeableReservationCard 
-                      key={res.id} 
-                      reservation={res}
-                      statusColors={statusColors}
-                      statusLabels={statusLabels}
-                      locale={locale}
-                      onView={() => navigate(`/agency/reservation/${res.id}`)}
-                      onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
-                      onCancel={() => handleCancelReservation(res.id)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Active Section - Card Layout */}
-            {activeJobs.length > 0 && (
-              <section>
-                <div className="flex items-center gap-2 py-2 mb-3">
-                  <span className="font-semibold">{t('activeTransfers') || 'Active Transfers'}</span>
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-700">{activeJobs.length}</Badge>
-                </div>
-                <div className="space-y-3">
-                  {activeJobs.map((res) => (
-                    <SwipeableReservationCard 
-                      key={res.id} 
-                      reservation={res}
-                      statusColors={statusColors}
-                      statusLabels={statusLabels}
-                      locale={locale}
-                      onView={() => navigate(`/agency/reservation/${res.id}`)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Past Incomplete Section - Card Layout */}
-            {pastIncompleteJobs.length > 0 && (
-              <section>
-                <div className="flex items-center gap-2 py-2 mb-3">
-                  <span className="font-semibold">{t('pastIncompleteTransfers') || 'Past (Incomplete)'}</span>
-                  <Badge variant="secondary" className="bg-orange-500/20 text-orange-700">{pastIncompleteJobs.length}</Badge>
-                </div>
-                <div className="space-y-3">
-                  {pastIncompleteJobs.map((res) => (
-                    <SwipeableReservationCard 
-                      key={res.id} 
-                      reservation={res}
-                      statusColors={statusColors}
-                      statusLabels={statusLabels}
-                      locale={locale}
-                      onView={() => navigate(`/agency/reservation/${res.id}`)}
-                      onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
-                      onCancel={() => handleCancelReservation(res.id)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Completed Section - Card Layout */}
-            {completedJobs.length > 0 && (
-              <section id="completed-section">
-                <div className="flex items-center gap-2 py-2 mb-3">
-                  <span className="font-semibold">{t('completedTransfers') || 'Completed Transfers'}</span>
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-700">{completedJobs.length}</Badge>
-                </div>
-                <div className="space-y-3">
-                  {completedJobs.slice(0, 10).map((res) => (
-                    <SwipeableReservationCard 
-                      key={res.id} 
-                      reservation={res}
-                      statusColors={statusColors}
-                      statusLabels={statusLabels}
-                      locale={locale}
-                      onView={() => navigate(`/agency/reservation/${res.id}`)}
-                    />
-                  ))}
-                  {completedJobs.length > 10 && (
-                    <Card 
-                      className="cursor-pointer hover:shadow-md transition-shadow text-center"
-                      onClick={() => navigate('/agency/reports')}
-                    >
-                      <CardContent className="py-4">
-                        <p className="text-muted-foreground">
-                          +{completedJobs.length - 10} {t('moreTransfers') || 'daha fazla transfer'}
-                        </p>
-                      </CardContent>
-                    </Card>
+            {/* Transfer Categories - Collapsible Card Style */}
+            <div className="space-y-3">
+              {/* Upcoming Transfers Card */}
+              {upcomingJobs.length > 0 && (
+                <Card 
+                  className={cn(
+                    "cursor-pointer transition-all duration-200 hover:shadow-lg",
+                    expandedSections.upcoming 
+                      ? "ring-2 ring-primary/30 shadow-lg" 
+                      : "hover:border-primary/30"
                   )}
-                </div>
-              </section>
-            )}
+                >
+                  <CardContent 
+                    className="p-4"
+                    onClick={() => toggleSection('upcoming')}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-full bg-primary/10">
+                          <Calendar className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">{t('upcomingTransfers')}</p>
+                          <p className="text-sm text-muted-foreground">{t('scheduledTransfers') || 'Planlanmış transferler'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-primary text-primary-foreground text-base px-3 py-1">
+                          {upcomingJobs.length}
+                        </Badge>
+                        <ChevronDown className={cn(
+                          "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                          expandedSections.upcoming && "rotate-180"
+                        )} />
+                      </div>
+                    </div>
+                  </CardContent>
+                  <AnimatePresence>
+                    {expandedSections.upcoming && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden border-t"
+                      >
+                        <div className="p-3 space-y-3 bg-muted/30">
+                          {upcomingJobs.map((res) => (
+                            <SwipeableReservationCard 
+                              key={res.id} 
+                              reservation={res}
+                              statusColors={statusColors}
+                              statusLabels={statusLabels}
+                              locale={locale}
+                              onView={() => navigate(`/agency/reservation/${res.id}`)}
+                              onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
+                              onCancel={() => handleCancelReservation(res.id)}
+                            />
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              )}
+
+              {/* Active Transfers Card */}
+              {activeJobs.length > 0 && (
+                <Card 
+                  className={cn(
+                    "cursor-pointer transition-all duration-200 hover:shadow-lg border-blue-200 dark:border-blue-800",
+                    expandedSections.active 
+                      ? "ring-2 ring-blue-400/30 shadow-lg" 
+                      : "hover:border-blue-400/50"
+                  )}
+                >
+                  <CardContent 
+                    className="p-4 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-950/30"
+                    onClick={() => toggleSection('active')}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-full bg-blue-500/20">
+                          <Car className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-blue-800 dark:text-blue-200">{t('activeTransfers') || 'Aktif Transferler'}</p>
+                          <p className="text-sm text-blue-600/70 dark:text-blue-400/70">{t('inProgressNow') || 'Şu an devam eden'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-blue-500 text-white text-base px-3 py-1 animate-pulse">
+                          {activeJobs.length}
+                        </Badge>
+                        <ChevronDown className={cn(
+                          "h-5 w-5 text-blue-500 transition-transform duration-200",
+                          expandedSections.active && "rotate-180"
+                        )} />
+                      </div>
+                    </div>
+                  </CardContent>
+                  <AnimatePresence>
+                    {expandedSections.active && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden border-t border-blue-200 dark:border-blue-800"
+                      >
+                        <div className="p-3 space-y-3 bg-blue-50/30 dark:bg-blue-950/20">
+                          {activeJobs.map((res) => (
+                            <SwipeableReservationCard 
+                              key={res.id} 
+                              reservation={res}
+                              statusColors={statusColors}
+                              statusLabels={statusLabels}
+                              locale={locale}
+                              onView={() => navigate(`/agency/reservation/${res.id}`)}
+                            />
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              )}
+
+              {/* Past Incomplete Transfers Card */}
+              {pastIncompleteJobs.length > 0 && (
+                <Card 
+                  className={cn(
+                    "cursor-pointer transition-all duration-200 hover:shadow-lg border-orange-200 dark:border-orange-800",
+                    expandedSections.pastIncomplete 
+                      ? "ring-2 ring-orange-400/30 shadow-lg" 
+                      : "hover:border-orange-400/50"
+                  )}
+                >
+                  <CardContent 
+                    className="p-4 bg-gradient-to-r from-orange-50/50 to-transparent dark:from-orange-950/30"
+                    onClick={() => toggleSection('pastIncomplete')}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-full bg-orange-500/20">
+                          <History className="h-5 w-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-orange-800 dark:text-orange-200">{t('pastIncompleteTransfers') || 'Geçmiş (Tamamlanmamış)'}</p>
+                          <p className="text-sm text-orange-600/70 dark:text-orange-400/70">{t('requiresAttention') || 'Dikkat gerektiren'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-orange-500 text-white text-base px-3 py-1">
+                          {pastIncompleteJobs.length}
+                        </Badge>
+                        <ChevronDown className={cn(
+                          "h-5 w-5 text-orange-500 transition-transform duration-200",
+                          expandedSections.pastIncomplete && "rotate-180"
+                        )} />
+                      </div>
+                    </div>
+                  </CardContent>
+                  <AnimatePresence>
+                    {expandedSections.pastIncomplete && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden border-t border-orange-200 dark:border-orange-800"
+                      >
+                        <div className="p-3 space-y-3 bg-orange-50/30 dark:bg-orange-950/20">
+                          {pastIncompleteJobs.map((res) => (
+                            <SwipeableReservationCard 
+                              key={res.id} 
+                              reservation={res}
+                              statusColors={statusColors}
+                              statusLabels={statusLabels}
+                              locale={locale}
+                              onView={() => navigate(`/agency/reservation/${res.id}`)}
+                              onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
+                              onCancel={() => handleCancelReservation(res.id)}
+                            />
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              )}
+
+              {/* Completed Transfers Card */}
+              {completedJobs.length > 0 && (
+                <Card 
+                  id="completed-section"
+                  className={cn(
+                    "cursor-pointer transition-all duration-200 hover:shadow-lg border-green-200 dark:border-green-800",
+                    expandedSections.completed 
+                      ? "ring-2 ring-green-400/30 shadow-lg" 
+                      : "hover:border-green-400/50"
+                  )}
+                >
+                  <CardContent 
+                    className="p-4 bg-gradient-to-r from-green-50/50 to-transparent dark:from-green-950/30"
+                    onClick={() => toggleSection('completed')}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-full bg-green-500/20">
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-green-800 dark:text-green-200">{t('completedTransfers') || 'Tamamlanan Transferler'}</p>
+                          <p className="text-sm text-green-600/70 dark:text-green-400/70">{t('successfullyCompleted') || 'Başarıyla tamamlanan'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-500 text-white text-base px-3 py-1">
+                          {completedJobs.length}
+                        </Badge>
+                        <ChevronDown className={cn(
+                          "h-5 w-5 text-green-500 transition-transform duration-200",
+                          expandedSections.completed && "rotate-180"
+                        )} />
+                      </div>
+                    </div>
+                  </CardContent>
+                  <AnimatePresence>
+                    {expandedSections.completed && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden border-t border-green-200 dark:border-green-800"
+                      >
+                        <div className="p-3 space-y-3 bg-green-50/30 dark:bg-green-950/20">
+                          {completedJobs.slice(0, 10).map((res) => (
+                            <SwipeableReservationCard 
+                              key={res.id} 
+                              reservation={res}
+                              statusColors={statusColors}
+                              statusLabels={statusLabels}
+                              locale={locale}
+                              onView={() => navigate(`/agency/reservation/${res.id}`)}
+                            />
+                          ))}
+                          {completedJobs.length > 10 && (
+                            <Card 
+                              className="cursor-pointer hover:shadow-md transition-shadow text-center bg-white dark:bg-slate-900"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate('/agency/reports');
+                              }}
+                            >
+                              <CardContent className="py-4">
+                                <p className="text-muted-foreground">
+                                  +{completedJobs.length - 10} {t('moreTransfers') || 'daha fazla transfer'}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              )}
+            </div>
               </>
             )}
           </div>
