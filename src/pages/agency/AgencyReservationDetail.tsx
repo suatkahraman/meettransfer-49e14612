@@ -62,6 +62,7 @@ interface AgencyReservationDetail {
   agency_profit: number;
   agency_notes: string | null;
   payment_status: string;
+  agency_price_currency: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -626,7 +627,7 @@ const AgencyReservationDetail = () => {
             <CardContent>
               <div className="text-center py-2">
                 <p className="text-3xl font-bold text-green-700 dark:text-green-300">
-                  {getCurrencySymbol(reservation?.price_currency)}{agencyDetails.company_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                  {getCurrencySymbol(agencyDetails.agency_price_currency)}{agencyDetails.company_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-sm text-green-600/80 dark:text-green-400/80 mt-1">
                   {t('agencyExpense') || 'Agency Expense'}
