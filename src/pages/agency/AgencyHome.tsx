@@ -315,6 +315,9 @@ const AgencyHome = () => {
   // Cancel reservation handler
   const handleCancelReservation = useCallback(async (reservationId: string) => {
     try {
+      // Find reservation details for notification
+      const reservation = reservations.find(r => r.id === reservationId);
+      
       const { error } = await supabase
         .from('reservations')
         .update({ status: 'cancelled_by_agency' })
@@ -322,13 +325,31 @@ const AgencyHome = () => {
 
       if (error) throw error;
 
+      // Send notification to admin
+      try {
+        await supabase.functions.invoke('create-notification', {
+          body: {
+            notify_admins: true,
+            reservation_id: reservationId,
+            title: '🚫 Acenta Rezervasyon İptali',
+            message: `${agency?.agency_name || 'Acenta'} tarafından iptal edildi: ${reservation?.customer_name || 'Müşteri'} - ${reservation?.pickup_date || ''}`,
+            type: 'reservation_cancelled',
+            send_push: true,
+          },
+        });
+        console.log('Admin notification sent for cancellation');
+      } catch (notifyError) {
+        console.error('Failed to send admin notification:', notifyError);
+        // Don't fail the cancellation if notification fails
+      }
+
       toast.success(t('reservationCancelled') || 'Rezervasyon iptal edildi');
       fetchData(); // Refresh data
     } catch (error) {
       console.error('Cancel error:', error);
       toast.error(t('cancelError') || 'İptal işlemi başarısız');
     }
-  }, [fetchData, t]);
+  }, [fetchData, t, reservations, agency]);
 
   const now = new Date();
   const startOfToday = new Date(now);
