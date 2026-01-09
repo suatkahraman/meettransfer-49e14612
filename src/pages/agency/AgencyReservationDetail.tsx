@@ -99,8 +99,9 @@ const statusLabels: Record<string, string> = {
 };
 
 const paymentStatusLabels: Record<string, string> = {
-  'not_paid': 'Not Paid',
-  'customer_pay_cash': 'Customer Pay Cash',
+  not_paid: 'Not Paid',
+  partially_paid: 'Partially Paid',
+  paid: 'Paid',
 };
 
 const AgencyReservationDetail = () => {
@@ -201,19 +202,19 @@ const AgencyReservationDetail = () => {
     setSaving(true);
 
     try {
-      // Get current user ID for RLS policy
+      const allowedPaymentStatuses = ['not_paid', 'partially_paid', 'paid'];
+      const normalizedPaymentStatus = allowedPaymentStatuses.includes(paymentStatus)
+        ? paymentStatus
+        : 'not_paid';
+
+      // Get current user ID for RLS policy (needed when inserting agency details)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
-
-      // Update agency reservation details - set payment status to customer_pay_cash for cash payments
-      const updateData = {
-        payment_status: isCashPayment ? 'customer_pay_cash' : paymentStatus,
-      };
 
       if (agencyDetails) {
         const { error } = await supabase
           .from('agency_reservation_details')
-          .update(updateData)
+          .update({ payment_status: normalizedPaymentStatus })
           .eq('id', agencyDetails.id);
         if (error) throw error;
       } else {
@@ -223,7 +224,7 @@ const AgencyReservationDetail = () => {
           .insert({
             reservation_id: id,
             agency_user_id: user.id,
-            payment_status: isCashPayment ? 'customer_pay_cash' : paymentStatus,
+            payment_status: normalizedPaymentStatus,
           });
         if (error) throw error;
       }
