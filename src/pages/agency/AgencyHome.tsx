@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt, Volume2, History } from 'lucide-react';
+import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt, Volume2, History, AlertCircle } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import AgencyLanguageSelector from '@/components/agency/AgencyLanguageSelector';
 import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
@@ -117,6 +117,7 @@ const AgencyHome = () => {
     completedReservations: 0
   });
   const [expandedSections, setExpandedSections] = useState({
+    awaitingApproval: false,
     upcoming: false,
     active: false,
     pastIncomplete: false,
@@ -273,7 +274,7 @@ const AgencyHome = () => {
     await fetchData(true);
   };
 
-  const toggleSection = (section: 'upcoming' | 'active' | 'pastIncomplete' | 'completed' | 'accounting' | 'notificationSettings' | 'notificationHistory') => {
+  const toggleSection = (section: 'awaitingApproval' | 'upcoming' | 'active' | 'pastIncomplete' | 'completed' | 'accounting' | 'notificationSettings' | 'notificationHistory') => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -358,10 +359,16 @@ const AgencyHome = () => {
   const startOfToday = new Date(now);
   startOfToday.setHours(0, 0, 0, 0);
 
+  // Reservations awaiting agency price approval
+  const awaitingApprovalJobs = filteredReservations.filter(
+    (r) => r.status === 'waiting_for_agency_approval'
+  );
+
   // Keep same-day reservations visible even if pickup_time already passed
+  // Exclude waiting_for_agency_approval from upcoming
   const upcomingJobs = filteredReservations.filter(
     (r) =>
-      !['completed', 'cancelled', 'active'].includes(r.status) &&
+      !['completed', 'cancelled', 'active', 'waiting_for_agency_approval'].includes(r.status) &&
       new Date(`${r.pickup_date}T00:00:00`) >= startOfToday
   );
   const activeJobs = filteredReservations.filter((r) => r.status === 'active');
@@ -826,6 +833,69 @@ const AgencyHome = () => {
               <>
             {/* Transfer Categories - Collapsible Card Style */}
             <div className="space-y-3">
+              {/* Awaiting Price Approval Card */}
+              {awaitingApprovalJobs.length > 0 && (
+                <Card 
+                  className={cn(
+                    "cursor-pointer transition-all duration-200 hover:shadow-lg border-purple-200 dark:border-purple-800",
+                    expandedSections.awaitingApproval 
+                      ? "ring-2 ring-purple-400/30 shadow-lg" 
+                      : "hover:border-purple-400/50"
+                  )}
+                >
+                  <CardContent 
+                    className="p-4 bg-gradient-to-r from-purple-50/50 to-transparent dark:from-purple-950/30"
+                    onClick={() => toggleSection('awaitingApproval')}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-full bg-purple-500/20">
+                          <AlertCircle className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-purple-800 dark:text-purple-200">{t('awaitingPriceApproval') || 'Fiyat Onayı Bekleniyor'}</p>
+                          <p className="text-sm text-purple-600/70 dark:text-purple-400/70">{t('priceSetByAdmin') || 'Admin fiyat belirledi'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-purple-500 text-white text-base px-3 py-1 animate-pulse">
+                          {awaitingApprovalJobs.length}
+                        </Badge>
+                        <ChevronDown className={cn(
+                          "h-5 w-5 text-purple-500 transition-transform duration-200",
+                          expandedSections.awaitingApproval && "rotate-180"
+                        )} />
+                      </div>
+                    </div>
+                  </CardContent>
+                  <AnimatePresence>
+                    {expandedSections.awaitingApproval && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden border-t border-purple-200 dark:border-purple-800"
+                      >
+                        <div className="p-3 space-y-3 bg-purple-50/30 dark:bg-purple-950/20">
+                          {awaitingApprovalJobs.map((res) => (
+                            <SwipeableReservationCard 
+                              key={res.id} 
+                              reservation={res}
+                              statusColors={statusColors}
+                              statusLabels={statusLabels}
+                              locale={locale}
+                              onView={() => navigate(`/agency/reservation/${res.id}`)}
+                              onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
+                              onCancel={() => handleCancelReservation(res.id)}
+                            />
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              )}
+
               {/* Upcoming Transfers Card */}
               {upcomingJobs.length > 0 && (
                 <Card 
