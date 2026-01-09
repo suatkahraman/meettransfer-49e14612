@@ -94,19 +94,25 @@ serve(async (req) => {
       .eq('reservation_id', reservation_id)
       .maybeSingle();
 
-    // Admin fiyatı (company_amount) = Acenta'nın gideri = Acenta Geliri for admin
+    // Admin fiyatı (company_amount) = Acenta'nın kabul ettiği fiyat
     const adminPrice = agencyDetail?.company_amount || 0;
     const agencyCurrency = agencyDetail?.agency_price_currency || 'EUR';
     
-    // Yolcu nakit = Acenta'nın geliri (passenger_cash_amount) - bu acentanın borcundan düşer
+    // Yolcu nakit = Acenta'nın yolcudan aldığı nakit
     const passengerCashAmount = reservation.passenger_cash_amount || 0;
     const passengerCashCurrency = reservation.passenger_cash_currency || agencyCurrency;
 
-    // Net amount to add to agency debt:
-    // Gider (admin fiyatı) - Gelir (yolcu nakit) = Net borç artışı
-    const netAmountToAdd = Math.max(0, adminPrice - passengerCashAmount);
+    // Net amount calculation:
+    // Acenta Fiyatı: 100 USD (adminPrice) - Bu acenta bakiyesine eklenir (borç)
+    // Nakit Alınacak: 120 USD (passengerCashAmount) - Bu acenta bakiyesinden düşer (gelir)
+    // Net Borç = adminPrice - passengerCashAmount = 100 - 120 = -20 (yani 20 USD acenta lehine)
+    // 
+    // Örnek 2:
+    // Acenta Fiyatı: 100 USD, Nakit Alınacak: 80 USD
+    // Net Borç = 100 - 80 = 20 USD (acenta aleyhine, borç olarak eklenir)
+    const netAmount = adminPrice - passengerCashAmount;
 
-    console.log(`Admin Price (expense): ${adminPrice} ${agencyCurrency}, Passenger cash (income): ${passengerCashAmount}, Net debt to add: ${netAmountToAdd}`);
+    console.log(`Admin Price (agency expense): ${adminPrice} ${agencyCurrency}, Passenger cash (agency income): ${passengerCashAmount}, Net: ${netAmount}`);
 
     // === DRIVER BALANCE DEDUCTION ===
     // Şoförün topladığı nakit tutarı şoförün alacağından düşülecek
@@ -159,14 +165,15 @@ serve(async (req) => {
     }
     // === END DRIVER BALANCE DEDUCTION ===
 
-    if (netAmountToAdd <= 0) {
-      console.log('No amount to add to agency balance (passenger cash covers the price)');
+    // If net amount is 0, no balance change needed
+    if (netAmount === 0) {
+      console.log('No balance change needed - passenger cash equals agency price');
       return new Response(
         JSON.stringify({ 
-          message: 'No amount to add - passenger cash covers the price',
+          message: 'No balance change - cash equals price',
           admin_price: adminPrice,
           passenger_cash: passengerCashAmount,
-          net_debt: 0,
+          net_balance_change: 0,
           driver_cash_deducted: driverCashCollected
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -198,16 +205,20 @@ serve(async (req) => {
     let currentCurrencyBalance = 0;
     if (existingTransactions) {
       existingTransactions.forEach(tx => {
-        if (tx.type === 'top_up') {
-          currentCurrencyBalance += tx.amount;
+        if (tx.type === 'top_up' || tx.type === 'cash_surplus') {
+          // top_up reduces debt, cash_surplus also reduces debt
+          currentCurrencyBalance -= tx.amount;
         } else {
-          currentCurrencyBalance -= Math.abs(tx.amount);
+          // reservation_completed adds debt
+          currentCurrencyBalance += tx.amount;
         }
       });
     }
 
-    // New balance for this currency after adding the net amount
-    const newCurrencyBalance = currentCurrencyBalance + netAmountToAdd;
+    // New balance for this currency after applying net amount
+    // Positive netAmount = more debt for agency
+    // Negative netAmount = less debt for agency (cash income exceeds price)
+    const newCurrencyBalance = currentCurrencyBalance + netAmount;
 
     // Get currency symbol for description
     const currencySymbols: Record<string, string> = {
@@ -221,18 +232,25 @@ serve(async (req) => {
     const passengerCashSymbol = currencySymbols[passengerCashCurrency] || passengerCashCurrency;
 
     // Create transaction record with detailed description and currency
-    let description = `Transfer tamamlandı - Gider: ${currencySymbol}${adminPrice.toFixed(2)}`;
+    let description = `Transfer tamamlandı - Acenta Fiyatı: ${currencySymbol}${adminPrice.toFixed(2)}`;
     if (passengerCashAmount > 0) {
-      description += ` | Gelir (Yolcu nakit): ${passengerCashSymbol}${passengerCashAmount.toFixed(2)}`;
-      description += ` | Net Borç: ${currencySymbol}${netAmountToAdd.toFixed(2)}`;
+      description += ` | Nakit Alınan: ${passengerCashSymbol}${passengerCashAmount.toFixed(2)}`;
+      if (netAmount > 0) {
+        description += ` | Net Borç: ${currencySymbol}${netAmount.toFixed(2)}`;
+      } else if (netAmount < 0) {
+        description += ` | Net Alacak: ${currencySymbol}${Math.abs(netAmount).toFixed(2)}`;
+      }
     }
+
+    // Transaction type based on whether it's adding or reducing debt
+    const transactionType = netAmount > 0 ? 'reservation_completed' : 'cash_surplus';
 
     const { error: txError } = await supabase
       .from('agency_transactions')
       .insert({
         agency_id: agency.id,
-        amount: netAmountToAdd,
-        type: 'reservation_completed',
+        amount: Math.abs(netAmount),
+        type: transactionType,
         description: description,
         balance_after: newCurrencyBalance,
         reservation_id: reservation_id,
@@ -243,14 +261,14 @@ serve(async (req) => {
       console.error('Failed to create transaction:', txError);
     }
 
-    console.log(`Added net ${currencySymbol}${netAmountToAdd} (${agencyCurrency}) to ${agency.agency_name}. Admin price: ${adminPrice}, Passenger cash: ${passengerCashAmount}, New ${agencyCurrency} balance: ${newCurrencyBalance}`);
+    console.log(`Applied net ${currencySymbol}${netAmount} (${agencyCurrency}) to ${agency.agency_name}. Admin price: ${adminPrice}, Passenger cash: ${passengerCashAmount}, New ${agencyCurrency} balance: ${newCurrencyBalance}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         admin_price: adminPrice,
         passenger_cash_amount: passengerCashAmount,
-        net_added_amount: netAmountToAdd,
+        net_balance_change: netAmount,
         currency: agencyCurrency,
         new_currency_balance: newCurrencyBalance,
         agency_name: agency.agency_name,
