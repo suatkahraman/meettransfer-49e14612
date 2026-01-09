@@ -205,9 +205,12 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
     }
   };
 
-  const canSwipeRight = (reservation.status === 'sent_to_driver' || reservation.status === 'assigned' || reservation.status === 'confirmed') && onAccept;
-  // Only allow swipe left if validation passes
-  const canSwipeLeft = reservation.status === 'active' && onComplete && completionValidation.canComplete;
+  // Check if reservation is in a cancelled/inactive state - no swipe allowed
+  const isCancelledOrInactive = ['cancelled', 'cancelled_by_customer', 'cancelled_by_agency', 'no_show', 'completed'].includes(reservation.status);
+  
+  const canSwipeRight = !isCancelledOrInactive && (reservation.status === 'sent_to_driver' || reservation.status === 'assigned' || reservation.status === 'confirmed') && onAccept;
+  // Only allow swipe left if validation passes and not cancelled
+  const canSwipeLeft = !isCancelledOrInactive && reservation.status === 'active' && onComplete && completionValidation.canComplete;
 
   return (
     <div className="relative overflow-hidden rounded-xl">
