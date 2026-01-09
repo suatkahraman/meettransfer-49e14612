@@ -21,6 +21,7 @@ import { getCurrencySymbol, calculateCurrencyBalances, CurrencyBalance } from '@
 import AgencyNotificationHistory from '@/components/agency/AgencyNotificationHistory';
 import AgencyReservationFilters, { ReservationFilters } from '@/components/agency/AgencyReservationFilters';
 import AgencyBottomNav from '@/components/agency/AgencyBottomNav';
+import SwipeableReservationCard from '@/components/agency/SwipeableReservationCard';
 
 interface Driver {
   id: string;
@@ -727,7 +728,19 @@ const AgencyHome = () => {
                       className="space-y-3 overflow-hidden"
                     >
                       {upcomingJobs.map((res) => (
-                        <ReservationCard key={res.id} reservation={res} />
+                        <SwipeableReservationCard 
+                          key={res.id} 
+                          reservation={res}
+                          statusColors={statusColors}
+                          statusLabels={statusLabels}
+                          locale={locale}
+                          onView={() => navigate(`/agency/reservation/${res.id}`)}
+                          onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
+                          onCancel={() => {
+                            toast.error(t('confirmCancelFromDetail') || 'İptal için detay sayfasına gidin');
+                            navigate(`/agency/reservation/${res.id}`);
+                          }}
+                        />
                       ))}
                     </motion.div>
                   )}
@@ -760,7 +773,14 @@ const AgencyHome = () => {
                       className="space-y-3 overflow-hidden"
                     >
                       {activeJobs.map((res) => (
-                        <ReservationCard key={res.id} reservation={res} />
+                        <SwipeableReservationCard 
+                          key={res.id} 
+                          reservation={res}
+                          statusColors={statusColors}
+                          statusLabels={statusLabels}
+                          locale={locale}
+                          onView={() => navigate(`/agency/reservation/${res.id}`)}
+                        />
                       ))}
                     </motion.div>
                   )}
@@ -777,7 +797,19 @@ const AgencyHome = () => {
                 </div>
                 <div className="space-y-3">
                   {pastIncompleteJobs.map((res) => (
-                    <ReservationCard key={res.id} reservation={res} />
+                    <SwipeableReservationCard 
+                      key={res.id} 
+                      reservation={res}
+                      statusColors={statusColors}
+                      statusLabels={statusLabels}
+                      locale={locale}
+                      onView={() => navigate(`/agency/reservation/${res.id}`)}
+                      onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
+                      onCancel={() => {
+                        toast.error(t('confirmCancelFromDetail') || 'İptal için detay sayfasına gidin');
+                        navigate(`/agency/reservation/${res.id}`);
+                      }}
+                    />
                   ))}
                 </div>
               </section>
@@ -792,7 +824,14 @@ const AgencyHome = () => {
                 </div>
                 <div className="space-y-3">
                   {completedJobs.slice(0, 10).map((res) => (
-                    <ReservationCard key={res.id} reservation={res} />
+                    <SwipeableReservationCard 
+                      key={res.id} 
+                      reservation={res}
+                      statusColors={statusColors}
+                      statusLabels={statusLabels}
+                      locale={locale}
+                      onView={() => navigate(`/agency/reservation/${res.id}`)}
+                    />
                   ))}
                   {completedJobs.length > 10 && (
                     <Card 
