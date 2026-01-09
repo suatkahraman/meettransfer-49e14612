@@ -24,6 +24,7 @@ import AgencyBottomNav from '@/components/agency/AgencyBottomNav';
 import SwipeableReservationCard from '@/components/agency/SwipeableReservationCard';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import PullToRefreshIndicator from '@/components/agency/PullToRefreshIndicator';
+import AgencyHomeSkeleton, { ReservationCardSkeleton, SectionSkeleton } from '@/components/agency/AgencyHomeSkeleton';
 
 interface Driver {
   id: string;
@@ -558,8 +559,17 @@ const AgencyHome = () => {
 
       <main className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-2xl">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="space-y-4 sm:space-y-6">
+            {/* Skeleton for search/filters */}
+            <div className="space-y-3">
+              <div className="h-10 bg-muted animate-pulse rounded-lg" />
+            </div>
+            
+            {/* Skeleton for upcoming section */}
+            <SectionSkeleton count={2} />
+            
+            {/* Skeleton for active section */}
+            <SectionSkeleton count={1} />
           </div>
         ) : (
           <div className="space-y-4 sm:space-y-6">
