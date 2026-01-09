@@ -230,6 +230,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noCompletedJobs: 'Bu ay tamamlanan iş yok',
     jobs: 'İşler',
     noJobs: 'İş yok',
+    updated: 'Güncellendi',
+    confirmUpdate: 'Güncellemeyi Onayla',
   },
   EN: {
     driverPanel: 'Driver Panel',
@@ -426,6 +428,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noCompletedJobs: 'No completed jobs this month',
     jobs: 'Jobs',
     noJobs: 'No jobs',
+    updated: 'Updated',
+    confirmUpdate: 'Confirm Update',
   },
   DE: {
     driverPanel: 'Fahrer-Panel',
@@ -622,6 +626,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noCompletedJobs: 'Keine abgeschlossenen Aufträge diesen Monat',
     jobs: 'Aufträge',
     noJobs: 'Keine Aufträge',
+    updated: 'Aktualisiert',
+    confirmUpdate: 'Aktualisierung Bestätigen',
   },
   FR: {
     driverPanel: 'Panneau Chauffeur',
@@ -818,6 +824,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noCompletedJobs: 'Aucune tâche terminée ce mois',
     jobs: 'Tâches',
     noJobs: 'Aucune tâche',
+    updated: 'Mis à jour',
+    confirmUpdate: 'Confirmer la mise à jour',
   },
   RU: {
     driverPanel: 'Панель Водителя',
@@ -1014,6 +1022,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noCompletedJobs: 'Нет завершенных заказов в этом месяце',
     jobs: 'Заказы',
     noJobs: 'Нет заказов',
+    updated: 'Обновлено',
+    confirmUpdate: 'Подтвердить обновление',
   },
   AR: {
     driverPanel: 'لوحة السائق',
@@ -1210,6 +1220,8 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     noCompletedJobs: 'لا توجد وظائف مكتملة هذا الشهر',
     jobs: 'الوظائف',
     noJobs: 'لا توجد وظائف',
+    updated: 'محدث',
+    confirmUpdate: 'تأكيد التحديث',
   },
 };
 
