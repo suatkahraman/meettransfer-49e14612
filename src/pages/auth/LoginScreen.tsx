@@ -66,7 +66,7 @@ const newPasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
-type ViewMode = 'login' | 'forgot' | 'reset' | 'reset-sent';
+type ViewMode = 'login' | 'forgot' | 'reset' | 'reset-sent' | '2fa';
 
 const LoginScreen = () => {
   const [searchParams] = useSearchParams();
@@ -84,11 +84,22 @@ const LoginScreen = () => {
   });
   const [copied, setCopied] = useState(false);
   const [lockoutCountdown, setLockoutCountdown] = useState<number | null>(null);
+  const [pendingRole, setPendingRole] = useState<string | null>(null);
   const { signIn, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { isIOS, isStandalone } = usePWADetect();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { rateLimitStatus, checkRateLimit, logLoginAttempt, formatLockoutTime } = useLoginRateLimit();
+  const { 
+    twoFactorState, 
+    isLoading: is2FALoading, 
+    error: twoFactorError, 
+    initiate2FA, 
+    verify2FA, 
+    resendOTP, 
+    cancel2FA,
+    checkTrustedDevice 
+  } = useTwoFactorAuth();
   const navigate = useNavigate();
 
   // Lockout countdown timer
@@ -198,9 +209,9 @@ const LoginScreen = () => {
     }
   }, [searchParams, user, authLoading, handleGoogleLogin]);
 
-  // Role-based redirect after login
+  // Role-based redirect after login (only if not pending 2FA)
   useEffect(() => {
-    if (user && !roleLoading && role) {
+    if (user && !roleLoading && role && viewMode !== '2fa') {
       switch (role) {
         case 'admin':
           navigate('/admin', { replace: true });
@@ -215,7 +226,39 @@ const LoginScreen = () => {
           navigate('/customer', { replace: true });
       }
     }
-  }, [user, role, roleLoading, navigate]);
+  }, [user, role, roleLoading, navigate, viewMode]);
+
+  // Handle 2FA verification success
+  const handle2FAVerify = async (code: string) => {
+    const result = await verify2FA(code);
+    if (result.success && user && pendingRole) {
+      // Log successful login after 2FA
+      await logLoginAttempt(user.email || '', true, undefined, undefined, pendingRole);
+      
+      // Redirect based on role
+      switch (pendingRole) {
+        case 'admin':
+          navigate('/admin', { replace: true });
+          break;
+        case 'driver':
+          navigate('/driver', { replace: true });
+          break;
+        case 'agency':
+          navigate('/agency', { replace: true });
+          break;
+        default:
+          navigate('/customer', { replace: true });
+      }
+    }
+  };
+
+  // Handle 2FA cancel - sign out and go back to login
+  const handle2FACancel = async () => {
+    cancel2FA();
+    setPendingRole(null);
+    setViewMode('login');
+    await supabase.auth.signOut();
+  };
 
   // If already logged in, show loading
   if (authLoading || (user && roleLoading)) {
@@ -255,7 +298,11 @@ const LoginScreen = () => {
         localStorage.removeItem('guestSavedEmail');
       }
       
-      const { error } = await signIn(validation.email, validation.password);
+      // Use supabase directly to get the user data for 2FA check
+      const { error, data: authData } = await supabase.auth.signInWithPassword({
+        email: validation.email,
+        password: validation.password,
+      });
       
       if (error) {
         // Log failed login attempt
@@ -266,9 +313,30 @@ const LoginScreen = () => {
         } else {
           toast.error(error.message);
         }
-      } else {
-        // Log successful login attempt
-        await logLoginAttempt(validation.email, true, undefined, undefined, 'customer');
+      } else if (authData?.user) {
+        // Check user role to determine if 2FA is needed
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', authData.user.id)
+          .single();
+        
+        const userRole = roleData?.role || 'customer';
+        
+        // Check if device is trusted
+        const isTrusted = await checkTrustedDevice(authData.user.id);
+        
+        if (!isTrusted) {
+          // Device not trusted - require 2FA
+          setPendingRole(userRole);
+          setViewMode('2fa');
+          const langCode = language === 'TR' ? 'tr' : 'en';
+          await initiate2FA(authData.user.id, validation.email, userRole, langCode);
+          toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
+        } else {
+          // Device trusted - proceed with login
+          await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
+        }
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -364,6 +432,19 @@ const LoginScreen = () => {
 
   const renderContent = () => {
     switch (viewMode) {
+      case '2fa':
+        return (
+          <TwoFactorVerification
+            email={twoFactorState.email || ''}
+            role={twoFactorState.role || 'customer'}
+            isLoading={is2FALoading}
+            error={twoFactorError}
+            onVerify={handle2FAVerify}
+            onResend={resendOTP}
+            onCancel={handle2FACancel}
+          />
+        );
+
       case 'forgot':
         return (
           <Card className="w-full max-w-md">
