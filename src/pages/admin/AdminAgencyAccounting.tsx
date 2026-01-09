@@ -886,17 +886,34 @@ const AdminAgencyAccounting = () => {
                         const currentMonthPaid = currentMonthPaymentsByCurrency[currency] || 0;
                         const totalBalance = carryover + currentMonthDebt - currentMonthPaid;
                         
-                        if (totalBalance !== 0 || currency === agencyCurrency) {
+                        // Sadece bakiye olan para birimlerini göster - agencyCurrency için ayrıcalık yok
+                        if (totalBalance !== 0) {
                           totalBalancesByCurrency.push({ currency, balance: totalBalance });
                         }
                       });
                       
-                      // Sort: agency currency first
-                      totalBalancesByCurrency.sort((a, b) => {
-                        if (a.currency === agencyCurrency) return -1;
-                        if (b.currency === agencyCurrency) return 1;
-                        return 0;
-                      });
+                      // Eğer hiç bakiye yoksa bilgi mesajı göster
+                      if (totalBalancesByCurrency.length === 0) {
+                        return (
+                          <Card className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                <div className="p-2 rounded-full bg-gray-500/20">
+                                  <Banknote className="h-4 w-4 text-gray-600" />
+                                </div>
+                                Güncel Bakiye
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="text-2xl font-bold text-gray-700 dark:text-gray-400">Hesaplaşıldı</div>
+                              <p className="text-xs text-muted-foreground mt-2">Tüm para birimlerinde bakiye sıfır</p>
+                            </CardContent>
+                          </Card>
+                        );
+                      }
+                      
+                      // Sort by absolute balance (highest first)
+                      totalBalancesByCurrency.sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance));
                       
                       return totalBalancesByCurrency.map(({ currency, balance }) => (
                         <Card key={`balance-${currency}`} className={`relative overflow-hidden ${
