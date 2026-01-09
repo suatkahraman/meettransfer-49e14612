@@ -1354,23 +1354,62 @@ export type Database = {
           },
         ]
       }
+      two_factor_otp: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          otp_code: string
+          user_agent: string | null
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          otp_code: string
+          user_agent?: string | null
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          otp_code?: string
+          user_agent?: string | null
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
+          two_factor_enabled: boolean | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
+          two_factor_enabled?: boolean | null
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          two_factor_enabled?: boolean | null
           user_id?: string
         }
         Relationships: []
@@ -1531,6 +1570,16 @@ export type Database = {
         Args: { p_email: string; p_ip_address?: string }
         Returns: Json
       }
+      cleanup_expired_otps: { Args: never; Returns: undefined }
+      generate_otp: {
+        Args: {
+          p_email: string
+          p_ip_address?: string
+          p_user_agent?: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       generate_reservation_code: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -1550,6 +1599,10 @@ export type Database = {
           p_user_id?: string
         }
         Returns: undefined
+      }
+      verify_otp: {
+        Args: { p_otp_code: string; p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {

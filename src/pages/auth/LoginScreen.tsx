@@ -5,6 +5,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { usePWADetect } from '@/hooks/usePWADetect';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLoginRateLimit } from '@/hooks/useLoginRateLimit';
+import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle, Share2, Check, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
+import TwoFactorVerification from '@/components/auth/TwoFactorVerification';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
