@@ -284,20 +284,30 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                   <span>{reservation.pickup_time}</span>
                 </div>
               </div>
-              <Badge className={cn(
-                "flex items-center gap-1 px-3 py-1",
-                (reservation.status === 'pending') && "bg-gray-500/20 text-gray-700 border-gray-500",
-                (reservation.status === 'pending_admin_review') && "bg-purple-500/20 text-purple-700 border-purple-500",
-                (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && "bg-orange-500/20 text-orange-700 border-orange-500",
-                reservation.status === 'confirmed' && "bg-amber-500/20 text-amber-700 border-amber-500 animate-pulse",
-                reservation.status === 'active' && "bg-blue-500/20 text-blue-700 border-blue-500",
-                reservation.status === 'completed' && "bg-green-500/20 text-green-700 border-green-500",
-                (reservation.status === 'cancelled' || reservation.status === 'cancelled_by_customer' || reservation.status === 'cancelled_by_agency') && "bg-red-500/20 text-red-700 border-red-500",
-                reservation.status === 'no_show' && "bg-gray-500/20 text-gray-700 border-gray-500"
-              )}>
-                {config.icon}
-                <span className="ml-1">{config.label}</span>
-              </Badge>
+              <div className="flex flex-col items-end gap-1.5">
+                {/* Update Available Badge - Show when confirmed but driver hasn't re-confirmed */}
+                {reservation.status === 'confirmed' && reservation.driver_confirmed === false && (
+                  <Badge className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg shadow-amber-500/30 animate-pulse font-bold">
+                    <RefreshCw className="h-4 w-4 animate-spin" style={{ animationDuration: '3s' }} />
+                    <span>Güncelleme var!</span>
+                  </Badge>
+                )}
+                <Badge className={cn(
+                  "flex items-center gap-1 px-3 py-1",
+                  (reservation.status === 'pending') && "bg-gray-500/20 text-gray-700 border-gray-500",
+                  (reservation.status === 'pending_admin_review') && "bg-purple-500/20 text-purple-700 border-purple-500",
+                  (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && "bg-orange-500/20 text-orange-700 border-orange-500",
+                  reservation.status === 'confirmed' && reservation.driver_confirmed === false && "bg-amber-500/20 text-amber-700 border-amber-500",
+                  reservation.status === 'confirmed' && reservation.driver_confirmed === true && "bg-green-500/20 text-green-700 border-green-500",
+                  reservation.status === 'active' && "bg-blue-500/20 text-blue-700 border-blue-500",
+                  reservation.status === 'completed' && "bg-green-500/20 text-green-700 border-green-500",
+                  (reservation.status === 'cancelled' || reservation.status === 'cancelled_by_customer' || reservation.status === 'cancelled_by_agency') && "bg-red-500/20 text-red-700 border-red-500",
+                  reservation.status === 'no_show' && "bg-gray-500/20 text-gray-700 border-gray-500"
+                )}>
+                  {config.icon}
+                  <span className="ml-1">{config.label}</span>
+                </Badge>
+              </div>
             </div>
 
             {/* Agency or Guest Badge */}
