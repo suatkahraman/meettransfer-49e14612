@@ -76,6 +76,10 @@ const CITIES_DATA = {
   'Aydin': {
     airports: [],
     districts: ['Aydin Center', 'Kusadasi', 'Didim', 'Altinkum', 'Akbuk', 'Soke', 'Nazilli', 'Germencik', 'Incirliova', 'Kocarli', 'Sultanhisar', 'Aydinlar', 'Davutlar', 'Guzelcamli', 'Karacasu', 'Kuyucak', 'Buharkent', 'Yenipazar', 'Bozdogan', 'Cine', 'Kosk', 'Umurlu']
+  },
+  'Mugla': {
+    airports: ['Dalaman Airport (DLM)', 'Bodrum-Milas Airport (BJV)'],
+    districts: ['Mugla Center', 'Marmaris', 'Datca', 'Fethiye', 'Koycegiz', 'Ortaca', 'Dalyan', 'Oludeniz', 'Hisaronu', 'Gocek', 'Icmeler', 'Turunc', 'Akyaka', 'Bozburun', 'Selimiye', 'Sogut', 'Taslica', 'Armutalan', 'Beldibi', 'Sarigerme', 'Calis', 'Ovacik', 'Kayakoy', 'Seydikemer', 'Ula', 'Yatagan', 'Milas', 'Bodrum']
   }
 };
 
