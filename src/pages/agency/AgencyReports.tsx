@@ -51,7 +51,7 @@ const AgencyReports = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [agencyDetails, setAgencyDetails] = useState<AgencyReservationDetail[]>([]);
   const [transactions, setTransactions] = useState<AgencyTransaction[]>([]);
-  const [carryoverBalance, setCarryoverBalance] = useState(0);
+  const [carryoverBalances, setCarryoverBalances] = useState<Record<string, number>>({});
 
   const fetchData = useCallback(async () => {
     if (!agencyId) return;
@@ -122,35 +122,67 @@ const AgencyReports = () => {
       setAgencyDetails([]);
     }
 
-    // Calculate carryover balance from previous months
-    let prevMonthsCarryoverDebt = 0;
+    // PARA BİRİMİ BAZLI devir bakiye hesaplama
+    const prevMonthsCarryoverDebts: Record<string, number> = {};
     if (prevMonthsReservations.length > 0) {
       const prevReservationIds = prevMonthsReservations.map(r => r.id);
       const { data: prevDetailsData } = await supabase
         .from('agency_reservation_details')
-        .select('reservation_id, company_amount')
+        .select('reservation_id, company_amount, agency_price_currency')
         .in('reservation_id', prevReservationIds);
       
       const prevDetails = prevDetailsData || [];
       
-      // Calculate total debt from previous months completed reservations
-      // Debt = company_amount (admin price) - passenger_cash_amount
+      // Calculate debt by currency from previous months completed reservations
       prevMonthsReservations.forEach(r => {
         const detail = prevDetails.find(d => d.reservation_id === r.id);
+        const currency = detail?.agency_price_currency || 'TRY';
         const companyAmount = detail?.company_amount || 0;
+        
+        if (!prevMonthsCarryoverDebts[currency]) {
+          prevMonthsCarryoverDebts[currency] = 0;
+        }
+        prevMonthsCarryoverDebts[currency] += companyAmount;
+      });
+      
+      // Subtract passenger cash by their currency
+      prevMonthsReservations.forEach(r => {
         const passengerCash = r.passenger_cash_amount || 0;
-        prevMonthsCarryoverDebt += (companyAmount - passengerCash);
+        const cashCurrency = r.passenger_cash_currency || 'TRY';
+        if (passengerCash > 0) {
+          if (!prevMonthsCarryoverDebts[cashCurrency]) {
+            prevMonthsCarryoverDebts[cashCurrency] = 0;
+          }
+          prevMonthsCarryoverDebts[cashCurrency] -= passengerCash;
+        }
       });
     }
 
-    // Calculate payments before this month
-    const prevMonthsPayments = allPayments
+    // Calculate payments by currency before this month
+    const prevMonthsPaymentsByCurrency: Record<string, number> = {};
+    allPayments
       .filter(p => p.payment_date < monthStart)
-      .reduce((sum, p) => sum + p.amount, 0);
+      .forEach(p => {
+        const currency = p.currency || 'TRY';
+        if (!prevMonthsPaymentsByCurrency[currency]) {
+          prevMonthsPaymentsByCurrency[currency] = 0;
+        }
+        prevMonthsPaymentsByCurrency[currency] += p.amount;
+      });
 
-    // Carryover = Previous months debt - Previous months payments
-    setCarryoverBalance(prevMonthsCarryoverDebt - prevMonthsPayments);
+    // Calculate carryover balance by currency = debt - payments
+    const carryoverByCurrency: Record<string, number> = {};
+    const allCurrencies = new Set([...Object.keys(prevMonthsCarryoverDebts), ...Object.keys(prevMonthsPaymentsByCurrency)]);
+    allCurrencies.forEach(currency => {
+      const debt = prevMonthsCarryoverDebts[currency] || 0;
+      const payments = prevMonthsPaymentsByCurrency[currency] || 0;
+      const balance = debt - payments;
+      if (balance !== 0) {
+        carryoverByCurrency[currency] = balance;
+      }
+    });
 
+    setCarryoverBalances(carryoverByCurrency);
     setLoading(false);
   }, [agencyId, currentMonth]);
 
@@ -206,7 +238,10 @@ const AgencyReports = () => {
     .filter(r => r.status === 'completed')
     .reduce((sum, r) => sum + (r.passenger_cash_amount || 0), 0);
   const currentMonthDebt = totalCompanyAmount - totalPassengerCash;
-  const totalBalance = carryoverBalance + currentMonthDebt;
+  
+  // Total carryover for legacy compatibility
+  const totalCarryover = Object.values(carryoverBalances).reduce((sum, val) => sum + val, 0);
+  const totalBalance = totalCarryover + currentMonthDebt;
 
   if (loading) {
     return (
@@ -265,18 +300,29 @@ const AgencyReports = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Carryover Balance Card */}
-          {carryoverBalance !== 0 && (
-            <Card className={carryoverBalance > 0 ? 'border-blue-500/50' : 'border-green-500/50'}>
-              <CardContent className="pt-6 text-center">
-                <History className="h-8 w-8 mx-auto text-blue-500 mb-2" />
-                <p className={`text-2xl font-bold ${carryoverBalance > 0 ? 'text-blue-600' : 'text-green-600'}`}>
-                  {currencySymbol}{carryoverBalance.toFixed(0)}
-                </p>
-                <p className="text-sm text-muted-foreground">{t('carryoverBalance') || 'Devir Bakiye'}</p>
-              </CardContent>
-            </Card>
-          )}
+          {/* Carryover Balance Cards - Para birimi bazlı ayrı kartlar */}
+          {Object.entries(carryoverBalances)
+            .filter(([_, balance]) => balance !== 0)
+            .sort(([, a], [, b]) => Math.abs(b) - Math.abs(a))
+            .map(([currency, balance]) => {
+              const symbol = currency === 'TRY' ? '₺' : currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency;
+              return (
+                <Card key={`carryover-${currency}`} className={balance > 0 ? 'border-blue-500/50 border-2' : 'border-green-500/50 border-2'}>
+                  <CardContent className="pt-6 text-center">
+                    <History className={`h-8 w-8 mx-auto mb-2 ${balance > 0 ? 'text-blue-500' : 'text-green-500'}`} />
+                    <p className={`text-2xl font-bold ${balance > 0 ? 'text-blue-600' : 'text-green-600'}`}>
+                      {symbol}{Math.abs(balance).toFixed(0)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {t('carryoverBalance') || 'Devir'} ({currency})
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {balance > 0 ? (t('debt') || 'Borç') : (t('credit') || 'Alacak')}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
 
           <Card>
             <CardContent className="pt-6 text-center">
@@ -334,14 +380,20 @@ const AgencyReports = () => {
             <CardTitle>{t('financialSummary')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {carryoverBalance !== 0 && (
-              <div className="flex justify-between py-2 border-b">
-                <span className="text-muted-foreground">{t('carryoverBalance') || 'Devir Bakiye'}</span>
-                <span className={`font-semibold ${carryoverBalance > 0 ? 'text-blue-600' : 'text-green-600'}`}>
-                  {currencySymbol}{carryoverBalance.toFixed(2)}
-                </span>
-              </div>
-            )}
+            {/* Para birimi bazlı devir bakiye */}
+            {Object.entries(carryoverBalances)
+              .filter(([_, balance]) => balance !== 0)
+              .map(([currency, balance]) => {
+                const symbol = currency === 'TRY' ? '₺' : currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency;
+                return (
+                  <div key={`carryover-detail-${currency}`} className="flex justify-between py-2 border-b">
+                    <span className="text-muted-foreground">{t('carryoverBalance') || 'Devir Bakiye'} ({currency})</span>
+                    <span className={`font-semibold ${balance > 0 ? 'text-blue-600' : 'text-green-600'}`}>
+                      {symbol}{balance.toFixed(2)}
+                    </span>
+                  </div>
+                );
+              })}
             
             {/* Para birimi bazlı detaylar */}
             {currencyBalances.map(cb => {
