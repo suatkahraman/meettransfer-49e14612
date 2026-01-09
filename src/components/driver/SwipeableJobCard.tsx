@@ -121,6 +121,24 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
         bgColor: 'bg-green-500',
         icon: <CheckCircle className="h-4 w-4" />
       },
+      cancelled: { 
+        label: t('cancelled') || 'İptal Edildi', 
+        color: 'text-red-600',
+        bgColor: 'bg-red-500',
+        icon: <Ban className="h-4 w-4" />
+      },
+      cancelled_by_customer: { 
+        label: t('cancelledByCustomer') || 'Müşteri İptal', 
+        color: 'text-red-600',
+        bgColor: 'bg-red-500',
+        icon: <Ban className="h-4 w-4" />
+      },
+      cancelled_by_agency: { 
+        label: t('cancelledByAgency') || 'Acenta İptal', 
+        color: 'text-red-600',
+        bgColor: 'bg-red-500',
+        icon: <Ban className="h-4 w-4" />
+      },
     };
     return configs[status] || configs.sent_to_driver;
   };
@@ -244,7 +262,8 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                 (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && "bg-orange-500/20 text-orange-700 border-orange-500",
                 reservation.status === 'confirmed' && "bg-amber-500/20 text-amber-700 border-amber-500 animate-pulse",
                 reservation.status === 'active' && "bg-blue-500/20 text-blue-700 border-blue-500",
-                reservation.status === 'completed' && "bg-green-500/20 text-green-700 border-green-500"
+                reservation.status === 'completed' && "bg-green-500/20 text-green-700 border-green-500",
+                (reservation.status === 'cancelled' || reservation.status === 'cancelled_by_customer' || reservation.status === 'cancelled_by_agency') && "bg-red-500/20 text-red-700 border-red-500"
               )}>
                 {config.icon}
                 <span className="ml-1">{config.label}</span>
