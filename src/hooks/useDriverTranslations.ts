@@ -220,6 +220,14 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     region: 'Bölge',
     selectRegion: 'Bölge seçin',
     vehicleInfo: 'Araç Bilgileri',
+    
+    // Job List Page
+    tapToView: 'Görüntülemek için dokun',
+    noPendingJobs: 'Bekleyen iş yok',
+    noActiveJobs: 'Aktif iş yok',
+    noCompletedJobs: 'Bu ay tamamlanan iş yok',
+    jobs: 'İşler',
+    noJobs: 'İş yok',
   },
   EN: {
     driverPanel: 'Driver Panel',
@@ -406,6 +414,14 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     region: 'Region',
     selectRegion: 'Select region',
     vehicleInfo: 'Vehicle Info',
+    
+    // Job List Page
+    tapToView: 'Tap to view',
+    noPendingJobs: 'No pending jobs',
+    noActiveJobs: 'No active jobs',
+    noCompletedJobs: 'No completed jobs this month',
+    jobs: 'Jobs',
+    noJobs: 'No jobs',
   },
   DE: {
     driverPanel: 'Fahrer-Panel',
@@ -592,6 +608,14 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     region: 'Region',
     selectRegion: 'Region auswählen',
     vehicleInfo: 'Fahrzeuginfo',
+    
+    // Job List Page
+    tapToView: 'Tippen zum Anzeigen',
+    noPendingJobs: 'Keine ausstehenden Aufträge',
+    noActiveJobs: 'Keine aktiven Aufträge',
+    noCompletedJobs: 'Keine abgeschlossenen Aufträge diesen Monat',
+    jobs: 'Aufträge',
+    noJobs: 'Keine Aufträge',
   },
   FR: {
     driverPanel: 'Panneau Chauffeur',
@@ -778,6 +802,14 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     region: 'Région',
     selectRegion: 'Sélectionner la région',
     vehicleInfo: 'Info Véhicule',
+    
+    // Job List Page
+    tapToView: 'Appuyez pour voir',
+    noPendingJobs: 'Aucune tâche en attente',
+    noActiveJobs: 'Aucune tâche active',
+    noCompletedJobs: 'Aucune tâche terminée ce mois',
+    jobs: 'Tâches',
+    noJobs: 'Aucune tâche',
   },
   RU: {
     driverPanel: 'Панель Водителя',
@@ -964,6 +996,14 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     region: 'Регион',
     selectRegion: 'Выберите регион',
     vehicleInfo: 'Информация о транспорте',
+    
+    // Job List Page
+    tapToView: 'Нажмите для просмотра',
+    noPendingJobs: 'Нет ожидающих заказов',
+    noActiveJobs: 'Нет активных заказов',
+    noCompletedJobs: 'Нет завершенных заказов в этом месяце',
+    jobs: 'Заказы',
+    noJobs: 'Нет заказов',
   },
   AR: {
     driverPanel: 'لوحة السائق',
@@ -1150,6 +1190,14 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     region: 'المنطقة',
     selectRegion: 'اختر المنطقة',
     vehicleInfo: 'معلومات المركبة',
+    
+    // Job List Page
+    tapToView: 'انقر للعرض',
+    noPendingJobs: 'لا توجد وظائف معلقة',
+    noActiveJobs: 'لا توجد وظائف نشطة',
+    noCompletedJobs: 'لا توجد وظائف مكتملة هذا الشهر',
+    jobs: 'الوظائف',
+    noJobs: 'لا توجد وظائف',
   },
 };
 

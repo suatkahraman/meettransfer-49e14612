@@ -37,6 +37,7 @@ const CustomerReviewPage = lazy(() => import("./pages/customer/CustomerReviewPag
 // Driver Pages - lazy loaded
 const DriverHome = lazy(() => import("./pages/driver/DriverHome"));
 const DriverJobDetails = lazy(() => import("./pages/driver/DriverJobDetails"));
+const DriverJobList = lazy(() => import("./pages/driver/DriverJobList"));
 const DriverAccounting = lazy(() => import("./pages/driver/DriverAccounting"));
 const DriverHistory = lazy(() => import("./pages/driver/DriverHistory"));
 const DriverMonthlyAccounting = lazy(() => import("./pages/driver/DriverMonthlyAccounting"));
@@ -238,6 +239,7 @@ const App = () => (
               
               {/* Driver Routes - Protected */}
               <Route path="/driver" element={<DriverRoute><LazyRoute><DriverHome /></LazyRoute></DriverRoute>} />
+              <Route path="/driver/jobs/:type" element={<DriverRoute><LazyRoute><DriverJobList /></LazyRoute></DriverRoute>} />
               <Route path="/driver/job/:id" element={<DriverRoute><LazyRoute><DriverJobDetails /></LazyRoute></DriverRoute>} />
               <Route path="/driver/accounting" element={<DriverRoute><LazyRoute><DriverAccounting /></LazyRoute></DriverRoute>} />
               <Route path="/driver/monthly-accounting" element={<DriverRoute><LazyRoute><DriverMonthlyAccounting /></LazyRoute></DriverRoute>} />
