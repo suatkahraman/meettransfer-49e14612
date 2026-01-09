@@ -19,10 +19,7 @@ import { PhoneInput } from '@/components/ui/phone-input';
 
 // Use centralized vehicle types
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
-
-// Payment types will use translations
-
-// Currencies removed - agency no longer sets price
+import { CURRENCY_OPTIONS } from '@/lib/currency';
 
 const AgencyCreateReservation = () => {
   const navigate = useNavigate();
@@ -45,6 +42,7 @@ const AgencyCreateReservation = () => {
     customer_notes: '',
     luggage_count: '',
     baby_seat_count: '',
+    currency: 'EUR', // Agency selects currency for this reservation
     // Place details
     pickup_place_name: '',
     pickup_lat: null as number | null,
@@ -134,7 +132,7 @@ const AgencyCreateReservation = () => {
           vehicle_type: formData.vehicle_type,
           payment_type: formData.payment_type,
           price: null, // Admin will set the price
-          price_currency: 'EUR', // Default, admin will update
+          price_currency: formData.currency, // Agency selected currency
           status: 'pending_admin_review', // Admin onayı ve fiyat belirleme bekliyor
           agency_id: agencyId,
           passenger_names: validPassengerNames,
@@ -154,13 +152,13 @@ const AgencyCreateReservation = () => {
 
       if (reservationError) throw reservationError;
 
-      // Create agency reservation details
+      // Create agency reservation details with selected currency
       if (reservation) {
         await supabase.from('agency_reservation_details').insert({
           reservation_id: reservation.id,
           agency_user_id: user?.id,
           customer_price: 0, // Admin will set
-          agency_price_currency: 'EUR',
+          agency_price_currency: formData.currency, // Agency selected currency
           agency_notes: formData.customer_notes || null,
         });
       }
@@ -421,25 +419,48 @@ const AgencyCreateReservation = () => {
                 </div>
               </div>
 
-              {/* Payment Type Only */}
+              {/* Payment Type & Currency */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg border-b pb-2">{t('payment')}</h3>
 
-                <div>
-                  <Label htmlFor="payment_type">{t('paymentType')}</Label>
-                  <Select
-                    value={formData.payment_type}
-                    onValueChange={(value) => setFormData({ ...formData, payment_type: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cash">{t('cash')}</SelectItem>
-                      <SelectItem value="payment_link">{t('onlinePayment')}</SelectItem>
-                      <SelectItem value="agency_pay">{t('agencyPayment')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="payment_type">{t('paymentType')}</Label>
+                    <Select
+                      value={formData.payment_type}
+                      onValueChange={(value) => setFormData({ ...formData, payment_type: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cash">{t('cash')}</SelectItem>
+                        <SelectItem value="payment_link">{t('onlinePayment')}</SelectItem>
+                        <SelectItem value="agency_pay">{t('agencyPayment')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="currency">{t('currency') || 'Para Birimi'} *</Label>
+                    <Select
+                      value={formData.currency}
+                      onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CURRENCY_OPTIONS.map(c => (
+                          <SelectItem key={c.value} value={c.value}>
+                            {c.flag} {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t('currencyCannotBeChangedAfterApproval') || 'Onaylandıktan sonra para birimi değiştirilemez'}
+                    </p>
+                  </div>
                 </div>
               </div>
 

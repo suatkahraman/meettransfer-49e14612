@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { getCurrencySymbol } from '@/lib/currency';
 
 // Use centralized vehicle types
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
@@ -50,6 +51,7 @@ interface Reservation {
   status: string;
   driver_id: string | null;
   agency_id: string | null;
+  price_currency: string | null;
   drivers?: Driver | null;
 }
 
@@ -590,6 +592,21 @@ const AgencyEditReservation = () => {
                   required
                 />
               </div>
+
+              {/* Currency - Read Only */}
+              {originalData?.price_currency && (
+                <div className="space-y-2 p-3 rounded-lg bg-muted/50 border">
+                  <Label>{t('currency') || 'Para Birimi'}</Label>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-lg py-1 px-3">
+                      {getCurrencySymbol(originalData.price_currency)} {originalData.price_currency}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      ({t('currencyCannotBeChanged') || 'Değiştirilemez'})
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Customer Notes */}
               <div className="space-y-2">
