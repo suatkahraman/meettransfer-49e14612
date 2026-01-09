@@ -47,6 +47,7 @@ interface Reservation {
   driver_id: string | null;
   price: number | null;
   price_currency: string | null;
+  payment_type: string;
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
   luggage_count: number | null;
@@ -133,7 +134,7 @@ const AgencyReservationDetail = () => {
           id, reservation_code, customer_name, customer_phone, pickup, dropoff,
           pickup_place_name, dropoff_place_name,
           pickup_date, pickup_time, flight_number, vehicle_type, status,
-          passenger_names, driver_id, price, price_currency,
+          passenger_names, driver_id, price, price_currency, payment_type,
           passenger_cash_amount, passenger_cash_currency, luggage_count, baby_seat_count,
           drivers:driver_id (id, name, plate_number, vehicle_model, vehicle_color)
         `)
@@ -173,18 +174,37 @@ const AgencyReservationDetail = () => {
     fetchData();
   }, [id]);
 
+  // Check if this is a cash payment reservation (payment_type === 'cash')
+  const isCashPayment = reservation?.payment_type === 'cash';
+
+  // Check if reservation needs cash amount entry (approved, cash payment, no cash entered)
+  const needsCashAmountEntry = () => {
+    if (!reservation) return false;
+    const approvedStatuses = ['customer_approved', 'confirmed', 'sent_to_driver', 'active'];
+    return (
+      approvedStatuses.includes(reservation.status) &&
+      isCashPayment &&
+      (!reservation.passenger_cash_amount || reservation.passenger_cash_amount <= 0)
+    );
+  };
+
   const handleSave = async () => {
     if (!id || !agencyId) return;
     
-    // No validation required - cash amount is optional, agency can save without entering it
+    // Validate cash amount for cash payments
+    const cashAmount = parseFloat(passengerCashAmount) || 0;
+    if (isCashPayment && cashAmount <= 0) {
+      toast.error(t('enterCashAmount') || 'Nakit tutarını giriniz');
+      return;
+    }
     
     setSaving(true);
 
     try {
-      // Update agency reservation details - only payment status
+      // Update agency reservation details - set payment status to customer_pay_cash for cash payments
       const detailsData = {
         reservation_id: id,
-        payment_status: paymentStatus,
+        payment_status: isCashPayment ? 'customer_pay_cash' : paymentStatus,
       };
 
       if (agencyDetails) {
@@ -201,11 +221,10 @@ const AgencyReservationDetail = () => {
       }
 
       // Update reservation with passenger cash amount
-      const passengerCash = paymentStatus === 'customer_pay_cash' ? parseFloat(passengerCashAmount) || 0 : 0;
       const { error: resError } = await supabase
         .from('reservations')
         .update({
-          passenger_cash_amount: passengerCash,
+          passenger_cash_amount: cashAmount,
           passenger_cash_currency: passengerCashCurrency,
         })
         .eq('id', id);
@@ -224,10 +243,11 @@ const AgencyReservationDetail = () => {
 
       if (data) {
         setAgencyDetails(data);
+        setPaymentStatus(data.payment_status || 'not_paid');
       }
       
       // Refresh reservation data
-      setReservation(prev => prev ? { ...prev, passenger_cash_amount: passengerCash, passenger_cash_currency: passengerCashCurrency } : null);
+      setReservation(prev => prev ? { ...prev, passenger_cash_amount: cashAmount, passenger_cash_currency: passengerCashCurrency } : null);
     } catch (error: any) {
       toast.error(error.message || 'Failed to save');
     } finally {
@@ -637,10 +657,8 @@ const AgencyReservationDetail = () => {
           </Card>
         )}
 
-        {/* Cash Entry Warning - Show when approved but cash payment not entered yet */}
-        {['customer_approved', 'confirmed', 'sent_to_driver', 'active'].includes(reservation.status) && 
-         agencyDetails?.payment_status === 'customer_pay_cash' && 
-         (!reservation.passenger_cash_amount || reservation.passenger_cash_amount <= 0) && (
+        {/* Cash Entry Warning - Show when approved, cash payment type, but cash amount not entered yet */}
+        {needsCashAmountEntry() && (
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -665,14 +683,29 @@ const AgencyReservationDetail = () => {
                     </motion.div>
                     <div className="flex-1">
                       <p className="font-bold text-amber-700 dark:text-amber-300 text-lg">
-                        {t('enterCashAmount') || 'Nakit Tutarını Girin!'}
+                        {t('enterCashAmount') || 'Nakit Alınacak Tutarı Girin!'}
                       </p>
                       <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
-                        {t('cashAmountRequired') || 'Yolcudan alınacak nakit tutarını girmeniz gerekmektedir.'}
+                        {t('cashAmountRequiredAfterApproval') || 'Fiyatı onayladınız. Şimdi yolcudan alınacak nakit tutarını girmeniz gerekmektedir.'}
                       </p>
+                      {agencyDetails?.company_amount && (
+                        <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-2">
+                          {t('approvedPrice') || 'Onaylanan Fiyat'}: {getCurrencySymbol(agencyDetails.agency_price_currency)}{agencyDetails.company_amount}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </motion.div>
+                {/* Quick Cash Entry Button */}
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    onClick={() => setIsEditing(true)}
+                    className="bg-amber-600 hover:bg-amber-700"
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    {t('enterCashNow') || 'Nakit Tutarı Gir'}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
@@ -978,12 +1011,15 @@ const AgencyReservationDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Payment Status Card - Only show for cash payments */}
-        {(agencyDetails?.payment_status === 'customer_pay_cash' || reservation.passenger_cash_amount) && (
-          <Card>
+        {/* Payment Status Card - Show for cash payment reservations (payment_type === 'cash') */}
+        {isCashPayment && ['customer_approved', 'confirmed', 'sent_to_driver', 'active', 'completed'].includes(reservation.status) && (
+          <Card className={needsCashAmountEntry() ? 'border-2 border-amber-500' : ''}>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{t('paymentStatus')}</CardTitle>
-              {!isEditing && (
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                {t('cashPaymentDetails') || 'Nakit Ödeme Detayları'}
+              </CardTitle>
+              {!isEditing && reservation.status !== 'completed' && (
                 <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                   <Edit className="h-4 w-4 mr-2" />
                   {t('edit')}
@@ -993,49 +1029,69 @@ const AgencyReservationDetail = () => {
             <CardContent className="space-y-4">
               {isEditing ? (
                 <>
-                  <div className="space-y-2">
-                    <Label>{t('paymentStatus')}</Label>
-                    <Select value={paymentStatus} onValueChange={setPaymentStatus}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="not_paid">Not Paid</SelectItem>
-                        <SelectItem value="customer_pay_cash">Customer Pay Cash</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {paymentStatus === 'customer_pay_cash' && (
-                    <div className="space-y-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                      <Label className="text-green-700">{t('passengerCashAmount')} *</Label>
-                      <div className="flex gap-2">
-                        <Select value={passengerCashCurrency} onValueChange={setPassengerCashCurrency}>
-                          <SelectTrigger className="w-24">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="USD">$</SelectItem>
-                            <SelectItem value="EUR">€</SelectItem>
-                            <SelectItem value="GBP">£</SelectItem>
-                            <SelectItem value="TRY">₺</SelectItem>
-                            <SelectItem value="AED">د.إ</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          type="number"
-                          value={passengerCashAmount}
-                          onChange={(e) => setPassengerCashAmount(e.target.value)}
-                          placeholder="0"
-                          className="flex-1"
-                          required
-                        />
+                  {/* Show approved price for reference */}
+                  {agencyDetails?.company_amount && agencyDetails.company_amount > 0 && (
+                    <div className="p-3 bg-muted rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">{t('approvedAgencyPrice') || 'Onaylanan Acenta Fiyatı'}:</span>
+                        <span className="font-bold">
+                          {getCurrencySymbol(agencyDetails.agency_price_currency)}{agencyDetails.company_amount}
+                        </span>
                       </div>
-                      <p className="text-sm text-green-600">
-                        {t('passengerCashInfo') || 'Bu tutar yolcudan nakit olarak alınacak ve bakiyenizden düşülecektir.'}
-                      </p>
                     </div>
                   )}
+
+                  <div className="space-y-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <Label className="text-green-700 font-medium">{t('cashToBeCollected') || 'Yolcudan Alınacak Nakit'} *</Label>
+                    <div className="flex gap-2">
+                      <Select value={passengerCashCurrency} onValueChange={setPassengerCashCurrency}>
+                        <SelectTrigger className="w-24">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="USD">$</SelectItem>
+                          <SelectItem value="EUR">€</SelectItem>
+                          <SelectItem value="GBP">£</SelectItem>
+                          <SelectItem value="TRY">₺</SelectItem>
+                          <SelectItem value="AED">د.إ</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        type="number"
+                        value={passengerCashAmount}
+                        onChange={(e) => setPassengerCashAmount(e.target.value)}
+                        placeholder="0"
+                        className="flex-1"
+                        required
+                      />
+                    </div>
+                    <p className="text-sm text-green-600">
+                      {t('cashCollectionInfo') || 'Bu tutar yolcudan nakit olarak alınacaktır. Onaylanan fiyattan fazla veya eksik olabilir.'}
+                    </p>
+                    {agencyDetails?.company_amount && passengerCashAmount && (
+                      <div className="pt-2 border-t border-green-500/30">
+                        {(() => {
+                          const cashAmount = parseFloat(passengerCashAmount) || 0;
+                          const diff = cashAmount - agencyDetails.company_amount;
+                          const symbol = getCurrencySymbol(agencyDetails.agency_price_currency);
+                          if (diff > 0) {
+                            return (
+                              <p className="text-sm text-green-700">
+                                ✓ {t('debtReduction') || 'Bakiyenizden düşülecek'}: {symbol}{diff.toFixed(2)}
+                              </p>
+                            );
+                          } else if (diff < 0) {
+                            return (
+                              <p className="text-sm text-amber-600">
+                                ⚠ {t('debtIncrease') || 'Bakiyenize eklenecek'}: {symbol}{Math.abs(diff).toFixed(2)}
+                              </p>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="flex gap-2">
                     <Button 
@@ -1043,7 +1099,7 @@ const AgencyReservationDetail = () => {
                       className="flex-1"
                       onClick={() => setIsEditing(false)}
                     >
-                      Cancel
+                      {t('cancel') || 'İptal'}
                     </Button>
                     <Button 
                       className="flex-1"
@@ -1055,32 +1111,62 @@ const AgencyReservationDetail = () => {
                       ) : (
                         <Save className="h-4 w-4 mr-2" />
                       )}
-                      Save
+                      {t('save') || 'Kaydet'}
                     </Button>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">{t('paymentStatus')}:</span>
-                    <Badge variant={paymentStatus === 'customer_pay_cash' ? 'default' : 'secondary'}>
-                      {paymentStatusLabels[agencyDetails?.payment_status || 'not_paid']}
-                    </Badge>
-                  </div>
+                  {/* Show approved agency price */}
+                  {agencyDetails?.company_amount && agencyDetails.company_amount > 0 && (
+                    <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                      <span className="text-muted-foreground">{t('approvedAgencyPrice') || 'Onaylanan Fiyat'}:</span>
+                      <span className="font-bold">
+                        {getCurrencySymbol(agencyDetails.agency_price_currency)}{agencyDetails.company_amount}
+                      </span>
+                    </div>
+                  )}
 
-                  {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
+                  {/* Show cash to be collected */}
+                  {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 ? (
                     <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-lg">
                       <div className="flex justify-between items-center">
-                        <span className="font-medium text-green-700">{t('passengerCash')}:</span>
+                        <span className="font-medium text-green-700">{t('cashToBeCollected') || 'Nakit Alınacak'}:</span>
                         <span className="text-xl font-bold text-green-600">
-                          {reservation.passenger_cash_currency === 'EUR' && '€'}
-                          {reservation.passenger_cash_currency === 'USD' && '$'}
-                          {reservation.passenger_cash_currency === 'GBP' && '£'}
-                          {reservation.passenger_cash_currency === 'TRY' && '₺'}
-                          {reservation.passenger_cash_currency === 'AED' && 'د.إ'}
-                          {reservation.passenger_cash_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                          {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                         </span>
                       </div>
+                      {/* Show difference */}
+                      {agencyDetails?.company_amount && (
+                        <div className="mt-2 pt-2 border-t border-green-500/30">
+                          {(() => {
+                            const diff = reservation.passenger_cash_amount - agencyDetails.company_amount;
+                            const symbol = getCurrencySymbol(agencyDetails.agency_price_currency);
+                            if (diff > 0) {
+                              return (
+                                <p className="text-sm text-green-700">
+                                  ✓ {t('willBeDeducted') || 'Transfer tamamlandığında bakiyenizden düşülecek'}: {symbol}{diff.toFixed(2)}
+                                </p>
+                              );
+                            } else if (diff < 0) {
+                              return (
+                                <p className="text-sm text-amber-600">
+                                  ⚠ {t('willBeAdded') || 'Transfer tamamlandığında bakiyenize eklenecek'}: {symbol}{Math.abs(diff).toFixed(2)}
+                                </p>
+                              );
+                            }
+                            return (
+                              <p className="text-sm text-muted-foreground">
+                                {t('noDifference') || 'Fark yok - bakiyeniz değişmeyecek'}
+                              </p>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-amber-500/10 border border-amber-500/30 p-3 rounded-lg">
+                      <p className="text-amber-700 font-medium">{t('cashNotEntered') || 'Nakit tutarı henüz girilmedi'}</p>
                     </div>
                   )}
                 </>
