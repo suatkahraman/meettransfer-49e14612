@@ -54,12 +54,7 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
         .gte('pickup_date', monthStart)
         .lte('pickup_date', monthEnd);
 
-      // Fetch driver balance
-      const { data: balanceData } = await supabase
-        .from('driver_balances')
-        .select('balance')
-        .eq('driver_id', driverId)
-        .single();
+      // Not using driver_balances anymore, calculating from monthly reservations
 
       // Fetch next upcoming job
       const { data: nextJobData } = await supabase
@@ -75,6 +70,9 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
 
       const totalEarnings = monthlyRes?.reduce((sum, r) => sum + (r.driver_earning || 0), 0) || 0;
       const totalCash = monthlyRes?.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0) || 0;
+      
+      // Aylık hesaptaki alacak = kazanç - toplanan nakit
+      const monthlyBalance = totalEarnings - totalCash;
 
       setStats({
         name: driverData?.name || '',
@@ -83,7 +81,7 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
         totalCompletedThisMonth: monthlyRes?.length || 0,
         totalEarningsThisMonth: totalEarnings,
         totalCashThisMonth: totalCash,
-        currentBalance: balanceData?.balance || 0,
+        currentBalance: monthlyBalance,
         nextJob: nextJobData ? {
           date: nextJobData.pickup_date,
           time: nextJobData.pickup_time,
@@ -188,24 +186,31 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
             </div>
           </div>
 
-          {/* Balance Indicator */}
-          {stats.currentBalance !== 0 && (
-            <div className={`rounded-lg p-3 ${stats.currentBalance > 0 ? 'bg-amber-500/10' : 'bg-green-500/10'}`}>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">
-                  {t('balance')}
-                </span>
-                <span className={`font-bold ${stats.currentBalance > 0 ? 'text-amber-600' : 'text-green-600'}`}>
-                  {stats.currentBalance > 0 ? '+' : ''}₺{stats.currentBalance.toLocaleString('tr-TR')}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats.currentBalance > 0 
-                  ? (t('companyOwesYou') || 'Şirket size borçlu')
-                  : (t('youOweCompany') || 'Şirkete borcunuz')}
-              </p>
+          {/* Balance Indicator - Always show, even if 0 */}
+          <div className={`rounded-lg p-3 ${stats.currentBalance > 0 ? 'bg-amber-500/10' : stats.currentBalance < 0 ? 'bg-red-500/10' : 'bg-muted/50'}`}>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">
+                {t('balance')}
+              </span>
+              <span className={`font-bold ${
+                stats.currentBalance > 0 
+                  ? 'text-amber-600' 
+                  : stats.currentBalance < 0 
+                    ? 'text-red-600' 
+                    : 'text-muted-foreground'
+              }`}>
+                ₺{Math.abs(stats.currentBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {stats.currentBalance > 0 ? ' (alacak)' : stats.currentBalance < 0 ? ' (borç)' : ''}
+              </span>
             </div>
-          )}
+            <p className="text-xs text-muted-foreground mt-1">
+              {stats.currentBalance > 0 
+                ? (t('companyOwesYou') || 'Şirket size borçlu')
+                : stats.currentBalance < 0
+                  ? (t('youOweCompany') || 'Şirkete borcunuz')
+                  : (t('balanced') || 'Hesap dengede')}
+            </p>
+          </div>
 
           {/* Next Job Preview */}
           {stats.nextJob && (
