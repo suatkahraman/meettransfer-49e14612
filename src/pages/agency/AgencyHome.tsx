@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt, Volume2 } from 'lucide-react';
+import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt, Volume2, History } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import AgencyLanguageSelector from '@/components/agency/AgencyLanguageSelector';
 import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
@@ -17,8 +17,9 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LocationDisplay } from '@/components/ui/location-display';
-import ReservationSearch from '@/components/ReservationSearch';
 import { getCurrencySymbol, calculateCurrencyBalances, CurrencyBalance } from '@/lib/currency';
+import AgencyNotificationHistory from '@/components/agency/AgencyNotificationHistory';
+import AgencyReservationFilters, { ReservationFilters } from '@/components/agency/AgencyReservationFilters';
 
 interface Driver {
   id: string;
@@ -113,7 +114,15 @@ const AgencyHome = () => {
     active: true,
     pastIncomplete: false,
     completed: false,
-    notificationSettings: false
+    notificationSettings: false,
+    notificationHistory: false
+  });
+  const [filters, setFilters] = useState<ReservationFilters>({
+    searchQuery: '',
+    status: 'all',
+    dateFrom: undefined,
+    dateTo: undefined,
+    customerName: '',
   });
 
   const fetchData = useCallback(async (showToast = false) => {
@@ -235,30 +244,68 @@ const AgencyHome = () => {
     await fetchData(true);
   };
 
-  const toggleSection = (section: 'upcoming' | 'active' | 'pastIncomplete' | 'completed' | 'notificationSettings') => {
+  const toggleSection = (section: 'upcoming' | 'active' | 'pastIncomplete' | 'completed' | 'notificationSettings' | 'notificationHistory') => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
+
+  // Calculate active filter count
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.status && filters.status !== 'all') count++;
+    if (filters.customerName) count++;
+    if (filters.dateFrom) count++;
+    if (filters.dateTo) count++;
+    return count;
+  }, [filters]);
+
+  // Filter reservations based on filters
+  const filteredReservations = useMemo(() => {
+    return reservations.filter(r => {
+      // Search query
+      if (filters.searchQuery) {
+        const query = filters.searchQuery.toLowerCase();
+        const matchesCode = r.reservation_code?.toLowerCase().includes(query);
+        const matchesCustomer = r.customer_name.toLowerCase().includes(query);
+        const matchesPickup = r.pickup.toLowerCase().includes(query) || r.pickup_place_name?.toLowerCase().includes(query);
+        const matchesDropoff = r.dropoff.toLowerCase().includes(query) || r.dropoff_place_name?.toLowerCase().includes(query);
+        if (!matchesCode && !matchesCustomer && !matchesPickup && !matchesDropoff) return false;
+      }
+
+      // Status filter
+      if (filters.status && filters.status !== 'all' && r.status !== filters.status) return false;
+
+      // Customer name filter
+      if (filters.customerName && !r.customer_name.toLowerCase().includes(filters.customerName.toLowerCase())) return false;
+
+      // Date range filter
+      const pickupDate = new Date(r.pickup_date);
+      if (filters.dateFrom && pickupDate < filters.dateFrom) return false;
+      if (filters.dateTo && pickupDate > filters.dateTo) return false;
+
+      return true;
+    });
+  }, [reservations, filters]);
 
   const now = new Date();
   const startOfToday = new Date(now);
   startOfToday.setHours(0, 0, 0, 0);
 
   // Keep same-day reservations visible even if pickup_time already passed
-  const upcomingJobs = reservations.filter(
+  const upcomingJobs = filteredReservations.filter(
     (r) =>
       !['completed', 'cancelled', 'active'].includes(r.status) &&
       new Date(`${r.pickup_date}T00:00:00`) >= startOfToday
   );
-  const activeJobs = reservations.filter((r) => r.status === 'active');
+  const activeJobs = filteredReservations.filter((r) => r.status === 'active');
   
   // Past incomplete: pickup date before today and status is NOT completed/cancelled
-  const pastIncompleteJobs = reservations.filter(
+  const pastIncompleteJobs = filteredReservations.filter(
     (r) =>
       new Date(`${r.pickup_date}T00:00:00`) < startOfToday &&
       !['completed', 'cancelled', 'cancelled_by_customer', 'cancelled_by_agency'].includes(r.status)
   );
   
-  const completedJobs = reservations.filter((r) => r.status === 'completed');
+  const completedJobs = filteredReservations.filter((r) => r.status === 'completed');
 
   const ReservationCard = ({ reservation }: { reservation: Reservation }) => (
     <Card 
@@ -379,6 +426,18 @@ const AgencyHome = () => {
           <Button 
             variant="ghost" 
             size="icon" 
+            onClick={() => toggleSection('notificationHistory')}
+            className={cn(
+              "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9",
+              expandedSections.notificationHistory && "bg-primary-foreground/20"
+            )}
+            title={t('notificationHistory') || 'Bildirim Geçmişi'}
+          >
+            <History className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
             onClick={() => toggleSection('notificationSettings')}
             className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
             title={t('notificationSettings') || 'Bildirim Ayarları'}
@@ -465,13 +524,26 @@ const AgencyHome = () => {
               )}
             </AnimatePresence>
 
-            {/* Reservation Code Search */}
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-2">{t('searchReservation') || 'Rezervasyon Ara'}</p>
-                <ReservationSearch userType="agency" agencyId={agencyId || undefined} placeholder="MT123456" />
-              </CardContent>
-            </Card>
+            {/* Notification History Panel */}
+            <AnimatePresence>
+              {expandedSections.notificationHistory && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <AgencyNotificationHistory />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Advanced Filters & Search */}
+            <AgencyReservationFilters 
+              filters={filters} 
+              onFiltersChange={setFilters} 
+              activeFilterCount={activeFilterCount} 
+            />
 
             {/* Para Birimi Bazlı Bakiye Kartları */}
             {accountingSummary.currencyBalances.length > 0 && (
