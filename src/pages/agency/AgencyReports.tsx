@@ -43,7 +43,6 @@ interface AgencyTransaction {
 const AgencyReports = () => {
   const { agencyId } = useUserRole();
   const { t, locale } = useAgencyTranslations();
-  const { currencySymbol, currency: agencyCurrency } = useAgencyLanguage();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -269,27 +268,46 @@ const AgencyReports = () => {
       </header>
 
       <main className="container mx-auto py-6 px-4 max-w-4xl space-y-6">
-        {/* Current Balance */}
-        <Card className={agency && agency.balance < 0 ? 'border-destructive' : ''}>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Wallet className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('currentBalance')}</p>
-                  <p className={`text-3xl font-bold ${agency && agency.balance < 0 ? 'text-destructive' : 'text-primary'}`}>
-                    {currencySymbol}{agency?.balance?.toFixed(2) || '0.00'}
-                  </p>
-                </div>
-              </div>
-              {agency && agency.balance < 0 && (
-                <Badge variant="destructive">{t('insufficientBalance')}</Badge>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Para Birimi Bazlı Güncel Bakiye Kartları */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {currencyBalances.length > 0 ? (
+            currencyBalances.map(cb => {
+              const symbol = cb.currency === 'TRY' ? '₺' : cb.currency === 'EUR' ? '€' : cb.currency === 'USD' ? '$' : cb.currency === 'GBP' ? '£' : cb.currency;
+              const carryover = carryoverBalances[cb.currency] || 0;
+              const totalWithCarryover = cb.netDebt + carryover;
+              return (
+                <Card key={`current-${cb.currency}`} className={totalWithCarryover > 0 ? 'border-orange-500/50 border-2' : 'border-green-500/50 border-2'}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${totalWithCarryover > 0 ? 'bg-orange-100' : 'bg-green-100'}`}>
+                        <Wallet className={`h-5 w-5 ${totalWithCarryover > 0 ? 'text-orange-600' : 'text-green-600'}`} />
+                      </div>
+                      <Badge variant="outline" className="font-mono">{cb.currency}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-1">{t('currentBalance') || 'Güncel Bakiye'}</p>
+                    <p className={`text-2xl font-bold ${totalWithCarryover > 0 ? 'text-orange-600' : totalWithCarryover < 0 ? 'text-green-600' : 'text-gray-600'}`}>
+                      {symbol}{Math.abs(totalWithCarryover).toFixed(2)}
+                    </p>
+                    {totalWithCarryover > 0 && (
+                      <p className="text-xs text-orange-600 mt-1">{t('amountOwed') || 'Borç'}</p>
+                    )}
+                    {totalWithCarryover < 0 && (
+                      <p className="text-xs text-green-600 mt-1">{t('creditBalance') || 'Alacak'}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })
+          ) : (
+            <Card className="col-span-full">
+              <CardContent className="pt-6 text-center">
+                <Wallet className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                <p className="text-lg font-medium text-gray-500">{t('noBalance') || 'Bakiye Yok'}</p>
+                <p className="text-sm text-muted-foreground">{t('noCompletedReservations') || 'Tamamlanmış rezervasyon yok'}</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         {/* Month Navigator */}
         <MonthNavigator 
@@ -476,10 +494,10 @@ const AgencyReports = () => {
                     </div>
                     <div className="text-right">
                       <p className={`font-bold ${tx.type === 'top_up' ? 'text-green-600' : 'text-red-600'}`}>
-                        {tx.type === 'top_up' ? '+' : '-'}{currencySymbol}{Math.abs(tx.amount).toFixed(2)}
+                        {tx.type === 'top_up' ? '+' : '-'}{tx.currency === 'TRY' ? '₺' : tx.currency === 'EUR' ? '€' : tx.currency === 'USD' ? '$' : tx.currency}{Math.abs(tx.amount).toFixed(2)}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {t('balance')}: {currencySymbol}{tx.balance_after.toFixed(2)}
+                        {t('balance')}: {tx.currency === 'TRY' ? '₺' : tx.currency === 'EUR' ? '€' : tx.currency === 'USD' ? '$' : tx.currency}{tx.balance_after.toFixed(2)}
                       </p>
                     </div>
                   </div>
