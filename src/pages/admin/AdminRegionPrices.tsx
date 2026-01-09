@@ -80,6 +80,10 @@ const CITIES_DATA = {
   'Mugla': {
     airports: ['Dalaman Airport (DLM)', 'Bodrum-Milas Airport (BJV)'],
     districts: ['Mugla Center', 'Marmaris', 'Datca', 'Fethiye', 'Koycegiz', 'Ortaca', 'Dalyan', 'Oludeniz', 'Hisaronu', 'Gocek', 'Icmeler', 'Turunc', 'Akyaka', 'Bozburun', 'Selimiye', 'Sogut', 'Taslica', 'Armutalan', 'Beldibi', 'Sarigerme', 'Calis', 'Ovacik', 'Kayakoy', 'Seydikemer', 'Ula', 'Yatagan', 'Milas', 'Bodrum']
+  },
+  'Denizli': {
+    airports: ['Denizli Cardak Airport (DNZ)'],
+    districts: ['Denizli Center', 'Pamukkale', 'Hierapolis', 'Laodikeia', 'Karahayit', 'Merkezefendi', 'Saraykoy', 'Acipayam', 'Buldan', 'Civril', 'Tavas', 'Honaz', 'Kaklik', 'Colossae', 'Tripolis', 'Babadag', 'Bekilli', 'Bozkurt', 'Cal', 'Cardak', 'Guney', 'Kale', 'Serinhisar']
   }
 };
 
