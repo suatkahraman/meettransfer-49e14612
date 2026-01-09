@@ -685,69 +685,45 @@ const AgencyHome = () => {
               </section>
             )}
 
-            {/* Past Incomplete Section */}
+            {/* Past Incomplete Section - Card Layout */}
             {pastIncompleteJobs.length > 0 && (
               <section>
-                <button 
-                  onClick={() => toggleSection('pastIncomplete')}
-                  className="flex items-center justify-between w-full py-2 mb-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{t('pastIncompleteTransfers') || 'Past (Incomplete)'}</span>
-                    <Badge variant="secondary" className="bg-orange-500/20 text-orange-700">{pastIncompleteJobs.length}</Badge>
-                  </div>
-                  <ChevronDown className={cn(
-                    "h-5 w-5 text-muted-foreground transition-transform",
-                    expandedSections.pastIncomplete && "rotate-180"
-                  )} />
-                </button>
-                <AnimatePresence>
-                  {expandedSections.pastIncomplete && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="space-y-3 overflow-hidden"
-                    >
-                      {pastIncompleteJobs.map((res) => (
-                        <ReservationCard key={res.id} reservation={res} />
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className="flex items-center gap-2 py-2 mb-3">
+                  <span className="font-semibold">{t('pastIncompleteTransfers') || 'Past (Incomplete)'}</span>
+                  <Badge variant="secondary" className="bg-orange-500/20 text-orange-700">{pastIncompleteJobs.length}</Badge>
+                </div>
+                <div className="space-y-3">
+                  {pastIncompleteJobs.map((res) => (
+                    <ReservationCard key={res.id} reservation={res} />
+                  ))}
+                </div>
               </section>
             )}
 
-            {/* Completed Section */}
+            {/* Completed Section - Card Layout */}
             {completedJobs.length > 0 && (
               <section id="completed-section">
-                <button 
-                  onClick={() => toggleSection('completed')}
-                  className="flex items-center justify-between w-full py-2 mb-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{t('completedTransfers') || 'Completed Transfers'}</span>
-                    <Badge variant="secondary" className="bg-green-500/20 text-green-700">{completedJobs.length}</Badge>
-                  </div>
-                  <ChevronDown className={cn(
-                    "h-5 w-5 text-muted-foreground transition-transform",
-                    expandedSections.completed && "rotate-180"
-                  )} />
-                </button>
-                <AnimatePresence>
-                  {expandedSections.completed && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="space-y-3 overflow-hidden"
+                <div className="flex items-center gap-2 py-2 mb-3">
+                  <span className="font-semibold">{t('completedTransfers') || 'Completed Transfers'}</span>
+                  <Badge variant="secondary" className="bg-green-500/20 text-green-700">{completedJobs.length}</Badge>
+                </div>
+                <div className="space-y-3">
+                  {completedJobs.slice(0, 10).map((res) => (
+                    <ReservationCard key={res.id} reservation={res} />
+                  ))}
+                  {completedJobs.length > 10 && (
+                    <Card 
+                      className="cursor-pointer hover:shadow-md transition-shadow text-center"
+                      onClick={() => navigate('/agency/reports')}
                     >
-                      {completedJobs.map((res) => (
-                        <ReservationCard key={res.id} reservation={res} />
-                      ))}
-                    </motion.div>
+                      <CardContent className="py-4">
+                        <p className="text-muted-foreground">
+                          +{completedJobs.length - 10} {t('moreTransfers') || 'daha fazla transfer'}
+                        </p>
+                      </CardContent>
+                    </Card>
                   )}
-                </AnimatePresence>
+                </div>
               </section>
             )}
               </>
