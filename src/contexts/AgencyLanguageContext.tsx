@@ -1,6 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useUserRole } from '@/hooks/useUserRole';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export type AgencyLanguage = 'EN' | 'TR' | 'DE' | 'FR' | 'RU' | 'IT' | 'ES' | 'AR' | 'UK' | 'JA';
 export type AgencyCurrency = 'TRY' | 'EUR' | 'GBP' | 'USD' | 'RUB' | 'UAH' | 'AED' | 'JPY' | 'AUD';
@@ -66,18 +64,12 @@ const getBrowserLanguage = (): AgencyLanguage => {
 interface AgencyLanguageContextType {
   language: AgencyLanguage;
   setLanguage: (lang: AgencyLanguage) => void;
-  currency: AgencyCurrency;
-  currencySymbol: string;
-  currencyCode: string;
   languageConfig: LanguageConfig;
-  currencyConfig: CurrencyConfig;
 }
 
 const AgencyLanguageContext = createContext<AgencyLanguageContextType | undefined>(undefined);
 
 export const AgencyLanguageProvider = ({ children }: { children: ReactNode }) => {
-  const { agencyId } = useUserRole();
-  
   const [language, setLanguageState] = useState<AgencyLanguage>(() => {
     const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (saved && Object.values(BROWSER_LANG_MAP).includes(saved as AgencyLanguage)) {
@@ -86,32 +78,7 @@ export const AgencyLanguageProvider = ({ children }: { children: ReactNode }) =>
     return getBrowserLanguage();
   });
 
-  const [currency, setCurrency] = useState<AgencyCurrency>('EUR');
-
-  // Fetch currency from database when agencyId is available
-  useEffect(() => {
-    const fetchAgencyCurrency = async () => {
-      if (!agencyId) return;
-      
-      const { data, error } = await supabase
-        .from('agencies')
-        .select('currency')
-        .eq('id', agencyId)
-        .single();
-      
-      if (!error && data?.currency) {
-        const currencyCode = data.currency as AgencyCurrency;
-        if (AGENCY_CURRENCIES.some(c => c.code === currencyCode)) {
-          setCurrency(currencyCode);
-        }
-      }
-    };
-
-    fetchAgencyCurrency();
-  }, [agencyId]);
-
   const languageConfig = AGENCY_LANGUAGES.find(l => l.code === language) || AGENCY_LANGUAGES[0];
-  const currencyConfig = AGENCY_CURRENCIES.find(c => c.code === currency) || AGENCY_CURRENCIES[1]; // Default EUR
 
   const setLanguage = (lang: AgencyLanguage) => {
     setLanguageState(lang);
@@ -122,11 +89,7 @@ export const AgencyLanguageProvider = ({ children }: { children: ReactNode }) =>
     <AgencyLanguageContext.Provider value={{ 
       language, 
       setLanguage, 
-      currency,
-      currencySymbol: currencyConfig.symbol,
-      currencyCode: currencyConfig.code,
-      languageConfig,
-      currencyConfig
+      languageConfig
     }}>
       {children}
     </AgencyLanguageContext.Provider>
