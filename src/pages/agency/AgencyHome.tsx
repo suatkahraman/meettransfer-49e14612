@@ -20,6 +20,7 @@ import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol, calculateCurrencyBalances, CurrencyBalance } from '@/lib/currency';
 import AgencyNotificationHistory from '@/components/agency/AgencyNotificationHistory';
 import AgencyReservationFilters, { ReservationFilters } from '@/components/agency/AgencyReservationFilters';
+import AgencyBottomNav from '@/components/agency/AgencyBottomNav';
 
 interface Driver {
   id: string;
@@ -117,6 +118,16 @@ const AgencyHome = () => {
     notificationSettings: false,
     notificationHistory: false
   });
+
+  // Listen for bottom nav notification toggle
+  useEffect(() => {
+    const handleToggleNotifications = () => {
+      setExpandedSections(prev => ({ ...prev, notificationHistory: !prev.notificationHistory }));
+    };
+
+    window.addEventListener('toggleNotificationHistory', handleToggleNotifications);
+    return () => window.removeEventListener('toggleNotificationHistory', handleToggleNotifications);
+  }, []);
   const [filters, setFilters] = useState<ReservationFilters>({
     searchQuery: '',
     status: 'all',
@@ -803,6 +814,12 @@ const AgencyHome = () => {
           </div>
         )}
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <AgencyBottomNav />
+      
+      {/* Spacer for bottom nav on mobile */}
+      <div className="h-14 sm:hidden" />
     </div>
   );
 };
