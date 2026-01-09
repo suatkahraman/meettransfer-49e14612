@@ -209,8 +209,17 @@ const DriverHome = () => {
   const currentYear = now.getFullYear();
 
   // Separate reservations by status and time
-  const pendingJobs = reservations.filter(r => r.status === 'sent_to_driver' || r.status === 'assigned');
-  const activeJobs = reservations.filter(r => r.status === 'active');
+  // Pending = awaiting driver confirmation (sent_to_driver, assigned) OR confirmed but driver_confirmed=false (updated after initial confirmation)
+  const pendingJobs = reservations.filter(r => 
+    r.status === 'sent_to_driver' || 
+    r.status === 'assigned' ||
+    (r.status === 'confirmed' && r.driver_confirmed === false)
+  );
+  // Active = driver confirmed and status is confirmed/active
+  const activeJobs = reservations.filter(r => 
+    r.status === 'active' || 
+    (r.status === 'confirmed' && r.driver_confirmed === true)
+  );
   
   // Only show completed jobs from current month (older ones go to history)
   const completedJobs = reservations.filter(r => {
