@@ -31,15 +31,15 @@ export const PushNotificationToggle = ({ compact = false }: PushNotificationTogg
         size="icon"
         onClick={handleToggle}
         disabled={isLoading || permission === 'denied'}
-        className="h-9 w-9 text-primary-foreground hover:bg-primary-foreground/10"
+        className="h-9 w-9 sm:h-10 sm:w-10 text-primary-foreground hover:bg-primary-foreground/10"
         title={isSubscribed ? (t("notificationsOn") || 'Notifications On') : (t("enableNotifications") || 'Enable Notifications')}
       >
         {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="h-4.5 w-4.5 sm:h-5 sm:w-5 animate-spin" />
         ) : isSubscribed ? (
-          <Bell className="h-4 w-4" />
+          <Bell className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
         ) : (
-          <BellOff className="h-4 w-4" />
+          <BellOff className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
         )}
       </Button>
     );

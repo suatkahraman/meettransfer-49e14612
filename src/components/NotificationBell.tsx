@@ -251,12 +251,12 @@ export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) =
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className={`relative ${buttonClass}`}>
-          <Bell className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className={`relative h-9 w-9 sm:h-10 sm:w-10 ${buttonClass}`}>
+          <Bell className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           {unreadCount > 0 && (
             <Badge 
               variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs animate-pulse"
+              className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[10px] sm:text-xs animate-pulse"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
