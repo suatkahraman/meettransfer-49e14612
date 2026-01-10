@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Icon mapping for vehicle features with colors
 const getFeatureIconWithColor = (iconName: string) => {
@@ -35,6 +36,53 @@ const getFeatureIconWithColor = (iconName: string) => {
   return iconConfig[iconName] || { icon: Sparkles, color: 'text-purple-500' };
 };
 
+// Skeleton Loading Component
+export function VehicleSelectionCardSkeleton() {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border-2 border-border/60 bg-gradient-to-br from-muted/80 via-muted/50 to-background">
+      <div className="relative p-4 sm:p-5">
+        <div className="flex gap-4">
+          {/* Image Skeleton */}
+          <Skeleton className="w-32 sm:w-40 h-24 sm:h-28 rounded-xl flex-shrink-0" />
+          
+          {/* Details Skeleton */}
+          <div className="flex-1 min-w-0 flex flex-col justify-between">
+            <div>
+              {/* Title */}
+              <Skeleton className="h-6 w-32 mb-2" />
+              
+              {/* Capacity Pills */}
+              <div className="flex items-center gap-2 mb-3">
+                <Skeleton className="h-6 w-16 rounded-lg" />
+                <Skeleton className="h-6 w-14 rounded-lg" />
+              </div>
+            </div>
+            
+            {/* Feature Icons */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Skeleton className="h-6 w-20 rounded-md" />
+              <Skeleton className="h-6 w-16 rounded-md" />
+              <Skeleton className="h-6 w-18 rounded-md" />
+            </div>
+          </div>
+        </div>
+        
+        {/* Price Section Skeleton */}
+        <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-8 w-20" />
+        </div>
+        
+        {/* Description Skeleton */}
+        <div className="mt-3 space-y-1">
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-3/4" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface VehicleSelectionCardProps {
   vehicleType: string;
   isSelected: boolean;
@@ -46,6 +94,7 @@ interface VehicleSelectionCardProps {
   available?: boolean;
   previousPrice?: number | null;
   showDiscountAnimation?: boolean;
+  isLoading?: boolean;
 }
 
 export function VehicleSelectionCard({
@@ -59,11 +108,17 @@ export function VehicleSelectionCard({
   available = true,
   previousPrice,
   showDiscountAnimation = false,
+  isLoading = false,
 }: VehicleSelectionCardProps) {
   const { t, language } = useLanguage();
   const [imageModalOpen, setImageModalOpen] = useState(false);
   
   const vehicleInfo = VEHICLE_TYPE_MAP[vehicleType];
+  
+  // Show skeleton if loading
+  if (isLoading) {
+    return <VehicleSelectionCardSkeleton />;
+  }
   
   if (!vehicleInfo) return null;
   
