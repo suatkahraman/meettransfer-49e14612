@@ -10323,11 +10323,24 @@ const resolveLanguage = (pathname: string): { language: Language; fromPrefix: bo
     return { language: prefixLang, fromPrefix: true };
   }
 
-  if (isAuthLanguageRoute(pathname)) {
+  // For auth routes AND internal app routes, use stored language
+  if (isAuthLanguageRoute(pathname) || isInternalAppRoute(pathname)) {
     return { language: getStoredLanguage() ?? "EN", fromPrefix: false };
   }
 
+  // For public website root without prefix, also check stored language
+  const stored = getStoredLanguage();
+  if (stored) {
+    return { language: stored, fromPrefix: false };
+  }
+
   return { language: "EN", fromPrefix: false };
+};
+
+// Internal app routes that don't use URL prefixes for language
+const isInternalAppRoute = (pathname: string): boolean => {
+  const internalRoutes = ["/customer", "/driver", "/admin", "/agency", "/portal"];
+  return internalRoutes.some((p) => pathname.startsWith(p));
 };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
