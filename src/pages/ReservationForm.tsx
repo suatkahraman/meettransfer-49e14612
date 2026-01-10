@@ -954,6 +954,7 @@ const ReservationForm = () => {
       const selectedPriceInfo = fetchedVehiclePrices.find(v => v.vehicleType === selectedVehicleForConfirm);
       if (!selectedPriceInfo?.price) {
         toast.error(t('language') === 'TR' ? 'Fiyat bulunamadı' : 'Price not found');
+        setIsRejecting(false);
         return;
       }
 
@@ -964,12 +965,17 @@ const ReservationForm = () => {
       });
       setPreviousVehiclePrices(oldPricesMap);
 
-      // Apply €3 discount (approximately, use exchange rate)
-      const discountAmount = selectedPriceInfo.currency === 'EUR' ? 3 :
-                            selectedPriceInfo.currency === 'USD' ? 3 :
-                            selectedPriceInfo.currency === 'GBP' ? 3 :
-                            selectedPriceInfo.currency === 'TRY' ? 110 :
-                            selectedPriceInfo.currency === 'AED' ? 12 : 3;
+      // Calculate discount dynamically based on currency (5% discount with min/max limits)
+      const discountPercentage = 0.05;
+      const minDiscount: Record<string, number> = { EUR: 2, USD: 2, GBP: 2, TRY: 80, AED: 8 };
+      const maxDiscount: Record<string, number> = { EUR: 8, USD: 9, GBP: 7, TRY: 300, AED: 35 };
+      
+      const currency = selectedPriceInfo.currency;
+      const calculatedDiscount = Math.round(selectedPriceInfo.price * discountPercentage);
+      const discountAmount = Math.max(
+        minDiscount[currency] || 2,
+        Math.min(calculatedDiscount, maxDiscount[currency] || 8)
+      );
 
       // Update all vehicle prices with discount
       setFetchedVehiclePrices(prevPrices => 
@@ -983,10 +989,12 @@ const ReservationForm = () => {
       setIsDiscountedOffer(true);
       setCanReject(false);
 
+      // Show animated gift icon toast
       toast.success(
         t('language') === 'TR' 
-          ? `Özel indirim uygulandı! -${discountAmount} ${selectedPriceInfo.currency}` 
-          : `Special discount applied! -${discountAmount} ${selectedPriceInfo.currency}`
+          ? `🎁 Özel indiriminiz uygulandı! -${discountAmount} ${currency}` 
+          : `🎁 Special discount applied! -${discountAmount} ${currency}`,
+        { duration: 4000 }
       );
 
       // Clear animation after 4 seconds
@@ -1505,11 +1513,22 @@ const ReservationForm = () => {
                     </>
                   ) : (
                     <>
-                      <ThumbsDown className="h-4 w-4 mr-2" />
+                      <Gift className="h-4 w-4 mr-2" />
                       {t('language') === 'TR' ? 'Fiyat Yüksek, İndirim İste' : 'Price Too High, Request Discount'}
                     </>
                   )}
                 </Button>
+              )}
+              
+              {/* Discount Applied Badge - Show after discount */}
+              {isDiscountedOffer && (
+                <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300">
+                  <Gift className="h-5 w-5" />
+                  <span className="font-medium">
+                    {t('language') === 'TR' ? 'Özel İndiriminiz Uygulandı!' : 'Your Special Discount Applied!'}
+                  </span>
+                  <CheckCircle className="h-5 w-5" />
+                </div>
               )}
               
               <Button 
