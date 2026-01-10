@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby, Edit, RefreshCw, Sparkles } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby, Edit, RefreshCw, Sparkles, Shield, History, Phone } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -376,7 +376,7 @@ const CustomerBookings = () => {
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-4"
         >
           <div className="flex items-center gap-2 mb-1">
             <motion.div
@@ -387,6 +387,58 @@ const CustomerBookings = () => {
             </motion.div>
             <h1 className="text-2xl font-serif font-bold text-foreground">{t('myReservationsTitle')}</h1>
           </div>
+        </motion.div>
+
+        {/* Quick Actions Bar */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-4 gap-2 mb-6"
+        >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="outline"
+              className="flex flex-col items-center gap-1 h-auto py-3 w-full bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:border-primary/40"
+              onClick={() => navigate('/customer')}
+            >
+              <Plus className="h-5 w-5 text-primary" />
+              <span className="text-xs font-medium">{language === 'TR' ? 'Yeni' : 'New'}</span>
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="outline"
+              className="flex flex-col items-center gap-1 h-auto py-3 w-full bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20 hover:border-blue-500/40"
+              onClick={() => {
+                const historySection = document.getElementById('past-reservations');
+                historySection?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <History className="h-5 w-5 text-blue-500" />
+              <span className="text-xs font-medium">{language === 'TR' ? 'Geçmiş' : 'History'}</span>
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="outline"
+              className="flex flex-col items-center gap-1 h-auto py-3 w-full bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/40"
+              onClick={() => navigate('/security-settings')}
+            >
+              <Shield className="h-5 w-5 text-emerald-500" />
+              <span className="text-xs font-medium">{language === 'TR' ? 'Güvenlik' : 'Security'}</span>
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="outline"
+              className="flex flex-col items-center gap-1 h-auto py-3 w-full bg-gradient-to-br from-orange-500/5 to-orange-500/10 border-orange-500/20 hover:border-orange-500/40"
+              onClick={() => setShowNotificationSettings(!showNotificationSettings)}
+            >
+              <Settings className="h-5 w-5 text-orange-500" />
+              <span className="text-xs font-medium">{language === 'TR' ? 'Ayarlar' : 'Settings'}</span>
+            </Button>
+          </motion.div>
         </motion.div>
 
         {/* Notification Settings Panel */}
@@ -723,9 +775,9 @@ const CustomerBookings = () => {
 
             {/* Past Reservations Section */}
             {sortedPastReservations.length > 0 && (
-              <motion.div variants={itemVariants} className="space-y-3">
+              <motion.div id="past-reservations" variants={itemVariants} className="space-y-3">
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-muted-foreground">
-                  <CheckCircle className="h-5 w-5" />
+                  <History className="h-5 w-5" />
                   {t('pastReservations') || 'Past Reservations'} ({sortedPastReservations.length})
                 </h2>
                 {sortedPastReservations.map((reservation, index) => (
