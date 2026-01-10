@@ -9,6 +9,9 @@ type EmailType =
   | 'driver_assigned_driver'
   | 'driver_assigned_customer'
   | 'reservation_updated_driver'
+  | 'reservation_updated_customer'
+  | 'reservation_cancelled_customer'
+  | 'trip_completed_customer'
   | 'payment_request_customer'
   | 'payment_confirmed_customer'
   | 'trip_completed_admin'
@@ -255,6 +258,30 @@ export const useEmailNotifications = () => {
     });
   }, [sendEmail]);
 
+  // 17. When reservation is cancelled → Email to customer
+  const emailCustomerReservationCancelled = useCallback(async (reservationId: string) => {
+    return sendEmail({
+      type: 'reservation_cancelled_customer',
+      reservation_id: reservationId,
+    });
+  }, [sendEmail]);
+
+  // 18. When reservation is updated → Email to customer
+  const emailCustomerReservationUpdated = useCallback(async (reservationId: string) => {
+    return sendEmail({
+      type: 'reservation_updated_customer',
+      reservation_id: reservationId,
+    });
+  }, [sendEmail]);
+
+  // 19. When trip is completed → Email to customer
+  const emailCustomerTripCompleted = useCallback(async (reservationId: string) => {
+    return sendEmail({
+      type: 'trip_completed_customer',
+      reservation_id: reservationId,
+    });
+  }, [sendEmail]);
+
   return {
     sendEmail,
     emailAdminNewReservation,
@@ -275,5 +302,8 @@ export const useEmailNotifications = () => {
     emailAgencyPriceSet,
     emailAdminAgencyPriceApproved,
     emailAdminAgencyPriceRejected,
+    emailCustomerReservationCancelled,
+    emailCustomerReservationUpdated,
+    emailCustomerTripCompleted,
   };
 };

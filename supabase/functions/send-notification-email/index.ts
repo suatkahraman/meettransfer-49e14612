@@ -18,6 +18,9 @@ type EmailType =
   | 'driver_assigned_driver'     // Admin assigns driver → Driver
   | 'driver_assigned_customer'   // Admin assigns driver → Customer
   | 'reservation_updated_driver' // Reservation updated → Driver (new assignment or changes)
+  | 'reservation_updated_customer' // Reservation updated → Customer
+  | 'reservation_cancelled_customer' // Reservation cancelled → Customer
+  | 'trip_completed_customer'    // Trip completed → Customer
   | 'payment_request_customer'   // Admin sends payment link → Customer
   | 'payment_confirmed_customer' // Admin confirms payment → Customer
   | 'trip_completed_admin'       // Driver completes trip → Admin
@@ -1406,6 +1409,220 @@ const getEmailTemplate = (type: EmailType, data: any) => {
         `,
       };
 
+    case 'reservation_cancelled_customer':
+      return {
+        subject: `❌ Your Transfer Has Been Cancelled - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">❌ Transfer Cancelled</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">Your reservation has been cancelled</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #ef4444; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 2px solid #ef4444;">
+                <p style="margin: 0; color: #dc2626; font-weight: bold; text-align: center; font-size: 16px;">Your transfer has been cancelled</p>
+                <p style="margin: 10px 0 0; color: #7f1d1d; text-align: center; font-size: 14px;">If you did not request this cancellation, please contact us immediately.</p>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Original Date</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff_display}</td>
+                </tr>
+              </table>
+
+              <div style="text-align: center; margin-top: 25px;">
+                <a href="${baseUrl}" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Book a New Transfer</a>
+              </div>
+
+              <div style="margin-top: 25px; padding: 20px; background: #111; border-radius: 8px; text-align: center;">
+                <p style="margin: 0 0 15px; color: #fdd835; font-size: 14px; font-weight: bold;">Questions? Contact Us</p>
+                <div>
+                  <a href="https://wa.me/15558051101" style="display: inline-block; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">💬 WhatsApp Chat</a>
+                  <a href="mailto:info@meettransfer.app" style="display: inline-block; background: #fdd835; color: #111; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">✉️ info@meettransfer.app</a>
+                </div>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+    case 'reservation_updated_customer':
+      return {
+        subject: `📋 Your Transfer Has Been Updated - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">📋 Transfer Updated</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">Your reservation details have been updated</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #f59e0b; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 2px solid #f59e0b;">
+                <p style="margin: 0; color: #92400e; font-weight: bold; text-align: center;">⚠️ Please review the updated details below</p>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Date & Time</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #d97706;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${getVehicleLabel(data.vehicle_type)}</td>
+                </tr>
+                ${data.driver_name ? `
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Driver</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.driver_name}</td>
+                </tr>
+                ` : ''}
+                ${data.driver_plate ? `
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Vehicle Plate</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.driver_plate}</td>
+                </tr>
+                ` : ''}
+              </table>
+
+              <div style="text-align: center; margin-top: 25px;">
+                <a href="${baseUrl}/customer/reservation/${data.reservation_id}" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">View Reservation Details</a>
+              </div>
+
+              <div style="margin-top: 25px; padding: 20px; background: #111; border-radius: 8px; text-align: center;">
+                <p style="margin: 0 0 15px; color: #fdd835; font-size: 14px; font-weight: bold;">Questions? Contact Us</p>
+                <div>
+                  <a href="https://wa.me/15558051101" style="display: inline-block; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">💬 WhatsApp Chat</a>
+                  <a href="mailto:info@meettransfer.app" style="display: inline-block; background: #fdd835; color: #111; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">✉️ info@meettransfer.app</a>
+                </div>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+    case 'trip_completed_customer':
+      return {
+        subject: `✅ Your Transfer is Complete - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">✅ Transfer Complete!</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">Thank you for traveling with Meet Transfer</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #22c55e; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <div style="background: #dcfce7; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 2px solid #22c55e; text-align: center;">
+                <p style="margin: 0; font-size: 48px;">🎉</p>
+                <h2 style="margin: 15px 0 10px; color: #16a34a; font-size: 20px;">We hope you enjoyed your journey!</h2>
+                <p style="margin: 0; color: #15803d; font-size: 14px;">Your satisfaction is our priority.</p>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Date</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_date}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Route</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_display} → ${data.dropoff_display}</td>
+                </tr>
+                ${data.driver_name ? `
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Your Driver</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.driver_name}</td>
+                </tr>
+                ` : ''}
+              </table>
+
+              <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 2px solid #f59e0b; text-align: center;">
+                <p style="margin: 0; color: #92400e; font-weight: bold; font-size: 16px;">⭐ Rate Your Experience</p>
+                <p style="margin: 10px 0 15px; color: #78350f; font-size: 13px;">Your feedback helps us improve and helps other travelers.</p>
+                <a href="${baseUrl}/customer/review/${data.reservation_id}" style="display: inline-block; background: #f59e0b; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">Leave a Review</a>
+              </div>
+
+              <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0 0 10px; color: #475569; font-weight: bold;">Planning another trip?</p>
+                <a href="${baseUrl}" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Book Another Transfer</a>
+              </div>
+
+              <div style="margin-top: 25px; padding: 20px; background: #111; border-radius: 8px; text-align: center;">
+                <p style="margin: 0 0 15px; color: #fdd835; font-size: 14px; font-weight: bold;">Need Assistance?</p>
+                <div>
+                  <a href="https://wa.me/15558051101" style="display: inline-block; background: #25D366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">💬 WhatsApp Chat</a>
+                  <a href="mailto:info@meettransfer.app" style="display: inline-block; background: #fdd835; color: #111; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 5px;">✉️ info@meettransfer.app</a>
+                </div>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
     default:
       throw new Error(`Unknown email type: ${type}`);
   }
@@ -1596,6 +1813,9 @@ const handler = async (req: Request): Promise<Response> => {
       case 'payment_request_customer':
       case 'payment_confirmed_customer':
       case 'driver_assigned_customer':
+      case 'reservation_cancelled_customer':
+      case 'reservation_updated_customer':
+      case 'trip_completed_customer':
         recipient = customerEmail;
         break;
       case 'driver_assigned_driver':
