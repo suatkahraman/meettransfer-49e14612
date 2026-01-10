@@ -148,6 +148,11 @@ const ReservationForm = () => {
   const quickBookingId = searchParams.get('quickBookingId') || '';
   const urlPaymentMethod = searchParams.get('paymentMethod') || '';
   
+  // Luggage and baby seat from URL (from CustomerHome form)
+  const urlLuggageCount = searchParams.get('luggageCount') || '';
+  const urlBabySeatCount = searchParams.get('babySeatCount') || '';
+  const urlCustomerNotes = searchParams.get('customerNotes') || '';
+  
   // Return trip URL params
   const urlHasReturn = searchParams.get('hasReturn') === 'true';
   const urlReturnDate = searchParams.get('returnDate') || '';
@@ -218,9 +223,9 @@ const ReservationForm = () => {
     flightNumber: '',
   });
   
-  // Baby seat and luggage counts for vehicle selection screen
-  const [babySeatCount, setBabySeatCount] = useState(0);
-  const [luggageCount, setLuggageCount] = useState(0);
+  // Baby seat and luggage counts for vehicle selection screen - initialize from URL params
+  const [babySeatCount, setBabySeatCount] = useState(() => urlBabySeatCount ? parseInt(urlBabySeatCount) || 0 : 0);
+  const [luggageCount, setLuggageCount] = useState(() => urlLuggageCount ? parseInt(urlLuggageCount) || 0 : 0);
   
   // Quick booking pre-filled price display
   const isFromQuickBooking = !!quickBookingId;
@@ -242,6 +247,7 @@ const ReservationForm = () => {
     time: urlTime,
     vehicleType: urlVehicleType || defaultFormData.vehicleType,
     paymentMethod: (urlPaymentMethod === 'cash' || urlPaymentMethod === 'payment_link') ? urlPaymentMethod : '' as '' | 'cash' | 'payment_link',
+    notes: urlCustomerNotes || defaultFormData.notes,
   }));
 
   // Load saved form data on mount - but DON'T override URL params if coming from QuickBooking
@@ -2204,10 +2210,28 @@ const ReservationForm = () => {
                 {errors.paymentMethod && <p className="text-sm text-destructive">{errors.paymentMethod}</p>}
               </div>
 
+              {/* Luggage & Baby Seat Display - from CustomerHome form */}
+              {(luggageCount > 0 || babySeatCount > 0) && (
+                <div className="flex flex-wrap gap-4 p-3 bg-muted/30 rounded-lg border border-border/50">
+                  {luggageCount > 0 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Luggage className="h-4 w-4 text-orange-500" />
+                      <span>{luggageCount} {t('luggage') || 'Luggage'}</span>
+                    </div>
+                  )}
+                  {babySeatCount > 0 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Baby className="h-4 w-4 text-pink-500" />
+                      <span>{babySeatCount} {t('babySeat') || 'Baby Seat'}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="space-y-2">
-                <Label>Notes (optional)</Label>
+                <Label>{t('specialRequests') || 'Notes'} ({t('optional') || 'optional'})</Label>
                 <Textarea
-                  placeholder="Special requests, number of luggage, etc."
+                  placeholder={t('specialRequestsPlaceholder') || "Special requests, additional info..."}
                   value={formData.notes}
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
                   rows={3}

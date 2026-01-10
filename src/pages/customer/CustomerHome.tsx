@@ -14,7 +14,8 @@ import {
   Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
   ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall, Sparkles, 
   Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe, History,
-  Bookmark, TrendingUp, Briefcase, Baby, MessageSquare, CheckCircle
+  Bookmark, TrendingUp, Briefcase, Baby, MessageSquare, CheckCircle,
+  Snowflake, Armchair, Wifi, BatteryCharging, Droplets, Stars, Wine, Crown, Tv
 } from 'lucide-react';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -58,6 +59,25 @@ const reservationSchema = z.object({
 const MAX_PASSENGERS = 15;
 const WHATSAPP_NUMBER = '905321748390';
 const EMERGENCY_PHONE = '+905321748390';
+
+// Feature icon helper - matches Hero.tsx
+const getFeatureIconWithColor = (iconName: string) => {
+  const iconConfig: Record<string, { icon: typeof Snowflake; color: string }> = {
+    'snowflake': { icon: Snowflake, color: 'text-sky-500' },
+    'armchair': { icon: Armchair, color: 'text-amber-600' },
+    'wifi': { icon: Wifi, color: 'text-blue-500' },
+    'battery-charging': { icon: BatteryCharging, color: 'text-green-500' },
+    'droplets': { icon: Droplets, color: 'text-cyan-500' },
+    'luggage': { icon: Briefcase, color: 'text-orange-500' },
+    'stars': { icon: Stars, color: 'text-yellow-500' },
+    'wine': { icon: Wine, color: 'text-rose-500' },
+    'sparkles': { icon: Sparkles, color: 'text-purple-500' },
+    'crown': { icon: Crown, color: 'text-yellow-600' },
+    'tv': { icon: Tv, color: 'text-indigo-500' },
+    'champagne': { icon: Wine, color: 'text-pink-500' },
+  };
+  return iconConfig[iconName] || { icon: Sparkles, color: 'text-purple-500' };
+};
 
 // Helper function - outside component for better performance
 const getGreeting = (language: string): string => {
@@ -1039,7 +1059,7 @@ const CustomerHome = () => {
                       )}>
                         {v.label}
                       </h3>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
                         <span className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
                           {v.passengers}
@@ -1048,6 +1068,26 @@ const CustomerHome = () => {
                           <Briefcase className="h-3 w-3" />
                           {v.luggage}
                         </span>
+                      </div>
+                      {/* Feature icons - like Hero.tsx */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {v.features.slice(0, 4).map((feature, idx) => {
+                          const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
+                          return (
+                            <div 
+                              key={idx} 
+                              className="flex items-center gap-1 bg-muted/50 px-1.5 py-0.5 rounded text-[10px]"
+                              title={language === 'TR' ? feature.labelTr : feature.label}
+                            >
+                              <FeatureIcon className={cn("h-2.5 w-2.5", color)} />
+                            </div>
+                          );
+                        })}
+                        {v.features.length > 4 && (
+                          <div className="flex items-center px-1.5 py-0.5 bg-muted/50 rounded text-[10px] text-muted-foreground">
+                            +{v.features.length - 4}
+                          </div>
+                        )}
                       </div>
                     </button>
                   ))}
