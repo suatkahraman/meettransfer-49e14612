@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,11 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, AlertTriangle, Edit, RefreshCw, Home } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { motion } from 'framer-motion';
+import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
 
 // Use centralized vehicle types
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
@@ -298,37 +300,102 @@ const CustomerEditReservation = () => {
     }
   };
 
+  // Animation variants
+  const containerVariants = useMemo(() => ({
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }), []);
+
+  const itemVariants = useMemo(() => ({
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+  }), []);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center space-y-4"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <RefreshCw className="h-8 w-8 mx-auto text-primary" />
+          </motion.div>
+          <p className="text-muted-foreground">Loading...</p>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => navigate(`/customer/reservation/${id}`)} 
-          className="text-primary-foreground hover:bg-primary-foreground/10"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-serif">{t('editReservation')}</h1>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Modern Header */}
+      <motion.header 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="bg-primary text-primary-foreground py-4 px-4 shadow-lg backdrop-blur-sm sticky top-0 z-50"
+      >
+        <div className="flex items-center justify-between max-w-2xl mx-auto">
+          <div className="flex items-center gap-3">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => navigate(`/customer/reservation/${id}`)} 
+                className="text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </motion.div>
+            <img src={meetTransferLogo} alt="Meet Transfer" className="h-8 w-auto" />
+          </div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10">
+              <Home className="h-5 w-5" />
+            </Button>
+          </motion.div>
+        </div>
+      </motion.header>
 
-      <main className="container mx-auto py-8 px-4 max-w-2xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('updateYourReservation')}</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {t('changesWillBeSentToAdmin')}
-            </p>
-          </CardHeader>
-          <CardContent>
+      <motion.main 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="container mx-auto py-6 px-4 max-w-2xl"
+      >
+        {/* Title Section */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Edit className="h-5 w-5 text-primary" />
+            </motion.div>
+            <h1 className="text-2xl font-serif font-bold text-foreground">{t('editReservation')}</h1>
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <Card className="shadow-xl border-border/50 overflow-hidden backdrop-blur-sm bg-card/95">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border/50">
+              <CardTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5 text-primary" />
+                {t('updateYourReservation')}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {t('changesWillBeSentToAdmin')}
+              </p>
+            </CardHeader>
+            <CardContent className="p-6">
             {/* Price Update Warning */}
             {showPriceWarning && (
               <Alert variant="destructive" className="mb-6 border-amber-500 bg-amber-500/10">
@@ -526,9 +593,10 @@ const CustomerEditReservation = () => {
                 </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
-      </main>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.main>
     </div>
   );
 };
