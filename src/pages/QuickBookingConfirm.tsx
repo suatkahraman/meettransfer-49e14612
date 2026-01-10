@@ -880,81 +880,81 @@ export default function QuickBookingConfirm() {
   const selectedVehicleInfo = VEHICLE_TYPE_MAP[selectedVehicle || booking.vehicle_type];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-3 sm:p-4">
       <Card className="max-w-2xl w-full">
-        <CardContent className="pt-6">
-          {/* Header */}
-          <div className="text-center mb-6">
-            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <DollarSign className="h-8 w-8 text-primary" />
+        <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+          {/* Header - Mobile Optimized */}
+          <div className="text-center mb-4 sm:mb-6">
+            <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold mb-2">{t("qbYourPriceQuote")}</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{t("qbYourPriceQuote")}</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               {t("qbReviewAndConfirm")}
             </p>
           </div>
 
-          {/* Transfer Details */}
-          <div className="bg-muted/50 rounded-lg p-4 mb-6 space-y-3">
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <p className="text-sm text-muted-foreground">{t("qbPickup")}</p>
-                <p className="font-medium">{booking.pickup}</p>
+          {/* Transfer Details - Mobile Optimized */}
+          <div className="bg-muted/50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 space-y-2 sm:space-y-3">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm text-muted-foreground">{t("qbPickup")}</p>
+                <p className="font-medium text-sm sm:text-base truncate">{booking.pickup}</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-accent mt-0.5" />
-              <div>
-                <p className="text-sm text-muted-foreground">{t("qbDropoff")}</p>
-                <p className="font-medium">{booking.dropoff}</p>
+            <div className="flex items-start gap-2 sm:gap-3">
+              <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-accent mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm text-muted-foreground">{t("qbDropoff")}</p>
+                <p className="font-medium text-sm sm:text-base truncate">{booking.dropoff}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t("qbDate")}</p>
-                  <p className="font-medium">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground">{t("qbDate")}</p>
+                  <p className="font-medium text-xs sm:text-base">
                     {format(parseISO(booking.pickup_date), "dd/MM/yyyy")}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-muted-foreground" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-muted-foreground">{t("qbTime")}</p>
-                  <p className="font-medium">{booking.pickup_time}</p>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground">{t("qbTime")}</p>
+                  <p className="font-medium text-xs sm:text-base">{booking.pickup_time}</p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-muted-foreground" />
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
               <div>
-                <p className="text-sm text-muted-foreground">{t("qbPassengers")}</p>
-                <p className="font-medium">{booking.passengers}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground">{t("qbPassengers")}</p>
+                <p className="font-medium text-xs sm:text-base">{booking.passengers}</p>
               </div>
             </div>
           </div>
 
-          {/* Vehicle Selection */}
-          <div className="mb-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Car className="h-5 w-5" />
+          {/* Vehicle Selection - Mobile Optimized */}
+          <div className="mb-4 sm:mb-6">
+            <h3 className="font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+              <Car className="h-4 w-4 sm:h-5 sm:w-5" />
               {t("qbSelectVehicle") || "Select Your Vehicle"}
             </h3>
             
             {loadingPrices ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <span className="ml-2 text-muted-foreground">Loading vehicle options...</span>
+              <div className="flex items-center justify-center py-6 sm:py-8">
+                <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-primary" />
+                <span className="ml-2 text-sm text-muted-foreground">Loading...</span>
               </div>
             ) : allVehiclePrices.length > 0 ? (
-              <div className="grid gap-4">
+              <div className="grid gap-2 sm:gap-4">
                 {allVehiclePrices.map((vehicle) => {
                   const isSelected = (selectedVehicle || booking.vehicle_type) === vehicle.vehicleType;
                   const recommendedVehicle = getRecommendedVehicle(booking.passengers, booking.luggage_count || 0);
@@ -991,48 +991,50 @@ export default function QuickBookingConfirm() {
             )}
           </div>
 
-          {/* Return Trip Option */}
-          <div className="bg-muted/50 rounded-lg p-4 mb-4">
-            <div className="flex items-center space-x-3 mb-4">
+          {/* Return Trip Option - Mobile Optimized */}
+          <div className="bg-muted/50 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+            <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
               <Checkbox
                 id="returnTrip"
                 checked={hasReturnTrip}
                 onCheckedChange={(checked) => setHasReturnTrip(checked === true)}
               />
-              <Label htmlFor="returnTrip" className="flex items-center gap-2 cursor-pointer font-medium">
-                <ArrowLeftRight className="h-4 w-4 text-primary" />
+              <Label htmlFor="returnTrip" className="flex items-center gap-1.5 sm:gap-2 cursor-pointer font-medium text-sm sm:text-base">
+                <ArrowLeftRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 {t("qbAddReturnTransfer")}
               </Label>
             </div>
 
             {hasReturnTrip && (
-              <div className="space-y-4 mt-4 pl-6 border-l-2 border-primary/30">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="returnDate">{t("qbReturnDate")}</Label>
+              <div className="space-y-3 sm:space-y-4 mt-3 sm:mt-4 pl-3 sm:pl-6 border-l-2 border-primary/30">
+                <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                  <div className="space-y-1 sm:space-y-2">
+                    <Label htmlFor="returnDate" className="text-xs sm:text-sm">{t("qbReturnDate")}</Label>
                     <Input
                       id="returnDate"
                       type="date"
                       value={returnTripData.date}
                       onChange={(e) => setReturnTripData(prev => ({ ...prev, date: e.target.value }))}
                       min={booking.pickup_date}
+                      className="h-9 sm:h-10 text-sm"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="returnTime">{t("qbReturnTime")}</Label>
+                  <div className="space-y-1 sm:space-y-2">
+                    <Label htmlFor="returnTime" className="text-xs sm:text-sm">{t("qbReturnTime")}</Label>
                     <Input
                       id="returnTime"
                       type="time"
                       value={returnTripData.time}
                       onChange={(e) => setReturnTripData(prev => ({ ...prev, time: e.target.value }))}
+                      className="h-9 sm:h-10 text-sm"
                     />
                   </div>
                 </div>
 
                 {/* Promo Code */}
-                <div className="space-y-2">
-                  <Label htmlFor="promoCode" className="flex items-center gap-2">
-                    <Tag className="h-4 w-4" />
+                <div className="space-y-1 sm:space-y-2">
+                  <Label htmlFor="promoCode" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                    <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     {t("qbPromoCodeLabel")}
                   </Label>
                   <div className="relative">
@@ -1041,27 +1043,27 @@ export default function QuickBookingConfirm() {
                       placeholder={t("qbEnterPromoCode")}
                       value={promoCode}
                       onChange={(e) => handlePromoCodeChange(e.target.value)}
-                      className={`pr-10 ${
+                      className={`pr-10 h-9 sm:h-10 text-sm ${
                         isPromoCodeValid === true ? "border-green-500 focus:ring-green-500" :
                         isPromoCodeValid === false ? "border-red-500 focus:ring-red-500" : ""
                       }`}
                     />
                     {isPromoCodeValid === true && (
-                      <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                      <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                     )}
                     {isPromoCodeValid === false && (
-                      <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500" />
+                      <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
                     )}
                   </div>
                   {isPromoCodeValid === true && (
-                    <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
-                      <CheckCircle2 className="h-4 w-4" />
+                    <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       {t("qbDiscountApplied")}
                     </p>
                   )}
                 </div>
 
-                <div className="bg-primary/5 rounded p-3 text-sm">
+                <div className="bg-primary/5 rounded p-2 sm:p-3 text-xs sm:text-sm">
                   <p className="text-muted-foreground">
                     <strong>{t("qbReturnRoute")}:</strong> {booking.dropoff} → {booking.pickup}
                   </p>
@@ -1070,59 +1072,59 @@ export default function QuickBookingConfirm() {
             )}
           </div>
 
-          {/* Price Display */}
-          <div className={`rounded-lg p-6 mb-6 text-center transition-all duration-500 ${
+          {/* Price Display - Mobile Optimized */}
+          <div className={`rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 text-center transition-all duration-500 ${
             discountJustApplied 
               ? 'bg-green-100 dark:bg-green-900/30 ring-2 ring-green-500 animate-pulse' 
               : 'bg-primary/10'
           }`}>
             {!hasReturnTrip ? (
               <>
-                <p className="text-sm text-muted-foreground mb-2">{t("qbYourTransferPrice")}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2">{t("qbYourTransferPrice")}</p>
                 {discountJustApplied && previousPrice && (
-                  <div className="mb-2">
-                    <span className="text-xl line-through text-muted-foreground">
+                  <div className="mb-1 sm:mb-2">
+                    <span className="text-lg sm:text-xl line-through text-muted-foreground">
                       {currencySymbol}{previousPrice}
                     </span>
-                    <span className="ml-2 text-sm bg-green-500 text-white px-2 py-1 rounded-full animate-bounce inline-block">
+                    <span className="ml-1.5 sm:ml-2 text-xs sm:text-sm bg-green-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full animate-bounce inline-block">
                       -€3 {t("discount") || "İndirim"}!
                     </span>
                   </div>
                 )}
-                <p className={`text-4xl font-bold transition-all duration-300 ${
+                <p className={`text-3xl sm:text-4xl font-bold transition-all duration-300 ${
                   discountJustApplied ? 'text-green-600 dark:text-green-400 scale-110' : 'text-primary'
                 }`}>
                   {currencySymbol}{selectedPrice}
                 </p>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
                   {booking.price_currency}
                 </p>
                 {discountJustApplied && (
-                  <p className="text-sm text-green-600 dark:text-green-400 mt-2 font-medium">
+                  <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 mt-1 sm:mt-2 font-medium">
                     ✨ {t("specialDiscountApplied") || "Sizin için özel indirim uygulandı!"}
                   </p>
                 )}
               </>
             ) : (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm">
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
                   <span>{t("qbOutboundTransfer")}</span>
                   <span className="font-medium">
                     {currencySymbol}{selectedPrice}
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="flex items-center gap-2">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
+                  <span className="flex items-center gap-1 sm:gap-2">
                     {t("qbReturnTransfer")}
                     {isPromoCodeValid && (
-                      <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] sm:text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-1.5 sm:px-2 py-0.5 rounded-full">
                         30% OFF
                       </span>
                     )}
                   </span>
                   <span className="font-medium">
                     {isPromoCodeValid && getOriginalReturnPrice() && (
-                      <span className="line-through text-muted-foreground mr-2">
+                      <span className="line-through text-muted-foreground mr-1 sm:mr-2 text-xs">
                         {currencySymbol}{getOriginalReturnPrice()}
                       </span>
                     )}
@@ -1130,20 +1132,21 @@ export default function QuickBookingConfirm() {
                   </span>
                 </div>
                 {isPromoCodeValid && getDiscountAmount() && (
-                  <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-400">
-                    <span className="flex items-center gap-2">
-                      <Tag className="h-4 w-4" />
-                      {t("qbDiscountWithCode")} ({promoCode})
+                  <div className="flex justify-between items-center text-xs sm:text-sm text-green-600 dark:text-green-400">
+                    <span className="flex items-center gap-1 sm:gap-2">
+                      <Tag className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden xs:inline">{t("qbDiscountWithCode")}</span>
+                      <span className="xs:hidden">Promo</span>
                     </span>
                     <span className="font-medium">
                       -{currencySymbol}{getDiscountAmount()?.toFixed(0)}
                     </span>
                   </div>
                 )}
-                <div className="border-t pt-3">
+                <div className="border-t pt-2 sm:pt-3">
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold">{t("qbTotal")}</span>
-                    <span className="text-2xl font-bold text-primary">
+                    <span className="font-semibold text-sm sm:text-base">{t("qbTotal")}</span>
+                    <span className="text-xl sm:text-2xl font-bold text-primary">
                       {currencySymbol}{getTotalPrice()?.toFixed(0)}
                     </span>
                   </div>
@@ -1152,68 +1155,68 @@ export default function QuickBookingConfirm() {
             )}
           </div>
 
-          {/* Payment Method */}
-          <div className="bg-muted/50 rounded-lg p-4 mb-6">
-            <Label className="text-base font-medium mb-4 block">{t("qbPaymentMethod")}</Label>
+          {/* Payment Method - Mobile Optimized */}
+          <div className="bg-muted/50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+            <Label className="text-sm sm:text-base font-medium mb-3 sm:mb-4 block">{t("qbPaymentMethod")}</Label>
             <RadioGroup
               value={paymentMethod}
               onValueChange={(value) => setPaymentMethod(value as "cash" | "payment_link")}
-              className="space-y-3"
+              className="space-y-2 sm:space-y-3"
             >
-              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-background hover:bg-muted/50 cursor-pointer">
+              <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 rounded-lg border bg-background hover:bg-muted/50 cursor-pointer">
                 <RadioGroupItem value="cash" id="cash" />
-                <Label htmlFor="cash" className="flex items-center gap-2 cursor-pointer flex-1">
-                  <Banknote className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="font-medium">{t("qbPayCashToDriver")}</p>
-                    <p className="text-sm text-muted-foreground">{t("qbPayCashDesc")}</p>
+                <Label htmlFor="cash" className="flex items-center gap-1.5 sm:gap-2 cursor-pointer flex-1">
+                  <Banknote className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm sm:text-base">{t("qbPayCashToDriver")}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{t("qbPayCashDesc")}</p>
                   </div>
                 </Label>
               </div>
-              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-background hover:bg-muted/50 cursor-pointer">
+              <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 rounded-lg border bg-background hover:bg-muted/50 cursor-pointer">
                 <RadioGroupItem value="payment_link" id="payment_link" />
-                <Label htmlFor="payment_link" className="flex items-center gap-2 cursor-pointer flex-1">
-                  <CreditCard className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium">{t("qbPayOnline")}</p>
-                    <p className="text-sm text-muted-foreground">{t("qbPayOnlineDesc")}</p>
+                <Label htmlFor="payment_link" className="flex items-center gap-1.5 sm:gap-2 cursor-pointer flex-1">
+                  <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm sm:text-base">{t("qbPayOnline")}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{t("qbPayOnlineDesc")}</p>
                   </div>
                 </Label>
               </div>
             </RadioGroup>
           </div>
 
-          {/* Discounted Offer Badge */}
+          {/* Discounted Offer Badge - Mobile Optimized */}
           {isDiscountedOffer && (
-            <div className="bg-green-50 dark:bg-green-950/30 p-3 rounded-lg border border-green-200 dark:border-green-800 mb-4">
-              <div className="flex items-center gap-2 justify-center">
-                <Tag className="h-4 w-4 text-green-600 dark:text-green-400" />
-                <span className="text-sm font-medium text-green-700 dark:text-green-300">
+            <div className="bg-green-50 dark:bg-green-950/30 p-2.5 sm:p-3 rounded-lg border border-green-200 dark:border-green-800 mb-3 sm:mb-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 justify-center">
+                <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 dark:text-green-400" />
+                <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">
                   {t("specialDiscountApplied") || "İndirimli fiyat uygulandı!"}
                 </span>
               </div>
             </div>
           )}
 
-          {/* Action Buttons */}
+          {/* Action Buttons - Mobile Optimized */}
           {canReject ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2 sm:space-y-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-4">
                 <Button
                   variant="outline"
                   onClick={handleReject}
                   disabled={rejecting || confirming}
-                  className="h-14 flex-col py-2"
+                  className="h-12 sm:h-14 flex-col py-1.5 sm:py-2"
                 >
                   <div className="flex items-center">
                     {rejecting ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin mr-1.5 sm:mr-2" />
                     ) : (
-                      <XCircle className="h-4 w-4 mr-2" />
+                      <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                     )}
-                    {t("qbReject")}
+                    <span className="text-sm sm:text-base">{t("qbReject")}</span>
                   </div>
-                  <span className="text-xs font-medium text-muted-foreground mt-0.5">
+                  <span className="text-[10px] sm:text-xs font-medium text-muted-foreground mt-0.5 hidden xs:block">
                     {t("rejectButtonHint") || "Request better price"}
                   </span>
                 </Button>
@@ -1221,42 +1224,42 @@ export default function QuickBookingConfirm() {
                 <Button
                   onClick={handleConfirm}
                   disabled={confirming || rejecting}
-                  className="h-12"
+                  className="h-12 sm:h-14 text-sm sm:text-base"
                 >
                   {confirming ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin mr-1.5 sm:mr-2" />
                   ) : (
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                   )}
                   {t("qbConfirmBooking")}
                 </Button>
               </div>
-              <p className="text-center text-xs text-muted-foreground">
+              <p className="text-center text-[10px] sm:text-xs text-muted-foreground">
                 {t("rejectExplanation") || "Bu Fiyatları Beğenmediyseniz Reject Tuşuna Basarak iletin."}
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <Button
                 onClick={handleConfirm}
                 disabled={confirming || rejecting}
-                className="w-full h-12"
+                className="w-full h-11 sm:h-12 text-sm sm:text-base"
                 size="lg"
               >
                 {confirming ? (
-                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin mr-1.5 sm:mr-2" />
                 ) : (
-                  <CheckCircle className="h-5 w-5 mr-2" />
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
                 )}
                 {t("qbConfirmBooking")}
               </Button>
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-center text-xs sm:text-sm text-muted-foreground">
                 {t("finalOfferMessage") || "Bu sizin için özel indirimli son teklifimizdir."}
               </p>
             </div>
           )}
 
-          <p className="text-xs text-muted-foreground text-center mt-4">
+          <p className="text-[10px] sm:text-xs text-muted-foreground text-center mt-3 sm:mt-4">
             {t("qbByConfirming")}
           </p>
         </CardContent>

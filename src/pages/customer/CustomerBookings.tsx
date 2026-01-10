@@ -708,15 +708,15 @@ const CustomerBookings = () => {
               </motion.div>
             )}
 
-            {/* Active Reservations Section */}
+            {/* Active Reservations Section - Mobile Optimized */}
             {sortedActiveReservations.length > 0 && (
-              <motion.div variants={itemVariants} className="space-y-3">
-                <h2 className="text-lg font-semibold flex items-center gap-2 text-cyan-700 dark:text-cyan-300">
+              <motion.div variants={itemVariants} className="space-y-2 sm:space-y-3">
+                <h2 className="text-base sm:text-lg font-semibold flex items-center gap-2 text-cyan-700 dark:text-cyan-300">
                   <motion.div
                     animate={{ rotate: [0, 10, -10, 0] }}
                     transition={{ duration: 3, repeat: Infinity }}
                   >
-                    <Car className="h-5 w-5" />
+                    <Car className="h-4 w-4 sm:h-5 sm:w-5" />
                   </motion.div>
                   {t('activeReservations') || 'Active Reservations'} ({sortedActiveReservations.length})
                 </h2>
@@ -733,25 +733,25 @@ const CustomerBookings = () => {
                       className={`cursor-pointer hover:shadow-lg transition-all duration-300 backdrop-blur-sm ${statusCardColors[reservation.status] || ''}`}
                       onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
                     >
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <div className="flex flex-col gap-1">
+                    <CardHeader className="p-3 sm:pb-2">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex flex-col gap-1 min-w-0 flex-1">
                           {reservation.reservation_code && (
-                            <span className="text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
+                            <span className="text-[10px] sm:text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
                           )}
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm flex-wrap">
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                             <span className="font-medium">
-                              {format(new Date(reservation.pickup_date), 'PPP')}
+                              {format(new Date(reservation.pickup_date), 'PP')}
                             </span>
-                            <Clock className="h-4 w-4 text-muted-foreground ml-2" />
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground ml-1 sm:ml-2 flex-shrink-0" />
                             <span>{reservation.pickup_time}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge className={`flex items-center gap-1 ${statusColors[reservation.status] || 'bg-muted'}`}>
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap flex-shrink-0">
+                          <Badge className={`flex items-center gap-1 text-[10px] sm:text-xs ${statusColors[reservation.status] || 'bg-muted'}`}>
                             {statusIcons[reservation.status]}
-                            {getStatusLabel(reservation.status)}
+                            <span className="hidden xs:inline">{getStatusLabel(reservation.status)}</span>
                           </Badge>
                           {reservation.flight_number && (
                             <FlightDelayBadge 
@@ -762,7 +762,7 @@ const CustomerBookings = () => {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="space-y-2 sm:space-y-3 p-3 pt-0 sm:px-6 sm:pb-6">
                       <div className="space-y-2">
                         <LocationDisplay
                           placeName={reservation.pickup_place_name}
@@ -779,51 +779,51 @@ const CustomerBookings = () => {
                       </div>
                       
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Car className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <Car className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                          <span className="text-xs sm:text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
                           {reservation.luggage_count && reservation.luggage_count > 0 && (
-                            <Badge variant="outline" className="text-xs gap-1 text-orange-600 border-orange-300">
-                              <Briefcase className="h-3 w-3" />
+                            <Badge variant="outline" className="text-[10px] sm:text-xs gap-0.5 sm:gap-1 text-orange-600 border-orange-300 px-1.5">
+                              <Briefcase className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                               {reservation.luggage_count}
                             </Badge>
                           )}
                           {reservation.baby_seat_count && reservation.baby_seat_count > 0 && (
-                            <Badge variant="outline" className="text-xs gap-1 text-pink-600 border-pink-300">
-                              <Baby className="h-3 w-3" />
+                            <Badge variant="outline" className="text-[10px] sm:text-xs gap-0.5 sm:gap-1 text-pink-600 border-pink-300 px-1.5">
+                              <Baby className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                               {reservation.baby_seat_count}
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                           {reservation.price !== null ? (
-                            <span className="font-bold text-primary">
+                            <span className="font-bold text-primary text-sm sm:text-base">
                               {formatPrice(reservation.price, reservation.price_currency)}
                             </span>
                           ) : (
-                            <span className="text-sm text-muted-foreground">{t('pricePending')}</span>
+                            <span className="text-xs sm:text-sm text-muted-foreground">{t('pricePending')}</span>
                           )}
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                         </div>
                       </div>
 
                       {/* Cash payment amount indicator */}
                       {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && !['awaiting-price', 'waiting_for_customer_approval'].includes(reservation.status) && (
-                        <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-200 dark:border-amber-800">
-                          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
-                            <Banknote className="h-4 w-4" />
-                            <span className="text-sm font-medium">{t('cashToDriver')}</span>
+                        <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-950/30 p-1.5 sm:p-2 rounded-lg border border-amber-200 dark:border-amber-800">
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-amber-700 dark:text-amber-300">
+                            <Banknote className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="text-xs sm:text-sm font-medium">{t('cashToDriver')}</span>
                           </div>
-                          <span className="font-bold text-amber-700 dark:text-amber-300">
+                          <span className="font-bold text-amber-700 dark:text-amber-300 text-sm">
                             {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
                           </span>
                         </div>
                       )}
 
                       {reservation.status === 'awaiting-price' && (
-                        <div className="bg-orange-100 dark:bg-orange-950/50 p-3 rounded-lg text-center border border-orange-300 dark:border-orange-700">
-                          <p className="text-sm font-medium text-orange-700 dark:text-orange-300 flex items-center justify-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                        <div className="bg-orange-100 dark:bg-orange-950/50 p-2 sm:p-3 rounded-lg text-center border border-orange-300 dark:border-orange-700">
+                          <p className="text-xs sm:text-sm font-medium text-orange-700 dark:text-orange-300 flex items-center justify-center gap-1.5 sm:gap-2">
+                            <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                             {t('waitingForPrice')}
                           </p>
                         </div>
@@ -834,25 +834,25 @@ const CustomerBookings = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full"
+                          className="w-full h-8 sm:h-9 text-xs sm:text-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/customer/reservation/${reservation.id}/edit`);
                           }}
                         >
-                          <Edit className="h-4 w-4 mr-2" />
+                          <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                           {t('editReservation') || 'Edit Reservation'}
                         </Button>
                       )}
 
                       {reservation.status === 'sent_to_driver' && reservation.drivers && (
-                        <div className="bg-yellow-50 dark:bg-yellow-950/30 p-2 rounded text-sm text-yellow-700 dark:text-yellow-300">
-                          <div className="flex flex-col items-center gap-1">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4" />
+                        <div className="bg-yellow-50 dark:bg-yellow-950/30 p-1.5 sm:p-2 rounded text-xs sm:text-sm text-yellow-700 dark:text-yellow-300">
+                          <div className="flex flex-col items-center gap-0.5 sm:gap-1">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                              <User className="h-3 w-3 sm:h-4 sm:w-4" />
                               <span>{reservation.drivers.name}</span>
                             </div>
-                            <span className="text-xs">{reservation.drivers.plate_number} • {reservation.drivers.vehicle_model}</span>
+                            <span className="text-[10px] sm:text-xs">{reservation.drivers.plate_number} • {reservation.drivers.vehicle_model}</span>
                           </div>
                         </div>
                       )}
@@ -863,11 +863,11 @@ const CustomerBookings = () => {
               </motion.div>
             )}
 
-            {/* Past Reservations Section */}
+            {/* Past Reservations Section - Mobile Optimized */}
             {sortedPastReservations.length > 0 && (
-              <motion.div id="past-reservations" variants={itemVariants} className="space-y-3">
-                <h2 className="text-lg font-semibold flex items-center gap-2 text-muted-foreground">
-                  <History className="h-5 w-5" />
+              <motion.div id="past-reservations" variants={itemVariants} className="space-y-2 sm:space-y-3">
+                <h2 className="text-base sm:text-lg font-semibold flex items-center gap-2 text-muted-foreground">
+                  <History className="h-4 w-4 sm:h-5 sm:w-5" />
                   {t('pastReservations') || 'Past Reservations'} ({sortedPastReservations.length})
                 </h2>
                 {sortedPastReservations.map((reservation, index) => (
@@ -882,30 +882,30 @@ const CustomerBookings = () => {
                       className={`cursor-pointer hover:shadow-md transition-all duration-300 ${statusCardColors[reservation.status] || ''}`}
                       onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
                     >
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <div className="flex flex-col gap-1">
+                    <CardHeader className="p-3 sm:pb-2">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex flex-col gap-1 min-w-0 flex-1">
                           {reservation.reservation_code && (
-                            <span className="text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
+                            <span className="text-[10px] sm:text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
                           )}
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm flex-wrap">
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                             <span className="font-medium">
-                              {format(new Date(reservation.pickup_date), 'PPP')}
+                              {format(new Date(reservation.pickup_date), 'PP')}
                             </span>
-                            <Clock className="h-4 w-4 text-muted-foreground ml-2" />
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground ml-1 sm:ml-2 flex-shrink-0" />
                             <span>{reservation.pickup_time}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge className={`flex items-center gap-1 ${statusColors[reservation.status] || 'bg-muted'}`}>
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap flex-shrink-0">
+                          <Badge className={`flex items-center gap-1 text-[10px] sm:text-xs ${statusColors[reservation.status] || 'bg-muted'}`}>
                             {statusIcons[reservation.status]}
-                            {getStatusLabel(reservation.status)}
+                            <span className="hidden xs:inline">{getStatusLabel(reservation.status)}</span>
                           </Badge>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="space-y-2 sm:space-y-3 p-3 pt-0 sm:px-6 sm:pb-6">
                       <div className="space-y-2">
                         <LocationDisplay
                           placeName={reservation.pickup_place_name}
@@ -922,17 +922,17 @@ const CustomerBookings = () => {
                       </div>
                       
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Car className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <Car className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                          <span className="text-xs sm:text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                           {reservation.price !== null && (
-                            <span className="font-bold text-muted-foreground">
+                            <span className="font-bold text-muted-foreground text-sm">
                               {formatPrice(reservation.price, reservation.price_currency)}
                             </span>
                           )}
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                         </div>
                       </div>
                     </CardContent>
