@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare, Building2, Briefcase, Baby } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare, Building2, Briefcase, Baby, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
@@ -25,6 +25,7 @@ import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
 import { parseMoneyInput } from '@/lib/money';
+import { getWhatsAppUrl } from '@/lib/contact';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes-vito',
@@ -465,8 +466,8 @@ const DriverJobDetails = () => {
     }
   };
 
-  const copyReservationDetails = async () => {
-    if (!reservation) return;
+  const getReservationDetailsText = () => {
+    if (!reservation) return '';
 
     const passengerList = reservation.passenger_names && reservation.passenger_names.length > 0
       ? reservation.passenger_names.map((name, index) => `   ${index + 1}. ${name}`).join('\n')
@@ -518,12 +519,25 @@ const DriverJobDetails = () => {
       `━━━━━━━━━━━━━━━━━`,
     ].filter(Boolean).join('\n');
 
+    return lines;
+  };
+
+  const copyReservationDetails = async () => {
+    const lines = getReservationDetailsText();
+    if (!lines) return;
+
     try {
       await navigator.clipboard.writeText(lines);
       toast.success(t('detailsCopied'));
     } catch (err) {
       toast.error(t('copyFailed'));
     }
+  };
+
+  const shareViaWhatsApp = () => {
+    const lines = getReservationDetailsText();
+    if (!lines) return;
+    window.open(getWhatsAppUrl(lines), '_blank');
   };
 
   if (loading) {
@@ -917,16 +931,25 @@ const DriverJobDetails = () => {
           </CardContent>
         </Card>
 
-        {/* Copy Reservation Details Button */}
-        <Button
-          variant="outline"
-          size="lg"
-          className="w-full"
-          onClick={copyReservationDetails}
-        >
-          <ClipboardCopy className="h-5 w-5 mr-2" />
-          {t('copyReservationDetails')}
-        </Button>
+        {/* Copy & Share Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={copyReservationDetails}
+          >
+            <ClipboardCopy className="h-5 w-5 mr-2" />
+            {t('copyReservationDetails')}
+          </Button>
+          <Button
+            size="lg"
+            className="bg-[#25D366] hover:bg-[#22c55e] text-white"
+            onClick={shareViaWhatsApp}
+          >
+            <MessageCircle className="h-5 w-5 mr-2" />
+            WhatsApp
+          </Button>
+        </div>
 
         {/* Action Buttons Card */}
         <Card>

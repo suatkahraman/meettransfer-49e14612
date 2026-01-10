@@ -628,6 +628,68 @@ const CustomerHome = () => {
           </h1>
         </motion.div>
 
+        {/* Missing Phone Warning */}
+        {!profileData.phone && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-4"
+          >
+            <Card className="bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-700">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="bg-amber-500 p-2 rounded-full flex-shrink-0">
+                    <Phone className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-amber-800 dark:text-amber-200">
+                      {language === 'TR' ? 'Telefon Numaranız Eksik' : 'Phone Number Missing'}
+                    </p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                      {language === 'TR' 
+                        ? 'Rezervasyonlarınız için telefon numaranızı ekleyin.' 
+                        : 'Please add your phone number for reservations.'}
+                    </p>
+                  </div>
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button size="sm" variant="outline" className="border-amber-500 text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/50">
+                        <Edit2 className="h-3 w-3 mr-1" />
+                        {language === 'TR' ? 'Ekle' : 'Add'}
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent className="w-full sm:max-w-md">
+                      <SheetHeader>
+                        <SheetTitle className="flex items-center gap-2">
+                          <Phone className="h-5 w-5" />
+                          {language === 'TR' ? 'Telefon Numarası Ekle' : 'Add Phone Number'}
+                        </SheetTitle>
+                      </SheetHeader>
+                      <div className="mt-6 space-y-4">
+                        <div className="space-y-2">
+                          <Label>{language === 'TR' ? 'Telefon Numarası' : 'Phone Number'}</Label>
+                          <PhoneInput
+                            value={profileData.phone}
+                            onChange={(value) => setProfileData({ ...profileData, phone: value })}
+                          />
+                        </div>
+                        <Button 
+                          className="w-full" 
+                          onClick={handleSaveProfile}
+                          disabled={isSavingProfile || !profileData.phone}
+                        >
+                          {isSavingProfile ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                          {language === 'TR' ? 'Kaydet' : 'Save'}
+                        </Button>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Next Transfer Card with Animation */}
         <AnimatePresence>
           {nextTransfer && (
