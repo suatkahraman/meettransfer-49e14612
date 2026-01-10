@@ -18,6 +18,7 @@ import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle, Share2, Check, Shie
 import { toast } from 'sonner';
 import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
 import TwoFactorVerification from '@/components/auth/TwoFactorVerification';
+import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -86,6 +87,7 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [newPasswordValue, setNewPasswordValue] = useState('');
   const [lockoutCountdown, setLockoutCountdown] = useState<number | null>(null);
   const [pendingRole, setPendingRole] = useState<string | null>(null);
   const { signIn, user, loading: authLoading } = useAuth();
@@ -565,6 +567,8 @@ const LoginScreen = () => {
                       required 
                       className="h-12 pr-12"
                       autoComplete="new-password"
+                      value={newPasswordValue}
+                      onChange={(e) => setNewPasswordValue(e.target.value)}
                     />
                     <Button
                       type="button"
@@ -580,9 +584,10 @@ const LoginScreen = () => {
                       )}
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {t('passwordFormat')}
-                  </p>
+                  <PasswordStrengthIndicator 
+                    password={newPasswordValue} 
+                    language={language === 'TR' ? 'TR' : 'EN'} 
+                  />
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 

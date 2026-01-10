@@ -16,23 +16,23 @@ interface StrengthCriteria {
 const PasswordStrengthIndicator = ({ password, language = 'EN' }: PasswordStrengthIndicatorProps) => {
   const criteria: StrengthCriteria[] = useMemo(() => [
     {
-      label: 'At least 6 characters',
-      labelTR: 'En az 6 karakter',
+      label: 'Min 6 chars',
+      labelTR: 'Min 6 karakter',
       met: password.length >= 6,
     },
     {
-      label: '1 uppercase letter',
-      labelTR: '1 büyük harf',
+      label: '1 uppercase (A-Z)',
+      labelTR: '1 büyük harf (A-Z)',
       met: /[A-Z]/.test(password),
     },
     {
-      label: '1 lowercase letter',
-      labelTR: '1 küçük harf',
+      label: '1 lowercase (a-z)',
+      labelTR: '1 küçük harf (a-z)',
       met: /[a-z]/.test(password),
     },
     {
-      label: 'At least 4 digits',
-      labelTR: 'En az 4 rakam',
+      label: 'Min 4 digits (0-9)',
+      labelTR: 'Min 4 rakam (0-9)',
       met: /\d.*\d.*\d.*\d/.test(password),
     },
   ], [password]);
