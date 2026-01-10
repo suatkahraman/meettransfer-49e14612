@@ -155,39 +155,24 @@ const AntalyaAirportTransferGuide = () => {
           <p>{t("blogAntalyaSection1P1")}</p>
           <p>{t("blogAntalyaSection1P2")}</p>
           
-          <p>
-            Antalya Airport (AYT) is Turkey's third-busiest airport, handling over 35 million passengers annually. 
-            Located on the stunning Turkish Riviera, it serves as the gateway to some of the Mediterranean's most 
-            beautiful beaches and ancient ruins. The airport features two international terminals and one domestic 
-            terminal, all well-equipped with modern amenities.
-          </p>
+          <p>{t("blogAntalyaAirportP1")}</p>
 
-          <h3>Navigating Antalya Airport</h3>
-          <p>
-            Upon arrival at Antalya Airport, you'll find clear signage in multiple languages guiding you through 
-            passport control and baggage claim. Terminal 1 primarily serves international flights, while Terminal 2 
-            handles both domestic and international traffic. Both terminals offer free WiFi, currency exchange, 
-            and various dining options.
-          </p>
+          <h3>{t("blogAntalyaNavigating")}</h3>
+          <p>{t("blogAntalyaNavigatingP1")}</p>
 
           <h2 id="why-private">{t("blogAntalyaSection2Title")}</h2>
           <p>{t("blogAntalyaSection2Intro")}</p>
 
-          <h3>The Antalya Transfer Challenge</h3>
-          <p>
-            Unlike some cities where public transport is straightforward, Antalya's resort-focused layout means 
-            many destinations are spread along the coastline. Hotels in Belek, Side, or Kemer may be 30-130 km 
-            from the airport, making private transfer the most practical option. After a long flight, the last 
-            thing you want is multiple connections or navigating unfamiliar bus routes with heavy luggage.
-          </p>
+          <h3>{t("blogAntalyaChallenge")}</h3>
+          <p>{t("blogAntalyaChallengeP1")}</p>
 
-          <h3>Benefits of Private Transfer in Antalya</h3>
+          <h3>{t("blogAntalyaBenefits")}</h3>
           <ul>
-            <li><strong>Direct service:</strong> Straight to your hotel's door, no matter how remote</li>
-            <li><strong>Local knowledge:</strong> Drivers know every resort and villa address</li>
-            <li><strong>Flexible timing:</strong> Service available 24/7 for all flight arrivals</li>
-            <li><strong>Comfort in heat:</strong> Air-conditioned vehicles are essential in summer</li>
-            <li><strong>Luggage handling:</strong> Professional assistance with all your bags</li>
+            <li><strong>{t("blogAntalyaBenefit1").split(":")[0]}:</strong> {t("blogAntalyaBenefit1").split(":")[1]}</li>
+            <li><strong>{t("blogAntalyaBenefit2").split(":")[0]}:</strong> {t("blogAntalyaBenefit2").split(":")[1]}</li>
+            <li><strong>{t("blogAntalyaBenefit3").split(":")[0]}:</strong> {t("blogAntalyaBenefit3").split(":")[1]}</li>
+            <li><strong>{t("blogAntalyaBenefit4").split(":")[0]}:</strong> {t("blogAntalyaBenefit4").split(":")[1]}</li>
+            <li><strong>{t("blogAntalyaBenefit5").split(":")[0]}:</strong> {t("blogAntalyaBenefit5").split(":")[1]}</li>
           </ul>
 
           <h2 id="transfer-prices">{t("blogAntalyaSection3Title")}</h2>
@@ -224,46 +209,23 @@ const AntalyaAirportTransferGuide = () => {
 
           <h3>{t("blogAntalyaLaraTitle")}</h3>
           <p>{t("blogAntalyaLaraDesc")}</p>
-          <p>
-            Lara Beach is known for its massive all-inclusive resorts that line the golden sand coastline. 
-            This area, sometimes called the "Las Vegas of Turkey," features themed hotels inspired by famous 
-            landmarks. The beach stretches for 12 km and offers crystal-clear Mediterranean waters perfect 
-            for swimming from May through October.
-          </p>
+          <p>{t("blogAntalyaLaraP1")}</p>
 
           <h3>{t("blogAntalyaBelekTitle")}</h3>
           <p>{t("blogAntalyaBelekDesc")}</p>
-          <p>
-            Belek has evolved into Turkey's premier golf destination, boasting over 15 championship courses 
-            designed by legends like Colin Montgomerie and Nick Faldo. The area is also famous for its luxury 
-            spa resorts and family-friendly all-inclusive properties. Transfer from Antalya Airport takes 
-            approximately 35-45 minutes via the D400 highway.
-          </p>
+          <p>{t("blogAntalyaBelekP1")}</p>
 
           <h3>{t("blogAntalyaSideTitle")}</h3>
           <p>{t("blogAntalyaSideDesc")}</p>
-          <p>
-            Side offers a unique blend of ancient history and modern tourism. Walk among Roman ruins, including 
-            a 15,000-seat amphitheater and the Temple of Apollo, then relax on beautiful sandy beaches just 
-            meters away. The old town's pedestrianized streets are filled with boutiques, restaurants, and 
-            cafes overlooking the Mediterranean.
-          </p>
+          <p>{t("blogAntalyaSideP1")}</p>
 
           <h3>{t("blogAntalyaKemerTitle")}</h3>
           <p>{t("blogAntalyaKemerDesc")}</p>
-          <p>
-            Kemer and nearby Göynük are set against the dramatic backdrop of the Taurus Mountains, creating 
-            stunning scenery where mountains meet the sea. This area is popular with outdoor enthusiasts, 
-            offering opportunities for hiking, diving, and boat trips to secluded coves along the Lycian coast.
-          </p>
+          <p>{t("blogAntalyaKemerP1")}</p>
 
           <h3>{t("blogAntalyaAlanyaTitle")}</h3>
           <p>{t("blogAntalyaAlanyaDesc")}</p>
-          <p>
-            Alanya is a bustling resort town dominated by a magnificent 13th-century Seljuk castle perched 
-            on a rocky peninsula. The town offers a more local Turkish atmosphere compared to Lara or Belek, 
-            with a vibrant bazaar, Cleopatra Beach (one of Turkey's finest), and the famous Red Tower harbor.
-          </p>
+          <p>{t("blogAntalyaAlanyaP1")}</p>
 
           <h2 id="whats-included">{t("blogAntalyaSection5Title")}</h2>
 
@@ -315,24 +277,19 @@ const AntalyaAirportTransferGuide = () => {
           <h2>{t("blogAntalyaSection6Title")}</h2>
           <p>{t("blogAntalyaSection6Intro")}</p>
 
-          <h3>Best Time to Visit the Turkish Riviera</h3>
-          <p>
-            The Antalya region enjoys a Mediterranean climate with over 300 days of sunshine annually. 
-            Peak season runs from June to September when temperatures reach 30-35°C. Spring (April-May) 
-            and autumn (September-October) offer ideal conditions for sightseeing with pleasant 
-            temperatures and fewer crowds. Winter remains mild, making it suitable for golf holidays.
-          </p>
+          <h3>{t("blogAntalyaBestTime")}</h3>
+          <p>{t("blogAntalyaBestTimeP1")}</p>
 
           <h2>{t("blogAntalyaSection7Title")}</h2>
           <p>{t("blogAntalyaSection7Intro")}</p>
 
-          <h3>Day Trip Ideas from Your Resort</h3>
+          <h3>{t("blogAntalyaDayTrips")}</h3>
           <ul>
-            <li><strong>Aspendos:</strong> One of the best-preserved Roman theaters in the world (1 hour from Antalya)</li>
-            <li><strong>Perge:</strong> Impressive ancient city ruins just 18 km from Antalya center</li>
-            <li><strong>Pamukkale:</strong> Famous white travertine terraces (4-hour day trip)</li>
-            <li><strong>Düden Waterfalls:</strong> Stunning cascades near Antalya city</li>
-            <li><strong>Olympos & Chimera:</strong> Ancient ruins and eternal flames on the Lycian coast</li>
+            <li><strong>Aspendos:</strong> {t("blogAntalyaDayTrip1").split(":")[1] || t("blogAntalyaDayTrip1")}</li>
+            <li><strong>Perge:</strong> {t("blogAntalyaDayTrip2").split(":")[1] || t("blogAntalyaDayTrip2")}</li>
+            <li><strong>Pamukkale:</strong> {t("blogAntalyaDayTrip3").split(":")[1] || t("blogAntalyaDayTrip3")}</li>
+            <li><strong>Düden Waterfalls:</strong> {t("blogAntalyaDayTrip4").split(":")[1] || t("blogAntalyaDayTrip4")}</li>
+            <li><strong>Olympos & Chimera:</strong> {t("blogAntalyaDayTrip5").split(":")[1] || t("blogAntalyaDayTrip5")}</li>
           </ul>
 
           {/* Image Gallery */}
@@ -370,12 +327,7 @@ const AntalyaAirportTransferGuide = () => {
             {t("blogAntalyaConclusionP1")} 
             <Link to={getLocalizedPath("/antalya-transfer")} className="text-primary hover:underline"> {t("blogAntalyaConclusionLink")}</Link>
           </p>
-          <p>
-            Your Turkish Riviera adventure begins the moment you land at Antalya Airport. With our professional 
-            transfer service, you'll be whisked away to your beach resort, golf hotel, or boutique accommodation 
-            in comfort and style. Let the turquoise waters and ancient wonders of the Mediterranean coast 
-            welcome you to an unforgettable holiday experience.
-          </p>
+          <p>{t("blogAntalyaConclusionP2")}</p>
           <p>
             <Link to={getLocalizedPath("/book")} className="text-primary hover:underline">{t("blogPriceConclusionCta")}</Link>
           </p>
