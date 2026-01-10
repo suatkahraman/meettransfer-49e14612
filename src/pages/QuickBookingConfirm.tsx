@@ -1202,40 +1202,49 @@ export default function QuickBookingConfirm() {
           {canReject ? (
             <div className="space-y-2 sm:space-y-3">
               <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                {/* Reject Button - Better Price Request */}
                 <Button
                   variant="outline"
                   onClick={handleReject}
                   disabled={rejecting || confirming}
-                  className="h-12 sm:h-14 flex-col py-1.5 sm:py-2"
+                  className="h-auto min-h-[52px] sm:min-h-[60px] flex-col py-2 sm:py-3 border-2 border-orange-200 hover:border-orange-400 hover:bg-orange-50 dark:border-orange-800 dark:hover:border-orange-600 dark:hover:bg-orange-950/30 transition-all"
                 >
-                  <div className="flex items-center">
+                  <div className="flex items-center text-orange-600 dark:text-orange-400">
                     {rejecting ? (
-                      <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin mr-1.5 sm:mr-2" />
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin mr-1.5 sm:mr-2" />
                     ) : (
-                      <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                      <Tag className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
                     )}
-                    <span className="text-sm sm:text-base">{t("qbReject")}</span>
+                    <span className="text-sm sm:text-base font-semibold">
+                      {t("qbRejectForBetterPrice") || "Better Price?"}
+                    </span>
                   </div>
-                  <span className="text-[10px] sm:text-xs font-medium text-muted-foreground mt-0.5 hidden xs:block">
-                    {t("rejectButtonHint") || "Request better price"}
+                  <span className="text-[10px] sm:text-xs text-muted-foreground mt-1 leading-tight text-center px-1">
+                    {t("rejectButtonHint") || "Request a better offer"}
                   </span>
                 </Button>
 
+                {/* Confirm Button */}
                 <Button
                   onClick={handleConfirm}
                   disabled={confirming || rejecting}
-                  className="h-12 sm:h-14 text-sm sm:text-base"
+                  className="h-auto min-h-[52px] sm:min-h-[60px] flex-col py-2 sm:py-3"
                 >
-                  {confirming ? (
-                    <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin mr-1.5 sm:mr-2" />
-                  ) : (
-                    <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                  )}
-                  {t("qbConfirmBooking")}
+                  <div className="flex items-center">
+                    {confirming ? (
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin mr-1.5 sm:mr-2" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
+                    )}
+                    <span className="text-sm sm:text-base font-semibold">{t("qbConfirmBooking")}</span>
+                  </div>
+                  <span className="text-[10px] sm:text-xs text-primary-foreground/80 mt-1">
+                    {t("confirmButtonHint") || "Book this transfer"}
+                  </span>
                 </Button>
               </div>
-              <p className="text-center text-[10px] sm:text-xs text-muted-foreground">
-                {t("rejectExplanation") || "Bu Fiyatları Beğenmediyseniz Reject Tuşuna Basarak iletin."}
+              <p className="text-center text-[10px] sm:text-xs text-muted-foreground bg-muted/50 rounded-lg py-2 px-3">
+                💡 {t("rejectExplanation") || "Not happy with the price? Tap 'Better Price?' to request a special offer!"}
               </p>
             </div>
           ) : (
