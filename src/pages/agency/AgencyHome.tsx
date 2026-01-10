@@ -507,11 +507,11 @@ const AgencyHome = () => {
         isPulling={isPulling}
         threshold={80}
       />
-      <header className="bg-primary text-primary-foreground py-3 px-3 sm:py-4 sm:px-4 flex justify-between items-center sticky top-0 z-10 safe-area-inset-top">
+      <header className="bg-primary text-primary-foreground py-2.5 px-3 sm:py-4 sm:px-4 flex justify-between items-center sticky top-0 z-10 safe-area-inset-top">
         <div className="min-w-0 flex-1 mr-2">
-          <h1 className="text-lg sm:text-xl font-serif font-bold truncate">{t('agencyPanel')}</h1>
+          <h1 className="text-base sm:text-xl font-serif font-bold truncate">{t('agencyPanel')}</h1>
           {agency && (
-            <p className="text-xs sm:text-sm opacity-80 truncate">{agency.agency_name}</p>
+            <p className="text-[10px] sm:text-sm opacity-80 truncate">{agency.agency_name}</p>
           )}
         </div>
         <div className="flex items-center gap-0.5 sm:gap-1.5 flex-shrink-0">
@@ -521,21 +521,21 @@ const AgencyHome = () => {
             size="icon" 
             onClick={() => toggleSection('notificationHistory')}
             className={cn(
-              "text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9",
+              "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10",
               expandedSections.notificationHistory && "bg-primary-foreground/20"
             )}
             title={t('notificationHistory') || 'Bildirim Geçmişi'}
           >
-            <History className="h-4 w-4" />
+            <History className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={() => toggleSection('notificationSettings')}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
             title={t('notificationSettings') || 'Bildirim Ayarları'}
           >
-            <Volume2 className="h-4 w-4" />
+            <Volume2 className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
           {isSupported && (
             <Button 
@@ -543,15 +543,15 @@ const AgencyHome = () => {
               size="icon" 
               onClick={isSubscribed ? unsubscribe : subscribe}
               disabled={pushLoading || permission === 'denied'}
-              className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9"
+              className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
               title={isSubscribed ? t('notificationsOn') : t('enableNotifications')}
             >
               {pushLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4.5 w-4.5 sm:h-5 sm:w-5 animate-spin" />
               ) : isSubscribed ? (
-                <Bell className="h-4 w-4" />
+                <Bell className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
               ) : (
-                <BellOff className="h-4 w-4" />
+                <BellOff className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
               )}
             </Button>
           )}
@@ -560,34 +560,34 @@ const AgencyHome = () => {
             size="icon" 
             onClick={handleRefresh}
             disabled={refreshing}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
           >
-            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+            <RefreshCw className={cn("h-4.5 w-4.5 sm:h-5 sm:w-5", refreshing && "animate-spin")} />
           </Button>
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={() => navigate('/agency/reports')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9 hidden sm:flex"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10 hidden sm:flex"
           >
-            <BarChart3 className="h-4 w-4" />
+            <BarChart3 className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={() => navigate('/security-settings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
             title={t('securitySettings') || 'Güvenlik Ayarları'}
           >
-            <Shield className="h-4 w-4" />
+            <Shield className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={signOut} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
         </div>
       </header>

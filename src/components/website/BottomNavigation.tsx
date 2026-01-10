@@ -22,7 +22,7 @@ const BottomNavigation = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-bottom">
-      <div className="flex items-center justify-around h-16">
+      <div className="flex items-center justify-around h-16 sm:h-18">
         {navItems.map((item) => {
           const active = isActive(item.path);
           return (
@@ -35,8 +35,8 @@ const BottomNavigation = () => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <item.icon className="h-5 w-5 mb-1" />
-              <span className="text-xs font-medium">{item.label}</span>
+              <item.icon className="h-5 w-5 sm:h-6 sm:w-6 mb-0.5 sm:mb-1" />
+              <span className="text-[10px] sm:text-xs font-medium">{item.label}</span>
             </Link>
           );
         })}

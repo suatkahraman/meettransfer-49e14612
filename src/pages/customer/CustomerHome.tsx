@@ -154,24 +154,34 @@ const CustomerHome = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
-        <h1 className="text-2xl font-serif">Meet Transfer</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={() => navigate('/customer/bookings')} className="text-primary-foreground hover:bg-primary-foreground/10">
-            {t('myBookings')}
+      <header className="bg-primary text-primary-foreground py-3 px-3 sm:py-4 sm:px-6 flex justify-between items-center sticky top-0 z-10 safe-area-inset-top">
+        <h1 className="text-lg sm:text-2xl font-serif font-bold truncate">Meet Transfer</h1>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/customer/bookings')} 
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 sm:h-10 px-2 sm:px-4 text-sm sm:text-base"
+          >
+            <Calendar className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{t('myBookings')}</span>
           </Button>
           <NotificationBell />
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={() => navigate('/security-settings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
             title={t('securitySettings') || 'Security Settings'}
           >
-            <Shield className="h-5 w-5" />
+            <Shield className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
-            <LogOut className="h-5 w-5" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={signOut} 
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
+          >
+            <LogOut className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
         </div>
       </header>

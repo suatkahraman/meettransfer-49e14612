@@ -231,84 +231,91 @@ const DriverHome = () => {
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Compact mobile-optimized header */}
-      <header className="bg-primary text-primary-foreground py-2 px-3 flex justify-between items-center flex-shrink-0 z-20 shadow-lg">
-        <div className="flex items-center gap-2">
-          <h1 className="text-base font-serif font-bold">{t('driverPanel')}</h1>
+      <header className="bg-primary text-primary-foreground py-2.5 px-3 sm:py-3 sm:px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg safe-area-inset-top">
+        <div className="flex items-center gap-2 min-w-0">
+          <h1 className="text-base sm:text-lg font-serif font-bold truncate">{t('driverPanel')}</h1>
           {activeJobs.length > 0 && (
-            <Badge variant="secondary" className="bg-green-500 text-white hover:bg-green-600 h-5 px-1.5 text-xs">
+            <Badge variant="secondary" className="bg-green-500 text-white hover:bg-green-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
               {activeJobs.length}
             </Badge>
           )}
           {pendingJobs.length > 0 && (
-            <Badge variant="secondary" className="bg-amber-500 text-white hover:bg-amber-600 h-5 px-1.5 text-xs">
+            <Badge variant="secondary" className="bg-amber-500 text-white hover:bg-amber-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
               {pendingJobs.length}
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
           <Button 
             variant="ghost" 
+            size="icon"
             onClick={() => {
               setRefreshing(true);
               fetchReservations(true);
             }}
             disabled={refreshing}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
           >
-            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+            <RefreshCw className={cn("h-4.5 w-4.5 sm:h-5 sm:w-5", refreshing && "animate-spin")} />
           </Button>
           <Button 
             variant="ghost" 
+            size="icon"
             onClick={() => toggleSection('search')} 
             className={cn(
-              "text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0",
+              "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10",
               expandedSections.search && "bg-primary-foreground/20"
             )}
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
           <PushNotificationToggle compact />
           <NotificationBell />
           <Button 
             variant="ghost" 
+            size="icon"
             onClick={() => navigate('/driver/history')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 px-2 gap-1"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
           >
-            <History className="h-4 w-4" />
+            <History className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
           <Button 
             variant="ghost" 
+            size="icon"
             onClick={() => toggleSection('notificationSettings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
             title="Bildirim Ayarları"
           >
-            <Volume2 className="h-4 w-4" />
+            <Volume2 className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
           <Button 
             variant="ghost" 
+            size="icon"
             onClick={() => toggleSection('settings')} 
             className={cn(
-              "text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0",
+              "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10",
               expandedSections.settings && "bg-primary-foreground/20"
             )}
             title={t('updateInfo')}
           >
-            <Settings className="h-4 w-4" />
+            <Settings className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
           <Button 
             variant="ghost" 
+            size="icon"
             onClick={() => navigate('/security-settings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
             title={t('securitySettings') || 'Güvenlik Ayarları'}
           >
-            <Shield className="h-4 w-4" />
+            <Shield className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
           <Button 
             variant="ghost" 
+            size="icon"
             onClick={signOut} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
         </div>
       </header>

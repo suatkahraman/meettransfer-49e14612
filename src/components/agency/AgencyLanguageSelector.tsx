@@ -16,11 +16,11 @@ const AgencyLanguageSelector = () => {
     <div className="flex items-center gap-1">
       {/* Language Selector Only - Currency is set at agency creation */}
       <Select value={language} onValueChange={(val) => setLanguage(val as AgencyLanguage)}>
-        <SelectTrigger className="w-auto min-w-[80px] h-9 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground text-xs gap-1.5 hover:bg-primary-foreground/20 transition-colors">
-          <Globe className="h-3.5 w-3.5" />
+        <SelectTrigger className="w-auto min-w-[70px] sm:min-w-[80px] h-9 sm:h-10 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground text-[11px] sm:text-xs gap-1 sm:gap-1.5 hover:bg-primary-foreground/20 transition-colors px-2 sm:px-3">
+          <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <SelectValue>
-            <span className="flex items-center gap-1">
-              <span>{currentLang?.flag}</span>
+            <span className="flex items-center gap-0.5 sm:gap-1">
+              <span className="text-sm sm:text-base">{currentLang?.flag}</span>
               <span className="font-medium">{language}</span>
             </span>
           </SelectValue>
