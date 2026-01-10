@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -6,9 +6,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby, Edit } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby, Edit, RefreshCw, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '@/components/NotificationBell';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
@@ -16,6 +17,7 @@ import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
+import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes-vito',
@@ -159,6 +161,20 @@ const CustomerBookings = () => {
   const { playSound } = useNotificationSound();
   const { isSubscribed, subscribe, unsubscribe, isLoading: pushLoading } = usePushNotifications();
 
+  // Animation variants
+  const containerVariants = useMemo(() => ({
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.08 }
+    }
+  }), []);
+
+  const itemVariants = useMemo(() => ({
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+  }), []);
+
   const getStatusLabel = (status: string) => {
     const statusLabels: Record<string, string> = {
       'awaiting-price': t('statusPendingPrice'),
@@ -277,87 +293,162 @@ const CustomerBookings = () => {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center flex-shrink-0">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/customer')} className="text-primary-foreground hover:bg-primary-foreground/10">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-serif">{t('myReservationsTitle')}</h1>
+    <div className="h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
+      {/* Modern Header */}
+      <motion.header 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="bg-primary text-primary-foreground py-4 px-4 flex justify-between items-center flex-shrink-0 shadow-lg backdrop-blur-sm sticky top-0 z-50"
+      >
+        <div className="flex items-center gap-3">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/customer')} className="text-primary-foreground hover:bg-primary-foreground/10">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </motion.div>
+          <img src={meetTransferLogo} alt="Meet Transfer" className="h-8 w-auto" />
         </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setShowNotificationSettings(!showNotificationSettings)}
-            className="text-primary-foreground hover:bg-primary-foreground/10"
-            title="Bildirim Ayarları"
-          >
-            <Volume2 className="h-5 w-5" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => isSubscribed ? unsubscribe() : subscribe()}
-            disabled={pushLoading}
-            className="text-primary-foreground hover:bg-primary-foreground/10"
-            title={isSubscribed ? 'Notifications On' : 'Notifications Off'}
-          >
-            {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5 opacity-60" />}
-          </Button>
+        <div className="flex items-center gap-1">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setShowNotificationSettings(!showNotificationSettings)}
+              className="text-primary-foreground hover:bg-primary-foreground/10"
+              title="Bildirim Ayarları"
+            >
+              <Volume2 className="h-5 w-5" />
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => isSubscribed ? unsubscribe() : subscribe()}
+              disabled={pushLoading}
+              className="text-primary-foreground hover:bg-primary-foreground/10"
+              title={isSubscribed ? 'Notifications On' : 'Notifications Off'}
+            >
+              {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5 opacity-60" />}
+            </Button>
+          </motion.div>
           <NotificationBell />
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10" title="Home">
-            <Home className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10" title="Home">
+              <Home className="h-5 w-5" />
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </motion.div>
         </div>
-      </header>
+      </motion.header>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto py-8 px-4 max-w-2xl">
-        {/* Notification Settings Panel */}
-        {showNotificationSettings && (
-          <div className="mb-6">
-            <NotificationSettingsPanel language={language === 'TR' ? 'TR' : 'EN'} />
+        <div className="container mx-auto py-6 px-4 max-w-2xl">
+        {/* Title Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Sparkles className="h-5 w-5 text-primary" />
+            </motion.div>
+            <h1 className="text-2xl font-serif font-bold text-foreground">{t('myReservationsTitle')}</h1>
           </div>
-        )}
+        </motion.div>
+
+        {/* Notification Settings Panel */}
+        <AnimatePresence>
+          {showNotificationSettings && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-6"
+            >
+              <NotificationSettingsPanel language={language === 'TR' ? 'TR' : 'EN'} />
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-12"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            >
+              <RefreshCw className="h-8 w-8 text-primary" />
+            </motion.div>
+            <p className="mt-4 text-muted-foreground">{language === 'TR' ? 'Yükleniyor...' : 'Loading...'}</p>
+          </motion.div>
         ) : reservations.length === 0 ? (
-          <div className="text-center py-12">
-            <Car className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-12"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Car className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            </motion.div>
             <p className="text-muted-foreground mb-4">{t('noReservationsYet')}</p>
-            <Button onClick={() => navigate('/book')}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t('bookATransfer')}
-            </Button>
-          </div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button onClick={() => navigate('/book')} className="shadow-lg">
+                <Plus className="h-4 w-4 mr-2" />
+                {t('bookATransfer')}
+              </Button>
+            </motion.div>
+          </motion.div>
         ) : (
-          <div className="space-y-6">
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6"
+          >
             {/* Action Required Section */}
             {actionRequired.length > 0 && (
-              <div className="space-y-3">
+              <motion.div variants={itemVariants} className="space-y-3">
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-purple-700 dark:text-purple-300">
-                  <AlertCircle className="h-5 w-5" />
+                  <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                    <AlertCircle className="h-5 w-5" />
+                  </motion.div>
                   {t('actionRequired')} ({actionRequired.length})
                 </h2>
-                {actionRequired.map((reservation) => (
-                  <Card 
-                    key={reservation.id} 
-                    className="cursor-pointer hover:shadow-md transition-shadow border-purple-300 dark:border-purple-700 bg-purple-50/50 dark:bg-purple-950/20"
-                    onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
+                {actionRequired.map((reservation, index) => (
+                  <motion.div
+                    key={reservation.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                   >
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <div className="flex flex-col gap-1">
-                          {reservation.reservation_code && (
-                            <span className="text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
-                          )}
+                    <Card 
+                      className="cursor-pointer hover:shadow-lg transition-all duration-300 border-purple-300 dark:border-purple-700 bg-purple-50/50 dark:bg-purple-950/20 backdrop-blur-sm"
+                      onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
+                    >
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                          <div className="flex flex-col gap-1">
+                            {reservation.reservation_code && (
+                              <span className="text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
+                            )}
                           <div className="flex items-center gap-2 text-sm">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
@@ -447,23 +538,36 @@ const CustomerBookings = () => {
                       )}
                     </CardContent>
                   </Card>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
 
             {/* Active Reservations Section */}
             {sortedActiveReservations.length > 0 && (
-              <div className="space-y-3">
+              <motion.div variants={itemVariants} className="space-y-3">
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-cyan-700 dark:text-cyan-300">
-                  <Car className="h-5 w-5" />
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Car className="h-5 w-5" />
+                  </motion.div>
                   {t('activeReservations') || 'Active Reservations'} ({sortedActiveReservations.length})
                 </h2>
-                {sortedActiveReservations.map((reservation) => (
-                  <Card 
-                    key={reservation.id} 
-                    className={`cursor-pointer hover:shadow-md transition-shadow ${statusCardColors[reservation.status] || ''}`}
-                    onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
+                {sortedActiveReservations.map((reservation, index) => (
+                  <motion.div
+                    key={reservation.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.08 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                   >
+                    <Card 
+                      className={`cursor-pointer hover:shadow-lg transition-all duration-300 backdrop-blur-sm ${statusCardColors[reservation.status] || ''}`}
+                      onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
+                    >
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <div className="flex flex-col gap-1">
@@ -589,23 +693,30 @@ const CustomerBookings = () => {
                       )}
                     </CardContent>
                   </Card>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
 
             {/* Past Reservations Section */}
             {sortedPastReservations.length > 0 && (
-              <div className="space-y-3">
+              <motion.div variants={itemVariants} className="space-y-3">
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-muted-foreground">
                   <CheckCircle className="h-5 w-5" />
                   {t('pastReservations') || 'Past Reservations'} ({sortedPastReservations.length})
                 </h2>
-                {sortedPastReservations.map((reservation) => (
-                  <Card 
-                    key={reservation.id} 
-                    className={`cursor-pointer hover:shadow-md transition-shadow opacity-75 ${statusCardColors[reservation.status] || ''}`}
-                    onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
+                {sortedPastReservations.map((reservation, index) => (
+                  <motion.div
+                    key={reservation.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.75 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ opacity: 1, scale: 1.01 }}
                   >
+                    <Card 
+                      className={`cursor-pointer hover:shadow-md transition-all duration-300 ${statusCardColors[reservation.status] || ''}`}
+                      onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
+                    >
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <div className="flex flex-col gap-1">
@@ -661,10 +772,11 @@ const CustomerBookings = () => {
                       </div>
                     </CardContent>
                   </Card>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         )}
         </div>
       </main>
