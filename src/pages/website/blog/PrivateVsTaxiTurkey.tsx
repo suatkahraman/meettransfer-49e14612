@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
+import TableOfContents from "@/components/website/TableOfContents";
 
 const PrivateVsTaxiTurkey = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -131,9 +132,20 @@ const PrivateVsTaxiTurkey = () => {
           />
         </div>
 
+        {/* Table of Contents */}
+        <TableOfContents items={[
+          { id: "introduction", title: "Introduction: The Age-Old Debate" },
+          { id: "quick-summary", title: "Quick Summary: At a Glance" },
+          { id: "safety-comparison", title: "Safety Comparison" },
+          { id: "comfort-experience", title: "Comfort and Experience" },
+          { id: "price-comparison", title: "Price Comparison" },
+          { id: "convenience-factor", title: "Convenience Factor" },
+          { id: "best-choice", title: "Best Choice by Traveler Type" },
+        ]} />
+
         {/* Article Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <h2>Introduction: The Age-Old Debate</h2>
+          <h2 id="introduction">Introduction: The Age-Old Debate</h2>
           <p>
             When planning your trip to Turkey, one of the most important decisions you'll make is 
             how to get from the airport to your hotel. The two main options are taking a regular 
@@ -146,7 +158,7 @@ const PrivateVsTaxiTurkey = () => {
             make an informed decision for your Turkish adventure.
           </p>
 
-          <h2>Quick Summary: At a Glance</h2>
+          <h2 id="quick-summary">Quick Summary: At a Glance</h2>
           
           <div className="not-prose grid md:grid-cols-2 gap-6 my-8">
             <Card className="border-primary/30">
@@ -206,7 +218,7 @@ const PrivateVsTaxiTurkey = () => {
             </Card>
           </div>
 
-          <h2>Safety Comparison</h2>
+          <h2 id="safety-comparison">Safety Comparison</h2>
           
           <div className="not-prose my-8">
             <Card className="bg-primary/5 border-primary/20">
@@ -276,7 +288,7 @@ const PrivateVsTaxiTurkey = () => {
             pre-screening and variable conditions make private transfers the safer choice.
           </p>
 
-          <h2>Comfort and Experience</h2>
+          <h2 id="comfort-experience">Comfort and Experience</h2>
           <p>
             After a long flight, comfort becomes a priority. Here's how the two options compare:
           </p>
@@ -300,7 +312,7 @@ const PrivateVsTaxiTurkey = () => {
             <li><strong>Cleanliness:</strong> Variable</li>
           </ul>
 
-          <h2>Price Comparison</h2>
+          <h2 id="price-comparison">Price Comparison</h2>
           
           <div className="not-prose my-8">
             <Card>
@@ -341,7 +353,7 @@ const PrivateVsTaxiTurkey = () => {
             <li>Peace of mind: priceless when traveling in unfamiliar territory</li>
           </ul>
 
-          <h2>Convenience Factor</h2>
+          <h2 id="convenience-factor">Convenience Factor</h2>
 
           <div className="not-prose my-8">
             <Card>
@@ -376,7 +388,7 @@ const PrivateVsTaxiTurkey = () => {
             </Card>
           </div>
 
-          <h2>Best Choice by Traveler Type</h2>
+          <h2 id="best-choice">Best Choice by Traveler Type</h2>
 
           <div className="not-prose my-8">
             <Card>
