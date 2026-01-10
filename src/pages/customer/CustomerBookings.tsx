@@ -328,31 +328,31 @@ const CustomerBookings = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
-      {/* Modern Header */}
+      {/* Modern Header - Mobile Optimized */}
       <motion.header 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="bg-primary text-primary-foreground py-4 px-4 flex justify-between items-center flex-shrink-0 shadow-lg backdrop-blur-sm sticky top-0 z-50"
+        className="bg-primary text-primary-foreground py-2.5 sm:py-4 px-3 sm:px-4 flex justify-between items-center flex-shrink-0 shadow-lg backdrop-blur-sm sticky top-0 z-50"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant="ghost" size="icon" onClick={() => navigate('/customer')} className="text-primary-foreground hover:bg-primary-foreground/10">
-              <ArrowLeft className="h-5 w-5" />
+            <Button variant="ghost" size="icon" onClick={() => navigate('/customer')} className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10">
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </motion.div>
-          <img src={meetTransferLogo} alt="Meet Transfer" className="h-8 w-auto" />
+          <img src={meetTransferLogo} alt="Meet Transfer" className="h-6 sm:h-8 w-auto" />
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => setShowNotificationSettings(!showNotificationSettings)}
-              className="text-primary-foreground hover:bg-primary-foreground/10"
+              className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10"
               title="Bildirim Ayarları"
             >
-              <Volume2 className="h-5 w-5" />
+              <Volume2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -361,21 +361,21 @@ const CustomerBookings = () => {
               size="icon" 
               onClick={() => isSubscribed ? unsubscribe() : subscribe()}
               disabled={pushLoading}
-              className="text-primary-foreground hover:bg-primary-foreground/10"
+              className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10"
               title={isSubscribed ? 'Notifications On' : 'Notifications Off'}
             >
-              {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5 opacity-60" />}
+              {isSubscribed ? <Bell className="h-4 w-4 sm:h-5 sm:w-5" /> : <BellOff className="h-4 w-4 sm:h-5 sm:w-5 opacity-60" />}
             </Button>
           </motion.div>
           <NotificationBell />
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10" title="Home">
-              <Home className="h-5 w-5" />
+            <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10" title="Home">
+              <Home className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
-              <LogOut className="h-5 w-5" />
+            <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10">
+              <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </motion.div>
         </div>
@@ -391,27 +391,27 @@ const CustomerBookings = () => {
           isPulling={isPulling}
           language={language === 'TR' ? 'TR' : 'EN'}
         />
-        <div className="container mx-auto py-6 px-4 max-w-2xl">
-        {/* Premium Title Section */}
+        <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
+        {/* Premium Title Section - Mobile Optimized */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-4 sm:mb-6"
         >
           <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden">
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+            <CardContent className="p-3 sm:p-4 md:p-5">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                   <motion.div
                     animate={{ rotate: [0, 5, -5, 0] }}
                     transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                    className="bg-primary/20 p-2.5 rounded-full"
+                    className="bg-primary/20 p-2 sm:p-2.5 rounded-full flex-shrink-0"
                   >
-                    <ClipboardList className="h-5 w-5 text-primary" />
+                    <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   </motion.div>
-                  <div>
-                    <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t('myReservationsTitle')}</h1>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="min-w-0">
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-serif font-bold text-foreground truncate">{t('myReservationsTitle')}</h1>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
                       {reservations.length > 0 
                         ? `${reservations.length} ${t('reservationsFound') || 'reservations found'}`
                         : (t('noReservationsYet') || 'No reservations yet')}
@@ -419,8 +419,8 @@ const CustomerBookings = () => {
                   </div>
                 </div>
                 
-                {/* Stats */}
-                <div className="hidden sm:flex items-center gap-4">
+                {/* Stats - Hidden on mobile, visible on larger screens */}
+                <div className="hidden md:flex items-center gap-4">
                   {actionRequired.length > 0 && (
                     <div className="text-center">
                       <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto">
@@ -441,70 +441,92 @@ const CustomerBookings = () => {
                   )}
                 </div>
               </div>
+              
+              {/* Mobile Stats Row */}
+              <div className="flex md:hidden items-center gap-2 mt-3 pt-3 border-t border-primary/10">
+                {actionRequired.length > 0 && (
+                  <Badge className="bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {actionRequired.length} {t('pendingLabel') || 'Pending'}
+                  </Badge>
+                )}
+                {sortedActiveReservations.length > 0 && (
+                  <Badge className="bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 text-xs">
+                    <Car className="h-3 w-3 mr-1" />
+                    {sortedActiveReservations.length} {t('activeLabel') || 'Active'}
+                  </Badge>
+                )}
+                {sortedPastReservations.length > 0 && (
+                  <Badge className="bg-muted text-muted-foreground text-xs">
+                    <History className="h-3 w-3 mr-1" />
+                    {sortedPastReservations.length}
+                  </Badge>
+                )}
+              </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Quick Actions Bar - Enhanced */}
+        {/* Quick Actions Bar - Mobile Optimized */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-4 gap-2 mb-6"
+          className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-6"
         >
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-1.5 h-auto py-3 w-full bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30 hover:border-primary/50 hover:bg-primary/15 shadow-sm"
+              className="flex flex-col items-center gap-1 sm:gap-1.5 h-auto py-2 sm:py-3 w-full bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30 hover:border-primary/50 hover:bg-primary/15 shadow-sm"
               onClick={() => navigate('/customer#booking-form')}
             >
-              <div className="bg-primary/20 p-1.5 rounded-full">
-                <Plus className="h-4 w-4 text-primary" />
+              <div className="bg-primary/20 p-1 sm:p-1.5 rounded-full">
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
               </div>
-              <span className="text-xs font-semibold">{t('newLabel') || 'New'}</span>
+              <span className="text-[10px] sm:text-xs font-semibold">{t('newLabel') || 'New'}</span>
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-1.5 h-auto py-3 w-full bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/15 shadow-sm"
+              className="flex flex-col items-center gap-1 sm:gap-1.5 h-auto py-2 sm:py-3 w-full bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/15 shadow-sm"
               onClick={() => {
                 const historySection = document.getElementById('past-reservations');
                 historySection?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              <div className="bg-blue-500/20 p-1.5 rounded-full">
-                <History className="h-4 w-4 text-blue-500" />
+              <div className="bg-blue-500/20 p-1 sm:p-1.5 rounded-full">
+                <History className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-500" />
               </div>
-              <span className="text-xs font-semibold">{t('historyLabel') || 'History'}</span>
+              <span className="text-[10px] sm:text-xs font-semibold">{t('historyLabel') || 'History'}</span>
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-1.5 h-auto py-3 w-full bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/30 hover:border-green-500/50 hover:bg-green-500/15 shadow-sm"
+              className="flex flex-col items-center gap-1 sm:gap-1.5 h-auto py-2 sm:py-3 w-full bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/30 hover:border-green-500/50 hover:bg-green-500/15 shadow-sm"
               onClick={() => {
                 window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
                   t('helloReservationInfoMsg') || 'Hello, I would like to get information about my reservation.'
                 )}`, '_blank');
               }}
             >
-              <div className="bg-green-500/20 p-1.5 rounded-full">
-                <MessageCircle className="h-4 w-4 text-green-500" />
+              <div className="bg-green-500/20 p-1 sm:p-1.5 rounded-full">
+                <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500" />
               </div>
-              <span className="text-xs font-semibold">WhatsApp</span>
+              <span className="text-[10px] sm:text-xs font-semibold">WhatsApp</span>
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-1.5 h-auto py-3 w-full bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/30 hover:border-orange-500/50 hover:bg-orange-500/15 shadow-sm"
+              className="flex flex-col items-center gap-1 sm:gap-1.5 h-auto py-2 sm:py-3 w-full bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/30 hover:border-orange-500/50 hover:bg-orange-500/15 shadow-sm"
               onClick={() => setShowNotificationSettings(!showNotificationSettings)}
             >
-              <div className="bg-orange-500/20 p-1.5 rounded-full">
-                <Settings className="h-4 w-4 text-orange-500" />
+              <div className="bg-orange-500/20 p-1 sm:p-1.5 rounded-full">
+                <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500" />
               </div>
-              <span className="text-xs font-semibold">{t('settingsLabel') || 'Settings'}</span>
+              <span className="text-[10px] sm:text-xs font-semibold">{t('settingsLabel') || 'Settings'}</span>
             </Button>
           </motion.div>
         </motion.div>
@@ -564,12 +586,12 @@ const CustomerBookings = () => {
             animate="visible"
             className="space-y-6"
           >
-            {/* Action Required Section */}
+            {/* Action Required Section - Mobile Optimized */}
             {actionRequired.length > 0 && (
-              <motion.div variants={itemVariants} className="space-y-3">
-                <h2 className="text-lg font-semibold flex items-center gap-2 text-purple-700 dark:text-purple-300">
+              <motion.div variants={itemVariants} className="space-y-2 sm:space-y-3">
+                <h2 className="text-base sm:text-lg font-semibold flex items-center gap-2 text-purple-700 dark:text-purple-300">
                   <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }}>
-                    <AlertCircle className="h-5 w-5" />
+                    <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
                   </motion.div>
                   {t('actionRequired')} ({actionRequired.length})
                 </h2>
@@ -586,25 +608,25 @@ const CustomerBookings = () => {
                       className="cursor-pointer hover:shadow-lg transition-all duration-300 border-purple-300 dark:border-purple-700 bg-purple-50/50 dark:bg-purple-950/20 backdrop-blur-sm"
                       onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
                     >
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                          <div className="flex flex-col gap-1">
+                      <CardHeader className="p-3 sm:pb-2">
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex flex-col gap-1 min-w-0 flex-1">
                             {reservation.reservation_code && (
-                              <span className="text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
+                              <span className="text-[10px] sm:text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
                             )}
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm flex-wrap">
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                             <span className="font-medium">
-                              {format(new Date(reservation.pickup_date), 'PPP')}
+                              {format(new Date(reservation.pickup_date), 'PP')}
                             </span>
-                            <Clock className="h-4 w-4 text-muted-foreground ml-2" />
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground ml-1 sm:ml-2 flex-shrink-0" />
                             <span>{reservation.pickup_time}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge className={`flex items-center gap-1 ${statusColors[reservation.status]}`}>
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap flex-shrink-0">
+                          <Badge className={`flex items-center gap-1 text-[10px] sm:text-xs ${statusColors[reservation.status]}`}>
                             {statusIcons[reservation.status]}
-                            {getStatusLabel(reservation.status)}
+                            <span className="hidden xs:inline">{getStatusLabel(reservation.status)}</span>
                           </Badge>
                           {reservation.flight_number && (
                             <FlightDelayBadge 
@@ -615,7 +637,7 @@ const CustomerBookings = () => {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="space-y-2 sm:space-y-3 p-3 pt-0 sm:px-6 sm:pb-6">
                       <div className="space-y-2">
                         <LocationDisplay
                           placeName={reservation.pickup_place_name}
@@ -632,34 +654,34 @@ const CustomerBookings = () => {
                       </div>
                       
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Car className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <Car className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                          <span className="text-xs sm:text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
                           {reservation.luggage_count && reservation.luggage_count > 0 && (
-                            <Badge variant="outline" className="text-xs gap-1 text-orange-600 border-orange-300">
-                              <Briefcase className="h-3 w-3" />
+                            <Badge variant="outline" className="text-[10px] sm:text-xs gap-0.5 sm:gap-1 text-orange-600 border-orange-300 px-1.5">
+                              <Briefcase className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                               {reservation.luggage_count}
                             </Badge>
                           )}
                           {reservation.baby_seat_count && reservation.baby_seat_count > 0 && (
-                            <Badge variant="outline" className="text-xs gap-1 text-pink-600 border-pink-300">
-                              <Baby className="h-3 w-3" />
+                            <Badge variant="outline" className="text-[10px] sm:text-xs gap-0.5 sm:gap-1 text-pink-600 border-pink-300 px-1.5">
+                              <Baby className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                               {reservation.baby_seat_count}
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                           {reservation.price !== null && (
-                            <span className="font-bold text-primary text-lg">
+                            <span className="font-bold text-primary text-sm sm:text-lg">
                               {formatPrice(reservation.price, reservation.price_currency)}
                             </span>
                           )}
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                         </div>
                       </div>
 
-                      <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg text-center">
-                        <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                      <div className="bg-purple-100 dark:bg-purple-900/30 p-2 sm:p-3 rounded-lg text-center">
+                        <p className="text-xs sm:text-sm font-medium text-purple-700 dark:text-purple-300">
                           {t('tapToReviewPrice')}
                         </p>
                       </div>
@@ -669,13 +691,13 @@ const CustomerBookings = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full"
+                          className="w-full h-8 sm:h-9 text-xs sm:text-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/customer/reservation/${reservation.id}/edit`);
                           }}
                         >
-                          <Edit className="h-4 w-4 mr-2" />
+                          <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                           {t('editReservation') || 'Edit Reservation'}
                         </Button>
                       )}
@@ -924,8 +946,8 @@ const CustomerBookings = () => {
         </div>
       </main>
 
-      {/* Sticky FABs */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+      {/* Sticky FABs - Mobile Optimized */}
+      <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50 flex flex-col gap-2 sm:gap-3">
         {/* WhatsApp Support Button */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
@@ -942,10 +964,10 @@ const CustomerBookings = () => {
                 window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
               }}
               size="lg"
-              className="h-12 w-12 rounded-full shadow-lg bg-[#25D366] hover:bg-[#22c55e] text-white"
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-full shadow-lg bg-[#25D366] hover:bg-[#22c55e] text-white"
               title={t('whatsAppSupportTooltip') || 'WhatsApp Support'}
             >
-              <MessageCircle className="h-5 w-5" />
+              <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </motion.div>
         </motion.div>
@@ -961,9 +983,9 @@ const CustomerBookings = () => {
               type="button"
               onClick={() => navigate('/customer#booking-form')}
               size="lg"
-              className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
+              className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
             >
-              <Plus className="h-6 w-6" />
+              <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
           </motion.div>
         </motion.div>

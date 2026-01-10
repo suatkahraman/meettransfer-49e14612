@@ -649,38 +649,38 @@ const CustomerReservationDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Modern Header */}
+      {/* Modern Header - Mobile Optimized */}
       <motion.header 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="bg-primary text-primary-foreground py-4 px-4 shadow-lg backdrop-blur-sm sticky top-0 z-50"
+        className="bg-primary text-primary-foreground py-2.5 sm:py-4 px-3 sm:px-4 shadow-lg backdrop-blur-sm sticky top-0 z-50"
       >
         <div className="flex items-center justify-between max-w-2xl mx-auto">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="ghost" size="icon" onClick={() => navigate('/customer/bookings')} className="text-primary-foreground hover:bg-primary-foreground/10">
-                <ArrowLeft className="h-5 w-5" />
+              <Button variant="ghost" size="icon" onClick={() => navigate('/customer/bookings')} className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10">
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </motion.div>
-            <img src={meetTransferLogo} alt="Meet Transfer" className="h-8 w-auto" />
+            <img src={meetTransferLogo} alt="Meet Transfer" className="h-6 sm:h-8 w-auto" />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => isSubscribed ? unsubscribe() : subscribe()}
                 disabled={pushLoading}
-                className="text-primary-foreground hover:bg-primary-foreground/10"
+                className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10"
                 title={isSubscribed ? 'Notifications On' : 'Notifications Off'}
               >
-                {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5 opacity-60" />}
+                {isSubscribed ? <Bell className="h-4 w-4 sm:h-5 sm:w-5" /> : <BellOff className="h-4 w-4 sm:h-5 sm:w-5 opacity-60" />}
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10">
-                <Home className="h-5 w-5" />
+              <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10">
+                <Home className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </motion.div>
           </div>
@@ -691,7 +691,7 @@ const CustomerReservationDetail = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="container mx-auto py-6 px-4 max-w-2xl"
+        className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl"
         {...pullHandlers}
       >
         <PullToRefreshIndicator
@@ -700,24 +700,24 @@ const CustomerReservationDetail = () => {
           isPulling={isPulling}
           language={language === 'TR' ? 'TR' : 'EN'}
         />
-        {/* Premium Title Section with Status Tracker */}
-        <motion.div variants={itemVariants} className="mb-6">
+        {/* Premium Title Section with Status Tracker - Mobile Optimized */}
+        <motion.div variants={itemVariants} className="mb-4 sm:mb-6">
           <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden">
-            <CardContent className="p-5">
-              <div className="flex items-center gap-3 mb-4">
+            <CardContent className="p-3 sm:p-5">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <motion.div
                   animate={{ rotate: [0, 15, -15, 0] }}
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                  className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center"
+                  className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0"
                 >
-                  <Sparkles className="h-6 w-6 text-primary" />
+                  <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </motion.div>
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t('reservationDetails')}</h1>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-lg sm:text-xl md:text-2xl font-serif font-bold text-foreground truncate">{t('reservationDetails')}</h1>
                   {reservation.reservation_code && (
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="secondary" className="font-mono text-xs bg-primary/10 text-primary border-primary/20">
-                        <Shield className="h-3 w-3 mr-1" />
+                      <Badge variant="secondary" className="font-mono text-[10px] sm:text-xs bg-primary/10 text-primary border-primary/20">
+                        <Shield className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                         {reservation.reservation_code}
                       </Badge>
                     </div>
@@ -725,19 +725,19 @@ const CustomerReservationDetail = () => {
                 </div>
               </div>
               
-              {/* Status Progress Tracker */}
-              <div className="bg-background/50 rounded-xl p-4 border border-primary/10">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-muted-foreground">
+              {/* Status Progress Tracker - Mobile Optimized */}
+              <div className="bg-background/50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-primary/10">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <span className="text-xs sm:text-sm font-medium text-muted-foreground">
                     {t('transferStatus') || 'Transfer Status'}
                   </span>
-                  <Badge className={cn(statusColors[reservation.status] || 'bg-muted', "px-3 py-1 font-medium")}>
+                  <Badge className={cn(statusColors[reservation.status] || 'bg-muted', "px-2 sm:px-3 py-0.5 sm:py-1 font-medium text-[10px] sm:text-xs")}>
                     {getStatusLabel(reservation.status)}
                   </Badge>
                 </div>
                 
-                {/* Progress Steps */}
-                <div className="flex items-center gap-1">
+                {/* Progress Steps - Mobile Optimized */}
+                <div className="flex items-center gap-0.5 sm:gap-1">
                   {['awaiting-price', 'waiting_for_customer_approval', 'customer_approved', 'sent_to_driver', 'completed'].map((step, index) => {
                     const stepLabels: Record<string, { en: string; tr: string }> = {
                       'awaiting-price': { en: 'Price', tr: 'Fiyat' },
@@ -758,14 +758,14 @@ const CustomerReservationDetail = () => {
                     if (isCancelled) return null;
                     
                     return (
-                      <div key={step} className="flex-1 flex flex-col items-center gap-1">
+                      <div key={step} className="flex-1 flex flex-col items-center gap-0.5 sm:gap-1">
                         <div className={cn(
-                          "h-2 w-full rounded-full transition-all",
+                          "h-1.5 sm:h-2 w-full rounded-full transition-all",
                           isActive ? "bg-primary" : "bg-muted",
                           isCurrent && "animate-pulse"
                         )} />
                         <span className={cn(
-                          "text-[10px] font-medium",
+                          "text-[8px] sm:text-[10px] font-medium text-center leading-tight",
                           isActive ? "text-primary" : "text-muted-foreground"
                         )}>
                           {stepLabels[step]?.[language === 'TR' ? 'tr' : 'en'] || ''}
@@ -777,9 +777,9 @@ const CustomerReservationDetail = () => {
                 
                 {/* Cancelled Status */}
                 {(reservation.status.includes('cancelled') || reservation.status === 'customer_rejected') && (
-                  <div className="flex items-center gap-2 mt-3 p-2 bg-destructive/10 rounded-lg">
-                    <XCircle className="h-4 w-4 text-destructive" />
-                    <span className="text-sm text-destructive font-medium">
+                  <div className="flex items-center gap-2 mt-2 sm:mt-3 p-2 bg-destructive/10 rounded-lg">
+                    <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-destructive" />
+                    <span className="text-xs sm:text-sm text-destructive font-medium">
                       {t('reservationCancelledLabel') || 'Reservation Cancelled'}
                     </span>
                   </div>
@@ -791,38 +791,38 @@ const CustomerReservationDetail = () => {
 
         <motion.div variants={itemVariants}>
           <Card className="shadow-xl border-border/50 overflow-hidden backdrop-blur-sm bg-card/95">
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border/50">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <Car className="h-5 w-5 text-primary" />
-                  {t('transferDetailsTitle')}
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border/50 p-3 sm:p-6">
+              <div className="flex justify-between items-center gap-2">
+                <CardTitle className="text-base sm:text-xl flex items-center gap-1.5 sm:gap-2">
+                  <Car className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  <span className="truncate">{t('transferDetailsTitle')}</span>
                 </CardTitle>
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Badge className={cn(statusColors[reservation.status] || 'bg-muted', "px-3 py-1 font-medium")}>
+                  <Badge className={cn(statusColors[reservation.status] || 'bg-muted', "px-2 sm:px-3 py-0.5 sm:py-1 font-medium text-[10px] sm:text-xs")}>
                     {getStatusLabel(reservation.status)}
                   </Badge>
                 </motion.div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6 p-6">
-              {/* Date & Time - Enhanced */}
+            <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6">
+              {/* Date & Time - Mobile Optimized */}
               <motion.div 
                 variants={itemVariants}
-                className="flex items-center gap-4 pb-4 border-b border-border/50 bg-gradient-to-r from-primary/5 to-transparent rounded-lg p-4 -mx-2"
+                className="flex flex-wrap items-center gap-2 sm:gap-4 pb-3 sm:pb-4 border-b border-border/50 bg-gradient-to-r from-primary/5 to-transparent rounded-lg p-2 sm:p-4 -mx-1 sm:-mx-2"
               >
-                <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-lg">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">
-                    {format(new Date(reservation.pickup_date), 'PPP')}
+                <div className="flex items-center gap-1.5 sm:gap-2 bg-primary/10 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg">
+                  <Calendar className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-primary" />
+                  <span className="font-semibold text-xs sm:text-base">
+                    {format(new Date(reservation.pickup_date), 'PP')}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-lg">
-                  <Clock className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">{reservation.pickup_time}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 bg-primary/10 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg">
+                  <Clock className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-primary" />
+                  <span className="font-semibold text-xs sm:text-base">{reservation.pickup_time}</span>
                 </div>
               </motion.div>
 
@@ -857,21 +857,21 @@ const CustomerReservationDetail = () => {
                 </div>
               </motion.div>
 
-              {/* Share Buttons */}
-              <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 py-4 border-t border-border/50">
+              {/* Share Buttons - Mobile Optimized */}
+              <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2 sm:gap-3 py-3 sm:py-4 border-t border-border/50">
                 <Button
                   variant="outline"
                   onClick={copyReservationDetails}
-                  className="w-full"
+                  className="w-full h-9 sm:h-10 text-xs sm:text-sm"
                 >
-                  <ClipboardCopy className="h-4 w-4 mr-2" />
+                  <ClipboardCopy className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                   {t('copyBtn') || 'Copy'}
                 </Button>
                 <Button
                   onClick={shareViaWhatsApp}
-                  className="w-full bg-[#25D366] hover:bg-[#22c55e] text-white"
+                  className="w-full bg-[#25D366] hover:bg-[#22c55e] text-white h-9 sm:h-10 text-xs sm:text-sm"
                 >
-                  <MessageCircle className="h-4 w-4 mr-2" />
+                  <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                   WhatsApp
                 </Button>
               </motion.div>
