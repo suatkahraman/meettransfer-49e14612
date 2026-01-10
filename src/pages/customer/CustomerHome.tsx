@@ -57,7 +57,7 @@ const reservationSchema = z.object({
 });
 
 const MAX_PASSENGERS = 15;
-const WHATSAPP_NUMBER = '905321748390';
+const WHATSAPP_NUMBER = '15558051101';
 const EMERGENCY_PHONE = '+905321748390';
 
 // Feature icon helper - matches Hero.tsx
