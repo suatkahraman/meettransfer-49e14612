@@ -5,10 +5,10 @@
 
 // WhatsApp number for customer support and bookings
 // Format: country code + number without spaces or special characters
-export const WHATSAPP_NUMBER = "905321748390";
+export const WHATSAPP_NUMBER = "15558051101";
 
 // Display format for the phone number
-export const WHATSAPP_DISPLAY = "+90 532 174 8390";
+export const WHATSAPP_DISPLAY = "+1 (555) 805-1101";
 
 // Emergency/alternative phone number
 export const EMERGENCY_PHONE = "+905321748390";
