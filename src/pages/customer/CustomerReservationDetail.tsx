@@ -262,10 +262,10 @@ const CustomerReservationDetail = () => {
 
   const canEdit = reservation && 
     !isPickupDatePast() && 
-    ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status);
+    ['customer_approved', 'confirmed', 'sent_to_driver', 'waiting_for_customer_approval', 'pending_admin_review'].includes(reservation.status);
   const canCancel = reservation && 
     !isPickupDatePast() && 
-    ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status);
+    ['customer_approved', 'confirmed', 'sent_to_driver', 'waiting_for_customer_approval'].includes(reservation.status);
 
   const handleAcceptPrice = async () => {
     if (!reservation) return;

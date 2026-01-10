@@ -87,8 +87,8 @@ const CustomerEditReservation = () => {
         return;
       }
 
-      // Only allow editing confirmed reservations
-      const editableStatuses = ['customer_approved', 'confirmed', 'sent_to_driver'];
+      // Only allow editing reservations in certain statuses
+      const editableStatuses = ['customer_approved', 'confirmed', 'sent_to_driver', 'waiting_for_customer_approval', 'pending_admin_review'];
       if (!editableStatuses.includes(data.status)) {
         toast.error(t('reservationCannotBeEdited'));
         navigate(`/customer/reservation/${id}`);
