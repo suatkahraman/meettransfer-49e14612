@@ -1,4 +1,4 @@
-import { Users, Car, CheckCircle2, ZoomIn, Briefcase, Snowflake, Wifi, BatteryCharging, Droplets, Sparkles, Tv, Crown, Wine, Armchair, Stars, ThumbsUp } from "lucide-react";
+import { Users, Car, CheckCircle2, ZoomIn, Briefcase, Snowflake, Wifi, BatteryCharging, Droplets, Sparkles, Tv, Crown, Wine, Armchair, Stars, ThumbsUp, TrendingUp, Award, Gem, Heart } from "lucide-react";
 import { VEHICLE_TYPE_MAP, VehicleTypeInfo } from "@/lib/vehicleTypes";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -77,6 +77,9 @@ export function VehicleSelectionCardSkeleton() {
   );
 }
 
+// Badge types for vehicle cards
+export type VehicleBadgeType = 'popular' | 'best-value' | 'premium' | 'family-friendly' | 'luxury' | null;
+
 interface VehicleSelectionCardProps {
   vehicleType: string;
   isSelected: boolean;
@@ -89,7 +92,50 @@ interface VehicleSelectionCardProps {
   previousPrice?: number | null;
   showDiscountAnimation?: boolean;
   isLoading?: boolean;
+  badge?: VehicleBadgeType;
 }
+
+// Badge configuration
+const getBadgeConfig = (badge: VehicleBadgeType, isTurkish: boolean) => {
+  const configs: Record<NonNullable<VehicleBadgeType>, { label: string; labelTr: string; icon: typeof TrendingUp; gradient: string; textColor: string }> = {
+    'popular': {
+      label: 'Most Popular',
+      labelTr: 'En Popüler',
+      icon: TrendingUp,
+      gradient: 'from-blue-500 to-indigo-600',
+      textColor: 'text-white'
+    },
+    'best-value': {
+      label: 'Best Value',
+      labelTr: 'En İyi Değer',
+      icon: Award,
+      gradient: 'from-amber-500 to-orange-600',
+      textColor: 'text-white'
+    },
+    'premium': {
+      label: 'Premium',
+      labelTr: 'Premium',
+      icon: Crown,
+      gradient: 'from-purple-500 to-violet-600',
+      textColor: 'text-white'
+    },
+    'family-friendly': {
+      label: 'Family Choice',
+      labelTr: 'Aile Tercihi',
+      icon: Heart,
+      gradient: 'from-pink-500 to-rose-600',
+      textColor: 'text-white'
+    },
+    'luxury': {
+      label: 'Luxury',
+      labelTr: 'Lüks',
+      icon: Gem,
+      gradient: 'from-yellow-500 to-amber-600',
+      textColor: 'text-white'
+    }
+  };
+  return badge ? configs[badge] : null;
+};
 
 export function VehicleSelectionCard({
   vehicleType,
@@ -103,6 +149,7 @@ export function VehicleSelectionCard({
   previousPrice,
   showDiscountAnimation = false,
   isLoading = false,
+  badge = null,
 }: VehicleSelectionCardProps) {
   const { t, language } = useLanguage();
   const [imageModalOpen, setImageModalOpen] = useState(false);
@@ -175,7 +222,7 @@ return (
         )}
         
         {/* Recommended Badge - Compact on mobile */}
-        {isRecommended && (
+        {isRecommended && !badge && (
           <div className="absolute top-0 left-0 z-10">
             <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2.5 py-1 sm:px-5 sm:py-2 rounded-br-xl sm:rounded-br-2xl rounded-tl-xl sm:rounded-tl-2xl shadow-lg">
               <span className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-bold uppercase tracking-wide">
@@ -186,6 +233,23 @@ return (
             </div>
           </div>
         )}
+        
+        {/* Custom Badge - Popular, Best Value, Premium, etc. */}
+        {badge && (() => {
+          const badgeConfig = getBadgeConfig(badge, isTurkish);
+          if (!badgeConfig) return null;
+          const BadgeIcon = badgeConfig.icon;
+          return (
+            <div className="absolute top-0 left-0 z-10">
+              <div className={`bg-gradient-to-r ${badgeConfig.gradient} ${badgeConfig.textColor} px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-br-xl sm:rounded-br-2xl rounded-tl-xl sm:rounded-tl-2xl shadow-lg`}>
+                <span className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wide">
+                  <BadgeIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span>{isTurkish ? badgeConfig.labelTr : badgeConfig.label}</span>
+                </span>
+              </div>
+            </div>
+          );
+        })()}
         
         <div className="relative p-3 sm:p-5">
           <div className="flex gap-3 sm:gap-5">
