@@ -260,11 +260,28 @@ const CustomerReservationDetail = () => {
     return pickupDate.getTime() < today.getTime(); // Only past, not today
   };
 
+  // Check if cancellation is allowed (at least 24 hours before pickup)
+  const canCancelWithin24Hours = () => {
+    if (!reservation) return false;
+    const now = new Date();
+    const pickupDateTime = new Date(`${reservation.pickup_date}T${reservation.pickup_time}`);
+    const hoursUntilPickup = (pickupDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    return hoursUntilPickup >= 24;
+  };
+
+  const hoursUntilPickup = () => {
+    if (!reservation) return 0;
+    const now = new Date();
+    const pickupDateTime = new Date(`${reservation.pickup_date}T${reservation.pickup_time}`);
+    return Math.max(0, Math.floor((pickupDateTime.getTime() - now.getTime()) / (1000 * 60 * 60)));
+  };
+
   const canEdit = reservation && 
     !isPickupDatePast() && 
     ['customer_approved', 'confirmed', 'sent_to_driver', 'waiting_for_customer_approval', 'pending_admin_review'].includes(reservation.status);
   const canCancel = reservation && 
     !isPickupDatePast() && 
+    canCancelWithin24Hours() &&
     ['customer_approved', 'confirmed', 'sent_to_driver', 'waiting_for_customer_approval'].includes(reservation.status);
 
   const handleAcceptPrice = async () => {
@@ -1107,7 +1124,7 @@ const CustomerReservationDetail = () => {
                     className="w-full"
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit Reservation
+                    {t('editReservation') || 'Edit Reservation'}
                   </Button>
                 )}
                 
@@ -1120,28 +1137,55 @@ const CustomerReservationDetail = () => {
                         disabled={cancelLoading}
                       >
                         <XCircle className="h-4 w-4 mr-2" />
-                        Cancel Reservation
+                        {t('cancelReservation') || 'Cancel Reservation'}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Cancel Reservation?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('cancelReservationTitle') || 'Cancel Reservation?'}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to cancel this reservation? This action cannot be undone.
+                          {t('cancelReservationDescription') || 'Are you sure you want to cancel this reservation? This action cannot be undone.'}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Keep Reservation</AlertDialogCancel>
+                        <AlertDialogCancel>{t('keepReservation') || 'Keep Reservation'}</AlertDialogCancel>
                         <AlertDialogAction 
                           onClick={handleCancelReservation}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          Yes, Cancel It
+                          {t('yesCancelIt') || 'Yes, Cancel It'}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 )}
+              </div>
+            )}
+
+            {/* Cannot cancel warning - less than 24 hours */}
+            {!canCancel && !isPickupDatePast() && reservation && 
+              ['customer_approved', 'confirmed', 'sent_to_driver', 'waiting_for_customer_approval'].includes(reservation.status) && (
+              <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-700 dark:text-amber-300">
+                      {t('cannotCancelTitle') || 'Cancellation Not Available'}
+                    </p>
+                    <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                      {t('cannotCancelMessage') || `Reservations can only be cancelled at least 24 hours before pickup. Your pickup is in ${hoursUntilPickup()} hours. Please contact us via WhatsApp for assistance.`}
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-3 border-amber-500 text-amber-700 hover:bg-amber-100"
+                      onClick={() => window.open('https://wa.me/905323461686', '_blank')}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      {t('contactWhatsApp') || 'Contact via WhatsApp'}
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
           </CardContent>
