@@ -850,17 +850,15 @@ const CustomerHome = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge className="bg-green-500 text-white text-xs font-bold px-2 py-0.5">
-                      {language === 'TR' ? 'KAMPANYA' : 'PROMO'}
+                      {t('promo')}
                     </Badge>
                     <Sparkles className="h-4 w-4 text-green-500" />
                   </div>
                   <h3 className="font-bold text-foreground text-sm sm:text-base">
-                    {language === 'TR' ? 'Gidiş-Dönüş %30 İndirim!' : 'Round Trip 30% OFF!'}
+                    {t('roundTrip30Off')}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {language === 'TR' 
-                      ? 'Dönüş transferinize otomatik indirim' 
-                      : 'Auto discount on your return transfer'}
+                    {t('autoDiscountReturn')}
                   </p>
                 </div>
                 <ChevronRight className="h-5 w-5 text-green-600 flex-shrink-0" />
@@ -889,7 +887,7 @@ const CustomerHome = () => {
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-primary animate-pulse" />
                           <span className="text-sm font-medium text-primary">
-                            {language === 'TR' ? 'Yaklaşan Transferiniz' : 'Your Next Transfer'}
+                            {t('yourNextTransfer')}
                           </span>
                         </div>
                         {nextTransfer.reservationCode && (
@@ -952,10 +950,10 @@ const CustomerHome = () => {
                   <Plus className="h-6 w-6" />
                 </div>
                 <span className="font-semibold text-sm">
-                  {language === 'TR' ? 'Yeni Rezervasyon' : 'New Reservation'}
+                  {t('newReservationBtn')}
                 </span>
                 <span className="text-xs opacity-80 mt-1">
-                  {language === 'TR' ? 'Hemen başla' : 'Start now'}
+                  {t('startNowDesc')}
                 </span>
               </CardContent>
             </Card>
@@ -975,12 +973,12 @@ const CustomerHome = () => {
                   <ClipboardList className="h-6 w-6 text-primary" />
                 </div>
                 <span className="font-semibold text-sm">
-                  {language === 'TR' ? 'Rezervasyonlarım' : 'My Bookings'}
+                  {t('myBookingsBtn')}
                 </span>
                 <span className="text-xs text-muted-foreground mt-1">
                   {activeBookingsCount > 0 
-                    ? (language === 'TR' ? `${activeBookingsCount} aktif` : `${activeBookingsCount} active`)
-                    : (language === 'TR' ? 'Görüntüle' : 'View all')}
+                    ? `${activeBookingsCount} ${t('activeLabel')}`
+                    : t('viewAllLabel')}
                 </span>
                 {activeBookingsCount > 0 && (
                   <motion.div
@@ -1014,7 +1012,7 @@ const CustomerHome = () => {
             >
               <Home className="h-5 w-5 text-primary" />
               <span className="text-xs font-medium">
-                {language === 'TR' ? 'Anasayfa' : 'Home'}
+                {t('homeBtn')}
               </span>
             </Button>
           </motion.div>
@@ -1024,7 +1022,7 @@ const CustomerHome = () => {
             <Button 
               variant="outline" 
               className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 hover:border-green-500/40"
-              onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
+              onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank')}
             >
               <MessageCircle className="h-5 w-5 text-green-500" />
               <span className="text-xs font-medium">
@@ -1042,7 +1040,7 @@ const CustomerHome = () => {
             >
               <PhoneCall className="h-5 w-5 text-red-500" />
               <span className="text-xs font-medium">
-                {language === 'TR' ? 'Acil' : 'Call'}
+                {t('emergencyBtn')}
               </span>
             </Button>
           </motion.div>
@@ -1056,7 +1054,7 @@ const CustomerHome = () => {
             >
               <Shield className="h-5 w-5 text-emerald-500" />
               <span className="text-xs font-medium">
-                {language === 'TR' ? 'Güvenlik' : 'Security'}
+                {t('securityBtn')}
               </span>
             </Button>
           </motion.div>
@@ -1073,8 +1071,8 @@ const CustomerHome = () => {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <ClipboardList className="h-4 w-4 text-primary" />
-                <span className="text-sm font-semibold">
-                  {language === 'TR' ? 'Aktif Rezervasyonlar' : 'Active Reservations'}
+              <span className="text-sm font-semibold">
+                  {t('activeReservationsTitle')}
                 </span>
               </div>
               {activeBookingsCount > 3 && (
@@ -1084,22 +1082,22 @@ const CustomerHome = () => {
                   className="text-xs text-primary hover:text-primary/80"
                   onClick={() => navigate('/customer/bookings')}
                 >
-                  {language === 'TR' ? 'Tümünü Gör' : 'View All'}
+                  {t('viewAll')}
                   <ChevronRight className="h-3 w-3 ml-1" />
                 </Button>
               )}
             </div>
             <div className="space-y-3">
               {recentReservations.slice(0, 3).map((reservation, index) => {
-                const statusConfig: Record<string, { label: string; labelTr: string; color: string; bgColor: string }> = {
-                  'awaiting-price': { label: 'Awaiting Price', labelTr: 'Fiyat Bekleniyor', color: 'text-amber-700', bgColor: 'bg-amber-100' },
-                  'waiting_for_customer_approval': { label: 'Awaiting Approval', labelTr: 'Onay Bekliyor', color: 'text-orange-700', bgColor: 'bg-orange-100' },
-                  'customer_approved': { label: 'Approved', labelTr: 'Onaylandı', color: 'text-blue-700', bgColor: 'bg-blue-100' },
-                  'confirmed': { label: 'Confirmed', labelTr: 'Onaylandı', color: 'text-green-700', bgColor: 'bg-green-100' },
-                  'sent_to_driver': { label: 'Driver Assigned', labelTr: 'Şoför Atandı', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
-                  'pending_admin_review': { label: 'Under Review', labelTr: 'İnceleniyor', color: 'text-purple-700', bgColor: 'bg-purple-100' },
+                const statusConfig: Record<string, { key: string; color: string; bgColor: string }> = {
+                  'awaiting-price': { key: 'awaitingPrice', color: 'text-amber-700', bgColor: 'bg-amber-100' },
+                  'waiting_for_customer_approval': { key: 'awaitingApproval', color: 'text-orange-700', bgColor: 'bg-orange-100' },
+                  'customer_approved': { key: 'approved', color: 'text-blue-700', bgColor: 'bg-blue-100' },
+                  'confirmed': { key: 'confirmed', color: 'text-green-700', bgColor: 'bg-green-100' },
+                  'sent_to_driver': { key: 'driverAssigned', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
+                  'pending_admin_review': { key: 'underReview', color: 'text-purple-700', bgColor: 'bg-purple-100' },
                 };
-                const status = statusConfig[reservation.status] || { label: reservation.status, labelTr: reservation.status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
+                const status = statusConfig[reservation.status] || { key: reservation.status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
                 
                 const vehicleLabels: Record<string, string> = {
                   'mercedes-vito': 'Mercedes Vito',
@@ -1131,7 +1129,7 @@ const CustomerHome = () => {
                                 {reservation.reservation_code || 'N/A'}
                               </span>
                               <Badge className={cn("text-xs font-medium", status.bgColor, status.color)}>
-                                {language === 'TR' ? status.labelTr : status.label}
+                                {t(status.key)}
                               </Badge>
                             </div>
                             
@@ -1187,8 +1185,8 @@ const CustomerHome = () => {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <History className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-semibold text-muted-foreground">
-                  {language === 'TR' ? 'Geçmiş Transferler' : 'Past Transfers'}
+              <span className="text-sm font-semibold text-muted-foreground">
+                  {t('pastTransfersTitle')}
                 </span>
               </div>
               <Button
@@ -1197,7 +1195,7 @@ const CustomerHome = () => {
                 className="text-xs text-muted-foreground hover:text-foreground"
                 onClick={() => navigate('/customer/bookings#past-reservations')}
               >
-                {language === 'TR' ? 'Tümünü Gör' : 'View All'}
+                {t('viewAll')}
                 <ChevronRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
@@ -1205,8 +1203,8 @@ const CustomerHome = () => {
               {completedReservations.slice(0, 3).map((reservation, index) => {
                 const isCompleted = reservation.status === 'completed';
                 const statusConfig = isCompleted
-                  ? { label: 'Completed', labelTr: 'Tamamlandı', color: 'text-green-700', bgColor: 'bg-green-100', icon: CheckCircle }
-                  : { label: 'Cancelled', labelTr: 'İptal Edildi', color: 'text-red-700', bgColor: 'bg-red-100', icon: X };
+                  ? { key: 'completedLabel', color: 'text-green-700', bgColor: 'bg-green-100', icon: CheckCircle }
+                  : { key: 'cancelledLabel', color: 'text-red-700', bgColor: 'bg-red-100', icon: X };
                 
                 const vehicleLabels: Record<string, string> = {
                   'mercedes-vito': 'Mercedes Vito',
@@ -1241,7 +1239,7 @@ const CustomerHome = () => {
                                 {reservation.reservation_code || 'N/A'}
                               </span>
                               <Badge className={cn("text-xs font-medium", statusConfig.bgColor, statusConfig.color)}>
-                                {language === 'TR' ? statusConfig.labelTr : statusConfig.label}
+                                {t(statusConfig.key)}
                               </Badge>
                             </div>
                             
@@ -1296,7 +1294,7 @@ const CustomerHome = () => {
             <div className="flex items-center gap-2 mb-3">
               <History className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium text-muted-foreground">
-                {language === 'TR' ? 'Son Aramalar' : 'Recent Searches'}
+                {t('recentSearches')}
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1341,10 +1339,10 @@ const CustomerHome = () => {
                   </div>
                   <div>
                     <CardTitle className="text-base font-semibold">
-                      {language === 'TR' ? 'Favori Rotalarım' : 'My Favorite Routes'}
+                      {t('favoriteRoutes')}
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      {language === 'TR' ? 'Sık kullandığın rotalar' : 'Your frequently used routes'}
+                      {t('frequentRoutesDesc')}
                     </CardDescription>
                   </div>
                 </div>
@@ -1355,7 +1353,7 @@ const CustomerHome = () => {
                   onClick={() => setIsAddingFavorite(true)}
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  {language === 'TR' ? 'Ekle' : 'Add'}
+                  {t('addFavoriteBtn')}
                 </Button>
               </div>
             </CardHeader>
@@ -1372,7 +1370,7 @@ const CustomerHome = () => {
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-semibold text-sm flex items-center gap-2">
                         <Route className="h-4 w-4 text-rose-500" />
-                        {language === 'TR' ? 'Yeni Favori Rota' : 'New Favorite Route'}
+                        {t('newFavoriteRouteTitle')}
                       </h4>
                       <Button
                         variant="ghost"
@@ -1389,10 +1387,10 @@ const CustomerHome = () => {
                     <div className="space-y-3">
                       <div>
                         <Label className="text-xs text-muted-foreground">
-                          {language === 'TR' ? 'Rota Adı' : 'Route Name'}
+                          {t('routeName')}
                         </Label>
                         <Input
-                          placeholder={language === 'TR' ? 'Örn: Eve, İşe, Havalimanı' : 'E.g: Home, Work, Airport'}
+                          placeholder={t('routeNameExample')}
                           value={newFavoriteRoute.name}
                           onChange={(e) => setNewFavoriteRoute(prev => ({ ...prev, name: e.target.value }))}
                           className="mt-1"
@@ -1400,34 +1398,34 @@ const CustomerHome = () => {
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">
-                          {language === 'TR' ? 'Alış Noktası' : 'Pickup Location'}
+                          {t('pickupLocationLabel')}
                         </Label>
                         <GooglePlacesAutocomplete
                           initialValue={newFavoriteRoute.pickup}
                           onPlaceSelected={(val) => setNewFavoriteRoute(prev => ({ ...prev, pickup: val }))}
                           onInputChange={(val) => setNewFavoriteRoute(prev => ({ ...prev, pickup: val }))}
-                          placeholder={language === 'TR' ? 'Adres girin...' : 'Enter address...'}
+                          placeholder={t('enterAddressPlaceholder')}
                           className="mt-1"
                         />
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">
-                          {language === 'TR' ? 'Bırakış Noktası' : 'Dropoff Location'}
+                          {t('dropoffLocationLabel')}
                         </Label>
                         <GooglePlacesAutocomplete
                           initialValue={newFavoriteRoute.dropoff}
                           onPlaceSelected={(val) => setNewFavoriteRoute(prev => ({ ...prev, dropoff: val }))}
                           onInputChange={(val) => setNewFavoriteRoute(prev => ({ ...prev, dropoff: val }))}
-                          placeholder={language === 'TR' ? 'Adres girin...' : 'Enter address...'}
+                          placeholder={t('enterAddressPlaceholder')}
                           className="mt-1"
                         />
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">
-                          {language === 'TR' ? 'Notlar (Opsiyonel)' : 'Notes (Optional)'}
+                          {t('notesOptional')}
                         </Label>
                         <Input
-                          placeholder={language === 'TR' ? 'Özel notlar...' : 'Special notes...'}
+                          placeholder={t('specialNotesPlaceholder')}
                           value={newFavoriteRoute.notes}
                           onChange={(e) => setNewFavoriteRoute(prev => ({ ...prev, notes: e.target.value }))}
                           className="mt-1"
@@ -1438,7 +1436,7 @@ const CustomerHome = () => {
                         className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
                       >
                         <Heart className="h-4 w-4 mr-2" />
-                        {language === 'TR' ? 'Favorilere Ekle' : 'Add to Favorites'}
+                        {t('addToFavoritesBtn')}
                       </Button>
                     </div>
                   </motion.div>
@@ -1506,7 +1504,7 @@ const CustomerHome = () => {
                     <Heart className="h-8 w-8 text-muted-foreground/50" />
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">
-                    {language === 'TR' ? 'Henüz favori rotanız yok' : 'No favorite routes yet'}
+                    {t('noFavoriteRoutes')}
                   </p>
                   <Button
                     variant="outline"
@@ -1515,7 +1513,7 @@ const CustomerHome = () => {
                     className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:hover:bg-rose-900/20"
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    {language === 'TR' ? 'İlk Rotanı Ekle' : 'Add Your First Route'}
+                    {t('addFirstRouteBtn')}
                   </Button>
                 </div>
               ) : null}
@@ -1577,7 +1575,7 @@ const CustomerHome = () => {
                     <div className="flex flex-col items-center gap-3">
                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
                       <span className="text-sm font-medium text-muted-foreground">
-                        {language === 'TR' ? 'İşleniyor...' : 'Processing...'}
+                        {t('processingLabel')}
                       </span>
                     </div>
                   </motion.div>
@@ -1884,7 +1882,7 @@ const CustomerHome = () => {
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <Star className="h-4 w-4 text-primary" />
                   <span className="font-medium text-primary text-sm">
-                    {language === 'TR' ? 'En İyi Fiyat Garantisi' : 'Best Price Guarantee'}
+                    {t('bestPriceGuaranteeLabel')}
                   </span>
                 </div>
                 <p className="text-muted-foreground text-xs">
@@ -1925,16 +1923,12 @@ const CustomerHome = () => {
               <Button
                 type="button"
                 onClick={() => {
-                  const message = encodeURIComponent(
-                    language === 'TR' 
-                      ? 'Merhaba, destek almak istiyorum.' 
-                      : 'Hello, I would like to get support.'
-                  );
+                  const message = encodeURIComponent(t('helloSupportMsg'));
                   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
                 }}
                 size="lg"
                 className="h-12 w-12 rounded-full shadow-lg bg-[#25D366] hover:bg-[#22c55e] text-white"
-                title={language === 'TR' ? 'WhatsApp Destek' : 'WhatsApp Support'}
+                title={t('whatsAppSupportTooltip')}
               >
                 <MessageCircle className="h-5 w-5" />
               </Button>
@@ -1953,7 +1947,7 @@ const CustomerHome = () => {
                 onClick={() => navigate('/customer/bookings')}
                 size="lg"
                 className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
-                title={language === 'TR' ? 'Rezervasyonlarım' : 'My Bookings'}
+                title={t('myBookingsTooltip')}
               >
                 <ClipboardList className="h-6 w-6" />
               </Button>
