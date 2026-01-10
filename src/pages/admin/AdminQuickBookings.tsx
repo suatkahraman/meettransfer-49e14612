@@ -316,6 +316,25 @@ export default function AdminQuickBookings() {
         console.error("Failed to record price history:", e);
       }
 
+      // Save manual price to region_prices/intercity_prices for future auto-matching
+      try {
+        const { data: saveResult } = await supabase.functions.invoke('save-manual-price-to-region', {
+          body: {
+            pickup: selectedRequest.pickup,
+            dropoff: selectedRequest.dropoff,
+            vehicle_type: selectedRequest.vehicle_type,
+            price: priceValue,
+            price_currency: currency,
+            quick_booking_id: selectedRequest.id,
+          }
+        });
+        if (saveResult?.success) {
+          console.log('Manual price saved to prices table:', saveResult.saved_location);
+        }
+      } catch (e) {
+        console.error('Failed to save manual price to region:', e);
+      }
+
       try {
         // discountedReturnPrice is already calculated above with 30% discount if promo code exists
         // returnPriceValue is the original price admin entered
