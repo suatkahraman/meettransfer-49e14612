@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2 } from "lucide-react";
+import istanbulTransferHero from "@/assets/blog/istanbul-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -126,7 +127,7 @@ const IstanbulTransferPriceGuide = () => {
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
-            src="/images/meet-transfer-vip-mercedes-vito.jpg" 
+            src={istanbulTransferHero} 
             alt="Istanbul Airport Private Transfer 2025 - Mercedes Vito VIP Service to Taksim, Sultanahmet and City Center"
             className="w-full h-full object-cover"
             loading="eager"

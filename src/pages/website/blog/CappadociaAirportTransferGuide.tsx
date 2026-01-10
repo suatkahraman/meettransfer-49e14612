@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, MapPin, Plane, Star, Sunrise } from "lucide-react";
+import cappadociaTransferHero from "@/assets/blog/cappadocia-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -197,7 +198,7 @@ const CappadociaAirportTransferGuide = () => {
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
-            src="/images/meet-transfer-vip-mercedes-vito.jpg" 
+            src={cappadociaTransferHero} 
             alt={language === 'TR' 
               ? "Kapadokya Havalimanı Transfer 2025 - Göreme, Ürgüp, Uçhisar Otellere VIP Transfer" 
               : "Cappadocia Airport Transfer 2025 - VIP Transfer to Göreme, Ürgüp, Uchisar Hotels"}

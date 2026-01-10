@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import istanbulAirportCityHero from "@/assets/blog/istanbul-airport-city-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -159,7 +160,7 @@ const IstanbulAirportToCityGuide = () => {
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
-            src="/images/meet-transfer-vclass-interior.jpg" 
+            src={istanbulAirportCityHero} 
             alt="Istanbul Airport to City Center 2025 - Best Transportation Options Including Private Transfer, Metro M11, and Havaist Bus"
             className="w-full h-full object-cover"
             loading="eager"
