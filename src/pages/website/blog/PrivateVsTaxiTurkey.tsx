@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, XCircle, Shield, Clock4, Wallet, Users } from "lucide-react";
-import privateVsTaxiHero from "@/assets/blog/private-vs-taxi-hero.jpg";
+import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -125,8 +125,8 @@ const PrivateVsTaxiTurkey = () => {
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
-            src={privateVsTaxiHero} 
-            alt="Private Transfer vs Taxi in Turkey 2025 - Comparison of luxury Mercedes VIP transfer and yellow taxi"
+            src={vitoVipStarlightPurple} 
+            alt="Private Transfer vs Regular Transportation in Turkey 2025 - Luxury Mercedes VIP Transfer Service"
             className="w-full h-full object-cover"
             loading="eager"
           />
@@ -149,7 +149,7 @@ const PrivateVsTaxiTurkey = () => {
           <p>
             When planning your trip to Turkey, one of the most important decisions you'll make is 
             how to get from the airport to your hotel. The two main options are taking a regular 
-            taxi or booking a private transfer service. Both have their merits, but which is truly 
+            transportation or booking a private transfer service. Both have their merits, but which is truly 
             better for your situation?
           </p>
           <p>
@@ -191,7 +191,7 @@ const PrivateVsTaxiTurkey = () => {
 
             <Card className="border-amber-500/30">
               <CardHeader>
-                <CardTitle className="text-lg">Regular Transport</CardTitle>
+                <CardTitle className="text-lg">Regular Transportation</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-center gap-2 text-green-600">
@@ -256,7 +256,7 @@ const PrivateVsTaxiTurkey = () => {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-3">Regular Transport</h4>
+                    <h4 className="font-semibold mb-3">Regular Transportation</h4>
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
@@ -303,7 +303,7 @@ const PrivateVsTaxiTurkey = () => {
             <li><strong>Personal space:</strong> Private vehicle, no sharing</li>
           </ul>
 
-          <h3>Regular Transport Comfort</h3>
+          <h3>Regular Transportation Comfort</h3>
           <ul>
             <li><strong>Vehicle quality:</strong> Standard vehicles, condition varies</li>
             <li><strong>Climate control:</strong> May vary</li>
@@ -332,7 +332,7 @@ const PrivateVsTaxiTurkey = () => {
                     <p className="text-sm text-muted-foreground">Per person (4 travelers): ~$15</p>
                   </div>
                   <div className="p-4 bg-amber-500/5 rounded-lg">
-                    <h4 className="font-semibold mb-2">Regular</h4>
+                    <h4 className="font-semibold mb-2">Regular Transportation</h4>
                     <p className="text-2xl font-bold mb-2">Variable</p>
                     <p className="text-sm text-muted-foreground">Depends on traffic and time</p>
                   </div>

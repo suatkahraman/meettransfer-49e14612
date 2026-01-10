@@ -74,7 +74,7 @@ const IstanbulTransferPriceGuide = () => {
       <SEOHead
         title={t("blogPriceSeoTitle")}
         description={t("blogPriceSeoDesc")}
-        keywords="Istanbul Airport transfer price 2025, IST transfer cost, private transfer Istanbul price, Istanbul Airport to Taksim price, airport transfer pricing Turkey, Istanbul Airport taxi fare, VIP transfer Istanbul cost, Mercedes transfer Istanbul, Istanbul Airport to hotel price, Sultanahmet transfer cost"
+        keywords="Istanbul Airport transfer price 2025, IST transfer cost, private transfer Istanbul price, Istanbul Airport to Taksim price, airport transfer pricing Turkey, Istanbul Airport transfer fare, VIP transfer Istanbul cost, Mercedes transfer Istanbul, Istanbul Airport to hotel price, Sultanahmet transfer cost"
         canonicalPath="/blog/istanbul-airport-transfer-price-guide"
         ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
         ogType="article"

@@ -30,8 +30,8 @@ const IstanbulAirportToCityGuide = () => {
       answer: "The fastest way is by private transfer, taking approximately 35-45 minutes to Taksim or Sultanahmet depending on traffic. The metro takes about 50-60 minutes but requires transfers."
     },
     {
-      question: "How much does regular transport cost from Istanbul Airport to Taksim?",
-      answer: "Regular transport from Istanbul Airport to Taksim typically costs between 600-800 TL ($20-25 USD) depending on traffic and time of day. Prices can be higher at night or during peak hours."
+      question: "How much does regular transportation cost from Istanbul Airport to Taksim?",
+      answer: "Regular transportation from Istanbul Airport to Taksim typically costs between 600-800 TL ($20-25 USD) depending on traffic and time of day. Prices can be higher at night or during peak hours."
     },
     {
       question: "Is there a metro from Istanbul Airport?",
@@ -61,7 +61,7 @@ const IstanbulAirportToCityGuide = () => {
       rating: 5
     },
     {
-      method: "Regular",
+      method: "Regular Transportation",
       duration: "40-60 min",
       price: "Variable",
       pros: ["Available at airport", "No booking needed"],

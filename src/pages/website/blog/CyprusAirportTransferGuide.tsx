@@ -68,7 +68,7 @@ const CyprusAirportTransferGuide = () => {
       <SEOHead
         title={t("blogCyprusSeoTitle")}
         description={t("blogCyprusSeoDesc")}
-        keywords="Cyprus airport transfer 2025, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Protaras transfer, Kyrenia transfer, Northern Cyprus transfer, Ercan airport, Famagusta transfer, Troodos transfer, Cyprus VIP transfer, Cyprus taxi price"
+        keywords="Cyprus airport transfer 2025, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Protaras transfer, Kyrenia transfer, Northern Cyprus transfer, Ercan airport, Famagusta transfer, Troodos transfer, Cyprus VIP transfer, Cyprus transfer price"
         canonicalPath="/blog/cyprus-airport-transfer-guide"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
         ogType="article"
@@ -265,7 +265,7 @@ const CyprusAirportTransferGuide = () => {
 
           <h3>Why Private Transfer in Cyprus?</h3>
           <p>
-            While Cyprus has public buses and taxis, private transfers offer significant advantages. 
+            While Cyprus has public buses and regular transportation options, private transfers offer significant advantages.
             Resort areas like Ayia Napa, Protaras, and the Paphos region are spread across large areas, 
             often with hotels located outside main transport hubs. Private transfer ensures door-to-door 
             service without the hassle of multiple connections or language barriers.
