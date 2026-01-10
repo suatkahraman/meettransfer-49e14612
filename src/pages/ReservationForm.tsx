@@ -1046,6 +1046,15 @@ const ReservationForm = () => {
               </div>
             </div>
 
+            {/* Route Map */}
+            <div className="mb-6">
+              <GoogleRouteMap 
+                pickup={pendingFormData.pickup}
+                dropoff={pendingFormData.dropoff}
+                showNavigationButtons={false}
+              />
+            </div>
+
             {/* Vehicle Selection */}
             <div className="mb-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
