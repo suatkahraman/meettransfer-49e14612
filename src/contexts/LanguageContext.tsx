@@ -773,6 +773,10 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaTitle: "Istanbul to Bursa Day Tour Guide 2025 | What to See & How to Get There",
     blogBursaDesc: "Complete guide to visiting Bursa from Istanbul. Learn about the best attractions, transportation options, tour itineraries, and tips for the perfect day trip.",
     
+    // Blog 9: Cappadocia Airport Transfer Guide
+    blogCappadociaTitle: "Cappadocia Airport Transfer Guide 2025 | Prices & Balloon Tours",
+    blogCappadociaDesc: "VIP transfer from Kayseri and Nevsehir airports to Göreme, Ürgüp and all Cappadocia regions. Balloon tour transfers, current prices and popular hotels.",
+    
     // Blog Page
     blogPageTitle: "Travel Guides & Airport Transfer Tips",
     blogPageDesc: "Expert guides on airport transfers, travel tips, and destination insights. Plan your perfect trip to Turkey, Dubai, and Cyprus.",
@@ -1871,6 +1875,10 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaH1: "Istanbul nach Bursa Tagesausflug Guide 2025",
     blogBursaIntro: "Entdecken Sie die alte osmanische Hauptstadt - nur 2,5 Stunden von Istanbul entfernt.",
     
+    // Blog 9: Cappadocia Airport Transfer Guide
+    blogCappadociaTitle: "Kappadokien Flughafentransfer Guide 2025 | Preise & Ballonfahrten",
+    blogCappadociaDesc: "VIP-Transfer von den Flughäfen Kayseri und Nevşehir nach Göreme, Ürgüp und alle Kappadokien-Regionen. Ballonfahrt-Transfers und aktuelle Preise.",
+    
     // Blog Page
     blogPageTitle: "Reiseführer & Flughafentransfer Tipps",
     blogPageDesc: "Experten-Guides zu Flughafentransfers, Reisetipps und Ziel-Einblicke für Türkei, Dubai und Zypern.",
@@ -2876,6 +2884,11 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaDesc: "Guide complet pour visiter Bursa depuis Istanbul.",
     blogBursaH1: "Guide excursion Istanbul-Bursa 2025",
     blogBursaIntro: "Découvrez l'ancienne capitale ottomane à seulement 2,5 heures d'Istanbul.",
+    
+    // Blog 9: Cappadocia Airport Transfer Guide
+    blogCappadociaTitle: "Guide Transfert Aéroport Cappadoce 2025 | Prix & Montgolfières",
+    blogCappadociaDesc: "Transfert VIP des aéroports de Kayseri et Nevşehir vers Göreme, Ürgüp et toute la Cappadoce. Transferts pour montgolfières et prix actuels.",
+    
     blogPageTitle: "Guides de voyage et conseils transfert aéroport",
     blogPageDesc: "Guides experts sur les transferts aéroport et conseils de voyage pour la Turquie, Dubaï et Chypre.",
     blogPageKeywords: "conseils transfert aéroport, guides voyage, Turquie voyage, Dubaï voyage, Chypre voyage",
@@ -3878,6 +3891,11 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaDesc: "Полный гид по посещению Бурсы из Стамбула.",
     blogBursaH1: "Гид по однодневному туру Стамбул-Бурса 2025",
     blogBursaIntro: "Откройте древнюю османскую столицу в 2,5 часах от Стамбула.",
+    
+    // Blog 9: Cappadocia Airport Transfer Guide
+    blogCappadociaTitle: "Гид по трансферу из аэропорта Каппадокии 2025 | Цены и воздушные шары",
+    blogCappadociaDesc: "VIP-трансфер из аэропортов Кайсери и Невшехир в Гёреме, Ургюп и все регионы Каппадокии. Трансферы на воздушные шары и актуальные цены.",
+    
     blogPageTitle: "Путеводители и советы по трансферам",
     blogPageDesc: "Экспертные гиды по трансферам и советы для Турции, Дубая и Кипра.",
     blogPageKeywords: "советы по трансферам, путеводители, Турция путешествие, Дубай путешествие, Кипр путешествие",
@@ -4825,6 +4843,11 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaDesc: "Guida completa per visitare Bursa da Istanbul.",
     blogBursaH1: "Guida escursione Istanbul-Bursa 2025",
     blogBursaIntro: "Scopri l'antica capitale ottomana a sole 2,5 ore da Istanbul.",
+    
+    // Blog 9: Cappadocia Airport Transfer Guide
+    blogCappadociaTitle: "Guida Transfer Aeroporto Cappadocia 2025 | Prezzi e Tour in Mongolfiera",
+    blogCappadociaDesc: "Transfer VIP dagli aeroporti di Kayseri e Nevşehir a Göreme, Ürgüp e tutta la Cappadocia. Transfer per mongolfiere e prezzi attuali.",
+    
     blogPageTitle: "Guide di viaggio e consigli transfer",
     blogPageDesc: "Guide esperte sui transfer e consigli per Turchia, Dubai e Cipro.",
     blogPageKeywords: "consigli transfer aeroporto, guide viaggio, Turchia viaggio, Dubai viaggio, Cipro viaggio",
@@ -5825,6 +5848,11 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaDesc: "Guía completa para visitar Bursa desde Estambul.",
     blogBursaH1: "Guía excursión Estambul-Bursa 2025",
     blogBursaIntro: "Descubre la antigua capital otomana a solo 2,5 horas de Estambul.",
+    
+    // Blog 9: Cappadocia Airport Transfer Guide
+    blogCappadociaTitle: "Guía Traslado Aeropuerto Capadocia 2025 | Precios y Globos Aerostáticos",
+    blogCappadociaDesc: "Traslado VIP desde aeropuertos de Kayseri y Nevşehir a Göreme, Ürgüp y toda Capadocia. Traslados para globos y precios actuales.",
+    
     blogPageTitle: "Guías de viaje y consejos de traslado",
     blogPageDesc: "Guías expertas de traslados y consejos para Turquía, Dubái y Chipre.",
     blogPageKeywords: "consejos traslado aeropuerto, guías viaje, Turquía viaje, Dubái viaje, Chipre viaje",
@@ -6825,6 +6853,11 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaDesc: "دليل شامل لزيارة بورصة من إسطنبول.",
     blogBursaH1: "دليل رحلة يومية إسطنبول-بورصة 2025",
     blogBursaIntro: "اكتشف العاصمة العثمانية القديمة على بعد 2.5 ساعة من إسطنبول.",
+    
+    // Blog 9: Cappadocia Airport Transfer Guide
+    blogCappadociaTitle: "دليل النقل من مطار كابادوكيا 2025 | الأسعار ورحلات البالون",
+    blogCappadociaDesc: "نقل VIP من مطاري قيصرية ونوشهر إلى غوريمه وأورغوب وجميع مناطق كابادوكيا. نقل رحلات البالون والأسعار الحالية.",
+    
     blogPageTitle: "أدلة السفر ونصائح النقل",
     blogPageDesc: "أدلة خبراء حول النقل ونصائح السفر لتركيا ودبي وقبرص.",
     blogPageKeywords: "نصائح النقل, أدلة السفر, السفر تركيا, السفر دبي, السفر قبرص",
@@ -7777,6 +7810,11 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaDesc: "İstanbul'dan Bursa ziyareti tam rehberi.",
     blogBursaH1: "İstanbul'dan Bursa Günübirlik Tur Rehberi 2025",
     blogBursaIntro: "İstanbul'dan sadece 2,5 saat uzaklıktaki eski Osmanlı başkentini keşfedin.",
+    
+    // Blog 9: Cappadocia Airport Transfer Guide
+    blogCappadociaTitle: "Kapadokya Havalimanı Transfer Rehberi 2025 | Fiyatlar & Balon Turları",
+    blogCappadociaDesc: "Kayseri ve Nevşehir havalimanlarından Göreme, Ürgüp ve tüm Kapadokya bölgelerine VIP transfer. Balon turu transferleri ve güncel fiyatlar.",
+    
     blogPageTitle: "Seyahat Rehberleri ve Transfer İpuçları",
     blogPageDesc: "Türkiye, Dubai ve Kıbrıs için uzman transfer rehberleri ve seyahat ipuçları.",
     blogPageKeywords: "transfer ipuçları, seyahat rehberleri, Türkiye seyahat, Dubai seyahat, Kıbrıs seyahat",
@@ -9034,6 +9072,11 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaH1: "Одноденний тур зі Стамбула до Бурси",
     blogBursaIntro: "Бурса — перша столиця Османської імперії, місто з багатою історією та природною красою. Всього за 2 години від Стамбула ви відкриєте для себе Зелене місто Туреччини.",
     blogBursaUpdated: "Оновлено: Січень 2025",
+    
+    // Blog 9: Cappadocia Airport Transfer Guide
+    blogCappadociaTitle: "Гід по трансферу з аеропорту Каппадокії 2025 | Ціни та повітряні кулі",
+    blogCappadociaDesc: "VIP-трансфер з аеропортів Кайсері та Невшехір до Гереме, Ургюп та всіх регіонів Каппадокії. Трансфери на повітряні кулі та актуальні ціни.",
+    
     blogBursaReadTime: "8 хв читання",
     blogBursaQuickInfo: "Швидка інформація",
     blogBursaDistance: "Відстань від Стамбула",
@@ -10010,6 +10053,11 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaH1: "イスタンブールからブルサへの日帰りツアー",
     blogBursaIntro: "ブルサはオスマン帝国の最初の首都で、豊かな歴史と自然の美しさを持つ街。イスタンブールからわずか2時間でトルコの緑の街を発見できます。",
     blogBursaUpdated: "更新: 2025年1月",
+    
+    // Blog 9: Cappadocia Airport Transfer Guide
+    blogCappadociaTitle: "カッパドキア空港送迎ガイド 2025 | 料金と気球ツアー",
+    blogCappadociaDesc: "カイセリ空港とネヴシェヒル空港からギョレメ、ウルギュップ、カッパドキア全域へのVIP送迎。気球ツアー送迎と最新料金。",
+    
     blogBursaReadTime: "8分で読める",
     blogBursaQuickInfo: "クイック情報",
     blogBursaDistance: "イスタンブールからの距離",
