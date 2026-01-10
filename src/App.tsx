@@ -36,6 +36,7 @@ const CustomerBookings = lazy(() => import("./pages/customer/CustomerBookings"))
 const CustomerReservationDetail = lazy(() => import("./pages/customer/CustomerReservationDetail"));
 const CustomerEditReservation = lazy(() => import("./pages/customer/CustomerEditReservation"));
 const CustomerReviewPage = lazy(() => import("./pages/customer/CustomerReviewPage"));
+const CustomerProfile = lazy(() => import("./pages/customer/CustomerProfile"));
 
 // Driver Pages - lazy loaded
 const DriverHome = lazy(() => import("./pages/driver/DriverHome"));
@@ -242,6 +243,7 @@ const App = () => (
               <Route path="/customer/reservation/:id" element={<CustomerRoute><LazyRoute><CustomerReservationDetail /></LazyRoute></CustomerRoute>} />
               <Route path="/customer/reservation/:id/edit" element={<CustomerRoute><LazyRoute><CustomerEditReservation /></LazyRoute></CustomerRoute>} />
               <Route path="/customer/review/:reservationId" element={<CustomerRoute><LazyRoute><CustomerReviewPage /></LazyRoute></CustomerRoute>} />
+              <Route path="/customer/profile" element={<CustomerRoute><LazyRoute><CustomerProfile /></LazyRoute></CustomerRoute>} />
               
               {/* Driver Routes - Protected */}
               <Route path="/driver" element={<DriverRoute><LazyRoute><DriverHome /></LazyRoute></DriverRoute>} />
