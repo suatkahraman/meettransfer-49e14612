@@ -230,11 +230,13 @@ const CustomerHome = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    setIsLoading(true);
 
     const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
     if (validPassengerNames.length === 0) {
       setErrors({ passengerNames: t('passengerRequired') });
       toast.error(t('passengerRequired'));
+      setIsLoading(false);
       return;
     }
 
@@ -248,6 +250,7 @@ const CustomerHome = () => {
       });
       setErrors(fieldErrors);
       toast.error(t('fixValidationErrors'));
+      setIsLoading(false);
       return;
     }
 
