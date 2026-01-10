@@ -50,7 +50,10 @@ const AgencyLoginScreen = () => {
     verify2FA, 
     resendOTP, 
     cancel2FA,
-    checkTrustedDevice 
+    checkTrustedDevice,
+    maxAttempts,
+    remainingAttempts,
+    otpSettings
   } = useTwoFactorAuth();
   const navigate = useNavigate();
 
@@ -318,6 +321,10 @@ const AgencyLoginScreen = () => {
             onVerify={handle2FAVerify}
             onResend={resendOTP}
             onCancel={handle2FACancel}
+            maxAttempts={maxAttempts}
+            remainingAttempts={remainingAttempts}
+            otpLength={otpSettings.otpLength}
+            expiryMinutes={otpSettings.expiryMinutes}
           />
         </div>
       </div>
