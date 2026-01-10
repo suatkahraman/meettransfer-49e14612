@@ -229,8 +229,8 @@ const CustomerReservationDetail = () => {
   // Pull to refresh
   const handlePullRefresh = useCallback(async () => {
     await fetchReservation();
-    toast.success(language === 'TR' ? 'Yenilendi!' : 'Refreshed!');
-  }, [fetchReservation, language]);
+    toast.success(t('refreshedMsg') || 'Refreshed!');
+  }, [fetchReservation, t]);
 
   const { pullDistance, isRefreshing: isPullRefreshing, isPulling, handlers: pullHandlers } = usePullToRefresh({
     onRefresh: handlePullRefresh,
@@ -358,9 +358,9 @@ const CustomerReservationDetail = () => {
 
     try {
       await navigator.clipboard.writeText(lines);
-      toast.success(language === 'TR' ? 'Rezervasyon detayları kopyalandı' : 'Reservation details copied');
+      toast.success(t('reservationDetailsCopied') || 'Reservation details copied');
     } catch (err) {
-      toast.error(language === 'TR' ? 'Kopyalama başarısız' : 'Copy failed');
+      toast.error(t('copyFailed') || 'Copy failed');
     }
   };
 
@@ -729,7 +729,7 @@ const CustomerReservationDetail = () => {
               <div className="bg-background/50 rounded-xl p-4 border border-primary/10">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-muted-foreground">
-                    {language === 'TR' ? 'Transfer Durumu' : 'Transfer Status'}
+                    {t('transferStatus') || 'Transfer Status'}
                   </span>
                   <Badge className={cn(statusColors[reservation.status] || 'bg-muted', "px-3 py-1 font-medium")}>
                     {getStatusLabel(reservation.status)}
@@ -780,7 +780,7 @@ const CustomerReservationDetail = () => {
                   <div className="flex items-center gap-2 mt-3 p-2 bg-destructive/10 rounded-lg">
                     <XCircle className="h-4 w-4 text-destructive" />
                     <span className="text-sm text-destructive font-medium">
-                      {language === 'TR' ? 'Rezervasyon İptal Edildi' : 'Reservation Cancelled'}
+                      {t('reservationCancelledLabel') || 'Reservation Cancelled'}
                     </span>
                   </div>
                 )}
@@ -865,7 +865,7 @@ const CustomerReservationDetail = () => {
                   className="w-full"
                 >
                   <ClipboardCopy className="h-4 w-4 mr-2" />
-                  {language === 'TR' ? 'Kopyala' : 'Copy'}
+                  {t('copyBtn') || 'Copy'}
                 </Button>
                 <Button
                   onClick={shareViaWhatsApp}

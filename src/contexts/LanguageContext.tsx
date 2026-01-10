@@ -711,6 +711,21 @@ const translations: Record<Language, Record<string, string>> = {
     whatsAppSupportTooltip: "WhatsApp Support",
     myBookingsTooltip: "My Bookings",
     
+    // Customer Bookings Page
+    failedToLoadReservations: "Failed to load reservations",
+    errorOccurred: "An error occurred",
+    reservationsFound: "reservations found",
+    pendingLabel: "Pending",
+    newLabel: "New",
+    historyLabel: "History",
+    helloReservationInfoMsg: "Hello, I would like to get information about my reservation.",
+    settingsLabel: "Settings",
+    transferStatus: "Transfer Status",
+    reservationCancelledLabel: "Reservation Cancelled",
+    reservationDetailsCopied: "Reservation details copied",
+    copyFailed: "Copy failed",
+    copyBtn: "Copy",
+    
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - International VIP Airport Transfer & Chauffeur Service | Turkey, Dubai, Cyprus",
     seoHomeDesc: "Luxury VIP airport transfer and private chauffeur service worldwide. Professional drivers, Mercedes fleet, 24/7 service. Istanbul, Antalya, Dubai, Cyprus, Cappadocia and more.",
@@ -9201,6 +9216,21 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "Merhaba, destek almak istiyorum.",
     whatsAppSupportTooltip: "WhatsApp Destek",
     myBookingsTooltip: "Rezervasyonlarım",
+    
+    // Customer Bookings Page
+    failedToLoadReservations: "Rezervasyonlar yüklenemedi",
+    errorOccurred: "Bir hata oluştu",
+    reservationsFound: "rezervasyon bulundu",
+    pendingLabel: "Bekleyen",
+    newLabel: "Yeni",
+    historyLabel: "Geçmiş",
+    helloReservationInfoMsg: "Merhaba, rezervasyonum hakkında bilgi almak istiyorum.",
+    settingsLabel: "Ayarlar",
+    transferStatus: "Transfer Durumu",
+    reservationCancelledLabel: "Rezervasyon İptal Edildi",
+    reservationDetailsCopied: "Rezervasyon detayları kopyalandı",
+    copyFailed: "Kopyalama başarısız",
+    copyBtn: "Kopyala",
 
     // Customer Portal Page
     yourBookings: "Rezervasyonlarınız",
