@@ -131,6 +131,18 @@ const ReservationForm = () => {
   const urlReturnTime = searchParams.get('returnTime') || '';
   const urlReturnPrice = searchParams.get('returnPrice') || '';
   const urlPromoCode = searchParams.get('promoCode') || '';
+  const urlAllVehiclePrices = searchParams.get('allVehiclePrices') || '';
+  
+  // Parse all vehicle prices from URL (JSON encoded)
+  const allVehiclePrices: Record<string, number> = urlAllVehiclePrices 
+    ? (() => {
+        try {
+          return JSON.parse(decodeURIComponent(urlAllVehiclePrices));
+        } catch {
+          return {};
+        }
+      })()
+    : {};
   
   const [hasReturnTrip, setHasReturnTrip] = useState(urlHasReturn);
   const [promoCode, setPromoCode] = useState(urlPromoCode);
@@ -1219,15 +1231,22 @@ const ReservationForm = () => {
                   {t('vehicleType')}
                 </Label>
                 <div className="grid gap-4">
-                  {vehicleTypes.map(vehicle => (
-                    <VehicleSelectionCard
-                      key={vehicle.value}
-                      vehicleType={vehicle.value}
-                      isSelected={formData.vehicleType === vehicle.value}
-                      onSelect={(v) => setFormData({...formData, vehicleType: v})}
-                      showPrice={false}
-                    />
-                  ))}
+                  {vehicleTypes.map(vehicle => {
+                    const vehiclePrice = allVehiclePrices[vehicle.value] || null;
+                    const hasAnyPrices = Object.keys(allVehiclePrices).length > 0;
+                    return (
+                      <VehicleSelectionCard
+                        key={vehicle.value}
+                        vehicleType={vehicle.value}
+                        isSelected={formData.vehicleType === vehicle.value}
+                        onSelect={(v) => setFormData({...formData, vehicleType: v})}
+                        price={vehiclePrice}
+                        currency={prefilledCurrency}
+                        showPrice={hasAnyPrices}
+                        isRecommended={isFromQuickBooking && vehicle.value === formData.vehicleType && !!vehiclePrice}
+                      />
+                    );
+                  })}
                 </div>
               </div>
 
