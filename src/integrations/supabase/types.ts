@@ -597,6 +597,42 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_routes: {
+        Row: {
+          created_at: string
+          dropoff_location: string
+          id: string
+          name: string
+          notes: string | null
+          pickup_location: string
+          updated_at: string
+          usage_count: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dropoff_location: string
+          id?: string
+          name: string
+          notes?: string | null
+          pickup_location: string
+          updated_at?: string
+          usage_count?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dropoff_location?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          pickup_location?: string
+          updated_at?: string
+          usage_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       intercity_prices: {
         Row: {
           created_at: string
