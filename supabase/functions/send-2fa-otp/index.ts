@@ -229,10 +229,17 @@ async function sendEmailWithFallback(
   
   // Method 1: Try Resend API if configured with verified domain
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL"); // e.g., "noreply@meettransfer.app"
+  const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL"); // e.g., "Meet Transfer <noreply@mail.meettransfer.app>"
   
   if (RESEND_API_KEY && RESEND_FROM_EMAIL) {
     try {
+      // Check if RESEND_FROM_EMAIL already contains display name (e.g., "Name <email>")
+      const fromEmail = RESEND_FROM_EMAIL.includes('<') 
+        ? RESEND_FROM_EMAIL 
+        : `Meet Transfer <${RESEND_FROM_EMAIL}>`;
+      
+      console.log("Sending email via Resend with from:", fromEmail);
+      
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -240,7 +247,7 @@ async function sendEmailWithFallback(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: `Meet Transfer <${RESEND_FROM_EMAIL}>`,
+          from: fromEmail,
           to: [email],
           subject,
           html,
