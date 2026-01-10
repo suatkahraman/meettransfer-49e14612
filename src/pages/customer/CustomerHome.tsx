@@ -98,6 +98,7 @@ const CustomerHome = () => {
   
   // State - organized by purpose
   const [isLoading, setIsLoading] = useState(false);
+  const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
@@ -694,8 +695,11 @@ const CustomerHome = () => {
             <Card 
               className="cursor-pointer shadow-md hover:shadow-xl transition-all bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground border-0 overflow-hidden relative"
               onClick={() => {
-                const formElement = document.getElementById('booking-form');
-                formElement?.scrollIntoView({ behavior: 'smooth' });
+                setIsBookingFormOpen(true);
+                setTimeout(() => {
+                  const formElement = document.getElementById('booking-form');
+                  formElement?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
               }}
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.15),_transparent_50%)]" />
@@ -1060,8 +1064,11 @@ const CustomerHome = () => {
                   className="flex items-center gap-2 px-3 py-2 bg-muted/50 hover:bg-muted rounded-lg text-sm transition-colors border border-border/50"
                   onClick={() => {
                     setFormData(prev => ({ ...prev, pickup: search.pickup, dropoff: search.dropoff }));
-                    const formElement = document.getElementById('booking-form');
-                    formElement?.scrollIntoView({ behavior: 'smooth' });
+                    setIsBookingFormOpen(true);
+                    setTimeout(() => {
+                      const formElement = document.getElementById('booking-form');
+                      formElement?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
                   }}
                 >
                   <Bookmark className="h-3.5 w-3.5 text-primary" />
@@ -1081,15 +1088,39 @@ const CustomerHome = () => {
           transition={{ delay: 0.5 }}
         >
           <Card id="booking-form" className="scroll-mt-20 shadow-lg border-border/50">
-          <CardHeader>
-            <CardTitle className="text-xl sm:text-2xl font-serif flex items-center gap-2">
-              <Car className="h-5 w-5 sm:h-6 sm:w-6" />
-              {t('bookYourTransfer')}
-            </CardTitle>
-            <CardDescription>
-              {t('submitTransferDetails')}
-            </CardDescription>
+          <CardHeader 
+            className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg"
+            onClick={() => setIsBookingFormOpen(!isBookingFormOpen)}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl sm:text-2xl font-serif flex items-center gap-2">
+                  <Car className="h-5 w-5 sm:h-6 sm:w-6" />
+                  {t('bookYourTransfer')}
+                </CardTitle>
+                <CardDescription>
+                  {t('submitTransferDetails')}
+                </CardDescription>
+              </div>
+              <motion.div
+                animate={{ rotate: isBookingFormOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronRight className={cn(
+                  "h-5 w-5 text-muted-foreground transition-transform rotate-90"
+                )} />
+              </motion.div>
+            </div>
           </CardHeader>
+          <AnimatePresence initial={false}>
+            {isBookingFormOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                style={{ overflow: "hidden" }}
+              >
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5 relative">
               {/* Loading Overlay */}
@@ -1434,6 +1465,9 @@ const CustomerHome = () => {
               </Button>
             </form>
           </CardContent>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Card>
         </motion.div>
 
