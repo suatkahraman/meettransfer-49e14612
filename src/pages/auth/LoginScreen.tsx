@@ -84,6 +84,8 @@ const LoginScreen = () => {
   });
   const [copied, setCopied] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [lockoutCountdown, setLockoutCountdown] = useState<number | null>(null);
   const [pendingRole, setPendingRole] = useState<string | null>(null);
   const { signIn, user, loading: authLoading } = useAuth();
@@ -554,15 +556,30 @@ const LoginScreen = () => {
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="password">{t('newPassword')}</Label>
-                  <Input 
-                    id="password" 
-                    name="password" 
-                    type="password" 
-                    placeholder="Ab2215" 
-                    required 
-                    className="h-12"
-                    autoComplete="new-password"
-                  />
+                  <div className="relative">
+                    <Input 
+                      id="password" 
+                      name="password" 
+                      type={showNewPassword ? 'text' : 'password'} 
+                      placeholder="Ab2215" 
+                      required 
+                      className="h-12 pr-12"
+                      autoComplete="new-password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     {t('passwordFormat')}
                   </p>
@@ -571,15 +588,30 @@ const LoginScreen = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
-                  <Input 
-                    id="confirmPassword" 
-                    name="confirmPassword" 
-                    type="password" 
-                    placeholder="••••••••" 
-                    required 
-                    className="h-12"
-                    autoComplete="new-password"
-                  />
+                  <div className="relative">
+                    <Input 
+                      id="confirmPassword" 
+                      name="confirmPassword" 
+                      type={showConfirmPassword ? 'text' : 'password'} 
+                      placeholder="••••••••" 
+                      required 
+                      className="h-12 pr-12"
+                      autoComplete="new-password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
                   {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
                 </div>
                 

@@ -5,13 +5,13 @@
 
 // WhatsApp number for customer support and bookings
 // Format: country code + number without spaces or special characters
-export const WHATSAPP_NUMBER = "15558051101";
+export const WHATSAPP_NUMBER = "905321748390";
 
 // Display format for the phone number
-export const WHATSAPP_DISPLAY = "+1 (555) 805-1101";
+export const WHATSAPP_DISPLAY = "+90 532 174 8390";
 
 // Emergency/alternative phone number
-export const EMERGENCY_PHONE = "+15558051101";
+export const EMERGENCY_PHONE = "+905321748390";
 
 // Email addresses
 export const SUPPORT_EMAIL = "info@meettransfer.app";
