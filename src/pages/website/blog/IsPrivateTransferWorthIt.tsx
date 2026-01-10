@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, XCircle, DollarSign, Clock4, ShieldCheck, Users } from "lucide-react";
+import privateTransferWorthHero from "@/assets/blog/private-transfer-worth-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -116,9 +117,10 @@ const IsPrivateTransferWorthIt = () => {
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
-            src="/images/meet-transfer-vclass-interior.jpg" 
-            alt="Luxury private transfer in Turkey"
+            src={privateTransferWorthHero} 
+            alt="Luxury private transfer interior in Turkey - VIP Mercedes with premium leather seats and amenities"
             className="w-full h-full object-cover"
+            loading="eager"
           />
         </div>
 

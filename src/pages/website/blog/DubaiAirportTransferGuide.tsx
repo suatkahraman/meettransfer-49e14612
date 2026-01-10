@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, Plane, Building, Sun } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, Plane, Building } from "lucide-react";
+import dubaiTransferHero from "@/assets/blog/dubai-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -123,12 +124,13 @@ const DubaiAirportTransferGuide = () => {
         </header>
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-xl mb-12 bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
-          <div className="text-center">
-            <Sun className="h-20 w-20 text-amber-500 mx-auto mb-4" />
-            <p className="text-2xl font-bold">{t("blogDubaiVipTransfers")}</p>
-            <p className="text-muted-foreground">{t("blogDubaiLuxuryTransport")}</p>
-          </div>
+        <div className="aspect-video overflow-hidden rounded-xl mb-12">
+          <img 
+            src={dubaiTransferHero} 
+            alt="Dubai Airport Transfer 2025 - VIP Private Transfer to Downtown, Palm Jumeirah, Dubai Marina"
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
         </div>
 
         {/* Article Content */}

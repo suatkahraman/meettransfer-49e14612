@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { Badge } from "@/components/ui/badge";
-import bursaHeroImage from "@/assets/bursa-transfer-hero.jpg";
+import bursaHeroImage from "@/assets/blog/bursa-day-tour-hero.jpg";
 import cumalikizikImage from "@/assets/cumalikizik-village.jpg";
 import uludagImage from "@/assets/uludag-cable-car.jpg";
 import { getWhatsAppUrl } from "@/lib/contact";

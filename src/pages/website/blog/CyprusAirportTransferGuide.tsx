@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, Plane, Palmtree, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, Plane, MapPin } from "lucide-react";
+import cyprusTransferHero from "@/assets/blog/cyprus-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -133,12 +134,13 @@ const CyprusAirportTransferGuide = () => {
         </header>
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-xl mb-12 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
-          <div className="text-center">
-            <Palmtree className="h-20 w-20 text-cyan-500 mx-auto mb-4" aria-hidden="true" />
-            <p className="text-2xl font-bold">{t("blogCyprusTransfers")}</p>
-            <p className="text-muted-foreground">{t("blogCyprusIslandParadise")}</p>
-          </div>
+        <div className="aspect-video overflow-hidden rounded-xl mb-12">
+          <img 
+            src={cyprusTransferHero} 
+            alt="Cyprus Airport Transfer 2025 - VIP Private Transfer from Larnaca and Paphos Airports"
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
         </div>
 
         {/* Article Content */}

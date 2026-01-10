@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, MapPin } from "lucide-react";
+import antalyaTransferHero from "@/assets/blog/antalya-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -118,7 +119,7 @@ const AntalyaAirportTransferGuide = () => {
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
-            src="/images/meet-transfer-vip-mercedes-vito.jpg" 
+            src={antalyaTransferHero} 
             alt="Antalya Airport Transfer 2025 - Private VIP Transfer to Belek, Side, Kemer, Lara Beach and All-Inclusive Hotels"
             className="w-full h-full object-cover"
             loading="eager"

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, XCircle, Shield, Clock4, Wallet, Users } from "lucide-react";
+import privateVsTaxiHero from "@/assets/blog/private-vs-taxi-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -116,9 +117,10 @@ const PrivateVsTaxiTurkey = () => {
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
-            src="/images/meet-transfer-vclass-interior.jpg" 
-            alt="Private transfer vs taxi comparison"
+            src={privateVsTaxiHero} 
+            alt="Private Transfer vs Taxi in Turkey 2025 - Comparison of luxury Mercedes VIP transfer and yellow taxi"
             className="w-full h-full object-cover"
+            loading="eager"
           />
         </div>
 
