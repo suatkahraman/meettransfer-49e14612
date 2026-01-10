@@ -532,46 +532,68 @@ const CustomerHome = () => {
                 </SheetTitle>
               </SheetHeader>
               <div className="mt-6 space-y-6">
-                {/* Profile Section */}
-                <Card>
-                  <CardHeader className="pb-3">
+                {/* Profile Section - Premium Design */}
+                <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(var(--primary),0.1),_transparent_50%)]" />
+                  <CardHeader className="pb-3 relative z-10">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        {language === 'TR' ? 'Profil Bilgileri' : 'Profile Info'}
-                      </CardTitle>
+                      <div className="flex items-center gap-3">
+                        <motion.div 
+                          className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <User className="h-6 w-6 text-primary" />
+                        </motion.div>
+                        <div>
+                          <CardTitle className="text-lg font-semibold">
+                            {language === 'TR' ? 'Profil Bilgileri' : 'Profile Info'}
+                          </CardTitle>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {language === 'TR' ? 'Hesap bilgileriniz' : 'Your account details'}
+                          </p>
+                        </div>
+                      </div>
                       {!isEditingProfile ? (
                         <Button 
-                          variant="ghost" 
+                          variant="outline" 
                           size="sm"
                           onClick={() => setIsEditingProfile(true)}
+                          className="gap-1"
                         >
-                          <Edit2 className="h-4 w-4" />
+                          <Edit2 className="h-3.5 w-3.5" />
+                          {language === 'TR' ? 'Düzenle' : 'Edit'}
                         </Button>
                       ) : (
-                        <div className="flex gap-1">
+                        <div className="flex gap-2">
                           <Button 
-                            variant="ghost" 
+                            variant="outline" 
                             size="sm"
                             onClick={() => setIsEditingProfile(false)}
                           >
                             <X className="h-4 w-4" />
                           </Button>
                           <Button 
-                            variant="ghost" 
+                            variant="default" 
                             size="sm"
                             onClick={handleSaveProfile}
                             disabled={isSavingProfile}
+                            className="gap-1"
                           >
-                            <Save className="h-4 w-4 text-primary" />
+                            {isSavingProfile ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Save className="h-3.5 w-3.5" />
+                            )}
+                            {language === 'TR' ? 'Kaydet' : 'Save'}
                           </Button>
                         </div>
                       )}
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">
+                  <CardContent className="relative z-10 space-y-4 pt-2">
+                    {/* Name Field */}
+                    <div className="bg-background/60 rounded-lg p-3 border border-border/50">
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wider">
                         {language === 'TR' ? 'Ad Soyad' : 'Full Name'}
                       </Label>
                       {isEditingProfile ? (
@@ -579,31 +601,63 @@ const CustomerHome = () => {
                           value={profileData.full_name}
                           onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
                           placeholder={language === 'TR' ? 'Adınız Soyadınız' : 'Your Name'}
+                          className="mt-1 bg-background"
                         />
                       ) : (
-                        <p className="text-sm font-medium">
-                          {profileData.full_name || (language === 'TR' ? 'Belirtilmemiş' : 'Not specified')}
+                        <p className="text-base font-semibold mt-1 flex items-center gap-2">
+                          {profileData.full_name || (
+                            <span className="text-muted-foreground italic">
+                              {language === 'TR' ? 'Belirtilmemiş' : 'Not specified'}
+                            </span>
+                          )}
                         </p>
                       )}
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">
+
+                    {/* Phone Field */}
+                    <div className="bg-background/60 rounded-lg p-3 border border-border/50">
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
                         {language === 'TR' ? 'Telefon' : 'Phone'}
                       </Label>
                       {isEditingProfile ? (
                         <PhoneInput
                           value={profileData.phone}
                           onChange={(value) => setProfileData({ ...profileData, phone: value })}
+                          className="mt-1"
                         />
                       ) : (
-                        <p className="text-sm font-medium">
-                          {profileData.phone || (language === 'TR' ? 'Belirtilmemiş' : 'Not specified')}
+                        <p className="text-base font-semibold mt-1">
+                          {profileData.phone || (
+                            <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                              <span className="inline-flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                              {language === 'TR' ? 'Lütfen ekleyin' : 'Please add'}
+                            </span>
+                          )}
                         </p>
                       )}
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">Email</Label>
-                      <p className="text-sm font-medium">{user?.email}</p>
+
+                    {/* Email Field */}
+                    <div className="bg-background/60 rounded-lg p-3 border border-border/50">
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wider">Email</Label>
+                      <p className="text-base font-semibold mt-1 flex items-center gap-2">
+                        {user?.email}
+                        <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
+                          {language === 'TR' ? 'Doğrulandı' : 'Verified'}
+                        </Badge>
+                      </p>
+                    </div>
+
+                    {/* Member Since */}
+                    <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                      <span className="text-xs text-muted-foreground">
+                        {language === 'TR' ? 'Üyelik' : 'Member since'}
+                      </span>
+                      <Badge variant="secondary" className="text-xs">
+                        <Star className="h-3 w-3 mr-1" />
+                        VIP {language === 'TR' ? 'Müşteri' : 'Customer'}
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
