@@ -12,7 +12,8 @@ import { toast } from 'sonner';
 import { 
   LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, 
   Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
-  ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall
+  ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall, Sparkles, 
+  Clock, Star, ArrowRight, Loader2
 } from 'lucide-react';
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
@@ -23,6 +24,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 const reservationSchema = z.object({
   pickup: z.string().trim().min(2, "Pick-up point must be at least 2 characters").max(200, "Pick-up point is too long"),
@@ -49,6 +51,7 @@ const CustomerHome = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [activeBookingsCount, setActiveBookingsCount] = useState(0);
+  const [nextTransfer, setNextTransfer] = useState<{date: string; time: string; pickup: string; dropoff: string} | null>(null);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -67,19 +70,46 @@ const CustomerHome = () => {
     paymentType: 'cash',
   });
 
+  // Get greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (language === 'TR') {
+      if (hour < 12) return 'Günaydın';
+      if (hour < 18) return 'İyi günler';
+      return 'İyi akşamlar';
+    }
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
   // Fetch active bookings count and profile
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.id) return;
       
-      // Fetch active bookings
-      const { count } = await supabase
+      // Fetch active bookings with next transfer info
+      const { data: activeReservations, count } = await supabase
         .from('reservations')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'exact' })
         .eq('customer_id', user.id)
-        .in('status', ['awaiting-price', 'waiting_for_customer_approval', 'customer_approved', 'confirmed', 'sent_to_driver', 'pending_admin_review']);
+        .in('status', ['awaiting-price', 'waiting_for_customer_approval', 'customer_approved', 'confirmed', 'sent_to_driver', 'pending_admin_review'])
+        .order('pickup_date', { ascending: true })
+        .order('pickup_time', { ascending: true })
+        .limit(1);
       
       setActiveBookingsCount(count || 0);
+      
+      // Set next upcoming transfer
+      if (activeReservations && activeReservations.length > 0) {
+        const next = activeReservations[0];
+        setNextTransfer({
+          date: next.pickup_date,
+          time: next.pickup_time,
+          pickup: next.pickup_place_name || next.pickup,
+          dropoff: next.dropoff_place_name || next.dropoff
+        });
+      }
 
       // Fetch profile
       const { data: profile } = await supabase
@@ -376,42 +406,125 @@ const CustomerHome = () => {
         </div>
       </header>
 
-      <main className="container mx-auto py-4 px-3 sm:py-8 sm:px-4 max-w-4xl">
-        {/* Quick Actions */}
+      <main className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-4xl">
+        {/* Welcome Section */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h2 className="text-lg sm:text-xl font-medium text-muted-foreground">
+              {getGreeting()},
+            </h2>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold">
+            {profileData.full_name || user?.email?.split('@')[0] || (language === 'TR' ? 'Değerli Müşterimiz' : 'Valued Customer')}
+          </h1>
+        </div>
+
+        {/* Next Transfer Card */}
+        {nextTransfer && (
+          <Card 
+            className="mb-6 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => navigate('/customer/bookings')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-primary">
+                      {language === 'TR' ? 'Yaklaşan Transferiniz' : 'Your Next Transfer'}
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-semibold text-sm sm:text-base">
+                      {new Date(nextTransfer.date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { 
+                        weekday: 'long', 
+                        day: 'numeric', 
+                        month: 'long' 
+                      })} • {nextTransfer.time}
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                      {nextTransfer.pickup.substring(0, 30)}...
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-primary flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Quick Actions Grid */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           {/* New Reservation Card */}
           <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow bg-primary text-primary-foreground"
+            className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0"
             onClick={() => {
               const formElement = document.getElementById('booking-form');
               formElement?.scrollIntoView({ behavior: 'smooth' });
             }}
           >
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[100px]">
-              <Plus className="h-8 w-8 mb-2" />
-              <span className="font-medium text-sm">
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[110px]">
+              <div className="bg-primary-foreground/20 rounded-full p-2 mb-2">
+                <Plus className="h-6 w-6" />
+              </div>
+              <span className="font-semibold text-sm">
                 {language === 'TR' ? 'Yeni Rezervasyon' : 'New Reservation'}
+              </span>
+              <span className="text-xs opacity-80 mt-1">
+                {language === 'TR' ? 'Hemen başla' : 'Start now'}
               </span>
             </CardContent>
           </Card>
 
           {/* My Bookings Card */}
           <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
+            className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] relative overflow-hidden"
             onClick={() => navigate('/customer/bookings')}
           >
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[100px] relative">
-              <ClipboardList className="h-8 w-8 mb-2 text-primary" />
-              <span className="font-medium text-sm">
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[110px]">
+              <div className="bg-primary/10 rounded-full p-2 mb-2">
+                <ClipboardList className="h-6 w-6 text-primary" />
+              </div>
+              <span className="font-semibold text-sm">
                 {language === 'TR' ? 'Rezervasyonlarım' : 'My Bookings'}
               </span>
+              <span className="text-xs text-muted-foreground mt-1">
+                {activeBookingsCount > 0 
+                  ? (language === 'TR' ? `${activeBookingsCount} aktif` : `${activeBookingsCount} active`)
+                  : (language === 'TR' ? 'Görüntüle' : 'View all')}
+              </span>
               {activeBookingsCount > 0 && (
-                <Badge className="absolute top-2 right-2 bg-orange-500 hover:bg-orange-600">
+                <Badge className="absolute top-2 right-2 bg-orange-500 hover:bg-orange-600 animate-pulse">
                   {activeBookingsCount}
                 </Badge>
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* Quick Support Actions */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <Button 
+            variant="outline" 
+            className="h-auto py-3 flex flex-col items-center gap-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
+            onClick={() => window.open('https://wa.me/905321748390?text=' + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
+          >
+            <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <span className="text-xs font-medium text-green-700 dark:text-green-300">
+              {language === 'TR' ? 'WhatsApp' : 'WhatsApp'}
+            </span>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="h-auto py-3 flex flex-col items-center gap-1 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
+            onClick={() => window.open('tel:+905321748390', '_self')}
+          >
+            <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <span className="text-xs font-medium text-red-700 dark:text-red-300">
+              {language === 'TR' ? 'Acil Arama' : 'Emergency'}
+            </span>
+          </Button>
         </div>
 
         {/* Booking Form */}
@@ -593,14 +706,30 @@ const CustomerHome = () => {
               </div>
 
               {/* Info message */}
-              <div className="bg-muted p-4 rounded-lg text-center">
-                <p className="text-muted-foreground text-sm">
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg text-center border border-primary/20">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Star className="h-4 w-4 text-primary" />
+                  <span className="font-medium text-primary text-sm">
+                    {language === 'TR' ? 'En İyi Fiyat Garantisi' : 'Best Price Guarantee'}
+                  </span>
+                </div>
+                <p className="text-muted-foreground text-xs">
                   {t('priceApprovalMessage')}
                 </p>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                {isLoading ? t('submitting') : t('submitBookingRequest')}
+              <Button type="submit" className="w-full h-12 text-base font-semibold" size="lg" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    {t('submitting')}
+                  </>
+                ) : (
+                  <>
+                    {t('submitBookingRequest')}
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>
