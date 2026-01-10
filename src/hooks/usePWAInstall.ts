@@ -16,6 +16,14 @@ declare global {
   }
 }
 
+interface BrowserInfo {
+  name: string;
+  version: string;
+  isSupported: boolean;
+  installMethod: 'native' | 'manual' | 'none';
+  instructions?: string;
+}
+
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -23,28 +31,193 @@ export function usePWAInstall() {
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
+  const [browserInfo, setBrowserInfo] = useState<BrowserInfo | null>(null);
 
   useEffect(() => {
-    const INSTALL_TRACK_KEY = 'app_install_tracked_v1';
+    const INSTALL_TRACK_KEY = 'app_install_tracked_v2';
 
-    // Detect platform - more robust iOS detection
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIOSDevice = (/iphone|ipad|ipod/.test(userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
-      !(window as any).MSStream;
-    const isAndroidDevice = /android/.test(userAgent);
+    // Enhanced platform detection
+    const userAgent = window.navigator.userAgent;
+    const userAgentLower = userAgent.toLowerCase();
+    
+    // iOS detection (including iPad Pro with desktop Safari)
+    const isIOSDevice = (
+      /iphone|ipad|ipod/i.test(userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    ) && !('MSStream' in window);
+    
+    // Android detection
+    const isAndroidDevice = /android/i.test(userAgent);
+    
+    // Browser detection with version
+    const detectBrowser = (): BrowserInfo => {
+      const ua = userAgent;
+      
+      // Samsung Internet
+      if (/SamsungBrowser/i.test(ua)) {
+        const match = ua.match(/SamsungBrowser\/(\d+)/);
+        return {
+          name: 'Samsung Internet',
+          version: match?.[1] || 'unknown',
+          isSupported: true,
+          installMethod: 'native'
+        };
+      }
+      
+      // UC Browser
+      if (/UCBrowser/i.test(ua)) {
+        return {
+          name: 'UC Browser',
+          version: 'unknown',
+          isSupported: false,
+          installMethod: 'none',
+          instructions: 'UC Browser PWA desteği sınırlıdır. Chrome veya Safari kullanmanızı öneririz.'
+        };
+      }
+      
+      // Opera Mini
+      if (/Opera Mini/i.test(ua)) {
+        return {
+          name: 'Opera Mini',
+          version: 'unknown',
+          isSupported: false,
+          installMethod: 'none',
+          instructions: 'Opera Mini PWA desteği sınırlıdır. Chrome veya Safari kullanmanızı öneririz.'
+        };
+      }
+      
+      // Opera
+      if (/OPR|Opera/i.test(ua)) {
+        const match = ua.match(/OPR\/(\d+)/);
+        return {
+          name: 'Opera',
+          version: match?.[1] || 'unknown',
+          isSupported: true,
+          installMethod: 'native'
+        };
+      }
+      
+      // Edge (Chromium)
+      if (/Edg/i.test(ua)) {
+        const match = ua.match(/Edg\/(\d+)/);
+        return {
+          name: 'Edge',
+          version: match?.[1] || 'unknown',
+          isSupported: true,
+          installMethod: 'native'
+        };
+      }
+      
+      // Firefox
+      if (/Firefox/i.test(ua) && !/Seamonkey/i.test(ua)) {
+        const match = ua.match(/Firefox\/(\d+)/);
+        const version = parseInt(match?.[1] || '0', 10);
+        // Firefox on Android supports PWA from version 79+
+        // Firefox on desktop has limited support
+        const isSupported = isAndroidDevice && version >= 79;
+        return {
+          name: 'Firefox',
+          version: match?.[1] || 'unknown',
+          isSupported,
+          installMethod: isSupported ? 'native' : 'manual',
+          instructions: !isSupported 
+            ? 'Firefox masaüstünde PWA desteği sınırlıdır. Menüden "Sayfayı ana ekrana ekle" seçeneğini kullanın.' 
+            : undefined
+        };
+      }
+      
+      // Chrome on iOS (CriOS)
+      if (/CriOS/i.test(ua)) {
+        return {
+          name: 'Chrome iOS',
+          version: 'unknown',
+          isSupported: false,
+          installMethod: 'manual',
+          instructions: 'iOS\'ta uygulamayı yüklemek için Safari kullanın.'
+        };
+      }
+      
+      // Chrome
+      if (/Chrome/i.test(ua) && !/Chromium/i.test(ua)) {
+        const match = ua.match(/Chrome\/(\d+)/);
+        const version = parseInt(match?.[1] || '0', 10);
+        return {
+          name: 'Chrome',
+          version: match?.[1] || 'unknown',
+          isSupported: version >= 68, // PWA install prompt from Chrome 68+
+          installMethod: version >= 68 ? 'native' : 'manual'
+        };
+      }
+      
+      // Safari
+      if (/Safari/i.test(ua) && !/Chrome|CriOS|Chromium/i.test(ua)) {
+        const match = ua.match(/Version\/(\d+)/);
+        const version = parseInt(match?.[1] || '0', 10);
+        return {
+          name: 'Safari',
+          version: match?.[1] || 'unknown',
+          isSupported: true,
+          installMethod: 'manual' // Safari always requires manual Add to Home Screen
+        };
+      }
+      
+      // Brave
+      if ('brave' in navigator) {
+        return {
+          name: 'Brave',
+          version: 'unknown',
+          isSupported: true,
+          installMethod: 'native'
+        };
+      }
+      
+      // Chromium-based (fallback)
+      if (/Chromium/i.test(ua)) {
+        return {
+          name: 'Chromium',
+          version: 'unknown',
+          isSupported: true,
+          installMethod: 'native'
+        };
+      }
+      
+      // Unknown browser
+      return {
+        name: 'Unknown',
+        version: 'unknown',
+        isSupported: false,
+        installMethod: 'manual',
+        instructions: 'Bu tarayıcı PWA desteği sağlamayabilir. Chrome veya Safari kullanmanızı öneririz.'
+      };
+    };
+    
+    const browser = detectBrowser();
+    setBrowserInfo(browser);
+    
+    // Log browser info for debugging
+    console.log('[PWA] Browser detected:', browser);
+    console.log('[PWA] Platform:', { isIOS: isIOSDevice, isAndroid: isAndroidDevice });
 
     // Check if running in standalone mode (already installed)
     const isIOSStandalone = (window.navigator as any).standalone === true;
     const isDisplayStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    const standalone = isIOSStandalone || isDisplayStandalone;
+    const isFullscreen = window.matchMedia('(display-mode: fullscreen)').matches;
+    const isMinimalUI = window.matchMedia('(display-mode: minimal-ui)').matches;
+    const isTWA = document.referrer.includes('android-app://');
+    
+    const standalone = isIOSStandalone || isDisplayStandalone || isFullscreen || isMinimalUI || isTWA;
 
     setIsStandalone(standalone);
     setIsInstalled(standalone);
     setIsIOS(isIOSDevice);
     setIsAndroid(isAndroidDevice);
 
-      const trackInstallation = async () => {
+    // For iOS, set canInstall to true if not already installed (manual install)
+    if (isIOSDevice && !standalone && browser.name === 'Safari') {
+      setCanInstall(true);
+    }
+
+    const trackInstallation = async () => {
       if (localStorage.getItem(INSTALL_TRACK_KEY) === '1') return;
 
       try {
@@ -54,34 +227,36 @@ export function usePWAInstall() {
         // Get current user if logged in
         const { data: { user } } = await supabase.auth.getUser();
 
-        // Fetch country info
+        // Fetch country info with fallback
         let countryCode: string | null = null;
         let countryName: string | null = null;
         let city: string | null = null;
         
         try {
-          const geoRes = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          
+          const geoRes = await fetch('https://ipapi.co/json/', { 
+            signal: controller.signal 
+          });
+          
+          clearTimeout(timeoutId);
+          
           if (geoRes.ok) {
             const geoData = await geoRes.json();
             countryCode = geoData.country_code || null;
             countryName = geoData.country_name || null;
             city = geoData.city || null;
           }
-        } catch {
-          console.log('[PWA] Could not fetch geo info');
+        } catch (geoError) {
+          console.log('[PWA] Could not fetch geo info:', geoError);
         }
 
         const { error } = await supabase.from('app_installations').insert({
           visitor_id: visitorId,
           user_id: user?.id || null,
-          device: /mobile/i.test(userAgent) ? 'mobile' : 'desktop',
-          browser: /chrome/i.test(userAgent)
-            ? 'Chrome'
-            : /safari/i.test(userAgent)
-              ? 'Safari'
-              : /firefox/i.test(userAgent)
-                ? 'Firefox'
-                : 'Other',
+          device: /mobile|tablet/i.test(userAgent) ? 'mobile' : 'desktop',
+          browser: browser.name,
           platform: isIOSDevice ? 'iOS' : isAndroidDevice ? 'Android' : 'Desktop',
           country_code: countryCode,
           country_name: countryName,
@@ -106,8 +281,9 @@ export function usePWAInstall() {
       void trackInstallation();
     }
 
-    // Listen for beforeinstallprompt event
+    // Listen for beforeinstallprompt event (Chromium browsers)
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      console.log('[PWA] beforeinstallprompt event fired');
       e.preventDefault();
       setDeferredPrompt(e);
       setCanInstall(true);
@@ -115,6 +291,7 @@ export function usePWAInstall() {
 
     // Listen for appinstalled event
     const handleAppInstalled = async () => {
+      console.log('[PWA] appinstalled event fired');
       setIsInstalled(true);
       setDeferredPrompt(null);
       setCanInstall(false);
@@ -123,28 +300,45 @@ export function usePWAInstall() {
 
       // Try to open the installed app after a short delay
       setTimeout(() => {
-        // Redirect to home to trigger standalone mode
-        window.location.href = window.location.origin;
+        window.location.href = window.location.origin + '/?source=pwa_installed';
       }, 500);
     };
 
+    // Listen for display mode changes
+    const handleDisplayModeChange = (e: MediaQueryListEvent) => {
+      if (e.matches) {
+        console.log('[PWA] Display mode changed to standalone');
+        setIsStandalone(true);
+        setIsInstalled(true);
+        void trackInstallation();
+      }
+    };
+
+    const standaloneQuery = window.matchMedia('(display-mode: standalone)');
+    
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
+    standaloneQuery.addEventListener('change', handleDisplayModeChange);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      standaloneQuery.removeEventListener('change', handleDisplayModeChange);
     };
   }, []);
 
-  const promptInstall = useCallback(async () => {
+  const promptInstall = useCallback(async (): Promise<boolean> => {
     if (!deferredPrompt) {
+      console.log('[PWA] No deferred prompt available');
       return false;
     }
 
     try {
+      console.log('[PWA] Triggering install prompt...');
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
+      
+      console.log('[PWA] User choice:', outcome);
       
       if (outcome === 'accepted') {
         setIsInstalled(true);
@@ -154,7 +348,7 @@ export function usePWAInstall() {
       setDeferredPrompt(null);
       return outcome === 'accepted';
     } catch (error) {
-      console.error('Error prompting PWA install:', error);
+      console.error('[PWA] Error prompting install:', error);
       return false;
     }
   }, [deferredPrompt]);
@@ -162,14 +356,87 @@ export function usePWAInstall() {
   // Function to check if app can be opened via installed PWA
   const openInstalledApp = useCallback(() => {
     if (isStandalone) {
-      // Already in standalone mode
       return true;
     }
     
     // Try to open the app URL which will open in installed PWA if available
-    window.location.href = window.location.origin;
+    window.location.href = window.location.origin + '/?source=pwa';
     return false;
   }, [isStandalone]);
+
+  // Get install instructions for current browser/platform
+  const getInstallInstructions = useCallback((): { steps: string[]; note?: string } => {
+    if (isIOS) {
+      return {
+        steps: [
+          'Safari\'de paylaş (Share) butonuna dokunun',
+          '"Ana Ekrana Ekle" seçeneğini seçin',
+          '"Ekle" butonuna dokunun'
+        ],
+        note: browserInfo?.name !== 'Safari' 
+          ? 'iOS\'ta uygulamayı yüklemek için Safari tarayıcısını kullanın.'
+          : undefined
+      };
+    }
+    
+    if (isAndroid) {
+      if (browserInfo?.name === 'Samsung Internet') {
+        return {
+          steps: [
+            'Menü butonuna (☰) dokunun',
+            '"Sayfayı ekle" veya "Ana ekrana ekle" seçin',
+            'Onaylayın'
+          ]
+        };
+      }
+      
+      if (browserInfo?.name === 'Firefox') {
+        return {
+          steps: [
+            'Menü butonuna (⋮) dokunun',
+            '"Yükle" veya "Ana ekrana ekle" seçin',
+            'Onaylayın'
+          ]
+        };
+      }
+      
+      // Chrome and other Chromium browsers
+      return {
+        steps: [
+          'Menü butonuna (⋮) dokunun',
+          '"Uygulamayı yükle" veya "Ana ekrana ekle" seçin',
+          'Onaylayın'
+        ]
+      };
+    }
+    
+    // Desktop
+    if (browserInfo?.name === 'Chrome' || browserInfo?.name === 'Edge') {
+      return {
+        steps: [
+          'Adres çubuğundaki yükleme simgesine (⊕) tıklayın',
+          '"Yükle" butonuna tıklayın'
+        ]
+      };
+    }
+    
+    if (browserInfo?.name === 'Firefox') {
+      return {
+        steps: [
+          'Firefox masaüstünde PWA desteği sınırlıdır',
+          'Chrome veya Edge kullanmanızı öneririz'
+        ],
+        note: 'Firefox masaüstü tarayıcısı PWA yüklemeyi tam olarak desteklememektedir.'
+      };
+    }
+    
+    return {
+      steps: [
+        'Tarayıcı menüsünden "Uygulamayı yükle" seçeneğini arayın',
+        'Veya adres çubuğundaki yükleme simgesine tıklayın'
+      ]
+    };
+  }, [isIOS, isAndroid, browserInfo]);
 
   return {
     canInstall,
@@ -180,5 +447,7 @@ export function usePWAInstall() {
     promptInstall,
     openInstalledApp,
     deferredPrompt,
+    browserInfo,
+    getInstallInstructions,
   };
 }
