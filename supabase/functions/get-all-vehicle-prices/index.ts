@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { analyzeTransfer } from "../_shared/priceMatching.ts";
+import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck } from "../_shared/priceMatching.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +21,8 @@ interface VehiclePriceInfo {
   passengers: number;
   luggage: number;
   available: boolean;
+  sanityFailed?: boolean;
+  sanityReason?: string;
 }
 
 // Currency conversion helper
@@ -302,15 +304,43 @@ const handler = async (req: Request): Promise<Response> => {
           exchangeRate = conversion.rate;
         }
 
-        vehiclePrices.push({
+        // Perform sanity check on the price
+        const sanityCheck = checkPriceSanity(
+          pickupCity,
+          dropoffCity,
+          foundPrice.price, // Use original price for sanity check
+          foundPrice.currency,
           vehicleType,
-          vehicleLabel: config.label,
-          price: finalPrice,
-          currency: finalCurrency,
-          passengers: config.passengers,
-          luggage: config.luggage,
-          available: true,
-        });
+          airport
+        );
+
+        logPriceSanityCheck('quick_booking', `get-prices-${vehicleType}`, sanityCheck);
+
+        if (!sanityCheck.isValid) {
+          console.log(`⚠️ Price sanity check FAILED for ${vehicleType}: ${sanityCheck.reason}`);
+          // Mark as unavailable when sanity check fails - admin needs to set price
+          vehiclePrices.push({
+            vehicleType,
+            vehicleLabel: config.label,
+            price: null,
+            currency: finalCurrency,
+            passengers: config.passengers,
+            luggage: config.luggage,
+            available: false,
+            sanityFailed: true,
+            sanityReason: sanityCheck.reason,
+          });
+        } else {
+          vehiclePrices.push({
+            vehicleType,
+            vehicleLabel: config.label,
+            price: finalPrice,
+            currency: finalCurrency,
+            passengers: config.passengers,
+            luggage: config.luggage,
+            available: true,
+          });
+        }
       } else {
         vehiclePrices.push({
           vehicleType,
@@ -324,7 +354,13 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log("✅ Vehicle prices found:", vehiclePrices.filter(v => v.available).length, "out of", VEHICLE_TYPES.length);
+    const availableCount = vehiclePrices.filter(v => v.available).length;
+    const sanityFailedCount = vehiclePrices.filter(v => v.sanityFailed).length;
+    
+    console.log("✅ Vehicle prices found:", availableCount, "out of", VEHICLE_TYPES.length);
+    if (sanityFailedCount > 0) {
+      console.log("⚠️ Prices with sanity check failed:", sanityFailedCount);
+    }
 
     return new Response(
       JSON.stringify({
@@ -337,6 +373,8 @@ const handler = async (req: Request): Promise<Response> => {
         confidence,
         baseCurrency,
         exchangeRate: exchangeRate !== 1 ? exchangeRate : null,
+        sanityCheckFailed: sanityFailedCount > 0,
+        requiresManualPricing: sanityFailedCount > 0,
       }),
       { headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
