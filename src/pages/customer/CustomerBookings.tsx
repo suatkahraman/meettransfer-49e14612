@@ -90,16 +90,34 @@ const FlightDelayBadge = ({ flightNumber, date }: { flightNumber: string; date: 
   );
 };
 
+// Status colors for badges
 const statusColors: Record<string, string> = {
   'awaiting-price': 'bg-orange-500/20 text-orange-700 dark:text-orange-300',
   'waiting_for_customer_approval': 'bg-purple-500/20 text-purple-700 dark:text-purple-300',
   'customer_approved': 'bg-blue-500/20 text-blue-700 dark:text-blue-300',
   'customer_rejected': 'bg-destructive/20 text-destructive',
   'sent_to_driver': 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-300',
+  'confirmed': 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300',
   'active': 'bg-cyan-500/20 text-cyan-700 dark:text-cyan-300',
   'completed': 'bg-green-500/20 text-green-700 dark:text-green-300',
   'pending_admin_review': 'bg-amber-500/20 text-amber-700 dark:text-amber-300',
   'cancelled_by_customer': 'bg-destructive/20 text-destructive',
+  'cancelled': 'bg-destructive/20 text-destructive',
+};
+
+// Card border colors based on status
+const statusCardColors: Record<string, string> = {
+  'awaiting-price': 'border-orange-300 dark:border-orange-600 bg-orange-50/50 dark:bg-orange-950/20',
+  'waiting_for_customer_approval': 'border-purple-300 dark:border-purple-600 bg-purple-50/50 dark:bg-purple-950/20',
+  'customer_approved': 'border-blue-300 dark:border-blue-600 bg-blue-50/50 dark:bg-blue-950/20',
+  'customer_rejected': 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-950/20',
+  'sent_to_driver': 'border-yellow-300 dark:border-yellow-600 bg-yellow-50/50 dark:bg-yellow-950/20',
+  'confirmed': 'border-emerald-300 dark:border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20',
+  'active': 'border-cyan-300 dark:border-cyan-600 bg-cyan-50/50 dark:bg-cyan-950/20',
+  'completed': 'border-green-300 dark:border-green-600 bg-green-50/50 dark:bg-green-950/20',
+  'pending_admin_review': 'border-amber-300 dark:border-amber-600 bg-amber-50/50 dark:bg-amber-950/20',
+  'cancelled_by_customer': 'border-red-300 dark:border-red-600 bg-red-50/30 dark:bg-red-950/10',
+  'cancelled': 'border-red-300 dark:border-red-600 bg-red-50/30 dark:bg-red-950/10',
 };
 
 const statusIcons: Record<string, React.ReactNode> = {
@@ -108,11 +126,27 @@ const statusIcons: Record<string, React.ReactNode> = {
   'customer_approved': <CheckCircle className="h-3 w-3" />,
   'customer_rejected': <XCircle className="h-3 w-3" />,
   'sent_to_driver': <Truck className="h-3 w-3" />,
+  'confirmed': <CheckCircle className="h-3 w-3" />,
   'active': <Car className="h-3 w-3" />,
   'completed': <CheckCircle className="h-3 w-3" />,
   'pending_admin_review': <AlertCircle className="h-3 w-3" />,
   'cancelled_by_customer': <XCircle className="h-3 w-3" />,
+  'cancelled': <XCircle className="h-3 w-3" />,
 };
+
+// Active statuses - reservations that are in progress or upcoming
+const activeStatuses = [
+  'awaiting-price',
+  'waiting_for_customer_approval', 
+  'customer_approved',
+  'confirmed',
+  'sent_to_driver',
+  'pending_admin_review',
+  'active'
+];
+
+// Check if reservation is active
+const isActiveReservation = (status: string) => activeStatuses.includes(status);
 
 
 const CustomerBookings = () => {
@@ -222,9 +256,25 @@ const CustomerBookings = () => {
     return status === 'awaiting-price';
   };
 
-  // Separate reservations by action required
+  // Separate reservations: action required, active, past/inactive
   const actionRequired = reservations.filter(r => getActionRequired(r.status));
-  const otherReservations = reservations.filter(r => !getActionRequired(r.status));
+  const activeReservations = reservations.filter(r => 
+    !getActionRequired(r.status) && isActiveReservation(r.status)
+  );
+  const pastReservations = reservations.filter(r => 
+    !getActionRequired(r.status) && !isActiveReservation(r.status)
+  );
+
+  // Sort active reservations by pickup date (soonest first)
+  const sortedActiveReservations = [...activeReservations].sort((a, b) => 
+    new Date(a.pickup_date + 'T' + a.pickup_time).getTime() - 
+    new Date(b.pickup_date + 'T' + b.pickup_time).getTime()
+  );
+
+  // Sort past reservations by pickup date (most recent first)
+  const sortedPastReservations = [...pastReservations].sort((a, b) => 
+    new Date(b.pickup_date).getTime() - new Date(a.pickup_date).getTime()
+  );
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
@@ -401,20 +451,17 @@ const CustomerBookings = () => {
               </div>
             )}
 
-            {/* All Other Reservations */}
-            {otherReservations.length > 0 && (
+            {/* Active Reservations Section */}
+            {sortedActiveReservations.length > 0 && (
               <div className="space-y-3">
-                {actionRequired.length > 0 && (
-                  <h2 className="text-lg font-semibold">{t('allReservations')}</h2>
-                )}
-                {otherReservations.map((reservation) => (
+                <h2 className="text-lg font-semibold flex items-center gap-2 text-cyan-700 dark:text-cyan-300">
+                  <Car className="h-5 w-5" />
+                  {t('activeReservations') || 'Active Reservations'} ({sortedActiveReservations.length})
+                </h2>
+                {sortedActiveReservations.map((reservation) => (
                   <Card 
                     key={reservation.id} 
-                    className={`cursor-pointer hover:shadow-md transition-shadow ${
-                      isAwaitingPrice(reservation.status) 
-                        ? 'border-orange-300 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-950/20' 
-                        : ''
-                    }`}
+                    className={`cursor-pointer hover:shadow-md transition-shadow ${statusCardColors[reservation.status] || ''}`}
                     onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
                   >
                     <CardHeader className="pb-2">
@@ -529,39 +576,15 @@ const CustomerBookings = () => {
                         </Button>
                       )}
 
-                      {reservation.status === 'sent_to_driver' && (
+                      {reservation.status === 'sent_to_driver' && reservation.drivers && (
                         <div className="bg-yellow-50 dark:bg-yellow-950/30 p-2 rounded text-sm text-yellow-700 dark:text-yellow-300">
-                          {reservation.drivers ? (
-                            <div className="flex flex-col items-center gap-1">
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4" />
-                                <span>{reservation.drivers.name}</span>
-                              </div>
-                              {reservation.drivers.plate_number && (
-                                <span className="font-mono text-xs">
-                                  {reservation.drivers.plate_number}
-                                  {reservation.drivers.vehicle_color && ` • ${reservation.drivers.vehicle_color}`}
-                                </span>
-                              )}
-                              {reservation.drivers.vehicle_model && (
-                                <span className="text-xs text-muted-foreground">{reservation.drivers.vehicle_model}</span>
-                              )}
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4" />
+                              <span>{reservation.drivers.name}</span>
                             </div>
-                          ) : (
-                            <p className="text-center">{t('driverAssignedSoon')}</p>
-                          )}
-                        </div>
-                      )}
-
-                      {reservation.status === 'active' && (
-                        <div className="bg-cyan-50 dark:bg-cyan-950/30 p-2 rounded text-center text-sm text-cyan-700 dark:text-cyan-300">
-                          {t('tripInProgress')}
-                        </div>
-                      )}
-
-                      {reservation.status === 'completed' && (
-                        <div className="bg-green-50 dark:bg-green-950/30 p-2 rounded text-center text-sm text-green-700 dark:text-green-300">
-                          {t('tripCompleted')}
+                            <span className="text-xs">{reservation.drivers.plate_number} • {reservation.drivers.vehicle_model}</span>
+                          </div>
                         </div>
                       )}
                     </CardContent>
@@ -570,13 +593,77 @@ const CustomerBookings = () => {
               </div>
             )}
 
-            {/* New Booking Button */}
-            <div className="pt-4">
-              <Button onClick={() => navigate('/book')} className="w-full" size="lg">
-                <Plus className="h-4 w-4 mr-2" />
-                {t('bookNewTransfer')}
-              </Button>
-            </div>
+            {/* Past Reservations Section */}
+            {sortedPastReservations.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold flex items-center gap-2 text-muted-foreground">
+                  <CheckCircle className="h-5 w-5" />
+                  {t('pastReservations') || 'Past Reservations'} ({sortedPastReservations.length})
+                </h2>
+                {sortedPastReservations.map((reservation) => (
+                  <Card 
+                    key={reservation.id} 
+                    className={`cursor-pointer hover:shadow-md transition-shadow opacity-75 ${statusCardColors[reservation.status] || ''}`}
+                    onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
+                  >
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div className="flex flex-col gap-1">
+                          {reservation.reservation_code && (
+                            <span className="text-xs font-mono text-muted-foreground">{reservation.reservation_code}</span>
+                          )}
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">
+                              {format(new Date(reservation.pickup_date), 'PPP')}
+                            </span>
+                            <Clock className="h-4 w-4 text-muted-foreground ml-2" />
+                            <span>{reservation.pickup_time}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge className={`flex items-center gap-1 ${statusColors[reservation.status] || 'bg-muted'}`}>
+                            {statusIcons[reservation.status]}
+                            {getStatusLabel(reservation.status)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="space-y-2">
+                        <LocationDisplay
+                          placeName={reservation.pickup_place_name}
+                          address={reservation.pickup}
+                          type="pickup"
+                          size="sm"
+                        />
+                        <LocationDisplay
+                          placeName={reservation.dropoff_place_name}
+                          address={reservation.dropoff}
+                          type="dropoff"
+                          size="sm"
+                        />
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-2 border-t">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Car className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {reservation.price !== null && (
+                            <span className="font-bold text-muted-foreground">
+                              {formatPrice(reservation.price, reservation.price_currency)}
+                            </span>
+                          )}
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         )}
         </div>
