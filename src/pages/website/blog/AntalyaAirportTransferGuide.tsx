@@ -19,6 +19,7 @@ import {
 import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
+import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 
 const AntalyaAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -45,6 +46,7 @@ const AntalyaAirportTransferGuide = () => {
 
   return (
     <WebsiteLayout>
+      <ReadingProgressBar />
       <SEOHead
         title={t("blogAntalyaSeoTitle")}
         description={t("blogAntalyaSeoDesc")}

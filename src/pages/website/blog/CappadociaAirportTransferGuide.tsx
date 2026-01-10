@@ -19,6 +19,7 @@ import {
 import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
+import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 
 const CappadociaAirportTransferGuide = () => {
   const { getLocalizedPath, t, language } = useLanguage();
@@ -112,6 +113,7 @@ const CappadociaAirportTransferGuide = () => {
 
   return (
     <WebsiteLayout>
+      <ReadingProgressBar />
       <SEOHead
         title={language === 'TR' 
           ? "Kapadokya Havalimanı Transfer Rehberi 2025 | Fiyatlar & Balon Turları" 
