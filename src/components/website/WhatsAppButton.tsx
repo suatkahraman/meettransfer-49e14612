@@ -2,6 +2,7 @@ import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { trackConversion, CONVERSION_LABELS } from "@/lib/gtag";
+import { WHATSAPP_NUMBER } from "@/lib/contact";
 
 interface WhatsAppButtonProps {
   phone?: string;
@@ -12,7 +13,7 @@ interface WhatsAppButtonProps {
 }
 
 const WhatsAppButton = ({
-  phone = "15558051101",
+  phone = WHATSAPP_NUMBER,
   message = "Hello, I would like to book a transfer.",
   className = "",
   variant = "default",

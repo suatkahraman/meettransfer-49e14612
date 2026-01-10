@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getWhatsAppUrl } from "@/lib/contact";
 
 const CyprusAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -289,7 +290,7 @@ const CyprusAirportTransferGuide = () => {
               </Button>
             </Link>
             <a 
-              href="https://wa.me/905321748390?text=Hello, I need a transfer from Cyprus airport."
+              href={getWhatsAppUrl("Hello, I need a transfer from Cyprus airport.")}
               target="_blank"
               rel="noopener noreferrer"
             >

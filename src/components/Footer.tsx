@@ -1,6 +1,7 @@
 import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Youtube, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from "@/lib/contact";
 
 const TripAdvisorBadge = () => (
   <a
@@ -115,8 +116,8 @@ export const Footer = () => {
             <ul className="space-y-3 text-primary-foreground/80 text-sm">
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 flex-shrink-0" />
-                <a href="https://wa.me/15558051101" target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors">
-                  +1 555 805 1101 <span className="text-xs opacity-70">({t('footerOnlyWhatsApp')})</span>
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors">
+                  {WHATSAPP_DISPLAY} <span className="text-xs opacity-70">({t('footerOnlyWhatsApp')})</span>
                 </a>
               </li>
               <li className="flex items-center gap-2">

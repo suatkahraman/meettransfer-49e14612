@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import bursaHeroImage from "@/assets/bursa-transfer-hero.jpg";
 import cumalikizikImage from "@/assets/cumalikizik-village.jpg";
 import uludagImage from "@/assets/uludag-cable-car.jpg";
+import { getWhatsAppUrl } from "@/lib/contact";
 
 const BursaDayTourGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -419,7 +420,7 @@ const BursaDayTourGuide = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="https://wa.me/905321748390?text=Hello, I'm interested in a Bursa day tour from Istanbul."
+              href={getWhatsAppUrl("Hello, I'm interested in a Bursa day tour from Istanbul.")}
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -20,6 +20,7 @@ import { NotificationSettingsPanel } from '@/components/NotificationSettingsPane
 import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
+import { WHATSAPP_NUMBER } from '@/lib/contact';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes-vito',
@@ -873,7 +874,7 @@ const CustomerBookings = () => {
                     ? 'Merhaba, destek almak istiyorum.' 
                     : 'Hello, I would like to get support.'
                 );
-                window.open(`https://wa.me/15558051101?text=${message}`, '_blank');
+                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
               }}
               size="lg"
               className="h-12 w-12 rounded-full shadow-lg bg-[#25D366] hover:bg-[#22c55e] text-white"

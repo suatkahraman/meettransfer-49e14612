@@ -24,6 +24,7 @@ import {
   CarouselDots,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { WHATSAPP_NUMBER } from "@/lib/contact";
 
 // Vehicle images - only landscape orientation
 import vitoAirportAnime from "@/assets/vito-airport-anime.jpg";
@@ -156,7 +157,7 @@ const [formData, setFormData] = useState({
 Please confirm availability and price.`;
 
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/15558051101?text=${encodedMessage}`, "_blank");
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`, "_blank");
   };
 
   return (

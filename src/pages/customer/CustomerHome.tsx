@@ -33,6 +33,7 @@ import { Language } from '@/contexts/LanguageContext';
 import meetTransferLogo from '@/assets/meet-transfer-logo-small.webp';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
+import { WHATSAPP_NUMBER, EMERGENCY_PHONE } from '@/lib/contact';
 
 // Language options
 const LANGUAGES = [
@@ -57,8 +58,6 @@ const reservationSchema = z.object({
 });
 
 const MAX_PASSENGERS = 15;
-const WHATSAPP_NUMBER = '15558051101';
-const EMERGENCY_PHONE = '+905321748390';
 
 // Feature icon helper - matches Hero.tsx
 const getFeatureIconWithColor = (iconName: string) => {
