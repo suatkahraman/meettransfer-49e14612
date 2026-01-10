@@ -482,6 +482,25 @@ const AdminEditReservation = () => {
         console.error('Failed to record price history:', e);
       }
 
+      // Save manual price to region_prices/intercity_prices for future auto-matching
+      try {
+        const { data: saveResult } = await supabase.functions.invoke('save-manual-price-to-region', {
+          body: {
+            pickup: formData.pickup,
+            dropoff: formData.dropoff,
+            vehicle_type: formData.vehicle_type,
+            price: priceValue,
+            price_currency: formData.price_currency,
+            reservation_id: id,
+          }
+        });
+        if (saveResult?.success) {
+          console.log('Manual price saved to prices table:', saveResult.saved_location);
+        }
+      } catch (e) {
+        console.error('Failed to save manual price to region:', e);
+      }
+
       // Notify customer
       if (customerId) {
         const symbol = getCurrencySymbol(formData.price_currency);

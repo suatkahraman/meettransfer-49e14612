@@ -153,5 +153,8 @@ verify_jwt = false
 [functions.delete-user-account]
 verify_jwt = true
 
+[functions.save-manual-price-to-region]
+verify_jwt = true
+
 [functions.get-customer-reservations]
 verify_jwt = false
