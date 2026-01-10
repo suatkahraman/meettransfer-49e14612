@@ -7,6 +7,7 @@ interface PullToRefreshIndicatorProps {
   isRefreshing: boolean;
   isPulling: boolean;
   threshold?: number;
+  language?: 'TR' | 'EN';
 }
 
 export const PullToRefreshIndicator = ({
@@ -14,6 +15,7 @@ export const PullToRefreshIndicator = ({
   isRefreshing,
   isPulling,
   threshold = 80,
+  language = 'EN',
 }: PullToRefreshIndicatorProps) => {
   const progress = Math.min(pullDistance / threshold, 1);
   const isReady = pullDistance >= threshold;
@@ -64,7 +66,9 @@ export const PullToRefreshIndicator = ({
           animate={{ opacity: 1, x: 0 }}
           className="ml-2 text-sm text-muted-foreground"
         >
-          {isReady ? 'Bırak ve yenile' : 'Aşağı çek'}
+          {isReady 
+            ? (language === 'TR' ? 'Bırak ve yenile' : 'Release to refresh')
+            : (language === 'TR' ? 'Aşağı çek' : 'Pull down')}
         </motion.span>
       )}
       
@@ -74,7 +78,7 @@ export const PullToRefreshIndicator = ({
           animate={{ opacity: 1 }}
           className="ml-2 text-sm text-primary font-medium"
         >
-          Yenileniyor...
+          {language === 'TR' ? 'Yenileniyor...' : 'Refreshing...'}
         </motion.span>
       )}
     </motion.div>
