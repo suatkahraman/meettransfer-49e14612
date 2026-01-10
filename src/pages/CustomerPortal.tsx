@@ -32,6 +32,7 @@ import {
   PhoneCall,
   Shield,
   Globe,
+  ChevronRight,
 } from "lucide-react";
 
 // Language options
@@ -440,6 +441,54 @@ export default function CustomerPortal() {
             </Button>
           </div>
 
+          {/* Next Transfer Card - Show first upcoming reservation */}
+          {portalData?.reservations && portalData.reservations.length > 0 && (
+            () => {
+              const upcomingReservations = portalData.reservations.filter(
+                r => !['cancelled', 'completed'].includes(r.status)
+              );
+              if (upcomingReservations.length === 0) return null;
+              
+              const nextTransfer = upcomingReservations[0];
+              return (
+                <Card 
+                  className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => {
+                    // Scroll to the reservation card
+                    const element = document.getElementById(`reservation-${nextTransfer.id}`);
+                    element?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Clock className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-primary">
+                            {language === 'TR' ? 'Yaklaşan Transferiniz' : 'Your Next Transfer'}
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-semibold text-sm sm:text-base">
+                            {new Date(nextTransfer.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { 
+                              weekday: 'long', 
+                              day: 'numeric', 
+                              month: 'long' 
+                            })} • {nextTransfer.pickup_time}
+                          </p>
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                            {nextTransfer.pickup.substring(0, 35)}{nextTransfer.pickup.length > 35 ? '...' : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-primary flex-shrink-0" />
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            }
+          )()}
+
           {/* New Reservation Card */}
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01] bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0"
@@ -503,7 +552,7 @@ export default function CustomerPortal() {
           ) : (
             <div className="space-y-4">
               {portalData?.reservations.map((reservation) => (
-                <Card key={reservation.id}>
+                <Card key={reservation.id} id={`reservation-${reservation.id}`} className="scroll-mt-20">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div>
