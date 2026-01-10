@@ -19,6 +19,7 @@ import {
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
+import TableOfContents from "@/components/website/TableOfContents";
 
 const IstanbulAirportToCityGuide = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -174,9 +175,22 @@ const IstanbulAirportToCityGuide = () => {
           />
         </div>
 
+        {/* Table of Contents */}
+        <TableOfContents items={[
+          { id: "introduction", title: "Introduction: Getting from Istanbul Airport to the City" },
+          { id: "quick-comparison", title: "Quick Comparison: All Transportation Options" },
+          { id: "private-transfer", title: "Option 1: Private Airport Transfer (Recommended)" },
+          { id: "regular-transport", title: "Option 2: Regular Transport" },
+          { id: "metro-m11", title: "Option 3: Metro (M11 Line)" },
+          { id: "havaist-bus", title: "Option 4: Havaist Airport Buses" },
+          { id: "which-option", title: "Which Option Should You Choose?" },
+          { id: "distances", title: "Distances from Istanbul Airport" },
+          { id: "tips", title: "Tips for a Smooth Arrival" },
+        ]} />
+
         {/* Article Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <h2>Introduction: Getting from Istanbul Airport to the City</h2>
+          <h2 id="introduction">Introduction: Getting from Istanbul Airport to the City</h2>
           <p>
             Istanbul Airport (IST) is one of the world's largest and busiest airports, serving as Turkey's 
             main international gateway. Located approximately 35 kilometers northwest of the city center, 
@@ -190,7 +204,7 @@ const IstanbulAirportToCityGuide = () => {
             you're traveling solo, with family, or in a large group, we've got you covered.
           </p>
 
-          <h2>Quick Comparison: All Transportation Options</h2>
+          <h2 id="quick-comparison">Quick Comparison: All Transportation Options</h2>
           <p>
             Before diving into details, here's a quick overview of your options:
           </p>
@@ -234,7 +248,7 @@ const IstanbulAirportToCityGuide = () => {
             </Table>
           </div>
 
-          <h2>Option 1: Private Airport Transfer (Recommended)</h2>
+          <h2 id="private-transfer">Option 1: Private Airport Transfer (Recommended)</h2>
           <p>
             A <Link to={getLocalizedPath("/istanbul-transfer")} className="text-primary hover:underline">private airport transfer</Link> is 
             the most comfortable and stress-free way to travel from Istanbul Airport to your destination. 
@@ -300,7 +314,7 @@ const IstanbulAirportToCityGuide = () => {
             </Card>
           </div>
 
-          <h2>Option 2: Regular Transport</h2>
+          <h2 id="regular-transport">Option 2: Regular Transport</h2>
           <p>
             Regular transport options are available outside the arrivals hall at Istanbul Airport. 
             While convenient for solo travelers, there are some important things to consider.
@@ -317,7 +331,7 @@ const IstanbulAirportToCityGuide = () => {
             <li>Payment typically in local currency</li>
           </ul>
 
-          <h2>Option 3: Metro (M11 Line)</h2>
+          <h2 id="metro-m11">Option 3: Metro (M11 Line)</h2>
           <p>
             The Istanbul Metro M11 line connects Istanbul Airport to the city center. This is the most 
             budget-friendly option but requires some navigation and isn't ideal if you have heavy luggage.
@@ -356,7 +370,7 @@ const IstanbulAirportToCityGuide = () => {
             </Card>
           </div>
 
-          <h2>Option 4: Havaist Airport Buses</h2>
+          <h2 id="havaist-bus">Option 4: Havaist Airport Buses</h2>
           <p>
             Havaist is the official airport bus service connecting Istanbul Airport to various parts of 
             the city. It's a good middle-ground option between metro and private transfer.
@@ -370,7 +384,7 @@ const IstanbulAirportToCityGuide = () => {
             <li><strong>HVIST-19:</strong> To Yenikapı</li>
           </ul>
 
-          <h2>Which Option Should You Choose?</h2>
+          <h2 id="which-option">Which Option Should You Choose?</h2>
           <p>
             Your best choice depends on your specific situation:
           </p>
@@ -400,7 +414,7 @@ const IstanbulAirportToCityGuide = () => {
             <li>Your hotel is near a metro station</li>
           </ul>
 
-          <h2>Distances from Istanbul Airport</h2>
+          <h2 id="distances">Distances from Istanbul Airport</h2>
           <p>
             Here are the approximate distances from Istanbul Airport to popular destinations:
           </p>
@@ -412,7 +426,7 @@ const IstanbulAirportToCityGuide = () => {
             <li><strong>Sabiha Gökçen Airport:</strong> 90 km (56 miles)</li>
           </ul>
 
-          <h2>Tips for a Smooth Arrival</h2>
+          <h2 id="tips">Tips for a Smooth Arrival</h2>
           <ol>
             <li><strong>Book in advance:</strong> Pre-book your transfer to avoid waiting</li>
             <li><strong>Share flight details:</strong> This helps with flight tracking</li>

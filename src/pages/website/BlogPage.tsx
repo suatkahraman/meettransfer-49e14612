@@ -11,6 +11,17 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { getWhatsAppUrl } from "@/lib/contact";
 
+// Import blog hero images
+import cappadociaHero from "@/assets/blog/cappadocia-transfer-hero.jpg";
+import bursaHero from "@/assets/blog/bursa-day-tour-hero.jpg";
+import dubaiHero from "@/assets/blog/dubai-transfer-hero.jpg";
+import cyprusHero from "@/assets/blog/cyprus-transfer-hero.jpg";
+import istanbulCityHero from "@/assets/blog/istanbul-airport-city-hero.jpg";
+import istanbulTransferHero from "@/assets/blog/istanbul-transfer-hero.jpg";
+import privateVsTaxiHero from "@/assets/blog/private-vs-taxi-hero.jpg";
+import antalyaHero from "@/assets/blog/antalya-transfer-hero.jpg";
+import privateWorthHero from "@/assets/blog/private-transfer-worth-hero.jpg";
+
 const BlogPage = () => {
   const { t, getLocalizedPath, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,7 +37,7 @@ const BlogPage = () => {
       categoryKey: "cappadocia",
       readTime: 18,
       date: "2025-01-10",
-      image: "/images/meet-transfer-vip-mercedes-vito.jpg",
+      image: cappadociaHero,
     },
     {
       id: "istanbul-bursa-day-tour-guide",
@@ -36,7 +47,7 @@ const BlogPage = () => {
       categoryKey: "bursa",
       readTime: 18,
       date: "2025-01-10",
-      image: "/images/meet-transfer-vip-mercedes-vito.jpg",
+      image: bursaHero,
     },
     {
       id: "dubai-airport-transfer-guide",
@@ -46,7 +57,7 @@ const BlogPage = () => {
       categoryKey: "dubai",
       readTime: 16,
       date: "2025-01-10",
-      image: "/images/meet-transfer-vip-mercedes-vito.jpg",
+      image: dubaiHero,
     },
     {
       id: "cyprus-airport-transfer-guide",
@@ -56,7 +67,7 @@ const BlogPage = () => {
       categoryKey: "cyprus",
       readTime: 17,
       date: "2025-01-10",
-      image: "/images/meet-transfer-vclass-interior.jpg",
+      image: cyprusHero,
     },
     {
       id: "istanbul-airport-to-city-best-way",
@@ -66,7 +77,7 @@ const BlogPage = () => {
       categoryKey: "istanbul",
       readTime: 14,
       date: "2025-01-10",
-      image: "/images/meet-transfer-vclass-interior.jpg",
+      image: istanbulCityHero,
     },
     {
       id: "istanbul-airport-transfer-price-guide",
@@ -76,7 +87,7 @@ const BlogPage = () => {
       categoryKey: "priceGuide",
       readTime: 12,
       date: "2025-01-10",
-      image: "/images/meet-transfer-vip-mercedes-vito.jpg",
+      image: istanbulTransferHero,
     },
     {
       id: "private-vs-taxi-transfer-turkey",
@@ -86,7 +97,7 @@ const BlogPage = () => {
       categoryKey: "travelTips",
       readTime: 13,
       date: "2025-01-10",
-      image: "/images/meet-transfer-vclass-interior.jpg",
+      image: privateVsTaxiHero,
     },
     {
       id: "antalya-airport-transfer-to-hotels",
@@ -96,7 +107,7 @@ const BlogPage = () => {
       categoryKey: "antalya",
       readTime: 15,
       date: "2025-01-10",
-      image: "/images/meet-transfer-vip-mercedes-vito.jpg",
+      image: antalyaHero,
     },
     {
       id: "is-private-transfer-worth-it-turkey",
@@ -106,7 +117,7 @@ const BlogPage = () => {
       categoryKey: "travelTips",
       readTime: 16,
       date: "2025-01-10",
-      image: "/images/meet-transfer-vclass-interior.jpg",
+      image: privateWorthHero,
     },
   ], []);
 

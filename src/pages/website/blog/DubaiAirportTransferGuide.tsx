@@ -20,6 +20,7 @@ import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
+import TableOfContents from "@/components/website/TableOfContents";
 
 const DubaiAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -140,16 +141,28 @@ const DubaiAirportTransferGuide = () => {
           />
         </div>
 
+        {/* Table of Contents */}
+        <TableOfContents items={[
+          { id: "dubai-intro", title: t("blogDubaiSection1Title") },
+          { id: "dubai-airports", title: t("blogDubaiSection2Title") },
+          { id: "dubai-prices", title: t("blogDubaiSection3Title") },
+          { id: "dubai-private", title: t("blogDubaiSection4Title") },
+          { id: "dubai-booking", title: t("blogDubaiSection5Title") },
+          { id: "dubai-tips", title: t("blogDubaiSection6Title") },
+          { id: "dubai-attractions", title: t("blogDubaiSection7Title") },
+          { id: "dubai-faq", title: t("blogDubaiSection8Title") },
+        ]} />
+
         {/* Article Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <h2>{t("blogDubaiSection1Title")}</h2>
+          <h2 id="dubai-intro">{t("blogDubaiSection1Title")}</h2>
           <p>{t("blogDubaiSection1P1")}</p>
           <p>{t("blogDubaiSection1P2")}</p>
 
-          <h2>{t("blogDubaiSection2Title")}</h2>
+          <h2 id="dubai-airports">{t("blogDubaiSection2Title")}</h2>
           <p>{t("blogDubaiSection2Intro")}</p>
 
-          <h2>{t("blogDubaiSection3Title")}</h2>
+          <h2 id="dubai-prices">{t("blogDubaiSection3Title")}</h2>
           <p>{t("blogDubaiSection3Intro")}</p>
 
           <div className="overflow-x-auto not-prose my-8">
@@ -173,7 +186,7 @@ const DubaiAirportTransferGuide = () => {
             </Table>
           </div>
 
-          <h2>{t("blogDubaiSection4Title")}</h2>
+          <h2 id="dubai-private">{t("blogDubaiSection4Title")}</h2>
           <p>
             <Link to={getLocalizedPath("/dubai-transfer")} className="text-primary hover:underline">{t("blogDubaiPrivateTransfer")}</Link> {t("blogDubaiSection4P1")}
           </p>
@@ -218,13 +231,13 @@ const DubaiAirportTransferGuide = () => {
             </Card>
           </div>
 
-          <h2>{t("blogDubaiSection5Title")}</h2>
+          <h2 id="dubai-booking">{t("blogDubaiSection5Title")}</h2>
           <p>{t("blogDubaiSection5Intro")}</p>
 
-          <h2>{t("blogDubaiSection6Title")}</h2>
+          <h2 id="dubai-tips">{t("blogDubaiSection6Title")}</h2>
           <p>{t("blogDubaiSection6Intro")}</p>
 
-          <h2>{t("blogDubaiSection7Title")}</h2>
+          <h2 id="dubai-attractions">{t("blogDubaiSection7Title")}</h2>
           <div className="not-prose my-8 grid md:grid-cols-2 gap-4">
             {popularAttractions.map((attraction, index) => (
               <Card key={index}>
@@ -241,7 +254,7 @@ const DubaiAirportTransferGuide = () => {
             ))}
           </div>
 
-          <h2>{t("blogDubaiSection8Title")}</h2>
+          <h2 id="dubai-faq">{t("blogDubaiSection8Title")}</h2>
           <p>{t("blogDubaiSection8Intro")}</p>
 
           <h2>{t("blogDubaiConclusion")}</h2>

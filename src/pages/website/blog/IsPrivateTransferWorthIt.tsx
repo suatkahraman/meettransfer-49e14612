@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
+import TableOfContents from "@/components/website/TableOfContents";
 
 const IsPrivateTransferWorthIt = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -131,9 +132,19 @@ const IsPrivateTransferWorthIt = () => {
           />
         </div>
 
+        {/* Table of Contents */}
+        <TableOfContents items={[
+          { id: "million-dollar-question", title: "The Million-Dollar Question" },
+          { id: "real-cost-breakdown", title: "The Real Cost Breakdown" },
+          { id: "hidden-value", title: "The Hidden Value Proposition" },
+          { id: "group-math", title: "The Group Math: Where Private Transfer Wins" },
+          { id: "definitely-worth", title: "When Private Transfer is DEFINITELY Worth It" },
+          { id: "might-not-worth", title: "When Private Transfer Might NOT Be Worth It" },
+        ]} />
+
         {/* Article Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <h2>The Million-Dollar Question</h2>
+          <h2 id="million-dollar-question">The Million-Dollar Question</h2>
           <p>
             You're planning your trip to Turkey and facing a common dilemma: should you splurge on 
             a private airport transfer, or save money with regular transport? It's a question we hear 
@@ -146,7 +157,7 @@ const IsPrivateTransferWorthIt = () => {
             with alternatives.
           </p>
 
-          <h2>The Real Cost Breakdown</h2>
+          <h2 id="real-cost-breakdown">The Real Cost Breakdown</h2>
           <p>
             Let's start with what matters most to many travelers: the money. Here's an honest 
             comparison of costs from Istanbul Airport to Taksim:
@@ -191,7 +202,7 @@ const IsPrivateTransferWorthIt = () => {
             But here's where it gets interesting...
           </p>
 
-          <h2>The Hidden Value Proposition</h2>
+          <h2 id="hidden-value">The Hidden Value Proposition</h2>
           <p>
             When evaluating whether private transfer is "worth it," you need to consider more than 
             just the ticket price. Here's what you're actually getting:
@@ -253,7 +264,7 @@ const IsPrivateTransferWorthIt = () => {
             </Card>
           </div>
 
-          <h2>The Group Math: Where Private Transfer Wins</h2>
+          <h2 id="group-math">The Group Math: Where Private Transfer Wins</h2>
           <p>
             Here's where the economics flip dramatically. Let's do the math for a family of 4:
           </p>
@@ -298,7 +309,7 @@ const IsPrivateTransferWorthIt = () => {
             or less per person than regular transport, while offering a dramatically better experience.
           </p>
 
-          <h2>When Private Transfer is DEFINITELY Worth It</h2>
+          <h2 id="definitely-worth">When Private Transfer is DEFINITELY Worth It</h2>
           <p>
             Based on our experience with thousands of transfers, here are the situations where 
             private transfer provides exceptional value:
@@ -361,7 +372,7 @@ const IsPrivateTransferWorthIt = () => {
             <li>No wrestling bags onto buses or trains</li>
           </ul>
 
-          <h2>When Private Transfer Might NOT Be Worth It</h2>
+          <h2 id="might-not-worth">When Private Transfer Might NOT Be Worth It</h2>
           <p>
             We believe in honesty, so here's when you might skip the private transfer:
           </p>

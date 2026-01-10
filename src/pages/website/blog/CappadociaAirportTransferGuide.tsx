@@ -20,6 +20,7 @@ import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
+import TableOfContents from "@/components/website/TableOfContents";
 
 const CappadociaAirportTransferGuide = () => {
   const { getLocalizedPath, t, language } = useLanguage();
@@ -219,9 +220,19 @@ const CappadociaAirportTransferGuide = () => {
           />
         </div>
 
+        {/* Table of Contents */}
+        <TableOfContents items={[
+          { id: "cappadocia-how-to-get", title: language === 'TR' ? "Kapadokya'ya Nasıl Ulaşılır?" : "How to Get to Cappadocia?" },
+          { id: "cappadocia-kayseri-prices", title: language === 'TR' ? "Kayseri Havalimanı Transfer Fiyatları 2025" : "Kayseri Airport Transfer Prices 2025" },
+          { id: "cappadocia-nevsehir-prices", title: language === 'TR' ? "Nevşehir Havalimanı Transfer Fiyatları 2025" : "Nevsehir Airport Transfer Prices 2025" },
+          { id: "cappadocia-balloon", title: language === 'TR' ? "Balon Turu Transferleri" : "Balloon Tour Transfers" },
+          { id: "cappadocia-hotels", title: language === 'TR' ? "Popüler Oteller" : "Popular Hotels" },
+          { id: "cappadocia-why-choose", title: language === 'TR' ? "Neden Özel Transfer?" : "Why Choose Private Transfer?" },
+        ]} />
+
         {/* Article Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <h2>
+          <h2 id="cappadocia-how-to-get">
             {language === 'TR' 
               ? "Kapadokya'ya Nasıl Ulaşılır?" 
               : "How to Get to Cappadocia?"}
@@ -269,7 +280,7 @@ const CappadociaAirportTransferGuide = () => {
             </Card>
           </div>
 
-          <h2>
+          <h2 id="cappadocia-kayseri-prices">
             {language === 'TR' 
               ? "Kayseri Havalimanı Transfer Fiyatları 2025" 
               : "Kayseri Airport Transfer Prices 2025"}
@@ -309,7 +320,7 @@ const CappadociaAirportTransferGuide = () => {
             </Table>
           </div>
 
-          <h2>
+          <h2 id="cappadocia-nevsehir-prices">
             {language === 'TR' 
               ? "Nevşehir Havalimanı Transfer Fiyatları 2025" 
               : "Nevsehir Airport Transfer Prices 2025"}
@@ -356,7 +367,7 @@ const CappadociaAirportTransferGuide = () => {
           </p>
 
           {/* Balloon Tour Section */}
-          <h2 className="flex items-center gap-2">
+          <h2 id="cappadocia-balloon" className="flex items-center gap-2">
             <Sunrise className="h-6 w-6 text-orange-500" />
             {language === 'TR' 
               ? "Balon Turu Transferleri" 
@@ -414,9 +425,9 @@ const CappadociaAirportTransferGuide = () => {
           </p>
 
           {/* Popular Hotels */}
-          <h2>
+          <h2 id="cappadocia-hotels">
             {language === 'TR' 
-              ? "Popüler Kapadokya Otelleri" 
+              ? "Popüler Kapadokya Otelleri"
               : "Popular Cappadocia Hotels"}
           </h2>
           <p>
@@ -434,7 +445,7 @@ const CappadociaAirportTransferGuide = () => {
             ))}
           </div>
 
-          <h2>
+          <h2 id="cappadocia-why-choose">
             {language === 'TR' 
               ? "Transfer Hizmetimize Neler Dahil?" 
               : "What's Included in Our Transfer Service?"}

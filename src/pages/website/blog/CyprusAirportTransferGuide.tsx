@@ -20,6 +20,7 @@ import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
+import TableOfContents from "@/components/website/TableOfContents";
 
 const CyprusAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -150,13 +151,26 @@ const CyprusAirportTransferGuide = () => {
           />
         </div>
 
+        {/* Table of Contents */}
+        <TableOfContents items={[
+          { id: "cyprus-intro", title: t("blogCyprusSection1Title") },
+          { id: "cyprus-airports", title: t("blogCyprusSection2Title") },
+          { id: "cyprus-larnaca", title: t("blogCyprusSection3Title") },
+          { id: "cyprus-paphos", title: t("blogCyprusSection4Title") },
+          { id: "cyprus-private", title: t("blogCyprusSection5Title") },
+          { id: "cyprus-tips", title: t("blogCyprusSection6Title") },
+          { id: "cyprus-destinations", title: t("blogCyprusSection7Title") },
+          { id: "cyprus-north", title: t("blogCyprusSection8Title") },
+          { id: "cyprus-booking", title: t("blogCyprusSection9Title") },
+        ]} />
+
         {/* Article Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <h2>{t("blogCyprusSection1Title")}</h2>
+          <h2 id="cyprus-intro">{t("blogCyprusSection1Title")}</h2>
           <p>{t("blogCyprusSection1P1")}</p>
           <p>{t("blogCyprusSection1P2")}</p>
 
-          <h2>{t("blogCyprusSection2Title")}</h2>
+          <h2 id="cyprus-airports">{t("blogCyprusSection2Title")}</h2>
           
           <h3>{t("blogCyprusLarnacaTitle")}</h3>
           <p>{t("blogCyprusLarnacaDesc")}</p>
@@ -164,7 +178,7 @@ const CyprusAirportTransferGuide = () => {
           <h3>{t("blogCyprusPaphosAirportTitle")}</h3>
           <p>{t("blogCyprusPaphosAirportDesc")}</p>
 
-          <h2>{t("blogCyprusSection3Title")}</h2>
+          <h2 id="cyprus-larnaca">{t("blogCyprusSection3Title")}</h2>
           <div className="overflow-x-auto not-prose my-8">
             <Table>
               <TableHeader>
@@ -186,7 +200,7 @@ const CyprusAirportTransferGuide = () => {
             </Table>
           </div>
 
-          <h2>{t("blogCyprusSection4Title")}</h2>
+          <h2 id="cyprus-paphos">{t("blogCyprusSection4Title")}</h2>
           <div className="overflow-x-auto not-prose my-8">
             <Table>
               <TableHeader>
@@ -208,7 +222,7 @@ const CyprusAirportTransferGuide = () => {
             </Table>
           </div>
 
-          <h2>{t("blogCyprusSection5Title")}</h2>
+          <h2 id="cyprus-private">{t("blogCyprusSection5Title")}</h2>
           <p>
             <Link to={getLocalizedPath("/cyprus-transfer")} className="text-primary hover:underline">{t("blogCyprusPrivateTransfer")}</Link> {t("blogCyprusSection5P1")}
           </p>
@@ -253,10 +267,10 @@ const CyprusAirportTransferGuide = () => {
             </Card>
           </div>
 
-          <h2>{t("blogCyprusSection6Title")}</h2>
+          <h2 id="cyprus-tips">{t("blogCyprusSection6Title")}</h2>
           <p>{t("blogCyprusSection6Intro")}</p>
 
-          <h2>{t("blogCyprusSection7Title")}</h2>
+          <h2 id="cyprus-destinations">{t("blogCyprusSection7Title")}</h2>
           <div className="not-prose my-8 grid md:grid-cols-2 gap-4">
             {popularDestinations.map((destination, index) => (
               <Card key={index}>
@@ -273,10 +287,10 @@ const CyprusAirportTransferGuide = () => {
             ))}
           </div>
 
-          <h2>{t("blogCyprusSection8Title")}</h2>
+          <h2 id="cyprus-north">{t("blogCyprusSection8Title")}</h2>
           <p>{t("blogCyprusSection8Intro")}</p>
 
-          <h2>{t("blogCyprusSection9Title")}</h2>
+          <h2 id="cyprus-booking">{t("blogCyprusSection9Title")}</h2>
           <p>{t("blogCyprusSection9Intro")}</p>
 
           <h2>{t("blogCyprusConclusion")}</h2>
