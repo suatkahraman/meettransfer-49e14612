@@ -102,6 +102,18 @@ const CustomerHome = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [activeBookingsCount, setActiveBookingsCount] = useState(0);
+  const [recentReservations, setRecentReservations] = useState<Array<{
+    id: string;
+    reservation_code: string | null;
+    pickup: string;
+    dropoff: string;
+    pickup_place_name: string | null;
+    dropoff_place_name: string | null;
+    pickup_date: string;
+    pickup_time: string;
+    status: string;
+    vehicle_type: string;
+  }>>([]);
   const [nextTransfer, setNextTransfer] = useState<{date: string; time: string; pickup: string; dropoff: string; reservationCode?: string} | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({ full_name: '', phone: '' });
@@ -152,14 +164,15 @@ const CustomerHome = () => {
       // Fetch active bookings with next transfer info
       const { data: activeReservations, count } = await supabase
         .from('reservations')
-        .select('*', { count: 'exact' })
+        .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, status, vehicle_type', { count: 'exact' })
         .eq('customer_id', user.id)
         .in('status', ['awaiting-price', 'waiting_for_customer_approval', 'customer_approved', 'confirmed', 'sent_to_driver', 'pending_admin_review'])
         .order('pickup_date', { ascending: true })
         .order('pickup_time', { ascending: true })
-        .limit(1);
+        .limit(5);
       
       setActiveBookingsCount(count || 0);
+      setRecentReservations(activeReservations || []);
       
       // Set next upcoming transfer
       if (activeReservations && activeReservations.length > 0) {
@@ -776,6 +789,120 @@ const CustomerHome = () => {
             </Button>
           </motion.div>
         </motion.div>
+
+        {/* Active Reservations Cards */}
+        {recentReservations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mb-6"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold">
+                  {language === 'TR' ? 'Aktif Rezervasyonlar' : 'Active Reservations'}
+                </span>
+              </div>
+              {activeBookingsCount > 3 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-primary hover:text-primary/80"
+                  onClick={() => navigate('/customer/bookings')}
+                >
+                  {language === 'TR' ? 'Tümünü Gör' : 'View All'}
+                  <ChevronRight className="h-3 w-3 ml-1" />
+                </Button>
+              )}
+            </div>
+            <div className="space-y-3">
+              {recentReservations.slice(0, 3).map((reservation, index) => {
+                const statusConfig: Record<string, { label: string; labelTr: string; color: string; bgColor: string }> = {
+                  'awaiting-price': { label: 'Awaiting Price', labelTr: 'Fiyat Bekleniyor', color: 'text-amber-700', bgColor: 'bg-amber-100' },
+                  'waiting_for_customer_approval': { label: 'Awaiting Approval', labelTr: 'Onay Bekliyor', color: 'text-orange-700', bgColor: 'bg-orange-100' },
+                  'customer_approved': { label: 'Approved', labelTr: 'Onaylandı', color: 'text-blue-700', bgColor: 'bg-blue-100' },
+                  'confirmed': { label: 'Confirmed', labelTr: 'Onaylandı', color: 'text-green-700', bgColor: 'bg-green-100' },
+                  'sent_to_driver': { label: 'Driver Assigned', labelTr: 'Şoför Atandı', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
+                  'pending_admin_review': { label: 'Under Review', labelTr: 'İnceleniyor', color: 'text-purple-700', bgColor: 'bg-purple-100' },
+                };
+                const status = statusConfig[reservation.status] || { label: reservation.status, labelTr: reservation.status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
+                
+                const vehicleLabels: Record<string, string> = {
+                  'mercedes-vito': 'Mercedes Vito',
+                  'mercedes-vito-vip': 'Mercedes Vito VIP',
+                  'mercedes-sprinter': 'Sprinter',
+                  'minibus': 'Minibüs',
+                  'maybach': 'Maybach',
+                };
+                
+                return (
+                  <motion.div
+                    key={reservation.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                  >
+                    <Card
+                      className="cursor-pointer shadow-sm hover:shadow-md transition-all border-l-4 border-l-primary/60 overflow-hidden"
+                      onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            {/* Header with code and status */}
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="font-mono text-sm font-semibold text-primary">
+                                {reservation.reservation_code || 'N/A'}
+                              </span>
+                              <Badge className={cn("text-xs font-medium", status.bgColor, status.color)}>
+                                {language === 'TR' ? status.labelTr : status.label}
+                              </Badge>
+                            </div>
+                            
+                            {/* Route info */}
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1.5">
+                              <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-primary" />
+                              <span className="truncate">
+                                {(reservation.pickup_place_name || reservation.pickup).split(',')[0]}
+                              </span>
+                              <ArrowRight className="h-3 w-3 flex-shrink-0" />
+                              <span className="truncate">
+                                {(reservation.dropoff_place_name || reservation.dropoff).split(',')[0]}
+                              </span>
+                            </div>
+                            
+                            {/* Date, time and vehicle */}
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                <span>{new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                <span>{reservation.pickup_time.slice(0, 5)}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Car className="h-3 w-3" />
+                                <span>{vehicleLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Arrow indicator */}
+                          <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
 
         {/* Recent Searches - New Feature */}
         {recentSearches.length > 0 && (
