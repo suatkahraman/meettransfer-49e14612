@@ -49,6 +49,7 @@ import { toast } from 'sonner';
 import { format, formatDistanceToNow, Locale } from 'date-fns';
 import { tr, enUS } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
+import PasswordChangeCard from '@/components/security/PasswordChangeCard';
 
 interface TrustedDevice {
   id: string;
@@ -632,6 +633,15 @@ const SecuritySettings = () => {
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Password Change Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+        >
+          <PasswordChangeCard isTurkish={isTurkish} />
         </motion.div>
 
         {/* Login History Card */}
