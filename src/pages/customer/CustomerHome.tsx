@@ -15,7 +15,8 @@ import {
   ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall, Sparkles, 
   Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe, History,
   Bookmark, TrendingUp, Briefcase, Baby, MessageSquare, CheckCircle,
-  Snowflake, Armchair, Wifi, BatteryCharging, Droplets, Stars, Wine, Crown, Tv
+  Snowflake, Armchair, Wifi, BatteryCharging, Droplets, Stars, Wine, Crown, Tv,
+  Award, Zap
 } from 'lucide-react';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -607,38 +608,69 @@ const CustomerHome = () => {
           isPulling={isPulling}
           language={language === 'TR' ? 'TR' : 'EN'}
         />
-        {/* Welcome Section with Animation */}
+        {/* Welcome Section with Premium Design */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           className="mb-6"
         >
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <motion.div
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-              >
-                <Sparkles className="h-5 w-5 text-primary" />
-              </motion.div>
-              <h2 className="text-lg sm:text-xl font-medium text-muted-foreground">
-                {greeting},
-              </h2>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={fetchData}
-              disabled={isRefreshing}
-              className="h-8 w-8"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-            {displayName}
-          </h1>
+          <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden relative">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(var(--primary),0.1),_transparent_50%)]" />
+            <CardContent className="p-5 sm:p-6 relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <motion.div
+                    animate={{ rotate: [0, 15, -15, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    className="bg-primary/20 p-2.5 rounded-full"
+                  >
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </motion.div>
+                  <div>
+                    <p className="text-sm text-muted-foreground font-medium">
+                      {greeting}
+                    </p>
+                    <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
+                      {displayName}
+                    </h1>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={fetchData}
+                  disabled={isRefreshing}
+                  className="h-10 w-10 rounded-full bg-background/50 hover:bg-background"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                </Button>
+              </div>
+              
+              {/* Stats Row */}
+              <div className="flex items-center gap-4 pt-3 border-t border-primary/10">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <ClipboardList className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{language === 'TR' ? 'Aktif' : 'Active'}</p>
+                    <p className="font-bold text-foreground">{activeBookingsCount}</p>
+                  </div>
+                </div>
+                <div className="h-8 w-px bg-border/50" />
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{language === 'TR' ? 'Tamamlanan' : 'Completed'}</p>
+                    <p className="font-bold text-foreground">{completedReservations.length}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Missing Phone Warning */}
