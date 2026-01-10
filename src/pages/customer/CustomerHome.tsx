@@ -14,7 +14,7 @@ import {
   Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
   ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall, Sparkles, 
   Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe, History,
-  Bookmark, TrendingUp
+  Bookmark, TrendingUp, Briefcase, Baby, MessageSquare, CheckCircle
 } from 'lucide-react';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,8 +24,10 @@ import { PhoneInput } from '@/components/ui/phone-input';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
+import { VEHICLE_TYPE_OPTIONS as vehicleTypes, getAvailableVehicles, isMinibusRequired, VEHICLE_TYPE_MAP } from '@/lib/vehicleTypes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import { Language } from '@/contexts/LanguageContext';
 import meetTransferLogo from '@/assets/meet-transfer-logo-small.webp';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
@@ -95,7 +97,24 @@ const CustomerHome = () => {
     passengerPhone: '',
     vehicleType: 'mercedes-vito',
     paymentType: 'cash',
+    luggageCount: '1',
+    babySeatCount: '0',
+    customerNotes: '',
   });
+
+  // Computed: available vehicles based on passengers and luggage
+  const passengerNum = passengerNames.filter(n => n.trim()).length || 1;
+  const luggageNum = parseInt(formData.luggageCount) || 1;
+  const availableVehicles = getAvailableVehicles(passengerNum, luggageNum);
+  const minibusRequired = isMinibusRequired(passengerNum, luggageNum);
+  const currentVehicle = VEHICLE_TYPE_MAP[formData.vehicleType];
+
+  // Auto-select minibus if required
+  useEffect(() => {
+    if (minibusRequired && formData.vehicleType !== 'minibus') {
+      setFormData(prev => ({ ...prev, vehicleType: 'minibus' }));
+    }
+  }, [minibusRequired, formData.vehicleType]);
 
   // Memoized greeting
   const greeting = useMemo(() => getGreeting(language), [language]);
@@ -274,10 +293,16 @@ const CustomerHome = () => {
       vehicleType: result.data.vehicleType,
       passengers: String(validPassengerNames.length),
       paymentMethod: result.data.paymentType,
+      luggageCount: formData.luggageCount,
+      babySeatCount: formData.babySeatCount,
     });
     
     if (result.data.flightNumber) {
       params.set('flightNumber', result.data.flightNumber.trim());
+    }
+    
+    if (formData.customerNotes.trim()) {
+      params.set('customerNotes', formData.customerNotes.trim());
     }
 
     // Store passenger names in sessionStorage for the reservation form to pick up
@@ -919,20 +944,105 @@ const CustomerHome = () => {
                 {errors.passengerPhone && <p className="text-sm text-destructive">{errors.passengerPhone}</p>}
               </div>
 
-              {/* Vehicle Type */}
+              {/* Luggage & Baby Seat */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    {t('luggageCount') || 'Luggage'}
+                  </Label>
+                  <Select value={formData.luggageCount} onValueChange={(v) => setFormData({...formData, luggageCount: v})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectLuggage') || 'Luggage'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 20 }, (_, i) => i).map((num) => (
+                        <SelectItem key={num} value={num.toString()}>{num} {t('luggage') || 'Luggage'}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Baby className="h-4 w-4" />
+                    {t('babySeat') || 'Baby Seat'}
+                  </Label>
+                  <Select value={formData.babySeatCount} onValueChange={(v) => setFormData({...formData, babySeatCount: v})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectBabySeat') || 'Baby Seat'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 4 }, (_, i) => i).map((num) => (
+                        <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Vehicle Type - Visual Cards */}
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
                   {t('vehicleType')}
                 </Label>
-                <RadioGroup value={formData.vehicleType} onValueChange={(v) => setFormData({...formData, vehicleType: v})}>
-                  {vehicleTypes.map(vehicle => (
-                    <div key={vehicle.value} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                      <RadioGroupItem value={vehicle.value} id={vehicle.value} />
-                      <Label htmlFor={vehicle.value} className="cursor-pointer flex-1">{vehicle.label}</Label>
-                    </div>
+                {minibusRequired && (
+                  <div className="flex items-center gap-2 text-amber-600 text-xs bg-amber-100 dark:bg-amber-900/30 p-2 rounded-lg">
+                    <Briefcase className="h-4 w-4" />
+                    <span>{t('minibusRequiredInfo') || 'For 7+ passengers or luggage, only Minibus is available'}</span>
+                  </div>
+                )}
+                <div className={cn(
+                  "grid gap-3",
+                  availableVehicles.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                )}>
+                  {availableVehicles.map((v) => (
+                    <button
+                      key={v.value}
+                      type="button"
+                      disabled={minibusRequired && v.value !== 'minibus'}
+                      onClick={() => setFormData({...formData, vehicleType: v.value})}
+                      className={cn(
+                        "relative overflow-hidden rounded-xl p-3 transition-all duration-200 text-left",
+                        "border-2 hover:scale-[1.02] active:scale-[0.98]",
+                        formData.vehicleType === v.value
+                          ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/30"
+                          : "border-border bg-card hover:bg-muted/50 hover:border-primary/40",
+                        minibusRequired && v.value !== 'minibus' && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      {formData.vehicleType === v.value && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                          <CheckCircle className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                      )}
+                      <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-muted">
+                        <img
+                          src={v.images[0]?.src}
+                          alt={v.label}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <h3 className={cn(
+                        "font-semibold text-sm mb-1",
+                        formData.vehicleType === v.value ? "text-primary" : "text-foreground"
+                      )}>
+                        {v.label}
+                      </h3>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          {v.passengers}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Briefcase className="h-3 w-3" />
+                          {v.luggage}
+                        </span>
+                      </div>
+                    </button>
                   ))}
-                </RadioGroup>
+                </div>
               </div>
 
               {/* Payment Type */}
@@ -951,6 +1061,22 @@ const CustomerHome = () => {
                     <Label htmlFor="online" className="cursor-pointer">{t('onlinePaymentLink')}</Label>
                   </div>
                 </RadioGroup>
+              </div>
+
+              {/* Special Requests / Notes */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  {t('specialRequests') || 'Special Requests / Notes'}
+                  <span className="text-muted-foreground text-xs">({t('optional') || 'Optional'})</span>
+                </Label>
+                <Textarea
+                  value={formData.customerNotes}
+                  onChange={(e) => setFormData({...formData, customerNotes: e.target.value})}
+                  placeholder={t('specialRequestsPlaceholder') || 'Flight number, child seat, special requirements...'}
+                  className="resize-none min-h-[80px]"
+                  maxLength={500}
+                />
               </div>
 
               {/* Info message */}
