@@ -35,7 +35,7 @@ const checkRateLimit = (email: string): { allowed: boolean; remaining: number; r
   return { allowed: true, remaining: maxRequests - limit.count, resetIn: limit.resetAt - now };
 };
 
-const getEmailContent = (otp: string, role: string, language: string = 'en') => {
+const getEmailContent = (otp: string, role: string, language: string = 'en', expiryMinutes: number = 5) => {
   const roleLabels: Record<string, Record<string, string>> = {
     admin: { tr: 'Yönetici', en: 'Admin' },
     agency: { tr: 'Acenta', en: 'Agency' },
@@ -95,7 +95,7 @@ const getEmailContent = (otp: string, role: string, language: string = 'en') => 
                         <tr>
                           <td style="padding: 24px 0;">
                             <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 16px;">
-                              <p style="color: #92400e; font-size: 14px; margin: 0;">⏱️ Bu kod <strong>5 dakika</strong> içinde geçerliliğini yitirecektir.</p>
+                              <p style="color: #92400e; font-size: 14px; margin: 0;">⏱️ Bu kod <strong>${expiryMinutes} dakika</strong> içinde geçerliliğini yitirecektir.</p>
                             </div>
                           </td>
                         </tr>
@@ -181,7 +181,7 @@ const getEmailContent = (otp: string, role: string, language: string = 'en') => 
                       <tr>
                         <td style="padding: 24px 0;">
                           <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 16px;">
-                            <p style="color: #92400e; font-size: 14px; margin: 0;">⏱️ This code expires in <strong>5 minutes</strong>.</p>
+                            <p style="color: #92400e; font-size: 14px; margin: 0;">⏱️ This code expires in <strong>${expiryMinutes} minutes</strong>.</p>
                           </div>
                         </td>
                       </tr>
@@ -385,13 +385,30 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Get OTP settings from database
+    const { data: settings } = await supabase
+      .from('otp_settings')
+      .select('setting_key, setting_value');
+    
+    const settingsMap: Record<string, string> = {};
+    if (settings) {
+      settings.forEach((s: { setting_key: string; setting_value: string }) => {
+        settingsMap[s.setting_key] = s.setting_value;
+      });
+    }
+    
+    const otpExpiryMinutes = parseInt(settingsMap['otp_expiry_minutes'] || '5', 10);
+    const otpLength = parseInt(settingsMap['otp_length'] || '6', 10);
+    
+    console.log("OTP settings loaded:", { otpExpiryMinutes, otpLength });
+
     // Get client info for logging
     const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
                       req.headers.get('x-real-ip') || 
                       'unknown';
     const userAgent = req.headers.get('user-agent') || 'unknown';
 
-    // Generate OTP using the database function
+    // Generate OTP using the database function (uses settings from otp_settings table)
     const { data: otp, error: otpError } = await supabase.rpc('generate_otp', {
       p_user_id: userId,
       p_email: email,
@@ -415,10 +432,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("OTP generated successfully for:", email.substring(0, 5) + '***');
+    console.log("OTP generated successfully for:", email.substring(0, 5) + '***', { length: otp.length, expiryMinutes: otpExpiryMinutes });
 
-    // Get email content based on language and role
-    const emailContent = getEmailContent(otp, role, language);
+    // Get email content based on language, role and expiry time
+    const emailContent = getEmailContent(otp, role, language, otpExpiryMinutes);
 
     // Send OTP via email with fallback methods
     const emailResult = await sendEmailWithFallback(supabase, email, emailContent.subject, emailContent.html, otp);

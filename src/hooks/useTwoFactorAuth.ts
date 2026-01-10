@@ -119,9 +119,10 @@ const getDeviceName = (): string => {
   return `${browser} on ${os}`;
 };
 
-// OTP resend cooldown in milliseconds
-const OTP_RESEND_COOLDOWN = 60000; // 60 seconds
-const MAX_VERIFY_ATTEMPTS = 5;
+// OTP resend cooldown in milliseconds (can be overridden by settings)
+const DEFAULT_OTP_RESEND_COOLDOWN = 60000; // 60 seconds
+const DEFAULT_MAX_VERIFY_ATTEMPTS = 5;
+const DEFAULT_OTP_LENGTH = 6;
 
 export const useTwoFactorAuth = () => {
   const [twoFactorState, setTwoFactorState] = useState<TwoFactorState>({
@@ -136,12 +137,56 @@ export const useTwoFactorAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // OTP Settings state (loaded from database)
+  const [otpSettings, setOtpSettings] = useState({
+    resendCooldownSeconds: 60,
+    maxVerifyAttempts: 5,
+    otpLength: 6,
+    expiryMinutes: 5,
+    failedLoginThreshold: 2,
+  });
+  
   // Memoize device fingerprint to prevent regeneration
   const deviceFingerprint = useMemo(() => generateDeviceFingerprint(), []);
   const deviceName = useMemo(() => getDeviceName(), []);
   
   // Ref to prevent duplicate API calls
   const pendingRequest = useRef<AbortController | null>(null);
+  
+  // Load OTP settings from database
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('otp_settings')
+          .select('setting_key, setting_value');
+        
+        if (error) {
+          console.error('Failed to load OTP settings:', error);
+          return;
+        }
+        
+        if (data) {
+          const settingsMap: Record<string, string> = {};
+          data.forEach((s) => {
+            settingsMap[s.setting_key] = s.setting_value;
+          });
+          
+          setOtpSettings({
+            resendCooldownSeconds: parseInt(settingsMap['resend_cooldown_seconds'] || '60', 10),
+            maxVerifyAttempts: parseInt(settingsMap['max_verify_attempts'] || '5', 10),
+            otpLength: parseInt(settingsMap['otp_length'] || '6', 10),
+            expiryMinutes: parseInt(settingsMap['otp_expiry_minutes'] || '5', 10),
+            failedLoginThreshold: parseInt(settingsMap['failed_login_threshold'] || '2', 10),
+          });
+        }
+      } catch (err) {
+        console.error('Error loading OTP settings:', err);
+      }
+    };
+    
+    loadSettings();
+  }, []);
 
   // Check if device is trusted (2FA not needed)
   const checkTrustedDevice = useCallback(async (userId: string): Promise<boolean> => {
@@ -188,15 +233,17 @@ export const useTwoFactorAuth = () => {
   // Check if we can resend OTP (cooldown check)
   const canResendOTP = useCallback((): boolean => {
     if (!twoFactorState.lastOtpSentAt) return true;
-    return Date.now() - twoFactorState.lastOtpSentAt >= OTP_RESEND_COOLDOWN;
-  }, [twoFactorState.lastOtpSentAt]);
+    const cooldownMs = otpSettings.resendCooldownSeconds * 1000;
+    return Date.now() - twoFactorState.lastOtpSentAt >= cooldownMs;
+  }, [twoFactorState.lastOtpSentAt, otpSettings.resendCooldownSeconds]);
 
   // Get remaining cooldown time in seconds
   const getResendCooldown = useCallback((): number => {
     if (!twoFactorState.lastOtpSentAt) return 0;
     const elapsed = Date.now() - twoFactorState.lastOtpSentAt;
-    return Math.max(0, Math.ceil((OTP_RESEND_COOLDOWN - elapsed) / 1000));
-  }, [twoFactorState.lastOtpSentAt]);
+    const cooldownMs = otpSettings.resendCooldownSeconds * 1000;
+    return Math.max(0, Math.ceil((cooldownMs - elapsed) / 1000));
+  }, [twoFactorState.lastOtpSentAt, otpSettings.resendCooldownSeconds]);
 
   const initiate2FA = useCallback(async (
     userId: string, 
@@ -257,7 +304,7 @@ export const useTwoFactorAuth = () => {
     }
 
     // Check max attempts
-    if (twoFactorState.attempts >= MAX_VERIFY_ATTEMPTS) {
+    if (twoFactorState.attempts >= otpSettings.maxVerifyAttempts) {
       setError('Çok fazla hatalı deneme. Yeni kod isteyin.');
       return { 
         success: false, 
@@ -266,9 +313,10 @@ export const useTwoFactorAuth = () => {
       };
     }
 
-    // Validate OTP format before sending
-    if (!/^\d{6}$/.test(otpCode)) {
-      setError('Kod 6 haneli olmalıdır');
+    // Validate OTP format before sending (dynamic length)
+    const otpRegex = new RegExp(`^\\d{${otpSettings.otpLength}}$`);
+    if (!otpRegex.test(otpCode)) {
+      setError(`Kod ${otpSettings.otpLength} haneli olmalıdır`);
       return { success: false, error: 'invalid_format', errorCode: 'invalid' };
     }
 
@@ -292,9 +340,10 @@ export const useTwoFactorAuth = () => {
         }));
 
         const isExpired = data?.error === 'expired';
+        const remainingAttemptsCount = otpSettings.maxVerifyAttempts - twoFactorState.attempts - 1;
         const errorMessage = isExpired 
           ? 'Kod süresi dolmuş. Yeni kod gönderin.' 
-          : `Geçersiz kod (${MAX_VERIFY_ATTEMPTS - twoFactorState.attempts - 1} deneme kaldı)`;
+          : `Geçersiz kod (${remainingAttemptsCount} deneme kaldı)`;
         
         setError(errorMessage);
         return { 
@@ -391,7 +440,8 @@ export const useTwoFactorAuth = () => {
     registerTrustedDevice,
     canResendOTP,
     getResendCooldown,
-    maxAttempts: MAX_VERIFY_ATTEMPTS,
-    remainingAttempts: MAX_VERIFY_ATTEMPTS - twoFactorState.attempts,
+    maxAttempts: otpSettings.maxVerifyAttempts,
+    remainingAttempts: otpSettings.maxVerifyAttempts - twoFactorState.attempts,
+    otpSettings,
   };
 };

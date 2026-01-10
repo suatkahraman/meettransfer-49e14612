@@ -16,6 +16,8 @@ interface TwoFactorVerificationProps {
   onCancel: () => void;
   maxAttempts?: number;
   remainingAttempts?: number;
+  otpLength?: number;
+  expiryMinutes?: number;
 }
 
 const TwoFactorVerification = ({
@@ -28,6 +30,8 @@ const TwoFactorVerification = ({
   onCancel,
   maxAttempts = 5,
   remainingAttempts = 5,
+  otpLength = 6,
+  expiryMinutes = 5,
 }: TwoFactorVerificationProps) => {
   const [otpCode, setOtpCode] = useState('');
   const [countdown, setCountdown] = useState(60);
@@ -44,8 +48,8 @@ const TwoFactorVerification = ({
   const t = {
     title: isTurkish ? 'İki Faktörlü Doğrulama' : 'Two-Factor Authentication',
     description: isTurkish 
-      ? `${getRoleLabel(role, language)} paneline giriş için email adresinize gönderilen 6 haneli kodu girin.`
-      : `Enter the 6-digit code sent to your email to access the ${getRoleLabel(role, language)} panel.`,
+      ? `${getRoleLabel(role, language)} paneline giriş için email adresinize gönderilen ${otpLength} haneli kodu girin.`
+      : `Enter the ${otpLength}-digit code sent to your email to access the ${getRoleLabel(role, language)} panel.`,
     codeSent: isTurkish ? 'Kod gönderildi' : 'Code sent',
     verifying: isTurkish ? 'Doğrulanıyor...' : 'Verifying...',
     verify: isTurkish ? 'Doğrula' : 'Verify',
@@ -71,16 +75,16 @@ const TwoFactorVerification = ({
     }
   }, [countdown]);
 
-  // Auto-submit when 6 digits entered (only once per code)
+  // Auto-submit when all digits entered (only once per code)
   useEffect(() => {
-    if (otpCode.length === 6 && !hasAutoSubmitted.current && !isLoading) {
+    if (otpCode.length === otpLength && !hasAutoSubmitted.current && !isLoading) {
       hasAutoSubmitted.current = true;
       onVerify(otpCode);
     }
-    if (otpCode.length < 6) {
+    if (otpCode.length < otpLength) {
       hasAutoSubmitted.current = false;
     }
-  }, [otpCode, onVerify, isLoading]);
+  }, [otpCode, onVerify, isLoading, otpLength]);
 
   // Focus input on mount and after error
   useEffect(() => {
@@ -114,10 +118,13 @@ const TwoFactorVerification = ({
   }, [canResend, isResending, onResend]);
 
   const handleVerify = useCallback(() => {
-    if (otpCode.length === 6 && !isLoading) {
+    if (otpCode.length === otpLength && !isLoading) {
       onVerify(otpCode);
     }
-  }, [otpCode, isLoading, onVerify]);
+  }, [otpCode, isLoading, onVerify, otpLength]);
+
+  // Generate OTP slots dynamically based on otpLength
+  const otpSlots = Array.from({ length: otpLength }, (_, i) => i);
 
   const maskedEmail = email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
   const isLocked = remainingAttempts <= 0;
@@ -176,14 +183,14 @@ const TwoFactorVerification = ({
           transition={{ delay: 0.2 }}
         >
           <InputOTP
-            maxLength={6}
+            maxLength={otpLength}
             value={otpCode}
             onChange={setOtpCode}
             disabled={isLoading || isLocked}
             autoFocus
           >
             <InputOTPGroup className="gap-2">
-              {[0, 1, 2, 3, 4, 5].map((index) => (
+              {otpSlots.map((index) => (
                 <InputOTPSlot 
                   key={index}
                   index={index} 
@@ -270,7 +277,7 @@ const TwoFactorVerification = ({
           variant="accent"
           className="w-full h-12 rounded-xl text-base font-medium transition-all"
           onClick={handleVerify}
-          disabled={isLoading || otpCode.length !== 6 || isLocked}
+          disabled={isLoading || otpCode.length !== otpLength || isLocked}
         >
           {isLoading ? (
             <>
