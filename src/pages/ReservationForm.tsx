@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins, Sparkles, Loader2, Baby, Luggage, Minus, Plus } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins, Sparkles, Loader2, Baby, Luggage, Minus, Plus, ThumbsDown, Gift } from 'lucide-react';
 import { VehicleSelectionCard } from '@/components/VehicleSelectionCard';
 import { cn } from '@/lib/utils';
 import { CURRENCY_OPTIONS } from '@/lib/currency';
@@ -109,6 +109,13 @@ const ReservationForm = () => {
   const [selectedVehicleForConfirm, setSelectedVehicleForConfirm] = useState<string>('');
   const [pendingFormData, setPendingFormData] = useState<typeof defaultFormData | null>(null);
   const [pendingPassengerNames, setPendingPassengerNames] = useState<string[]>([]);
+  
+  // Reject and auto discount states (like QuickBookingConfirm)
+  const [isRejecting, setIsRejecting] = useState(false);
+  const [canReject, setCanReject] = useState(true);
+  const [isDiscountedOffer, setIsDiscountedOffer] = useState(false);
+  const [discountJustApplied, setDiscountJustApplied] = useState(false);
+  const [previousVehiclePrices, setPreviousVehiclePrices] = useState<Record<string, number>>({});
   
   // Check if coming from QuickBooking flow
   const quickBookingIdParam = searchParams.get('quickBookingId') || '';
@@ -905,6 +912,64 @@ const ReservationForm = () => {
     return 'vip-mercedes';
   };
 
+  // Handle price rejection with auto discount (like QuickBookingConfirm)
+  const handleRejectPrice = async () => {
+    if (!selectedVehicleForConfirm || !canReject) return;
+
+    setIsRejecting(true);
+    try {
+      const selectedPriceInfo = fetchedVehiclePrices.find(v => v.vehicleType === selectedVehicleForConfirm);
+      if (!selectedPriceInfo?.price) {
+        toast.error(t('language') === 'TR' ? 'Fiyat bulunamadı' : 'Price not found');
+        return;
+      }
+
+      // Store previous prices for animation
+      const oldPricesMap: Record<string, number> = {};
+      fetchedVehiclePrices.forEach(v => {
+        if (v.price) oldPricesMap[v.vehicleType] = v.price;
+      });
+      setPreviousVehiclePrices(oldPricesMap);
+
+      // Apply €3 discount (approximately, use exchange rate)
+      const discountAmount = selectedPriceInfo.currency === 'EUR' ? 3 :
+                            selectedPriceInfo.currency === 'USD' ? 3 :
+                            selectedPriceInfo.currency === 'GBP' ? 3 :
+                            selectedPriceInfo.currency === 'TRY' ? 110 :
+                            selectedPriceInfo.currency === 'AED' ? 12 : 3;
+
+      // Update all vehicle prices with discount
+      setFetchedVehiclePrices(prevPrices => 
+        prevPrices.map(v => ({
+          ...v,
+          price: v.price ? Math.max(v.price - discountAmount, 1) : null,
+        }))
+      );
+
+      setDiscountJustApplied(true);
+      setIsDiscountedOffer(true);
+      setCanReject(false);
+
+      toast.success(
+        t('language') === 'TR' 
+          ? `Özel indirim uygulandı! -${discountAmount} ${selectedPriceInfo.currency}` 
+          : `Special discount applied! -${discountAmount} ${selectedPriceInfo.currency}`
+      );
+
+      // Clear animation after 4 seconds
+      setTimeout(() => {
+        setDiscountJustApplied(false);
+        setPreviousVehiclePrices({});
+      }, 4000);
+
+    } catch (error: any) {
+      console.error('Reject price error:', error);
+      toast.error(error.message || 'Failed to apply discount');
+    } finally {
+      setIsRejecting(false);
+    }
+  };
+
   // Price preparation animation screen
   if (showPricePreparation) {
     return (
@@ -1061,6 +1126,37 @@ const ReservationForm = () => {
               />
             </div>
 
+            {/* Discount Applied Animation Banner */}
+            {discountJustApplied && (
+              <div className="mb-6 overflow-hidden">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl p-4 animate-scale-in">
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center animate-bounce">
+                      <Gift className="h-5 w-5" />
+                    </div>
+                    <div className="text-center">
+                      <p className="font-bold text-lg">
+                        {t('language') === 'TR' ? '🎉 Özel İndirim Uygulandı!' : '🎉 Special Discount Applied!'}
+                      </p>
+                      <p className="text-sm text-white/90">
+                        {t('language') === 'TR' ? 'Yeni fiyatlarınız aşağıda gösterilmektedir' : 'Your new prices are shown below'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Already Discounted Badge */}
+            {isDiscountedOffer && !discountJustApplied && (
+              <div className="mb-4 flex items-center justify-center">
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-sm font-medium">
+                  <Gift className="h-4 w-4" />
+                  {t('language') === 'TR' ? 'İndirimli Fiyat' : 'Discounted Price'}
+                </span>
+              </div>
+            )}
+
             {/* Vehicle Selection */}
             <div className="mb-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -1073,19 +1169,34 @@ const ReservationForm = () => {
                   {fetchedVehiclePrices.map((vehicle) => {
                     const isSelected = selectedVehicleForConfirm === vehicle.vehicleType;
                     const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
+                    const previousPrice = previousVehiclePrices[vehicle.vehicleType];
+                    const hasDiscount = previousPrice && vehicle.price && previousPrice > vehicle.price;
                     
                     return (
-                      <VehicleSelectionCard
-                        key={vehicle.vehicleType}
-                        vehicleType={vehicle.vehicleType}
-                        isSelected={isSelected}
-                        onSelect={(v) => setSelectedVehicleForConfirm(v)}
-                        price={vehicle.price}
-                        currency={vehicle.currency}
-                        showPrice={true}
-                        isRecommended={isRecommended}
-                        available={vehicle.available}
-                      />
+                      <div key={vehicle.vehicleType} className={cn(
+                        "relative transition-all duration-500",
+                        discountJustApplied && hasDiscount && "animate-fade-in"
+                      )}>
+                        {/* Previous Price Strike-through */}
+                        {hasDiscount && discountJustApplied && (
+                          <div className="absolute -top-2 right-4 z-10">
+                            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full line-through">
+                              {previousPrice} {vehicle.currency}
+                            </span>
+                          </div>
+                        )}
+                        
+                        <VehicleSelectionCard
+                          vehicleType={vehicle.vehicleType}
+                          isSelected={isSelected}
+                          onSelect={(v) => setSelectedVehicleForConfirm(v)}
+                          price={vehicle.price}
+                          currency={vehicle.currency}
+                          showPrice={true}
+                          isRecommended={isRecommended}
+                          available={vehicle.available}
+                        />
+                      </div>
                     );
                   })}
                 </div>
@@ -1328,7 +1439,7 @@ const ReservationForm = () => {
             <div className="space-y-3">
               <Button 
                 onClick={handleConfirmVehicleSelection} 
-                className="w-full" 
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700" 
                 size="lg"
                 disabled={isLoading || !selectedVehicleForConfirm || (hasReturnTrip && (!returnTripData.date || !returnTripData.time))}
               >
@@ -1340,21 +1451,48 @@ const ReservationForm = () => {
                 ) : (
                   <>
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    {t('language') === 'TR' ? 'Rezervasyonu Onayla' : 'Confirm Reservation'}
+                    {t('language') === 'TR' ? 'Fiyatı Onayla ve Rezerve Et' : 'Accept Price & Book'}
                   </>
                 )}
               </Button>
               
+              {/* Reject Price Button - Only show if prices exist and can reject */}
+              {fetchedVehiclePrices.some(v => v.price) && canReject && !isDiscountedOffer && (
+                <Button 
+                  variant="outline"
+                  onClick={handleRejectPrice}
+                  className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-950/30"
+                  size="lg"
+                  disabled={isRejecting || isLoading || !selectedVehicleForConfirm}
+                >
+                  {isRejecting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t('language') === 'TR' ? 'İndirim Uygulanıyor...' : 'Applying Discount...'}
+                    </>
+                  ) : (
+                    <>
+                      <ThumbsDown className="h-4 w-4 mr-2" />
+                      {t('language') === 'TR' ? 'Fiyat Yüksek, İndirim İste' : 'Price Too High, Request Discount'}
+                    </>
+                  )}
+                </Button>
+              )}
+              
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 onClick={() => {
                   setShowVehicleSelection(false);
                   setPendingFormData(null);
                   setPendingPassengerNames([]);
                   setFetchedVehiclePrices([]);
+                  setCanReject(true);
+                  setIsDiscountedOffer(false);
+                  setDiscountJustApplied(false);
+                  setPreviousVehiclePrices({});
                 }}
                 className="w-full"
-                disabled={isLoading}
+                disabled={isLoading || isRejecting}
               >
                 {t('language') === 'TR' ? 'Geri Dön' : 'Go Back'}
               </Button>
