@@ -1558,22 +1558,57 @@ const ReservationForm = () => {
                 </Button>
               )}
               
-              {/* Discount Applied Badge - Show after discount */}
+              {/* Discount Applied Badge - Show after discount with glow animation */}
               {isDiscountedOffer && appliedDiscountInfo && (
-                <div className="flex flex-col items-center gap-2 py-4 px-5 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300">
+                <div 
+                  className={cn(
+                    "flex flex-col items-center gap-2 py-4 px-5 rounded-xl",
+                    "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40",
+                    "border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300",
+                    "shadow-[0_0_15px_rgba(16,185,129,0.3)] dark:shadow-[0_0_20px_rgba(52,211,153,0.25)]",
+                    discountJustApplied && "animate-[pulse-glow_2s_ease-in-out_infinite]"
+                  )}
+                  style={{
+                    animation: discountJustApplied ? 'pulse-glow 2s ease-in-out infinite' : undefined
+                  }}
+                >
+                  <style>{`
+                    @keyframes pulse-glow {
+                      0%, 100% { 
+                        box-shadow: 0 0 15px rgba(16,185,129,0.3), 0 0 30px rgba(16,185,129,0.1);
+                        transform: scale(1);
+                      }
+                      50% { 
+                        box-shadow: 0 0 25px rgba(16,185,129,0.5), 0 0 50px rgba(16,185,129,0.2);
+                        transform: scale(1.02);
+                      }
+                    }
+                  `}</style>
                   <div className="flex items-center gap-2">
-                    <Gift className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <Gift className={cn(
+                      "h-5 w-5 text-green-600 dark:text-green-400",
+                      discountJustApplied && "animate-bounce"
+                    )} />
                     <span className="font-semibold text-base">
                       {t('language') === 'TR' ? 'Özel İndiriminiz Uygulandı!' : 'Your Special Discount Applied!'}
                     </span>
-                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <CheckCircle className={cn(
+                      "h-5 w-5 text-green-600 dark:text-green-400",
+                      discountJustApplied && "animate-pulse"
+                    )} />
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/50 font-bold text-green-800 dark:text-green-200">
+                    <span className={cn(
+                      "inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/50 font-bold text-green-800 dark:text-green-200",
+                      discountJustApplied && "animate-pulse"
+                    )}>
                       <Tag className="h-3.5 w-3.5" />
                       -{appliedDiscountInfo.amount} {appliedDiscountInfo.currency}
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 font-bold text-emerald-800 dark:text-emerald-200">
+                    <span className={cn(
+                      "inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 font-bold text-emerald-800 dark:text-emerald-200",
+                      discountJustApplied && "animate-pulse"
+                    )}>
                       <Sparkles className="h-3.5 w-3.5" />
                       %{appliedDiscountInfo.percentage} {t('language') === 'TR' ? 'İndirim' : 'Off'}
                     </span>
