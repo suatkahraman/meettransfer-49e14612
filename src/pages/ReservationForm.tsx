@@ -1110,18 +1110,94 @@ const ReservationForm = () => {
               )}
             </div>
 
-            {/* Return Trip Info */}
-            {hasReturnTrip && (
-              <div className="bg-muted/50 rounded-lg p-4 mb-4">
-                <div className="flex items-center gap-2 mb-2">
+            {/* Return Trip Option with Date/Time Selection */}
+            <div className="bg-muted/50 rounded-lg p-4 mb-4">
+              <div className="flex items-center space-x-3 mb-4">
+                <input
+                  type="checkbox"
+                  id="returnTripVehicleScreen"
+                  checked={hasReturnTrip}
+                  onChange={(e) => setHasReturnTrip(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <Label htmlFor="returnTripVehicleScreen" className="flex items-center gap-2 cursor-pointer font-medium">
                   <ArrowLeftRight className="h-4 w-4 text-primary" />
-                  <span className="font-medium">{t('returnTrip')}</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {returnTripData.date} - {returnTripData.time}
-                </p>
+                  {t('language') === 'TR' ? 'Dönüş Transferi Ekle' : 'Add Return Transfer'}
+                </Label>
               </div>
-            )}
+
+              {hasReturnTrip && (
+                <div className="space-y-4 pt-2 border-t">
+                  {/* Return Date */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2 text-sm">
+                      <Calendar className="h-4 w-4" />
+                      {t('language') === 'TR' ? 'Dönüş Tarihi' : 'Return Date'}
+                    </Label>
+                    <Input
+                      type="date"
+                      value={returnTripData.date}
+                      onChange={(e) => setReturnTripData(prev => ({ ...prev, date: e.target.value }))}
+                      min={pendingFormData?.date || new Date().toISOString().split('T')[0]}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Return Time */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2 text-sm">
+                      <Clock className="h-4 w-4" />
+                      {t('language') === 'TR' ? 'Dönüş Saati' : 'Return Time'}
+                    </Label>
+                    <Input
+                      type="time"
+                      value={returnTripData.time}
+                      onChange={(e) => setReturnTripData(prev => ({ ...prev, time: e.target.value }))}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Promo Code for Return */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2 text-sm">
+                      <Tag className="h-4 w-4" />
+                      {t('language') === 'TR' ? 'Promosyon Kodu' : 'Promo Code'}
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        value={promoCode}
+                        onChange={(e) => handlePromoCodeChange(e.target.value)}
+                        placeholder="Meet40Return"
+                        className={cn(
+                          "pr-10",
+                          isPromoCodeValid === true && "border-green-500",
+                          isPromoCodeValid === false && "border-destructive"
+                        )}
+                      />
+                      {isPromoCodeValid === true && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                      )}
+                      {isPromoCodeValid === false && (
+                        <X className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-destructive" />
+                      )}
+                    </div>
+                    {isPromoCodeValid === true && (
+                      <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {t('language') === 'TR' ? 'Dönüş transferinde %30 indirim!' : '30% off on return transfer!'}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Return Route Info */}
+                  <div className="text-sm text-muted-foreground bg-background/50 p-3 rounded-lg">
+                    <p className="font-medium mb-1">{t('language') === 'TR' ? 'Dönüş Güzergahı:' : 'Return Route:'}</p>
+                    <p>{pendingFormData?.dropoff} → {pendingFormData?.pickup}</p>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Price Summary */}
             {selectedPrice && (
@@ -1174,7 +1250,7 @@ const ReservationForm = () => {
                 onClick={handleConfirmVehicleSelection} 
                 className="w-full" 
                 size="lg"
-                disabled={isLoading || !selectedVehicleForConfirm}
+                disabled={isLoading || !selectedVehicleForConfirm || (hasReturnTrip && (!returnTripData.date || !returnTripData.time))}
               >
                 {isLoading ? (
                   <>
