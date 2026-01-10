@@ -19,9 +19,19 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { userId, deviceFingerprint }: CheckDeviceRequest = await req.json();
 
+    // Validate required fields
     if (!userId || !deviceFingerprint) {
       return new Response(
         JSON.stringify({ trusted: false, error: "Missing required fields" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate userId format (UUID)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      return new Response(
+        JSON.stringify({ trusted: false, error: "Invalid user ID format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -30,24 +40,49 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check if device is trusted
-    const { data: isTrusted, error } = await supabase.rpc('is_device_trusted', {
-      p_user_id: userId,
-      p_device_fingerprint: deviceFingerprint,
-    });
+    // Extract base fingerprint (without timestamp suffix)
+    const baseFp = deviceFingerprint.split('-')[0];
 
-    if (error) {
-      console.error("Error checking trusted device:", error);
+    // Check if device is trusted using pattern matching for the base fingerprint
+    const { data: devices, error: fetchError } = await supabase
+      .from('trusted_devices')
+      .select('id, device_fingerprint, last_used_at')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .order('last_used_at', { ascending: false })
+      .limit(10);
+
+    if (fetchError) {
+      console.error("Error fetching trusted devices:", fetchError);
       return new Response(
         JSON.stringify({ trusted: false }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Device check for user ${userId}: trusted=${isTrusted}`);
+    // Check if any device matches the base fingerprint
+    const matchingDevice = devices?.find(d => {
+      const storedBaseFp = d.device_fingerprint.split('-')[0];
+      return storedBaseFp === baseFp;
+    });
 
+    if (matchingDevice) {
+      // Update last_used_at for the matching device
+      await supabase
+        .from('trusted_devices')
+        .update({ last_used_at: new Date().toISOString() })
+        .eq('id', matchingDevice.id);
+      
+      console.log(`Trusted device found for user ${userId}`);
+      return new Response(
+        JSON.stringify({ trusted: true }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`No trusted device found for user ${userId}`);
     return new Response(
-      JSON.stringify({ trusted: isTrusted }),
+      JSON.stringify({ trusted: false }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
