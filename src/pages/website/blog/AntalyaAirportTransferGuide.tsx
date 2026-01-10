@@ -20,6 +20,7 @@ import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
+import TableOfContents from "@/components/website/TableOfContents";
 
 const AntalyaAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -31,6 +32,14 @@ const AntalyaAirportTransferGuide = () => {
     { question: t("blogAntalyaFaq4Q"), answer: t("blogAntalyaFaq4A") },
     { question: t("blogAntalyaFaq5Q"), answer: t("blogAntalyaFaq5A") },
     { question: t("blogAntalyaFaq6Q"), answer: t("blogAntalyaFaq6A") },
+  ];
+
+  const tocItems = [
+    { id: "airport-overview", title: t("blogAntalyaSection1Title") },
+    { id: "why-private", title: t("blogAntalyaSection2Title") },
+    { id: "transfer-prices", title: t("blogAntalyaSection3Title") },
+    { id: "destinations", title: t("blogAntalyaSection4Title") },
+    { id: "whats-included", title: t("blogAntalyaSection5Title") },
   ];
 
   const destinations = [
@@ -124,7 +133,7 @@ const AntalyaAirportTransferGuide = () => {
         <ShareButtons title={t("blogAntalyaH1")} className="mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-xl mb-12">
+        <div className="aspect-video overflow-hidden rounded-xl mb-8">
           <img 
             src={antalyaTransferHero} 
             alt="Antalya Airport Transfer 2025 - Private VIP Transfer to Belek, Side, Kemer, Lara Beach and All-Inclusive Hotels"
@@ -133,16 +142,19 @@ const AntalyaAirportTransferGuide = () => {
           />
         </div>
 
+        {/* Table of Contents */}
+        <TableOfContents items={tocItems} />
+
         {/* Article Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <h2>{t("blogAntalyaSection1Title")}</h2>
+          <h2 id="airport-overview">{t("blogAntalyaSection1Title")}</h2>
           <p>{t("blogAntalyaSection1P1")}</p>
           <p>{t("blogAntalyaSection1P2")}</p>
 
-          <h2>{t("blogAntalyaSection2Title")}</h2>
+          <h2 id="why-private">{t("blogAntalyaSection2Title")}</h2>
           <p>{t("blogAntalyaSection2Intro")}</p>
 
-          <h2>{t("blogAntalyaSection3Title")}</h2>
+          <h2 id="transfer-prices">{t("blogAntalyaSection3Title")}</h2>
           <p>{t("blogAntalyaSection3Intro")}</p>
 
           <div className="overflow-x-auto not-prose my-8">
@@ -172,7 +184,7 @@ const AntalyaAirportTransferGuide = () => {
             {t("blogAntalyaTableNote")}
           </p>
 
-          <h2>{t("blogAntalyaSection4Title")}</h2>
+          <h2 id="destinations">{t("blogAntalyaSection4Title")}</h2>
 
           <h3>{t("blogAntalyaLaraTitle")}</h3>
           <p>{t("blogAntalyaLaraDesc")}</p>
@@ -189,7 +201,7 @@ const AntalyaAirportTransferGuide = () => {
           <h3>{t("blogAntalyaAlanyaTitle")}</h3>
           <p>{t("blogAntalyaAlanyaDesc")}</p>
 
-          <h2>{t("blogAntalyaSection5Title")}</h2>
+          <h2 id="whats-included">{t("blogAntalyaSection5Title")}</h2>
 
           <div className="not-prose my-8">
             <Card className="bg-primary/5 border-primary/20">
