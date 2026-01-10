@@ -10335,7 +10335,26 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const { language, fromPrefix } = resolveLanguage(location.pathname);
 
   const t = (key: string): string => {
-    return translations[language][key] || translations["EN"][key] || key;
+    const translation = translations[language][key];
+    if (translation) {
+      return translation;
+    }
+    
+    // Fallback to English
+    const englishTranslation = translations["EN"][key];
+    if (englishTranslation) {
+      // Only log in development and for non-blog keys to reduce noise
+      if (import.meta.env.DEV && !key.startsWith("blog") && !key.startsWith("seo")) {
+        console.debug(`[i18n] Missing ${language} translation for: ${key}`);
+      }
+      return englishTranslation;
+    }
+    
+    // Return key if no translation exists at all
+    if (import.meta.env.DEV) {
+      console.warn(`[i18n] Missing translation key: ${key}`);
+    }
+    return key;
   };
 
   const getLocalizedPath = (path: string): string => {
