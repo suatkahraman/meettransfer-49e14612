@@ -133,37 +133,65 @@ export const useGeoLanguageDetection = () => {
         // Try to get geo location from multiple sources
         let countryCode: string | null = null;
 
-        // First try: ipapi.co (free tier)
-        try {
-          const response = await fetch("https://ipapi.co/json/", {
-            signal: AbortSignal.timeout(3000),
-          });
-          if (response.ok) {
-            const data = await response.json();
-            countryCode = data.country_code;
-            setGeoData({
-              country_code: data.country_code,
-              country_name: data.country_name,
+        // Try multiple geo APIs with CORS support
+        const geoApis = [
+          {
+            url: "https://api.country.is",
+            parse: (data: { country?: string }) => ({
+              countryCode: data.country,
+              countryName: null,
+              city: null,
+            }),
+          },
+          {
+            url: "https://freeipapi.com/api/json",
+            parse: (data: { countryCode?: string; countryName?: string; cityName?: string }) => ({
+              countryCode: data.countryCode,
+              countryName: data.countryName,
+              city: data.cityName,
+            }),
+          },
+          {
+            url: "https://ipwho.is",
+            parse: (data: { country_code?: string; country?: string; city?: string }) => ({
+              countryCode: data.country_code,
+              countryName: data.country,
               city: data.city,
-            });
-          }
-        } catch {
-          // Try fallback: ip-api.com
+            }),
+          },
+        ];
+
+        for (const api of geoApis) {
+          if (countryCode) break;
+          
           try {
-            const response = await fetch("http://ip-api.com/json/?fields=countryCode,country,city", {
-              signal: AbortSignal.timeout(3000),
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
+            const response = await fetch(api.url, {
+              signal: controller.signal,
+              mode: "cors",
             });
+            
+            clearTimeout(timeoutId);
+            
             if (response.ok) {
               const data = await response.json();
-              countryCode = data.countryCode;
-              setGeoData({
-                country_code: data.countryCode,
-                country_name: data.country,
-                city: data.city,
-              });
+              const parsed = api.parse(data);
+              
+              if (parsed.countryCode) {
+                countryCode = parsed.countryCode;
+                setGeoData({
+                  country_code: parsed.countryCode,
+                  country_name: parsed.countryName || undefined,
+                  city: parsed.city || undefined,
+                });
+                console.log("[GeoLang] Detected country:", countryCode, "from", api.url);
+              }
             }
-          } catch {
-            // Geo detection failed, fall back to browser language
+          } catch (error) {
+            console.log("[GeoLang] API failed:", api.url, error);
+            // Continue to next API
           }
         }
 

@@ -119,25 +119,60 @@ export const useBrowserLanguageRedirect = () => {
       setIsDetecting(true);
       let detectedLang: Language = "EN";
 
-      try {
-        // Try to get geo location
-        const response = await fetch("https://ipapi.co/json/", {
-          signal: AbortSignal.timeout(3000),
-        });
+      // Try multiple geo APIs with CORS support
+      const geoApis = [
+        {
+          url: "https://api.country.is",
+          parse: (data: { country?: string }) => data.country,
+        },
+        {
+          url: "https://freeipapi.com/api/json",
+          parse: (data: { countryCode?: string }) => data.countryCode,
+        },
+        {
+          url: "https://ipwho.is",
+          parse: (data: { country_code?: string }) => data.country_code,
+        },
+      ];
+
+      let countryCode: string | null = null;
+
+      for (const api of geoApis) {
+        if (countryCode) break;
         
-        if (response.ok) {
-          const data = await response.json();
-          const countryCode = data.country_code;
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
           
-          if (countryCode && COUNTRY_TO_LANGUAGE[countryCode]) {
-            detectedLang = COUNTRY_TO_LANGUAGE[countryCode];
+          const response = await fetch(api.url, {
+            signal: controller.signal,
+            mode: "cors",
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (response.ok) {
+            const data = await response.json();
+            const code = api.parse(data);
+            if (code) {
+              countryCode = code;
+              console.log("[BrowserLangRedirect] Detected country:", countryCode, "from", api.url);
+            }
           }
+        } catch (error) {
+          console.log("[BrowserLangRedirect] API failed:", api.url, error);
+          // Continue to next API
         }
-      } catch {
-        // Fall back to browser language on error
+      }
+
+      if (countryCode && COUNTRY_TO_LANGUAGE[countryCode]) {
+        detectedLang = COUNTRY_TO_LANGUAGE[countryCode];
+      } else {
+        // Fall back to browser language
         const browserLang = navigator.language || (navigator as unknown as { userLanguage?: string }).userLanguage || "en";
         const primaryLang = browserLang.split("-")[0].toLowerCase();
         detectedLang = BROWSER_LANG_MAP[primaryLang] || "EN";
+        console.log("[BrowserLangRedirect] Fallback to browser language:", detectedLang);
       }
 
       // Mark as detected and save the language
