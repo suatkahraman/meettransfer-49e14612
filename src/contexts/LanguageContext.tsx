@@ -1147,6 +1147,20 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq5A: "Spring (April-May) and autumn (September-October) offer pleasant weather. Winter is perfect for skiing. Summer can be hot.",
     blogBursaFaq6Q: "Can you customize the Bursa tour itinerary?",
     blogBursaFaq6A: "Yes! All our tours are fully customizable based on your interests - history, nature, food, thermal baths, or a mix of everything.",
+    
+    // Blog CTA Component
+    blogCtaDiscountBadge: "30% OFF Return Transfers",
+    blogCtaTitle: "Book Your Premium Transfer",
+    blogCtaReturnDiscount: "Round-Trip Transfers – 30% OFF!",
+    blogCtaReturnDiscountDesc: "Book your Arrival & Return Airport Transfer Together and Save 30% instantly",
+    blogCtaPromoCode: "Use Promo Code on Return",
+    blogCtaDescription: "Professional drivers, luxury Mercedes fleet, 24/7 meet & greet service. Fixed prices with no hidden fees.",
+    blogCtaRequestPrice: "Request Price Now",
+    blogCtaFeature1: "Service",
+    blogCtaFeature2: "Hidden Fees",
+    blogCtaFeature3: "Return Discount",
+    blogCtaFeature4: "Mercedes Fleet",
+    galleryTitle: "Our Fleet Gallery",
   },
   DE: {
     // Best Price Animation
@@ -2186,6 +2200,20 @@ const translations: Record<Language, Record<string, string>> = {
     blogCategory: "Kategorie",
     blogAuthor: "Autor",
     blogMeetTransferTeam: "Meet Transfer Team",
+    
+    // Blog CTA Component
+    blogCtaDiscountBadge: "30% RABATT auf Rücktransfers",
+    blogCtaTitle: "Buchen Sie Ihren Premium-Transfer",
+    blogCtaReturnDiscount: "Hin- und Rücktransfers – 30% RABATT!",
+    blogCtaReturnDiscountDesc: "Buchen Sie An- und Abreise-Flughafentransfer zusammen und sparen Sie sofort 30%",
+    blogCtaPromoCode: "Promo-Code für die Rückfahrt",
+    blogCtaDescription: "Professionelle Fahrer, luxuriöse Mercedes-Flotte, 24/7 Meet & Greet Service. Festpreise ohne versteckte Gebühren.",
+    blogCtaRequestPrice: "Jetzt Preis anfragen",
+    blogCtaFeature1: "Service",
+    blogCtaFeature2: "Versteckte Gebühren",
+    blogCtaFeature3: "Rückfahrt-Rabatt",
+    blogCtaFeature4: "Mercedes Flotte",
+    galleryTitle: "Unsere Flottenbilder",
   },
   FR: {
     // Best Price Animation
@@ -3210,6 +3238,20 @@ const translations: Record<Language, Record<string, string>> = {
     blogCategory: "Catégorie",
     blogAuthor: "Auteur",
     blogMeetTransferTeam: "Équipe Meet Transfer",
+    
+    // Blog CTA Component
+    blogCtaDiscountBadge: "30% DE RÉDUCTION sur les transferts retour",
+    blogCtaTitle: "Réservez votre transfert premium",
+    blogCtaReturnDiscount: "Transferts aller-retour – 30% DE RÉDUCTION !",
+    blogCtaReturnDiscountDesc: "Réservez vos transferts aéroport aller et retour ensemble et économisez 30% instantanément",
+    blogCtaPromoCode: "Code promo pour le retour",
+    blogCtaDescription: "Chauffeurs professionnels, flotte Mercedes de luxe, service meet & greet 24/7. Prix fixes sans frais cachés.",
+    blogCtaRequestPrice: "Demander un prix",
+    blogCtaFeature1: "Service",
+    blogCtaFeature2: "Frais cachés",
+    blogCtaFeature3: "Réduction retour",
+    blogCtaFeature4: "Flotte Mercedes",
+    galleryTitle: "Galerie de notre flotte",
   },
   RU: {
     // Best Price Animation
@@ -4177,6 +4219,20 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Blog Common Additional
     blogMeetTransferTeam: "Команда Meet Transfer",
+    
+    // Blog CTA Component
+    blogCtaDiscountBadge: "30% СКИДКА на обратные трансферы",
+    blogCtaTitle: "Забронируйте ваш премиум-трансфер",
+    blogCtaReturnDiscount: "Трансферы туда-обратно – 30% СКИДКА!",
+    blogCtaReturnDiscountDesc: "Закажите трансфер из аэропорта и обратно вместе и сэкономьте 30% мгновенно",
+    blogCtaPromoCode: "Промокод на обратный рейс",
+    blogCtaDescription: "Профессиональные водители, люксовый парк Mercedes, встреча 24/7. Фиксированные цены без скрытых платежей.",
+    blogCtaRequestPrice: "Запросить цену",
+    blogCtaFeature1: "Сервис",
+    blogCtaFeature2: "Скрытые платежи",
+    blogCtaFeature3: "Скидка на обратный рейс",
+    blogCtaFeature4: "Парк Mercedes",
+    galleryTitle: "Галерея нашего автопарка",
   },
   IT: {
     // Best Price Animation
@@ -5197,6 +5253,20 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Blog Common Additional
     blogMeetTransferTeam: "Team Meet Transfer",
+    
+    // Blog CTA Component
+    blogCtaDiscountBadge: "30% DI SCONTO sui trasferimenti di ritorno",
+    blogCtaTitle: "Prenota il tuo trasferimento premium",
+    blogCtaReturnDiscount: "Trasferimenti andata e ritorno – 30% DI SCONTO!",
+    blogCtaReturnDiscountDesc: "Prenota i trasferimenti aeroportuali di andata e ritorno insieme e risparmia subito il 30%",
+    blogCtaPromoCode: "Usa il codice promo per il ritorno",
+    blogCtaDescription: "Autisti professionisti, flotta Mercedes di lusso, servizio meet & greet 24/7. Prezzi fissi senza costi nascosti.",
+    blogCtaRequestPrice: "Richiedi un preventivo",
+    blogCtaFeature1: "Servizio",
+    blogCtaFeature2: "Costi nascosti",
+    blogCtaFeature3: "Sconto ritorno",
+    blogCtaFeature4: "Flotta Mercedes",
+    galleryTitle: "Galleria della nostra flotta",
   },
   ES: {
     // Best Price Animation
@@ -6217,6 +6287,20 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Blog Common Additional
     blogMeetTransferTeam: "Equipo Meet Transfer",
+    
+    // Blog CTA Component
+    blogCtaDiscountBadge: "30% DE DESCUENTO en traslados de vuelta",
+    blogCtaTitle: "Reserva tu traslado premium",
+    blogCtaReturnDiscount: "¡Traslados de ida y vuelta – 30% DE DESCUENTO!",
+    blogCtaReturnDiscountDesc: "Reserva tus traslados de llegada y salida juntos y ahorra 30% instantáneamente",
+    blogCtaPromoCode: "Usa el código promo en el regreso",
+    blogCtaDescription: "Conductores profesionales, flota Mercedes de lujo, servicio meet & greet 24/7. Precios fijos sin cargos ocultos.",
+    blogCtaRequestPrice: "Solicitar precio",
+    blogCtaFeature1: "Servicio",
+    blogCtaFeature2: "Cargos ocultos",
+    blogCtaFeature3: "Descuento vuelta",
+    blogCtaFeature4: "Flota Mercedes",
+    galleryTitle: "Galería de nuestra flota",
   },
   AR: {
     // Best Price Animation
@@ -7184,6 +7268,20 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Blog Common Additional
     blogMeetTransferTeam: "فريق Meet Transfer",
+    
+    // Blog CTA Component
+    blogCtaDiscountBadge: "خصم 30٪ على رحلات العودة",
+    blogCtaTitle: "احجز رحلتك المميزة",
+    blogCtaReturnDiscount: "رحلات الذهاب والعودة - خصم 30٪!",
+    blogCtaReturnDiscountDesc: "احجز رحلة الوصول والعودة معًا واحصل على خصم 30٪ فورًا",
+    blogCtaPromoCode: "استخدم كود الخصم للعودة",
+    blogCtaDescription: "سائقون محترفون، أسطول مرسيدس فاخر، خدمة استقبال 24/7. أسعار ثابتة بدون رسوم مخفية.",
+    blogCtaRequestPrice: "اطلب السعر",
+    blogCtaFeature1: "الخدمة",
+    blogCtaFeature2: "رسوم مخفية",
+    blogCtaFeature3: "خصم العودة",
+    blogCtaFeature4: "أسطول مرسيدس",
+    galleryTitle: "معرض أسطولنا",
   },
   TR: {
     // Best Price Animation
@@ -8281,6 +8379,20 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq5A: "Cumalıkızık, 700 yıllık orijinal ahşap evleri koruyan UNESCO Dünya Mirası Osmanlı köyüdür.",
     blogBursaFaq6Q: "Kışın Bursa'yı ziyaret edebilir miyim?",
     blogBursaFaq6A: "Evet! Kış Uludağ'da kayak için harikadır. Cumalıkızık ve tarihi mekanlar yıl boyunca ziyaret edilebilir.",
+    
+    // Blog CTA Component
+    blogCtaDiscountBadge: "Dönüş transferlerinde %30 İNDİRİM",
+    blogCtaTitle: "Premium Transferinizi Rezerve Edin",
+    blogCtaReturnDiscount: "Gidiş-Dönüş Transferler – %30 İNDİRİM!",
+    blogCtaReturnDiscountDesc: "Varış ve dönüş havalimanı transferini birlikte rezerve edin ve anında %30 tasarruf edin",
+    blogCtaPromoCode: "Dönüşte Promosyon Kodu kullanın",
+    blogCtaDescription: "Profesyonel şoförler, lüks Mercedes filosu, 7/24 karşılama hizmeti. Gizli ücret olmadan sabit fiyatlar.",
+    blogCtaRequestPrice: "Şimdi Fiyat Alın",
+    blogCtaFeature1: "Hizmet",
+    blogCtaFeature2: "Gizli Ücret",
+    blogCtaFeature3: "Dönüş İndirimi",
+    blogCtaFeature4: "Mercedes Filosu",
+    galleryTitle: "Filo Galerimiz",
   },
   UK: {
     // Best Price Animation
