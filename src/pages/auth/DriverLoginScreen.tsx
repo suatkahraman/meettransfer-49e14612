@@ -164,6 +164,15 @@ const DriverLoginScreen = () => {
         await logLoginAttempt(validation.email, false, error.message, undefined, 'driver');
         
         if (error.message?.includes('Invalid login credentials')) {
+          // Check if failed attempts require 2FA verification
+          const updatedRateLimit = await checkRateLimit(validation.email);
+          const failedAttempts = updatedRateLimit.failedAttempts || 0;
+          
+          // After 2+ failed attempts, require 2FA on next successful login
+          if (failedAttempts >= 2) {
+            localStorage.setItem(`require2FA_${validation.email}`, 'true');
+          }
+          
           setErrors({ password: t('invalidCredentials') || 'Invalid email or password' });
         } else if (error.message?.includes('Email not confirmed')) {
           toast.error(t('emailNotConfirmed') || 'Please confirm your email first');
@@ -190,18 +199,29 @@ const DriverLoginScreen = () => {
           return;
         }
         
+        // Check if 2FA is required due to previous failed attempts
+        const require2FAKey = `require2FA_${validation.email}`;
+        const require2FADueToFailedAttempts = localStorage.getItem(require2FAKey) === 'true';
+        
         // Check if device is trusted
         const isTrusted = await checkTrustedDevice(authData.user.id);
         
-        if (!isTrusted) {
-          // Device not trusted - require 2FA
+        // Require 2FA if: device not trusted OR there were failed login attempts
+        if (!isTrusted || require2FADueToFailedAttempts) {
+          // Sign out temporarily - user needs to verify via 2FA
+          await supabase.auth.signOut();
+          
+          // Device not trusted or suspicious activity - require 2FA
           setPendingRole(userRole);
           setViewMode('2fa');
           const langCode = language === 'TR' ? 'tr' : 'en';
           await initiate2FA(authData.user.id, validation.email, userRole, langCode);
           toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
+          
+          // Clear the flag after initiating 2FA
+          localStorage.removeItem(require2FAKey);
         } else {
-          // Device trusted - proceed with login
+          // Device trusted and no suspicious activity - proceed with login
           await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
         }
       }
