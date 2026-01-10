@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins } from 'lucide-react';
+import { VehicleSelectionCard } from '@/components/VehicleSelectionCard';
 import { cn } from '@/lib/utils';
 import { CURRENCY_OPTIONS } from '@/lib/currency';
 import { z } from 'zod';
@@ -1217,14 +1218,17 @@ const ReservationForm = () => {
                   <Car className="h-4 w-4" />
                   {t('vehicleType')}
                 </Label>
-                <RadioGroup value={formData.vehicleType} onValueChange={(v) => setFormData({...formData, vehicleType: v})}>
+                <div className="grid gap-4">
                   {vehicleTypes.map(vehicle => (
-                    <div key={vehicle.value} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                      <RadioGroupItem value={vehicle.value} id={vehicle.value} />
-                      <Label htmlFor={vehicle.value} className="cursor-pointer flex-1">{vehicle.label}</Label>
-                    </div>
+                    <VehicleSelectionCard
+                      key={vehicle.value}
+                      vehicleType={vehicle.value}
+                      isSelected={formData.vehicleType === vehicle.value}
+                      onSelect={(v) => setFormData({...formData, vehicleType: v})}
+                      showPrice={false}
+                    />
                   ))}
-                </RadioGroup>
+                </div>
               </div>
 
               {/* Payment Option Section */}
