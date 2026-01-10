@@ -64,6 +64,7 @@ interface PhoneInputProps {
   error?: boolean;
   minLength?: number;
   onValidationError?: (error: string | null) => void;
+  disabled?: boolean;
 }
 
 // Validation helper
@@ -89,7 +90,7 @@ export const validatePhoneNumber = (phone: string, minLength: number = 7): { isV
 };
 
 export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ value, onChange, placeholder, className, inputClassName, defaultCountry = "TR", error, minLength = 7, onValidationError }, ref) => {
+  ({ value, onChange, placeholder, className, inputClassName, defaultCountry = "TR", error, minLength = 7, onValidationError, disabled }, ref) => {
     // Parse existing value to extract country code
     const getInitialCountry = () => {
       if (value) {
@@ -153,7 +154,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
 
     return (
       <div className={cn("flex gap-2", className)}>
-        <Select value={selectedCountry} onValueChange={handleCountryChange}>
+        <Select value={selectedCountry} onValueChange={handleCountryChange} disabled={disabled}>
           <SelectTrigger className={cn("w-[110px] shrink-0", inputClassName)}>
             <SelectValue>
               <span className="flex items-center gap-1.5">
@@ -180,6 +181,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           value={phoneNumber}
           onChange={handlePhoneChange}
           placeholder={placeholder || "555 123 4567"}
+          disabled={disabled}
           className={cn(
             "flex-1",
             inputClassName,

@@ -824,6 +824,7 @@ const CustomerHome = () => {
                   placeholder={t('enterPickupPoint')}
                   className={errors.pickup ? 'border-destructive' : ''}
                   maxLength={200}
+                  disabled={isLoading}
                 />
                 {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
               </div>
@@ -839,6 +840,7 @@ const CustomerHome = () => {
                   placeholder={t('hotelNameOrAddress')}
                   className={errors.dropoff ? 'border-destructive' : ''}
                   maxLength={200}
+                  disabled={isLoading}
                 />
                 {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
               </div>
@@ -856,6 +858,7 @@ const CustomerHome = () => {
                     onChange={(e) => setFormData({...formData, date: e.target.value})}
                     min={new Date().toISOString().split('T')[0]}
                     className={errors.date ? 'border-destructive' : ''}
+                    disabled={isLoading}
                   />
                   {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
                 </div>
@@ -866,6 +869,7 @@ const CustomerHome = () => {
                     value={formData.time}
                     onChange={(e) => setFormData({...formData, time: e.target.value})}
                     className={errors.time ? 'border-destructive' : ''}
+                    disabled={isLoading}
                   />
                   {errors.time && <p className="text-sm text-destructive">{errors.time}</p>}
                 </div>
@@ -882,6 +886,7 @@ const CustomerHome = () => {
                   value={formData.flightNumber}
                   onChange={(e) => setFormData({...formData, flightNumber: e.target.value})}
                   maxLength={20}
+                  disabled={isLoading}
                 />
               </div>
 
@@ -900,6 +905,7 @@ const CustomerHome = () => {
                         onChange={(e) => updatePassenger(index, e.target.value)}
                         className={index === 0 && errors.passengerNames ? 'border-destructive' : ''}
                         maxLength={100}
+                        disabled={isLoading}
                       />
                     </div>
                     {passengerNames.length > 1 && (
@@ -909,6 +915,7 @@ const CustomerHome = () => {
                         size="icon"
                         onClick={() => removePassenger(index)}
                         className="text-destructive hover:bg-destructive/10 shrink-0"
+                        disabled={isLoading}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -923,6 +930,7 @@ const CustomerHome = () => {
                     size="sm" 
                     onClick={addPassenger}
                     className="w-full"
+                    disabled={isLoading}
                   >
                     <UserPlus className="h-4 w-4 mr-2" />
                     {t('addPassenger')}
@@ -940,6 +948,7 @@ const CustomerHome = () => {
                   value={formData.passengerPhone}
                   onChange={(value) => setFormData({...formData, passengerPhone: value})}
                   className={errors.passengerPhone ? 'border-destructive' : ''}
+                  disabled={isLoading}
                 />
                 {errors.passengerPhone && <p className="text-sm text-destructive">{errors.passengerPhone}</p>}
               </div>
@@ -951,7 +960,7 @@ const CustomerHome = () => {
                     <Briefcase className="h-4 w-4" />
                     {t('luggageCount') || 'Luggage'}
                   </Label>
-                  <Select value={formData.luggageCount} onValueChange={(v) => setFormData({...formData, luggageCount: v})}>
+                  <Select value={formData.luggageCount} onValueChange={(v) => setFormData({...formData, luggageCount: v})} disabled={isLoading}>
                     <SelectTrigger>
                       <SelectValue placeholder={t('selectLuggage') || 'Luggage'} />
                     </SelectTrigger>
@@ -967,7 +976,7 @@ const CustomerHome = () => {
                     <Baby className="h-4 w-4" />
                     {t('babySeat') || 'Baby Seat'}
                   </Label>
-                  <Select value={formData.babySeatCount} onValueChange={(v) => setFormData({...formData, babySeatCount: v})}>
+                  <Select value={formData.babySeatCount} onValueChange={(v) => setFormData({...formData, babySeatCount: v})} disabled={isLoading}>
                     <SelectTrigger>
                       <SelectValue placeholder={t('selectBabySeat') || 'Baby Seat'} />
                     </SelectTrigger>
@@ -1000,7 +1009,7 @@ const CustomerHome = () => {
                     <button
                       key={v.value}
                       type="button"
-                      disabled={minibusRequired && v.value !== 'minibus'}
+                      disabled={isLoading || (minibusRequired && v.value !== 'minibus')}
                       onClick={() => setFormData({...formData, vehicleType: v.value})}
                       className={cn(
                         "relative overflow-hidden rounded-xl p-3 transition-all duration-200 text-left",
@@ -1008,7 +1017,7 @@ const CustomerHome = () => {
                         formData.vehicleType === v.value
                           ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/30"
                           : "border-border bg-card hover:bg-muted/50 hover:border-primary/40",
-                        minibusRequired && v.value !== 'minibus' && "opacity-50 cursor-not-allowed"
+                        (isLoading || (minibusRequired && v.value !== 'minibus')) && "opacity-50 cursor-not-allowed"
                       )}
                     >
                       {formData.vehicleType === v.value && (
@@ -1051,13 +1060,13 @@ const CustomerHome = () => {
                   <CreditCard className="h-4 w-4" />
                   {t('paymentType')}
                 </Label>
-                <RadioGroup value={formData.paymentType} onValueChange={(v) => setFormData({...formData, paymentType: v})}>
+                <RadioGroup value={formData.paymentType} onValueChange={(v) => setFormData({...formData, paymentType: v})} disabled={isLoading}>
                   <div className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                    <RadioGroupItem value="cash" id="cash" />
+                    <RadioGroupItem value="cash" id="cash" disabled={isLoading} />
                     <Label htmlFor="cash" className="cursor-pointer">{t('cashToDriver')}</Label>
                   </div>
                   <div className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                    <RadioGroupItem value="online" id="online" />
+                    <RadioGroupItem value="online" id="online" disabled={isLoading} />
                     <Label htmlFor="online" className="cursor-pointer">{t('onlinePaymentLink')}</Label>
                   </div>
                 </RadioGroup>
@@ -1076,6 +1085,7 @@ const CustomerHome = () => {
                   placeholder={t('specialRequestsPlaceholder') || 'Flight number, child seat, special requirements...'}
                   className="resize-none min-h-[80px]"
                   maxLength={500}
+                  disabled={isLoading}
                 />
               </div>
 
