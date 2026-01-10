@@ -124,7 +124,18 @@ const AdminEditReservation = () => {
     agency_price_currency: string;
     agency_notes: string;
     payment_status: string;
-  }>({ customer_price: '', agency_price_currency: 'USD', agency_notes: '', payment_status: 'not_paid' });
+    company_amount: string;
+    company_amount_try: string;
+    agency_profit: string;
+  }>({ 
+    customer_price: '', 
+    agency_price_currency: 'USD', 
+    agency_notes: '', 
+    payment_status: 'not_paid',
+    company_amount: '',
+    company_amount_try: '',
+    agency_profit: ''
+  });
   const [originalData, setOriginalData] = useState<Record<string, unknown> | null>(null);
   const [originalPassengerCount, setOriginalPassengerCount] = useState<number>(1);
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
@@ -372,11 +383,17 @@ const AdminEditReservation = () => {
       // Load agency details if exists
       if (agencyDetailsResult.data) {
         const savedCustomerPrice = agencyDetailsResult.data.customer_price?.toString() || '';
+        const savedCompanyAmount = (agencyDetailsResult.data as any).company_amount?.toString() || '';
+        const savedCompanyAmountTry = (agencyDetailsResult.data as any).company_amount_try?.toString() || '';
+        const savedAgencyProfit = (agencyDetailsResult.data as any).agency_profit?.toString() || '';
         setAgencyDetails({
           customer_price: savedCustomerPrice,
           agency_price_currency: (agencyDetailsResult.data as any).agency_price_currency || 'USD',
           agency_notes: agencyDetailsResult.data.agency_notes || '',
           payment_status: agencyDetailsResult.data.payment_status || 'not_paid',
+          company_amount: savedCompanyAmount,
+          company_amount_try: savedCompanyAmountTry,
+          agency_profit: savedAgencyProfit,
         });
         // Mark as saved if there's an existing price
         if (savedCustomerPrice && parseFloat(savedCustomerPrice) > 0) {
@@ -2493,15 +2510,15 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-base">
                       <Building2 className="h-4 w-4" />
-                      Acenta Fiyatı
+                      Acenta Fiyatlandırması
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    {/* Customer Price (Acentadan Alınan Tutar) */}
                     <div className="space-y-2">
-                      <Label className="text-sm">Acentadan Alınacak Tutar</Label>
+                      <Label className="text-sm font-medium">Müşteri Fiyatı (Acenta Müşterisinden Alınan)</Label>
                       <div className="flex gap-2">
                         <div className="relative flex-1">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{getCurrencySymbol(formData.price_currency)}</span>
                           <Input
                             type="number"
                             step="0.01"
@@ -2509,32 +2526,99 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                             value={agencyDetails.customer_price}
                             onChange={(e) => setAgencyDetails({...agencyDetails, customer_price: e.target.value})}
                             placeholder="0.00"
-                            className="pl-8"
                           />
                         </div>
-                        {/* Currency is fixed by agency - read only */}
-                        <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted/50 min-w-[100px]">
-                          <Badge variant="outline" className="text-sm font-medium">
-                            {formData.price_currency}
-                          </Badge>
+                        <Select 
+                          value={agencyDetails.agency_price_currency} 
+                          onValueChange={(v) => setAgencyDetails({...agencyDetails, agency_price_currency: v})}
+                        >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {currencies.map(c => (
+                              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Company Amount (Şirkete Kalan) */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        Şirkete Kalan Tutar
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border-green-300">
+                          {agencyDetails.agency_price_currency}
+                        </Badge>
+                      </Label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={agencyDetails.company_amount}
+                            onChange={(e) => setAgencyDetails({...agencyDetails, company_amount: e.target.value})}
+                            placeholder="0.00"
+                            className="border-green-300 focus:border-green-500"
+                          />
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Para birimi acenta tarafından rezervasyon oluşturulurken belirlendi
+                        Acentanın şirkete ödediği tutar (para birimi: {agencyDetails.agency_price_currency})
+                      </p>
+                    </div>
+
+                    {/* Company Amount TRY */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        Şirkete Kalan (TRY)
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-300">
+                          ₺
+                        </Badge>
+                      </Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={agencyDetails.company_amount_try}
+                          onChange={(e) => setAgencyDetails({...agencyDetails, company_amount_try: e.target.value})}
+                          placeholder="0.00"
+                          className="pl-8 border-amber-300 focus:border-amber-500"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Döviz tutarının TRY karşılığı (aylık kâr hesabında kullanılır)
+                      </p>
+                    </div>
+
+                    {/* Agency Profit */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Acenta Kârı ({agencyDetails.agency_price_currency})</Label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={agencyDetails.agency_profit}
+                          onChange={(e) => setAgencyDetails({...agencyDetails, agency_profit: e.target.value})}
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Müşteri Fiyatı - Şirkete Kalan = Acenta Kârı
                       </p>
                     </div>
 
                     <Button
                       type="button"
                       onClick={async () => {
-                        const agencyPriceValue = (agencyDetails.customer_price || '').toString().trim();
-                        const agencyPrice = parseFloat(agencyPriceValue) || 0;
-                        if (agencyPrice <= 0) {
-                          toast.error('Lütfen geçerli bir acenta fiyatı girin');
-                          return;
-                        }
-                        const driverFee = parseFloat(formData.price) || 0;
-                        const profit = agencyPrice - driverFee;
+                        const customerPrice = parseFloat(agencyDetails.customer_price) || 0;
+                        const companyAmount = parseFloat(agencyDetails.company_amount) || 0;
+                        const companyAmountTry = parseFloat(agencyDetails.company_amount_try) || 0;
+                        const agencyProfit = parseFloat(agencyDetails.agency_profit) || (customerPrice - companyAmount);
 
                         try {
                           const { data: existingRecord } = await supabase
@@ -2544,17 +2628,18 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                             .maybeSingle();
 
                           let error;
-                          // Use the fixed currency from the reservation (set by agency)
-                          const fixedCurrency = formData.price_currency;
                           
                           if (existingRecord) {
-                          const result = await supabase
+                            const result = await supabase
                               .from('agency_reservation_details')
                               .update({
-                                customer_price: agencyPrice,
-                                agency_price_currency: fixedCurrency,
-                                company_amount: driverFee,
-                                agency_profit: profit,
+                                customer_price: customerPrice || null,
+                                agency_price_currency: agencyDetails.agency_price_currency,
+                                company_amount: companyAmount || null,
+                                company_amount_try: companyAmountTry || null,
+                                agency_profit: agencyProfit || null,
+                                exchange_rate_used: null, // Clear exchange rate when manually edited
+                                conversion_date: companyAmountTry ? new Date().toISOString().split('T')[0] : null,
                               })
                               .eq('reservation_id', id);
                             error = result.error;
@@ -2563,43 +2648,63 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                               .from('agency_reservation_details')
                               .insert({
                                 reservation_id: id,
-                                customer_price: agencyPrice,
-                                agency_price_currency: fixedCurrency,
-                                company_amount: driverFee,
-                                agency_profit: profit,
+                                customer_price: customerPrice || null,
+                                agency_price_currency: agencyDetails.agency_price_currency,
+                                company_amount: companyAmount || null,
+                                company_amount_try: companyAmountTry || null,
+                                agency_profit: agencyProfit || null,
                               });
                             error = result.error;
                           }
 
                           if (error) {
-                            console.error('Agency price save error:', error);
-                            toast.error(error.message || 'Acenta fiyatı kaydedilemedi');
+                            console.error('Agency details save error:', error);
+                            toast.error(error.message || 'Acenta bilgileri kaydedilemedi');
                           } else {
                             setAgencyDetails({
                               ...agencyDetails,
-                              customer_price: agencyPrice.toString(),
-                              agency_price_currency: fixedCurrency
+                              agency_profit: agencyProfit.toString(),
                             });
                             setAgencyPriceSaved(true);
-                            toast.success('Acenta fiyatı kaydedildi');
+                            toast.success('Acenta fiyatlandırması kaydedildi');
                           }
                         } catch (err: any) {
-                          console.error('Agency price save exception:', err);
-                          toast.error(err.message || 'Acenta fiyatı kaydedilemedi');
+                          console.error('Agency details save exception:', err);
+                          toast.error(err.message || 'Acenta bilgileri kaydedilemedi');
                         }
                       }}
                       className="w-full bg-blue-600 hover:bg-blue-700"
                     >
                       <Save className="h-4 w-4 mr-2" />
-                      Acenta Fiyatını Kaydet
+                      Acenta Fiyatlandırmasını Kaydet
                     </Button>
                     
-                    {agencyDetails.customer_price && agencyPriceSaved && (
-                      <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border">
-                        <div className="flex justify-between items-center font-bold">
-                          <span>Kaydedilen Tutar:</span>
-                          <span className="text-blue-600">
-                            {getCurrencySymbol(formData.price_currency)}{parseFloat(agencyDetails.customer_price).toFixed(2)}
+                    {agencyPriceSaved && (
+                      <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border space-y-2">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-muted-foreground">Müşteri Fiyatı:</span>
+                          <span className="font-medium">
+                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price || '0').toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-muted-foreground">Şirkete Kalan:</span>
+                          <span className="font-medium text-green-600">
+                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.company_amount || '0').toFixed(2)}
+                          </span>
+                        </div>
+                        {agencyDetails.company_amount_try && parseFloat(agencyDetails.company_amount_try) > 0 && (
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Şirkete Kalan (TRY):</span>
+                            <span className="font-medium text-amber-600">
+                              ₺{parseFloat(agencyDetails.company_amount_try).toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center text-sm border-t pt-2">
+                          <span className="text-muted-foreground">Acenta Kârı:</span>
+                          <span className="font-bold text-blue-600">
+                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.agency_profit || '0').toFixed(2)}
                           </span>
                         </div>
                       </div>
