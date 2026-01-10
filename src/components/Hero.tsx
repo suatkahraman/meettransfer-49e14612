@@ -209,24 +209,63 @@ export const Hero = () => {
       return;
     }
 
-    // If user is logged in (but not agency), redirect to reservation form
+    // If user is logged in (but not agency), redirect to reservation form with prices
     if (user && !isAgency) {
-      const params = new URLSearchParams();
-      params.set("pickup", pickup);
-      params.set("dropoff", dropoff);
-      params.set("date", format(date, "yyyy-MM-dd"));
-      params.set("time", time);
-      params.set("vehicleType", vehicleType);
-      params.set("passengers", passengers);
-      params.set("currency", preferredCurrency);
-      
-      if (hasReturnTrip && returnDate && returnTime) {
-        params.set("hasReturn", "true");
-        params.set("returnDate", format(returnDate, "yyyy-MM-dd"));
-        params.set("returnTime", returnTime);
+      setSubmitting(true);
+      try {
+        // Fetch all vehicle prices for the route
+        const { data: pricesData } = await supabase.functions.invoke("get-all-vehicle-prices", {
+          body: {
+            pickup,
+            dropoff,
+            customerCurrency: preferredCurrency,
+          },
+        });
+        
+        const params = new URLSearchParams();
+        params.set("pickup", pickup);
+        params.set("dropoff", dropoff);
+        params.set("date", format(date, "yyyy-MM-dd"));
+        params.set("time", time);
+        params.set("vehicleType", vehicleType);
+        params.set("passengers", passengers);
+        params.set("currency", preferredCurrency);
+        
+        if (hasReturnTrip && returnDate && returnTime) {
+          params.set("hasReturn", "true");
+          params.set("returnDate", format(returnDate, "yyyy-MM-dd"));
+          params.set("returnTime", returnTime);
+        }
+        
+        // Add all vehicle prices if available
+        if (pricesData?.prices) {
+          const pricesMap: Record<string, number> = {};
+          pricesData.prices.forEach((p: any) => {
+            if (p.price) {
+              pricesMap[p.vehicleType] = p.price;
+            }
+          });
+          if (Object.keys(pricesMap).length > 0) {
+            params.set("allVehiclePrices", encodeURIComponent(JSON.stringify(pricesMap)));
+          }
+        }
+        
+        navigate(`/book?${params.toString()}`);
+      } catch (error) {
+        console.error("Error fetching prices:", error);
+        // Still navigate even if prices fail
+        const params = new URLSearchParams();
+        params.set("pickup", pickup);
+        params.set("dropoff", dropoff);
+        params.set("date", format(date, "yyyy-MM-dd"));
+        params.set("time", time);
+        params.set("vehicleType", vehicleType);
+        params.set("passengers", passengers);
+        params.set("currency", preferredCurrency);
+        navigate(`/book?${params.toString()}`);
+      } finally {
+        setSubmitting(false);
       }
-      
-      navigate(`/book?${params.toString()}`);
       return;
     }
 
