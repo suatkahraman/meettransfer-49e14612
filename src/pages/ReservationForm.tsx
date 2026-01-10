@@ -1197,76 +1197,78 @@ const ReservationForm = () => {
     const selectedPrice = selectedPriceInfo?.price || null;
     const selectedCurrency = selectedPriceInfo?.currency || preferredCurrency;
     
-    // Calculate return price
+    // Calculate return price - always discounted for return trips
+    const RETURN_DISCOUNT_PERCENTAGE = 10; // 10% discount for return trip by default
+    const PROMO_DISCOUNT_PERCENTAGE = 30; // Additional 30% discount with promo code
+    
     const getReturnPrice = () => {
       if (!hasReturnTrip || !selectedPrice) return null;
-      if (isPromoCodeValid) return Math.round(selectedPrice * 0.7);
-      return selectedPrice;
+      // Promo code gives 30% off, otherwise 10% default return discount
+      const discountPercent = isPromoCodeValid ? PROMO_DISCOUNT_PERCENTAGE : RETURN_DISCOUNT_PERCENTAGE;
+      return Math.round(selectedPrice * (100 - discountPercent) / 100);
     };
     
     const returnPrice = getReturnPrice();
+    const returnOriginalPrice = selectedPrice; // Original return price (same as outbound)
+    const returnDiscountPercent = isPromoCodeValid ? PROMO_DISCOUNT_PERCENTAGE : RETURN_DISCOUNT_PERCENTAGE;
+    const returnDiscountAmount = hasReturnTrip && selectedPrice ? Math.round(selectedPrice * returnDiscountPercent / 100) : null;
     const totalPrice = selectedPrice ? selectedPrice + (returnPrice || 0) : null;
-    const discountAmount = hasReturnTrip && isPromoCodeValid && selectedPrice ? Math.round(selectedPrice * 0.3) : null;
+    const totalWithoutDiscount = hasReturnTrip && selectedPrice ? selectedPrice * 2 : selectedPrice;
+    const totalSavings = hasReturnTrip && returnDiscountAmount ? returnDiscountAmount : null;
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background p-4">
-        <Card className="max-w-2xl mx-auto">
-          <CardContent className="pt-6">
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background p-3 sm:p-4">
+        <Card className="max-w-2xl mx-auto shadow-lg">
+          <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
             {/* Header with Best Price Animation */}
-            <div className="text-center mb-6">
-              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-4 animate-bounce">
-                <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-3 sm:mb-4 animate-bounce">
+                <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-primary animate-pulse" />
               </div>
-              <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 {t('language') === 'TR' ? 'En İyi Fiyatlarımız' : 'Our Best Prices'}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 {t('language') === 'TR' 
                   ? 'Transferiniz için en uygun aracı seçin' 
                   : 'Choose the best vehicle for your transfer'}
               </p>
             </div>
 
-            {/* Transfer Details */}
-            <div className="bg-muted/50 rounded-lg p-4 mb-6 space-y-3">
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('pickupPoint')}</p>
-                  <p className="font-medium">{pendingFormData.pickup}</p>
+            {/* Transfer Details - Mobile Optimized */}
+            <div className="bg-muted/50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 space-y-2 sm:space-y-3">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t('pickupPoint')}</p>
+                  <p className="font-medium text-sm sm:text-base truncate">{pendingFormData.pickup}</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-accent mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('dropoffLocation')}</p>
-                  <p className="font-medium">{pendingFormData.dropoff}</p>
+              <div className="flex items-start gap-2 sm:gap-3">
+                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-accent mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t('dropoffLocation')}</p>
+                  <p className="font-medium text-sm sm:text-base truncate">{pendingFormData.dropoff}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('date')}</p>
-                    <p className="font-medium">{pendingFormData.date}</p>
-                  </div>
+              {/* Date, Time, Passengers - Responsive Grid */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-2 border-t border-border/50">
+                <div className="flex flex-col items-center text-center">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground mb-1" />
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">{t('date')}</p>
+                  <p className="font-medium text-xs sm:text-sm">{pendingFormData.date}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('time')}</p>
-                    <p className="font-medium">{pendingFormData.time}</p>
-                  </div>
+                <div className="flex flex-col items-center text-center">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground mb-1" />
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">{t('time')}</p>
+                  <p className="font-medium text-xs sm:text-sm">{pendingFormData.time}</p>
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('passengers')}</p>
-                  <p className="font-medium">{pendingPassengerNames.length}</p>
+                <div className="flex flex-col items-center text-center">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground mb-1" />
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">{t('passengers')}</p>
+                  <p className="font-medium text-xs sm:text-sm">{pendingPassengerNames.length}</p>
                 </div>
               </div>
             </div>
@@ -1529,58 +1531,63 @@ const ReservationForm = () => {
               </div>
             </div>
 
-            {/* Return Trip Option with Date/Time Selection */}
-            <div className="bg-muted/50 rounded-lg p-4 mb-4">
-              <div className="flex items-center space-x-3 mb-4">
+            {/* Return Trip Option with Date/Time Selection - Mobile Optimized */}
+            <div className="bg-muted/50 rounded-lg p-3 sm:p-4 mb-4">
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
                 <input
                   type="checkbox"
                   id="returnTripVehicleScreen"
                   checked={hasReturnTrip}
                   onChange={(e) => setHasReturnTrip(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
                 />
-                <Label htmlFor="returnTripVehicleScreen" className="flex items-center gap-2 cursor-pointer font-medium">
+                <Label htmlFor="returnTripVehicleScreen" className="flex items-center gap-2 cursor-pointer font-medium text-sm sm:text-base">
                   <ArrowLeftRight className="h-4 w-4 text-primary" />
                   {t('language') === 'TR' ? 'Dönüş Transferi Ekle' : 'Add Return Transfer'}
+                  {!isPromoCodeValid && hasReturnTrip && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                      -10%
+                    </span>
+                  )}
                 </Label>
               </div>
 
               {hasReturnTrip && (
-                <div className="space-y-4 pt-2 border-t">
-                  {/* Return Date */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4" />
-                      {t('language') === 'TR' ? 'Dönüş Tarihi' : 'Return Date'}
-                    </Label>
-                    <Input
-                      type="date"
-                      value={returnTripData.date}
-                      onChange={(e) => setReturnTripData(prev => ({ ...prev, date: e.target.value }))}
-                      min={pendingFormData?.date || new Date().toISOString().split('T')[0]}
-                      className="w-full"
-                    />
-                  </div>
-
-                  {/* Return Time */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4" />
-                      {t('language') === 'TR' ? 'Dönüş Saati' : 'Return Time'}
-                    </Label>
-                    <Input
-                      type="time"
-                      value={returnTripData.time}
-                      onChange={(e) => setReturnTripData(prev => ({ ...prev, time: e.target.value }))}
-                      className="w-full"
-                    />
+                <div className="space-y-3 sm:space-y-4 pt-2 sm:pt-3 border-t">
+                  {/* Return Date & Time - Side by side on all screens */}
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div className="space-y-1 sm:space-y-2">
+                      <Label className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                        <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                        {t('language') === 'TR' ? 'Dönüş Tarihi' : 'Return Date'}
+                      </Label>
+                      <Input
+                        type="date"
+                        value={returnTripData.date}
+                        onChange={(e) => setReturnTripData(prev => ({ ...prev, date: e.target.value }))}
+                        min={pendingFormData?.date || new Date().toISOString().split('T')[0]}
+                        className="w-full h-10 sm:h-11 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1 sm:space-y-2">
+                      <Label className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                        {t('language') === 'TR' ? 'Dönüş Saati' : 'Return Time'}
+                      </Label>
+                      <Input
+                        type="time"
+                        value={returnTripData.time}
+                        onChange={(e) => setReturnTripData(prev => ({ ...prev, time: e.target.value }))}
+                        className="w-full h-10 sm:h-11 text-sm"
+                      />
+                    </div>
                   </div>
 
                   {/* Promo Code for Return */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm">
-                      <Tag className="h-4 w-4" />
-                      {t('language') === 'TR' ? 'Promosyon Kodu' : 'Promo Code'}
+                  <div className="space-y-1 sm:space-y-2">
+                    <Label className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                      <Tag className="h-3 w-3 sm:h-4 sm:w-4" />
+                      {t('language') === 'TR' ? 'Promosyon Kodu (Opsiyonel)' : 'Promo Code (Optional)'}
                     </Label>
                     <div className="relative">
                       <Input
@@ -1589,97 +1596,141 @@ const ReservationForm = () => {
                         onChange={(e) => handlePromoCodeChange(e.target.value)}
                         placeholder="Meet40Return"
                         className={cn(
-                          "pr-10",
-                          isPromoCodeValid === true && "border-green-500",
+                          "pr-10 h-10 sm:h-11 text-sm",
+                          isPromoCodeValid === true && "border-green-500 bg-green-50 dark:bg-green-950/20",
                           isPromoCodeValid === false && "border-destructive"
                         )}
                       />
                       {isPromoCodeValid === true && (
-                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                       )}
                       {isPromoCodeValid === false && (
-                        <X className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-destructive" />
+                        <X className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
                       )}
                     </div>
                     {isPromoCodeValid === true && (
-                      <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
-                        <CheckCircle2 className="h-4 w-4" />
-                        {t('language') === 'TR' ? 'Dönüş transferinde %30 indirim!' : '30% off on return transfer!'}
+                      <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 flex items-center gap-1 bg-green-50 dark:bg-green-950/30 px-2 py-1 rounded">
+                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                        {t('language') === 'TR' ? 'Dönüşte %30 indirim kazandınız!' : '30% off on return transfer!'}
+                      </p>
+                    )}
+                    {!isPromoCodeValid && (
+                      <p className="text-xs text-muted-foreground">
+                        {t('language') === 'TR' 
+                          ? 'Kod olmadan da %10 dönüş indirimi otomatik uygulanır' 
+                          : '10% return discount is applied automatically without a code'}
                       </p>
                     )}
                   </div>
 
-                  {/* Return Route Info */}
-                  <div className="text-sm text-muted-foreground bg-background/50 p-3 rounded-lg">
-                    <p className="font-medium mb-1">{t('language') === 'TR' ? 'Dönüş Güzergahı:' : 'Return Route:'}</p>
-                    <p>{pendingFormData?.dropoff} → {pendingFormData?.pickup}</p>
+                  {/* Return Route Info - Compact */}
+                  <div className="text-xs sm:text-sm text-muted-foreground bg-background/50 p-2 sm:p-3 rounded-lg flex items-center gap-2">
+                    <ArrowLeftRight className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <p className="truncate">
+                      <span className="font-medium">{t('language') === 'TR' ? 'Dönüş:' : 'Return:'}</span> {pendingFormData?.dropoff?.split(',')[0]} → {pendingFormData?.pickup?.split(',')[0]}
+                    </p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Price Summary */}
+            {/* Price Summary - Mobile Optimized */}
             {selectedPrice && (
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
-                <div className="space-y-2">
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+                <div className="space-y-2 sm:space-y-3">
+                  {/* Outbound Price */}
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">{t('language') === 'TR' ? 'Gidiş' : 'Outbound'}</span>
-                    <span className="font-semibold">{selectedPrice} {selectedCurrency}</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary"></div>
+                      <span className="text-xs sm:text-sm text-muted-foreground">{t('language') === 'TR' ? 'Gidiş' : 'Outbound'}</span>
+                    </div>
+                    <span className="font-semibold text-sm sm:text-base">{selectedPrice} {selectedCurrency}</span>
                   </div>
                   
+                  {/* Return Price */}
                   {hasReturnTrip && returnPrice && (
                     <>
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">{t('returnTrip')}</span>
-                        <div className="text-right">
-                          {discountAmount && (
-                            <span className="text-sm line-through text-muted-foreground mr-2">
-                              {selectedPrice} {selectedCurrency}
-                            </span>
-                          )}
-                          <span className="font-semibold">{returnPrice} {selectedCurrency}</span>
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <div className="w-2 h-2 rounded-full bg-accent"></div>
+                          <span className="text-xs sm:text-sm text-muted-foreground">{t('language') === 'TR' ? 'Dönüş' : 'Return'}</span>
+                        </div>
+                        <div className="text-right flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-xs sm:text-sm line-through text-muted-foreground">
+                            {returnOriginalPrice} {selectedCurrency}
+                          </span>
+                          <span className="font-semibold text-sm sm:text-base text-green-600 dark:text-green-400">{returnPrice} {selectedCurrency}</span>
                         </div>
                       </div>
                       
-                      {discountAmount && (
-                        <div className="flex items-center justify-between text-green-600 dark:text-green-400">
-                          <span className="flex items-center gap-1">
-                            <Tag className="h-4 w-4" />
-                            {t('language') === 'TR' ? '30% İndirim' : '30% Discount'}
+                      {/* Discount Badge - Compact */}
+                      <div className="flex items-center justify-between bg-green-50 dark:bg-green-950/30 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2">
+                        <span className="flex items-center gap-1.5 text-green-700 dark:text-green-300 text-xs sm:text-sm">
+                          <Tag className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="hidden xs:inline">
+                            {isPromoCodeValid 
+                              ? (t('language') === 'TR' ? 'Promo Kod İndirimi' : 'Promo Discount') 
+                              : (t('language') === 'TR' ? 'Dönüş İndirimi' : 'Return Discount')}
                           </span>
-                          <span>-{discountAmount} {selectedCurrency}</span>
-                        </div>
-                      )}
+                          <span className="font-bold">
+                            ({isPromoCodeValid ? '30%' : '10%'})
+                          </span>
+                        </span>
+                        <span className="font-semibold text-xs sm:text-sm text-green-600 dark:text-green-400">
+                          -{returnDiscountAmount} {selectedCurrency}
+                        </span>
+                      </div>
                     </>
                   )}
                   
-                  <div className="border-t pt-2 mt-2">
-                    <div className="flex items-center justify-between text-lg font-bold">
-                      <span>{t('language') === 'TR' ? 'Toplam' : 'Total'}</span>
-                      <span className="text-primary">{totalPrice} {selectedCurrency}</span>
+                  {/* Divider & Total */}
+                  <div className="border-t border-primary/20 pt-2 sm:pt-3 mt-1 sm:mt-2">
+                    {/* Total without discount (only if return trip) */}
+                    {hasReturnTrip && totalSavings && (
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground mb-1">
+                        <span>{t('language') === 'TR' ? 'Ara Toplam' : 'Subtotal'}</span>
+                        <span className="line-through">{totalWithoutDiscount} {selectedCurrency}</span>
+                      </div>
+                    )}
+                    
+                    {/* Total Savings */}
+                    {totalSavings && (
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-green-600 dark:text-green-400 mb-1.5 sm:mb-2">
+                        <span className="flex items-center gap-1">
+                          <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
+                          {t('language') === 'TR' ? 'Tasarruf' : 'Savings'}
+                        </span>
+                        <span className="font-semibold">-{totalSavings} {selectedCurrency}</span>
+                      </div>
+                    )}
+                    
+                    {/* Final Total - Prominent */}
+                    <div className="flex items-center justify-between py-2 sm:py-3 bg-primary/10 rounded-lg px-2 sm:px-3 -mx-1 sm:-mx-2">
+                      <span className="font-bold text-sm sm:text-base">{t('language') === 'TR' ? 'Toplam' : 'Total'}</span>
+                      <span className="text-primary text-lg sm:text-xl font-bold">{totalPrice} {selectedCurrency}</span>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="space-y-3">
+            {/* Action Buttons - Mobile Optimized */}
+            <div className="space-y-2 sm:space-y-3">
               <Button 
                 onClick={handleConfirmVehicleSelection} 
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700" 
+                className="w-full h-12 sm:h-14 text-sm sm:text-base bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg" 
                 size="lg"
                 disabled={isLoading || !selectedVehicleForConfirm || (hasReturnTrip && (!returnTripData.date || !returnTripData.time))}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
                     {t('submitting')}
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    {t('language') === 'TR' ? 'Fiyatı Onayla ve Rezerve Et' : 'Accept Price & Book'}
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                    {t('language') === 'TR' ? 'Onayla ve Rezerve Et' : 'Confirm & Book'}
                   </>
                 )}
               </Button>
@@ -1689,19 +1740,20 @@ const ReservationForm = () => {
                 <Button 
                   variant="outline"
                   onClick={handleRejectPrice}
-                  className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-950/30"
-                  size="lg"
+                  className="w-full h-10 sm:h-12 text-sm border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-950/30"
                   disabled={isRejecting || isLoading || !selectedVehicleForConfirm}
                 >
                   {isRejecting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {t('language') === 'TR' ? 'İndirim Uygulanıyor...' : 'Applying Discount...'}
+                      <span className="hidden sm:inline">{t('language') === 'TR' ? 'İndirim Uygulanıyor...' : 'Applying Discount...'}</span>
+                      <span className="sm:hidden">{t('language') === 'TR' ? 'Yükleniyor...' : 'Loading...'}</span>
                     </>
                   ) : (
                     <>
                       <Gift className="h-4 w-4 mr-2" />
-                      {t('language') === 'TR' ? 'Fiyat Yüksek, İndirim İste' : 'Price Too High, Request Discount'}
+                      <span className="hidden sm:inline">{t('language') === 'TR' ? 'Fiyat Yüksek, İndirim İste' : 'Price Too High, Request Discount'}</span>
+                      <span className="sm:hidden">{t('language') === 'TR' ? 'İndirim İste' : 'Get Discount'}</span>
                     </>
                   )}
                 </Button>
