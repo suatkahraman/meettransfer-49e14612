@@ -345,15 +345,14 @@ const AdminMonthlyProfit = () => {
             continue;
           }
 
-          if (rateData && rateData.rate && rateData.converted_amount) {
-            const { error: updateError } = await supabase
-              .from('agency_reservation_details')
-              .update({
-                company_amount_try: rateData.converted_amount,
-                exchange_rate_used: rateData.rate,
-                conversion_date: rateData.date
-              })
-              .eq('reservation_id', res.id);
+            if (rateData && rateData.rate) {
+              const { error: updateError } = await supabase
+                .from('agency_reservation_details')
+                .update({
+                  exchange_rate_used: rateData.rate,
+                  conversion_date: rateData.date
+                })
+                .eq('reservation_id', res.id);
 
             if (updateError) {
               console.error('Update error:', updateError);
@@ -437,12 +436,11 @@ const AdminMonthlyProfit = () => {
             continue;
           }
 
-          if (rateData && rateData.rate && rateData.converted_amount) {
-            // Update the database with converted amount
+          if (rateData && rateData.rate) {
+            // Update the database with the exchange rate (income is computed from customer_price * exchange_rate_used)
             const { error: updateError } = await supabase
               .from('agency_reservation_details')
               .update({
-                company_amount_try: rateData.converted_amount,
                 exchange_rate_used: rateData.rate,
                 conversion_date: rateData.date
               })

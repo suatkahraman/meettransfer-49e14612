@@ -185,16 +185,15 @@ export const MonthlyProfitCard = () => {
             continue;
           }
 
-          if (rateData && rateData.rate && rateData.converted_amount) {
-            await supabase
-              .from('agency_reservation_details')
-              .update({
-                company_amount_try: rateData.converted_amount,
-                exchange_rate_used: rateData.rate,
-                conversion_date: rateData.date
-              })
-              .eq('reservation_id', item.reservationId);
-          }
+            if (rateData && rateData.rate) {
+              await supabase
+                .from('agency_reservation_details')
+                .update({
+                  exchange_rate_used: rateData.rate,
+                  conversion_date: rateData.date
+                })
+                .eq('reservation_id', item.reservationId);
+            }
         } catch (err) {
           console.error('Conversion error for reservation:', item.reservationId, err);
         }
