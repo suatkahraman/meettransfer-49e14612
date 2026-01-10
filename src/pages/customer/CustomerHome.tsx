@@ -251,65 +251,37 @@ const CustomerHome = () => {
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      const { data: insertedReservation, error } = await supabase.from('reservations').insert({
-        customer_id: user?.id,
-        customer_name: validPassengerNames[0].trim(),
-        customer_phone: result.data.passengerPhone.trim(),
-        passenger_names: validPassengerNames.map(n => n.trim()),
-        pickup: result.data.pickup,
-        dropoff: result.data.dropoff.trim(),
-        pickup_date: result.data.date,
-        pickup_time: result.data.time,
-        flight_number: result.data.flightNumber?.trim() || null,
-        vehicle_type: result.data.vehicleType,
-        price: null,
-        price_currency: null,
-        payment_type: result.data.paymentType,
-        status: 'awaiting-price',
-      }).select().single();
-
-      if (error) throw error;
-
-      try {
-        const notifyResponse = await supabase.functions.invoke('notify-admin-new-reservation', {
-          body: {
-            reservation_id: insertedReservation.id,
-            customer_name: validPassengerNames[0].trim(),
-            pickup: result.data.pickup,
-            dropoff: result.data.dropoff.trim(),
-            pickup_date: result.data.date,
-          }
-        });
-
-        if (notifyResponse.error) {
-          console.error('Admin notification error:', notifyResponse.error);
-        }
-      } catch (notifyError) {
-        console.error('Failed to notify admin:', notifyError);
-      }
-
-      // Save to recent searches
-      if (user?.id) {
-        const newSearch = { pickup: result.data.pickup, dropoff: result.data.dropoff.trim() };
-        const existingSearches = recentSearches.filter(
-          s => s.pickup !== newSearch.pickup || s.dropoff !== newSearch.dropoff
-        );
-        const updatedSearches = [newSearch, ...existingSearches].slice(0, 3);
-        setRecentSearches(updatedSearches);
-        localStorage.setItem(`recentSearches_${user.id}`, JSON.stringify(updatedSearches));
-      }
-
-      toast.success(t('reservationSubmitted'));
-      navigate('/customer/bookings');
-    } catch (error: any) {
-      console.error('Reservation error:', error);
-      toast.error(error.message || t('bookingFailed'));
-    } finally {
-      setIsLoading(false);
+    // Save to recent searches
+    if (user?.id) {
+      const newSearch = { pickup: result.data.pickup, dropoff: result.data.dropoff.trim() };
+      const existingSearches = recentSearches.filter(
+        s => s.pickup !== newSearch.pickup || s.dropoff !== newSearch.dropoff
+      );
+      const updatedSearches = [newSearch, ...existingSearches].slice(0, 3);
+      setRecentSearches(updatedSearches);
+      localStorage.setItem(`recentSearches_${user.id}`, JSON.stringify(updatedSearches));
     }
+
+    // Redirect to ReservationForm with all form data as URL params - same flow as quick booking
+    const params = new URLSearchParams({
+      pickup: result.data.pickup,
+      dropoff: result.data.dropoff.trim(),
+      date: result.data.date,
+      time: result.data.time,
+      vehicleType: result.data.vehicleType,
+      passengers: String(validPassengerNames.length),
+      paymentMethod: result.data.paymentType,
+    });
+    
+    if (result.data.flightNumber) {
+      params.set('flightNumber', result.data.flightNumber.trim());
+    }
+
+    // Store passenger names in sessionStorage for the reservation form to pick up
+    sessionStorage.setItem('customerPassengerNames', JSON.stringify(validPassengerNames));
+    sessionStorage.setItem('customerPhone', result.data.passengerPhone.trim());
+
+    navigate(`/reservation?${params.toString()}`);
   };
 
   return (
@@ -1019,6 +991,7 @@ const CustomerHome = () => {
           >
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button
+                type="button"
                 onClick={() => {
                   const message = encodeURIComponent(
                     language === 'TR' 
@@ -1044,6 +1017,7 @@ const CustomerHome = () => {
           >
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button
+                type="button"
                 onClick={() => navigate('/customer/bookings')}
                 size="lg"
                 className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"

@@ -866,6 +866,7 @@ const CustomerBookings = () => {
         >
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
             <Button
+              type="button"
               onClick={() => {
                 const message = encodeURIComponent(
                   language === 'TR' 
@@ -891,6 +892,7 @@ const CustomerBookings = () => {
         >
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
             <Button
+              type="button"
               onClick={() => navigate('/customer#booking-form')}
               size="lg"
               className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
