@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -18,6 +18,8 @@ import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes-vito',
@@ -190,7 +192,7 @@ const CustomerBookings = () => {
     return statusLabels[status] || status;
   };
 
-  const fetchReservations = async () => {
+  const fetchReservations = useCallback(async () => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -208,7 +210,19 @@ const CustomerBookings = () => {
       setReservations(data || []);
     }
     setLoading(false);
-  };
+  }, [user]);
+
+  // Pull to refresh
+  const handleRefresh = useCallback(async () => {
+    await fetchReservations();
+    toast.success(language === 'TR' ? 'Yenilendi!' : 'Refreshed!');
+  }, [fetchReservations, language]);
+
+  const { pullDistance, isRefreshing, isPulling, handlers } = usePullToRefresh({
+    onRefresh: handleRefresh,
+    threshold: 80,
+    disabled: loading
+  });
 
   useEffect(() => {
     fetchReservations();
@@ -347,7 +361,16 @@ const CustomerBookings = () => {
         </div>
       </motion.header>
 
-      <main className="flex-1 overflow-y-auto">
+      <main 
+        className="flex-1 overflow-y-auto"
+        {...handlers}
+      >
+        <PullToRefreshIndicator
+          pullDistance={pullDistance}
+          isRefreshing={isRefreshing}
+          isPulling={isPulling}
+          language={language === 'TR' ? 'TR' : 'EN'}
+        />
         <div className="container mx-auto py-6 px-4 max-w-2xl">
         {/* Title Section */}
         <motion.div 

@@ -28,6 +28,8 @@ import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Language } from '@/contexts/LanguageContext';
 import meetTransferLogo from '@/assets/meet-transfer-logo-small.webp';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 
 // Language options
 const LANGUAGES = [
@@ -166,6 +168,17 @@ const CustomerHome = () => {
       setIsRefreshing(false);
     }
   }, [user?.id, formData.passengerPhone]);
+
+  // Pull to refresh handler
+  const handlePullToRefresh = useCallback(async () => {
+    await fetchData();
+    toast.success(language === 'TR' ? 'Yenilendi!' : 'Refreshed!');
+  }, [fetchData, language]);
+
+  const { pullDistance, isRefreshing: isPullRefreshing, isPulling, handlers: pullHandlers } = usePullToRefresh({
+    onRefresh: handlePullToRefresh,
+    threshold: 80,
+  });
 
   useEffect(() => {
     fetchData();
@@ -511,7 +524,16 @@ const CustomerHome = () => {
         </div>
       </header>
 
-      <main className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-4xl">
+      <main 
+        className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-4xl"
+        {...pullHandlers}
+      >
+        <PullToRefreshIndicator
+          pullDistance={pullDistance}
+          isRefreshing={isPullRefreshing}
+          isPulling={isPulling}
+          language={language === 'TR' ? 'TR' : 'EN'}
+        />
         {/* Welcome Section with Animation */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
