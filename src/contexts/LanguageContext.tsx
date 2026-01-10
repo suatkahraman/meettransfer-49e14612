@@ -724,6 +724,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common
     backToBlog: "Back to Blog",
     minRead: "min read",
+    shareArticle: "Share",
     readyToBookTransfer: "Ready to Book Your Transfer?",
     getInstantQuote: "Get your instant price quote via WhatsApp or fill out our booking form.",
     frequentlyAskedQuestions: "Frequently Asked Questions",
@@ -1818,6 +1819,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common
     backToBlog: "Zurück zum Blog",
     minRead: "Min. Lesezeit",
+    shareArticle: "Teilen",
     readyToBookTransfer: "Bereit, Ihren Transfer zu buchen?",
     getInstantQuote: "Erhalten Sie ein sofortiges Preisangebot per WhatsApp oder füllen Sie unser Buchungsformular aus.",
     frequentlyAskedQuestions: "Häufig gestellte Fragen",
@@ -2842,6 +2844,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common
     backToBlog: "Retour au blog",
     minRead: "min de lecture",
+    shareArticle: "Partager",
     readyToBookTransfer: "Prêt à réserver votre transfert ?",
     getInstantQuote: "Obtenez un devis instantané via WhatsApp ou remplissez notre formulaire de réservation.",
     frequentlyAskedQuestions: "Questions fréquemment posées",
@@ -3851,6 +3854,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common
     backToBlog: "Назад к блогу",
     minRead: "мин чтения",
+    shareArticle: "Поделиться",
     readyToBookTransfer: "Готовы забронировать трансфер?",
     getInstantQuote: "Получите мгновенное предложение через WhatsApp или заполните форму бронирования.",
     frequentlyAskedQuestions: "Часто задаваемые вопросы",
@@ -4803,6 +4807,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common
     backToBlog: "Torna al blog",
     minRead: "min di lettura",
+    shareArticle: "Condividi",
     readyToBookTransfer: "Pronto a prenotare il tuo transfer?",
     getInstantQuote: "Ottieni un preventivo istantaneo via WhatsApp o compila il modulo di prenotazione.",
     frequentlyAskedQuestions: "Domande frequenti",
@@ -5808,6 +5813,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common
     backToBlog: "Volver al blog",
     minRead: "min de lectura",
+    shareArticle: "Compartir",
     readyToBookTransfer: "¿Listo para reservar tu traslado?",
     getInstantQuote: "Obtén un presupuesto instantáneo vía WhatsApp o completa nuestro formulario.",
     frequentlyAskedQuestions: "Preguntas frecuentes",
@@ -6813,6 +6819,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common
     backToBlog: "العودة للمدونة",
     minRead: "دقيقة قراءة",
+    shareArticle: "مشاركة",
     readyToBookTransfer: "هل أنت مستعد لحجز النقل الخاص بك؟",
     getInstantQuote: "احصل على عرض سعر فوري عبر واتساب أو أكمل نموذج الحجز.",
     frequentlyAskedQuestions: "الأسئلة الشائعة",
@@ -7770,6 +7777,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common
     backToBlog: "Bloga Dön",
     minRead: "dk okuma",
+    shareArticle: "Paylaş",
     readyToBookTransfer: "Transferinizi Rezerve Etmeye Hazır mısınız?",
     getInstantQuote: "WhatsApp ile anında fiyat teklifi alın veya rezervasyon formumuzu doldurun.",
     frequentlyAskedQuestions: "Sıkça Sorulan Sorular",
@@ -8847,6 +8855,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common
     backToBlog: "Назад до блогу",
     minRead: "хв читання",
+    shareArticle: "Поділитися",
     readyToBookTransfer: "Готові забронювати трансфер?",
     getInstantQuote: "Отримайте миттєву пропозицію через WhatsApp або заповніть форму бронювання.",
     frequentlyAskedQuestions: "Поширені запитання",
@@ -9824,6 +9833,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common
     backToBlog: "ブログに戻る",
     minRead: "分で読める",
+    shareArticle: "共有",
     readyToBookTransfer: "送迎を予約する準備はできましたか？",
     getInstantQuote: "WhatsAppで即座に見積もりを取得するか、予約フォームに記入してください。",
     frequentlyAskedQuestions: "よくある質問",

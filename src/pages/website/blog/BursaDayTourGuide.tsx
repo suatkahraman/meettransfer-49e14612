@@ -16,6 +16,7 @@ import bursaHeroImage from "@/assets/blog/bursa-day-tour-hero.jpg";
 import cumalikizikImage from "@/assets/cumalikizik-village.jpg";
 import uludagImage from "@/assets/uludag-cable-car.jpg";
 import { getWhatsAppUrl } from "@/lib/contact";
+import ShareButtons from "@/components/website/ShareButtons";
 
 const BursaDayTourGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -96,6 +97,9 @@ const BursaDayTourGuide = () => {
           <ArrowLeft className="h-4 w-4" />
           {t("backToBlog")}
         </Link>
+
+        {/* Share Buttons */}
+        <ShareButtons title={t("blogBursaH1")} className="mb-8" />
 
         {/* Quick Info */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">

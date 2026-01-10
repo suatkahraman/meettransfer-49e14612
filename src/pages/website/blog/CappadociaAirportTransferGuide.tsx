@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getWhatsAppUrl } from "@/lib/contact";
+import ShareButtons from "@/components/website/ShareButtons";
 
 const CappadociaAirportTransferGuide = () => {
   const { getLocalizedPath, t, language } = useLanguage();
@@ -194,6 +195,14 @@ const CappadociaAirportTransferGuide = () => {
             </span>
           </div>
         </header>
+
+        {/* Share Buttons */}
+        <ShareButtons 
+          title={language === 'TR' 
+            ? "Kapadokya Havalimanı Transfer Rehberi 2025" 
+            : "Cappadocia Airport Transfer Guide 2025"} 
+          className="mb-8" 
+        />
 
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">

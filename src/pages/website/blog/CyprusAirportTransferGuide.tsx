@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getWhatsAppUrl } from "@/lib/contact";
+import ShareButtons from "@/components/website/ShareButtons";
 
 const CyprusAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -132,6 +133,9 @@ const CyprusAirportTransferGuide = () => {
             </span>
           </div>
         </header>
+
+        {/* Share Buttons */}
+        <ShareButtons title={t("blogCyprusH1")} className="mb-8" />
 
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">

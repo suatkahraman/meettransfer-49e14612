@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ShareButtons from "@/components/website/ShareButtons";
 
 const IsPrivateTransferWorthIt = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -113,6 +114,9 @@ const IsPrivateTransferWorthIt = () => {
             </span>
           </div>
         </header>
+
+        {/* Share Buttons */}
+        <ShareButtons title={t('blogWorthItH1')} className="mb-8" />
 
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">

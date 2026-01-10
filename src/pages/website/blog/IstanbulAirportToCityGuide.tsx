@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ShareButtons from "@/components/website/ShareButtons";
 
 const IstanbulAirportToCityGuide = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -156,6 +157,9 @@ const IstanbulAirportToCityGuide = () => {
             </span>
           </div>
         </header>
+
+        {/* Share Buttons */}
+        <ShareButtons title={t('blogIstanbul1H1')} className="mb-8" />
 
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
