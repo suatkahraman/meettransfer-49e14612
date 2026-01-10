@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle, Tag, Briefcase, Baby, Sparkles, RefreshCw, Shield } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle, Tag, Briefcase, Baby, Sparkles, RefreshCw, Shield, ClipboardCopy, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol, CURRENCY_SYMBOLS } from '@/lib/currency';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -23,7 +23,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
-import { WHATSAPP_NUMBER } from '@/lib/contact';
+import { WHATSAPP_NUMBER, getWhatsAppUrl } from '@/lib/contact';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -315,6 +315,60 @@ const CustomerReservationDetail = () => {
     !isPickupDatePast() && 
     canCancelWithin24Hours() &&
     ['customer_approved', 'confirmed', 'sent_to_driver', 'waiting_for_customer_approval'].includes(reservation.status);
+
+  // Generate reservation details text for sharing
+  const getReservationDetailsText = () => {
+    if (!reservation) return '';
+    
+    const formattedDate = format(new Date(reservation.pickup_date), 'dd MMM yyyy');
+    const passengerList = reservation.passenger_names && reservation.passenger_names.length > 0
+      ? reservation.passenger_names.map((name, index) => `   ${index + 1}. ${name}`).join('\n')
+      : '   —';
+
+    const lines = [
+      `🚖 *${language === 'TR' ? 'TRANSFERİM' : 'MY TRANSFER'}*`,
+      `━━━━━━━━━━━━━━━━━`,
+      ``,
+      reservation.reservation_code ? `🎫 *${language === 'TR' ? 'Kod' : 'Code'}:* ${reservation.reservation_code}` : null,
+      `📅 *${language === 'TR' ? 'Tarih' : 'Date'}:* ${formattedDate}`,
+      `🕐 *${language === 'TR' ? 'Saat' : 'Time'}:* ${reservation.pickup_time}`,
+      ``,
+      `🟢 *${language === 'TR' ? 'Alış Noktası' : 'Pickup'}:*`,
+      reservation.pickup_place_name || reservation.pickup,
+      ``,
+      `🔴 *${language === 'TR' ? 'Varış Noktası' : 'Dropoff'}:*`,
+      reservation.dropoff_place_name || reservation.dropoff,
+      ``,
+      reservation.flight_number ? `✈️ *${language === 'TR' ? 'Uçuş' : 'Flight'}:* ${reservation.flight_number}` : null,
+      `🚗 *${language === 'TR' ? 'Araç' : 'Vehicle'}:* ${vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}`,
+      reservation.luggage_count ? `🧳 *${language === 'TR' ? 'Valiz' : 'Luggage'}:* ${reservation.luggage_count}` : null,
+      reservation.baby_seat_count ? `👶 *${language === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}:* ${reservation.baby_seat_count}` : null,
+      reservation.drivers ? `\n👤 *${language === 'TR' ? 'Şoför' : 'Driver'}:* ${reservation.drivers.name}` : null,
+      reservation.drivers?.plate_number ? `🚙 *${language === 'TR' ? 'Plaka' : 'Plate'}:* ${reservation.drivers.plate_number}` : null,
+      ``,
+      `━━━━━━━━━━━━━━━━━`,
+    ].filter(Boolean).join('\n');
+
+    return lines;
+  };
+
+  const copyReservationDetails = async () => {
+    const lines = getReservationDetailsText();
+    if (!lines) return;
+
+    try {
+      await navigator.clipboard.writeText(lines);
+      toast.success(language === 'TR' ? 'Rezervasyon detayları kopyalandı' : 'Reservation details copied');
+    } catch (err) {
+      toast.error(language === 'TR' ? 'Kopyalama başarısız' : 'Copy failed');
+    }
+  };
+
+  const shareViaWhatsApp = () => {
+    const lines = getReservationDetailsText();
+    if (!lines) return;
+    window.open(getWhatsAppUrl(lines), '_blank');
+  };
 
   const handleAcceptPrice = async () => {
     if (!reservation) return;
@@ -735,6 +789,25 @@ const CustomerReservationDetail = () => {
                     showNavigationButtons={false}
                   />
                 </div>
+              </motion.div>
+
+              {/* Share Buttons */}
+              <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 py-4 border-t border-border/50">
+                <Button
+                  variant="outline"
+                  onClick={copyReservationDetails}
+                  className="w-full"
+                >
+                  <ClipboardCopy className="h-4 w-4 mr-2" />
+                  {language === 'TR' ? 'Kopyala' : 'Copy'}
+                </Button>
+                <Button
+                  onClick={shareViaWhatsApp}
+                  className="w-full bg-[#25D366] hover:bg-[#22c55e] text-white"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  WhatsApp
+                </Button>
               </motion.div>
 
             {/* Passengers */}
