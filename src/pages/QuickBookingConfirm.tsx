@@ -1296,18 +1296,24 @@ export default function QuickBookingConfirm() {
               <Button
                 onClick={handleConfirm}
                 disabled={confirming || rejecting}
-                className="w-full h-11 sm:h-12 text-sm sm:text-base"
+                className="w-full h-auto min-h-[56px] sm:min-h-[64px] flex-col py-3 sm:py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-2 border-green-400 shadow-lg shadow-green-500/25 transition-all hover:shadow-xl hover:shadow-green-500/30"
                 size="lg"
               >
-                {confirming ? (
-                  <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin mr-1.5 sm:mr-2" />
-                ) : (
-                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
-                )}
-                {t("qbConfirmBooking")}
+                <div className="flex items-center">
+                  {confirming ? (
+                    <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin mr-2" />
+                  ) : (
+                    <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+                  )}
+                  <span className="text-base sm:text-lg font-semibold">{t("qbConfirmBooking")}</span>
+                </div>
+                <span className="text-[10px] sm:text-xs text-white/80 mt-1 flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  {t("confirmFinalOffer") || "Exclusive discounted price"}
+                </span>
               </Button>
-              <p className="text-center text-xs sm:text-sm text-muted-foreground">
-                {t("finalOfferMessage") || "Bu sizin için özel indirimli son teklifimizdir."}
+              <p className="text-center text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/30 rounded-lg py-2 px-3 border border-emerald-200 dark:border-emerald-800">
+                🎉 {t("finalOfferMessage") || "This is your exclusive discounted final offer!"}
               </p>
             </div>
           )}
