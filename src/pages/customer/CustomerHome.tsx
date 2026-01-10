@@ -832,7 +832,25 @@ const CustomerHome = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5 relative">
+              {/* Loading Overlay */}
+              <AnimatePresence>
+                {isLoading && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-lg"
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {language === 'TR' ? 'İşleniyor...' : 'Processing...'}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               {/* Pick-up Point */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
