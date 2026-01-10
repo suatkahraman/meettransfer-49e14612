@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCurrencySymbol } from "@/lib/currency";
 import { VEHICLE_TYPE_MAP } from "@/lib/vehicleTypes";
-import { VehicleSelectionCard } from "@/components/VehicleSelectionCard";
+import { VehicleSelectionCard, VehicleBadgeType } from "@/components/VehicleSelectionCard";
 
 interface BookingRequest {
   id: string;
@@ -1003,6 +1003,21 @@ export default function QuickBookingConfirm() {
                   const recommendedVehicle = getRecommendedVehicle(booking.passengers, booking.luggage_count || 0);
                   const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
                   
+                  // Determine badge for each vehicle type
+                  const getVehicleBadge = (vehicleType: string): VehicleBadgeType => {
+                    // Only show badge if it's the cheapest among available vehicles
+                    const availableVehicles = allVehiclePrices.filter(v => v.available && v.price);
+                    const cheapestVehicle = availableVehicles.reduce((min, v) => 
+                      (v.price && (!min.price || v.price < min.price)) ? v : min, availableVehicles[0]);
+                    
+                    if (vehicleType === 'vip-mercedes') return 'popular';
+                    if (vehicleType === 'mercedes-vito' && cheapestVehicle?.vehicleType === 'mercedes-vito') return 'best-value';
+                    if (vehicleType === 'mercedes-vito' && booking.passengers >= 4) return 'family-friendly';
+                    if (vehicleType === 'maybach-minibus') return 'luxury';
+                    if (vehicleType === 'minibus') return 'family-friendly';
+                    return null;
+                  };
+                  
                   return (
                     <VehicleSelectionCard
                       key={vehicle.vehicleType}
@@ -1016,6 +1031,7 @@ export default function QuickBookingConfirm() {
                       available={vehicle.available}
                       previousPrice={previousVehiclePrices[vehicle.vehicleType] || null}
                       showDiscountAnimation={discountJustApplied && !!previousVehiclePrices[vehicle.vehicleType]}
+                      badge={getVehicleBadge(vehicle.vehicleType)}
                     />
                   );
                 })}
