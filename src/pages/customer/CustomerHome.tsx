@@ -1011,8 +1011,22 @@ const CustomerHome = () => {
                             </div>
                           </div>
                           
-                          {/* Arrow indicator */}
-                          <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          {/* Review button for completed transfers */}
+                          {isCompleted ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="shrink-0 text-accent hover:text-accent hover:bg-accent/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/customer/review/${reservation.id}`);
+                              }}
+                            >
+                              <Star className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          )}
                         </div>
                       </CardContent>
                     </Card>

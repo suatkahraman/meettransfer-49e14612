@@ -17,6 +17,7 @@ import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import MissingInfoAlerts from '@/components/customer/MissingInfoAlerts';
+import { ReviewPromptBanner } from '@/components/customer/ReviewPromptBanner';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
@@ -120,6 +121,7 @@ const CustomerReservationDetail = () => {
   const [flightStatus, setFlightStatus] = useState<string | null>(null);
   const [canReject, setCanReject] = useState(true);
   const [isDiscountedOffer, setIsDiscountedOffer] = useState(false);
+  const [hasReview, setHasReview] = useState(false);
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
@@ -206,6 +208,19 @@ const CustomerReservationDetail = () => {
           setLinkedReservation(outboundTrip);
         }
       }
+    }
+
+    // Check if review already exists for completed reservations
+    if (data && data.status === 'completed' && data.driver_id) {
+      const { data: reviewData } = await supabase
+        .from('driver_reviews')
+        .select('id')
+        .eq('reservation_id', data.id)
+        .single();
+      
+      setHasReview(!!reviewData);
+    } else {
+      setHasReview(false);
     }
     
     setLoading(false);
@@ -1195,12 +1210,35 @@ const CustomerReservationDetail = () => {
               </div>
             )}
 
-            {/* Completed Message */}
+            {/* Completed Message & Review Prompt */}
             {reservation.status === 'completed' && (
-              <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg text-center">
-                <p className="text-green-700 dark:text-green-300">
-                  {t('thankYouMessage')}
-                </p>
+              <div className="space-y-4">
+                <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg text-center">
+                  <p className="text-green-700 dark:text-green-300">
+                    {t('thankYouMessage')}
+                  </p>
+                </div>
+                
+                {/* Review Prompt - only show if driver exists and no review yet */}
+                {reservation.drivers && !hasReview && (
+                  <ReviewPromptBanner
+                    reservationId={reservation.id}
+                    reservationCode={reservation.reservation_code || ''}
+                    driverName={reservation.drivers.name}
+                  />
+                )}
+                
+                {/* Already reviewed message */}
+                {hasReview && (
+                  <div className="bg-accent/10 border border-accent/30 rounded-lg p-4 text-center">
+                    <div className="flex items-center justify-center gap-2 text-accent">
+                      <CheckCircle2 className="h-5 w-5" />
+                      <span className="font-medium">
+                        {language === 'TR' ? 'Değerlendirmeniz için teşekkürler!' : 'Thank you for your review!'}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
