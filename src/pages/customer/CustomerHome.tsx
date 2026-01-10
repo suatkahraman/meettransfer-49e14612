@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,9 +13,11 @@ import {
   LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, 
   Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
   ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall, Sparkles, 
-  Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe
+  Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe, History,
+  Bookmark, TrendingUp
 } from 'lucide-react';
 import { z } from 'zod';
+import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '@/components/NotificationBell';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import { PhoneInput } from '@/components/ui/phone-input';
@@ -25,6 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Language } from '@/contexts/LanguageContext';
+import meetTransferLogo from '@/assets/meet-transfer-logo-small.webp';
 
 // Language options
 const LANGUAGES = [
@@ -76,10 +79,11 @@ const CustomerHome = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [activeBookingsCount, setActiveBookingsCount] = useState(0);
-  const [nextTransfer, setNextTransfer] = useState<{date: string; time: string; pickup: string; dropoff: string} | null>(null);
+  const [nextTransfer, setNextTransfer] = useState<{date: string; time: string; pickup: string; dropoff: string; reservationCode?: string} | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({ full_name: '', phone: '' });
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<{pickup: string; dropoff: string}[]>([]);
   const [formData, setFormData] = useState({
     pickup: '',
     dropoff: '',
@@ -124,10 +128,19 @@ const CustomerHome = () => {
           date: next.pickup_date,
           time: next.pickup_time,
           pickup: next.pickup_place_name || next.pickup,
-          dropoff: next.dropoff_place_name || next.dropoff
+          dropoff: next.dropoff_place_name || next.dropoff,
+          reservationCode: next.reservation_code || undefined
         });
       } else {
         setNextTransfer(null);
+      }
+
+      // Load recent searches from localStorage
+      const savedSearches = localStorage.getItem(`recentSearches_${user.id}`);
+      if (savedSearches) {
+        try {
+          setRecentSearches(JSON.parse(savedSearches).slice(0, 3));
+        } catch {}
       }
 
       // Fetch profile
@@ -265,6 +278,17 @@ const CustomerHome = () => {
         console.error('Failed to notify admin:', notifyError);
       }
 
+      // Save to recent searches
+      if (user?.id) {
+        const newSearch = { pickup: result.data.pickup, dropoff: result.data.dropoff.trim() };
+        const existingSearches = recentSearches.filter(
+          s => s.pickup !== newSearch.pickup || s.dropoff !== newSearch.dropoff
+        );
+        const updatedSearches = [newSearch, ...existingSearches].slice(0, 3);
+        setRecentSearches(updatedSearches);
+        localStorage.setItem(`recentSearches_${user.id}`, JSON.stringify(updatedSearches));
+      }
+
       toast.success(t('reservationSubmitted'));
       navigate('/customer/bookings');
     } catch (error: any) {
@@ -276,12 +300,37 @@ const CustomerHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-primary text-primary-foreground py-3 px-3 sm:py-4 sm:px-6 flex justify-between items-center sticky top-0 z-10 safe-area-inset-top">
-        <h1 className="text-lg sm:text-2xl font-serif font-bold truncate">Meet Transfer</h1>
-        <div className="flex items-center gap-1 sm:gap-2">
-          <NotificationBell />
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      {/* Header with Logo & Language */}
+      <header className="bg-primary text-primary-foreground py-3 px-3 sm:py-4 sm:px-6 sticky top-0 z-10 safe-area-inset-top shadow-lg">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+            <img 
+              src={meetTransferLogo} 
+              alt="Meet Transfer" 
+              className="h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-primary-foreground/20"
+            />
+            <span className="text-lg sm:text-xl font-serif font-bold">Meet Transfer</span>
+          </div>
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Language Selector in Header */}
+            <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
+              <SelectTrigger className="w-auto gap-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 h-8 sm:h-9 px-2 text-sm">
+                <Globe className="h-4 w-4" />
+                <SelectValue>
+                  {LANGUAGES.find((l) => l.code === language)?.flag}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.flag} {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <NotificationBell />
           
           {/* Settings Sheet */}
           <Sheet>
@@ -458,15 +507,26 @@ const CustomerHome = () => {
               </div>
             </SheetContent>
           </Sheet>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-4xl">
-        {/* Welcome Section */}
-        <div className="mb-6">
+        {/* Welcome Section with Animation */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-6"
+        >
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
+              <motion.div
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              >
+                <Sparkles className="h-5 w-5 text-primary" />
+              </motion.div>
               <h2 className="text-lg sm:text-xl font-medium text-muted-foreground">
                 {greeting},
               </h2>
@@ -481,173 +541,245 @@ const CustomerHome = () => {
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold">
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
             {displayName}
           </h1>
-        </div>
+        </motion.div>
 
-        {/* Next Transfer Card */}
-        {nextTransfer && (
-          <Card 
-            className="mb-6 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate('/customer/bookings')}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium text-primary">
-                      {language === 'TR' ? 'Yaklaşan Transferiniz' : 'Your Next Transfer'}
-                    </span>
+        {/* Next Transfer Card with Animation */}
+        <AnimatePresence>
+          {nextTransfer && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card 
+                className="mb-6 bg-gradient-to-r from-primary/15 via-primary/10 to-primary/5 border-primary/30 cursor-pointer hover:shadow-lg transition-all hover:border-primary/50 backdrop-blur-sm"
+                onClick={() => navigate('/customer/bookings')}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-primary animate-pulse" />
+                          <span className="text-sm font-medium text-primary">
+                            {language === 'TR' ? 'Yaklaşan Transferiniz' : 'Your Next Transfer'}
+                          </span>
+                        </div>
+                        {nextTransfer.reservationCode && (
+                          <Badge variant="outline" className="font-mono text-xs bg-primary/10 border-primary/30">
+                            {nextTransfer.reservationCode}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-semibold text-sm sm:text-base">
+                          {new Date(nextTransfer.date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { 
+                            weekday: 'long', 
+                            day: 'numeric', 
+                            month: 'long' 
+                          })} • {nextTransfer.time}
+                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                          {nextTransfer.pickup.substring(0, 35)}{nextTransfer.pickup.length > 35 ? '...' : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <motion.div
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <ChevronRight className="h-5 w-5 text-primary flex-shrink-0" />
+                    </motion.div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="font-semibold text-sm sm:text-base">
-                      {new Date(nextTransfer.date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { 
-                        weekday: 'long', 
-                        day: 'numeric', 
-                        month: 'long' 
-                      })} • {nextTransfer.time}
-                    </p>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                      {nextTransfer.pickup.substring(0, 30)}...
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="h-5 w-5 text-primary flex-shrink-0" />
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Quick Actions Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        {/* Quick Actions Grid with Stagger Animation */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="grid grid-cols-2 gap-3 mb-6"
+        >
           {/* New Reservation Card */}
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0"
-            onClick={() => {
-              const formElement = document.getElementById('booking-form');
-              formElement?.scrollIntoView({ behavior: 'smooth' });
-            }}
+          <motion.div
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[110px]">
-              <div className="bg-primary-foreground/20 rounded-full p-2 mb-2">
-                <Plus className="h-6 w-6" />
-              </div>
-              <span className="font-semibold text-sm">
-                {language === 'TR' ? 'Yeni Rezervasyon' : 'New Reservation'}
-              </span>
-              <span className="text-xs opacity-80 mt-1">
-                {language === 'TR' ? 'Hemen başla' : 'Start now'}
-              </span>
-            </CardContent>
-          </Card>
+            <Card 
+              className="cursor-pointer shadow-md hover:shadow-xl transition-all bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground border-0 overflow-hidden relative"
+              onClick={() => {
+                const formElement = document.getElementById('booking-form');
+                formElement?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.15),_transparent_50%)]" />
+              <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[110px] relative z-10">
+                <div className="bg-primary-foreground/20 rounded-full p-2.5 mb-2 backdrop-blur-sm">
+                  <Plus className="h-6 w-6" />
+                </div>
+                <span className="font-semibold text-sm">
+                  {language === 'TR' ? 'Yeni Rezervasyon' : 'New Reservation'}
+                </span>
+                <span className="text-xs opacity-80 mt-1">
+                  {language === 'TR' ? 'Hemen başla' : 'Start now'}
+                </span>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* My Bookings Card */}
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] relative overflow-hidden"
-            onClick={() => navigate('/customer/bookings')}
+          <motion.div
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[110px]">
-              <div className="bg-primary/10 rounded-full p-2 mb-2">
-                <ClipboardList className="h-6 w-6 text-primary" />
-              </div>
-              <span className="font-semibold text-sm">
-                {language === 'TR' ? 'Rezervasyonlarım' : 'My Bookings'}
-              </span>
-              <span className="text-xs text-muted-foreground mt-1">
-                {activeBookingsCount > 0 
-                  ? (language === 'TR' ? `${activeBookingsCount} aktif` : `${activeBookingsCount} active`)
-                  : (language === 'TR' ? 'Görüntüle' : 'View all')}
-              </span>
-              {activeBookingsCount > 0 && (
-                <Badge className="absolute top-2 right-2 bg-orange-500 hover:bg-orange-600 animate-pulse">
-                  {activeBookingsCount}
-                </Badge>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+            <Card 
+              className="cursor-pointer shadow-md hover:shadow-xl transition-all relative overflow-hidden bg-gradient-to-br from-background to-muted/50"
+              onClick={() => navigate('/customer/bookings')}
+            >
+              <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[110px]">
+                <div className="bg-primary/10 rounded-full p-2.5 mb-2">
+                  <ClipboardList className="h-6 w-6 text-primary" />
+                </div>
+                <span className="font-semibold text-sm">
+                  {language === 'TR' ? 'Rezervasyonlarım' : 'My Bookings'}
+                </span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  {activeBookingsCount > 0 
+                    ? (language === 'TR' ? `${activeBookingsCount} aktif` : `${activeBookingsCount} active`)
+                    : (language === 'TR' ? 'Görüntüle' : 'View all')}
+                </span>
+                {activeBookingsCount > 0 && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                  >
+                    <Badge className="absolute top-2 right-2 bg-orange-500 hover:bg-orange-600 shadow-lg">
+                      {activeBookingsCount}
+                    </Badge>
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
 
         {/* Quick Support & Navigation Actions */}
-        <div className="grid grid-cols-4 gap-2 mb-6">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="grid grid-cols-4 gap-2 mb-6"
+        >
           {/* Home */}
-          <Button 
-            variant="outline" 
-            className="h-auto py-3 flex flex-col items-center gap-1"
-            onClick={() => navigate('/')}
-          >
-            <Home className="h-5 w-5 text-primary" />
-            <span className="text-xs font-medium">
-              {language === 'TR' ? 'Anasayfa' : 'Home'}
-            </span>
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 w-full flex flex-col items-center gap-1 shadow-sm"
+              onClick={() => navigate('/')}
+            >
+              <Home className="h-5 w-5 text-primary" />
+              <span className="text-xs font-medium">
+                {language === 'TR' ? 'Anasayfa' : 'Home'}
+              </span>
+            </Button>
+          </motion.div>
           
           {/* WhatsApp */}
-          <Button 
-            variant="outline" 
-            className="h-auto py-3 flex flex-col items-center gap-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
-            onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
-          >
-            <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-            <span className="text-xs font-medium text-green-700 dark:text-green-300">
-              WhatsApp
-            </span>
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 shadow-sm"
+              onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
+            >
+              <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                WhatsApp
+              </span>
+            </Button>
+          </motion.div>
           
           {/* Emergency */}
-          <Button 
-            variant="outline" 
-            className="h-auto py-3 flex flex-col items-center gap-1 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
-            onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
-          >
-            <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
-            <span className="text-xs font-medium text-red-700 dark:text-red-300">
-              {language === 'TR' ? 'Acil' : 'Call'}
-            </span>
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 shadow-sm"
+              onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
+            >
+              <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
+              <span className="text-xs font-medium text-red-700 dark:text-red-300">
+                {language === 'TR' ? 'Acil' : 'Call'}
+              </span>
+            </Button>
+          </motion.div>
           
           {/* Security */}
-          <Button 
-            variant="outline" 
-            className="h-auto py-3 flex flex-col items-center gap-1 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50"
-            onClick={() => navigate('/security-settings')}
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 shadow-sm"
+              onClick={() => navigate('/security-settings')}
+            >
+              <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                {language === 'TR' ? 'Güvenlik' : 'Security'}
+              </span>
+            </Button>
+          </motion.div>
+        </motion.div>
+
+        {/* Recent Searches - New Feature */}
+        {recentSearches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-6"
           >
-            <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
-              {language === 'TR' ? 'Güvenlik' : 'Security'}
-            </span>
-          </Button>
-        </div>
-
-        {/* New Reservation Card - Below Shortcuts */}
-        <Card 
-          className="mb-6 cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01] bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0"
-          onClick={() => {
-            const formElement = document.getElementById('booking-form');
-            formElement?.scrollIntoView({ behavior: 'smooth' });
-          }}
-        >
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-primary-foreground/20 rounded-full p-3">
-                <Plus className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="font-semibold text-lg">
-                  {language === 'TR' ? 'Yeni Rezervasyon' : 'New Reservation'}
-                </p>
-                <p className="text-sm opacity-80">
-                  {language === 'TR' ? 'Hemen transfer rezervasyonu yapın' : 'Book your transfer now'}
-                </p>
-              </div>
+            <div className="flex items-center gap-2 mb-3">
+              <History className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">
+                {language === 'TR' ? 'Son Aramalar' : 'Recent Searches'}
+              </span>
             </div>
-            <Car className="h-8 w-8 opacity-60" />
-          </CardContent>
-        </Card>
+            <div className="flex flex-wrap gap-2">
+              {recentSearches.map((search, index) => (
+                <motion.button
+                  key={index}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-2 px-3 py-2 bg-muted/50 hover:bg-muted rounded-lg text-sm transition-colors border border-border/50"
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, pickup: search.pickup, dropoff: search.dropoff }));
+                    const formElement = document.getElementById('booking-form');
+                    formElement?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  <Bookmark className="h-3.5 w-3.5 text-primary" />
+                  <span className="truncate max-w-[120px]">{search.pickup.split(',')[0]}</span>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                  <span className="truncate max-w-[120px]">{search.dropoff.split(',')[0]}</span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
-        {/* Booking Form */}
-        <Card id="booking-form" className="scroll-mt-20">
+        {/* Booking Form with Enhanced Styling */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Card id="booking-form" className="scroll-mt-20 shadow-lg border-border/50">
           <CardHeader>
             <CardTitle className="text-xl sm:text-2xl font-serif flex items-center gap-2">
               <Car className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -853,6 +985,7 @@ const CustomerHome = () => {
             </form>
           </CardContent>
         </Card>
+        </motion.div>
       </main>
     </div>
   );
