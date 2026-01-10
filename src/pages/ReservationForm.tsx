@@ -284,7 +284,32 @@ const ReservationForm = () => {
   }, [formData, passengerNames, hasReturnTrip, returnTripData, promoCode, isPromoCodeValid]);
 
   // Pre-fill form if user is logged in (only email/phone, preserve other form data)
+  // Also check for data from CustomerHome sessionStorage
   useEffect(() => {
+    // Check for customer data from CustomerHome form
+    const savedPassengerNames = sessionStorage.getItem('customerPassengerNames');
+    const savedPhone = sessionStorage.getItem('customerPhone');
+    
+    if (savedPassengerNames) {
+      try {
+        const names = JSON.parse(savedPassengerNames);
+        if (Array.isArray(names) && names.length > 0) {
+          setPassengerNames(names);
+        }
+      } catch (e) {
+        console.error('Failed to parse passenger names from session:', e);
+      }
+      sessionStorage.removeItem('customerPassengerNames');
+    }
+    
+    if (savedPhone) {
+      setFormData(prev => ({
+        ...prev,
+        phone: savedPhone,
+      }));
+      sessionStorage.removeItem('customerPhone');
+    }
+    
     if (user) {
       setIsLoggedIn(true);
       setFormData(prev => ({
@@ -292,8 +317,8 @@ const ReservationForm = () => {
         email: user.email || prev.email,
       }));
       
-      // Only set passenger name if not already filled
-      if (user.user_metadata?.full_name && passengerNames[0] === '') {
+      // Only set passenger name if not already filled and no session data
+      if (user.user_metadata?.full_name && passengerNames[0] === '' && !savedPassengerNames) {
         setPassengerNames(prev => {
           if (prev[0] === '') {
             return [user.user_metadata.full_name, ...prev.slice(1)];
@@ -302,7 +327,7 @@ const ReservationForm = () => {
         });
       }
       
-      // Fetch profile for phone (only if not already filled)
+      // Fetch profile for phone (only if not already filled and no session data)
       const fetchProfile = async () => {
         const { data } = await supabase
           .from('profiles')
@@ -311,8 +336,8 @@ const ReservationForm = () => {
           .single();
         
         if (data) {
-          // Only set passenger name if not already filled
-          if (data.full_name && passengerNames[0] === '') {
+          // Only set passenger name if not already filled and no session data
+          if (data.full_name && passengerNames[0] === '' && !savedPassengerNames) {
             setPassengerNames(prev => {
               if (prev[0] === '') {
                 return [data.full_name, ...prev.slice(1)];
@@ -320,11 +345,13 @@ const ReservationForm = () => {
               return prev;
             });
           }
-          // Only set phone if not already filled
-          setFormData(prev => ({
-            ...prev,
-            phone: prev.phone || data.phone || '',
-          }));
+          // Only set phone if not already filled and no session data
+          if (!savedPhone) {
+            setFormData(prev => ({
+              ...prev,
+              phone: prev.phone || data.phone || '',
+            }));
+          }
         }
       };
       fetchProfile();
