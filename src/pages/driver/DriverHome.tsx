@@ -7,7 +7,7 @@ import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, RefreshCw, History, Settings, Volume2, Search } from 'lucide-react';
+import { LogOut, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, RefreshCw, History, Settings, Volume2, Search, Shield } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
@@ -294,6 +294,14 @@ const DriverHome = () => {
             title={t('updateInfo')}
           >
             <Settings className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/security-settings')} 
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 p-0"
+            title={t('securitySettings') || 'Güvenlik Ayarları'}
+          >
+            <Shield className="h-4 w-4" />
           </Button>
           <Button 
             variant="ghost" 
