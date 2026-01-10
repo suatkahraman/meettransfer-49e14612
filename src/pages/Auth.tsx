@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,8 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Mail, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Mail, CheckCircle, Eye, EyeOff, ShieldCheck, XCircle, AlertCircle, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -67,28 +68,191 @@ const newPasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
-type ViewMode = 'auth' | 'forgot' | 'reset-sent' | 'reset';
+type ViewMode = 'auth' | 'forgot' | 'reset-sent' | 'reset' | 'reset-success' | 'reset-error';
+
+// Password strength indicator component
+const PasswordStrengthIndicator = ({ password }: { password: string }) => {
+  const checks = useMemo(() => ({
+    minLength: password.length >= 6,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasFourDigits: /\d.*\d.*\d.*\d/.test(password),
+  }), [password]);
+
+  const score = useMemo(() => {
+    let s = 0;
+    if (checks.minLength) s += 25;
+    if (checks.hasUppercase) s += 25;
+    if (checks.hasLowercase) s += 25;
+    if (checks.hasFourDigits) s += 25;
+    return s;
+  }, [checks]);
+
+  if (!password) return null;
+
+  const getColor = () => {
+    if (score >= 100) return 'bg-green-500';
+    if (score >= 75) return 'bg-primary';
+    if (score >= 50) return 'bg-amber-500';
+    return 'bg-destructive';
+  };
+
+  const getLabel = () => {
+    if (score >= 100) return 'Strong';
+    if (score >= 75) return 'Good';
+    if (score >= 50) return 'Fair';
+    return 'Weak';
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -5 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-2 mt-2"
+    >
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">Password Strength</span>
+        <span className={`font-medium ${
+          score >= 100 ? 'text-green-600' :
+          score >= 75 ? 'text-primary' :
+          score >= 50 ? 'text-amber-600' :
+          'text-destructive'
+        }`}>
+          {getLabel()}
+        </span>
+      </div>
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+        <motion.div
+          className={`h-full ${getColor()}`}
+          initial={{ width: 0 }}
+          animate={{ width: `${score}%` }}
+          transition={{ duration: 0.3 }}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-1 text-xs">
+        <div className={`flex items-center gap-1 ${checks.minLength ? 'text-green-600' : 'text-muted-foreground'}`}>
+          {checks.minLength ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+          <span>6+ characters</span>
+        </div>
+        <div className={`flex items-center gap-1 ${checks.hasUppercase ? 'text-green-600' : 'text-muted-foreground'}`}>
+          {checks.hasUppercase ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+          <span>Uppercase</span>
+        </div>
+        <div className={`flex items-center gap-1 ${checks.hasLowercase ? 'text-green-600' : 'text-muted-foreground'}`}>
+          {checks.hasLowercase ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+          <span>Lowercase</span>
+        </div>
+        <div className={`flex items-center gap-1 ${checks.hasFourDigits ? 'text-green-600' : 'text-muted-foreground'}`}>
+          {checks.hasFourDigits ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+          <span>4+ digits</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<ViewMode>('auth');
   const [resetEmail, setResetEmail] = useState('');
-  const { signIn, signUp, user } = useAuth();
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isRecoverySession, setIsRecoverySession] = useState(false);
+  const [recoveryChecked, setRecoveryChecked] = useState(false);
+  const { signIn, signUp, user, session } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Check URL for password recovery
+  // Check for password recovery in URL and auth state
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('type') === 'recovery') {
-      setViewMode('reset');
-    }
+    const checkRecovery = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      
+      // Check for recovery type in URL params or hash
+      const isRecoveryType = params.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
+      const hasAccessToken = hashParams.get('access_token');
+      const errorDescription = hashParams.get('error_description');
+      
+      console.log('Recovery check:', { 
+        isRecoveryType, 
+        hasAccessToken: !!hasAccessToken, 
+        errorDescription,
+        hash: window.location.hash.substring(0, 50) + '...'
+      });
+
+      // Check for errors in the URL
+      if (errorDescription) {
+        console.error('Auth error from URL:', errorDescription);
+        toast.error(decodeURIComponent(errorDescription.replace(/\+/g, ' ')));
+        setViewMode('reset-error');
+        setRecoveryChecked(true);
+        
+        // Clean URL
+        window.history.replaceState(null, '', '/auth');
+        return;
+      }
+
+      // If recovery type is set and there's an access token in the hash
+      if (isRecoveryType && hasAccessToken) {
+        console.log('Recovery token detected, waiting for session...');
+        setViewMode('reset');
+        setIsRecoverySession(true);
+        
+        // Clean URL hash after processing
+        setTimeout(() => {
+          window.history.replaceState(null, '', '/auth?type=recovery');
+        }, 100);
+      } else if (isRecoveryType) {
+        // Just the type=recovery param without token (user might already have session)
+        console.log('Recovery type without token, checking existing session...');
+        
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        if (currentSession) {
+          console.log('Existing session found for recovery');
+          setViewMode('reset');
+          setIsRecoverySession(true);
+        } else {
+          console.log('No session found for recovery, showing error');
+          toast.error('Recovery link has expired or is invalid. Please request a new one.');
+          setViewMode('reset-error');
+        }
+      }
+      
+      setRecoveryChecked(true);
+    };
+
+    checkRecovery();
+
+    // Listen for PASSWORD_RECOVERY event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change in Auth page:', event);
+      
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('PASSWORD_RECOVERY event received');
+        setViewMode('reset');
+        setIsRecoverySession(true);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Role-based redirect after login
+  // Role-based redirect after login (only if not in recovery mode)
   useEffect(() => {
-    if (user && !roleLoading && role) {
+    if (isRecoverySession || viewMode === 'reset') {
+      // Don't redirect during recovery
+      return;
+    }
+    
+    if (user && !roleLoading && role && recoveryChecked) {
       switch (role) {
         case 'admin':
           navigate('/admin', { replace: true });
@@ -96,11 +260,14 @@ const Auth = () => {
         case 'driver':
           navigate('/driver', { replace: true });
           break;
+        case 'agency':
+          navigate('/agency', { replace: true });
+          break;
         default:
           navigate('/customer', { replace: true });
       }
     }
-  }, [user, role, roleLoading, navigate]);
+  }, [user, role, roleLoading, navigate, isRecoverySession, viewMode, recoveryChecked]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -169,12 +336,23 @@ const Auth = () => {
     try {
       const validation = resetEmailSchema.parse({ email: email.trim() });
       
+      console.log('Sending reset email to:', validation.email);
+      console.log('Redirect URL:', `${window.location.origin}/auth?type=recovery`);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(validation.email, {
         redirectTo: `${window.location.origin}/auth?type=recovery`,
       });
 
       if (error) {
-        toast.error(error.message);
+        console.error('Reset password email error:', error);
+        // Don't reveal if email exists for security
+        if (error.message.includes('rate limit')) {
+          toast.error('Too many requests. Please try again later.');
+        } else {
+          // Always show success to prevent email enumeration
+          setResetEmail(validation.email);
+          setViewMode('reset-sent');
+        }
       } else {
         setResetEmail(validation.email);
         setViewMode('reset-sent');
@@ -194,29 +372,61 @@ const Auth = () => {
     }
   };
 
-  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleResetPassword = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const password = formData.get('password') as string;
-    const confirmPassword = formData.get('confirmPassword') as string;
-
     try {
-      const validation = newPasswordSchema.parse({ password, confirmPassword });
+      const validation = newPasswordSchema.parse({ password: newPassword, confirmPassword });
+      
+      console.log('Updating password...');
+      
+      // Get current session to verify we have auth
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (!currentSession) {
+        console.error('No session found for password update');
+        toast.error('Your session has expired. Please request a new password reset link.');
+        setViewMode('reset-error');
+        setIsLoading(false);
+        return;
+      }
       
       const { error } = await supabase.auth.updateUser({ 
         password: validation.password 
       });
 
       if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success('Password updated successfully!');
-        setViewMode('auth');
-        navigate('/auth', { replace: true });
+        console.error('Password update error:', error);
+        
+        if (error.message.includes('same password') || error.message.includes('different from')) {
+          toast.error('New password must be different from your current password');
+        } else {
+          toast.error(error.message);
+        }
+        setIsLoading(false);
+        return;
       }
+
+      console.log('Password updated successfully');
+      
+      // Show success state
+      setViewMode('reset-success');
+      setIsRecoverySession(false);
+      
+      // Clear URL params
+      window.history.replaceState(null, '', '/auth');
+      
+      toast.success('Password updated successfully!');
+      
+      // Redirect to login after delay
+      setTimeout(() => {
+        setViewMode('auth');
+        setNewPassword('');
+        setConfirmPassword('');
+      }, 3000);
+      
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
@@ -230,7 +440,96 @@ const Auth = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [newPassword, confirmPassword]);
+
+  const passwordsMatch = useMemo(() => {
+    return newPassword.length > 0 && confirmPassword.length > 0 && newPassword === confirmPassword;
+  }, [newPassword, confirmPassword]);
+
+  const passwordsDontMatch = useMemo(() => {
+    return confirmPassword.length > 0 && newPassword !== confirmPassword;
+  }, [newPassword, confirmPassword]);
+
+  // Loading state while checking recovery
+  if (!recoveryChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Reset Error View
+  if (viewMode === 'reset-error') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center space-y-4">
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 200 }}
+              className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center"
+            >
+              <AlertCircle className="h-8 w-8 text-destructive" />
+            </motion.div>
+            <CardTitle className="text-2xl font-serif">Link Expired</CardTitle>
+            <CardDescription>
+              This password reset link has expired or is invalid.
+              Please request a new one.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter className="flex flex-col gap-2">
+            <Button className="w-full" onClick={() => setViewMode('forgot')}>
+              <Mail className="mr-2 h-4 w-4" />
+              Request New Link
+            </Button>
+            <Button variant="ghost" className="w-full" onClick={() => setViewMode('auth')}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Login
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  // Reset Success View
+  if (viewMode === 'reset-success') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center space-y-4">
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 200 }}
+              className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center"
+            >
+              <ShieldCheck className="h-8 w-8 text-green-600" />
+            </motion.div>
+            <CardTitle className="text-2xl font-serif">Password Updated!</CardTitle>
+            <CardDescription>
+              Your password has been successfully updated.
+              You can now sign in with your new password.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-sm text-muted-foreground">Redirecting to login...</p>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full" onClick={() => setViewMode('auth')}>
+              Continue to Login
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   if (viewMode === 'forgot') {
     return (
@@ -278,17 +577,26 @@ const Auth = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-4">
-            <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 200 }}
+              className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center"
+            >
               <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
+            </motion.div>
             <CardTitle className="text-2xl font-serif">Check Your Email</CardTitle>
             <CardDescription>
               We've sent a password reset link to<br />
               <span className="font-medium text-foreground">{resetEmail}</span>
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center text-sm text-muted-foreground">
+          <CardContent className="text-center text-sm text-muted-foreground space-y-2">
             <p>Click the link in the email to reset your password.</p>
+            <p className="flex items-center justify-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              Don't forget to check your spam folder.
+            </p>
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
             <Button variant="outline" className="w-full" onClick={() => setViewMode('forgot')}>
@@ -308,6 +616,9 @@ const Auth = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <KeyRound className="h-6 w-6 text-primary" />
+            </div>
             <CardTitle className="text-2xl font-serif">Set New Password</CardTitle>
             <CardDescription>Enter your new password below</CardDescription>
           </CardHeader>
@@ -315,26 +626,114 @@ const Auth = () => {
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="new-password">New Password</Label>
-                <Input id="new-password" name="password" type="password" placeholder="••••••••" required />
+                <div className="relative">
+                  <Input 
+                    id="new-password" 
+                    name="password" 
+                    type={showNewPassword ? 'text' : 'password'}
+                    placeholder="••••••••" 
+                    required 
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <PasswordStrengthIndicator password={newPassword} />
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">Confirm Password</Label>
-                <Input id="confirm-password" name="confirmPassword" type="password" placeholder="••••••••" required />
+                <div className="relative">
+                  <Input 
+                    id="confirm-password" 
+                    name="confirmPassword" 
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="••••••••" 
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`pr-10 ${
+                      passwordsDontMatch ? 'border-destructive focus-visible:ring-destructive' :
+                      passwordsMatch ? 'border-green-500 focus-visible:ring-green-500' : ''
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <AnimatePresence>
+                  {confirmPassword && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className={`flex items-center gap-1 text-xs ${
+                        passwordsMatch ? 'text-green-600' : 'text-destructive'
+                      }`}
+                    >
+                      {passwordsMatch ? (
+                        <>
+                          <CheckCircle className="h-3 w-3" />
+                          <span>Passwords match</span>
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-3 w-3" />
+                          <span>Passwords don't match</span>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
               </div>
-              <Button type="submit" variant="accent" className="w-full" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                variant="accent" 
+                className="w-full" 
+                disabled={isLoading || !passwordsMatch}
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Updating...
                   </>
                 ) : (
-                  'Update Password'
+                  <>
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    Update Password
+                  </>
                 )}
               </Button>
             </form>
           </CardContent>
+          <CardFooter>
+            <Button 
+              variant="ghost" 
+              className="w-full" 
+              onClick={() => {
+                setViewMode('auth');
+                setIsRecoverySession(false);
+                setNewPassword('');
+                setConfirmPassword('');
+                window.history.replaceState(null, '', '/auth');
+              }}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Login
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     );
@@ -358,7 +757,7 @@ const Auth = () => {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 rounded-xl text-base font-medium mb-4"
+              className="w-full h-12 rounded-xl text-base font-medium mb-4 mt-4"
               onClick={async () => {
                 setIsLoading(true);
                 try {
