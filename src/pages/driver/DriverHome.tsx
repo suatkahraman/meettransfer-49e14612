@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -20,6 +20,7 @@ import ReservationSearch from '@/components/ReservationSearch';
 import DriverInfoEditor from '@/components/driver/DriverInfoEditor';
 import DriverStatsCard from '@/components/driver/DriverStatsCard';
 import JobCategoryCard from '@/components/driver/JobCategoryCard';
+import FutureMonthCard from '@/components/driver/FutureMonthCard';
 interface Reservation {
   id: string;
   customer_id: string;
@@ -228,6 +229,53 @@ const DriverHome = () => {
     const pickupDate = new Date(r.pickup_date);
     return pickupDate.getMonth() === currentMonth && pickupDate.getFullYear() === currentYear;
   });
+
+  // Get month name helper
+  const getMonthName = (month: number): string => {
+    const monthKeys = [
+      'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'
+    ];
+    return t(monthKeys[month]) || monthKeys[month];
+  };
+
+  // Future months reservations (active/confirmed jobs for months after current month)
+  const futureMonthsData = useMemo(() => {
+    const futureJobs = reservations.filter(r => {
+      if (r.status !== 'active' && !(r.status === 'confirmed' && r.driver_confirmed === true)) return false;
+      const pickupDate = new Date(r.pickup_date);
+      const jobMonth = pickupDate.getMonth();
+      const jobYear = pickupDate.getFullYear();
+      
+      // Check if it's in a future month
+      if (jobYear > currentYear) return true;
+      if (jobYear === currentYear && jobMonth > currentMonth) return true;
+      return false;
+    });
+
+    // Group by month-year
+    const grouped: Record<string, { month: number; year: number; jobs: Reservation[] }> = {};
+    
+    futureJobs.forEach(job => {
+      const pickupDate = new Date(job.pickup_date);
+      const key = `${pickupDate.getFullYear()}-${pickupDate.getMonth()}`;
+      
+      if (!grouped[key]) {
+        grouped[key] = {
+          month: pickupDate.getMonth(),
+          year: pickupDate.getFullYear(),
+          jobs: []
+        };
+      }
+      grouped[key].jobs.push(job);
+    });
+
+    // Sort by date and convert to array
+    return Object.values(grouped).sort((a, b) => {
+      if (a.year !== b.year) return a.year - b.year;
+      return a.month - b.month;
+    });
+  }, [reservations, currentMonth, currentYear]);
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
@@ -514,6 +562,34 @@ const DriverHome = () => {
                 onClick={() => navigate('/driver/jobs/completed')}
               />
             </div>
+
+            {/* Future Months Section */}
+            {futureMonthsData.length > 0 && (
+              <div className="mt-6 space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground px-1">
+                  {t('futureReservations') || 'İleri Tarihli Rezervasyonlar'}
+                </h3>
+                <div className="space-y-2">
+                  {futureMonthsData.map((monthData) => {
+                    const firstJob = monthData.jobs[0];
+                    const firstJobDate = firstJob ? new Date(firstJob.pickup_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : undefined;
+                    const firstJobRoute = firstJob ? `${firstJob.pickup_place_name || firstJob.pickup.slice(0, 15)} → ${firstJob.dropoff_place_name || firstJob.dropoff.slice(0, 15)}` : undefined;
+                    
+                    return (
+                      <FutureMonthCard
+                        key={`${monthData.year}-${monthData.month}`}
+                        monthName={getMonthName(monthData.month)}
+                        year={monthData.year}
+                        count={monthData.jobs.length}
+                        firstJobDate={firstJobDate}
+                        firstJobRoute={firstJobRoute}
+                        onClick={() => navigate(`/driver/jobs/active?month=${monthData.month + 1}&year=${monthData.year}`)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
           </div>
         )}
