@@ -117,14 +117,53 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Check if this is a city-to-city transfer (no airport involved)
+    // Check if this is a city-to-city or intercity transfer
     const pickupCity = transferInfo.pickupAnalysis.city?.value || transferInfo.pickupAnalysis.district?.city || null;
     const dropoffCity = transferInfo.dropoffAnalysis.city?.value || transferInfo.dropoffAnalysis.district?.city || null;
     const pickupDistrict = transferInfo.pickupAnalysis.district?.value || null;
     const dropoffDistrict = transferInfo.dropoffAnalysis.district?.value || null;
-    const isIntercity = direction === 'city_to_city' && pickupCity && dropoffCity && pickupCity !== dropoffCity;
+    
+    // IMPORTANT: Also check intercity when going to/from airport if the non-airport city is different from airport's city
+    const airportCity = airport ? (
+      airport.includes('Istanbul') ? 'Istanbul' :
+      airport.includes('Sabiha') ? 'Istanbul' :
+      airport.includes('Antalya') ? 'Antalya' :
+      airport.includes('Bodrum') ? 'Bodrum' :
+      airport.includes('Dalaman') ? 'Dalaman' :
+      airport.includes('Izmir') ? 'Izmir' :
+      airport.includes('Kayseri') ? 'Cappadocia' :
+      airport.includes('Nevsehir') ? 'Cappadocia' :
+      airport.includes('Dubai') ? 'Dubai' :
+      airport.includes('Larnaca') || airport.includes('Paphos') || airport.includes('Ercan') ? 'Cyprus' :
+      airport.includes('Bursa') ? 'Bursa' :
+      null
+    ) : null;
+    
+    const nonAirportCity = direction === 'to_airport' ? pickupCity : 
+                           direction === 'from_airport' ? dropoffCity : null;
+    
+    // Intercity conditions:
+    // 1. city_to_city with different cities
+    // 2. to_airport/from_airport where non-airport city is different from airport's city
+    const isIntercity = (
+      (direction === 'city_to_city' && pickupCity && dropoffCity && pickupCity !== dropoffCity) ||
+      (airport && nonAirportCity && airportCity && nonAirportCity !== airportCity)
+    );
+    
+    // For intercity airport transfers, we need to know both cities
+    const intercityFromCity = direction === 'to_airport' ? pickupCity : 
+                              direction === 'from_airport' ? airportCity : pickupCity;
+    const intercityToCity = direction === 'to_airport' ? airportCity : 
+                            direction === 'from_airport' ? dropoffCity : dropoffCity;
+    const intercityFromDistrict = direction === 'to_airport' ? pickupDistrict : 
+                                  direction === 'from_airport' ? airport : pickupDistrict;
+    const intercityToDistrict = direction === 'to_airport' ? airport : 
+                                direction === 'from_airport' ? dropoffDistrict : dropoffDistrict;
 
-    console.log("🔍 Route type:", isIntercity ? "intercity" : "airport transfer", { pickupCity, pickupDistrict, dropoffCity, dropoffDistrict });
+    console.log("🔍 Route type:", isIntercity ? "intercity" : "airport transfer", { 
+      pickupCity, pickupDistrict, dropoffCity, dropoffDistrict, 
+      airportCity, nonAirportCity, intercityFromCity, intercityToCity 
+    });
 
     // Get vehicle fallback list for flexible matching
     const vehicleFallbacks = getVehicleFallbackList(reservation.vehicle_type);
@@ -139,25 +178,46 @@ const handler = async (req: Request): Promise<Response> => {
       if (bestPrice) break;
       
       // 0. For intercity routes, first check intercity_prices table
-      if (isIntercity && pickupCity && dropoffCity) {
-        // Try exact district match first (both directions)
-        if (pickupDistrict && dropoffDistrict) {
+      if (isIntercity && intercityFromCity && intercityToCity) {
+        // Try exact district match first
+        if (intercityFromDistrict && intercityToDistrict) {
           const { data: exactIntercityData } = await supabase
             .from("intercity_prices")
             .select("*")
             .eq("vehicle_type", vehicleType)
             .eq("is_active", true)
-            .or(`and(from_city.eq.${pickupCity},from_district.eq.${pickupDistrict},to_city.eq.${dropoffCity},to_district.eq.${dropoffDistrict}),and(from_city.eq.${dropoffCity},from_district.eq.${dropoffDistrict},to_city.eq.${pickupCity},to_district.eq.${pickupDistrict})`)
+            .or(`and(from_city.eq.${intercityFromCity},from_district.eq.${intercityFromDistrict},to_city.eq.${intercityToCity},to_district.eq.${intercityToDistrict}),and(from_city.eq.${intercityToCity},from_district.eq.${intercityToDistrict},to_city.eq.${intercityFromCity},to_district.eq.${intercityFromDistrict})`)
             .limit(1);
 
           if (exactIntercityData && exactIntercityData.length > 0) {
             bestPrice = exactIntercityData[0];
-            matchType = `intercity exact (${pickupCity}/${pickupDistrict} → ${dropoffCity}/${dropoffDistrict}) [${vehicleType}]`;
+            matchType = `intercity exact (${intercityFromCity}/${intercityFromDistrict} → ${intercityToCity}/${intercityToDistrict}) [${vehicleType}]`;
             console.log(`✅ Intercity exact price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
           }
         }
         
-        // Try city-only match (no district specified in price)
+        // Try partial district match - when only one side has district (e.g., airport)
+        if (!bestPrice && (intercityFromDistrict || intercityToDistrict)) {
+          const districtToMatch = intercityFromDistrict || intercityToDistrict;
+          const cityWithDistrict = intercityFromDistrict ? intercityFromCity : intercityToCity;
+          const cityWithoutDistrict = intercityFromDistrict ? intercityToCity : intercityFromCity;
+          
+          const { data: partialData } = await supabase
+            .from("intercity_prices")
+            .select("*")
+            .eq("vehicle_type", vehicleType)
+            .eq("is_active", true)
+            .or(`and(from_city.eq.${cityWithDistrict},from_district.eq.${districtToMatch},to_city.eq.${cityWithoutDistrict}),and(to_city.eq.${cityWithDistrict},to_district.eq.${districtToMatch},from_city.eq.${cityWithoutDistrict})`)
+            .limit(1);
+
+          if (partialData && partialData.length > 0) {
+            bestPrice = partialData[0];
+            matchType = `intercity partial (${cityWithDistrict}/${districtToMatch} → ${cityWithoutDistrict}) [${vehicleType}]`;
+            console.log(`✅ Intercity partial price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+          }
+        }
+        
+        // Try city-only match
         if (!bestPrice) {
           const { data: intercityData } = await supabase
             .from("intercity_prices")
@@ -166,12 +226,12 @@ const handler = async (req: Request): Promise<Response> => {
             .eq("is_active", true)
             .is("from_district", null)
             .is("to_district", null)
-            .or(`and(from_city.eq.${pickupCity},to_city.eq.${dropoffCity}),and(from_city.eq.${dropoffCity},to_city.eq.${pickupCity})`)
+            .or(`and(from_city.eq.${intercityFromCity},to_city.eq.${intercityToCity}),and(from_city.eq.${intercityToCity},to_city.eq.${intercityFromCity})`)
             .limit(1);
 
           if (intercityData && intercityData.length > 0) {
             bestPrice = intercityData[0];
-            matchType = `intercity city-only (${pickupCity} → ${dropoffCity}) [${vehicleType}]`;
+            matchType = `intercity city-only (${intercityFromCity} → ${intercityToCity}) [${vehicleType}]`;
             console.log(`✅ Intercity city price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
           }
         }
