@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, MapPin, Plane, Star, Sunrise } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, CheckCircle2, MapPin, Plane, Star, Sunrise } from "lucide-react";
 import cappadociaTransferHero from "@/assets/blog/cappadocia-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
@@ -22,6 +22,7 @@ import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import BlogImageGallery from "@/components/website/BlogImageGallery";
+import BlogCTA from "@/components/website/BlogCTA";
 import vitoCappadociaBalloon from "@/assets/vito-cappadocia-balloon.jpg";
 import vitoVipCouple from "@/assets/vito-vip-couple-starlight.jpg";
 import vitoPassengerCouple from "@/assets/vito-passenger-couple.jpg";
@@ -594,37 +595,7 @@ const CappadociaAirportTransferGuide = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="my-12 p-8 bg-primary/5 rounded-2xl text-center">
-          <h3 className="font-serif text-2xl font-bold mb-4">
-            {language === 'TR' 
-              ? "Kapadokya Transferinizi Hemen Rezerve Edin" 
-              : "Book Your Cappadocia Transfer Now"}
-          </h3>
-          <p className="text-muted-foreground mb-6">
-            {language === 'TR'
-              ? "Kayseri veya Nevşehir havalimanından otelinize konforlu ve güvenli transfer. Anında fiyat alın!"
-              : "Comfortable and safe transfer from Kayseri or Nevsehir airport to your hotel. Get instant price!"}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to={getLocalizedPath("/cappadocia-transfer")}>
-              <Button size="lg" variant="accent" className="gap-2">
-                {language === 'TR' ? 'Fiyat Al' : 'Get Price'}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <a 
-              href={getWhatsAppUrl(language === 'TR' 
-                ? "Merhaba, Kapadokya havalimanı transferi hakkında bilgi almak istiyorum." 
-                : "Hello, I need a transfer from Cappadocia Airport.")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button size="lg" variant="outline">
-                {t("whatsappBooking")}
-              </Button>
-            </a>
-          </div>
-        </div>
+        <BlogCTA destination="Cappadocia" />
 
         {/* FAQ Section */}
         <section className="my-12">

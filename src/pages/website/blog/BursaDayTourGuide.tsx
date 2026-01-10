@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   Clock, MapPin, Car, Mountain, Landmark, Camera, 
-  Utensils, ArrowRight, CheckCircle2, Calendar,
+  Utensils, CheckCircle2, Calendar,
   Snowflake, Sun, TreeDeciduous, ArrowLeft
 } from "lucide-react";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
@@ -15,11 +15,11 @@ import { Badge } from "@/components/ui/badge";
 import bursaHeroImage from "@/assets/blog/bursa-day-tour-hero.jpg";
 import cumalikizikImage from "@/assets/cumalikizik-village.jpg";
 import uludagImage from "@/assets/uludag-cable-car.jpg";
-import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
+import BlogCTA from "@/components/website/BlogCTA";
 
 const BursaDayTourGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -428,31 +428,7 @@ const BursaDayTourGuide = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-primary/5 rounded-2xl p-8 text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            {t("blogBursaCtaTitle")}
-          </h2>
-          <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            {t("blogBursaCtaDesc")}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href={getWhatsAppUrl("Hello, I'm interested in a Bursa day tour from Istanbul.")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button size="lg" variant="accent" className="gap-2 w-full sm:w-auto">
-                {t("whatsappBooking")}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </a>
-            <Link to={getLocalizedPath("/book")}>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                {t("requestPrice")}
-              </Button>
-            </Link>
-          </div>
-        </section>
+        <BlogCTA destination="Bursa" />
 
         {/* FAQ Section */}
         <section className="mb-12">

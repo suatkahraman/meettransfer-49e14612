@@ -1,17 +1,17 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, XCircle, DollarSign, Clock4, ShieldCheck, Users } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, CheckCircle2, XCircle, DollarSign, Clock4, ShieldCheck, Users } from "lucide-react";
 import privateTransferWorthHero from "@/assets/blog/private-transfer-worth-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
+import BlogCTA from "@/components/website/BlogCTA";
 
 const IsPrivateTransferWorthIt = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -454,27 +454,7 @@ const IsPrivateTransferWorthIt = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="my-12 p-8 bg-primary/5 rounded-2xl text-center">
-          <h3 className="font-serif text-2xl font-bold mb-4">
-            Ready to Experience Premium Transfer?
-          </h3>
-          <p className="text-muted-foreground mb-6">
-            Get a personalized quote and see how affordable comfort can be.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to={getLocalizedPath("/book")}>
-              <Button size="lg" variant="accent" className="gap-2">
-                Request Price
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to={getLocalizedPath("/fleet")}>
-              <Button size="lg" variant="outline">
-                View Our Vehicles
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <BlogCTA destination="Turkey" />
 
         {/* FAQ Section */}
         <section className="my-12">
