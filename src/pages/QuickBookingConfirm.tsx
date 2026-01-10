@@ -998,43 +998,53 @@ export default function QuickBookingConfirm() {
               </div>
             ) : allVehiclePrices.length > 0 ? (
               <div className="grid gap-2 sm:gap-4">
-                {allVehiclePrices.map((vehicle) => {
-                  const isSelected = (selectedVehicle || booking.vehicle_type) === vehicle.vehicleType;
-                  const recommendedVehicle = getRecommendedVehicle(booking.passengers, booking.luggage_count || 0);
-                  const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
+                {(() => {
+                  // Pre-calculate cheapest vehicle for dynamic badge assignment
+                  const availableVehicles = allVehiclePrices.filter(v => v.available && v.price);
+                  const cheapestVehicle = availableVehicles.length > 0 
+                    ? availableVehicles.reduce((min, v) => 
+                        (v.price && (!min.price || v.price < min.price)) ? v : min, availableVehicles[0])
+                    : null;
                   
-                  // Determine badge for each vehicle type
-                  const getVehicleBadge = (vehicleType: string): VehicleBadgeType => {
-                    // Only show badge if it's the cheapest among available vehicles
-                    const availableVehicles = allVehiclePrices.filter(v => v.available && v.price);
-                    const cheapestVehicle = availableVehicles.reduce((min, v) => 
-                      (v.price && (!min.price || v.price < min.price)) ? v : min, availableVehicles[0]);
+                  return allVehiclePrices.map((vehicle) => {
+                    const isSelected = (selectedVehicle || booking.vehicle_type) === vehicle.vehicleType;
+                    const recommendedVehicle = getRecommendedVehicle(booking.passengers, booking.luggage_count || 0);
+                    const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
                     
-                    if (vehicleType === 'vip-mercedes') return 'popular';
-                    if (vehicleType === 'mercedes-vito' && cheapestVehicle?.vehicleType === 'mercedes-vito') return 'best-value';
-                    if (vehicleType === 'mercedes-vito' && booking.passengers >= 4) return 'family-friendly';
-                    if (vehicleType === 'maybach-minibus') return 'luxury';
-                    if (vehicleType === 'minibus') return 'family-friendly';
-                    return null;
-                  };
-                  
-                  return (
-                    <VehicleSelectionCard
-                      key={vehicle.vehicleType}
-                      vehicleType={vehicle.vehicleType}
-                      isSelected={isSelected}
-                      onSelect={(v) => setSelectedVehicle(v)}
-                      price={vehicle.price}
-                      currency={vehicle.currency}
-                      showPrice={true}
-                      isRecommended={isRecommended}
-                      available={vehicle.available}
-                      previousPrice={previousVehiclePrices[vehicle.vehicleType] || null}
-                      showDiscountAnimation={discountJustApplied && !!previousVehiclePrices[vehicle.vehicleType]}
-                      badge={getVehicleBadge(vehicle.vehicleType)}
-                    />
-                  );
-                })}
+                    // Dynamic badge assignment - cheapest always gets "best-value"
+                    const getVehicleBadge = (vehicleType: string): VehicleBadgeType => {
+                      // First priority: cheapest vehicle gets "best-value" badge
+                      if (cheapestVehicle && vehicleType === cheapestVehicle.vehicleType && vehicle.available) {
+                        return 'best-value';
+                      }
+                      
+                      // Second priority: specific vehicle type badges (excluding cheapest)
+                      if (vehicleType === 'vip-mercedes') return 'popular';
+                      if (vehicleType === 'maybach-minibus') return 'luxury';
+                      if (vehicleType === 'minibus' && booking.passengers >= 6) return 'family-friendly';
+                      if (vehicleType === 'mercedes-vito' && booking.passengers >= 4) return 'family-friendly';
+                      
+                      return null;
+                    };
+                    
+                    return (
+                      <VehicleSelectionCard
+                        key={vehicle.vehicleType}
+                        vehicleType={vehicle.vehicleType}
+                        isSelected={isSelected}
+                        onSelect={(v) => setSelectedVehicle(v)}
+                        price={vehicle.price}
+                        currency={vehicle.currency}
+                        showPrice={true}
+                        isRecommended={isRecommended}
+                        available={vehicle.available}
+                        previousPrice={previousVehiclePrices[vehicle.vehicleType] || null}
+                        showDiscountAnimation={discountJustApplied && !!previousVehiclePrices[vehicle.vehicleType]}
+                        badge={getVehicleBadge(vehicle.vehicleType)}
+                      />
+                    );
+                  });
+                })()}
               </div>
             ) : (
               /* Fallback: show only the booked vehicle */
