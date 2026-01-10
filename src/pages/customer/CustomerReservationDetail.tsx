@@ -700,27 +700,93 @@ const CustomerReservationDetail = () => {
           isPulling={isPulling}
           language={language === 'TR' ? 'TR' : 'EN'}
         />
-        {/* Title Section */}
+        {/* Premium Title Section with Status Tracker */}
         <motion.div variants={itemVariants} className="mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <motion.div
-              animate={{ rotate: [0, 15, -15, 0] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-            >
-              <Sparkles className="h-5 w-5 text-primary" />
-            </motion.div>
-            <h1 className="text-2xl font-serif font-bold text-foreground">{t('reservationDetails')}</h1>
-          </div>
-          {reservation.reservation_code && (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="inline-flex items-center gap-2 text-sm font-mono bg-primary/10 text-primary px-3 py-1.5 rounded-full border border-primary/20"
-            >
-              <Shield className="h-3.5 w-3.5" />
-              {reservation.reservation_code}
-            </motion.div>
-          )}
+          <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <motion.div
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                  className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center"
+                >
+                  <Sparkles className="h-6 w-6 text-primary" />
+                </motion.div>
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t('reservationDetails')}</h1>
+                  {reservation.reservation_code && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="secondary" className="font-mono text-xs bg-primary/10 text-primary border-primary/20">
+                        <Shield className="h-3 w-3 mr-1" />
+                        {reservation.reservation_code}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Status Progress Tracker */}
+              <div className="bg-background/50 rounded-xl p-4 border border-primary/10">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {language === 'TR' ? 'Transfer Durumu' : 'Transfer Status'}
+                  </span>
+                  <Badge className={cn(statusColors[reservation.status] || 'bg-muted', "px-3 py-1 font-medium")}>
+                    {getStatusLabel(reservation.status)}
+                  </Badge>
+                </div>
+                
+                {/* Progress Steps */}
+                <div className="flex items-center gap-1">
+                  {['awaiting-price', 'waiting_for_customer_approval', 'customer_approved', 'sent_to_driver', 'completed'].map((step, index) => {
+                    const stepLabels: Record<string, { en: string; tr: string }> = {
+                      'awaiting-price': { en: 'Price', tr: 'Fiyat' },
+                      'waiting_for_customer_approval': { en: 'Approval', tr: 'Onay' },
+                      'customer_approved': { en: 'Confirmed', tr: 'Onaylandı' },
+                      'sent_to_driver': { en: 'Driver', tr: 'Şoför' },
+                      'completed': { en: 'Done', tr: 'Bitti' },
+                    };
+                    
+                    const stepOrder = ['awaiting-price', 'waiting_for_customer_approval', 'customer_approved', 'sent_to_driver', 'active', 'completed'];
+                    const currentIndex = stepOrder.indexOf(reservation.status);
+                    const stepIndex = stepOrder.indexOf(step);
+                    const isActive = currentIndex >= stepIndex;
+                    const isCurrent = reservation.status === step || 
+                      (reservation.status === 'active' && step === 'sent_to_driver');
+                    const isCancelled = reservation.status.includes('cancelled') || reservation.status === 'customer_rejected';
+                    
+                    if (isCancelled) return null;
+                    
+                    return (
+                      <div key={step} className="flex-1 flex flex-col items-center gap-1">
+                        <div className={cn(
+                          "h-2 w-full rounded-full transition-all",
+                          isActive ? "bg-primary" : "bg-muted",
+                          isCurrent && "animate-pulse"
+                        )} />
+                        <span className={cn(
+                          "text-[10px] font-medium",
+                          isActive ? "text-primary" : "text-muted-foreground"
+                        )}>
+                          {stepLabels[step]?.[language === 'TR' ? 'tr' : 'en'] || ''}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {/* Cancelled Status */}
+                {(reservation.status.includes('cancelled') || reservation.status === 'customer_rejected') && (
+                  <div className="flex items-center gap-2 mt-3 p-2 bg-destructive/10 rounded-lg">
+                    <XCircle className="h-4 w-4 text-destructive" />
+                    <span className="text-sm text-destructive font-medium">
+                      {language === 'TR' ? 'Rezervasyon İptal Edildi' : 'Reservation Cancelled'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         <motion.div variants={itemVariants}>
@@ -1204,74 +1270,130 @@ const CustomerReservationDetail = () => {
               </div>
             )}
 
-            {/* Driver Info - Enhanced Card */}
+            {/* Driver Info - Premium Enhanced Card */}
             {reservation.drivers ? (
-              <div className="relative overflow-hidden rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5">
-                {/* Header */}
-                <div className="bg-primary/10 px-4 py-3 border-b border-primary/20">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Car className="h-4 w-4 text-primary" />
+              <motion.div 
+                variants={itemVariants}
+                className="relative overflow-hidden rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-xl"
+              >
+                {/* Premium Header */}
+                <div className="bg-gradient-to-r from-primary/20 to-primary/10 px-5 py-4 border-b border-primary/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <motion.div
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="h-10 w-10 rounded-full bg-primary/30 flex items-center justify-center ring-2 ring-primary/20"
+                      >
+                        <Car className="h-5 w-5 text-primary" />
+                      </motion.div>
+                      <div>
+                        <span className="font-bold text-lg text-primary">{t('driverInformation')}</span>
+                        <p className="text-xs text-muted-foreground">{language === 'TR' ? 'Şoförünüz hazır' : 'Your driver is ready'}</p>
+                      </div>
                     </div>
-                    <span className="font-semibold text-primary">{t('driverInformation')}</span>
+                    <Badge className="bg-green-500/20 text-green-700 border-green-500/30">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      {language === 'TR' ? 'Atandı' : 'Assigned'}
+                    </Badge>
                   </div>
                 </div>
                 
-                {/* Content */}
-                <div className="p-4 space-y-4">
-                  {/* Driver Name */}
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <User className="h-6 w-6 text-primary" />
+                {/* Driver Content */}
+                <div className="p-5 space-y-5">
+                  {/* Driver Avatar & Name */}
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center ring-4 ring-primary/20 shadow-lg">
+                        <User className="h-8 w-8 text-primary" />
+                      </div>
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-green-500 border-2 border-background flex items-center justify-center"
+                      >
+                        <Check className="h-3 w-3 text-white" />
+                      </motion.div>
                     </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Driver</div>
-                      <div className="text-lg font-bold">{reservation.drivers.name}</div>
+                    <div className="flex-1">
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">
+                        {language === 'TR' ? 'Şoförünüz' : 'Your Driver'}
+                      </div>
+                      <div className="text-xl font-bold text-foreground">{reservation.drivers.name}</div>
                     </div>
                   </div>
                   
-                  {/* Vehicle Details */}
+                  {/* Vehicle Details Grid */}
                   <div className="grid grid-cols-2 gap-3">
                     {/* Plate Number */}
                     {reservation.drivers.plate_number && (
-                      <div className="bg-background/80 rounded-lg p-3 border border-primary/10">
-                        <div className="text-xs text-muted-foreground mb-1">Plate</div>
-                        <div className="font-mono font-bold text-sm">{reservation.drivers.plate_number}</div>
+                      <div className="bg-background/80 backdrop-blur-sm rounded-xl p-4 border border-primary/10 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Car className="h-3 w-3 text-primary" />
+                          </div>
+                          <span className="text-xs text-muted-foreground">{language === 'TR' ? 'Plaka' : 'Plate'}</span>
+                        </div>
+                        <div className="font-mono font-bold text-base bg-primary/10 px-2 py-1 rounded inline-block">
+                          {reservation.drivers.plate_number}
+                        </div>
                       </div>
                     )}
                     
                     {/* Color */}
                     {reservation.drivers.vehicle_color && (
-                      <div className="bg-background/80 rounded-lg p-3 border border-primary/10">
-                        <div className="text-xs text-muted-foreground mb-1">Color</div>
-                        <div className="font-medium text-sm">{reservation.drivers.vehicle_color}</div>
+                      <div className="bg-background/80 backdrop-blur-sm rounded-xl p-4 border border-primary/10 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Sparkles className="h-3 w-3 text-primary" />
+                          </div>
+                          <span className="text-xs text-muted-foreground">{language === 'TR' ? 'Renk' : 'Color'}</span>
+                        </div>
+                        <div className="font-semibold text-base">{reservation.drivers.vehicle_color}</div>
                       </div>
                     )}
                   </div>
                   
-                  {/* Vehicle Model */}
+                  {/* Vehicle Model - Full Width */}
                   {reservation.drivers.vehicle_model && (
-                    <div className="bg-background/80 rounded-lg p-3 border border-primary/10">
-                      <div className="text-xs text-muted-foreground mb-1">Vehicle</div>
-                      <div className="font-medium">{reservation.drivers.vehicle_model}</div>
+                    <div className="bg-background/80 backdrop-blur-sm rounded-xl p-4 border border-primary/10 shadow-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Car className="h-3 w-3 text-primary" />
+                        </div>
+                        <span className="text-xs text-muted-foreground">{language === 'TR' ? 'Araç' : 'Vehicle'}</span>
+                      </div>
+                      <div className="font-semibold text-base">{reservation.drivers.vehicle_model}</div>
                     </div>
                   )}
                   
                   {/* WhatsApp Support Button */}
                   <Button
                     onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank')}
-                    className="w-full bg-[#25D366] hover:bg-[#22c55e] text-white"
+                    className="w-full h-12 bg-[#25D366] hover:bg-[#22c55e] text-white font-semibold shadow-lg"
                   >
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    WhatsApp Support
+                    <MessageCircle className="h-5 w-5 mr-2" />
+                    {language === 'TR' ? 'WhatsApp Destek' : 'WhatsApp Support'}
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             ) : (
-              <div className="bg-muted/50 border border-dashed border-muted-foreground/30 p-4 rounded-lg text-center">
-                <Car className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
-                <p className="text-muted-foreground text-sm">{t('driverAssignedSoonMessage')}</p>
-              </div>
+              <motion.div 
+                variants={itemVariants}
+                className="bg-muted/30 border-2 border-dashed border-primary/20 p-6 rounded-2xl text-center"
+              >
+                <motion.div
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="h-16 w-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center"
+                >
+                  <Car className="h-8 w-8 text-primary/50" />
+                </motion.div>
+                <p className="text-muted-foreground font-medium mb-1">
+                  {language === 'TR' ? 'Şoför Atanacak' : 'Driver Will Be Assigned'}
+                </p>
+                <p className="text-sm text-muted-foreground/70">{t('driverAssignedSoonMessage')}</p>
+              </motion.div>
             )}
 
             {/* Confirmed Message */}

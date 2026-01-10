@@ -16,7 +16,7 @@ import {
   Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe, History,
   Bookmark, TrendingUp, Briefcase, Baby, MessageSquare, CheckCircle,
   Snowflake, Armchair, Wifi, BatteryCharging, Droplets, Stars, Wine, Crown, Tv,
-  Award, Zap
+  Award, Zap, Tag
 } from 'lucide-react';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -710,6 +710,46 @@ const CustomerHome = () => {
             </Card>
           </motion.div>
         )}
+
+        {/* Promo Campaign Banner */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15 }}
+          className="mb-6"
+        >
+          <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 border-green-500/30 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-400/20 to-transparent rounded-bl-full" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="h-14 w-14 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-lg"
+                >
+                  <Tag className="h-7 w-7 text-white" />
+                </motion.div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className="bg-green-500 text-white text-xs font-bold px-2 py-0.5">
+                      {language === 'TR' ? 'KAMPANYA' : 'PROMO'}
+                    </Badge>
+                    <Sparkles className="h-4 w-4 text-green-500" />
+                  </div>
+                  <h3 className="font-bold text-foreground text-sm sm:text-base">
+                    {language === 'TR' ? 'Gidiş-Dönüş %30 İndirim!' : 'Round Trip 30% OFF!'}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {language === 'TR' 
+                      ? 'Dönüş transferinize otomatik indirim' 
+                      : 'Auto discount on your return transfer'}
+                  </p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-green-600 flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Next Transfer Card with Animation */}
         <AnimatePresence>
