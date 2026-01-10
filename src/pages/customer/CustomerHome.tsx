@@ -328,7 +328,7 @@ const CustomerHome = () => {
     sessionStorage.setItem('customerPassengerNames', JSON.stringify(validPassengerNames));
     sessionStorage.setItem('customerPhone', result.data.passengerPhone.trim());
 
-    navigate(`/reservation?${params.toString()}`);
+    navigate(`/book?${params.toString()}`);
   };
 
   return (
