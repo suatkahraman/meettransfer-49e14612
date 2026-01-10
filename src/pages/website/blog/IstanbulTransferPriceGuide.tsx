@@ -160,6 +160,25 @@ const IstanbulTransferPriceGuide = () => {
           <h2 id="understanding-prices">{t("blogPriceSection1Title")}</h2>
           <p>{t("blogPriceSection1P1")}</p>
           <p>{t("blogPriceSection1P2")}</p>
+          
+          <p>
+            Istanbul Airport (IST) is one of the largest airports in the world, handling over 70 million passengers 
+            annually. Located approximately 35 kilometers from the city center, it replaced the historic Atatürk 
+            Airport in 2019 and has since become Turkey's primary international gateway. Understanding transfer 
+            pricing is essential for budget planning and avoiding tourist traps.
+          </p>
+
+          <h3>Factors Affecting Transfer Prices in 2025</h3>
+          <p>
+            Several key factors influence how much you'll pay for your Istanbul Airport transfer:
+          </p>
+          <ul>
+            <li><strong>Distance:</strong> Prices vary significantly based on your destination's distance from the airport</li>
+            <li><strong>Vehicle type:</strong> Standard, VIP, and luxury vehicles have different price points</li>
+            <li><strong>Time of day:</strong> Some providers charge more for night transfers (we don't!)</li>
+            <li><strong>Number of passengers:</strong> Larger groups may need bigger vehicles</li>
+            <li><strong>Season:</strong> Peak tourist seasons may see higher prices from some providers</li>
+          </ul>
 
           <h2 id="destination-prices">{t("blogPriceSection2Title")}</h2>
           <p>{t("blogPriceSection2Intro")}</p>
@@ -189,6 +208,18 @@ const IstanbulTransferPriceGuide = () => {
             {t("blogPriceTableNote")}
           </p>
 
+          <h3>Popular Neighborhoods & Transfer Times</h3>
+          <p>
+            Understanding Istanbul's geography helps explain the pricing differences:
+          </p>
+          <ul>
+            <li><strong>Taksim & Beyoğlu:</strong> The heart of modern Istanbul, home to Istiklal Street and vibrant nightlife. 40-50 minutes from IST.</li>
+            <li><strong>Sultanahmet:</strong> The historic peninsula with Hagia Sophia, Blue Mosque, and Topkapi Palace. 45-55 minutes from IST.</li>
+            <li><strong>Kadıköy:</strong> Located on the Asian side, this trendy neighborhood offers authentic local experiences. 60-75 minutes from IST.</li>
+            <li><strong>Beşiktaş:</strong> Waterfront district near Dolmabahçe Palace with excellent dining and nightlife. 45-55 minutes from IST.</li>
+            <li><strong>Galataport:</strong> New cruise terminal and shopping destination in Karaköy. 40-50 minutes from IST.</li>
+          </ul>
+
           <h2 id="vehicle-prices">{t("blogPriceSection3Title")}</h2>
           <p>
             {t("blogPriceSection3Intro")} <Link to={getLocalizedPath("/fleet")} className="text-primary hover:underline">{t("ourFleet")}</Link>
@@ -216,6 +247,14 @@ const IstanbulTransferPriceGuide = () => {
               </TableBody>
             </Table>
           </div>
+
+          <h3>Which Vehicle Should You Choose?</h3>
+          <ul>
+            <li><strong>Mercedes Vito (up to 6 pax):</strong> Perfect for families and small groups. Comfortable, spacious, with room for 6 large suitcases.</li>
+            <li><strong>Mercedes Vito VIP:</strong> Same capacity as standard Vito but with premium leather interior, USB ports, and enhanced comfort features.</li>
+            <li><strong>Mercedes Maybach (up to 3 pax):</strong> Ultimate luxury for business travelers or special occasions. Features include massage seats, privacy partition, and champagne cooler.</li>
+            <li><strong>Mercedes Sprinter (up to 16 pax):</strong> Ideal for tour groups, corporate events, or large families. Includes individual climate control and entertainment system.</li>
+          </ul>
 
           <h2 id="whats-included">{t("blogPriceSection4Title")}</h2>
 
@@ -264,6 +303,18 @@ const IstanbulTransferPriceGuide = () => {
             </Card>
           </div>
 
+          <h3>What Sets Our Service Apart</h3>
+          <p>
+            Unlike many competitors, our all-inclusive pricing means you won't face unexpected charges. 
+            Some important inclusions that others often charge extra for:
+          </p>
+          <ul>
+            <li><strong>Flight monitoring:</strong> We track your flight in real-time and adjust pickup if delayed</li>
+            <li><strong>Free waiting time:</strong> 60 minutes at airports, 15 minutes at hotels</li>
+            <li><strong>Child seats:</strong> Available at no extra charge when requested in advance</li>
+            <li><strong>24/7 availability:</strong> Same price whether you land at 2 PM or 2 AM</li>
+          </ul>
+
           <h2 id="booking-tips">{t("blogPriceSection5Title")}</h2>
           <p>{t("blogPriceSection5Intro")}</p>
 
@@ -281,8 +332,31 @@ const IstanbulTransferPriceGuide = () => {
             are fixed and agreed upon before booking - no hidden fees or surge pricing.
           </p>
 
+          <h3>Essential Booking Tips</h3>
+          <ul>
+            <li>Share your full flight details (airline, flight number) for accurate tracking</li>
+            <li>Provide your WhatsApp number for real-time communication</li>
+            <li>Specify the exact hotel address including neighborhood</li>
+            <li>Request child seats at least 24 hours before your transfer</li>
+            <li>Consider booking round-trip for discounted rates</li>
+            <li>Mention any special requirements (wheelchair access, extra luggage space)</li>
+          </ul>
+
           <h2 id="why-choose">{t("blogPriceSection6Title")}</h2>
           <p>{t("blogPriceSection6Intro")}</p>
+
+          <h3>The Meet Transfer Difference</h3>
+          <p>
+            Since 2018, we've completed over 50,000 successful transfers with a 4.9-star average rating. 
+            Here's what makes us different:
+          </p>
+          <ul>
+            <li><strong>Professional drivers:</strong> All drivers speak English and undergo background checks</li>
+            <li><strong>Premium fleet:</strong> Only Mercedes vehicles, regularly maintained and cleaned</li>
+            <li><strong>Transparent pricing:</strong> No surge pricing, no hidden fees, price confirmed before booking</li>
+            <li><strong>Reliability:</strong> We've never missed a pickup - 100% on-time guarantee</li>
+            <li><strong>24/7 support:</strong> WhatsApp support available around the clock</li>
+          </ul>
 
           <h3>Tips for First-Time Visitors</h3>
           <ul>
@@ -302,6 +376,11 @@ const IstanbulTransferPriceGuide = () => {
             Whether you're arriving for business or leisure, our professional transfer service ensures a stress-free 
             start to your Istanbul journey. With transparent pricing, modern vehicles, and English-speaking drivers, 
             we've served thousands of satisfied travelers since 2018.
+          </p>
+          <p>
+            Istanbul is a magical city where East meets West, and your journey should begin with comfort and style. 
+            From the moment you land at Istanbul Airport, our professional team is ready to welcome you with a 
+            personalized meet and greet service, ensuring your Turkish adventure starts on the right foot.
           </p>
           <p>
             <Link to={getLocalizedPath("/book")} className="text-primary hover:underline">{t("blogPriceConclusionCta")}</Link>
