@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle, Tag, Briefcase, Baby } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Car, Phone, User, Users, Check, X, Plane, Edit, XCircle, AlertTriangle, CreditCard, Banknote, CheckCircle2, Clock3, Map, Home, Bell, BellOff, MessageCircle, Tag, Briefcase, Baby, Sparkles, RefreshCw, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol, CURRENCY_SYMBOLS } from '@/lib/currency';
 import GoogleRouteMap from '@/components/ui/google-route-map';
@@ -18,6 +18,8 @@ import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import MissingInfoAlerts from '@/components/customer/MissingInfoAlerts';
 import { format } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
+import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -521,10 +523,38 @@ const CustomerReservationDetail = () => {
     }
   };
 
+  // Animation variants
+  const containerVariants = useMemo(() => ({
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }), []);
+
+  const itemVariants = useMemo(() => ({
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+  }), []);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center space-y-4"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <RefreshCw className="h-8 w-8 mx-auto text-primary" />
+          </motion.div>
+          <p className="text-muted-foreground">Loading...</p>
+        </motion.div>
       </div>
     );
   }
@@ -534,87 +564,141 @@ const CustomerReservationDetail = () => {
   const priceDisplay = formatPrice(reservation.price, reservation.price_currency);
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/customer/bookings')} className="text-primary-foreground hover:bg-primary-foreground/10">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-serif">{t('reservationDetails')}</h1>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Modern Header */}
+      <motion.header 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="bg-primary text-primary-foreground py-4 px-4 shadow-lg backdrop-blur-sm sticky top-0 z-50"
+      >
+        <div className="flex items-center justify-between max-w-2xl mx-auto">
+          <div className="flex items-center gap-3">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="ghost" size="icon" onClick={() => navigate('/customer/bookings')} className="text-primary-foreground hover:bg-primary-foreground/10">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </motion.div>
+            <img src={meetTransferLogo} alt="Meet Transfer" className="h-8 w-auto" />
+          </div>
+          <div className="flex items-center gap-2">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => isSubscribed ? unsubscribe() : subscribe()}
+                disabled={pushLoading}
+                className="text-primary-foreground hover:bg-primary-foreground/10"
+                title={isSubscribed ? 'Notifications On' : 'Notifications Off'}
+              >
+                {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5 opacity-60" />}
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10">
+                <Home className="h-5 w-5" />
+              </Button>
+            </motion.div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => isSubscribed ? unsubscribe() : subscribe()}
-            disabled={pushLoading}
-            className="text-primary-foreground hover:bg-primary-foreground/10"
-            title={isSubscribed ? 'Notifications On' : 'Notifications Off'}
-          >
-            {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5 opacity-60" />}
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-primary-foreground hover:bg-primary-foreground/10">
-            <Home className="h-5 w-5" />
-          </Button>
-        </div>
-      </header>
+      </motion.header>
 
-      <main className="container mx-auto py-8 px-4 max-w-2xl">
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                {reservation.reservation_code && (
-                  <div className="text-sm font-mono text-muted-foreground bg-muted px-2 py-1 rounded inline-block">
-                    {reservation.reservation_code}
-                  </div>
-                )}
-                <CardTitle className="text-xl">{t('transferDetailsTitle')}</CardTitle>
+      <motion.main 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="container mx-auto py-6 px-4 max-w-2xl"
+      >
+        {/* Title Section */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <motion.div
+              animate={{ rotate: [0, 15, -15, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Sparkles className="h-5 w-5 text-primary" />
+            </motion.div>
+            <h1 className="text-2xl font-serif font-bold text-foreground">{t('reservationDetails')}</h1>
+          </div>
+          {reservation.reservation_code && (
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="inline-flex items-center gap-2 text-sm font-mono bg-primary/10 text-primary px-3 py-1.5 rounded-full border border-primary/20"
+            >
+              <Shield className="h-3.5 w-3.5" />
+              {reservation.reservation_code}
+            </motion.div>
+          )}
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <Card className="shadow-xl border-border/50 overflow-hidden backdrop-blur-sm bg-card/95">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border/50">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Car className="h-5 w-5 text-primary" />
+                  {t('transferDetailsTitle')}
+                </CardTitle>
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <Badge className={cn(statusColors[reservation.status] || 'bg-muted', "px-3 py-1 font-medium")}>
+                    {getStatusLabel(reservation.status)}
+                  </Badge>
+                </motion.div>
               </div>
-              <Badge className={statusColors[reservation.status] || 'bg-muted'}>
-                {getStatusLabel(reservation.status)}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Date & Time */}
-            <div className="flex items-center gap-4 pb-4 border-b">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <span className="font-medium">
-                {format(new Date(reservation.pickup_date), 'PPP')}
-              </span>
-              <Clock className="h-5 w-5 text-muted-foreground ml-4" />
-              <span>{reservation.pickup_time}</span>
-            </div>
+            </CardHeader>
+            <CardContent className="space-y-6 p-6">
+              {/* Date & Time - Enhanced */}
+              <motion.div 
+                variants={itemVariants}
+                className="flex items-center gap-4 pb-4 border-b border-border/50 bg-gradient-to-r from-primary/5 to-transparent rounded-lg p-4 -mx-2"
+              >
+                <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-lg">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">
+                    {format(new Date(reservation.pickup_date), 'PPP')}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-lg">
+                  <Clock className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">{reservation.pickup_time}</span>
+                </div>
+              </motion.div>
 
-            {/* Route */}
-            <div className="space-y-3">
-              <LocationDisplay
-                placeName={reservation.pickup_place_name}
-                address={reservation.pickup}
-                type="pickup"
-                size="md"
-              />
-              <LocationDisplay
-                placeName={reservation.dropoff_place_name}
-                address={reservation.dropoff}
-                type="dropoff"
-                size="md"
-              />
-            </div>
+              {/* Route - Enhanced */}
+              <motion.div variants={itemVariants} className="space-y-3">
+                <LocationDisplay
+                  placeName={reservation.pickup_place_name}
+                  address={reservation.pickup}
+                  type="pickup"
+                  size="md"
+                />
+                <LocationDisplay
+                  placeName={reservation.dropoff_place_name}
+                  address={reservation.dropoff}
+                  type="dropoff"
+                  size="md"
+                />
+              </motion.div>
 
-            {/* Route Map */}
-            <div className="py-4 border-t">
-              <div className="flex items-center gap-2 mb-3">
-                <Map className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{t('routeMap')}</span>
-              </div>
-              <GoogleRouteMap
-                pickup={reservation.pickup}
-                dropoff={reservation.dropoff}
-                showNavigationButtons={false}
-              />
-            </div>
+              {/* Route Map - Enhanced */}
+              <motion.div variants={itemVariants} className="py-4 border-t border-border/50">
+                <div className="flex items-center gap-2 mb-3">
+                  <Map className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold">{t('routeMap')}</span>
+                </div>
+                <div className="rounded-xl overflow-hidden shadow-md">
+                  <GoogleRouteMap
+                    pickup={reservation.pickup}
+                    dropoff={reservation.dropoff}
+                    showNavigationButtons={false}
+                  />
+                </div>
+              </motion.div>
 
             {/* Passengers */}
             {reservation.passenger_names && reservation.passenger_names.length > 0 && (
@@ -1196,9 +1280,10 @@ const CustomerReservationDetail = () => {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
-      </main>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.main>
     </div>
   );
 };
