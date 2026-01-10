@@ -204,22 +204,41 @@ const CustomerBookings = () => {
       setLoading(true);
       console.log('CustomerBookings: Fetching reservations for user:', user.id);
 
+      // First fetch reservations without driver join to avoid RLS issues
       const { data, error } = await supabase
         .from('reservations')
-        .select(`
-          *,
-          drivers (name, plate_number, vehicle_model, vehicle_color)
-        `)
+        .select('*')
         .eq('customer_id', user.id)
         .order('pickup_date', { ascending: false });
 
       if (error) {
         console.error('CustomerBookings: Error fetching reservations:', error);
         toast.error(language === 'TR' ? 'Rezervasyonlar yüklenemedi' : 'Failed to load reservations');
-      } else {
-        console.log('CustomerBookings: Fetched', data?.length || 0, 'reservations for user', user.id);
-        setReservations(data || []);
+        return;
       }
+
+      console.log('CustomerBookings: Fetched', data?.length || 0, 'reservations for user', user.id);
+      
+      // For reservations with drivers, try to fetch driver info separately
+      const reservationsWithDrivers = await Promise.all(
+        (data || []).map(async (reservation) => {
+          if (reservation.driver_id) {
+            try {
+              const { data: driverData } = await supabase
+                .from('drivers')
+                .select('name, plate_number, vehicle_model, vehicle_color')
+                .eq('id', reservation.driver_id)
+                .maybeSingle();
+              return { ...reservation, drivers: driverData };
+            } catch {
+              return { ...reservation, drivers: null };
+            }
+          }
+          return { ...reservation, drivers: null };
+        })
+      );
+      
+      setReservations(reservationsWithDrivers);
     } catch (err) {
       console.error('CustomerBookings: Unexpected error:', err);
     } finally {
