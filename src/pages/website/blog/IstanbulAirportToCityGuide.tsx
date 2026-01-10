@@ -26,30 +26,12 @@ const IstanbulAirportToCityGuide = () => {
   const { t, getLocalizedPath } = useLanguage();
 
   const faqItems = [
-    {
-      question: "What is the fastest way to get from Istanbul Airport to city center?",
-      answer: "The fastest way is by private transfer, taking approximately 35-45 minutes to Taksim or Sultanahmet depending on traffic. The metro takes about 50-60 minutes but requires transfers."
-    },
-    {
-      question: "How much does regular transportation cost from Istanbul Airport to Taksim?",
-      answer: "Regular transportation from Istanbul Airport to Taksim typically costs between 600-800 TL ($20-25 USD) depending on traffic and time of day. Prices can be higher at night or during peak hours."
-    },
-    {
-      question: "Is there a metro from Istanbul Airport?",
-      answer: "Yes, the M11 metro line connects Istanbul Airport to Gayrettepe station, where you can transfer to the M2 line to reach Taksim. The journey takes approximately 50-60 minutes."
-    },
-    {
-      question: "What is the best option for families with children?",
-      answer: "Private transfer is the best option for families. It offers door-to-door service, child seats upon request, help with luggage, and no waiting or transfers required."
-    },
-    {
-      question: "Are private transfers available 24/7?",
-      answer: "Yes, Meet Transfer offers 24/7 private transfer services with flight tracking. Your driver will monitor your flight and adjust pickup time automatically for delays."
-    },
-    {
-      question: "How do I book a private transfer from Istanbul Airport?",
-      answer: "You can book through our website's reservation form or contact us via WhatsApp for instant booking. We'll send you a price quote within minutes."
-    }
+    { question: t("blogIstanbulFaq1Q"), answer: t("blogIstanbulFaq1A") },
+    { question: t("blogIstanbulFaq2Q"), answer: t("blogIstanbulFaq2A") },
+    { question: t("blogIstanbulFaq3Q"), answer: t("blogIstanbulFaq3A") },
+    { question: t("blogIstanbulFaq4Q"), answer: t("blogIstanbulFaq4A") },
+    { question: t("blogIstanbulFaq5Q"), answer: t("blogIstanbulFaq5A") },
+    { question: t("blogIstanbulFaq6Q"), answer: t("blogIstanbulFaq6A") },
   ];
 
   const transportOptions = [
@@ -176,114 +158,93 @@ const IstanbulAirportToCityGuide = () => {
           />
         </div>
 
-        {/* Table of Contents */}
         <TableOfContents items={[
-          { id: "introduction", title: "Introduction: Getting from Istanbul Airport to the City" },
-          { id: "quick-comparison", title: "Quick Comparison: All Transportation Options" },
-          { id: "private-transfer", title: "Option 1: Private Airport Transfer (Recommended)" },
-          { id: "regular-transport", title: "Option 2: Regular Transport" },
-          { id: "metro-m11", title: "Option 3: Metro (M11 Line)" },
-          { id: "havaist-bus", title: "Option 4: Havaist Airport Buses" },
-          { id: "which-option", title: "Which Option Should You Choose?" },
-          { id: "distances", title: "Distances from Istanbul Airport" },
-          { id: "tips", title: "Tips for a Smooth Arrival" },
+          { id: "introduction", title: t("blogIstanbulTocIntro") },
+          { id: "quick-comparison", title: t("blogIstanbulTocComparison") },
+          { id: "private-transfer", title: t("blogIstanbulTocPrivate") },
+          { id: "regular-transport", title: t("blogIstanbulTocRegular") },
+          { id: "metro-m11", title: t("blogIstanbulTocMetro") },
+          { id: "havaist-bus", title: t("blogIstanbulTocHavaist") },
+          { id: "which-option", title: t("blogIstanbulTocWhichOption") },
+          { id: "distances", title: t("blogIstanbulTocDistances") },
+          { id: "tips", title: t("blogIstanbulTocTips") },
         ]} />
 
         {/* Article Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <h2 id="introduction">Introduction: Getting from Istanbul Airport to the City</h2>
-          <p>
-            Istanbul Airport (IST) is one of the world's largest and busiest airports, serving as Turkey's 
-            main international gateway. Located approximately 35 kilometers northwest of the city center, 
-            it replaced the historic Atatürk Airport in 2019. With millions of passengers passing through 
-            annually, finding the best transportation option to your destination is crucial for a smooth 
-            start to your Istanbul experience.
-          </p>
-          <p>
-            In this comprehensive guide, we'll explore every transportation option available, compare 
-            prices and journey times, and help you decide which method suits your needs best. Whether 
-            you're traveling solo, with family, or in a large group, we've got you covered.
-          </p>
+          <h2 id="introduction">{t("blogIstanbulTocIntro")}</h2>
+          <p>{t("blogIstanbulIntroP1")}</p>
+          <p>{t("blogIstanbulIntroP2")}</p>
 
-          <h2 id="quick-comparison">Quick Comparison: All Transportation Options</h2>
-          <p>
-            Before diving into details, here's a quick overview of your options:
-          </p>
+          <h2 id="quick-comparison">{t("blogIstanbulTocComparison")}</h2>
+          <p>{t("blogIstanbulQuickOverview")}</p>
 
           <div className="overflow-x-auto not-prose my-8">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Option</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Price (to Taksim)</TableHead>
-                  <TableHead>Best For</TableHead>
+                  <TableHead>{t("blogIstanbulTableOption")}</TableHead>
+                  <TableHead>{t("blogIstanbulTableDuration")}</TableHead>
+                  <TableHead>{t("blogIstanbulTablePrice")}</TableHead>
+                  <TableHead>{t("blogIstanbulTableBestFor")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableCell className="font-medium">Private Transfer</TableCell>
+                  <TableCell className="font-medium">{t("blogIstanbulTablePrivate")}</TableCell>
                   <TableCell>35-45 min</TableCell>
                   <TableCell>€50-65</TableCell>
-                  <TableCell>Families, Business, Comfort</TableCell>
+                  <TableCell>{t("blogIstanbulBestForFamilies")}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Regular</TableCell>
+                  <TableCell className="font-medium">{t("blogIstanbulTableRegular")}</TableCell>
                   <TableCell>40-60 min</TableCell>
                   <TableCell>Variable</TableCell>
-                  <TableCell>Solo travelers, Flexibility</TableCell>
+                  <TableCell>{t("blogIstanbulBestForSolo")}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Metro (M11)</TableCell>
+                  <TableCell className="font-medium">{t("blogIstanbulTableMetro")}</TableCell>
                   <TableCell>50-70 min</TableCell>
                   <TableCell>€1-2</TableCell>
-                  <TableCell>Budget travelers</TableCell>
+                  <TableCell>{t("blogIstanbulBestForBudget")}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Havaist Bus</TableCell>
+                  <TableCell className="font-medium">{t("blogIstanbulTableHavaist")}</TableCell>
                   <TableCell>60-90 min</TableCell>
                   <TableCell>€5-8</TableCell>
-                  <TableCell>Budget, Major destinations</TableCell>
+                  <TableCell>{t("blogIstanbulBestForMajor")}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
           </div>
 
-          <h2 id="private-transfer">Option 1: Private Airport Transfer (Recommended)</h2>
+          <h2 id="private-transfer">{t("blogIstanbulTocPrivate")}</h2>
           <p>
-            A <Link to={getLocalizedPath("/istanbul-transfer")} className="text-primary hover:underline">private airport transfer</Link> is 
-            the most comfortable and stress-free way to travel from Istanbul Airport to your destination. 
-            This option is particularly popular among families, business travelers, and anyone who values 
-            convenience over cost savings.
+            <Link to={getLocalizedPath("/istanbul-transfer")} className="text-primary hover:underline">{t("blogIstanbulTablePrivate")}</Link> {t("blogIstanbulPrivateTransferDesc")}
           </p>
 
-          <h3>How Private Transfers Work</h3>
-          <p>
-            When you book a private transfer, your driver will be waiting at the arrivals hall with a 
-            personalized name sign. The service includes:
-          </p>
+          <h3>{t("blogIstanbulHowPrivateWorks")}</h3>
+          <p>{t("blogIstanbulHowPrivateP1")}</p>
           <ul>
-            <li>Meet & Greet at the arrivals hall</li>
-            <li>Help with luggage</li>
-            <li>Direct door-to-door service</li>
-            <li>Real-time flight tracking</li>
-            <li>Complimentary water and WiFi</li>
-            <li>Child seats upon request</li>
-            <li>No hidden fees or surge pricing</li>
+            <li>{t("blogIstanbulPrivateFeature1")}</li>
+            <li>{t("blogIstanbulPrivateFeature2")}</li>
+            <li>{t("blogIstanbulPrivateFeature3")}</li>
+            <li>{t("blogIstanbulPrivateFeature4")}</li>
+            <li>{t("blogIstanbulPrivateFeature5")}</li>
+            <li>{t("blogIstanbulPrivateFeature6")}</li>
+            <li>{t("blogIstanbulPrivateFeature7")}</li>
           </ul>
 
-          <h3>Private Transfer Pricing</h3>
-          <p>
-            Private transfer prices from Istanbul Airport are fixed and transparent:
-          </p>
+          <h3>{t("blogIstanbulPrivatePricing")}</h3>
+          <p>{t("blogIstanbulPrivatePricingP1")}</p>
           <ul>
-            <li><strong>To Taksim/Beyoğlu:</strong> €50-55 (Mercedes Vito)</li>
-            <li><strong>To Sultanahmet:</strong> €50-55 (Mercedes Vito)</li>
-            <li><strong>To Kadıköy (Asian Side):</strong> €65-70</li>
-            <li><strong>To Sabiha Gökçen Airport:</strong> €110-130</li>
-            <li><strong>To Bursa:</strong> €185-220</li>
-            <li><strong>To Sapanca:</strong> €245-265</li>
-            <li><strong>To Kartepe:</strong> €255-285</li>
+            <li>{t("blogIstanbulPriceTaksim")}</li>
+            <li>{t("blogIstanbulPriceSultanahmet")}</li>
+            <li>{t("blogIstanbulPriceKadikoy")}</li>
+            <li>{t("blogIstanbulPriceSabiha")}</li>
+            <li>{t("blogIstanbulPriceBursa")}</li>
+            <li>{t("blogIstanbulPriceSapanca")}</li>
+            <li>{t("blogIstanbulPriceKartepe")}</li>
           </ul>
 
           <div className="not-prose my-8">
@@ -291,162 +252,137 @@ const IstanbulAirportToCityGuide = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
-                  Why Choose Private Transfer?
+                  {t("blogIstanbulWhyChoosePrivate")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-4">
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>No waiting in queues</span>
+                  <span>{t("blogIstanbulWhyPrivate1")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>Fixed price - no surprises</span>
+                  <span>{t("blogIstanbulWhyPrivate2")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>Professional English-speaking driver</span>
+                  <span>{t("blogIstanbulWhyPrivate3")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>24/7 availability</span>
+                  <span>{t("blogIstanbulWhyPrivate4")}</span>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <h2 id="regular-transport">Option 2: Regular Transport</h2>
-          <p>
-            Regular transport options are available outside the arrivals hall at Istanbul Airport. 
-            While convenient for solo travelers, there are some important things to consider.
-          </p>
+          <h2 id="regular-transport">{t("blogIstanbulTocRegular")}</h2>
+          <p>{t("blogIstanbulRegularP1")}</p>
 
-          <h3>Tips for Regular Transport</h3>
-          <p>
-            When using regular transport options, keep these points in mind:
-          </p>
+          <h3>{t("blogIstanbulRegularTips")}</h3>
+          <p>{t("blogIstanbulRegularTipsP1")}</p>
           <ul>
-            <li>Variable pricing depending on traffic and time</li>
-            <li>Communication may be challenging</li>
-            <li>No pre-arranged pickup or meet & greet service</li>
-            <li>Payment typically in local currency</li>
+            <li>{t("blogIstanbulRegularTip1")}</li>
+            <li>{t("blogIstanbulRegularTip2")}</li>
+            <li>{t("blogIstanbulRegularTip3")}</li>
+            <li>{t("blogIstanbulRegularTip4")}</li>
           </ul>
 
-          <h2 id="metro-m11">Option 3: Metro (M11 Line)</h2>
-          <p>
-            The Istanbul Metro M11 line connects Istanbul Airport to the city center. This is the most 
-            budget-friendly option but requires some navigation and isn't ideal if you have heavy luggage.
-          </p>
+          <h2 id="metro-m11">{t("blogIstanbulTocMetro")}</h2>
+          <p>{t("blogIstanbulMetroP1")}</p>
 
-          <h3>Metro Route</h3>
-          <p>
-            The M11 line runs from Istanbul Airport to Gayrettepe station, where you can transfer to:
-          </p>
+          <h3>{t("blogIstanbulMetroRoute")}</h3>
+          <p>{t("blogIstanbulMetroRouteP1")}</p>
           <ul>
-            <li><strong>M2 Line:</strong> To Taksim, Şişli, Levent</li>
-            <li><strong>Marmaray:</strong> To Asian side via undersea tunnel</li>
+            <li>{t("blogIstanbulMetroM2")}</li>
+            <li>{t("blogIstanbulMetroMarmaray")}</li>
           </ul>
 
-          <h3>Metro Timings</h3>
-          <p>
-            The metro operates from approximately 6:00 AM to midnight. Trains run every 8-10 minutes 
-            during peak hours and every 15-20 minutes during off-peak times.
-          </p>
+          <h3>{t("blogIstanbulMetroTimings")}</h3>
+          <p>{t("blogIstanbulMetroTimingsP1")}</p>
 
           <div className="not-prose my-8">
             <Card className="bg-red-500/5 border-red-500/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <XCircle className="h-5 w-5 text-red-500" />
-                  Metro Limitations
+                  {t("blogIstanbulMetroLimitations")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p>• Not available late night/early morning</p>
-                <p>• Limited luggage space</p>
-                <p>• Requires transfers for most destinations</p>
-                <p>• Can be very crowded during rush hours</p>
-                <p>• Walking distance in airport is significant</p>
+                <p>• {t("blogIstanbulMetroLimit1")}</p>
+                <p>• {t("blogIstanbulMetroLimit2")}</p>
+                <p>• {t("blogIstanbulMetroLimit3")}</p>
+                <p>• {t("blogIstanbulMetroLimit4")}</p>
+                <p>• {t("blogIstanbulMetroLimit5")}</p>
               </CardContent>
             </Card>
           </div>
 
-          <h2 id="havaist-bus">Option 4: Havaist Airport Buses</h2>
-          <p>
-            Havaist is the official airport bus service connecting Istanbul Airport to various parts of 
-            the city. It's a good middle-ground option between metro and private transfer.
-          </p>
+          <h2 id="havaist-bus">{t("blogIstanbulTocHavaist")}</h2>
+          <p>{t("blogIstanbulHavalistRoutesP1")}</p>
 
-          <h3>Main Havaist Routes</h3>
+          <h3>{t("blogIstanbulHavalistRoutes")}</h3>
           <ul>
-            <li><strong>HVIST-1:</strong> To Aksaray (via Yenikapı)</li>
-            <li><strong>HVIST-12:</strong> To Taksim Square</li>
-            <li><strong>HVIST-14:</strong> To Kadıköy (Asian Side)</li>
-            <li><strong>HVIST-19:</strong> To Yenikapı</li>
+            <li>{t("blogIstanbulHavalistRoute1")}</li>
+            <li>{t("blogIstanbulHavalistRoute2")}</li>
+            <li>{t("blogIstanbulHavalistRoute3")}</li>
+            <li>{t("blogIstanbulHavalistRoute4")}</li>
           </ul>
 
-          <h2 id="which-option">Which Option Should You Choose?</h2>
-          <p>
-            Your best choice depends on your specific situation:
-          </p>
+          <h2 id="which-option">{t("blogIstanbulTocWhichOption")}</h2>
+          <p>{t("blogIstanbulWhichOption")}</p>
 
-          <h3>Choose Private Transfer If:</h3>
+          <h3>{t("blogIstanbulChoosePrivateIf")}</h3>
           <ul>
-            <li>You're traveling with family or children</li>
-            <li>You have heavy or multiple luggage</li>
-            <li>You're arriving late at night or early morning</li>
-            <li>You value comfort and convenience</li>
-            <li>You're a business traveler</li>
-            <li>You're unfamiliar with Istanbul</li>
+            <li>{t("blogIstanbulChoosePrivate1")}</li>
+            <li>{t("blogIstanbulChoosePrivate2")}</li>
+            <li>{t("blogIstanbulChoosePrivate3")}</li>
+            <li>{t("blogIstanbulChoosePrivate4")}</li>
+            <li>{t("blogIstanbulChoosePrivate5")}</li>
+            <li>{t("blogIstanbulChoosePrivate6")}</li>
           </ul>
 
-          <h3>Choose Regular Transport If:</h3>
+          <h3>{t("blogIstanbulChooseRegularIf")}</h3>
           <ul>
-            <li>You're traveling solo with light luggage</li>
-            <li>You're comfortable with local transport</li>
-            <li>You want flexibility without pre-booking</li>
+            <li>{t("blogIstanbulChooseRegular1")}</li>
+            <li>{t("blogIstanbulChooseRegular2")}</li>
+            <li>{t("blogIstanbulChooseRegular3")}</li>
           </ul>
 
-          <h3>Choose Metro If:</h3>
+          <h3>{t("blogIstanbulChooseMetroIf")}</h3>
           <ul>
-            <li>You're on a tight budget</li>
-            <li>You're traveling during daytime hours</li>
-            <li>You have minimal luggage</li>
-            <li>Your hotel is near a metro station</li>
+            <li>{t("blogIstanbulChooseMetro1")}</li>
+            <li>{t("blogIstanbulChooseMetro2")}</li>
+            <li>{t("blogIstanbulChooseMetro3")}</li>
+            <li>{t("blogIstanbulChooseMetro4")}</li>
           </ul>
 
-          <h2 id="distances">Distances from Istanbul Airport</h2>
-          <p>
-            Here are the approximate distances from Istanbul Airport to popular destinations:
-          </p>
+          <h2 id="distances">{t("blogIstanbulDistances")}</h2>
+          <p>{t("blogIstanbulDistancesP1")}</p>
           <ul>
-            <li><strong>Taksim Square:</strong> 40 km (25 miles)</li>
-            <li><strong>Sultanahmet:</strong> 45 km (28 miles)</li>
-            <li><strong>Kadıköy:</strong> 55 km (34 miles)</li>
-            <li><strong>Galataport:</strong> 42 km (26 miles)</li>
-            <li><strong>Sabiha Gökçen Airport:</strong> 90 km (56 miles)</li>
+            <li>{t("blogIstanbulDistTaksim")}</li>
+            <li>{t("blogIstanbulDistSultanahmet")}</li>
+            <li>{t("blogIstanbulDistKadikoy")}</li>
+            <li>{t("blogIstanbulDistGalataport")}</li>
+            <li>{t("blogIstanbulDistSabiha")}</li>
           </ul>
 
-          <h2 id="tips">Tips for a Smooth Arrival</h2>
+          <h2 id="tips">{t("blogIstanbulTips")}</h2>
           <ol>
-            <li><strong>Book in advance:</strong> Pre-book your transfer to avoid waiting</li>
-            <li><strong>Share flight details:</strong> This helps with flight tracking</li>
-            <li><strong>Have address ready:</strong> In Turkish if possible</li>
-            <li><strong>Get local SIM:</strong> Available at the airport for communication</li>
-            <li><strong>Know the route:</strong> Follow your journey on Google Maps</li>
+            <li>{t("blogIstanbulTip1")}</li>
+            <li>{t("blogIstanbulTip2")}</li>
+            <li>{t("blogIstanbulTip3")}</li>
+            <li>{t("blogIstanbulTip4")}</li>
+            <li>{t("blogIstanbulTip5")}</li>
           </ol>
 
-          <h2>Conclusion</h2>
+          <h2>{t("blogIstanbulConclusion")}</h2>
           <p>
-            Getting from Istanbul Airport to the city center doesn't have to be stressful. While each 
-            transportation option has its merits, <Link to={getLocalizedPath("/istanbul-transfer")} className="text-primary hover:underline">private 
-            transfer</Link> offers the best balance of comfort, reliability, and peace of mind – especially 
-            after a long flight.
+            {t("blogIstanbulConclusionP1")} <Link to={getLocalizedPath("/istanbul-transfer")} className="text-primary hover:underline">{t("blogIstanbulTablePrivate")}</Link>.
           </p>
           <p>
-            At Meet Transfer, we specialize in providing premium airport transfers with professional 
-            drivers, luxury vehicles, and 24/7 support. <Link to={getLocalizedPath("/book")} className="text-primary hover:underline">Request 
-            your price</Link> today and start your Istanbul journey in style.
+            {t("blogIstanbulConclusionP2")} <Link to={getLocalizedPath("/book")} className="text-primary hover:underline">{t("requestPrice")}</Link>.
           </p>
         </div>
 
