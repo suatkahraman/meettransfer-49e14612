@@ -53,12 +53,12 @@ const IstanbulTransferPriceGuide = () => {
       <SEOHead
         title={t("blogPriceSeoTitle")}
         description={t("blogPriceSeoDesc")}
-        keywords="Istanbul Airport transfer price, IST transfer cost, private transfer Istanbul price, Istanbul Airport to Taksim price, airport transfer pricing Turkey"
+        keywords="Istanbul Airport transfer price 2025, IST transfer cost, private transfer Istanbul price, Istanbul Airport to Taksim price, airport transfer pricing Turkey, Istanbul Airport taxi fare, VIP transfer Istanbul cost, Mercedes transfer Istanbul, Istanbul Airport to hotel price, Sultanahmet transfer cost"
         canonicalPath="/blog/istanbul-airport-transfer-price-guide"
         ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
         ogType="article"
         articlePublishedTime="2024-12-10"
-        articleModifiedTime="2025-01-05"
+        articleModifiedTime="2025-01-10"
         articleSection="Price Guide"
       />
       <SchemaOrg
@@ -70,9 +70,17 @@ const IstanbulTransferPriceGuide = () => {
             description: t("blogPriceSeoDesc"),
             image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
             datePublished: '2024-12-10',
-            dateModified: '2025-12-31',
+            dateModified: '2025-01-10',
             author: 'Meet Transfer',
-            readingTime: '10',
+            readingTime: '12',
+          },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Blog', url: '/blog' },
+              { name: 'Istanbul Airport Transfer Price Guide', url: '/blog/istanbul-airport-transfer-price-guide' },
+            ],
           },
           {
             type: 'FAQPage',
@@ -106,11 +114,11 @@ const IstanbulTransferPriceGuide = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              December 10, 2024
+              {t("lastUpdated")}: January 10, 2025
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              10 {t("minRead")}
+              12 {t("minRead")}
             </span>
           </div>
         </header>
@@ -119,8 +127,9 @@ const IstanbulTransferPriceGuide = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
             src="/images/meet-transfer-vip-mercedes-vito.jpg" 
-            alt="Mercedes Vito VIP Transfer Istanbul"
+            alt="Istanbul Airport Private Transfer 2025 - Mercedes Vito VIP Service to Taksim, Sultanahmet and City Center"
             className="w-full h-full object-cover"
+            loading="eager"
           />
         </div>
 
@@ -236,13 +245,41 @@ const IstanbulTransferPriceGuide = () => {
           <h2>{t("blogPriceSection5Title")}</h2>
           <p>{t("blogPriceSection5Intro")}</p>
 
+          <h3>When to Book Your Transfer</h3>
+          <p>
+            For the best experience, we recommend booking your Istanbul Airport transfer at least 24-48 hours 
+            in advance. During peak travel seasons (June-September, Christmas, and New Year), booking 3-5 days 
+            ahead ensures vehicle availability. However, we also accommodate last-minute bookings when possible.
+          </p>
+
+          <h3>Payment Options</h3>
+          <p>
+            We accept multiple payment methods for your convenience: credit/debit cards (Visa, Mastercard, Amex), 
+            cash payment to driver (EUR, USD, GBP, or TRY), and bank transfer for corporate clients. All prices 
+            are fixed and agreed upon before booking - no hidden fees or surge pricing.
+          </p>
+
           <h2>{t("blogPriceSection6Title")}</h2>
           <p>{t("blogPriceSection6Intro")}</p>
+
+          <h3>Tips for First-Time Visitors</h3>
+          <ul>
+            <li><strong>Share your flight details:</strong> We monitor your flight and adjust pickup time for delays</li>
+            <li><strong>Provide WhatsApp number:</strong> For real-time communication with your driver</li>
+            <li><strong>Specify hotel address:</strong> Include the full address for smooth navigation</li>
+            <li><strong>Request child seats early:</strong> If traveling with children, mention this when booking</li>
+            <li><strong>Consider return transfer:</strong> Book round-trip for better rates and guaranteed service</li>
+          </ul>
 
           <h2>{t("blogPriceConclusion")}</h2>
           <p>
             {t("blogPriceConclusionP1")} 
             <Link to={getLocalizedPath("/istanbul-transfer")} className="text-primary hover:underline"> {t("blogPriceConclusionLink")}</Link>
+          </p>
+          <p>
+            Whether you're arriving for business or leisure, our professional transfer service ensures a stress-free 
+            start to your Istanbul journey. With transparent pricing, modern vehicles, and English-speaking drivers, 
+            we've served thousands of satisfied travelers since 2018.
           </p>
           <p>
             <Link to={getLocalizedPath("/book")} className="text-primary hover:underline">{t("blogPriceConclusionCta")}</Link>

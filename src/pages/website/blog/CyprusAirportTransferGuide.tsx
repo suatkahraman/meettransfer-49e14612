@@ -62,12 +62,12 @@ const CyprusAirportTransferGuide = () => {
       <SEOHead
         title={t("blogCyprusSeoTitle")}
         description={t("blogCyprusSeoDesc")}
-        keywords="Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Protaras transfer, Kyrenia transfer, Northern Cyprus transfer, Ercan airport, Famagusta transfer, Troodos transfer"
+        keywords="Cyprus airport transfer 2025, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Protaras transfer, Kyrenia transfer, Northern Cyprus transfer, Ercan airport, Famagusta transfer, Troodos transfer, Cyprus VIP transfer, Cyprus taxi price"
         canonicalPath="/blog/cyprus-airport-transfer-guide"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
         ogType="article"
         articlePublishedTime="2024-12-26"
-        articleModifiedTime="2025-01-05"
+        articleModifiedTime="2025-01-10"
         articleSection="Travel Guide"
       />
       <SchemaOrg
@@ -79,9 +79,9 @@ const CyprusAirportTransferGuide = () => {
             description: t("blogCyprusSeoDesc"),
             image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
             datePublished: '2024-12-26',
-            dateModified: '2025-01-01',
+            dateModified: '2025-01-10',
             author: 'Meet Transfer',
-            readingTime: '15',
+            readingTime: '17',
           },
           {
             type: 'FAQPage',
@@ -123,11 +123,11 @@ const CyprusAirportTransferGuide = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              December 26, 2024
+              {t("lastUpdated")}: January 10, 2025
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              15 {t("minRead")}
+              17 {t("minRead")}
             </span>
           </div>
         </header>
@@ -135,7 +135,7 @@ const CyprusAirportTransferGuide = () => {
         {/* Featured Image */}
         <div className="aspect-video overflow-hidden rounded-xl mb-12 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
           <div className="text-center">
-            <Palmtree className="h-20 w-20 text-cyan-500 mx-auto mb-4" />
+            <Palmtree className="h-20 w-20 text-cyan-500 mx-auto mb-4" aria-hidden="true" />
             <p className="text-2xl font-bold">{t("blogCyprusTransfers")}</p>
             <p className="text-muted-foreground">{t("blogCyprusIslandParadise")}</p>
           </div>

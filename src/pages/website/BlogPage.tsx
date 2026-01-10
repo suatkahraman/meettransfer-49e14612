@@ -16,7 +16,7 @@ const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Blog posts with translation keys
+  // Blog posts with translation keys - Updated for 2025 SEO
   const blogPosts = useMemo(() => [
     {
       id: "istanbul-bursa-day-tour-guide",
@@ -24,8 +24,8 @@ const BlogPage = () => {
       descriptionKey: "blogBursaDesc",
       category: "Bursa",
       categoryKey: "bursa",
-      readTime: 15,
-      date: "2025-12-26",
+      readTime: 18,
+      date: "2025-01-10",
       image: "/images/meet-transfer-vip-mercedes-vito.jpg",
     },
     {
@@ -34,8 +34,8 @@ const BlogPage = () => {
       descriptionKey: "blogDubaiDesc",
       category: "Dubai",
       categoryKey: "dubai",
-      readTime: 14,
-      date: "2024-12-26",
+      readTime: 16,
+      date: "2025-01-10",
       image: "/images/meet-transfer-vip-mercedes-vito.jpg",
     },
     {
@@ -44,8 +44,8 @@ const BlogPage = () => {
       descriptionKey: "blogCyprusDesc",
       category: "Cyprus",
       categoryKey: "cyprus",
-      readTime: 15,
-      date: "2024-12-26",
+      readTime: 17,
+      date: "2025-01-10",
       image: "/images/meet-transfer-vclass-interior.jpg",
     },
     {
@@ -54,8 +54,8 @@ const BlogPage = () => {
       descriptionKey: "blogIstanbul1Desc",
       category: "Istanbul",
       categoryKey: "istanbul",
-      readTime: 12,
-      date: "2024-12-15",
+      readTime: 14,
+      date: "2025-01-10",
       image: "/images/meet-transfer-vclass-interior.jpg",
     },
     {
@@ -64,8 +64,8 @@ const BlogPage = () => {
       descriptionKey: "blogIstanbul2Desc",
       category: "Istanbul",
       categoryKey: "priceGuide",
-      readTime: 10,
-      date: "2024-12-10",
+      readTime: 12,
+      date: "2025-01-10",
       image: "/images/meet-transfer-vip-mercedes-vito.jpg",
     },
     {
@@ -74,8 +74,8 @@ const BlogPage = () => {
       descriptionKey: "blogPrivateTaxiDesc",
       category: "Travel Tips",
       categoryKey: "travelTips",
-      readTime: 11,
-      date: "2024-12-05",
+      readTime: 13,
+      date: "2025-01-10",
       image: "/images/meet-transfer-vclass-interior.jpg",
     },
     {
@@ -84,8 +84,8 @@ const BlogPage = () => {
       descriptionKey: "blogAntalyaDesc",
       category: "Antalya",
       categoryKey: "antalya",
-      readTime: 13,
-      date: "2024-11-28",
+      readTime: 15,
+      date: "2025-01-10",
       image: "/images/meet-transfer-vip-mercedes-vito.jpg",
     },
     {
@@ -94,8 +94,8 @@ const BlogPage = () => {
       descriptionKey: "blogIsWorthItDesc",
       category: "Travel Tips",
       categoryKey: "travelTips",
-      readTime: 14,
-      date: "2024-11-20",
+      readTime: 16,
+      date: "2025-01-10",
       image: "/images/meet-transfer-vclass-interior.jpg",
     },
   ], []);
@@ -143,7 +143,7 @@ const BlogPage = () => {
       <SEOHead
         title={t('blogPageTitle')}
         description={t('blogPageDesc')}
-        keywords={t('blogPageKeywords')}
+        keywords={`${t('blogPageKeywords')}, Turkey airport transfer 2025, Istanbul transfer guide, Antalya transfer tips, Dubai VIP transfer, Cyprus airport taxi, Bodrum transfer, Cappadocia transfer, Turkey travel tips`}
         canonicalPath="/blog"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
       />
@@ -163,6 +163,16 @@ const BlogPage = () => {
               question: item.question,
               answer: item.answer
             }))
+          },
+          {
+            type: 'Article',
+            headline: t('blogHeroTitle'),
+            description: t('blogPageDesc'),
+            image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
+            datePublished: '2024-11-01',
+            dateModified: '2025-01-10',
+            author: 'Meet Transfer',
+            readingTime: '5',
           }
         ]}
       />

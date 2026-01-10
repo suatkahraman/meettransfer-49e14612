@@ -43,12 +43,12 @@ const IsPrivateTransferWorthIt = () => {
       <SEOHead
         title={t('blogWorthItTitle')}
         description={t('blogWorthItDesc')}
-        keywords="private transfer Turkey worth it, Turkey airport transfer cost, VIP transfer value, should I book private transfer, Turkey private transfer"
+        keywords="private transfer Turkey worth it 2025, Turkey airport transfer cost, VIP transfer value, should I book private transfer, Turkey private transfer, airport taxi vs private, Turkey transfer comparison, Istanbul private transfer price, Antalya private transfer worth it"
         canonicalPath="/blog/is-private-transfer-worth-it-turkey"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
         ogType="article"
         articlePublishedTime="2024-11-20"
-        articleModifiedTime="2025-01-05"
+        articleModifiedTime="2025-01-10"
         articleSection="Travel Tips"
       />
       <SchemaOrg
@@ -60,9 +60,17 @@ const IsPrivateTransferWorthIt = () => {
             description: t('blogWorthItDesc'),
             image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
             datePublished: '2024-11-20',
-            dateModified: '2025-12-31',
+            dateModified: '2025-01-10',
             author: 'Meet Transfer',
-            readingTime: '14',
+            readingTime: '16',
+          },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Blog', url: '/blog' },
+              { name: 'Is Private Transfer Worth It?', url: '/blog/is-private-transfer-worth-it-turkey' },
+            ],
           },
           {
             type: 'FAQPage',

@@ -86,12 +86,12 @@ const IstanbulAirportToCityGuide = () => {
       <SEOHead
         title={t('blogIstanbul1Title')}
         description={t('blogIstanbul1Desc')}
-        keywords="Istanbul Airport to city, Istanbul Airport transfer, IST to Taksim, Istanbul Airport metro, Istanbul Airport to Sultanahmet, private transfer Istanbul"
+        keywords="Istanbul Airport to city 2025, Istanbul Airport transfer, IST to Taksim, Istanbul Airport metro, Istanbul Airport to Sultanahmet, private transfer Istanbul, Istanbul Airport bus, Havaist bus, M11 metro Istanbul, Istanbul new airport transport, IST airport to hotel"
         canonicalPath="/blog/istanbul-airport-to-city-best-way"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
         ogType="article"
         articlePublishedTime="2024-12-15"
-        articleModifiedTime="2025-01-05"
+        articleModifiedTime="2025-01-10"
         articleSection="Travel Guide"
       />
       <SchemaOrg
@@ -103,9 +103,17 @@ const IstanbulAirportToCityGuide = () => {
             description: t('blogIstanbul1Desc'),
             image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
             datePublished: '2024-12-15',
-            dateModified: '2025-12-31',
+            dateModified: '2025-01-10',
             author: 'Meet Transfer',
-            readingTime: '12',
+            readingTime: '14',
+          },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Blog', url: '/blog' },
+              { name: 'Istanbul Airport to City Guide', url: '/blog/istanbul-airport-to-city-best-way' },
+            ],
           },
           {
             type: 'FAQPage',
@@ -139,11 +147,11 @@ const IstanbulAirportToCityGuide = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              December 15, 2024
+              {t('lastUpdated')}: January 10, 2025
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              12 {t('minRead')}
+              14 {t('minRead')}
             </span>
           </div>
         </header>
@@ -152,8 +160,9 @@ const IstanbulAirportToCityGuide = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
             src="/images/meet-transfer-vclass-interior.jpg" 
-            alt="Private transfer from Istanbul Airport"
+            alt="Istanbul Airport to City Center 2025 - Best Transportation Options Including Private Transfer, Metro M11, and Havaist Bus"
             className="w-full h-full object-cover"
+            loading="eager"
           />
         </div>
 
