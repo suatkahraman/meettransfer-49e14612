@@ -8,13 +8,63 @@
 export const WHATSAPP_NUMBER = "15558051101";
 
 // Display format for the phone number
-export const WHATSAPP_DISPLAY = "+1 555 805 1101";
+export const WHATSAPP_DISPLAY = "+1 (555) 805-1101";
 
 // Emergency/alternative phone number
 export const EMERGENCY_PHONE = "+15558051101";
 
 // Email addresses
 export const SUPPORT_EMAIL = "info@meettransfer.app";
+
+// Global office locations
+export interface OfficeLocation {
+  flag: string;
+  country: string;
+  city: string;
+  address: string;
+  phone: string;
+  whatsappOnly: boolean;
+  email: string | null;
+}
+
+export const GLOBAL_OFFICES: OfficeLocation[] = [
+  {
+    flag: "🇹🇷",
+    country: "Türkiye",
+    city: "İstanbul Headquarters",
+    address: "Istanbul Airport (IST) – VIP Meet & Greet Terminal Office",
+    phone: WHATSAPP_DISPLAY,
+    whatsappOnly: true,
+    email: SUPPORT_EMAIL,
+  },
+  {
+    flag: "🇺🇸",
+    country: "USA",
+    city: "Los Angeles",
+    address: "La Fashion District, Los Angeles, CA 854",
+    phone: WHATSAPP_DISPLAY,
+    whatsappOnly: true,
+    email: null,
+  },
+  {
+    flag: "🇩🇪",
+    country: "Germany",
+    city: "Berlin",
+    address: "Street Business Center, Berlin 245",
+    phone: WHATSAPP_DISPLAY,
+    whatsappOnly: true,
+    email: null,
+  },
+  {
+    flag: "🇦🇪",
+    country: "UAE",
+    city: "Dubai",
+    address: "Downtown Business Tower, Dubai 35",
+    phone: WHATSAPP_DISPLAY,
+    whatsappOnly: true,
+    email: null,
+  },
+];
 
 /**
  * Generate a WhatsApp URL with an optional pre-filled message
