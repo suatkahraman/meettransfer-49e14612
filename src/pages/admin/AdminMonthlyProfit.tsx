@@ -74,6 +74,7 @@ const AdminMonthlyProfit = () => {
       // Fetch ALL completed reservations for the month
       // Includes both agency reservations AND guest reservations
       // Must have driver_earning (Bütçe) filled
+      // EXCLUDE: deleted, cancelled_by_customer, cancelled_by_agency, cancelled statuses
       const { data: reservations, error: resError } = await supabase
         .from("reservations")
         .select(`
@@ -92,8 +93,6 @@ const AdminMonthlyProfit = () => {
           passenger_cash_currency
         `)
         .eq("status", "completed")
-        .not("status", "eq", "deleted")
-        .not("status", "eq", "cancelled_by_customer")
         .not("driver_earning", "is", null)
         .gt("driver_earning", 0)
         .gte("pickup_date", format(monthStart, "yyyy-MM-dd"))
