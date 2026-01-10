@@ -194,7 +194,13 @@ const CustomerBookings = () => {
   };
 
   const fetchReservations = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('CustomerBookings: No user found, skipping fetch');
+      setLoading(false);
+      return;
+    }
+
+    console.log('CustomerBookings: Fetching reservations for user:', user.id);
 
     const { data, error } = await supabase
       .from('reservations')
@@ -208,6 +214,7 @@ const CustomerBookings = () => {
     if (error) {
       console.error('Error fetching reservations:', error);
     } else {
+      console.log('CustomerBookings: Fetched', data?.length || 0, 'reservations');
       setReservations(data || []);
     }
     setLoading(false);

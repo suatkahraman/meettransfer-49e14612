@@ -366,6 +366,9 @@ const CustomerHome = () => {
     sessionStorage.setItem('customerPassengerNames', JSON.stringify(validPassengerNames));
     sessionStorage.setItem('customerPhone', result.data.passengerPhone.trim());
 
+    // Close the booking form after submission
+    setIsBookingFormOpen(false);
+
     navigate(`/book?${params.toString()}`);
   };
 
@@ -1309,7 +1312,7 @@ const CustomerHome = () => {
                       <SelectValue placeholder={t('selectBabySeat') || 'Baby Seat'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 4 }, (_, i) => i).map((num) => (
+                      {Array.from({ length: 3 }, (_, i) => i).map((num) => (
                         <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
                       ))}
                     </SelectContent>

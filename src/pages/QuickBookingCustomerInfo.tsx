@@ -231,7 +231,6 @@ export default function QuickBookingCustomerInfo() {
     if (!isGoogleAuth || !reservationId) return;
     
     const handleGoogleAuthComplete = async () => {
-      setSubmitting(true);
       try {
         const { data: { user } } = await supabase.auth.getUser();
         
@@ -245,16 +244,31 @@ export default function QuickBookingCustomerInfo() {
         const userEmail = user.email || "";
         const userPhone = user.user_metadata?.phone || user.phone || "";
         
-        // Update reservation with Google account info (no password needed)
+        // If phone is missing, pre-fill form and let user enter phone
+        if (!userPhone) {
+          setFormData(prev => ({
+            ...prev,
+            name: userName,
+            email: userEmail,
+            phone: "",
+          }));
+          setNeedsPhoneFromGoogle(true);
+          setGoogleUserId(user.id);
+          toast.info("Please enter your phone number to complete booking");
+          return;
+        }
+        
+        // Phone exists, proceed with booking
+        setSubmitting(true);
         const { data, error } = await supabase.functions.invoke(
           "update-quick-booking-customer",
           {
             body: {
               reservationId,
               customerName: userName,
-              customerPhone: userPhone || formData.phone || "Not provided",
+              customerPhone: userPhone,
               customerEmail: userEmail,
-              customerId: user.id, // Pass the existing user ID
+              customerId: user.id,
               returnReservationCode: returnReservationCode || null,
               isGoogleAuth: true,
             },
@@ -289,6 +303,53 @@ export default function QuickBookingCustomerInfo() {
     handleGoogleAuthComplete();
   }, [searchParams, reservationId]);
 
+  // State for Google auth phone requirement
+  const [needsPhoneFromGoogle, setNeedsPhoneFromGoogle] = useState(false);
+  const [googleUserId, setGoogleUserId] = useState<string | null>(null);
+
+  // Handle phone submission for Google users without phone
+  const handleGooglePhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.phone || formData.phone.length < 7) {
+      setErrors({ phone: "Phone number is required" });
+      return;
+    }
+    
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "update-quick-booking-customer",
+        {
+          body: {
+            reservationId,
+            customerName: formData.name,
+            customerPhone: formData.phone.trim(),
+            customerEmail: formData.email,
+            customerId: googleUserId,
+            returnReservationCode: returnReservationCode || null,
+            isGoogleAuth: true,
+          },
+        }
+      );
+      
+      if (error) throw error;
+      if (!data.success) throw new Error(data.error || "Failed to update reservation");
+      
+      setSubmitted(true);
+      toast.success("Booking confirmed!");
+      
+      sessionStorage.removeItem('quickBookingReservationId');
+      sessionStorage.removeItem('quickBookingReservationCode');
+      sessionStorage.removeItem('quickBookingReturnReservationCode');
+    } catch (err: any) {
+      console.error("Phone submit error:", err);
+      toast.error(err.message || "Failed to complete booking");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -296,6 +357,94 @@ export default function QuickBookingCustomerInfo() {
           <CardContent className="pt-6 text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
             <h2 className="text-xl font-semibold mb-2">Loading...</h2>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Phone number required for Google auth users
+  if (needsPhoneFromGoogle) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
+        <Card className="max-w-lg w-full">
+          <CardHeader className="text-center">
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Phone className="h-8 w-8 text-primary" />
+            </div>
+            <CardTitle className="text-xl">Phone Number Required</CardTitle>
+            <CardDescription>
+              Welcome {formData.name}! Please enter your phone number to complete your booking.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Reservation Summary */}
+            {reservationData && (
+              <div className="bg-muted/50 rounded-lg p-4 mb-6 space-y-3">
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-muted-foreground">Route</p>
+                    <p className="font-medium truncate">{reservationData.pickup}</p>
+                    <p className="text-sm text-muted-foreground">→ {reservationData.dropoff}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>{format(parseISO(reservationData.pickup_date), "dd/MM")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span>{reservationData.pickup_time}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Car className="h-4 w-4 text-muted-foreground" />
+                    <span>{vehicleLabels[reservationData.vehicle_type] || reservationData.vehicle_type}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleGooglePhoneSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Phone Number *
+                </Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+90 555 123 4567"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className={errors.phone ? "border-destructive" : ""}
+                />
+                {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+              </div>
+
+              <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <User className="h-4 w-4" />
+                  <span>{formData.name}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground mt-1">
+                  <Mail className="h-4 w-4" />
+                  <span>{formData.email}</span>
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Confirming...
+                  </>
+                ) : (
+                  "Confirm Booking"
+                )}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>
