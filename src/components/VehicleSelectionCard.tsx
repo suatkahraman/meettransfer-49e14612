@@ -185,25 +185,34 @@ return (
         className={`
           relative overflow-hidden rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-300 group
           ${isSelected 
-            ? 'ring-2 sm:ring-3 ring-primary shadow-xl sm:shadow-2xl scale-[1.01] sm:scale-[1.02] z-10' 
+            ? 'ring-2 sm:ring-3 ring-primary shadow-xl sm:shadow-2xl scale-[1.02] sm:scale-[1.03] z-10' 
             : available 
               ? 'hover:shadow-lg sm:hover:shadow-xl hover:scale-[1.005] sm:hover:scale-[1.01] hover:ring-1 sm:hover:ring-2 hover:ring-primary/30' 
               : 'opacity-50 cursor-not-allowed grayscale'
           }
         `}
+        style={isSelected ? { animation: 'selectedPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' } : {}}
       >
+        {/* Animated Glow Effect for Selected */}
+        {isSelected && (
+          <div 
+            className="absolute -inset-1 rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-primary/80 to-primary opacity-30 blur-md z-0"
+            style={{ animation: 'selectedGlow 2s ease-in-out infinite' }}
+          />
+        )}
+        
         {/* Gradient Background */}
         <div className={`
           absolute inset-0 transition-all duration-300
           ${isSelected 
-            ? 'bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5' 
+            ? 'bg-gradient-to-br from-primary/25 via-primary/15 to-primary/5' 
             : isRecommended
               ? 'bg-gradient-to-br from-green-500/15 via-green-500/10 to-emerald-500/5 group-hover:from-green-500/20'
               : 'bg-gradient-to-br from-muted via-muted/70 to-background group-hover:from-muted/90'
           }
         `} />
         
-        {/* Border */}
+        {/* Animated Border for Selected */}
         <div className={`
           absolute inset-0 rounded-xl sm:rounded-2xl border sm:border-2 transition-all duration-300
           ${isSelected 
@@ -212,13 +221,34 @@ return (
               ? 'border-green-500/50 group-hover:border-green-500/70'
               : 'border-border group-hover:border-primary/50'
           }
-        `} />
+        `}>
+          {isSelected && (
+            <div 
+              className="absolute inset-0 rounded-xl sm:rounded-2xl border-2 border-primary/50"
+              style={{ animation: 'borderPulse 1.5s ease-in-out infinite' }}
+            />
+          )}
+        </div>
         
-        {/* Selection Indicator - Compact on mobile */}
+        {/* Selection Indicator - Enhanced with animation */}
         {isSelected && (
           <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
-            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary flex items-center justify-center shadow-lg animate-scale-in">
-              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
+            <div className="relative">
+              {/* Ripple effect */}
+              <div 
+                className="absolute inset-0 rounded-full bg-primary"
+                style={{ animation: 'rippleOut 1s ease-out infinite' }}
+              />
+              {/* Main badge */}
+              <div 
+                className="relative h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg"
+                style={{ animation: 'checkBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+              >
+                <CheckCircle2 
+                  className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" 
+                  style={{ animation: 'checkmarkPop 0.3s ease-out 0.2s both' }}
+                />
+              </div>
             </div>
           </div>
         )}
@@ -470,7 +500,7 @@ return (
         </DialogContent>
       </Dialog>
       
-      {/* Badge Animation Styles */}
+      {/* Badge & Selection Animation Styles */}
       <style>{`
         @keyframes badgeSlideIn {
           0% {
@@ -502,6 +532,74 @@ return (
           }
           100% {
             transform: scale(1) rotate(0deg);
+          }
+        }
+        
+        @keyframes selectedPop {
+          0% {
+            transform: scale(1);
+          }
+          40% {
+            transform: scale(1.04);
+          }
+          100% {
+            transform: scale(1.02);
+          }
+        }
+        
+        @keyframes selectedGlow {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.4;
+            transform: scale(1.02);
+          }
+        }
+        
+        @keyframes borderPulse {
+          0%, 100% {
+            opacity: 0.3;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.6;
+            transform: scale(1.005);
+          }
+        }
+        
+        @keyframes rippleOut {
+          0% {
+            transform: scale(1);
+            opacity: 0.5;
+          }
+          100% {
+            transform: scale(1.8);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes checkBounce {
+          0% {
+            transform: scale(0);
+          }
+          60% {
+            transform: scale(1.2);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+        
+        @keyframes checkmarkPop {
+          0% {
+            transform: scale(0) rotate(-45deg);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
           }
         }
       `}</style>
