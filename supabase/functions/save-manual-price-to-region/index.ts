@@ -52,16 +52,21 @@ serve(async (req) => {
     const pickupDistrict = transferInfo.pickupAnalysis.district?.value || null;
     const dropoffDistrict = transferInfo.dropoffAnalysis.district?.value || null;
 
-    // Determine if this is an airport transfer or intercity
+    // Determine if this is an airport transfer or intercity/same-city different districts
     const isAirportTransfer = !!(pickupAirport || dropoffAirport);
     const isIntercity = pickupCity !== dropoffCity && pickupCity && dropoffCity;
+    // Same city but different districts (like Kadıköy → Beylikdüzü)
+    const isSameCityDifferentDistricts = pickupCity === dropoffCity && 
+                                          pickupDistrict && dropoffDistrict && 
+                                          pickupDistrict !== dropoffDistrict;
 
     let saved = false;
     let saveLocation = "";
 
-    // If it's an intercity transfer, save to intercity_prices
-    if (isIntercity) {
-      console.log("[save-manual-price] Intercity route detected, saving to intercity_prices");
+    // If it's an intercity transfer OR same city with different districts, save to intercity_prices
+    if (isIntercity || isSameCityDifferentDistricts) {
+      const transferType = isIntercity ? "Intercity" : "Same-city different districts";
+      console.log(`[save-manual-price] ${transferType} route detected, saving to intercity_prices`);
       
       const fromCity = pickupCity;
       const toCity = dropoffCity;
@@ -69,7 +74,7 @@ serve(async (req) => {
       const toDistrict = dropoffDistrict || null;
 
       if (fromCity && toCity) {
-        // Check if price already exists for this route
+        // Check if price already exists for this route (check both directions for same-city)
         let existingQuery = supabase
           .from("intercity_prices")
           .select("id")
