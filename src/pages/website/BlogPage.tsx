@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { getWhatsAppUrl } from "@/lib/contact";
 
 const BlogPage = () => {
   const { t, getLocalizedPath, language } = useLanguage();
@@ -322,7 +323,7 @@ const BlogPage = () => {
               </Button>
             </Link>
             <a 
-              href="https://wa.me/905321748390?text=Hello, I would like to book a transfer."
+              href={getWhatsAppUrl("Hello, I would like to book a transfer.")}
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
+import { WHATSAPP_NUMBER } from '@/lib/contact';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1170,7 +1171,7 @@ const CustomerReservationDetail = () => {
                   
                   {/* WhatsApp Support Button */}
                   <Button
-                    onClick={() => window.open('https://wa.me/905321748390', '_blank')}
+                    onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank')}
                     className="w-full bg-[#25D366] hover:bg-[#22c55e] text-white"
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
@@ -1292,7 +1293,7 @@ const CustomerReservationDetail = () => {
                       variant="outline" 
                       size="sm" 
                       className="mt-3 border-amber-500 text-amber-700 hover:bg-amber-100"
-                      onClick={() => window.open('https://wa.me/905323461686', '_blank')}
+                      onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank')}
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
                       {t('contactWhatsApp') || 'Contact via WhatsApp'}
