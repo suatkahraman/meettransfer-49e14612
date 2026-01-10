@@ -87,6 +87,7 @@ const CustomerHome = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showPricePreparation, setShowPricePreparation] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [activeBookingsCount, setActiveBookingsCount] = useState(0);
@@ -460,11 +461,156 @@ const CustomerHome = () => {
     sessionStorage.setItem('customerPassengerNames', JSON.stringify(validPassengerNames));
     sessionStorage.setItem('customerPhone', result.data.passengerPhone.trim());
 
-    // Close the booking form after submission
+    // Close the booking form and show price preparation animation
     setIsBookingFormOpen(false);
-
-    navigate(`/book?${params.toString()}`);
+    setShowPricePreparation(true);
+    
+    // Navigate after animation delay
+    setTimeout(() => {
+      navigate(`/book?${params.toString()}`);
+    }, 2500);
   };
+
+  // Price preparation animation screen
+  if (showPricePreparation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
+        <Card className="max-w-lg w-full shadow-2xl border-primary/20">
+          <CardContent className="pt-8 pb-8">
+            <div className="text-center">
+              {/* Animated car icon with pulsing rings */}
+              <div className="relative mb-8">
+                <motion.div 
+                  className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Car className="h-12 w-12 text-white" />
+                </motion.div>
+                <motion.div 
+                  className="absolute inset-0 w-24 h-24 mx-auto rounded-full bg-green-400/30"
+                  animate={{ scale: [1, 1.5], opacity: [0.6, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+                <motion.div 
+                  className="absolute inset-0 w-24 h-24 mx-auto rounded-full bg-emerald-400/20"
+                  animate={{ scale: [1, 1.8], opacity: [0.4, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+                />
+              </div>
+              
+              {/* Main title with gradient */}
+              <motion.h1 
+                className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 bg-clip-text text-transparent"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                {language === 'TR' ? 'Fiyatınız Hazırlanıyor' : 'Your Price is Being Prepared'}
+              </motion.h1>
+              
+              {/* Animated subtitle */}
+              <motion.p 
+                className="text-muted-foreground mb-8 text-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {language === 'TR' 
+                  ? 'En iyi fiyatı sizin için hesaplıyoruz...' 
+                  : 'Calculating the best price for you...'}
+              </motion.p>
+              
+              {/* Animated progress bar */}
+              <div className="w-full max-w-xs mx-auto mb-8">
+                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-full"
+                    initial={{ width: '0%' }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 2.3, ease: 'easeOut' }}
+                  />
+                </div>
+              </div>
+              
+              {/* Loading steps animation */}
+              <div className="space-y-3 mb-6">
+                <motion.div 
+                  className="flex items-center justify-center gap-2 text-sm"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  >
+                    <Loader2 className="h-4 w-4 text-green-500" />
+                  </motion.div>
+                  <span className="text-muted-foreground">
+                    {language === 'TR' ? 'Rotanız analiz ediliyor...' : 'Analyzing your route...'}
+                  </span>
+                </motion.div>
+                <motion.div 
+                  className="flex items-center justify-center gap-2 text-sm"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7 }}
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  >
+                    <Loader2 className="h-4 w-4 text-emerald-500" />
+                  </motion.div>
+                  <span className="text-muted-foreground">
+                    {language === 'TR' ? 'Araç seçenekleri kontrol ediliyor...' : 'Checking vehicle options...'}
+                  </span>
+                </motion.div>
+                <motion.div 
+                  className="flex items-center justify-center gap-2 text-sm"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.2 }}
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  >
+                    <Loader2 className="h-4 w-4 text-teal-500" />
+                  </motion.div>
+                  <span className="text-muted-foreground">
+                    {language === 'TR' ? 'En iyi fiyat hesaplanıyor...' : 'Calculating best price...'}
+                  </span>
+                </motion.div>
+              </div>
+              
+              {/* Feature badges */}
+              <div className="flex flex-wrap justify-center gap-2">
+                <motion.span 
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-sm font-medium shadow-sm"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.5 }}
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  {language === 'TR' ? 'En İyi Fiyat Garantisi' : 'Best Price Guarantee'}
+                </motion.span>
+                <motion.span 
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-sm font-medium shadow-sm"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.8 }}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {language === 'TR' ? 'Gizli Ücret Yok' : 'No Hidden Fees'}
+                </motion.span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
