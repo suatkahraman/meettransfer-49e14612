@@ -7,7 +7,8 @@ import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, RefreshCw, History, Settings, Volume2, Search, Shield } from 'lucide-react';
+import { LogOut, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, RefreshCw, History, Settings, Volume2, Search, Shield, Globe } from 'lucide-react';
+import UniversalLanguageSelector from '@/components/UniversalLanguageSelector';
 import NotificationBell from '@/components/NotificationBell';
 import { PushNotificationToggle } from '@/components/PushNotificationToggle';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
@@ -300,6 +301,8 @@ const DriverHome = () => {
           >
             <Settings className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
+          {/* Language Selector */}
+          <UniversalLanguageSelector variant="header" />
           <Button 
             variant="ghost" 
             size="icon"

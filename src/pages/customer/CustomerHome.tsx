@@ -35,16 +35,7 @@ import meetTransferLogo from '@/assets/meet-transfer-logo-small.webp';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 import { WHATSAPP_NUMBER, EMERGENCY_PHONE } from '@/lib/contact';
-
-// Language options
-const LANGUAGES = [
-  { code: "EN" as Language, label: "English", flag: "🇬🇧" },
-  { code: "TR" as Language, label: "Türkçe", flag: "🇹🇷" },
-  { code: "DE" as Language, label: "Deutsch", flag: "🇩🇪" },
-  { code: "FR" as Language, label: "Français", flag: "🇫🇷" },
-  { code: "RU" as Language, label: "Русский", flag: "🇷🇺" },
-  { code: "AR" as Language, label: "العربية", flag: "🇸🇦" },
-] as const;
+import UniversalLanguageSelector from '@/components/UniversalLanguageSelector';
 
 // Validation schema - memoized outside component
 const reservationSchema = z.object({
@@ -495,21 +486,7 @@ const CustomerHome = () => {
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
             {/* Language Selector in Header */}
-            <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
-              <SelectTrigger className="w-auto gap-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 h-8 sm:h-9 px-2 text-sm">
-                <Globe className="h-4 w-4" />
-                <SelectValue>
-                  {LANGUAGES.find((l) => l.code === language)?.flag}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {LANGUAGES.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    {lang.flag} {lang.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <UniversalLanguageSelector variant="header" />
             
             <NotificationBell />
           
@@ -671,20 +648,7 @@ const CustomerHome = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue>
-                          {LANGUAGES.find((l) => l.code === language)?.flag} {LANGUAGES.find((l) => l.code === language)?.label}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {LANGUAGES.map((lang) => (
-                          <SelectItem key={lang.code} value={lang.code}>
-                            {lang.flag} {lang.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <UniversalLanguageSelector variant="default" />
                   </CardContent>
                 </Card>
 
