@@ -140,6 +140,7 @@ const AdminEditReservation = () => {
     payment_type: '',
     price: '',
     price_currency: 'TRY',
+    driver_earning: '', // Şoför Maliyeti (TRY bazlı)
     driver_cash_amount: '',
     passenger_cash_amount: '',
     passenger_cash_currency: 'TRY',
@@ -339,6 +340,7 @@ const AdminEditReservation = () => {
         payment_type: r.payment_type || '',
         price: r.price?.toString() || '',
         price_currency: r.price_currency || 'TRY',
+        driver_earning: (r as any).driver_earning?.toString() || '', // Şoför Maliyeti
         driver_cash_amount: r.driver_cash_amount?.toString() || '',
         passenger_cash_amount: (r as any).passenger_cash_amount?.toString() || '',
         passenger_cash_currency: (r as any).passenger_cash_currency || 'TRY',
@@ -809,6 +811,7 @@ const AdminEditReservation = () => {
         payment_type: formData.payment_type,
         price: safeParseFloat(formData.price),
         price_currency: formData.price_currency,
+        driver_earning: safeParseFloat(formData.driver_earning), // Şoför Maliyeti
         driver_cash_amount: safeParseFloat(formData.driver_cash_amount),
         passenger_cash_amount: safeParseFloat(formData.passenger_cash_amount),
         passenger_cash_currency: formData.passenger_cash_currency || 'TRY',
@@ -1833,6 +1836,16 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                       </div>
                     )}
 
+                    {formData.driver_earning && (
+                      <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
+                        <Briefcase className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <div>
+                          <p className="text-xs text-green-600 dark:text-green-400">Şoför Maliyeti</p>
+                          <p className="font-semibold text-green-700 dark:text-green-300">₺{formData.driver_earning}</p>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
                       <Mail className="h-5 w-5 text-muted-foreground" />
                       <div className="flex-1">
@@ -2336,7 +2349,7 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                 </div>
               )}
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Para Birimi</Label>
                   <Select value={formData.price_currency} onValueChange={(v) => setFormData({...formData, price_currency: v})}>
@@ -2361,6 +2374,24 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
                       className="pl-8"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5">
+                    <span>Şoför Maliyeti</span>
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border-green-300">₺</Badge>
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
+                    <Input
+                      type="number"
+                      step="1"
+                      min="0"
+                      value={formData.driver_earning}
+                      onChange={(e) => setFormData({...formData, driver_earning: e.target.value})}
+                      className="pl-8 border-green-300 focus:border-green-500"
+                      placeholder="0"
                     />
                   </div>
                 </div>
