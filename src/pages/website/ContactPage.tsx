@@ -6,45 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
-
-const globalOffices = [
-  {
-    flag: "🇹🇷",
-    country: "Türkiye",
-    city: "İstanbul Headquarters",
-    address: "Istanbul Airport (IST) – VIP Meet & Greet Terminal Office",
-    phone: "+1 (555) 805-1101",
-    whatsappOnly: true,
-    email: "info@meettransfer.app",
-  },
-  {
-    flag: "🇺🇸",
-    country: "USA",
-    city: "Los Angeles",
-    address: "La Fashion District, Los Angeles, CA 854",
-    phone: "+1 (555) 805-1101",
-    whatsappOnly: true,
-    email: null,
-  },
-  {
-    flag: "🇩🇪",
-    country: "Germany",
-    city: "Berlin",
-    address: "Street Business Center, Berlin 245",
-    phone: "+1 (555) 805-1101",
-    whatsappOnly: true,
-    email: null,
-  },
-  {
-    flag: "🇦🇪",
-    country: "UAE",
-    city: "Dubai",
-    address: "Downtown Business Tower, Dubai 35",
-    phone: "+1 (555) 805-1101",
-    whatsappOnly: true,
-    email: null,
-  },
-];
+import { GLOBAL_OFFICES } from "@/lib/contact";
 
 const ContactPage = () => {
   const { t } = useLanguage();
@@ -87,7 +49,7 @@ const ContactPage = () => {
           </p>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {globalOffices.map((office) => (
+            {GLOBAL_OFFICES.map((office) => (
               <Card key={office.city} className="overflow-hidden">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
