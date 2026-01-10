@@ -19,18 +19,18 @@ const IsPrivateTransferWorthIt = () => {
   const faqItems = [
     {
       question: "Is private transfer really worth the extra cost?",
-      answer: "For most travelers, yes. When you factor in time saved, comfort, safety, and especially when traveling with others, the value proposition is strong. A family of 4 pays roughly the same per person as taking separate regular transport options."
+      answer: "For most travelers, yes. When you factor in time saved, comfort, safety, and especially when traveling with others, the value proposition is strong. A family of 4 pays roughly the same per person as taking separate regular transportation options."
     },
     {
       question: "When is private transfer NOT worth it?",
-      answer: "Solo budget travelers on short distances during daytime may find regular transport or public transport more economical. However, for night arrivals, families, or groups, private transfer almost always offers better value."
+      answer: "Solo budget travelers on short distances during daytime may find regular transportation or public transport more economical. However, for night arrivals, families, or groups, private transfer almost always offers better value."
     },
     {
       question: "How much more expensive is private transfer?",
-      answer: "Private transfers typically cost 2-3x more than a single regular fare. However, this includes meet & greet, fixed pricing, premium vehicle, and professional driver. For 2+ passengers, the per-person cost becomes comparable."
+      answer: "Private transfers typically cost 2-3x more than a single regular transportation fare. However, this includes meet & greet, fixed pricing, premium vehicle, and professional driver. For 2+ passengers, the per-person cost becomes comparable."
     },
     {
-      question: "What makes private transfer better than regular transport?",
+      question: "What makes private transfer better than regular transportation?",
       answer: "Key advantages include: pre-booked so no waiting, fixed price so no surprises, meet & greet service, professional English-speaking driver, premium vehicle, flight monitoring, and door-to-door service."
     },
     {
@@ -147,7 +147,7 @@ const IsPrivateTransferWorthIt = () => {
           <h2 id="million-dollar-question">The Million-Dollar Question</h2>
           <p>
             You're planning your trip to Turkey and facing a common dilemma: should you splurge on 
-            a private airport transfer, or save money with regular transport? It's a question we hear 
+            a private airport transfer, or save money with regular transportation? It's a question we hear 
             all the time, and we're going to give you an honest, no-nonsense answer.
           </p>
           <p>
@@ -182,7 +182,7 @@ const IsPrivateTransferWorthIt = () => {
                     <span className="text-green-600 font-bold">$5-7</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <span className="font-medium">Regular Transport</span>
+                    <span className="font-medium">Regular Transportation</span>
                     <span className="text-amber-600 font-bold">Variable</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg border border-primary/20">
@@ -280,7 +280,7 @@ const IsPrivateTransferWorthIt = () => {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="p-4 bg-amber-500/5 rounded-lg">
-                    <h4 className="font-semibold mb-2">Regular Transport (x2)</h4>
+                    <h4 className="font-semibold mb-2">Regular Transportation (x2)</h4>
                     <p className="text-2xl font-bold mb-1">Variable total</p>
                     <p className="text-sm text-muted-foreground">Per person varies</p>
                     <ul className="text-sm mt-3 space-y-1 text-muted-foreground">
@@ -306,7 +306,7 @@ const IsPrivateTransferWorthIt = () => {
 
           <p>
             <strong>The verdict:</strong> For 2+ travelers, private transfer often costs the same 
-            or less per person than regular transport, while offering a dramatically better experience.
+            or less per person than regular transportation, while offering a dramatically better experience.
           </p>
 
           <h2 id="definitely-worth">When Private Transfer is DEFINITELY Worth It</h2>
@@ -320,7 +320,7 @@ const IsPrivateTransferWorthIt = () => {
             Arriving late at night? Private transfer is almost always worth it because:
           </p>
           <ul>
-            <li>Fewer transport options available</li>
+            <li>Fewer transportation options available</li>
             <li>Safety concerns in unfamiliar city at night</li>
             <li>Public transport may not be running</li>
             <li>You're tired and want to get to bed ASAP</li>
@@ -344,7 +344,7 @@ const IsPrivateTransferWorthIt = () => {
           </p>
           <ul>
             <li>Confusion navigating the airport</li>
-            <li>Risk of issues with unfamiliar transport</li>
+            <li>Risk of issues with unfamiliar transportation</li>
             <li>Stress of explaining your destination</li>
             <li>Uncertainty about fair pricing</li>
           </ul>
