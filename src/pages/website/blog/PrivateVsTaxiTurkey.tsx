@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ShareButtons from "@/components/website/ShareButtons";
+import RelatedArticles from "@/components/website/RelatedArticles";
 
 const PrivateVsTaxiTurkey = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -512,25 +513,7 @@ const PrivateVsTaxiTurkey = () => {
         </section>
 
         {/* Related Articles */}
-        <section className="my-12">
-          <h2 className="font-serif text-2xl font-bold mb-6">Related Articles</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <Link 
-              to={getLocalizedPath("/blog/istanbul-airport-transfer-price-guide")}
-              className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-            >
-              <h4 className="font-semibold mb-1">Istanbul Airport Transfer Price Guide</h4>
-              <p className="text-sm text-muted-foreground">Complete pricing for all destinations</p>
-            </Link>
-            <Link 
-              to={getLocalizedPath("/blog/is-private-transfer-worth-it-turkey")}
-              className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-            >
-              <h4 className="font-semibold mb-1">Is Private Transfer Worth It in Turkey?</h4>
-              <p className="text-sm text-muted-foreground">Deep dive into costs and benefits</p>
-            </Link>
-          </div>
-        </section>
+        <RelatedArticles currentArticleId="private-vs-taxi-transfer-turkey" />
       </article>
 
       <Footer />
