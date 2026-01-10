@@ -1008,6 +1008,32 @@ const CustomerHome = () => {
           </CardContent>
         </Card>
         </motion.div>
+
+        {/* Sticky WhatsApp Support FAB */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+          className="fixed bottom-6 right-6 z-50"
+        >
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <Button
+              onClick={() => {
+                const message = encodeURIComponent(
+                  language === 'TR' 
+                    ? 'Merhaba, destek almak istiyorum.' 
+                    : 'Hello, I would like to get support.'
+                );
+                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+              }}
+              size="lg"
+              className="h-14 w-14 rounded-full shadow-xl bg-[#25D366] hover:bg-[#22c55e] text-white"
+              title={language === 'TR' ? 'WhatsApp Destek' : 'WhatsApp Support'}
+            >
+              <MessageCircle className="h-6 w-6" />
+            </Button>
+          </motion.div>
+        </motion.div>
       </main>
     </div>
   );
