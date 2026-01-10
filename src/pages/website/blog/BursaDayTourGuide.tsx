@@ -19,6 +19,7 @@ import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
+import TableOfContents from "@/components/website/TableOfContents";
 
 const BursaDayTourGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -30,6 +31,11 @@ const BursaDayTourGuide = () => {
     { question: t("blogBursaFaq4Q"), answer: t("blogBursaFaq4A") },
     { question: t("blogBursaFaq5Q"), answer: t("blogBursaFaq5A") },
     { question: t("blogBursaFaq6Q"), answer: t("blogBursaFaq6A") },
+  ];
+
+  const tocItems = [
+    { id: "why-bursa", title: t("blogBursaSection1Title") },
+    { id: "how-to-get", title: t("blogBursaSection2Title") },
   ];
 
   return (
@@ -128,9 +134,12 @@ const BursaDayTourGuide = () => {
           </Card>
         </div>
 
+        {/* Table of Contents */}
+        <TableOfContents items={tocItems} />
+
         {/* Introduction */}
         <section className="prose prose-lg max-w-none mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+          <h2 id="why-bursa" className="text-2xl md:text-3xl font-bold text-foreground mb-4">
             {t("blogBursaSection1Title")}
           </h2>
           <p className="text-muted-foreground leading-relaxed">
@@ -143,7 +152,7 @@ const BursaDayTourGuide = () => {
 
         {/* How to Get There */}
         <section className="mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
+          <h2 id="how-to-get" className="text-2xl md:text-3xl font-bold text-foreground mb-6">
             {t("blogBursaSection2Title")}
           </h2>
           

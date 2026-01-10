@@ -20,6 +20,7 @@ import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
+import TableOfContents from "@/components/website/TableOfContents";
 
 const IstanbulTransferPriceGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -31,6 +32,16 @@ const IstanbulTransferPriceGuide = () => {
     { question: t("blogPriceFaq4Q"), answer: t("blogPriceFaq4A") },
     { question: t("blogPriceFaq5Q"), answer: t("blogPriceFaq5A") },
     { question: t("blogPriceFaq6Q"), answer: t("blogPriceFaq6A") },
+  ];
+
+  const tocItems = [
+    { id: "understanding-prices", title: t("blogPriceSection1Title") },
+    { id: "destination-prices", title: t("blogPriceSection2Title") },
+    { id: "vehicle-prices", title: t("blogPriceSection3Title") },
+    { id: "whats-included", title: t("blogPriceSection4Title") },
+    { id: "booking-tips", title: t("blogPriceSection5Title") },
+    { id: "why-choose", title: t("blogPriceSection6Title") },
+    { id: "conclusion", title: t("blogPriceConclusion") },
   ];
 
   const priceData = [
@@ -132,7 +143,7 @@ const IstanbulTransferPriceGuide = () => {
         <ShareButtons title={t("blogPriceH1")} className="mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-xl mb-12">
+        <div className="aspect-video overflow-hidden rounded-xl mb-8">
           <img 
             src={istanbulTransferHero} 
             alt="Istanbul Airport Private Transfer 2025 - Mercedes Vito VIP Service to Taksim, Sultanahmet and City Center"
@@ -141,13 +152,16 @@ const IstanbulTransferPriceGuide = () => {
           />
         </div>
 
+        {/* Table of Contents */}
+        <TableOfContents items={tocItems} />
+
         {/* Article Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
-          <h2>{t("blogPriceSection1Title")}</h2>
+          <h2 id="understanding-prices">{t("blogPriceSection1Title")}</h2>
           <p>{t("blogPriceSection1P1")}</p>
           <p>{t("blogPriceSection1P2")}</p>
 
-          <h2>{t("blogPriceSection2Title")}</h2>
+          <h2 id="destination-prices">{t("blogPriceSection2Title")}</h2>
           <p>{t("blogPriceSection2Intro")}</p>
 
           <div className="overflow-x-auto not-prose my-8">
@@ -175,7 +189,7 @@ const IstanbulTransferPriceGuide = () => {
             {t("blogPriceTableNote")}
           </p>
 
-          <h2>{t("blogPriceSection3Title")}</h2>
+          <h2 id="vehicle-prices">{t("blogPriceSection3Title")}</h2>
           <p>
             {t("blogPriceSection3Intro")} <Link to={getLocalizedPath("/fleet")} className="text-primary hover:underline">{t("ourFleet")}</Link>
           </p>
@@ -203,7 +217,7 @@ const IstanbulTransferPriceGuide = () => {
             </Table>
           </div>
 
-          <h2>{t("blogPriceSection4Title")}</h2>
+          <h2 id="whats-included">{t("blogPriceSection4Title")}</h2>
 
           <div className="not-prose my-8">
             <Card className="bg-primary/5 border-primary/20">
@@ -250,7 +264,7 @@ const IstanbulTransferPriceGuide = () => {
             </Card>
           </div>
 
-          <h2>{t("blogPriceSection5Title")}</h2>
+          <h2 id="booking-tips">{t("blogPriceSection5Title")}</h2>
           <p>{t("blogPriceSection5Intro")}</p>
 
           <h3>When to Book Your Transfer</h3>
@@ -267,7 +281,7 @@ const IstanbulTransferPriceGuide = () => {
             are fixed and agreed upon before booking - no hidden fees or surge pricing.
           </p>
 
-          <h2>{t("blogPriceSection6Title")}</h2>
+          <h2 id="why-choose">{t("blogPriceSection6Title")}</h2>
           <p>{t("blogPriceSection6Intro")}</p>
 
           <h3>Tips for First-Time Visitors</h3>
@@ -279,7 +293,7 @@ const IstanbulTransferPriceGuide = () => {
             <li><strong>Consider return transfer:</strong> Book round-trip for better rates and guaranteed service</li>
           </ul>
 
-          <h2>{t("blogPriceConclusion")}</h2>
+          <h2 id="conclusion">{t("blogPriceConclusion")}</h2>
           <p>
             {t("blogPriceConclusionP1")} 
             <Link to={getLocalizedPath("/istanbul-transfer")} className="text-primary hover:underline"> {t("blogPriceConclusionLink")}</Link>
