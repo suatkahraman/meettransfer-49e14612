@@ -200,25 +200,32 @@ const CustomerBookings = () => {
       return;
     }
 
-    console.log('CustomerBookings: Fetching reservations for user:', user.id);
+    try {
+      setLoading(true);
+      console.log('CustomerBookings: Fetching reservations for user:', user.id);
 
-    const { data, error } = await supabase
-      .from('reservations')
-      .select(`
-        *,
-        drivers (name, plate_number, vehicle_model, vehicle_color)
-      `)
-      .eq('customer_id', user.id)
-      .order('pickup_date', { ascending: false });
+      const { data, error } = await supabase
+        .from('reservations')
+        .select(`
+          *,
+          drivers (name, plate_number, vehicle_model, vehicle_color)
+        `)
+        .eq('customer_id', user.id)
+        .order('pickup_date', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching reservations:', error);
-    } else {
-      console.log('CustomerBookings: Fetched', data?.length || 0, 'reservations');
-      setReservations(data || []);
+      if (error) {
+        console.error('CustomerBookings: Error fetching reservations:', error);
+        toast.error(language === 'TR' ? 'Rezervasyonlar yüklenemedi' : 'Failed to load reservations');
+      } else {
+        console.log('CustomerBookings: Fetched', data?.length || 0, 'reservations for user', user.id);
+        setReservations(data || []);
+      }
+    } catch (err) {
+      console.error('CustomerBookings: Unexpected error:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [user]);
+  }, [user, language]);
 
   // Pull to refresh
   const handleRefresh = useCallback(async () => {
@@ -233,8 +240,10 @@ const CustomerBookings = () => {
   });
 
   useEffect(() => {
-    fetchReservations();
-  }, [user]);
+    if (user) {
+      fetchReservations();
+    }
+  }, [fetchReservations]);
 
   // Real-time subscription for customer's reservations
   useEffect(() => {
