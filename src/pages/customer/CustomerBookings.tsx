@@ -855,6 +855,24 @@ const CustomerBookings = () => {
         )}
         </div>
       </main>
+
+      {/* Sticky FAB - New Reservation */}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+        className="fixed bottom-6 right-6 z-50"
+      >
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <Button
+            onClick={() => navigate('/customer#booking-form')}
+            size="lg"
+            className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
