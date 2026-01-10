@@ -52,6 +52,7 @@ interface Reservation {
   driver_id: string | null;
   luggage_count: number | null;
   baby_seat_count: number | null;
+  matched_by_phone?: boolean; // Indicates if reservation was matched by phone number
   drivers?: {
     name: string;
     plate_number: string | null;
@@ -202,45 +203,28 @@ const CustomerBookings = () => {
 
     try {
       setLoading(true);
-      console.log('CustomerBookings: Fetching reservations for user:', user.id);
+      console.log('CustomerBookings: Fetching reservations via edge function for user:', user.id);
 
-      // First fetch reservations without driver join to avoid RLS issues
-      const { data, error } = await supabase
-        .from('reservations')
-        .select('*')
-        .eq('customer_id', user.id)
-        .order('pickup_date', { ascending: false });
+      // Use secure edge function that matches by customer_id AND verified phone
+      const { data: response, error } = await supabase.functions.invoke('get-customer-reservations');
 
       if (error) {
-        console.error('CustomerBookings: Error fetching reservations:', error);
+        console.error('CustomerBookings: Edge function error:', error);
         toast.error(language === 'TR' ? 'Rezervasyonlar yüklenemedi' : 'Failed to load reservations');
         return;
       }
 
-      console.log('CustomerBookings: Fetched', data?.length || 0, 'reservations for user', user.id);
-      
-      // For reservations with drivers, try to fetch driver info separately
-      const reservationsWithDrivers = await Promise.all(
-        (data || []).map(async (reservation) => {
-          if (reservation.driver_id) {
-            try {
-              const { data: driverData } = await supabase
-                .from('drivers')
-                .select('name, plate_number, vehicle_model, vehicle_color')
-                .eq('id', reservation.driver_id)
-                .maybeSingle();
-              return { ...reservation, drivers: driverData };
-            } catch {
-              return { ...reservation, drivers: null };
-            }
-          }
-          return { ...reservation, drivers: null };
-        })
-      );
-      
-      setReservations(reservationsWithDrivers);
+      if (!response?.success) {
+        console.error('CustomerBookings: API error:', response?.error);
+        toast.error(language === 'TR' ? 'Rezervasyonlar yüklenemedi' : 'Failed to load reservations');
+        return;
+      }
+
+      console.log('CustomerBookings: Fetched', response.total, 'reservations (by ID:', response.by_id, ', by phone:', response.by_phone, ')');
+      setReservations(response.reservations || []);
     } catch (err) {
       console.error('CustomerBookings: Unexpected error:', err);
+      toast.error(language === 'TR' ? 'Bir hata oluştu' : 'An error occurred');
     } finally {
       setLoading(false);
     }
