@@ -462,11 +462,16 @@ export default function CustomerPortal() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <Clock className="h-4 w-4 text-primary" />
                           <span className="text-sm font-medium text-primary">
                             {language === 'TR' ? 'Yaklaşan Transferiniz' : 'Your Next Transfer'}
                           </span>
+                          {nextTransfer.reservation_code && (
+                            <Badge variant="outline" className="font-mono text-xs bg-primary/10 border-primary/30">
+                              {nextTransfer.reservation_code}
+                            </Badge>
+                          )}
                         </div>
                         <div className="space-y-1">
                           <p className="font-semibold text-sm sm:text-base">
