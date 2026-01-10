@@ -400,7 +400,7 @@ const CustomerBookings = () => {
             <Button
               variant="outline"
               className="flex flex-col items-center gap-1 h-auto py-3 w-full bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:border-primary/40"
-              onClick={() => navigate('/customer')}
+              onClick={() => navigate('/customer#booking-form')}
             >
               <Plus className="h-5 w-5 text-primary" />
               <span className="text-xs font-medium">{language === 'TR' ? 'Yeni' : 'New'}</span>
