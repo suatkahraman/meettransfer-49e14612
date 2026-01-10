@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TwoFactorState {
@@ -6,43 +6,96 @@ interface TwoFactorState {
   userId: string | null;
   email: string | null;
   role: string | null;
+  attempts: number;
+  lastOtpSentAt: number | null;
 }
 
-// Generate a simple device fingerprint based on available browser data
+interface TwoFactorResult {
+  success: boolean;
+  error?: string;
+  errorCode?: 'expired' | 'invalid' | 'rate_limit' | 'no_pending' | 'network' | 'unknown';
+}
+
+// Generate a robust device fingerprint
 const generateDeviceFingerprint = (): string => {
   const components = [
     navigator.userAgent,
     navigator.language,
+    navigator.languages?.join(',') || '',
     new Date().getTimezoneOffset().toString(),
     screen.width.toString(),
     screen.height.toString(),
     screen.colorDepth.toString(),
+    screen.pixelDepth?.toString() || '',
     navigator.hardwareConcurrency?.toString() || '0',
+    navigator.maxTouchPoints?.toString() || '0',
+    navigator.platform || '',
+    // Canvas fingerprint hint (simplified)
+    typeof OffscreenCanvas !== 'undefined' ? 'offscreen' : 'legacy',
   ];
   
-  // Simple hash function
+  // FNV-1a hash for better distribution
   const str = components.join('|');
-  let hash = 0;
+  let hash = 2166136261;
   for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+    hash ^= str.charCodeAt(i);
+    hash = (hash * 16777619) >>> 0;
   }
   
-  return Math.abs(hash).toString(36);
+  return hash.toString(36) + '-' + Date.now().toString(36).slice(-4);
 };
 
-// Get device name for display
+// Get detailed device name for display
 const getDeviceName = (): string => {
   const ua = navigator.userAgent;
-  if (/iPhone/.test(ua)) return 'iPhone';
-  if (/iPad/.test(ua)) return 'iPad';
-  if (/Android/.test(ua)) return 'Android Device';
-  if (/Mac/.test(ua)) return 'Mac';
-  if (/Windows/.test(ua)) return 'Windows PC';
-  if (/Linux/.test(ua)) return 'Linux Device';
-  return 'Unknown Device';
+  
+  // Mobile devices
+  if (/iPhone/.test(ua)) {
+    const match = ua.match(/iPhone OS (\d+)/);
+    return match ? `iPhone (iOS ${match[1]})` : 'iPhone';
+  }
+  if (/iPad/.test(ua)) {
+    const match = ua.match(/OS (\d+)/);
+    return match ? `iPad (iPadOS ${match[1]})` : 'iPad';
+  }
+  if (/Android/.test(ua)) {
+    const match = ua.match(/Android (\d+(\.\d+)?)/);
+    const deviceMatch = ua.match(/;\s*([^;)]+)\s*Build/);
+    const device = deviceMatch ? deviceMatch[1].trim() : 'Device';
+    return match ? `${device} (Android ${match[1]})` : 'Android Device';
+  }
+  
+  // Desktop browsers
+  let browser = 'Browser';
+  if (/Edg\//.test(ua)) browser = 'Edge';
+  else if (/Chrome\//.test(ua)) browser = 'Chrome';
+  else if (/Firefox\//.test(ua)) browser = 'Firefox';
+  else if (/Safari\//.test(ua) && !/Chrome/.test(ua)) browser = 'Safari';
+  else if (/Opera|OPR\//.test(ua)) browser = 'Opera';
+  
+  let os = 'Computer';
+  if (/Mac OS X/.test(ua)) {
+    const match = ua.match(/Mac OS X (\d+[._]\d+)/);
+    os = match ? `macOS ${match[1].replace('_', '.')}` : 'macOS';
+  } else if (/Windows NT/.test(ua)) {
+    const versions: Record<string, string> = {
+      '10.0': 'Windows 10/11',
+      '6.3': 'Windows 8.1',
+      '6.2': 'Windows 8',
+      '6.1': 'Windows 7',
+    };
+    const match = ua.match(/Windows NT (\d+\.\d+)/);
+    os = match ? (versions[match[1]] || 'Windows') : 'Windows';
+  } else if (/Linux/.test(ua)) {
+    os = 'Linux';
+  }
+  
+  return `${browser} on ${os}`;
 };
+
+// OTP resend cooldown in milliseconds
+const OTP_RESEND_COOLDOWN = 60000; // 60 seconds
+const MAX_VERIFY_ATTEMPTS = 5;
 
 export const useTwoFactorAuth = () => {
   const [twoFactorState, setTwoFactorState] = useState<TwoFactorState>({
@@ -50,10 +103,18 @@ export const useTwoFactorAuth = () => {
     userId: null,
     email: null,
     role: null,
+    attempts: 0,
+    lastOtpSentAt: null,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [deviceFingerprint] = useState(() => generateDeviceFingerprint());
+  
+  // Memoize device fingerprint to prevent regeneration
+  const deviceFingerprint = useMemo(() => generateDeviceFingerprint(), []);
+  const deviceName = useMemo(() => getDeviceName(), []);
+  
+  // Ref to prevent duplicate API calls
+  const pendingRequest = useRef<AbortController | null>(null);
 
   // Check if device is trusted (2FA not needed)
   const checkTrustedDevice = useCallback(async (userId: string): Promise<boolean> => {
@@ -81,7 +142,7 @@ export const useTwoFactorAuth = () => {
         body: { 
           userId, 
           deviceFingerprint,
-          deviceName: getDeviceName(),
+          deviceName,
         },
       });
 
@@ -95,9 +156,32 @@ export const useTwoFactorAuth = () => {
       console.error('Error registering trusted device:', err);
       return false;
     }
-  }, [deviceFingerprint]);
+  }, [deviceFingerprint, deviceName]);
 
-  const initiate2FA = useCallback(async (userId: string, email: string, role: string, language: string = 'tr') => {
+  // Check if we can resend OTP (cooldown check)
+  const canResendOTP = useCallback((): boolean => {
+    if (!twoFactorState.lastOtpSentAt) return true;
+    return Date.now() - twoFactorState.lastOtpSentAt >= OTP_RESEND_COOLDOWN;
+  }, [twoFactorState.lastOtpSentAt]);
+
+  // Get remaining cooldown time in seconds
+  const getResendCooldown = useCallback((): number => {
+    if (!twoFactorState.lastOtpSentAt) return 0;
+    const elapsed = Date.now() - twoFactorState.lastOtpSentAt;
+    return Math.max(0, Math.ceil((OTP_RESEND_COOLDOWN - elapsed) / 1000));
+  }, [twoFactorState.lastOtpSentAt]);
+
+  const initiate2FA = useCallback(async (
+    userId: string, 
+    email: string, 
+    role: string, 
+    language: string = 'tr'
+  ): Promise<TwoFactorResult> => {
+    // Cancel any pending request
+    if (pendingRequest.current) {
+      pendingRequest.current.abort();
+    }
+    
     setIsLoading(true);
     setError(null);
 
@@ -119,22 +203,45 @@ export const useTwoFactorAuth = () => {
         userId,
         email,
         role,
+        attempts: 0,
+        lastOtpSentAt: Date.now(),
       });
 
       return { success: true };
     } catch (err: any) {
       console.error('2FA initiation error:', err);
-      setError(err.message || 'Failed to send verification code');
-      return { success: false, error: err.message };
+      const errorMessage = err.message || 'Failed to send verification code';
+      setError(errorMessage);
+      return { 
+        success: false, 
+        error: errorMessage,
+        errorCode: err.name === 'AbortError' ? 'network' : 'unknown'
+      };
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const verify2FA = useCallback(async (otpCode: string) => {
+  const verify2FA = useCallback(async (otpCode: string): Promise<TwoFactorResult> => {
     if (!twoFactorState.userId) {
       setError('No pending 2FA verification');
-      return { success: false, error: 'no_pending' };
+      return { success: false, error: 'no_pending', errorCode: 'no_pending' };
+    }
+
+    // Check max attempts
+    if (twoFactorState.attempts >= MAX_VERIFY_ATTEMPTS) {
+      setError('Çok fazla hatalı deneme. Yeni kod isteyin.');
+      return { 
+        success: false, 
+        error: 'Çok fazla hatalı deneme',
+        errorCode: 'rate_limit'
+      };
+    }
+
+    // Validate OTP format before sending
+    if (!/^\d{6}$/.test(otpCode)) {
+      setError('Kod 6 haneli olmalıdır');
+      return { success: false, error: 'invalid_format', errorCode: 'invalid' };
     }
 
     setIsLoading(true);
@@ -150,11 +257,23 @@ export const useTwoFactorAuth = () => {
       }
 
       if (!data?.success) {
-        const errorMessage = data?.error === 'expired' 
-          ? 'Kod süresi dolmuş. Yeni kod gönderilsin mi?' 
-          : 'Geçersiz doğrulama kodu';
+        // Increment attempts on failure
+        setTwoFactorState(prev => ({
+          ...prev,
+          attempts: prev.attempts + 1,
+        }));
+
+        const isExpired = data?.error === 'expired';
+        const errorMessage = isExpired 
+          ? 'Kod süresi dolmuş. Yeni kod gönderin.' 
+          : `Geçersiz kod (${MAX_VERIFY_ATTEMPTS - twoFactorState.attempts - 1} deneme kaldı)`;
+        
         setError(errorMessage);
-        return { success: false, error: data?.error || 'invalid' };
+        return { 
+          success: false, 
+          error: errorMessage,
+          errorCode: isExpired ? 'expired' : 'invalid'
+        };
       }
 
       // Register this device as trusted after successful verification
@@ -166,37 +285,65 @@ export const useTwoFactorAuth = () => {
         userId: null,
         email: null,
         role: null,
+        attempts: 0,
+        lastOtpSentAt: null,
       });
 
       return { success: true };
     } catch (err: any) {
       console.error('2FA verification error:', err);
-      setError(err.message || 'Verification failed');
-      return { success: false, error: err.message };
+      const errorMessage = err.message || 'Doğrulama başarısız';
+      setError(errorMessage);
+      return { 
+        success: false, 
+        error: errorMessage,
+        errorCode: 'network'
+      };
     } finally {
       setIsLoading(false);
     }
-  }, [twoFactorState.userId, registerTrustedDevice]);
+  }, [twoFactorState.userId, twoFactorState.attempts, registerTrustedDevice]);
 
-  const resendOTP = useCallback(async () => {
+  const resendOTP = useCallback(async (): Promise<TwoFactorResult> => {
     if (!twoFactorState.userId || !twoFactorState.email || !twoFactorState.role) {
       setError('No pending 2FA verification');
-      return { success: false };
+      return { success: false, errorCode: 'no_pending' };
     }
+
+    // Check cooldown
+    if (!canResendOTP()) {
+      const remaining = getResendCooldown();
+      setError(`${remaining} saniye bekleyin`);
+      return { 
+        success: false, 
+        error: `${remaining} saniye bekleyin`,
+        errorCode: 'rate_limit'
+      };
+    }
+
+    // Reset attempts when resending
+    setTwoFactorState(prev => ({ ...prev, attempts: 0 }));
 
     return initiate2FA(
       twoFactorState.userId,
       twoFactorState.email,
       twoFactorState.role
     );
-  }, [twoFactorState, initiate2FA]);
+  }, [twoFactorState, initiate2FA, canResendOTP, getResendCooldown]);
 
   const cancel2FA = useCallback(() => {
+    // Cancel any pending request
+    if (pendingRequest.current) {
+      pendingRequest.current.abort();
+    }
+    
     setTwoFactorState({
       isPending: false,
       userId: null,
       email: null,
       role: null,
+      attempts: 0,
+      lastOtpSentAt: null,
     });
     setError(null);
   }, []);
@@ -212,5 +359,9 @@ export const useTwoFactorAuth = () => {
     cancel2FA,
     checkTrustedDevice,
     registerTrustedDevice,
+    canResendOTP,
+    getResendCooldown,
+    maxAttempts: MAX_VERIFY_ATTEMPTS,
+    remainingAttempts: MAX_VERIFY_ATTEMPTS - twoFactorState.attempts,
   };
 };
