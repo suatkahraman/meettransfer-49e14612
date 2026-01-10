@@ -436,39 +436,89 @@ const CustomerHome = () => {
       localStorage.setItem(`recentSearches_${user.id}`, JSON.stringify(updatedSearches));
     }
 
-    // Redirect to ReservationForm with all form data as URL params - same flow as quick booking
-    const params = new URLSearchParams({
-      pickup: result.data.pickup,
-      dropoff: result.data.dropoff.trim(),
-      date: result.data.date,
-      time: result.data.time,
-      vehicleType: result.data.vehicleType,
-      passengers: String(validPassengerNames.length),
-      paymentMethod: result.data.paymentType,
-      luggageCount: formData.luggageCount,
-      babySeatCount: formData.babySeatCount,
-    });
-    
-    if (result.data.flightNumber) {
-      params.set('flightNumber', result.data.flightNumber.trim());
-    }
-    
-    if (formData.customerNotes.trim()) {
-      params.set('customerNotes', formData.customerNotes.trim());
-    }
+    // Close the booking form and show price preparation animation
+    setIsBookingFormOpen(false);
+    setShowPricePreparation(true);
 
     // Store passenger names in sessionStorage for the reservation form to pick up
     sessionStorage.setItem('customerPassengerNames', JSON.stringify(validPassengerNames));
     sessionStorage.setItem('customerPhone', result.data.passengerPhone.trim());
 
-    // Close the booking form and show price preparation animation
-    setIsBookingFormOpen(false);
-    setShowPricePreparation(true);
-    
-    // Navigate after animation delay
-    setTimeout(() => {
+    // Fetch prices DURING the animation (not after navigation)
+    try {
+      const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
+        body: {
+          pickup: result.data.pickup,
+          dropoff: result.data.dropoff.trim(),
+          customerCurrency: 'EUR',
+        },
+      });
+
+      // Build URL params with all form data
+      const params = new URLSearchParams({
+        pickup: result.data.pickup,
+        dropoff: result.data.dropoff.trim(),
+        date: result.data.date,
+        time: result.data.time,
+        vehicleType: result.data.vehicleType,
+        passengers: String(validPassengerNames.length),
+        paymentMethod: result.data.paymentType,
+        luggageCount: formData.luggageCount,
+        babySeatCount: formData.babySeatCount,
+        pricesPreFetched: 'true', // Flag to skip price animation on ReservationForm
+      });
+      
+      if (result.data.flightNumber) {
+        params.set('flightNumber', result.data.flightNumber.trim());
+      }
+      
+      if (formData.customerNotes.trim()) {
+        params.set('customerNotes', formData.customerNotes.trim());
+      }
+
+      // Add pre-fetched vehicle prices to URL
+      if (data?.prices && data.prices.length > 0) {
+        const pricesMap: Record<string, number> = {};
+        data.prices.forEach((p: any) => {
+          if (p.price) {
+            pricesMap[p.vehicleType] = p.price;
+          }
+        });
+        params.set('allVehiclePrices', encodeURIComponent(JSON.stringify(pricesMap)));
+        // Store full price data for vehicle selection
+        sessionStorage.setItem('preFetchedVehiclePrices', JSON.stringify(data.prices));
+      }
+
+      // Minimum 2.5 seconds for animation visibility
+      await new Promise(resolve => setTimeout(resolve, 2500));
+
       navigate(`/book?${params.toString()}`);
-    }, 2500);
+    } catch (error) {
+      console.error("Error fetching prices:", error);
+      // Even if price fetch fails, proceed with navigation
+      const params = new URLSearchParams({
+        pickup: result.data.pickup,
+        dropoff: result.data.dropoff.trim(),
+        date: result.data.date,
+        time: result.data.time,
+        vehicleType: result.data.vehicleType,
+        passengers: String(validPassengerNames.length),
+        paymentMethod: result.data.paymentType,
+        luggageCount: formData.luggageCount,
+        babySeatCount: formData.babySeatCount,
+      });
+      
+      if (result.data.flightNumber) {
+        params.set('flightNumber', result.data.flightNumber.trim());
+      }
+      
+      if (formData.customerNotes.trim()) {
+        params.set('customerNotes', formData.customerNotes.trim());
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      navigate(`/book?${params.toString()}`);
+    }
   };
 
   // Price preparation animation screen
