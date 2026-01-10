@@ -19,6 +19,16 @@ const BlogPage = () => {
   // Blog posts with translation keys - Updated for 2025 SEO
   const blogPosts = useMemo(() => [
     {
+      id: "cappadocia-airport-transfer-guide",
+      titleKey: "blogCappadociaTitle",
+      descriptionKey: "blogCappadociaDesc",
+      category: "Cappadocia",
+      categoryKey: "cappadocia",
+      readTime: 18,
+      date: "2025-01-10",
+      image: "/images/meet-transfer-vip-mercedes-vito.jpg",
+    },
+    {
       id: "istanbul-bursa-day-tour-guide",
       titleKey: "blogBursaTitle",
       descriptionKey: "blogBursaDesc",
