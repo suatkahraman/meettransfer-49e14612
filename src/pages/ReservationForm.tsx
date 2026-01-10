@@ -133,16 +133,58 @@ const ReservationForm = () => {
   const urlPromoCode = searchParams.get('promoCode') || '';
   const urlAllVehiclePrices = searchParams.get('allVehiclePrices') || '';
   
-  // Parse all vehicle prices from URL (JSON encoded)
-  const allVehiclePrices: Record<string, number> = urlAllVehiclePrices 
-    ? (() => {
-        try {
-          return JSON.parse(decodeURIComponent(urlAllVehiclePrices));
-        } catch {
-          return {};
+  // State for vehicle prices and loading
+  const [vehiclePrices, setVehiclePrices] = useState<Record<string, number>>({});
+  const [isPricesLoading, setIsPricesLoading] = useState(false);
+  
+  // Parse all vehicle prices from URL (JSON encoded) on mount
+  useEffect(() => {
+    if (urlAllVehiclePrices) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(urlAllVehiclePrices));
+        setVehiclePrices(parsed);
+      } catch {
+        setVehiclePrices({});
+      }
+    }
+  }, [urlAllVehiclePrices]);
+  
+  // Fetch prices when pickup/dropoff change (only for logged-in users without pre-loaded prices)
+  useEffect(() => {
+    const fetchPrices = async () => {
+      // Only fetch if user is logged in, has pickup/dropoff, and no prices loaded yet
+      if (!user || !urlPickup || !urlDropoff) return;
+      if (Object.keys(vehiclePrices).length > 0) return;
+      if (urlAllVehiclePrices) return; // Already have prices from URL
+      
+      setIsPricesLoading(true);
+      try {
+        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
+          body: {
+            pickup: urlPickup,
+            dropoff: urlDropoff,
+            customerCurrency: urlCurrency,
+          },
+        });
+        
+        if (data?.prices) {
+          const pricesMap: Record<string, number> = {};
+          data.prices.forEach((p: any) => {
+            if (p.price) {
+              pricesMap[p.vehicleType] = p.price;
+            }
+          });
+          setVehiclePrices(pricesMap);
         }
-      })()
-    : {};
+      } catch (error) {
+        console.error("Error fetching vehicle prices:", error);
+      } finally {
+        setIsPricesLoading(false);
+      }
+    };
+    
+    fetchPrices();
+  }, [user, urlPickup, urlDropoff, urlCurrency, urlAllVehiclePrices, vehiclePrices]);
   
   const [hasReturnTrip, setHasReturnTrip] = useState(urlHasReturn);
   const [promoCode, setPromoCode] = useState(urlPromoCode);
@@ -1232,8 +1274,8 @@ const ReservationForm = () => {
                 </Label>
                 <div className="grid gap-4">
                   {vehicleTypes.map(vehicle => {
-                    const vehiclePrice = allVehiclePrices[vehicle.value] || null;
-                    const hasAnyPrices = Object.keys(allVehiclePrices).length > 0;
+                    const vehiclePrice = vehiclePrices[vehicle.value] || null;
+                    const hasAnyPrices = Object.keys(vehiclePrices).length > 0;
                     return (
                       <VehicleSelectionCard
                         key={vehicle.value}
@@ -1242,8 +1284,9 @@ const ReservationForm = () => {
                         onSelect={(v) => setFormData({...formData, vehicleType: v})}
                         price={vehiclePrice}
                         currency={prefilledCurrency}
-                        showPrice={hasAnyPrices}
+                        showPrice={hasAnyPrices || isPricesLoading}
                         isRecommended={isFromQuickBooking && vehicle.value === formData.vehicleType && !!vehiclePrice}
+                        isLoading={isPricesLoading}
                       />
                     );
                   })}
