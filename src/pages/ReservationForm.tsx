@@ -1272,6 +1272,26 @@ const ReservationForm = () => {
                   <Car className="h-4 w-4" />
                   {t('vehicleType')}
                 </Label>
+                
+                {/* Price not found warning */}
+                {user && !isPricesLoading && Object.keys(vehiclePrices).length === 0 && urlPickup && urlDropoff && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200">
+                    <Coins className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium">
+                        {t('language') === 'TR' 
+                          ? 'Bu güzergah için otomatik fiyat bulunamadı' 
+                          : 'No automatic pricing found for this route'}
+                      </p>
+                      <p className="text-amber-700 dark:text-amber-300 mt-1">
+                        {t('language') === 'TR'
+                          ? 'Rezervasyon onaylandıktan sonra fiyat bilgisi tarafınıza iletilecektir.'
+                          : 'Price will be provided after your reservation is confirmed.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="grid gap-4">
                   {vehicleTypes.map(vehicle => {
                     const vehiclePrice = vehiclePrices[vehicle.value] || null;
