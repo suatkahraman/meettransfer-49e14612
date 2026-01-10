@@ -423,18 +423,18 @@ export default function CustomerPortal() {
             >
               <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
               <span className="text-xs font-medium text-red-700 dark:text-red-300">
-                {language === 'TR' ? 'Acil' : 'SOS'}
+                {language === 'TR' ? 'Acil' : 'Call'}
               </span>
             </Button>
             
             {/* Security */}
             <Button 
               variant="outline" 
-              className="h-auto py-3 flex flex-col items-center gap-1"
+              className="h-auto py-3 flex flex-col items-center gap-1 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50"
               onClick={() => navigate('/security-settings')}
             >
-              <Shield className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">
+              <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
                 {language === 'TR' ? 'Güvenlik' : 'Security'}
               </span>
             </Button>
