@@ -1,7 +1,7 @@
 import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Youtube, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from "@/lib/contact";
+import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, SUPPORT_EMAIL, GLOBAL_OFFICES } from "@/lib/contact";
 
 const TripAdvisorBadge = () => (
   <a
@@ -122,13 +122,13 @@ export const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 flex-shrink-0" />
-                <a href="mailto:info@meettransfer.app" className="hover:text-primary-foreground transition-colors">
-                  info@meettransfer.app
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-primary-foreground transition-colors">
+                  {SUPPORT_EMAIL}
                 </a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                <span>{t('footerAddress')}</span>
+                <span>{GLOBAL_OFFICES[0]?.address || t('footerAddress')}</span>
               </li>
             </ul>
           </div>
