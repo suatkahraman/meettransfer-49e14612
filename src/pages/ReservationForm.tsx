@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import confetti from 'canvas-confetti';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -993,6 +994,38 @@ const ReservationForm = () => {
       setDiscountJustApplied(true);
       setIsDiscountedOffer(true);
       setCanReject(false);
+
+      // Trigger confetti celebration 🎉
+      const duration = 3000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+      const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+      const confettiInterval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) {
+          clearInterval(confettiInterval);
+          return;
+        }
+        const particleCount = 50 * (timeLeft / duration);
+        
+        // Confetti from left side
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+          colors: ['#10b981', '#34d399', '#6ee7b7', '#fbbf24', '#f59e0b'],
+        });
+        
+        // Confetti from right side
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+          colors: ['#10b981', '#34d399', '#6ee7b7', '#fbbf24', '#f59e0b'],
+        });
+      }, 250);
 
       // Show animated gift icon toast
       toast.success(
