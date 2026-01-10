@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, CheckCircle2 } from "lucide-react";
 import istanbulTransferHero from "@/assets/blog/istanbul-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,12 +15,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import BlogImageGallery from "@/components/website/BlogImageGallery";
+import BlogCTA from "@/components/website/BlogCTA";
 import vitoVip1 from "@/assets/vito-vip-1.jpg";
 import vitoVip2 from "@/assets/vito-vip-2.jpg";
 import sprinterInteriorBlue from "@/assets/sprinter-interior-blue.jpg";
@@ -423,31 +422,7 @@ const IstanbulTransferPriceGuide = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="my-12 p-8 bg-primary/5 rounded-2xl text-center">
-          <h3 className="font-serif text-2xl font-bold mb-4">
-            {t("blogPriceCtaTitle")}
-          </h3>
-          <p className="text-muted-foreground mb-6">
-            {t("blogPriceCtaDesc")}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to={getLocalizedPath("/book")}>
-              <Button size="lg" variant="accent" className="gap-2">
-                {t("requestPrice")}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <a 
-              href={getWhatsAppUrl("Hello, I need a price quote for Istanbul Airport transfer.")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button size="lg" variant="outline">
-                {t("whatsappBooking")}
-              </Button>
-            </a>
-          </div>
-        </div>
+        <BlogCTA destination="Istanbul" />
 
         {/* FAQ Section */}
         <section className="my-12">

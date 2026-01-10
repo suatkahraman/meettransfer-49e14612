@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, Plane, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, CheckCircle2, Plane, MapPin } from "lucide-react";
 import cyprusTransferHero from "@/assets/blog/cyprus-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,11 +15,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
+import BlogCTA from "@/components/website/BlogCTA";
 
 const CyprusAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -380,31 +379,7 @@ const CyprusAirportTransferGuide = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="not-prose my-12 p-8 bg-primary/5 rounded-xl text-center">
-          <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4">
-            {t("blogCyprusCtaTitle")}
-          </h2>
-          <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            {t("blogCyprusCtaDesc")}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to={getLocalizedPath("/cyprus-transfer")}>
-              <Button size="lg" variant="accent" className="gap-2">
-                {t("blogCyprusCtaButton")}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <a 
-              href={getWhatsAppUrl("Hello, I need a transfer from Cyprus airport.")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button size="lg" variant="outline" className="gap-2">
-                {t("whatsappBooking")}
-              </Button>
-            </a>
-          </div>
-        </div>
+        <BlogCTA destination="Cyprus" />
 
         {/* FAQ Section */}
         <section className="not-prose mt-16">

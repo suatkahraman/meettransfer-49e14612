@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import istanbulAirportCityHero from "@/assets/blog/istanbul-airport-city-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
@@ -20,6 +20,7 @@ import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
+import BlogCTA from "@/components/website/BlogCTA";
 
 const IstanbulAirportToCityGuide = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -450,27 +451,7 @@ const IstanbulAirportToCityGuide = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="my-12 p-8 bg-primary/5 rounded-2xl text-center">
-          <h3 className="font-serif text-2xl font-bold mb-4">
-            {t('readyToBookTransfer')}
-          </h3>
-          <p className="text-muted-foreground mb-6">
-            {t('getInstantQuote')}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to={getLocalizedPath("/book")}>
-              <Button size="lg" variant="accent" className="gap-2">
-                {t('requestPrice')}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to={getLocalizedPath("/istanbul-transfer")}>
-              <Button size="lg" variant="outline">
-                {t('footerIstanbul')}
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <BlogCTA destination="Istanbul" />
 
         {/* FAQ Section */}
         <section className="my-12">

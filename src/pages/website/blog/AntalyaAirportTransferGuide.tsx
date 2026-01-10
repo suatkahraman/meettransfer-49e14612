@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Calendar, Clock, CheckCircle2, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, CheckCircle2, MapPin } from "lucide-react";
 import antalyaTransferHero from "@/assets/blog/antalya-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,12 +15,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import BlogImageGallery from "@/components/website/BlogImageGallery";
+import BlogCTA from "@/components/website/BlogCTA";
 import vitoFamilyInterior from "@/assets/vito-family-interior.jpg";
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
@@ -394,31 +393,7 @@ const AntalyaAirportTransferGuide = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="my-12 p-8 bg-primary/5 rounded-2xl text-center">
-          <h3 className="font-serif text-2xl font-bold mb-4">
-            {t("blogAntalyaCtaTitle")}
-          </h3>
-          <p className="text-muted-foreground mb-6">
-            {t("blogAntalyaCtaDesc")}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to={getLocalizedPath("/antalya-transfer")}>
-              <Button size="lg" variant="accent" className="gap-2">
-                {t("blogAntalyaCtaButton")}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <a 
-              href={getWhatsAppUrl("Hello, I need a transfer from Antalya Airport.")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button size="lg" variant="outline">
-                {t("whatsappBooking")}
-              </Button>
-            </a>
-          </div>
-        </div>
+        <BlogCTA destination="Antalya" />
 
         {/* FAQ Section */}
         <section className="my-12">
