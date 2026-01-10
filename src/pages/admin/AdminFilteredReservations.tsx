@@ -403,17 +403,15 @@ const AdminFilteredReservations = () => {
                           </Button>
                         </>
                       )}
-                      {filter === 'completed' && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteClick(reservation)}
-                          disabled={processingId === reservation.id}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Sil
-                        </Button>
-                      )}
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteClick(reservation)}
+                        disabled={processingId === reservation.id}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Sil
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
