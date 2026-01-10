@@ -142,61 +142,61 @@ export function VehicleSelectionCard({
         className={`
           relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 group
           ${isSelected 
-            ? 'ring-2 ring-primary shadow-xl scale-[1.01]' 
+            ? 'ring-3 ring-primary shadow-2xl scale-[1.02] z-10' 
             : available 
-              ? 'hover:shadow-lg hover:scale-[1.005]' 
-              : 'opacity-50 cursor-not-allowed'
+              ? 'hover:shadow-xl hover:scale-[1.01] hover:ring-2 hover:ring-primary/30' 
+              : 'opacity-50 cursor-not-allowed grayscale'
           }
         `}
       >
-        {/* Gradient Background */}
+        {/* Gradient Background - More vibrant */}
         <div className={`
           absolute inset-0 transition-all duration-300
           ${isSelected 
-            ? 'bg-gradient-to-br from-primary/10 via-primary/5 to-background' 
+            ? 'bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5' 
             : isRecommended
-              ? 'bg-gradient-to-br from-green-500/10 via-green-500/5 to-background group-hover:from-green-500/15'
-              : 'bg-gradient-to-br from-muted/80 via-muted/50 to-background group-hover:from-muted'
+              ? 'bg-gradient-to-br from-green-500/15 via-green-500/10 to-emerald-500/5 group-hover:from-green-500/20'
+              : 'bg-gradient-to-br from-muted via-muted/70 to-background group-hover:from-muted/90'
           }
         `} />
         
-        {/* Border */}
+        {/* Border - More prominent */}
         <div className={`
-          absolute inset-0 rounded-2xl border-2 transition-colors duration-300
+          absolute inset-0 rounded-2xl border-2 transition-all duration-300
           ${isSelected 
-            ? 'border-primary' 
+            ? 'border-primary shadow-inner' 
             : isRecommended
-              ? 'border-green-500/40 group-hover:border-green-500/60'
-              : 'border-border/60 group-hover:border-primary/40'
+              ? 'border-green-500/50 group-hover:border-green-500/70'
+              : 'border-border group-hover:border-primary/50'
           }
         `} />
         
-        {/* Selection Indicator */}
+        {/* Selection Indicator - Larger and more visible */}
         {isSelected && (
           <div className="absolute top-3 right-3 z-10">
-            <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
-              <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
+            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shadow-lg animate-scale-in">
+              <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
             </div>
           </div>
         )}
         
-        {/* Recommended Badge */}
+        {/* Recommended Badge - More prominent */}
         {isRecommended && (
           <div className="absolute top-0 left-0 z-10">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-1.5 rounded-br-xl rounded-tl-xl shadow-lg">
-              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
-                <ThumbsUp className="h-3.5 w-3.5" />
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-5 py-2 rounded-br-2xl rounded-tl-2xl shadow-lg">
+              <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide">
+                <ThumbsUp className="h-4 w-4" />
                 {isTurkish ? "Önerilen" : "Recommended"}
               </span>
             </div>
           </div>
         )}
         
-        <div className="relative p-4 sm:p-5">
-          <div className="flex gap-4">
-            {/* Vehicle Image */}
+        <div className="relative p-5 sm:p-6">
+          <div className="flex gap-5">
+            {/* Vehicle Image - Larger */}
             <div 
-              className="w-32 sm:w-40 h-24 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 relative cursor-pointer shadow-md"
+              className="w-36 sm:w-44 h-28 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 relative cursor-pointer shadow-lg ring-1 ring-border/50"
               onClick={(e) => {
                 e.stopPropagation();
                 if (vehicleImages.length > 0) {
@@ -224,8 +224,8 @@ export function VehicleSelectionCard({
                     </CarouselContent>
                   </Carousel>
                   {/* Zoom overlay on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-2">
-                    <span className="flex items-center gap-1 text-white text-xs font-medium">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-3">
+                    <span className="flex items-center gap-1.5 text-white text-xs font-semibold bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
                       <ZoomIn className="h-3.5 w-3.5" />
                       {isTurkish ? "Galeri" : "View Gallery"}
                     </span>
@@ -233,46 +233,46 @@ export function VehicleSelectionCard({
                 </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <Car className="h-10 w-10 text-muted-foreground" />
+                  <Car className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}
             </div>
             
             {/* Vehicle Details */}
-            <div className="flex-1 min-w-0 flex flex-col justify-between">
+            <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
               {/* Header: Name */}
               <div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h4 className="font-bold text-base sm:text-lg leading-tight">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <h4 className="font-bold text-lg sm:text-xl leading-tight">
                     {vehicleInfo.label}
                   </h4>
                 </div>
                 
-                {/* Capacity Pills */}
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-semibold">
-                    <Users className="h-3.5 w-3.5" />
-                    {vehicleInfo.passengers}
+                {/* Capacity Pills - More prominent */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-sm font-bold shadow-sm">
+                    <Users className="h-4 w-4" />
+                    <span>{vehicleInfo.passengers}</span>
                   </div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 text-accent-foreground text-xs font-semibold">
-                    <Briefcase className="h-3.5 w-3.5" />
-                    {vehicleInfo.luggage}
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/15 text-accent-foreground text-sm font-bold shadow-sm">
+                    <Briefcase className="h-4 w-4" />
+                    <span>{vehicleInfo.luggage}</span>
                   </div>
                 </div>
               </div>
               
-              {/* Feature Icons - Colorful */}
+              {/* Feature Icons - Colorful and more visible */}
               {vehicleInfo.features && vehicleInfo.features.length > 0 && (
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
                   {vehicleInfo.features.slice(0, 4).map((feature, idx) => {
                     const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
                     return (
                       <div 
                         key={idx}
-                        className="flex items-center gap-1 px-2 py-1 rounded-md bg-background/80 border border-border/50 text-xs hover:border-border transition-colors"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-background/90 border border-border/60 text-xs font-medium hover:border-primary/40 hover:bg-background transition-colors shadow-sm"
                         title={isTurkish ? feature.labelTr : feature.label}
                       >
-                        <FeatureIcon className={`h-3 w-3 flex-shrink-0 ${color}`} />
+                        <FeatureIcon className={`h-3.5 w-3.5 flex-shrink-0 ${color}`} />
                         <span className="hidden sm:inline truncate max-w-[80px] text-muted-foreground">
                           {isTurkish ? feature.labelTr : feature.label}
                         </span>
@@ -280,7 +280,7 @@ export function VehicleSelectionCard({
                     );
                   })}
                   {vehicleInfo.features.length > 4 && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground font-medium bg-muted px-2 py-1 rounded-md">
                       +{vehicleInfo.features.length - 4}
                     </span>
                   )}
@@ -289,49 +289,57 @@ export function VehicleSelectionCard({
             </div>
           </div>
           
-          {/* Price Section - Only show if showPrice is true */}
+          {/* Price Section - MUCH more prominent */}
           {showPrice && (
             <div className={`
-              mt-4 pt-3 border-t flex items-center justify-between transition-all duration-500
-              ${isSelected ? 'border-primary/20' : 'border-border/40'}
-              ${showDiscountAnimation && previousPrice ? 'bg-green-50 dark:bg-green-900/20 rounded-lg px-2 -mx-2' : ''}
+              mt-5 pt-4 border-t-2 flex items-center justify-between transition-all duration-500
+              ${isSelected ? 'border-primary/30' : 'border-border/60'}
+              ${showDiscountAnimation && previousPrice ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-4 -mx-2' : ''}
             `}>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-muted-foreground font-medium">
                 {isTurkish ? "Tek yön transfer" : "One-way transfer"}
               </span>
               {available && price ? (
-                <div className="text-right flex items-center gap-2">
+                <div className="text-right flex items-center gap-3">
                   {/* Show old price strikethrough when discount just applied */}
                   {showDiscountAnimation && previousPrice && previousPrice > price && (
-                    <span className="text-lg line-through text-muted-foreground">
+                    <span className="text-lg line-through text-muted-foreground/70">
                       {getCurrencySymbol(currency)}{previousPrice}
                     </span>
                   )}
-                  <span className={`
-                    text-2xl sm:text-3xl font-extrabold tracking-tight transition-all duration-300
-                    ${showDiscountAnimation && previousPrice 
-                      ? 'text-green-600 dark:text-green-400 scale-110' 
-                      : isSelected ? 'text-primary' : 'text-foreground'}
+                  <div className={`
+                    relative px-5 py-2 rounded-xl transition-all duration-300
+                    ${isSelected 
+                      ? 'bg-primary text-primary-foreground shadow-lg' 
+                      : showDiscountAnimation && previousPrice 
+                        ? 'bg-green-500 text-white shadow-lg'
+                        : 'bg-primary/10 text-primary'
+                    }
                   `}>
-                    {getCurrencySymbol(currency)}{price}
-                  </span>
+                    <span className={`
+                      text-2xl sm:text-3xl font-extrabold tracking-tight
+                      ${showDiscountAnimation && previousPrice ? 'animate-pulse' : ''}
+                    `}>
+                      {getCurrencySymbol(currency)}{price}
+                    </span>
+                  </div>
                   {/* Discount badge */}
                   {showDiscountAnimation && previousPrice && previousPrice > price && (
-                    <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded-full animate-pulse">
+                    <span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white px-2 py-1 rounded-full font-bold animate-bounce shadow-md">
                       -{getCurrencySymbol(currency)}{previousPrice - price}
                     </span>
                   )}
                 </div>
               ) : (
-                <span className="text-sm text-muted-foreground italic">
+                <span className="text-sm text-muted-foreground italic bg-muted px-3 py-2 rounded-lg">
                   {available ? (isTurkish ? "Fiyat bekleniyor" : "Price pending") : (isTurkish ? "Uygun değil" : "Not available")}
                 </span>
               )}
             </div>
           )}
           
-          {/* Description */}
-          <p className="text-xs text-muted-foreground mt-3 line-clamp-2">
+          {/* Description - Slightly larger */}
+          <p className="text-sm text-muted-foreground mt-4 line-clamp-2 leading-relaxed">
             {isTurkish ? vehicleInfo.descriptionTr : vehicleInfo.description}
           </p>
         </div>
