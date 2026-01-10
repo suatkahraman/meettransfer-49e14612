@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { ArrowLeft, Loader2, AlertCircle, Share2, Check, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
+import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -59,10 +60,11 @@ const SignupScreen = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordValue, setPasswordValue] = useState('');
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { isIOS, isStandalone } = usePWADetect();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   const handleShare = async () => {
@@ -391,6 +393,8 @@ const SignupScreen = () => {
                     required 
                     className="h-12 pr-12"
                     autoComplete="new-password"
+                    value={passwordValue}
+                    onChange={(e) => setPasswordValue(e.target.value)}
                   />
                   <Button
                     type="button"
@@ -406,9 +410,10 @@ const SignupScreen = () => {
                     )}
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {t('passwordFormat')}
-                </p>
+                <PasswordStrengthIndicator 
+                  password={passwordValue} 
+                  language={language === 'TR' ? 'TR' : 'EN'} 
+                />
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
 
