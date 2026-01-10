@@ -137,24 +137,39 @@ const handler = async (req: Request): Promise<Response> => {
     // Intercity conditions:
     // 1. city_to_city with different cities
     // 2. to_airport/from_airport where non-airport city is different from airport's city
+    // 3. Same city but different districts (e.g., Kadıköy → Beylikdüzü)
+    const isSameCityDifferentDistricts = (
+      pickupCity === dropoffCity && 
+      pickupDistrict && dropoffDistrict && 
+      pickupDistrict !== dropoffDistrict &&
+      !airport // Not an airport transfer
+    );
+    
     const isIntercity = (
       (direction === 'city_to_city' && pickupCity && dropoffCity && pickupCity !== dropoffCity) ||
-      (airport && nonAirportCity && airportCity && nonAirportCity !== airportCity)
+      (airport && nonAirportCity && airportCity && nonAirportCity !== airportCity) ||
+      isSameCityDifferentDistricts
     );
     
     // For intercity airport transfers, we need to know both cities
-    const intercityFromCity = direction === 'to_airport' ? pickupCity : 
+    // For same-city different districts, use the districts as from/to
+    const intercityFromCity = isSameCityDifferentDistricts ? pickupCity :
+                              direction === 'to_airport' ? pickupCity : 
                               direction === 'from_airport' ? airportCity : pickupCity;
-    const intercityToCity = direction === 'to_airport' ? airportCity : 
+    const intercityToCity = isSameCityDifferentDistricts ? dropoffCity :
+                            direction === 'to_airport' ? airportCity : 
                             direction === 'from_airport' ? dropoffCity : dropoffCity;
-    const intercityFromDistrict = direction === 'to_airport' ? pickupDistrict : 
+    const intercityFromDistrict = isSameCityDifferentDistricts ? pickupDistrict :
+                                  direction === 'to_airport' ? pickupDistrict : 
                                   direction === 'from_airport' ? airport : pickupDistrict;
-    const intercityToDistrict = direction === 'to_airport' ? airport : 
+    const intercityToDistrict = isSameCityDifferentDistricts ? dropoffDistrict :
+                                direction === 'to_airport' ? airport : 
                                 direction === 'from_airport' ? dropoffDistrict : dropoffDistrict;
 
-    console.log("🔍 Route type:", isIntercity ? "intercity" : "airport transfer", { 
+    console.log("🔍 Route type:", isIntercity ? (isSameCityDifferentDistricts ? "same-city different districts" : "intercity") : "airport transfer", { 
       pickupCity, pickupDistrict, dropoffCity, dropoffDistrict, 
-      airportCity, nonAirportCity, intercityFromCity, intercityToCity 
+      airportCity, nonAirportCity, intercityFromCity, intercityToCity,
+      isSameCityDifferentDistricts
     });
 
     // Get vehicle fallback list for flexible matching
