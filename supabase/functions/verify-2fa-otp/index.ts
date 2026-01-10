@@ -12,25 +12,33 @@ interface VerifyOTPRequest {
 }
 
 // Rate limiting: max 10 verification attempts per user per 5 minutes
-const verifyRateLimit = new Map<string, { count: number; resetAt: number }>();
+const verifyRateLimit = new Map<string, { count: number; resetAt: number; blocked: boolean }>();
 
-const checkRateLimit = (userId: string): { allowed: boolean; remaining: number } => {
+const checkRateLimit = (userId: string): { allowed: boolean; remaining: number; blocked: boolean } => {
   const now = Date.now();
   const limit = verifyRateLimit.get(userId);
   const maxAttempts = 10;
   const windowMs = 300000; // 5 minutes
+  const blockDuration = 900000; // 15 minutes block after exceeding
   
   if (!limit || now > limit.resetAt) {
-    verifyRateLimit.set(userId, { count: 1, resetAt: now + windowMs });
-    return { allowed: true, remaining: maxAttempts - 1 };
+    verifyRateLimit.set(userId, { count: 1, resetAt: now + windowMs, blocked: false });
+    return { allowed: true, remaining: maxAttempts - 1, blocked: false };
+  }
+  
+  // Check if blocked
+  if (limit.blocked && now < limit.resetAt) {
+    return { allowed: false, remaining: 0, blocked: true };
   }
   
   if (limit.count >= maxAttempts) {
-    return { allowed: false, remaining: 0 };
+    // Block for longer period
+    verifyRateLimit.set(userId, { count: limit.count, resetAt: now + blockDuration, blocked: true });
+    return { allowed: false, remaining: 0, blocked: true };
   }
   
   limit.count++;
-  return { allowed: true, remaining: maxAttempts - limit.count };
+  return { allowed: true, remaining: maxAttempts - limit.count, blocked: false };
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -39,13 +47,16 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+
   try {
-    const { userId, otpCode }: VerifyOTPRequest = await req.json();
+    const body = await req.json();
+    const { userId, otpCode }: VerifyOTPRequest = body;
 
     // Validate required fields
     if (!userId || !otpCode) {
       return new Response(
-        JSON.stringify({ success: false, error: "Missing required fields" }),
+        JSON.stringify({ success: false, error: "missing_fields", message: "Eksik alanlar" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -53,7 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Validate OTP format (6 digits)
     if (!/^\d{6}$/.test(otpCode)) {
       return new Response(
-        JSON.stringify({ success: false, error: "invalid", message: "OTP must be 6 digits" }),
+        JSON.stringify({ success: false, error: "invalid_format", message: "Kod 6 haneli olmalıdır" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -61,12 +72,17 @@ const handler = async (req: Request): Promise<Response> => {
     // Check rate limit
     const rateLimit = checkRateLimit(userId);
     if (!rateLimit.allowed) {
-      console.warn(`Rate limit exceeded for user: ${userId}`);
+      const message = rateLimit.blocked 
+        ? "Çok fazla hatalı deneme. 15 dakika bekleyin."
+        : "Çok fazla istek. Lütfen bekleyin.";
+      
+      console.warn(`Rate limit exceeded for user: ${userId}, blocked: ${rateLimit.blocked}`);
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: "rate_limit", 
-          message: "Too many verification attempts. Please wait 5 minutes." 
+          message,
+          blocked: rateLimit.blocked
         }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -86,19 +102,29 @@ const handler = async (req: Request): Promise<Response> => {
     if (verifyError) {
       console.error("OTP verification error:", verifyError);
       return new Response(
-        JSON.stringify({ success: false, error: "verification_failed", message: verifyError.message }),
+        JSON.stringify({ success: false, error: "verification_failed", message: "Doğrulama hatası" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     if (!result || !result.success) {
       const errorType = result?.error || 'invalid';
-      console.log(`OTP verification failed for user ${userId}: ${errorType}`);
+      const duration = Date.now() - startTime;
+      console.log(`OTP verification failed for user ${userId}: ${errorType} (remaining: ${rateLimit.remaining}, duration: ${duration}ms)`);
+      
+      // Map error types to user-friendly messages
+      const errorMessages: Record<string, string> = {
+        expired: 'Kod süresi dolmuş. Yeni kod gönderin.',
+        invalid: 'Geçersiz kod.',
+        not_found: 'Doğrulama kodu bulunamadı.',
+        already_verified: 'Bu kod zaten kullanılmış.',
+      };
       
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: errorType,
+          message: errorMessages[errorType] || 'Doğrulama başarısız.',
           attemptsRemaining: rateLimit.remaining
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -108,10 +134,11 @@ const handler = async (req: Request): Promise<Response> => {
     // Clear rate limit on successful verification
     verifyRateLimit.delete(userId);
 
-    console.log(`2FA OTP verified successfully for user: ${userId}`);
+    const duration = Date.now() - startTime;
+    console.log(`2FA OTP verified successfully for user: ${userId} (duration: ${duration}ms)`);
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, message: "Doğrulama başarılı" }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {

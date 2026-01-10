@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TwoFactorState {
@@ -8,41 +8,67 @@ interface TwoFactorState {
   role: string | null;
   attempts: number;
   lastOtpSentAt: number | null;
+  errorCode: string | null;
 }
 
 interface TwoFactorResult {
   success: boolean;
   error?: string;
-  errorCode?: 'expired' | 'invalid' | 'rate_limit' | 'no_pending' | 'network' | 'unknown';
+  errorCode?: 'expired' | 'invalid' | 'rate_limit' | 'no_pending' | 'network' | 'unknown' | 'blocked';
+  attemptsRemaining?: number;
 }
 
-// Generate a robust device fingerprint
+// Generate a robust device fingerprint with canvas fingerprinting
 const generateDeviceFingerprint = (): string => {
-  const components = [
-    navigator.userAgent,
-    navigator.language,
-    navigator.languages?.join(',') || '',
-    new Date().getTimezoneOffset().toString(),
-    screen.width.toString(),
-    screen.height.toString(),
-    screen.colorDepth.toString(),
-    screen.pixelDepth?.toString() || '',
-    navigator.hardwareConcurrency?.toString() || '0',
-    navigator.maxTouchPoints?.toString() || '0',
-    navigator.platform || '',
-    // Canvas fingerprint hint (simplified)
-    typeof OffscreenCanvas !== 'undefined' ? 'offscreen' : 'legacy',
-  ];
-  
-  // FNV-1a hash for better distribution
-  const str = components.join('|');
-  let hash = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    hash ^= str.charCodeAt(i);
-    hash = (hash * 16777619) >>> 0;
+  try {
+    const components: string[] = [
+      navigator.userAgent || '',
+      navigator.language || '',
+      navigator.languages?.join(',') || '',
+      new Date().getTimezoneOffset().toString(),
+      screen.width?.toString() || '',
+      screen.height?.toString() || '',
+      screen.colorDepth?.toString() || '',
+      screen.pixelDepth?.toString() || '',
+      navigator.hardwareConcurrency?.toString() || '0',
+      navigator.maxTouchPoints?.toString() || '0',
+      navigator.platform || '',
+      // WebGL renderer hint
+      (() => {
+        try {
+          const canvas = document.createElement('canvas');
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (gl && 'getParameter' in gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+              return (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
+            }
+          }
+          return '';
+        } catch {
+          return '';
+        }
+      })(),
+    ];
+    
+    // FNV-1a hash for better distribution
+    const str = components.join('|');
+    let hash = 2166136261;
+    for (let i = 0; i < str.length; i++) {
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    
+    // Add random component for uniqueness across sessions on same device
+    const sessionId = sessionStorage.getItem('device_session_id') || 
+                      Math.random().toString(36).substring(2);
+    sessionStorage.setItem('device_session_id', sessionId);
+    
+    return Math.abs(hash).toString(36) + '-' + sessionId.slice(0, 4);
+  } catch (e) {
+    // Fallback if anything fails
+    return 'fallback-' + Date.now().toString(36);
   }
-  
-  return hash.toString(36) + '-' + Date.now().toString(36).slice(-4);
 };
 
 // Get detailed device name for display
@@ -61,7 +87,7 @@ const getDeviceName = (): string => {
   if (/Android/.test(ua)) {
     const match = ua.match(/Android (\d+(\.\d+)?)/);
     const deviceMatch = ua.match(/;\s*([^;)]+)\s*Build/);
-    const device = deviceMatch ? deviceMatch[1].trim() : 'Device';
+    const device = deviceMatch ? deviceMatch[1].trim().slice(0, 20) : 'Device';
     return match ? `${device} (Android ${match[1]})` : 'Android Device';
   }
   
@@ -105,6 +131,7 @@ export const useTwoFactorAuth = () => {
     role: null,
     attempts: 0,
     lastOtpSentAt: null,
+    errorCode: null,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -205,6 +232,7 @@ export const useTwoFactorAuth = () => {
         role,
         attempts: 0,
         lastOtpSentAt: Date.now(),
+        errorCode: null,
       });
 
       return { success: true };
@@ -287,6 +315,7 @@ export const useTwoFactorAuth = () => {
         role: null,
         attempts: 0,
         lastOtpSentAt: null,
+        errorCode: null,
       });
 
       return { success: true };
@@ -344,6 +373,7 @@ export const useTwoFactorAuth = () => {
       role: null,
       attempts: 0,
       lastOtpSentAt: null,
+      errorCode: null,
     });
     setError(null);
   }, []);
