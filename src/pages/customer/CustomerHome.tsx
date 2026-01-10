@@ -13,7 +13,7 @@ import {
   LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, 
   Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
   ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall, Sparkles, 
-  Clock, Star, ArrowRight, Loader2, Home, RefreshCw
+  Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe
 } from 'lucide-react';
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
@@ -23,6 +23,18 @@ import { NotificationSettingsPanel } from '@/components/NotificationSettingsPane
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Language } from '@/contexts/LanguageContext';
+
+// Language options
+const LANGUAGES = [
+  { code: "EN" as Language, label: "English", flag: "🇬🇧" },
+  { code: "TR" as Language, label: "Türkçe", flag: "🇹🇷" },
+  { code: "DE" as Language, label: "Deutsch", flag: "🇩🇪" },
+  { code: "FR" as Language, label: "Français", flag: "🇫🇷" },
+  { code: "RU" as Language, label: "Русский", flag: "🇷🇺" },
+  { code: "AR" as Language, label: "العربية", flag: "🇸🇦" },
+] as const;
 
 // Validation schema - memoized outside component
 const reservationSchema = z.object({
@@ -55,7 +67,7 @@ const getGreeting = (language: string): string => {
 
 const CustomerHome = () => {
   const { user, signOut } = useAuth();
-  const { t, language } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   
   // State - organized by purpose
@@ -363,6 +375,32 @@ const CustomerHome = () => {
                       <Label className="text-xs text-muted-foreground">Email</Label>
                       <p className="text-sm font-medium">{user?.email}</p>
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* Language Selector */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      {language === 'TR' ? 'Dil Seçimi' : 'Language'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue>
+                          {LANGUAGES.find((l) => l.code === language)?.flag} {LANGUAGES.find((l) => l.code === language)?.label}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LANGUAGES.map((lang) => (
+                          <SelectItem key={lang.code} value={lang.code}>
+                            {lang.flag} {lang.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </CardContent>
                 </Card>
 
