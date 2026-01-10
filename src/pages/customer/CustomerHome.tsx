@@ -71,16 +71,11 @@ const getFeatureIconWithColor = (iconName: string) => {
 };
 
 // Helper function - outside component for better performance
-const getGreeting = (language: string): string => {
+const getGreeting = (t: (key: string) => string): string => {
   const hour = new Date().getHours();
-  if (language === 'TR') {
-    if (hour < 12) return 'Günaydın';
-    if (hour < 18) return 'İyi günler';
-    return 'İyi akşamlar';
-  }
-  if (hour < 12) return 'Good Morning';
-  if (hour < 18) return 'Good Afternoon';
-  return 'Good Evening';
+  if (hour < 12) return t('goodMorning');
+  if (hour < 18) return t('goodAfternoon');
+  return t('goodEvening');
 };
 
 const CustomerHome = () => {
@@ -163,12 +158,12 @@ const CustomerHome = () => {
   }, [minibusRequired, formData.vehicleType]);
 
   // Memoized greeting
-  const greeting = useMemo(() => getGreeting(language), [language]);
+  const greeting = useMemo(() => getGreeting(t), [t]);
 
   // Memoized display name
   const displayName = useMemo(() => {
-    return profileData.full_name || user?.email?.split('@')[0] || (language === 'TR' ? 'Değerli Müşterimiz' : 'Valued Customer');
-  }, [profileData.full_name, user?.email, language]);
+    return profileData.full_name || user?.email?.split('@')[0] || t('valuedCustomer');
+  }, [profileData.full_name, user?.email, t]);
 
   // Fetch data function - extracted for refresh capability
   const fetchData = useCallback(async () => {
@@ -260,8 +255,8 @@ const CustomerHome = () => {
   // Pull to refresh handler
   const handlePullToRefresh = useCallback(async () => {
     await fetchData();
-    toast.success(language === 'TR' ? 'Yenilendi!' : 'Refreshed!');
-  }, [fetchData, language]);
+    toast.success(t('refreshedMsg'));
+  }, [fetchData, t]);
 
   const { pullDistance, isRefreshing: isPullRefreshing, isPulling, handlers: pullHandlers } = usePullToRefresh({
     onRefresh: handlePullToRefresh,
@@ -288,7 +283,7 @@ const CustomerHome = () => {
 
       if (error) throw error;
 
-      toast.success(language === 'TR' ? 'Profil güncellendi' : 'Profile updated');
+      toast.success(t('profileUpdatedMsg'));
       setIsEditingProfile(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to update profile');
@@ -301,7 +296,7 @@ const CustomerHome = () => {
   const handleAddFavoriteRoute = async () => {
     if (!user?.id) return;
     if (!newFavoriteRoute.name.trim() || !newFavoriteRoute.pickup.trim() || !newFavoriteRoute.dropoff.trim()) {
-      toast.error(language === 'TR' ? 'Lütfen tüm alanları doldurun' : 'Please fill in all fields');
+      toast.error(t('fillAllFieldsMsg'));
       return;
     }
 
@@ -318,7 +313,7 @@ const CustomerHome = () => {
 
       if (error) throw error;
 
-      toast.success(language === 'TR' ? 'Favori rota eklendi!' : 'Favorite route added!');
+      toast.success(t('favoriteRouteAddedMsg'));
       setNewFavoriteRoute({ name: '', pickup: '', dropoff: '', notes: '' });
       setIsAddingFavorite(false);
       fetchData();
@@ -339,7 +334,7 @@ const CustomerHome = () => {
 
       if (error) throw error;
 
-      toast.success(language === 'TR' ? 'Favori rota silindi' : 'Favorite route deleted');
+      toast.success(t('favoriteRouteDeletedMsg'));
       setFavoriteRoutes(prev => prev.filter(r => r.id !== routeId));
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete route');
@@ -372,7 +367,7 @@ const CustomerHome = () => {
 
   const handleSaveCurrentRouteAsFavorite = () => {
     if (!formData.pickup || !formData.dropoff) {
-      toast.error(language === 'TR' ? 'Önce alış ve bırakış noktalarını girin' : 'Please enter pickup and dropoff locations first');
+      toast.error(t('enterLocationsFirstMsg'));
       return;
     }
     setNewFavoriteRoute({
@@ -505,7 +500,7 @@ const CustomerHome = () => {
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
-                  {language === 'TR' ? 'Ayarlar' : 'Settings'}
+                  {t('settingsTitle')}
                 </SheetTitle>
               </SheetHeader>
               <div className="mt-6 space-y-6">
@@ -523,10 +518,10 @@ const CustomerHome = () => {
                         </motion.div>
                         <div>
                           <CardTitle className="text-lg font-semibold">
-                            {language === 'TR' ? 'Profil Bilgileri' : 'Profile Info'}
+                            {t('profileInfoTitle')}
                           </CardTitle>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            {language === 'TR' ? 'Hesap bilgileriniz' : 'Your account details'}
+                            {t('accountDetailsDesc')}
                           </p>
                         </div>
                       </div>
@@ -538,7 +533,7 @@ const CustomerHome = () => {
                           className="gap-1"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
-                          {language === 'TR' ? 'Düzenle' : 'Edit'}
+                          {t('editBtn')}
                         </Button>
                       ) : (
                         <div className="flex gap-2">
@@ -561,7 +556,7 @@ const CustomerHome = () => {
                             ) : (
                               <Save className="h-3.5 w-3.5" />
                             )}
-                            {language === 'TR' ? 'Kaydet' : 'Save'}
+                            {t('save')}
                           </Button>
                         </div>
                       )}
@@ -571,20 +566,20 @@ const CustomerHome = () => {
                     {/* Name Field */}
                     <div className="bg-background/60 rounded-lg p-3 border border-border/50">
                       <Label className="text-xs text-muted-foreground uppercase tracking-wider">
-                        {language === 'TR' ? 'Ad Soyad' : 'Full Name'}
+                        {t('fullNameLabel')}
                       </Label>
                       {isEditingProfile ? (
                         <Input
                           value={profileData.full_name}
                           onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
-                          placeholder={language === 'TR' ? 'Adınız Soyadınız' : 'Your Name'}
+                          placeholder={t('yourNamePlaceholder')}
                           className="mt-1 bg-background"
                         />
                       ) : (
                         <p className="text-base font-semibold mt-1 flex items-center gap-2">
                           {profileData.full_name || (
                             <span className="text-muted-foreground italic">
-                              {language === 'TR' ? 'Belirtilmemiş' : 'Not specified'}
+                              {t('notSpecified')}
                             </span>
                           )}
                         </p>
@@ -595,7 +590,7 @@ const CustomerHome = () => {
                     <div className="bg-background/60 rounded-lg p-3 border border-border/50">
                       <Label className="text-xs text-muted-foreground uppercase tracking-wider flex items-center gap-1">
                         <Phone className="h-3 w-3" />
-                        {language === 'TR' ? 'Telefon' : 'Phone'}
+                        {t('phoneLabel')}
                       </Label>
                       {isEditingProfile ? (
                         <PhoneInput
@@ -608,7 +603,7 @@ const CustomerHome = () => {
                           {profileData.phone || (
                             <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
                               <span className="inline-flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                              {language === 'TR' ? 'Lütfen ekleyin' : 'Please add'}
+                              {t('pleaseAdd')}
                             </span>
                           )}
                         </p>
@@ -621,7 +616,7 @@ const CustomerHome = () => {
                       <p className="text-base font-semibold mt-1 flex items-center gap-2">
                         {user?.email}
                         <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
-                          {language === 'TR' ? 'Doğrulandı' : 'Verified'}
+                          {t('verified')}
                         </Badge>
                       </p>
                     </div>
@@ -629,11 +624,11 @@ const CustomerHome = () => {
                     {/* Member Since */}
                     <div className="flex items-center justify-between pt-2 border-t border-border/50">
                       <span className="text-xs text-muted-foreground">
-                        {language === 'TR' ? 'Üyelik' : 'Member since'}
+                        {t('memberSince')}
                       </span>
                       <Badge variant="secondary" className="text-xs">
                         <Star className="h-3 w-3 mr-1" />
-                        VIP {language === 'TR' ? 'Müşteri' : 'Customer'}
+                        VIP
                       </Badge>
                     </div>
                   </CardContent>
@@ -644,7 +639,7 @@ const CustomerHome = () => {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
                       <Globe className="h-4 w-4" />
-                      {language === 'TR' ? 'Dil Seçimi' : 'Language'}
+                      {t('languageLabel')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -659,11 +654,11 @@ const CustomerHome = () => {
                 <Button 
                   variant="outline" 
                   className="w-full justify-between bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
-                  onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
+                  onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank')}
                 >
                   <span className="flex items-center gap-2 text-green-700 dark:text-green-300">
                     <MessageCircle className="h-4 w-4" />
-                    {language === 'TR' ? 'WhatsApp Destek' : 'WhatsApp Support'}
+                    {t('whatsAppSupport')}
                   </span>
                   <ChevronRight className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </Button>
@@ -676,7 +671,7 @@ const CustomerHome = () => {
                 >
                   <span className="flex items-center gap-2 text-red-700 dark:text-red-300">
                     <PhoneCall className="h-4 w-4" />
-                    {language === 'TR' ? 'Acil Durum Hattı' : 'Emergency Hotline'}
+                    {t('emergencyHotline')}
                   </span>
                   <span className="text-xs text-red-600 dark:text-red-400 font-mono">{EMERGENCY_PHONE.replace('+90', '+90 ')}</span>
                 </Button>
@@ -689,7 +684,7 @@ const CustomerHome = () => {
                 >
                   <span className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    {language === 'TR' ? 'Profili Düzenle' : 'Edit Profile'}
+                    {t('editProfile')}
                   </span>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -702,7 +697,7 @@ const CustomerHome = () => {
                 >
                   <span className="flex items-center gap-2">
                     <Shield className="h-4 w-4" />
-                    {language === 'TR' ? 'Güvenlik Ayarları' : 'Security Settings'}
+                    {t('securitySettingsMenu')}
                   </span>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -714,7 +709,7 @@ const CustomerHome = () => {
                   onClick={signOut}
                 >
                   <LogOut className="h-4 w-4 mr-2" />
-                  {language === 'TR' ? 'Çıkış Yap' : 'Sign Out'}
+                  {t('logoutBtn')}
                 </Button>
               </div>
             </SheetContent>
@@ -779,7 +774,7 @@ const CustomerHome = () => {
                     <ClipboardList className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">{language === 'TR' ? 'Aktif' : 'Active'}</p>
+                    <p className="text-xs text-muted-foreground">{t('activeCount')}</p>
                     <p className="font-bold text-foreground">{activeBookingsCount}</p>
                   </div>
                 </div>
@@ -789,7 +784,7 @@ const CustomerHome = () => {
                     <CheckCircle className="h-4 w-4 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">{language === 'TR' ? 'Tamamlanan' : 'Completed'}</p>
+                    <p className="text-xs text-muted-foreground">{t('completedCount')}</p>
                     <p className="font-bold text-foreground">{completedReservations.length}</p>
                   </div>
                 </div>
@@ -813,12 +808,10 @@ const CustomerHome = () => {
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-amber-800 dark:text-amber-200">
-                      {language === 'TR' ? 'Telefon Numaranız Eksik' : 'Phone Number Missing'}
+                      {t('phoneNumberMissing')}
                     </p>
                     <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                      {language === 'TR' 
-                        ? 'Rezervasyonlarınız için telefon numaranızı ekleyin.' 
-                        : 'Please add your phone number for reservations.'}
+                      {t('addPhoneNumberMsg')}
                     </p>
                   </div>
                   <Button 
@@ -828,7 +821,7 @@ const CustomerHome = () => {
                     onClick={() => navigate('/customer/profile')}
                   >
                     <Edit2 className="h-3 w-3 mr-1" />
-                    {language === 'TR' ? 'Ekle' : 'Add'}
+                    {t('addBtn')}
                   </Button>
                 </div>
               </CardContent>
