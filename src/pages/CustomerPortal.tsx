@@ -42,20 +42,7 @@ import {
   History,
 } from "lucide-react";
 
-// Language options - All supported languages
-const LANGUAGES = [
-  { code: "EN" as Language, label: "English", flag: "🇬🇧" },
-  { code: "TR" as Language, label: "Türkçe", flag: "🇹🇷" },
-  { code: "DE" as Language, label: "Deutsch", flag: "🇩🇪" },
-  { code: "FR" as Language, label: "Français", flag: "🇫🇷" },
-  { code: "RU" as Language, label: "Русский", flag: "🇷🇺" },
-  { code: "UK" as Language, label: "Українська", flag: "🇺🇦" },
-  { code: "IT" as Language, label: "Italiano", flag: "🇮🇹" },
-  { code: "ES" as Language, label: "Español", flag: "🇪🇸" },
-  { code: "AR" as Language, label: "العربية", flag: "🇸🇦" },
-  { code: "JA" as Language, label: "日本語", flag: "🇯🇵" },
-] as const;
-
+import UniversalLanguageSelector, { LANGUAGES } from '@/components/UniversalLanguageSelector';
 import { WHATSAPP_NUMBER, EMERGENCY_PHONE } from "@/lib/contact";
 
 interface Reservation {
@@ -416,21 +403,7 @@ export default function CustomerPortal() {
           
           <div className="flex items-center gap-1 sm:gap-2">
             {/* Language Selector */}
-            <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
-              <SelectTrigger className="w-auto gap-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 h-8 sm:h-9 px-2 text-sm">
-                <Globe className="h-4 w-4" />
-                <SelectValue>
-                  {LANGUAGES.find((l) => l.code === language)?.flag}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {LANGUAGES.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    {lang.flag} {lang.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <UniversalLanguageSelector variant="header" />
             
             {/* Phone Badge */}
             <div className="flex items-center gap-1.5 text-xs sm:text-sm bg-primary-foreground/10 px-2 py-1.5 rounded-lg">
