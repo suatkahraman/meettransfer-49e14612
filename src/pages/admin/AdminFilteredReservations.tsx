@@ -4,13 +4,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Calendar, Clock, User, UserCheck, Pencil, Check, X, Car, Briefcase, Baby } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, UserCheck, Pencil, Check, X, Car, Briefcase, Baby, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
 import { toast } from 'sonner';
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 interface Reservation {
   id: string;
   reservation_code: string | null;
@@ -95,6 +104,8 @@ const AdminFilteredReservations = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [reservationToDelete, setReservationToDelete] = useState<Reservation | null>(null);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '-';
@@ -237,6 +248,35 @@ const AdminFilteredReservations = () => {
     }
   };
 
+  const handleDeleteClick = (reservation: Reservation) => {
+    setReservationToDelete(reservation);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!reservationToDelete) return;
+    
+    setProcessingId(reservationToDelete.id);
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .delete()
+        .eq('id', reservationToDelete.id);
+
+      if (error) throw error;
+
+      setReservations(prev => prev.filter(r => r.id !== reservationToDelete.id));
+      toast.success('Rezervasyon silindi');
+    } catch (error) {
+      console.error('Error deleting reservation:', error);
+      toast.error('Silme sırasında hata oluştu');
+    } finally {
+      setProcessingId(null);
+      setDeleteDialogOpen(false);
+      setReservationToDelete(null);
+    }
+  };
+
   const currentPath = `/admin/filtered-reservations?filter=${filter}`;
 
   return (
@@ -363,6 +403,17 @@ const AdminFilteredReservations = () => {
                           </Button>
                         </>
                       )}
+                      {filter === 'completed' && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteClick(reservation)}
+                          disabled={processingId === reservation.id}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Sil
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -379,6 +430,34 @@ const AdminFilteredReservations = () => {
           </div>
         )}
       </main>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Rezervasyonu Sil</AlertDialogTitle>
+            <AlertDialogDescription>
+              {reservationToDelete && (
+                <>
+                  <strong>{reservationToDelete.reservation_code}</strong> kodlu rezervasyonu silmek istediğinizden emin misiniz?
+                  <br /><br />
+                  <span className="font-medium">{reservationToDelete.customer_name}</span> - {format(new Date(reservationToDelete.pickup_date), 'dd MMMM yyyy', { locale: tr })}
+                  <br /><br />
+                  Bu işlem geri alınamaz ve rezervasyon kalıcı olarak silinecektir.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>İptal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Sil
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
