@@ -21,6 +21,11 @@ import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
+import BlogImageGallery from "@/components/website/BlogImageGallery";
+import vitoFamilyInterior from "@/assets/vito-family-interior.jpg";
+import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
+import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
+import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
 
 const AntalyaAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -330,6 +335,36 @@ const AntalyaAirportTransferGuide = () => {
             <li><strong>Düden Waterfalls:</strong> Stunning cascades near Antalya city</li>
             <li><strong>Olympos & Chimera:</strong> Ancient ruins and eternal flames on the Lycian coast</li>
           </ul>
+
+          {/* Image Gallery */}
+          <h3>{t("galleryTitle") || "Our Fleet Gallery"}</h3>
+          <div className="not-prose my-8">
+            <BlogImageGallery 
+              images={[
+                { 
+                  src: vitoFamilyInterior, 
+                  alt: "Mercedes Vito Family Interior Antalya Transfer",
+                  caption: "Spacious family-friendly interior"
+                },
+                { 
+                  src: vitoExteriorBlack, 
+                  alt: "Mercedes Vito VIP Exterior",
+                  caption: "Premium Mercedes Vito for resort transfers"
+                },
+                { 
+                  src: sprinterLuggage, 
+                  alt: "Mercedes Sprinter with luggage space",
+                  caption: "Ample luggage space for families"
+                },
+                { 
+                  src: vitoVipPassengersDay, 
+                  alt: "Happy passengers enjoying transfer",
+                  caption: "Comfortable journey to your resort"
+                },
+              ]}
+              columns={2}
+            />
+          </div>
 
           <h2>{t("blogAntalyaConclusion")}</h2>
           <p>
