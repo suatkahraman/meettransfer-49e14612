@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -7,14 +7,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, Trash2, UserPlus, Shield } from 'lucide-react';
+import { 
+  LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, 
+  Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
+  ChevronRight, Edit2, Save, X
+} from 'lucide-react';
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import { PhoneInput } from '@/components/ui/phone-input';
+import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+
 const reservationSchema = z.object({
   pickup: z.string().trim().min(2, "Pick-up point must be at least 2 characters").max(200, "Pick-up point is too long"),
   dropoff: z.string().trim().min(2, "Drop-off location must be at least 2 characters").max(200, "Drop-off location is too long"),
@@ -26,7 +35,6 @@ const reservationSchema = z.object({
   paymentType: z.string().min(1, "Please select a payment type"),
 });
 
-// Vehicle types without prices - prices set by admin
 // Use centralized vehicle types
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 
@@ -39,11 +47,19 @@ const MAX_PASSENGERS = 15;
 
 const CustomerHome = () => {
   const { user, signOut } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
+  const [activeBookingsCount, setActiveBookingsCount] = useState(0);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    full_name: '',
+    phone: ''
+  });
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [formData, setFormData] = useState({
     pickup: '',
     dropoff: '',
@@ -54,6 +70,63 @@ const CustomerHome = () => {
     vehicleType: 'mercedes-vito',
     paymentType: 'cash',
   });
+
+  // Fetch active bookings count and profile
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.id) return;
+      
+      // Fetch active bookings
+      const { count } = await supabase
+        .from('reservations')
+        .select('*', { count: 'exact', head: true })
+        .eq('customer_id', user.id)
+        .in('status', ['awaiting-price', 'waiting_for_customer_approval', 'customer_approved', 'confirmed', 'sent_to_driver', 'pending_admin_review']);
+      
+      setActiveBookingsCount(count || 0);
+
+      // Fetch profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, phone')
+        .eq('id', user.id)
+        .single();
+
+      if (profile) {
+        setProfileData({
+          full_name: profile.full_name || '',
+          phone: profile.phone || ''
+        });
+      }
+    };
+
+    fetchData();
+  }, [user?.id]);
+
+  const handleSaveProfile = async () => {
+    if (!user?.id) return;
+    
+    setIsSavingProfile(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          full_name: profileData.full_name.trim(),
+          phone: profileData.phone.trim(),
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      toast.success(language === 'TR' ? 'Profil güncellendi' : 'Profile updated');
+      setIsEditingProfile(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update profile');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   const addPassenger = () => {
     if (passengerNames.length < MAX_PASSENGERS) {
@@ -77,7 +150,6 @@ const CustomerHome = () => {
     e.preventDefault();
     setErrors({});
 
-    // Validate passenger names
     const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
     if (validPassengerNames.length === 0) {
       setErrors({ passengerNames: t('passengerRequired') });
@@ -85,7 +157,6 @@ const CustomerHome = () => {
       return;
     }
 
-    // Validate form data
     const result = reservationSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -121,7 +192,6 @@ const CustomerHome = () => {
 
       if (error) throw error;
 
-      // Notify admin about new reservation
       try {
         const notifyResponse = await supabase.functions.invoke('notify-admin-new-reservation', {
           body: {
@@ -135,11 +205,9 @@ const CustomerHome = () => {
 
         if (notifyResponse.error) {
           console.error('Admin notification error:', notifyResponse.error);
-          // Don't show error to customer, just log it
         }
       } catch (notifyError) {
         console.error('Failed to notify admin:', notifyError);
-        // Don't block the user - reservation was created successfully
       }
 
       toast.success(t('reservationSubmitted'));
@@ -154,43 +222,181 @@ const CustomerHome = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
       <header className="bg-primary text-primary-foreground py-3 px-3 sm:py-4 sm:px-6 flex justify-between items-center sticky top-0 z-10 safe-area-inset-top">
         <h1 className="text-lg sm:text-2xl font-serif font-bold truncate">Meet Transfer</h1>
         <div className="flex items-center gap-1 sm:gap-2">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/customer/bookings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 sm:h-10 px-2 sm:px-4 text-sm sm:text-base"
-          >
-            <Calendar className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">{t('myBookings')}</span>
-          </Button>
           <NotificationBell />
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate('/security-settings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-            title={t('securitySettings') || 'Security Settings'}
-          >
-            <Shield className="h-5 w-5 sm:h-6 sm:w-6" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={signOut} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-          >
-            <LogOut className="h-5 w-5 sm:h-6 sm:w-6" />
-          </Button>
+          
+          {/* Settings Sheet */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
+              >
+                <Settings className="h-5 w-5 sm:h-6 sm:w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  {language === 'TR' ? 'Ayarlar' : 'Settings'}
+                </SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 space-y-6">
+                {/* Profile Section */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        {language === 'TR' ? 'Profil Bilgileri' : 'Profile Info'}
+                      </CardTitle>
+                      {!isEditingProfile ? (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setIsEditingProfile(true)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setIsEditingProfile(false)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={handleSaveProfile}
+                            disabled={isSavingProfile}
+                          >
+                            <Save className="h-4 w-4 text-primary" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">
+                        {language === 'TR' ? 'Ad Soyad' : 'Full Name'}
+                      </Label>
+                      {isEditingProfile ? (
+                        <Input
+                          value={profileData.full_name}
+                          onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                          placeholder={language === 'TR' ? 'Adınız Soyadınız' : 'Your Name'}
+                        />
+                      ) : (
+                        <p className="text-sm font-medium">
+                          {profileData.full_name || (language === 'TR' ? 'Belirtilmemiş' : 'Not specified')}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">
+                        {language === 'TR' ? 'Telefon' : 'Phone'}
+                      </Label>
+                      {isEditingProfile ? (
+                        <PhoneInput
+                          value={profileData.phone}
+                          onChange={(value) => setProfileData({ ...profileData, phone: value })}
+                        />
+                      ) : (
+                        <p className="text-sm font-medium">
+                          {profileData.phone || (language === 'TR' ? 'Belirtilmemiş' : 'Not specified')}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Email</Label>
+                      <p className="text-sm font-medium">{user?.email}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Notification Settings */}
+                <NotificationSettingsPanel language={language === 'TR' ? 'TR' : 'EN'} />
+
+                {/* Security Settings */}
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate('/security-settings')}
+                >
+                  <span className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    {language === 'TR' ? 'Güvenlik Ayarları' : 'Security Settings'}
+                  </span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+
+                {/* Logout */}
+                <Button 
+                  variant="destructive" 
+                  className="w-full"
+                  onClick={signOut}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  {language === 'TR' ? 'Çıkış Yap' : 'Sign Out'}
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </header>
 
-      <main className="container mx-auto py-8 px-4">
-        <Card className="max-w-2xl mx-auto">
+      <main className="container mx-auto py-4 px-3 sm:py-8 sm:px-4 max-w-4xl">
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {/* New Reservation Card */}
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow bg-primary text-primary-foreground"
+            onClick={() => {
+              const formElement = document.getElementById('booking-form');
+              formElement?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[100px]">
+              <Plus className="h-8 w-8 mb-2" />
+              <span className="font-medium text-sm">
+                {language === 'TR' ? 'Yeni Rezervasyon' : 'New Reservation'}
+              </span>
+            </CardContent>
+          </Card>
+
+          {/* My Bookings Card */}
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => navigate('/customer/bookings')}
+          >
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[100px] relative">
+              <ClipboardList className="h-8 w-8 mb-2 text-primary" />
+              <span className="font-medium text-sm">
+                {language === 'TR' ? 'Rezervasyonlarım' : 'My Bookings'}
+              </span>
+              {activeBookingsCount > 0 && (
+                <Badge className="absolute top-2 right-2 bg-orange-500 hover:bg-orange-600">
+                  {activeBookingsCount}
+                </Badge>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Booking Form */}
+        <Card id="booking-form" className="scroll-mt-20">
           <CardHeader>
-            <CardTitle className="text-2xl font-serif flex items-center gap-2">
-              <Car className="h-6 w-6" />
+            <CardTitle className="text-xl sm:text-2xl font-serif flex items-center gap-2">
+              <Car className="h-5 w-5 sm:h-6 sm:w-6" />
               {t('bookYourTransfer')}
             </CardTitle>
             <CardDescription>
@@ -198,7 +404,7 @@ const CustomerHome = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {/* Pick-up Point */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
@@ -230,7 +436,7 @@ const CustomerHome = () => {
               </div>
 
               {/* Date & Time */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
@@ -294,7 +500,7 @@ const CustomerHome = () => {
                         variant="outline" 
                         size="icon"
                         onClick={() => removePassenger(index)}
-                        className="text-destructive hover:bg-destructive/10"
+                        className="text-destructive hover:bg-destructive/10 shrink-0"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -330,7 +536,7 @@ const CustomerHome = () => {
                 {errors.passengerPhone && <p className="text-sm text-destructive">{errors.passengerPhone}</p>}
               </div>
 
-              {/* Vehicle Type - No prices shown */}
+              {/* Vehicle Type */}
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
@@ -362,9 +568,9 @@ const CustomerHome = () => {
                 </RadioGroup>
               </div>
 
-              {/* Info message instead of price */}
+              {/* Info message */}
               <div className="bg-muted p-4 rounded-lg text-center">
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {t('priceApprovalMessage')}
                 </p>
               </div>
