@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { 
   LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, 
   Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
-  ChevronRight, Edit2, Save, X
+  ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall
 } from 'lucide-react';
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
@@ -321,6 +321,32 @@ const CustomerHome = () => {
 
                 {/* Notification Settings */}
                 <NotificationSettingsPanel language={language === 'TR' ? 'TR' : 'EN'} />
+
+                {/* WhatsApp Support */}
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
+                  onClick={() => window.open('https://wa.me/905321748390?text=' + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
+                >
+                  <span className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                    <MessageCircle className="h-4 w-4" />
+                    {language === 'TR' ? 'WhatsApp Destek' : 'WhatsApp Support'}
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-green-600 dark:text-green-400" />
+                </Button>
+
+                {/* Emergency Call */}
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
+                  onClick={() => window.open('tel:+905321748390', '_self')}
+                >
+                  <span className="flex items-center gap-2 text-red-700 dark:text-red-300">
+                    <PhoneCall className="h-4 w-4" />
+                    {language === 'TR' ? 'Acil Durum Hattı' : 'Emergency Hotline'}
+                  </span>
+                  <span className="text-xs text-red-600 dark:text-red-400 font-mono">+90 532 174 8390</span>
+                </Button>
 
                 {/* Security Settings */}
                 <Button 
