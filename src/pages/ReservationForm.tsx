@@ -106,6 +106,8 @@ const ReservationForm = () => {
     passengers: number;
     luggage: number;
     available: boolean;
+    sanityFailed?: boolean;
+    sanityReason?: string;
   }>>([]);
   const [selectedVehicleForConfirm, setSelectedVehicleForConfirm] = useState<string>('');
   const [pendingFormData, setPendingFormData] = useState<typeof defaultFormData | null>(null);
@@ -1243,91 +1245,150 @@ const ReservationForm = () => {
                 {t('vehicleType')}
               </h3>
               
-              {fetchedVehiclePrices.length > 0 ? (
-                <div className="grid gap-4">
-                  {fetchedVehiclePrices.map((vehicle, index) => {
-                    const isSelected = selectedVehicleForConfirm === vehicle.vehicleType;
-                    const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
-                    const previousPrice = previousVehiclePrices[vehicle.vehicleType];
-                    const hasDiscount = previousPrice && vehicle.price && previousPrice > vehicle.price;
-                    
-                    return (
-                      <div 
-                        key={vehicle.vehicleType} 
-                        className={cn(
-                          "relative transition-all duration-500 opacity-0 translate-y-4",
-                          "animate-[slideUp_0.5s_ease-out_forwards]",
-                          discountJustApplied && hasDiscount && "animate-fade-in"
-                        )}
-                        style={{ animationDelay: `${index * 150}ms` }}
-                      >
-                        {/* Best Price Badge for first available vehicle */}
-                        {index === 0 && vehicle.available && vehicle.price && !discountJustApplied && (
-                          <div className="absolute -top-3 left-4 z-10">
-                            <span className="inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-lg">
-                              <Sparkles className="h-3 w-3" />
-                              {t('language') === 'TR' ? 'En İyi Fiyat' : 'Best Price'}
+              {/* Check if all vehicles have sanity failed or no available vehicles */}
+              {(() => {
+                const hasAnyAvailable = fetchedVehiclePrices.some(v => v.available && v.price);
+                const hasSanityFailed = fetchedVehiclePrices.some(v => v.sanityFailed);
+                
+                // All sanity failed - show preparing price message
+                if (fetchedVehiclePrices.length > 0 && !hasAnyAvailable && hasSanityFailed) {
+                  return (
+                    <div className="space-y-4">
+                      {/* Price being prepared message */}
+                      <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-950/30 dark:to-sky-950/30 border border-blue-200 dark:border-blue-800">
+                        <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0 animate-pulse">
+                          <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-blue-800 dark:text-blue-200">
+                            {t('language') === 'TR' 
+                              ? '🕐 Fiyat Hazırlanıyor' 
+                              : '🕐 Price Being Prepared'}
+                          </p>
+                          <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                            {t('language') === 'TR'
+                              ? 'Bu güzergah için özel fiyatlandırma yapılıyor. En kısa sürede size en iyi fiyatımızla dönüş yapacağız. Rezervasyonunuz oluşturulacak ve fiyat e-posta ile iletilecektir.'
+                              : 'Special pricing is being prepared for this route. We will get back to you with our best price shortly. Your reservation will be created and the price will be sent via email.'}
+                          </p>
+                          <div className="flex items-center gap-2 mt-3">
+                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            <span className="text-xs text-blue-600 dark:text-blue-400">
+                              {t('language') === 'TR' ? 'Genellikle 30 dakika içinde yanıt' : 'Usually responded within 30 minutes'}
                             </span>
                           </div>
-                        )}
-                        
-                        {/* Previous Price Strike-through */}
-                        {hasDiscount && discountJustApplied && (
-                          <div className="absolute -top-2 right-4 z-10">
-                            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full line-through">
-                              {previousPrice} {vehicle.currency}
-                            </span>
-                          </div>
-                        )}
-                        
-                        <VehicleSelectionCard
-                          vehicleType={vehicle.vehicleType}
-                          isSelected={isSelected}
-                          onSelect={(v) => setSelectedVehicleForConfirm(v)}
-                          price={vehicle.price}
-                          currency={vehicle.currency}
-                          showPrice={true}
-                          isRecommended={isRecommended}
-                          available={vehicle.available}
-                        />
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                /* No prices found - show all vehicles without prices */
-                <div className="space-y-4">
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 mb-4">
-                    <Coins className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm">
-                      <p className="font-medium">
-                        {t('language') === 'TR' 
-                          ? 'Bu güzergah için otomatik fiyat bulunamadı' 
-                          : 'No automatic pricing found for this route'}
-                      </p>
-                      <p className="text-amber-700 dark:text-amber-300 mt-1">
-                        {t('language') === 'TR'
-                          ? 'Rezervasyon onaylandıktan sonra fiyat bilgisi tarafınıza iletilecektir.'
-                          : 'Price will be provided after your reservation is confirmed.'}
-                      </p>
+                      
+                      {/* Show vehicles without prices */}
+                      {vehicleTypes.map(vehicle => (
+                        <VehicleSelectionCard
+                          key={vehicle.value}
+                          vehicleType={vehicle.value}
+                          isSelected={selectedVehicleForConfirm === vehicle.value}
+                          onSelect={(v) => setSelectedVehicleForConfirm(v)}
+                          price={null}
+                          currency={preferredCurrency}
+                          showPrice={false}
+                          isRecommended={vehicle.value === recommendedVehicle}
+                          available={true}
+                        />
+                      ))}
                     </div>
+                  );
+                }
+                
+                // Normal flow - has available vehicles with prices
+                if (fetchedVehiclePrices.length > 0 && hasAnyAvailable) {
+                  return (
+                    <div className="grid gap-4">
+                      {fetchedVehiclePrices.map((vehicle, index) => {
+                        const isSelected = selectedVehicleForConfirm === vehicle.vehicleType;
+                        const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
+                        const previousPrice = previousVehiclePrices[vehicle.vehicleType];
+                        const hasDiscount = previousPrice && vehicle.price && previousPrice > vehicle.price;
+                        
+                        return (
+                          <div 
+                            key={vehicle.vehicleType} 
+                            className={cn(
+                              "relative transition-all duration-500 opacity-0 translate-y-4",
+                              "animate-[slideUp_0.5s_ease-out_forwards]",
+                              discountJustApplied && hasDiscount && "animate-fade-in"
+                            )}
+                            style={{ animationDelay: `${index * 150}ms` }}
+                          >
+                            {/* Best Price Badge for first available vehicle */}
+                            {index === 0 && vehicle.available && vehicle.price && !discountJustApplied && (
+                              <div className="absolute -top-3 left-4 z-10">
+                                <span className="inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-lg">
+                                  <Sparkles className="h-3 w-3" />
+                                  {t('language') === 'TR' ? 'En İyi Fiyat' : 'Best Price'}
+                                </span>
+                              </div>
+                            )}
+                            
+                            {/* Previous Price Strike-through */}
+                            {hasDiscount && discountJustApplied && (
+                              <div className="absolute -top-2 right-4 z-10">
+                                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full line-through">
+                                  {previousPrice} {vehicle.currency}
+                                </span>
+                              </div>
+                            )}
+                            
+                            <VehicleSelectionCard
+                              vehicleType={vehicle.vehicleType}
+                              isSelected={isSelected}
+                              onSelect={(v) => setSelectedVehicleForConfirm(v)}
+                              price={vehicle.price}
+                              currency={vehicle.currency}
+                              showPrice={true}
+                              isRecommended={isRecommended}
+                              available={vehicle.available}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+                
+                // Fallback - no prices found at all
+                return (
+                  /* No prices found - show all vehicles without prices */
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 mb-4">
+                      <Coins className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-medium">
+                          {t('language') === 'TR' 
+                            ? 'Bu güzergah için otomatik fiyat bulunamadı' 
+                            : 'No automatic pricing found for this route'}
+                        </p>
+                        <p className="text-amber-700 dark:text-amber-300 mt-1">
+                          {t('language') === 'TR'
+                            ? 'Rezervasyon onaylandıktan sonra fiyat bilgisi tarafınıza iletilecektir.'
+                            : 'Price will be provided after your reservation is confirmed.'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {vehicleTypes.map(vehicle => (
+                      <VehicleSelectionCard
+                        key={vehicle.value}
+                        vehicleType={vehicle.value}
+                        isSelected={selectedVehicleForConfirm === vehicle.value}
+                        onSelect={(v) => setSelectedVehicleForConfirm(v)}
+                        price={null}
+                        currency={preferredCurrency}
+                        showPrice={false}
+                        isRecommended={vehicle.value === recommendedVehicle}
+                        available={true}
+                      />
+                    ))}
                   </div>
-                  
-                  {vehicleTypes.map(vehicle => (
-                    <VehicleSelectionCard
-                      key={vehicle.value}
-                      vehicleType={vehicle.value}
-                      isSelected={selectedVehicleForConfirm === vehicle.value}
-                      onSelect={(v) => setSelectedVehicleForConfirm(v)}
-                      price={null}
-                      currency={preferredCurrency}
-                      showPrice={false}
-                      isRecommended={vehicle.value === recommendedVehicle}
-                      available={true}
-                    />
-                  ))}
-                </div>
-              )}
+                );
+              })()}
             </div>
 
             {/* Baby Seat and Luggage */}
