@@ -143,13 +143,18 @@ const AdminRegionPrices = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPrice, setEditingPrice] = useState<RegionPrice | null>(null);
   
-  // Airport form state
+  // Airport form state - now supports all 4 vehicles at once
   const [formCity, setFormCity] = useState('');
   const [formAirport, setFormAirport] = useState('');
   const [formDistrict, setFormDistrict] = useState('');
-  const [formVehicleType, setFormVehicleType] = useState('mercedes-vito');
-  const [formPrice, setFormPrice] = useState('');
   const [formCurrency, setFormCurrency] = useState('EUR');
+  // Individual prices for each vehicle type
+  const [formPrices, setFormPrices] = useState<Record<string, string>>({
+    'mercedes-vito': '',
+    'vip-mercedes': '',
+    'maybach-minibus': '',
+    'minibus': '',
+  });
   const [saving, setSaving] = useState(false);
   
   // Test state
@@ -172,14 +177,19 @@ const AdminRegionPrices = () => {
   const [isIntercityDialogOpen, setIsIntercityDialogOpen] = useState(false);
   const [editingIntercityPrice, setEditingIntercityPrice] = useState<IntercityPrice | null>(null);
   
-  // Intercity form state
+  // Intercity form state - now supports all 4 vehicles at once
   const [intercityFromCity, setIntercityFromCity] = useState('');
   const [intercityFromDistrict, setIntercityFromDistrict] = useState('');
   const [intercityToCity, setIntercityToCity] = useState('');
   const [intercityToDistrict, setIntercityToDistrict] = useState('');
-  const [intercityVehicleType, setIntercityVehicleType] = useState('mercedes-vito');
-  const [intercityPrice, setIntercityPrice] = useState('');
   const [intercityCurrency, setIntercityCurrency] = useState('EUR');
+  // Individual prices for each vehicle type
+  const [intercityPricesForm, setIntercityPricesForm] = useState<Record<string, string>>({
+    'mercedes-vito': '',
+    'vip-mercedes': '',
+    'maybach-minibus': '',
+    'minibus': '',
+  });
   const [intericitySaving, setIntercitySaving] = useState(false);
 
   useEffect(() => {
@@ -227,20 +237,39 @@ const AdminRegionPrices = () => {
     setFormCity('');
     setFormAirport('');
     setFormDistrict('');
-    setFormVehicleType('mercedes-vito');
-    setFormPrice('');
+    setFormPrices({
+      'mercedes-vito': '',
+      'vip-mercedes': '',
+      'maybach-minibus': '',
+      'minibus': '',
+    });
     setFormCurrency('EUR');
     setEditingPrice(null);
   };
 
   const openEditDialog = (price: RegionPrice) => {
+    // When editing, we need to load all prices for this city/airport/district
     setEditingPrice(price);
     setFormCity(price.city);
     setFormAirport(price.airport || '');
     setFormDistrict(price.district);
-    setFormVehicleType(price.vehicle_type);
-    setFormPrice(price.price.toString());
     setFormCurrency(price.price_currency);
+    
+    // Load all vehicle prices for this route
+    const routePrices: Record<string, string> = {
+      'mercedes-vito': '',
+      'vip-mercedes': '',
+      'maybach-minibus': '',
+      'minibus': '',
+    };
+    
+    prices
+      .filter(p => p.city === price.city && p.airport === price.airport && p.district === price.district)
+      .forEach(p => {
+        routePrices[p.vehicle_type] = p.price.toString();
+      });
+    
+    setFormPrices(routePrices);
     setIsDialogOpen(true);
   };
 
@@ -250,53 +279,69 @@ const AdminRegionPrices = () => {
   };
 
   const handleSave = async () => {
-    const priceValue = parseFloat(formPrice) || 0;
-    if (!formCity || !formDistrict || priceValue <= 0) {
-      toast.error('Lütfen tüm zorunlu alanları doldurun');
+    // Check that at least one price is entered
+    const hasAnyPrice = Object.values(formPrices).some(p => parseFloat(p) > 0);
+    if (!formCity || !formDistrict || !hasAnyPrice) {
+      toast.error('Lütfen tüm zorunlu alanları doldurun ve en az bir araç fiyatı girin');
       return;
     }
 
     setSaving(true);
     try {
-      const priceData = {
-        city: formCity,
-        airport: formAirport || null,
-        district: formDistrict,
-        vehicle_type: formVehicleType,
-        price: priceValue,
-        price_currency: formCurrency,
-        is_active: true,
-      };
+      // Process each vehicle type
+      for (const vehicleType of VEHICLE_TYPES) {
+        const priceValue = parseFloat(formPrices[vehicleType.value]) || 0;
+        
+        // Check if a price already exists for this combination
+        const existingPrice = prices.find(
+          p => p.city === formCity && 
+               p.airport === (formAirport || null) && 
+               p.district === formDistrict && 
+               p.vehicle_type === vehicleType.value
+        );
+        
+        if (priceValue > 0) {
+          const priceData = {
+            city: formCity,
+            airport: formAirport || null,
+            district: formDistrict,
+            vehicle_type: vehicleType.value,
+            price: priceValue,
+            price_currency: formCurrency,
+            is_active: true,
+          };
 
-      if (editingPrice) {
-        const { error } = await supabase
-          .from('region_prices')
-          .update(priceData)
-          .eq('id', editingPrice.id);
-
-        if (error) throw error;
-        toast.success('Fiyat güncellendi');
-      } else {
-        const { error } = await supabase
-          .from('region_prices')
-          .insert([priceData]);
-
-        if (error) {
-          if (error.code === '23505') {
-            toast.error('Bu kombinasyon için fiyat zaten mevcut');
-            return;
+          if (existingPrice) {
+            // Update existing price
+            const { error } = await supabase
+              .from('region_prices')
+              .update(priceData)
+              .eq('id', existingPrice.id);
+            if (error) throw error;
+          } else {
+            // Insert new price
+            const { error } = await supabase
+              .from('region_prices')
+              .insert([priceData]);
+            if (error && error.code !== '23505') throw error;
           }
-          throw error;
+        } else if (existingPrice) {
+          // Delete price if set to 0 or empty
+          const { error } = await supabase
+            .from('region_prices')
+            .delete()
+            .eq('id', existingPrice.id);
+          if (error) throw error;
         }
-        toast.success('Fiyat eklendi');
       }
 
+      toast.success('Fiyatlar kaydedildi');
       setIsDialogOpen(false);
       resetForm();
       fetchPrices();
     } catch (error) {
-      console.error('Error saving price:', error);
-      toast.error('Fiyat kaydedilirken hata oluştu');
+      console.error('Error saving prices:', error);
+      toast.error('Fiyatlar kaydedilirken hata oluştu');
     } finally {
       setSaving(false);
     }
@@ -326,8 +371,12 @@ const AdminRegionPrices = () => {
     setIntercityFromDistrict('');
     setIntercityToCity('');
     setIntercityToDistrict('');
-    setIntercityVehicleType('mercedes-vito');
-    setIntercityPrice('');
+    setIntercityPricesForm({
+      'mercedes-vito': '',
+      'vip-mercedes': '',
+      'maybach-minibus': '',
+      'minibus': '',
+    });
     setIntercityCurrency('EUR');
     setEditingIntercityPrice(null);
   };
@@ -338,9 +387,26 @@ const AdminRegionPrices = () => {
     setIntercityFromDistrict(price.from_district || '');
     setIntercityToCity(price.to_city);
     setIntercityToDistrict(price.to_district || '');
-    setIntercityVehicleType(price.vehicle_type);
-    setIntercityPrice(price.price.toString());
     setIntercityCurrency(price.price_currency);
+    
+    // Load all vehicle prices for this route
+    const routePrices: Record<string, string> = {
+      'mercedes-vito': '',
+      'vip-mercedes': '',
+      'maybach-minibus': '',
+      'minibus': '',
+    };
+    
+    intercityPrices
+      .filter(p => p.from_city === price.from_city && 
+                   p.from_district === price.from_district && 
+                   p.to_city === price.to_city && 
+                   p.to_district === price.to_district)
+      .forEach(p => {
+        routePrices[p.vehicle_type] = p.price.toString();
+      });
+    
+    setIntercityPricesForm(routePrices);
     setIsIntercityDialogOpen(true);
   };
 
@@ -350,9 +416,10 @@ const AdminRegionPrices = () => {
   };
 
   const handleIntercitySave = async () => {
-    const priceValue = parseFloat(intercityPrice) || 0;
-    if (!intercityFromCity || !intercityToCity || priceValue <= 0) {
-      toast.error('Lütfen tüm zorunlu alanları doldurun');
+    // Check that at least one price is entered
+    const hasAnyPrice = Object.values(intercityPricesForm).some(p => parseFloat(p) > 0);
+    if (!intercityFromCity || !intercityToCity || !hasAnyPrice) {
+      toast.error('Lütfen tüm zorunlu alanları doldurun ve en az bir araç fiyatı girin');
       return;
     }
 
@@ -363,46 +430,62 @@ const AdminRegionPrices = () => {
 
     setIntercitySaving(true);
     try {
-      const priceData = {
-        from_city: intercityFromCity,
-        from_district: intercityFromDistrict || null,
-        to_city: intercityToCity,
-        to_district: intercityToDistrict || null,
-        vehicle_type: intercityVehicleType,
-        price: priceValue,
-        price_currency: intercityCurrency,
-        is_active: true,
-      };
+      // Process each vehicle type
+      for (const vehicleType of VEHICLE_TYPES) {
+        const priceValue = parseFloat(intercityPricesForm[vehicleType.value]) || 0;
+        
+        // Check if a price already exists for this combination
+        const existingPrice = intercityPrices.find(
+          p => p.from_city === intercityFromCity && 
+               p.from_district === (intercityFromDistrict || null) && 
+               p.to_city === intercityToCity && 
+               p.to_district === (intercityToDistrict || null) && 
+               p.vehicle_type === vehicleType.value
+        );
+        
+        if (priceValue > 0) {
+          const priceData = {
+            from_city: intercityFromCity,
+            from_district: intercityFromDistrict || null,
+            to_city: intercityToCity,
+            to_district: intercityToDistrict || null,
+            vehicle_type: vehicleType.value,
+            price: priceValue,
+            price_currency: intercityCurrency,
+            is_active: true,
+          };
 
-      if (editingIntercityPrice) {
-        const { error } = await supabase
-          .from('intercity_prices')
-          .update(priceData)
-          .eq('id', editingIntercityPrice.id);
-
-        if (error) throw error;
-        toast.success('Şehirler arası fiyat güncellendi');
-      } else {
-        const { error } = await supabase
-          .from('intercity_prices')
-          .insert([priceData]);
-
-        if (error) {
-          if (error.code === '23505') {
-            toast.error('Bu kombinasyon için fiyat zaten mevcut');
-            return;
+          if (existingPrice) {
+            // Update existing price
+            const { error } = await supabase
+              .from('intercity_prices')
+              .update(priceData)
+              .eq('id', existingPrice.id);
+            if (error) throw error;
+          } else {
+            // Insert new price
+            const { error } = await supabase
+              .from('intercity_prices')
+              .insert([priceData]);
+            if (error && error.code !== '23505') throw error;
           }
-          throw error;
+        } else if (existingPrice) {
+          // Delete price if set to 0 or empty
+          const { error } = await supabase
+            .from('intercity_prices')
+            .delete()
+            .eq('id', existingPrice.id);
+          if (error) throw error;
         }
-        toast.success('Şehirler arası fiyat eklendi');
       }
 
+      toast.success('Şehirler arası fiyatlar kaydedildi');
       setIsIntercityDialogOpen(false);
       resetIntercityForm();
       fetchIntercityPrices();
     } catch (error) {
-      console.error('Error saving intercity price:', error);
-      toast.error('Fiyat kaydedilirken hata oluştu');
+      console.error('Error saving intercity prices:', error);
+      toast.error('Fiyatlar kaydedilirken hata oluştu');
     } finally {
       setIntercitySaving(false);
     }
@@ -708,42 +791,35 @@ const AdminRegionPrices = () => {
                         </Select>
                       </div>
 
+                      {/* All Vehicle Prices */}
+                      <div className="space-y-3">
+                        <Label>Araç Fiyatları *</Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {VEHICLE_TYPES.map(v => (
+                            <div key={v.value} className="space-y-1">
+                              <Label className="text-xs text-muted-foreground">{v.label}</Label>
+                              <MoneyInput
+                                value={formPrices[v.value]}
+                                onValueChange={(val) => setFormPrices(prev => ({ ...prev, [v.value]: val }))}
+                                placeholder="0"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                       <div className="space-y-2">
-                        <Label>Araç Tipi *</Label>
-                        <Select value={formVehicleType} onValueChange={setFormVehicleType}>
+                        <Label>Para Birimi</Label>
+                        <Select value={formCurrency} onValueChange={setFormCurrency}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {VEHICLE_TYPES.map(v => (
-                              <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                            {CURRENCIES.map(c => (
+                              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Fiyat *</Label>
-                          <MoneyInput
-                            value={formPrice}
-                            onValueChange={setFormPrice}
-                            placeholder="0"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Para Birimi</Label>
-                          <Select value={formCurrency} onValueChange={setFormCurrency}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {CURRENCIES.map(c => (
-                                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
                       </div>
                     </div>
                     <DialogFooter>
@@ -942,42 +1018,35 @@ const AdminRegionPrices = () => {
                         </div>
                       </div>
 
+                      {/* All Vehicle Prices */}
+                      <div className="space-y-3">
+                        <Label>Araç Fiyatları *</Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {VEHICLE_TYPES.map(v => (
+                            <div key={v.value} className="space-y-1">
+                              <Label className="text-xs text-muted-foreground">{v.label}</Label>
+                              <MoneyInput
+                                value={intercityPricesForm[v.value]}
+                                onValueChange={(val) => setIntercityPricesForm(prev => ({ ...prev, [v.value]: val }))}
+                                placeholder="0"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                       <div className="space-y-2">
-                        <Label>Araç Tipi *</Label>
-                        <Select value={intercityVehicleType} onValueChange={setIntercityVehicleType}>
+                        <Label>Para Birimi</Label>
+                        <Select value={intercityCurrency} onValueChange={setIntercityCurrency}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {VEHICLE_TYPES.map(v => (
-                              <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                            {CURRENCIES.map(c => (
+                              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Fiyat *</Label>
-                          <MoneyInput
-                            value={intercityPrice}
-                            onValueChange={setIntercityPrice}
-                            placeholder="0"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Para Birimi</Label>
-                          <Select value={intercityCurrency} onValueChange={setIntercityCurrency}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {CURRENCIES.map(c => (
-                                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
                       </div>
                     </div>
                     <DialogFooter>

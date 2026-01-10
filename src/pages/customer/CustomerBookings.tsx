@@ -210,13 +210,13 @@ const CustomerBookings = () => {
 
       if (error) {
         console.error('CustomerBookings: Edge function error:', error);
-        toast.error(language === 'TR' ? 'Rezervasyonlar yüklenemedi' : 'Failed to load reservations');
+        toast.error(t('failedToLoadReservations') || 'Failed to load reservations');
         return;
       }
 
       if (!response?.success) {
         console.error('CustomerBookings: API error:', response?.error);
-        toast.error(language === 'TR' ? 'Rezervasyonlar yüklenemedi' : 'Failed to load reservations');
+        toast.error(t('failedToLoadReservations') || 'Failed to load reservations');
         return;
       }
 
@@ -224,17 +224,17 @@ const CustomerBookings = () => {
       setReservations(response.reservations || []);
     } catch (err) {
       console.error('CustomerBookings: Unexpected error:', err);
-      toast.error(language === 'TR' ? 'Bir hata oluştu' : 'An error occurred');
+      toast.error(t('errorOccurred') || 'An error occurred');
     } finally {
       setLoading(false);
     }
-  }, [user, language]);
+  }, [user, language, t]);
 
   // Pull to refresh
   const handleRefresh = useCallback(async () => {
     await fetchReservations();
-    toast.success(language === 'TR' ? 'Yenilendi!' : 'Refreshed!');
-  }, [fetchReservations, language]);
+    toast.success(t('refreshedMsg') || 'Refreshed!');
+  }, [fetchReservations, t]);
 
   const { pullDistance, isRefreshing, isPulling, handlers } = usePullToRefresh({
     onRefresh: handleRefresh,
@@ -413,10 +413,8 @@ const CustomerBookings = () => {
                     <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t('myReservationsTitle')}</h1>
                     <p className="text-sm text-muted-foreground">
                       {reservations.length > 0 
-                        ? (language === 'TR' 
-                            ? `${reservations.length} rezervasyon bulundu` 
-                            : `${reservations.length} reservations found`)
-                        : (language === 'TR' ? 'Henüz rezervasyon yok' : 'No reservations yet')}
+                        ? `${reservations.length} ${t('reservationsFound') || 'reservations found'}`
+                        : (t('noReservationsYet') || 'No reservations yet')}
                     </p>
                   </div>
                 </div>
@@ -428,7 +426,7 @@ const CustomerBookings = () => {
                       <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto">
                         <AlertCircle className="h-5 w-5 text-purple-500" />
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">{language === 'TR' ? 'Bekleyen' : 'Pending'}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('pendingLabel') || 'Pending'}</p>
                       <p className="font-bold text-purple-600">{actionRequired.length}</p>
                     </div>
                   )}
@@ -437,7 +435,7 @@ const CustomerBookings = () => {
                       <div className="h-10 w-10 rounded-full bg-cyan-500/20 flex items-center justify-center mx-auto">
                         <Car className="h-5 w-5 text-cyan-500" />
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">{language === 'TR' ? 'Aktif' : 'Active'}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('activeLabel') || 'Active'}</p>
                       <p className="font-bold text-cyan-600">{sortedActiveReservations.length}</p>
                     </div>
                   )}
@@ -463,7 +461,7 @@ const CustomerBookings = () => {
               <div className="bg-primary/20 p-1.5 rounded-full">
                 <Plus className="h-4 w-4 text-primary" />
               </div>
-              <span className="text-xs font-semibold">{language === 'TR' ? 'Yeni' : 'New'}</span>
+              <span className="text-xs font-semibold">{t('newLabel') || 'New'}</span>
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -478,7 +476,7 @@ const CustomerBookings = () => {
               <div className="bg-blue-500/20 p-1.5 rounded-full">
                 <History className="h-4 w-4 text-blue-500" />
               </div>
-              <span className="text-xs font-semibold">{language === 'TR' ? 'Geçmiş' : 'History'}</span>
+              <span className="text-xs font-semibold">{t('historyLabel') || 'History'}</span>
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -487,9 +485,7 @@ const CustomerBookings = () => {
               className="flex flex-col items-center gap-1.5 h-auto py-3 w-full bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/30 hover:border-green-500/50 hover:bg-green-500/15 shadow-sm"
               onClick={() => {
                 window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-                  language === 'TR' 
-                    ? 'Merhaba, rezervasyonum hakkında bilgi almak istiyorum.' 
-                    : 'Hello, I would like to get information about my reservation.'
+                  t('helloReservationInfoMsg') || 'Hello, I would like to get information about my reservation.'
                 )}`, '_blank');
               }}
             >
@@ -508,7 +504,7 @@ const CustomerBookings = () => {
               <div className="bg-orange-500/20 p-1.5 rounded-full">
                 <Settings className="h-4 w-4 text-orange-500" />
               </div>
-              <span className="text-xs font-semibold">{language === 'TR' ? 'Ayarlar' : 'Settings'}</span>
+              <span className="text-xs font-semibold">{t('settingsLabel') || 'Settings'}</span>
             </Button>
           </motion.div>
         </motion.div>
@@ -539,7 +535,7 @@ const CustomerBookings = () => {
             >
               <RefreshCw className="h-8 w-8 text-primary" />
             </motion.div>
-            <p className="mt-4 text-muted-foreground">{language === 'TR' ? 'Yükleniyor...' : 'Loading...'}</p>
+            <p className="mt-4 text-muted-foreground">{t('loading') || 'Loading...'}</p>
           </motion.div>
         ) : reservations.length === 0 ? (
           <motion.div 
@@ -941,15 +937,13 @@ const CustomerBookings = () => {
               type="button"
               onClick={() => {
                 const message = encodeURIComponent(
-                  language === 'TR' 
-                    ? 'Merhaba, destek almak istiyorum.' 
-                    : 'Hello, I would like to get support.'
+                  t('helloSupportMsg') || 'Hello, I would like to get support.'
                 );
                 window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
               }}
               size="lg"
               className="h-12 w-12 rounded-full shadow-lg bg-[#25D366] hover:bg-[#22c55e] text-white"
-              title={language === 'TR' ? 'WhatsApp Destek' : 'WhatsApp Support'}
+              title={t('whatsAppSupportTooltip') || 'WhatsApp Support'}
             >
               <MessageCircle className="h-5 w-5" />
             </Button>
