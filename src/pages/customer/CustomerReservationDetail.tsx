@@ -20,6 +20,8 @@ import MissingInfoAlerts from '@/components/customer/MissingInfoAlerts';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -103,7 +105,7 @@ const statusColors: Record<string, string> = {
 const CustomerReservationDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const { emailAdminPriceAccepted, emailAdminPriceRejected, emailAdminReservationCancelled, emailDriverReservationCancelled } = useEmailNotifications();
   const { isSubscribed, subscribe, unsubscribe, isLoading: pushLoading
@@ -135,7 +137,7 @@ const CustomerReservationDetail = () => {
     return labels[status] || status;
   };
 
-  const fetchReservation = async () => {
+  const fetchReservation = useCallback(async () => {
     if (!id || !user) return;
 
     const { data, error } = await supabase
@@ -206,7 +208,19 @@ const CustomerReservationDetail = () => {
     }
     
     setLoading(false);
-  };
+  }, [id, user, navigate]);
+
+  // Pull to refresh
+  const handlePullRefresh = useCallback(async () => {
+    await fetchReservation();
+    toast.success(language === 'TR' ? 'Yenilendi!' : 'Refreshed!');
+  }, [fetchReservation, language]);
+
+  const { pullDistance, isRefreshing: isPullRefreshing, isPulling, handlers: pullHandlers } = usePullToRefresh({
+    onRefresh: handlePullRefresh,
+    threshold: 80,
+    disabled: loading
+  });
 
   useEffect(() => {
     fetchReservation();
@@ -608,7 +622,14 @@ const CustomerReservationDetail = () => {
         initial="hidden"
         animate="visible"
         className="container mx-auto py-6 px-4 max-w-2xl"
+        {...pullHandlers}
       >
+        <PullToRefreshIndicator
+          pullDistance={pullDistance}
+          isRefreshing={isPullRefreshing}
+          isPulling={isPulling}
+          language={language === 'TR' ? 'TR' : 'EN'}
+        />
         {/* Title Section */}
         <motion.div variants={itemVariants} className="mb-6">
           <div className="flex items-center gap-2 mb-2">
