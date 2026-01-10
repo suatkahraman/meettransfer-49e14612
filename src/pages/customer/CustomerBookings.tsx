@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import NotificationBell from '@/components/NotificationBell';
@@ -204,6 +204,24 @@ const CustomerBookings = () => {
     return status === 'waiting_for_customer_approval';
   };
 
+  // Check if reservation can be edited (editable statuses)
+  const canEditReservation = (status: string) => {
+    const editableStatuses = [
+      'awaiting-price',
+      'waiting_for_customer_approval',
+      'customer_approved',
+      'confirmed',
+      'sent_to_driver',
+      'pending_admin_review'
+    ];
+    return editableStatuses.includes(status);
+  };
+
+  // Check if awaiting price (needs highlighting)
+  const isAwaitingPrice = (status: string) => {
+    return status === 'awaiting-price';
+  };
+
   // Separate reservations by action required
   const actionRequired = reservations.filter(r => getActionRequired(r.status));
   const otherReservations = reservations.filter(r => !getActionRequired(r.status));
@@ -361,6 +379,22 @@ const CustomerBookings = () => {
                           {t('tapToReviewPrice')}
                         </p>
                       </div>
+
+                      {/* Edit Button */}
+                      {canEditReservation(reservation.status) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/customer/reservation/${reservation.id}/edit`);
+                          }}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          {t('editReservation') || 'Edit Reservation'}
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -376,7 +410,11 @@ const CustomerBookings = () => {
                 {otherReservations.map((reservation) => (
                   <Card 
                     key={reservation.id} 
-                    className="cursor-pointer hover:shadow-md transition-shadow"
+                    className={`cursor-pointer hover:shadow-md transition-shadow ${
+                      isAwaitingPrice(reservation.status) 
+                        ? 'border-orange-300 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-950/20' 
+                        : ''
+                    }`}
                     onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
                   >
                     <CardHeader className="pb-2">
@@ -467,9 +505,28 @@ const CustomerBookings = () => {
                       )}
 
                       {reservation.status === 'awaiting-price' && (
-                        <div className="bg-orange-50 dark:bg-orange-950/30 p-2 rounded text-center text-sm text-orange-700 dark:text-orange-300">
-                          {t('waitingForPrice')}
+                        <div className="bg-orange-100 dark:bg-orange-950/50 p-3 rounded-lg text-center border border-orange-300 dark:border-orange-700">
+                          <p className="text-sm font-medium text-orange-700 dark:text-orange-300 flex items-center justify-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            {t('waitingForPrice')}
+                          </p>
                         </div>
+                      )}
+
+                      {/* Edit Button */}
+                      {canEditReservation(reservation.status) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/customer/reservation/${reservation.id}/edit`);
+                          }}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          {t('editReservation') || 'Edit Reservation'}
+                        </Button>
                       )}
 
                       {reservation.status === 'sent_to_driver' && (

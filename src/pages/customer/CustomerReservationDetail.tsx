@@ -103,7 +103,7 @@ const CustomerReservationDetail = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { emailAdminPriceAccepted, emailAdminPriceRejected, emailAdminReservationCancelled } = useEmailNotifications();
+  const { emailAdminPriceAccepted, emailAdminPriceRejected, emailAdminReservationCancelled, emailDriverReservationCancelled } = useEmailNotifications();
   const { isSubscribed, subscribe, unsubscribe, isLoading: pushLoading
  } = usePushNotifications();
   const [reservation, setReservation] = useState<Reservation | null>(null);
@@ -488,6 +488,7 @@ const CustomerReservationDetail = () => {
             .single();
 
           if (driver?.user_id) {
+            // Send in-app notification to driver
             await supabase.functions.invoke('create-notification', {
               body: {
                 user_id: driver.user_id,
@@ -501,6 +502,13 @@ const CustomerReservationDetail = () => {
           }
         } catch (e) {
           console.error('Failed to notify driver:', e);
+        }
+
+        // Send email to driver about cancellation
+        try {
+          await emailDriverReservationCancelled(reservation.id);
+        } catch (e) {
+          console.error('Failed to send driver cancellation email:', e);
         }
       }
 
