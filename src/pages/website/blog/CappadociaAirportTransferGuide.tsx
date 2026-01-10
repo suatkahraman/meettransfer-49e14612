@@ -32,54 +32,12 @@ const CappadociaAirportTransferGuide = () => {
   const { getLocalizedPath, t, language } = useLanguage();
 
   const faqItems = [
-    { 
-      question: language === 'TR' 
-        ? "Kapadokya'ya en yakın havalimanı hangisi?" 
-        : "Which airport is closest to Cappadocia?",
-      answer: language === 'TR'
-        ? "Nevşehir-Kapadokya Havalimanı (NAV) Göreme'ye sadece 40 km mesafededir. Kayseri Havalimanı (ASR) ise 80 km uzaklıktadır ancak daha fazla uçuş seçeneği sunar."
-        : "Nevsehir-Kapadocia Airport (NAV) is only 40 km from Göreme. Kayseri Airport (ASR) is 80 km away but offers more flight options."
-    },
-    { 
-      question: language === 'TR' 
-        ? "Havalimanından otele transfer ne kadar sürer?" 
-        : "How long is the transfer from airport to hotel?",
-      answer: language === 'TR'
-        ? "Nevşehir Havalimanı'ndan Göreme'ye yaklaşık 35-45 dakika, Kayseri Havalimanı'ndan ise 60-75 dakika sürer."
-        : "From Nevsehir Airport to Göreme it takes approximately 35-45 minutes, from Kayseri Airport it takes 60-75 minutes."
-    },
-    { 
-      question: language === 'TR' 
-        ? "Balon turu için transfer hizmeti var mı?" 
-        : "Is there transfer service for balloon tours?",
-      answer: language === 'TR'
-        ? "Evet, sabah 04:00-05:00 arası balon turları için özel erken sabah transfer hizmetimiz mevcuttur. Otel alımı dahildir."
-        : "Yes, we offer early morning transfer service for balloon tours between 04:00-05:00 AM. Hotel pickup is included."
-    },
-    { 
-      question: language === 'TR' 
-        ? "Transfer fiyatlarına neler dahil?" 
-        : "What is included in transfer prices?",
-      answer: language === 'TR'
-        ? "Tüm vergiler, uçuş takibi, ücretsiz bekleme süresi (60 dk), kapıdan kapıya hizmet, çocuk koltuğu (talep üzerine) ve 7/24 destek dahildir."
-        : "All taxes, flight tracking, free waiting time (60 min), door-to-door service, child seat (on request), and 24/7 support are included."
-    },
-    { 
-      question: language === 'TR' 
-        ? "Kapadokya'da hangi bölgelere transfer yapıyorsunuz?" 
-        : "Which areas do you transfer to in Cappadocia?",
-      answer: language === 'TR'
-        ? "Göreme, Ürgüp, Uçhisar, Avanos, Nevşehir merkez, Ortahisar, Mustafapaşa ve tüm butik otellere transfer hizmeti sunuyoruz."
-        : "We offer transfers to Göreme, Ürgüp, Uchisar, Avanos, Nevşehir city center, Ortahisar, Mustafapaşa and all boutique hotels."
-    },
-    { 
-      question: language === 'TR' 
-        ? "Gece geç saatlerde transfer mümkün mü?" 
-        : "Is late night transfer available?",
-      answer: language === 'TR'
-        ? "Evet, 7/24 transfer hizmeti sunuyoruz. Gece uçuşları için ek ücret alınmaz."
-        : "Yes, we offer 24/7 transfer service. There is no extra charge for night flights."
-    },
+    { question: t("blogCappadociaFaq1Q"), answer: t("blogCappadociaFaq1A") },
+    { question: t("blogCappadociaFaq2Q"), answer: t("blogCappadociaFaq2A") },
+    { question: t("blogCappadociaFaq3Q"), answer: t("blogCappadociaFaq3A") },
+    { question: t("blogCappadociaFaq4Q"), answer: t("blogCappadociaFaq4A") },
+    { question: t("blogCappadociaFaq5Q"), answer: t("blogCappadociaFaq5A") },
+    { question: t("blogCappadociaFaq6Q"), answer: t("blogCappadociaFaq6A") },
   ];
 
   // Sistemdeki gerçek fiyatlar
@@ -185,14 +143,10 @@ const CappadociaAirportTransferGuide = () => {
         <header className="mb-12">
           <Badge variant="secondary" className="mb-4">Cappadocia</Badge>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-            {language === 'TR' 
-              ? "Kapadokya Havalimanı Transfer Rehberi 2025: Fiyatlar, Balon Turları ve Oteller" 
-              : "Cappadocia Airport Transfer Guide 2025: Prices, Balloon Tours & Hotels"}
+            {t("blogCappadociaH1")}
           </h1>
           <p className="text-xl text-muted-foreground mb-6">
-            {language === 'TR'
-              ? "Kayseri (ASR) ve Nevşehir-Kapadokya (NAV) havalimanlarından Göreme, Ürgüp ve tüm Kapadokya bölgelerine VIP transfer hizmeti. Güncel fiyatlar, balon turu transferleri ve popüler otel bilgileri."
-              : "VIP transfer service from Kayseri (ASR) and Nevsehir-Cappadocia (NAV) airports to Göreme, Ürgüp and all Cappadocia regions. Current prices, balloon tour transfers and popular hotel information."}
+            {t("blogCappadociaIntro")}
           </p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -228,31 +182,21 @@ const CappadociaAirportTransferGuide = () => {
 
         {/* Table of Contents */}
         <TableOfContents items={[
-          { id: "cappadocia-how-to-get", title: language === 'TR' ? "Kapadokya'ya Nasıl Ulaşılır?" : "How to Get to Cappadocia?" },
-          { id: "cappadocia-kayseri-prices", title: language === 'TR' ? "Kayseri Havalimanı Transfer Fiyatları 2025" : "Kayseri Airport Transfer Prices 2025" },
-          { id: "cappadocia-nevsehir-prices", title: language === 'TR' ? "Nevşehir Havalimanı Transfer Fiyatları 2025" : "Nevsehir Airport Transfer Prices 2025" },
-          { id: "cappadocia-balloon", title: language === 'TR' ? "Balon Turu Transferleri" : "Balloon Tour Transfers" },
-          { id: "cappadocia-hotels", title: language === 'TR' ? "Popüler Oteller" : "Popular Hotels" },
-          { id: "cappadocia-why-choose", title: language === 'TR' ? "Neden Özel Transfer?" : "Why Choose Private Transfer?" },
+          { id: "cappadocia-how-to-get", title: t("blogCappadociaTocHowToGet") },
+          { id: "cappadocia-kayseri-prices", title: t("blogCappadociaTocKayseriPrices") },
+          { id: "cappadocia-nevsehir-prices", title: t("blogCappadociaTocNevsehirPrices") },
+          { id: "cappadocia-balloon", title: t("blogCappadociaTocBalloon") },
+          { id: "cappadocia-hotels", title: t("blogCappadociaTocHotels") },
+          { id: "cappadocia-why-choose", title: t("blogCappadociaTocWhyChoose") },
         ]} />
 
         {/* Article Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <h2 id="cappadocia-how-to-get">
-            {language === 'TR' 
-              ? "Kapadokya'ya Nasıl Ulaşılır?" 
-              : "How to Get to Cappadocia?"}
+            {t("blogCappadociaTocHowToGet")}
           </h2>
-          <p>
-            {language === 'TR'
-              ? "Kapadokya, Türkiye'nin en büyüleyici destinasyonlarından biridir. Peri bacaları, yeraltı şehirleri ve eşsiz balon turlarıyla ünlü bu bölgeye iki havalimanından ulaşabilirsiniz: Nevşehir-Kapadokya Havalimanı (NAV) ve Kayseri Erkilet Havalimanı (ASR). Her iki havalimanı da yılda milyonlarca turisti Kapadokya'nın büyüleyici manzaralarına taşıyor."
-              : "Cappadocia is one of Turkey's most enchanting destinations. Famous for its fairy chimneys, underground cities, and unique balloon tours, you can reach this region from two airports: Nevsehir-Cappadocia Airport (NAV) and Kayseri Erkilet Airport (ASR). Both airports transport millions of tourists annually to Cappadocia's mesmerizing landscapes."}
-          </p>
-          <p>
-            {language === 'TR'
-              ? "Nevşehir Havalimanı Göreme'ye daha yakındır (40 km), ancak Kayseri Havalimanı daha fazla uçuş seçeneği sunar. İstanbul, Ankara ve diğer büyük şehirlerden düzenli seferler yapılmaktadır. Özellikle yaz aylarında ve balon turu sezonu olan Nisan-Kasım döneminde uçuşların erken dolması nedeniyle erken rezervasyon önemlidir."
-              : "Nevsehir Airport is closer to Göreme (40 km), but Kayseri Airport offers more flight options. Regular flights operate from Istanbul, Ankara, and other major cities. Early booking is important, especially during summer months and the balloon tour season from April to November, as flights fill up quickly."}
-          </p>
+          <p>{t("blogCappadociaHowToGetP1")}</p>
+          <p>{t("blogCappadociaHowToGetP2")}</p>
 
           {/* Two Airport Comparison */}
           <div className="not-prose my-8 grid md:grid-cols-2 gap-4">
@@ -264,10 +208,10 @@ const CappadociaAirportTransferGuide = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <p><strong>{language === 'TR' ? 'Mesafe:' : 'Distance:'}</strong> 80 km {language === 'TR' ? "Göreme'ye" : 'to Göreme'}</p>
-                <p><strong>{language === 'TR' ? 'Süre:' : 'Duration:'}</strong> 60-75 {language === 'TR' ? 'dakika' : 'minutes'}</p>
-                <p><strong>{language === 'TR' ? 'Avantaj:' : 'Advantage:'}</strong> {language === 'TR' ? 'Daha fazla uçuş seçeneği' : 'More flight options'}</p>
-                <p><strong>{language === 'TR' ? 'Dezavantaj:' : 'Disadvantage:'}</strong> {language === 'TR' ? 'Daha uzun transfer süresi' : 'Longer transfer time'}</p>
+                <p><strong>{t("blogCappadociaDistance")}:</strong> 80 km {t("blogCappadociaToGoreme")}</p>
+                <p><strong>{t("blogCappadociaDuration")}:</strong> 60-75 {t("blogCappadociaMinutes")}</p>
+                <p><strong>{t("blogCappadociaAdvantage")}:</strong> {t("blogCappadociaMoreFlights")}</p>
+                <p><strong>{t("blogCappadociaDisadvantage")}:</strong> {t("blogCappadociaLongerTransfer")}</p>
               </CardContent>
             </Card>
             <Card className="bg-accent/5 border-accent/20">
@@ -278,32 +222,26 @@ const CappadociaAirportTransferGuide = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <p><strong>{language === 'TR' ? 'Mesafe:' : 'Distance:'}</strong> 40 km {language === 'TR' ? "Göreme'ye" : 'to Göreme'}</p>
-                <p><strong>{language === 'TR' ? 'Süre:' : 'Duration:'}</strong> 35-45 {language === 'TR' ? 'dakika' : 'minutes'}</p>
-                <p><strong>{language === 'TR' ? 'Avantaj:' : 'Advantage:'}</strong> {language === 'TR' ? 'Daha kısa transfer' : 'Shorter transfer'}</p>
-                <p><strong>{language === 'TR' ? 'Dezavantaj:' : 'Disadvantage:'}</strong> {language === 'TR' ? 'Sınırlı uçuş' : 'Limited flights'}</p>
+                <p><strong>{t("blogCappadociaDistance")}:</strong> 40 km {t("blogCappadociaToGoreme")}</p>
+                <p><strong>{t("blogCappadociaDuration")}:</strong> 35-45 {t("blogCappadociaMinutes")}</p>
+                <p><strong>{t("blogCappadociaAdvantage")}:</strong> {t("blogCappadociaShorterTransfer")}</p>
+                <p><strong>{t("blogCappadociaDisadvantage")}:</strong> {t("blogCappadociaLimitedFlights")}</p>
               </CardContent>
             </Card>
           </div>
 
           <h2 id="cappadocia-kayseri-prices">
-            {language === 'TR' 
-              ? "Kayseri Havalimanı Transfer Fiyatları 2025" 
-              : "Kayseri Airport Transfer Prices 2025"}
+            {t("blogCappadociaTocKayseriPrices")}
           </h2>
-          <p>
-            {language === 'TR'
-              ? "Kayseri Erkilet Havalimanı, İstanbul ve Ankara'dan çok sayıda uçuş alır. Aşağıdaki tabloda güncel transfer fiyatlarını bulabilirsiniz:"
-              : "Kayseri Erkilet Airport receives numerous flights from Istanbul and Ankara. You can find current transfer prices in the table below:"}
-          </p>
+          <p>{t("blogCappadociaKayseriPricesP1")}</p>
 
           <div className="overflow-x-auto not-prose my-8">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{language === 'TR' ? 'Bölge' : 'Area'}</TableHead>
-                  <TableHead>{language === 'TR' ? 'Mesafe' : 'Distance'}</TableHead>
-                  <TableHead>{language === 'TR' ? 'Süre' : 'Duration'}</TableHead>
+                  <TableHead>{t("blogCappadociaArea")}</TableHead>
+                  <TableHead>{t("blogCappadociaDistance")}</TableHead>
+                  <TableHead>{t("blogCappadociaDuration")}</TableHead>
                   <TableHead>Mercedes Vito</TableHead>
                   <TableHead>VIP Mercedes</TableHead>
                   <TableHead>Maybach</TableHead>
@@ -327,23 +265,17 @@ const CappadociaAirportTransferGuide = () => {
           </div>
 
           <h2 id="cappadocia-nevsehir-prices">
-            {language === 'TR' 
-              ? "Nevşehir Havalimanı Transfer Fiyatları 2025" 
-              : "Nevsehir Airport Transfer Prices 2025"}
+            {t("blogCappadociaTocNevsehirPrices")}
           </h2>
-          <p>
-            {language === 'TR'
-              ? "Nevşehir-Kapadokya Havalimanı, Göreme'ye en yakın havalimanıdır. Daha kısa transfer süresi ve uygun fiyatlar sunar:"
-              : "Nevsehir-Cappadocia Airport is the closest airport to Göreme. It offers shorter transfer times and affordable prices:"}
-          </p>
+          <p>{t("blogCappadociaNevsehirPricesP1")}</p>
 
           <div className="overflow-x-auto not-prose my-8">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{language === 'TR' ? 'Bölge' : 'Area'}</TableHead>
-                  <TableHead>{language === 'TR' ? 'Mesafe' : 'Distance'}</TableHead>
-                  <TableHead>{language === 'TR' ? 'Süre' : 'Duration'}</TableHead>
+                  <TableHead>{t("blogCappadociaArea")}</TableHead>
+                  <TableHead>{t("blogCappadociaDistance")}</TableHead>
+                  <TableHead>{t("blogCappadociaDuration")}</TableHead>
                   <TableHead>Mercedes Vito</TableHead>
                   <TableHead>VIP Mercedes</TableHead>
                   <TableHead>Maybach</TableHead>
@@ -367,80 +299,56 @@ const CappadociaAirportTransferGuide = () => {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            {language === 'TR'
-              ? "* Fiyatlar araç başına olup 1-6 yolcu için geçerlidir. Minibüs 7-14 yolcu için uygundur. Tüm fiyatlara KDV dahildir."
-              : "* Prices are per vehicle and valid for 1-6 passengers. Minibus is suitable for 7-14 passengers. All prices include VAT."}
+            {t("blogCappadociaPriceNote")}
           </p>
 
           {/* Balloon Tour Section */}
           <h2 id="cappadocia-balloon" className="flex items-center gap-2">
             <Sunrise className="h-6 w-6 text-orange-500" />
-            {language === 'TR' 
-              ? "Balon Turu Transferleri" 
-              : "Balloon Tour Transfers"}
+            {t("blogCappadociaBalloonTitle")}
           </h2>
-          <p>
-            {language === 'TR'
-              ? "Kapadokya'nın dünyaca ünlü balon turları her sabah gün doğumunda başlar. Balon turları için otelden alım genellikle 04:00-05:00 saatleri arasında yapılır. Meet Transfer olarak balon turu transferi hizmeti sunuyoruz:"
-              : "Cappadocia's world-famous balloon tours start at sunrise every morning. Hotel pickup for balloon tours is usually between 04:00-05:00 AM. As Meet Transfer, we offer balloon tour transfer service:"}
-          </p>
+          <p>{t("blogCappadociaBalloonP1")}</p>
 
           <div className="not-prose my-8">
             <Card className="bg-orange-500/10 border-orange-500/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Sunrise className="h-5 w-5 text-orange-500" />
-                  {language === 'TR' ? 'Balon Turu Transfer Paketi' : 'Balloon Tour Transfer Package'}
+                  {t("blogCappadociaBalloonPackage")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-4">
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>{language === 'TR' ? 'Erken sabah otel alımı (04:00-05:00)' : 'Early morning hotel pickup (04:00-05:00)'}</span>
+                  <span>{t("blogCappadociaBalloonPickup")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>{language === 'TR' ? 'Balon kalkış noktasına transfer' : 'Transfer to balloon launch site'}</span>
+                  <span>{t("blogCappadociaBalloonLaunch")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>{language === 'TR' ? 'Tur sonrası otele dönüş' : 'Return to hotel after tour'}</span>
+                  <span>{t("blogCappadociaBalloonReturn")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>{language === 'TR' ? 'Profesyonel şoför' : 'Professional driver'}</span>
+                  <span>{t("blogCappadociaBalloonDriver")}</span>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <h3>
-            {language === 'TR' 
-              ? "Popüler Balon Firmaları" 
-              : "Popular Balloon Companies"}
-          </h3>
+          <h3>{t("blogCappadociaBalloonCompanies")}</h3>
           <ul>
             {balloonCompanies.map((company, index) => (
               <li key={index}>{company}</li>
             ))}
           </ul>
-          <p>
-            {language === 'TR'
-              ? "Balon turları hava koşullarına bağlıdır ve özellikle kış aylarında iptal edilebilir. Balon turu rezervasyonunuzu yapmadan önce hava durumunu kontrol etmenizi öneririz. Balon turları genellikle 150-250 EUR arasında değişir ve yaklaşık 1 saat sürer."
-              : "Balloon tours are weather dependent and may be cancelled especially in winter months. We recommend checking the weather before making your balloon tour reservation. Balloon tours typically cost between 150-250 EUR and last approximately 1 hour."}
-          </p>
+          <p>{t("blogCappadociaBalloonNote")}</p>
 
           {/* Popular Hotels */}
-          <h2 id="cappadocia-hotels">
-            {language === 'TR' 
-              ? "Popüler Kapadokya Otelleri"
-              : "Popular Cappadocia Hotels"}
-          </h2>
-          <p>
-            {language === 'TR'
-              ? "Kapadokya'nın büyüleyici mağara otelleri dünyaca ünlüdür. En popüler otellere transfer hizmeti sunuyoruz:"
-              : "Cappadocia's enchanting cave hotels are world-famous. We offer transfer service to the most popular hotels:"}
-          </p>
+          <h2 id="cappadocia-hotels">{t("blogCappadociaHotelsTitle")}</h2>
+          <p>{t("blogCappadociaHotelsP1")}</p>
           
           <div className="not-prose my-8 grid grid-cols-2 md:grid-cols-4 gap-3">
             {popularHotels.map((hotel, index) => (
@@ -452,51 +360,43 @@ const CappadociaAirportTransferGuide = () => {
           </div>
 
           {/* Image Gallery */}
-          <h3>
-            {language === 'TR' 
-              ? "Kapadokya Transfer Galerisi" 
-              : "Cappadocia Transfer Gallery"}
-          </h3>
+          <h3>{t("blogCappadociaGallery")}</h3>
           <div className="not-prose my-8">
             <BlogImageGallery 
               images={[
                 { 
                   src: vitoCappadociaBalloon, 
-                  alt: language === 'TR' ? "Kapadokya balon manzarası ile VIP transfer" : "VIP transfer with Cappadocia balloon view",
-                  caption: language === 'TR' ? "Balon turları için sabah erken transfer" : "Early morning transfer for balloon tours"
+                  alt: t("blogCappadociaGalleryBalloon"),
+                  caption: t("blogCappadociaGalleryBalloon")
                 },
                 { 
                   src: vitoAirportWelcome, 
-                  alt: language === 'TR' ? "Havalimanı karşılama servisi" : "Airport meet & greet service",
-                  caption: language === 'TR' ? "İsim tabelası ile profesyonel karşılama" : "Professional welcome with name sign"
+                  alt: t("blogCappadociaGalleryAirport"),
+                  caption: t("blogCappadociaGalleryAirport")
                 },
                 { 
                   src: vitoVipCouple, 
-                  alt: language === 'TR' ? "VIP Mercedes iç mekan" : "VIP Mercedes interior",
-                  caption: language === 'TR' ? "Lüks ve konforlu iç mekan" : "Luxurious and comfortable interior"
+                  alt: t("blogCappadociaGalleryVip"),
+                  caption: t("blogCappadociaGalleryVip")
                 },
                 { 
                   src: vitoPassengerCouple, 
-                  alt: language === 'TR' ? "Mutlu müşteriler" : "Happy customers",
-                  caption: language === 'TR' ? "Rahat yolculuk deneyimi" : "Comfortable travel experience"
+                  alt: t("blogCappadociaGalleryComfort"),
+                  caption: t("blogCappadociaGalleryComfort")
                 },
               ]}
               columns={2}
             />
           </div>
 
-          <h2 id="cappadocia-why-choose">
-            {language === 'TR' 
-              ? "Transfer Hizmetimize Neler Dahil?" 
-              : "What's Included in Our Transfer Service?"}
-          </h2>
+          <h2 id="cappadocia-why-choose">{t("blogCappadociaIncludedTitle")}</h2>
 
           <div className="not-prose my-8">
             <Card className="bg-primary/5 border-primary/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
-                  {language === 'TR' ? 'Dahil Olan Hizmetler' : 'Included Services'}
+                  {t("blogCappadociaIncludedServices")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-4">
@@ -510,7 +410,7 @@ const CappadociaAirportTransferGuide = () => {
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>{language === 'TR' ? '60 dakika ücretsiz bekleme (havalimanı)' : '60 minutes free waiting (airport)'}</span>
+                  <span>{t("blogCappadociaInclude60min")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
@@ -518,7 +418,7 @@ const CappadociaAirportTransferGuide = () => {
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>{language === 'TR' ? 'Uçuş takip sistemi' : 'Flight tracking system'}</span>
+                  <span>{t("blogCappadociaIncludeFlightTracking")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
@@ -526,55 +426,39 @@ const CappadociaAirportTransferGuide = () => {
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>{language === 'TR' ? 'İsim tabelası ile karşılama' : 'Meet & greet with name sign'}</span>
+                  <span>{t("blogCappadociaIncludeMeetGreet")}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <span>{language === 'TR' ? '7/24 müşteri desteği' : '24/7 customer support'}</span>
+                  <span>{t("blogCappadociaInclude247")}</span>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <h2>
-            {language === 'TR' 
-              ? "Kapadokya'da Görülecek Yerler" 
-              : "Places to Visit in Cappadocia"}
-          </h2>
-          <p>
-            {language === 'TR'
-              ? "Kapadokya, UNESCO Dünya Mirası Listesi'nde yer alan eşsiz bir bölgedir. Transfer hizmetimizle aşağıdaki popüler noktalara ulaşabilirsiniz:"
-              : "Cappadocia is a unique region on the UNESCO World Heritage List. You can reach the following popular spots with our transfer service:"}
-          </p>
+          <h2>{t("blogCappadociaPlacesTitle")}</h2>
+          <p>{t("blogCappadociaPlacesP1")}</p>
           <ul>
-            <li><strong>Göreme Açık Hava Müzesi</strong> - {language === 'TR' ? 'Bizans dönemi kaya kiliseleri' : 'Byzantine-era rock churches'}</li>
-            <li><strong>Derinkuyu Yeraltı Şehri</strong> - {language === 'TR' ? '8 katlı antik yeraltı kompleksi' : '8-story ancient underground complex'}</li>
-            <li><strong>Kaymakli Yeraltı Şehri</strong> - {language === 'TR' ? 'En büyük yeraltı şehirlerinden biri' : 'One of the largest underground cities'}</li>
-            <li><strong>Uçhisar Kalesi</strong> - {language === 'TR' ? "Kapadokya'nın en yüksek noktası" : "Cappadocia's highest point"}</li>
-            <li><strong>Paşabağ (Mantar Kaya)</strong> - {language === 'TR' ? 'İkonik peri bacaları' : 'Iconic fairy chimneys'}</li>
-            <li><strong>Devrent Vadisi</strong> - {language === 'TR' ? 'Hayvan şeklinde kaya oluşumları' : 'Animal-shaped rock formations'}</li>
-            <li><strong>Avanos</strong> - {language === 'TR' ? 'Geleneksel çömlek yapımı merkezi' : 'Traditional pottery making center'}</li>
+            <li><strong>Göreme Açık Hava Müzesi</strong> - {t("blogCappadociaGoreme")}</li>
+            <li><strong>Derinkuyu Yeraltı Şehri</strong> - {t("blogCappadociaDerinkuyu")}</li>
+            <li><strong>Kaymakli Yeraltı Şehri</strong> - {t("blogCappadociaKaymakli")}</li>
+            <li><strong>Uçhisar Kalesi</strong> - {t("blogCappadociaUchisar")}</li>
+            <li><strong>Paşabağ (Mantar Kaya)</strong> - {t("blogCappadociaPasabag")}</li>
+            <li><strong>Devrent Vadisi</strong> - {t("blogCappadociaDevrent")}</li>
+            <li><strong>Avanos</strong> - {t("blogCappadociaAvanos")}</li>
           </ul>
 
-          <h2>
-            {language === 'TR' 
-              ? "Neden Meet Transfer?" 
-              : "Why Meet Transfer?"}
-          </h2>
-          <p>
-            {language === 'TR'
-              ? "Meet Transfer olarak Kapadokya bölgesinde 7/24 profesyonel transfer hizmeti sunuyoruz. Lüks Mercedes araç filomuz, deneyimli şoförlerimiz ve müşteri memnuniyeti odaklı hizmet anlayışımızla fark yaratıyoruz. Online rezervasyon sistemimiz sayesinde dakikalar içinde transfer rezervasyonunuzu tamamlayabilirsiniz."
-              : "As Meet Transfer, we offer 24/7 professional transfer service in the Cappadocia region. We make a difference with our luxury Mercedes fleet, experienced drivers, and customer satisfaction-focused service approach. With our online booking system, you can complete your transfer reservation within minutes."}
-          </p>
+          <h2>{t("blogCappadociaWhyMeetTitle")}</h2>
+          <p>{t("blogCappadociaWhyMeetP1")}</p>
           <p>
             <Link to={getLocalizedPath("/cappadocia-transfer")} className="text-primary hover:underline">
-              {language === 'TR' ? 'Kapadokya Transfer sayfamızı ziyaret edin' : 'Visit our Cappadocia Transfer page'}
+              {t("blogCappadociaVisitPage")}
             </Link>
             {' '}
-            {language === 'TR' ? 'veya' : 'or'}
+            {t("blogCappadociaOr")}
             {' '}
             <Link to={getLocalizedPath("/book")} className="text-primary hover:underline">
-              {language === 'TR' ? 'hemen online rezervasyon yapın' : 'book online now'}
+              {t("blogCappadociaBookNow")}
             </Link>.
           </p>
         </div>
@@ -583,15 +467,9 @@ const CappadociaAirportTransferGuide = () => {
         <div className="my-12 p-6 bg-muted/50 rounded-2xl">
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold text-lg">
-              {language === 'TR' ? 'Kapadokya Haritası' : 'Cappadocia Map'}
-            </h3>
+            <h3 className="font-semibold text-lg">{t("blogCappadociaMapTitle")}</h3>
           </div>
-          <p className="text-muted-foreground text-sm mb-4">
-            {language === 'TR'
-              ? "Kapadokya bölgesi Nevşehir, Ürgüp, Göreme, Uçhisar ve Avanos'u kapsar. Her iki havalimanından da tüm bu bölgelere transfer hizmeti sunuyoruz."
-              : "Cappadocia region covers Nevşehir, Ürgüp, Göreme, Uçhisar and Avanos. We offer transfer service to all these areas from both airports."}
-          </p>
+          <p className="text-muted-foreground text-sm mb-4">{t("blogCappadociaMapP1")}</p>
         </div>
 
         {/* CTA Section */}
