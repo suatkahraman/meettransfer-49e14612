@@ -267,6 +267,59 @@ const DriverJobList = () => {
       toast.success(t('jobCompleted'));
       // Remove from active list since it's now completed
       setReservations(prev => prev.filter(r => r.id !== id));
+
+      // Send review request email to customer
+      try {
+        // Get driver info
+        const { data: driverData } = await supabase
+          .from('drivers')
+          .select('name')
+          .eq('id', driverId)
+          .maybeSingle();
+
+        // Get customer email from profiles or user_roles
+        let customerEmail = '';
+        if (reservation.customer_id) {
+          const { data: userData } = await supabase.auth.admin.getUserById(reservation.customer_id);
+          if (userData?.user?.email) {
+            customerEmail = userData.user.email;
+          }
+        }
+
+        // If we couldn't get email from auth, try getting it from a different source
+        // For now, we'll use the notification email function which handles this
+        if (customerEmail || reservation.customer_id) {
+          await supabase.functions.invoke('send-review-request', {
+            body: {
+              reservationId: id,
+              customerEmail: customerEmail,
+              customerName: reservation.customer_name,
+              driverName: driverData?.name || 'Your driver',
+              reservationCode: reservation.reservation_code || id.slice(0, 8).toUpperCase(),
+              pickupDate: reservation.pickup_date,
+              pickup: reservation.pickup,
+              dropoff: reservation.dropoff,
+              pickupPlaceName: reservation.pickup_place_name,
+              dropoffPlaceName: reservation.dropoff_place_name,
+            }
+          });
+          console.log('Review request email sent for reservation:', id);
+        }
+
+        // Send completion notification to admins
+        await supabase.functions.invoke('create-notification', {
+          body: {
+            type: 'trip_completed',
+            title: '✅ Trip Completed',
+            message: `${reservation.reservation_code || id.slice(0, 8)} transfer completed by ${driverData?.name || 'driver'}.`,
+            notify_admins: true,
+            reservation_id: id,
+          }
+        });
+      } catch (e) {
+        console.error('Error sending review request:', e);
+        // Don't show error to driver, as the job was completed successfully
+      }
     }
   };
 
