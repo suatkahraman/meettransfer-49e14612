@@ -42,18 +42,21 @@ import {
   History,
 } from "lucide-react";
 
-// Language options
+// Language options - All supported languages
 const LANGUAGES = [
   { code: "EN" as Language, label: "English", flag: "🇬🇧" },
   { code: "TR" as Language, label: "Türkçe", flag: "🇹🇷" },
   { code: "DE" as Language, label: "Deutsch", flag: "🇩🇪" },
   { code: "FR" as Language, label: "Français", flag: "🇫🇷" },
   { code: "RU" as Language, label: "Русский", flag: "🇷🇺" },
+  { code: "UK" as Language, label: "Українська", flag: "🇺🇦" },
+  { code: "IT" as Language, label: "Italiano", flag: "🇮🇹" },
+  { code: "ES" as Language, label: "Español", flag: "🇪🇸" },
   { code: "AR" as Language, label: "العربية", flag: "🇸🇦" },
+  { code: "JA" as Language, label: "日本語", flag: "🇯🇵" },
 ] as const;
 
-const WHATSAPP_NUMBER = '905321748390';
-const EMERGENCY_PHONE = '+905321748390';
+import { WHATSAPP_NUMBER, EMERGENCY_PHONE } from "@/lib/contact";
 
 interface Reservation {
   id: string;
