@@ -300,16 +300,16 @@ const AgencyTransactionHistory = () => {
                   {cb.netBalance < 0 && (
                     <p className="text-xs text-green-600 mt-1">{t('creditBalance') || 'Alacak bakiyesi'}</p>
                   )}
-                  <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-muted-foreground">
-                    <div>
-                      <span>Toplam: </span>
-                      <span className="font-medium">{getCurrencySymbol(cb.currency)}{cb.totalCompanyAmount.toLocaleString('tr-TR')}</span>
+                    <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-muted-foreground">
+                      <div>
+                        <span>{t('total') || 'Toplam'}: </span>
+                        <span className="font-medium">{getCurrencySymbol(cb.currency)}{cb.totalCompanyAmount.toLocaleString('tr-TR')}</span>
+                      </div>
+                      <div>
+                        <span>{t('paid') || 'Ödenen'}: </span>
+                        <span className="font-medium text-blue-600">{getCurrencySymbol(cb.currency)}{cb.totalPaid.toLocaleString('tr-TR')}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span>Ödenen: </span>
-                      <span className="font-medium text-blue-600">{getCurrencySymbol(cb.currency)}{cb.totalPaid.toLocaleString('tr-TR')}</span>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             ))}
