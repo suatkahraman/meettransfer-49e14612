@@ -1314,9 +1314,9 @@ const ReservationForm = () => {
             )}
 
             {/* Vehicle Selection */}
-            <div className="mb-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Car className="h-5 w-5" />
+            <div className="mb-4 sm:mb-6">
+              <h3 className="font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                <Car className="h-4 w-4 sm:h-5 sm:w-5" />
                 {t('vehicleType')}
               </h3>
               
@@ -1328,27 +1328,27 @@ const ReservationForm = () => {
                 // All sanity failed - show preparing price message
                 if (fetchedVehiclePrices.length > 0 && !hasAnyAvailable && hasSanityFailed) {
                   return (
-                    <div className="space-y-4">
+                    <div className="space-y-2 sm:space-y-4">
                       {/* Price being prepared message */}
-                      <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-950/30 dark:to-sky-950/30 border border-blue-200 dark:border-blue-800">
-                        <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0 animate-pulse">
-                          <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-950/30 dark:to-sky-950/30 border border-blue-200 dark:border-blue-800">
+                        <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0 animate-pulse">
+                          <Clock className="h-4 w-4 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <div>
-                          <p className="font-semibold text-blue-800 dark:text-blue-200">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-sm sm:text-base text-blue-800 dark:text-blue-200">
                             {t('language') === 'TR' 
                               ? '🕐 Fiyat Hazırlanıyor' 
                               : '🕐 Price Being Prepared'}
                           </p>
-                          <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                          <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300 mt-1">
                             {t('language') === 'TR'
-                              ? 'Bu güzergah için özel fiyatlandırma yapılıyor. En kısa sürede size en iyi fiyatımızla dönüş yapacağız. Rezervasyonunuz oluşturulacak ve fiyat e-posta ile iletilecektir.'
-                              : 'Special pricing is being prepared for this route. We will get back to you with our best price shortly. Your reservation will be created and the price will be sent via email.'}
+                              ? 'Bu güzergah için özel fiyatlandırma yapılıyor. En kısa sürede size en iyi fiyatımızla dönüş yapacağız.'
+                              : 'Special pricing is being prepared for this route. We will get back to you shortly.'}
                           </p>
-                          <div className="flex items-center gap-2 mt-3">
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                            <span className="text-xs text-blue-600 dark:text-blue-400">
-                              {t('language') === 'TR' ? 'Genellikle 30 dakika içinde yanıt' : 'Usually responded within 30 minutes'}
+                          <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3">
+                            <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                            <span className="text-[10px] sm:text-xs text-blue-600 dark:text-blue-400">
+                              {t('language') === 'TR' ? '30 dk içinde yanıt' : 'Response within 30 min'}
                             </span>
                           </div>
                         </div>
@@ -1375,7 +1375,7 @@ const ReservationForm = () => {
                 // Normal flow - has available vehicles with prices
                 if (fetchedVehiclePrices.length > 0 && hasAnyAvailable) {
                   return (
-                    <div className="grid gap-4">
+                    <div className="grid gap-2 sm:gap-4">
                       {fetchedVehiclePrices.map((vehicle, index) => {
                         const isSelected = selectedVehicleForConfirm === vehicle.vehicleType;
                         const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
@@ -1392,20 +1392,21 @@ const ReservationForm = () => {
                             )}
                             style={{ animationDelay: `${index * 150}ms` }}
                           >
-                            {/* Best Price Badge for first available vehicle */}
+                        {/* Best Price Badge for first available vehicle */}
                             {index === 0 && vehicle.available && vehicle.price && !discountJustApplied && (
-                              <div className="absolute -top-3 left-4 z-10">
-                                <span className="inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-lg">
-                                  <Sparkles className="h-3 w-3" />
-                                  {t('language') === 'TR' ? 'En İyi Fiyat' : 'Best Price'}
+                              <div className="absolute -top-2 sm:-top-3 left-2 sm:left-4 z-10">
+                                <span className="inline-flex items-center gap-0.5 sm:gap-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full animate-pulse shadow-lg">
+                                  <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                                  <span className="hidden xs:inline">{t('language') === 'TR' ? 'En İyi Fiyat' : 'Best Price'}</span>
+                                  <span className="xs:hidden">🌟</span>
                                 </span>
                               </div>
                             )}
                             
                             {/* Previous Price Strike-through */}
                             {hasDiscount && discountJustApplied && (
-                              <div className="absolute -top-2 right-4 z-10">
-                                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full line-through">
+                              <div className="absolute -top-2 right-2 sm:right-4 z-10">
+                                <span className="bg-red-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full line-through">
                                   {previousPrice} {vehicle.currency}
                                 </span>
                               </div>
@@ -1431,19 +1432,19 @@ const ReservationForm = () => {
                 // Fallback - no prices found at all
                 return (
                   /* No prices found - show all vehicles without prices */
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 mb-4">
-                      <Coins className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm">
+                  <div className="space-y-2 sm:space-y-4">
+                    <div className="flex items-start gap-2 p-2 sm:p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 mb-3 sm:mb-4">
+                      <Coins className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs sm:text-sm">
                         <p className="font-medium">
                           {t('language') === 'TR' 
-                            ? 'Bu güzergah için otomatik fiyat bulunamadı' 
-                            : 'No automatic pricing found for this route'}
+                            ? 'Otomatik fiyat bulunamadı' 
+                            : 'No automatic pricing found'}
                         </p>
-                        <p className="text-amber-700 dark:text-amber-300 mt-1">
+                        <p className="text-amber-700 dark:text-amber-300 mt-0.5 sm:mt-1">
                           {t('language') === 'TR'
-                            ? 'Rezervasyon onaylandıktan sonra fiyat bilgisi tarafınıza iletilecektir.'
-                            : 'Price will be provided after your reservation is confirmed.'}
+                            ? 'Fiyat onaydan sonra iletilecek.'
+                            : 'Price provided after confirmation.'}
                         </p>
                       </div>
                     </div>
@@ -1467,65 +1468,67 @@ const ReservationForm = () => {
             </div>
 
             {/* Baby Seat and Luggage */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
               {/* Baby Seat Count */}
-              <div className="bg-muted/50 rounded-lg p-4">
-                <Label className="flex items-center gap-2 text-sm font-medium mb-3">
-                  <Baby className="h-4 w-4 text-primary" />
-                  {t('language') === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}
+              <div className="bg-muted/50 rounded-lg p-2.5 sm:p-4">
+                <Label className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium mb-2 sm:mb-3">
+                  <Baby className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                  <span className="hidden xs:inline">{t('language') === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}</span>
+                  <span className="xs:hidden">{t('language') === 'TR' ? 'Bebek K.' : 'Baby'}</span>
                 </Label>
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-center gap-2 sm:gap-3">
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7 sm:h-8 sm:w-8"
                     onClick={() => setBabySeatCount(Math.max(0, babySeatCount - 1))}
                     disabled={babySeatCount === 0}
                   >
-                    <Minus className="h-4 w-4" />
+                    <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  <span className="text-xl font-semibold w-8 text-center">{babySeatCount}</span>
+                  <span className="text-lg sm:text-xl font-semibold w-6 sm:w-8 text-center">{babySeatCount}</span>
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7 sm:h-8 sm:w-8"
                     onClick={() => setBabySeatCount(Math.min(3, babySeatCount + 1))}
                     disabled={babySeatCount >= 3}
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
 
               {/* Luggage Count */}
-              <div className="bg-muted/50 rounded-lg p-4">
-                <Label className="flex items-center gap-2 text-sm font-medium mb-3">
-                  <Luggage className="h-4 w-4 text-primary" />
-                  {t('language') === 'TR' ? 'Bagaj Sayısı' : 'Luggage Count'}
+              <div className="bg-muted/50 rounded-lg p-2.5 sm:p-4">
+                <Label className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium mb-2 sm:mb-3">
+                  <Luggage className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                  <span className="hidden xs:inline">{t('language') === 'TR' ? 'Bagaj Sayısı' : 'Luggage'}</span>
+                  <span className="xs:hidden">{t('language') === 'TR' ? 'Bagaj' : 'Bags'}</span>
                 </Label>
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-center gap-2 sm:gap-3">
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7 sm:h-8 sm:w-8"
                     onClick={() => setLuggageCount(Math.max(0, luggageCount - 1))}
                     disabled={luggageCount === 0}
                   >
-                    <Minus className="h-4 w-4" />
+                    <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  <span className="text-xl font-semibold w-8 text-center">{luggageCount}</span>
+                  <span className="text-lg sm:text-xl font-semibold w-6 sm:w-8 text-center">{luggageCount}</span>
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-7 w-7 sm:h-8 sm:w-8"
                     onClick={() => setLuggageCount(Math.min(20, luggageCount + 1))}
                     disabled={luggageCount >= 20}
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
