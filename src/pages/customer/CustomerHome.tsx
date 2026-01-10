@@ -38,11 +38,7 @@ const reservationSchema = z.object({
 // Use centralized vehicle types
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 
-const paymentTypes = [
-  { value: 'cash', label: 'Cash to Driver' },
-  { value: 'online', label: 'Online Payment Link' },
-];
-
+// Payment types will use translations
 const MAX_PASSENGERS = 15;
 
 const CustomerHome = () => {
@@ -559,12 +555,14 @@ const CustomerHome = () => {
                   {t('paymentType')}
                 </Label>
                 <RadioGroup value={formData.paymentType} onValueChange={(v) => setFormData({...formData, paymentType: v})}>
-                  {paymentTypes.map(payment => (
-                    <div key={payment.value} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                      <RadioGroupItem value={payment.value} id={payment.value} />
-                      <Label htmlFor={payment.value} className="cursor-pointer">{payment.label}</Label>
-                    </div>
-                  ))}
+                  <div className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="cash" id="cash" />
+                    <Label htmlFor="cash" className="cursor-pointer">{t('cashToDriver')}</Label>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="online" id="online" />
+                    <Label htmlFor="online" className="cursor-pointer">{t('onlinePaymentLink')}</Label>
+                  </div>
                 </RadioGroup>
               </div>
 
