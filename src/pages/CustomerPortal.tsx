@@ -440,6 +440,29 @@ export default function CustomerPortal() {
             </Button>
           </div>
 
+          {/* New Reservation Card */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01] bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0"
+            onClick={() => navigate('/book')}
+          >
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-primary-foreground/20 rounded-full p-3">
+                  <Plus className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="font-semibold text-lg">
+                    {language === 'TR' ? 'Yeni Rezervasyon' : 'New Reservation'}
+                  </p>
+                  <p className="text-sm opacity-80">
+                    {language === 'TR' ? 'Hemen transfer rezervasyonu yapın' : 'Book your transfer now'}
+                  </p>
+                </div>
+              </div>
+              <Car className="h-8 w-8 opacity-60" />
+            </CardContent>
+          </Card>
+
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">{t('yourBookings')}</h2>
