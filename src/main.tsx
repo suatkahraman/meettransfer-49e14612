@@ -4,24 +4,45 @@ import "./index.css";
 
 createRoot(document.getElementById("root")!).render(<App />);
 
-
-// Defer service worker registration (PWA + Push)
-if ('serviceWorker' in navigator) {
+// Service worker management:
+// - Keep ONLY push SW (/sw-push.js)
+// - Unregister any legacy PWA SW that may be caching old builds
+if ("serviceWorker" in navigator) {
   const registerServiceWorkers = async () => {
-    // Register push notification service worker
     try {
-      const registration = await navigator.serviceWorker.register('/sw-push.js');
-      console.log('Push SW registered:', registration.scope);
+      const regs = await navigator.serviceWorker.getRegistrations();
+      const keepSuffix = "/sw-push.js";
+
+      await Promise.all(
+        regs.map(async (reg) => {
+          const scriptURL =
+            reg.active?.scriptURL || reg.waiting?.scriptURL || reg.installing?.scriptURL;
+
+          // If it's not our push SW, remove it (prevents stale cached frontend).
+          if (scriptURL && !scriptURL.endsWith(keepSuffix)) {
+            await reg.unregister();
+          }
+        })
+      );
     } catch (error) {
-      console.log('Push SW registration failed:', error);
+      console.log("SW cleanup failed:", error);
     }
 
-    // PWA service worker registration disabled to prevent auto update/reload loops.
-    // We keep ONLY push SW (/sw-push.js).
+    // Register push notification service worker
+    try {
+      const registration = await navigator.serviceWorker.register("/sw-push.js");
+      await registration.update();
+      console.log("Push SW registered:", registration.scope);
+    } catch (error) {
+      console.log("Push SW registration failed:", error);
+    }
+
+    // PWA caching service worker registration intentionally disabled.
   };
 
-  // Use setTimeout to defer SW registration outside critical path
-  window.addEventListener('load', () => {
-    setTimeout(registerServiceWorkers, 3000);
+  // Defer SW registration outside critical path
+  window.addEventListener("load", () => {
+    setTimeout(registerServiceWorkers, 1000);
   });
 }
+
