@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, AlertCircle, Share2, Check } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Share2, Check, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
 
@@ -58,6 +58,7 @@ const SignupScreen = () => {
   const [googleError, setGoogleError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { isIOS, isStandalone } = usePWADetect();
@@ -381,15 +382,30 @@ const SignupScreen = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="password">{t('password')}</Label>
-                <Input 
-                  id="password" 
-                  name="password" 
-                  type="password" 
-                  placeholder="Ab2215" 
-                  required 
-                  className="h-12"
-                  autoComplete="new-password"
-                />
+                <div className="relative">
+                  <Input 
+                    id="password" 
+                    name="password" 
+                    type={showPassword ? 'text' : 'password'} 
+                    placeholder="Ab2215" 
+                    required 
+                    className="h-12 pr-12"
+                    autoComplete="new-password"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {t('passwordFormat')}
                 </p>
