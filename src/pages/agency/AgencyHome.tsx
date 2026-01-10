@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt, Volume2, History, AlertCircle } from 'lucide-react';
+import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt, Volume2, History, AlertCircle, Shield } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import AgencyLanguageSelector from '@/components/agency/AgencyLanguageSelector';
 import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
@@ -571,6 +571,15 @@ const AgencyHome = () => {
             className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9 hidden sm:flex"
           >
             <BarChart3 className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate('/security-settings')} 
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9"
+            title={t('securitySettings') || 'Güvenlik Ayarları'}
+          >
+            <Shield className="h-4 w-4" />
           </Button>
           <Button 
             variant="ghost" 

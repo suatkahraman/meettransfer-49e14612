@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, Trash2, UserPlus } from 'lucide-react';
+import { LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, Trash2, UserPlus, Shield } from 'lucide-react';
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
@@ -161,6 +161,15 @@ const CustomerHome = () => {
             {t('myBookings')}
           </Button>
           <NotificationBell />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate('/security-settings')} 
+            className="text-primary-foreground hover:bg-primary-foreground/10"
+            title={t('securitySettings') || 'Security Settings'}
+          >
+            <Shield className="h-5 w-5" />
+          </Button>
           <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
             <LogOut className="h-5 w-5" />
           </Button>
