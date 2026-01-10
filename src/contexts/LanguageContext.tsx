@@ -2503,8 +2503,6 @@ const translations: Record<Language, Record<string, string>> = {
     // ============================================
     blogDubaiSeoTitle: "Dubai Flughafen Transfer Guide 2025 | DXB nach Downtown, Palm Jumeirah, Marina",
     blogDubaiSeoDesc: "Kompletter Dubai Flughafen Transfer Guide. Private VIP-Transfers von DXB nach Downtown Dubai, Palm Jumeirah, Dubai Marina ab 45$. 24/7 Meet & Greet, Luxusfahrzeuge.",
-    blogDubaiH1: "Dubai Flughafen Transfer Guide 2025: Beste Wege zu Ihrem Hotel",
-    blogDubaiIntro: "Kompletter Guide zum Transport vom Flughafen Dubai. Vergleichen Sie private VIP-Transfers, Metro und Fahrdienste.",
     blogDubaiVipTransfers: "Dubai VIP Transfers",
     blogDubaiLuxuryTransport: "Luxus-Flughafentransport",
     blogDubaiSection1Title: "Einführung: Willkommen in Dubai",
@@ -2568,8 +2566,6 @@ const translations: Record<Language, Record<string, string>> = {
     // ============================================
     blogCyprusSeoTitle: "Zypern Flughafen Transfer Guide 2025 | Larnaca nach Ayia Napa, Paphos nach Limassol",
     blogCyprusSeoDesc: "Kompletter Zypern Flughafen Transfer Guide. Private VIP-Transfers von Larnaca & Paphos Flughäfen ab 35€. Festpreise nach Ayia Napa, Limassol, Protaras, Kyrenia.",
-    blogCyprusH1: "Zypern Flughafen Transfer Guide 2025: Larnaca & Paphos",
-    blogCyprusIntro: "Kompletter Guide zum Transport von Zyperns Flughäfen. Vergleichen Sie Privattransfers und Busoptionen von Larnaca und Paphos Flughäfen.",
     blogCyprusTransfers: "Zypern Transfers",
     blogCyprusIslandParadise: "Mittelmeer-Inselparadies",
     blogCyprusSection1Title: "Einführung: Zypern entdecken",
@@ -2634,8 +2630,6 @@ const translations: Record<Language, Record<string, string>> = {
     // ============================================
     blogBursaSeoTitle: "Istanbul nach Bursa Tagestour Guide 2025 | Sehenswürdigkeiten & Anreise",
     blogBursaSeoDesc: "Kompletter Guide für einen Besuch in Bursa ab Istanbul. Beste Attraktionen, Transportoptionen, Tour-Routen und Tipps für den perfekten Tagesausflug.",
-    blogBursaH1: "Istanbul nach Bursa Tagestour Guide 2025",
-    blogBursaIntro: "Entdecken Sie die alte osmanische Hauptstadt - nur 2,5 Stunden von Istanbul entfernt",
     blogBursaTravelTime: "Reisezeit",
     blogBursaHours: "Stunden",
     blogBursaDistance: "Entfernung",
@@ -2830,7 +2824,6 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusPaphosAirportP2: "Er liegt 15 km vom Stadtzentrum Paphos entfernt und ist die bevorzugte Wahl für Besucher der Akamas-Halbinsel.",
     
     // Cappadocia additional blog content
-    blogCappadociaTitle: "Kappadokien Flughafentransfer Guide 2025 | Preise & Ballonfahrten",
     blogCappadociaPlacesTitle: "Sehenswürdigkeiten in Kappadokien",
     blogCappadociaPlacesP1: "Kappadokien ist eine einzigartige Region auf der UNESCO-Welterbeliste. Mit unserem Transferservice erreichen Sie folgende beliebte Orte:",
     blogCappadociaGoreme: "Byzantinische Felsenkirchen",
