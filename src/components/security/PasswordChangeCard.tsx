@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -15,11 +15,16 @@ import {
   Loader2,
   KeyRound,
   Mail,
-  Send
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import { z } from 'zod';
+
+// Constants
+const COOLDOWN_STORAGE_KEY = 'password_reset_cooldown';
+const COOLDOWN_DURATION = 60; // seconds
+const MAX_ATTEMPTS_PER_HOUR = 3;
 
 interface PasswordChangeCardProps {
   isTurkish: boolean;
@@ -79,24 +84,77 @@ const PasswordChangeCard = ({ isTurkish }: PasswordChangeCardProps) => {
     resendIn: (seconds: number) => isTurkish 
       ? `${seconds} saniye sonra tekrar gönder` 
       : `Resend in ${seconds} seconds`,
+    checkSpam: isTurkish 
+      ? 'Spam klasörünüzü de kontrol etmeyi unutmayın' 
+      : 'Don\'t forget to check your spam folder',
+    tooManyAttempts: isTurkish
+      ? 'Çok fazla deneme. Lütfen daha sonra tekrar deneyin.'
+      : 'Too many attempts. Please try again later.',
+    tryAgainIn: (minutes: number) => isTurkish
+      ? `${minutes} dakika sonra tekrar deneyebilirsiniz`
+      : `You can try again in ${minutes} minutes`,
   }), [isTurkish]);
 
-  // Cooldown timer
-  useState(() => {
-    if (resetEmailCooldown > 0) {
-      const timer = setInterval(() => {
-        setResetEmailCooldown(prev => Math.max(0, prev - 1));
-      }, 1000);
-      return () => clearInterval(timer);
+  // Initialize cooldown from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(COOLDOWN_STORAGE_KEY);
+    if (stored) {
+      const { timestamp, email } = JSON.parse(stored);
+      const elapsed = Math.floor((Date.now() - timestamp) / 1000);
+      const remaining = COOLDOWN_DURATION - elapsed;
+      
+      if (remaining > 0 && email === user?.email) {
+        setResetEmailCooldown(remaining);
+        setResetEmailSent(true);
+      } else {
+        localStorage.removeItem(COOLDOWN_STORAGE_KEY);
+      }
     }
-  });
+  }, [user?.email]);
 
-  // Password validation schema
-  const passwordSchema = z.string()
-    .min(8, t.minLength)
-    .regex(/[A-Z]/, t.hasUppercase)
-    .regex(/[a-z]/, t.hasLowercase)
-    .regex(/[0-9]/, t.hasNumber);
+  // Cooldown timer effect - properly using useEffect
+  useEffect(() => {
+    if (resetEmailCooldown <= 0) return;
+    
+    const timer = setInterval(() => {
+      setResetEmailCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [resetEmailCooldown > 0]); // Only re-run when cooldown starts
+
+  // Check rate limiting
+  const checkRateLimit = useCallback((): boolean => {
+    const attempts = JSON.parse(localStorage.getItem('reset_email_attempts') || '[]') as number[];
+    const oneHourAgo = Date.now() - 3600000;
+    const recentAttempts = attempts.filter(ts => ts > oneHourAgo);
+    
+    if (recentAttempts.length >= MAX_ATTEMPTS_PER_HOUR) {
+      const oldestAttempt = Math.min(...recentAttempts);
+      const waitMinutes = Math.ceil((oldestAttempt + 3600000 - Date.now()) / 60000);
+      toast.error(t.tooManyAttempts, {
+        description: t.tryAgainIn(waitMinutes)
+      });
+      return false;
+    }
+    
+    return true;
+  }, [t]);
+
+  // Record attempt for rate limiting
+  const recordAttempt = useCallback(() => {
+    const attempts = JSON.parse(localStorage.getItem('reset_email_attempts') || '[]') as number[];
+    const oneHourAgo = Date.now() - 3600000;
+    const recentAttempts = attempts.filter(ts => ts > oneHourAgo);
+    recentAttempts.push(Date.now());
+    localStorage.setItem('reset_email_attempts', JSON.stringify(recentAttempts));
+  }, []);
 
   // Password strength calculation
   const passwordStrength = useMemo(() => {
@@ -118,14 +176,14 @@ const PasswordChangeCard = ({ isTurkish }: PasswordChangeCardProps) => {
     if (checks.hasSpecial) score += 20;
 
     let label = t.weak;
-    let color = 'bg-red-500';
+    let color = 'bg-destructive';
 
     if (score >= 80) {
       label = t.strong;
       color = 'bg-green-500';
     } else if (score >= 60) {
       label = t.good;
-      color = 'bg-blue-500';
+      color = 'bg-primary';
     } else if (score >= 40) {
       label = t.fair;
       color = 'bg-amber-500';
@@ -143,43 +201,70 @@ const PasswordChangeCard = ({ isTurkish }: PasswordChangeCardProps) => {
     );
   }, [currentPassword, newPassword, confirmPassword, passwordStrength.score]);
 
-  const handleSendResetEmail = async () => {
-    if (!user?.email || resetEmailCooldown > 0) return;
+  const handleSendResetEmail = useCallback(async () => {
+    if (!user?.email || resetEmailCooldown > 0 || isSendingResetEmail) return;
+
+    // Check rate limit before sending
+    if (!checkRateLimit()) return;
 
     setIsSendingResetEmail(true);
+    
     try {
+      // Determine the correct redirect URL based on app structure
+      const redirectUrl = `${window.location.origin}/auth?type=recovery`;
+      
+      console.log('Sending password reset email to:', user.email);
+      console.log('Redirect URL:', redirectUrl);
+
       const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-        redirectTo: `${window.location.origin}/login?type=recovery`,
+        redirectTo: redirectUrl,
       });
 
       if (error) {
+        console.error('Reset email API error:', error);
         throw error;
       }
 
+      // Record successful attempt for rate limiting
+      recordAttempt();
+
+      // Store cooldown in localStorage for persistence
+      localStorage.setItem(COOLDOWN_STORAGE_KEY, JSON.stringify({
+        timestamp: Date.now(),
+        email: user.email
+      }));
+
       setResetEmailSent(true);
-      setResetEmailCooldown(60); // 60 second cooldown
-      toast.success(t.resetEmailSent);
+      setResetEmailCooldown(COOLDOWN_DURATION);
       
-      // Start cooldown timer
-      const timer = setInterval(() => {
-        setResetEmailCooldown(prev => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      toast.success(t.resetEmailSent, {
+        description: t.checkSpam,
+        duration: 5000
+      });
+      
     } catch (error: any) {
       console.error('Reset email error:', error);
-      toast.error(error.message || t.resetEmailError);
+      
+      // Handle specific error cases
+      if (error.message?.includes('rate limit')) {
+        toast.error(t.tooManyAttempts);
+      } else if (error.message?.includes('not found')) {
+        // Don't reveal if email exists - still show success for security
+        setResetEmailSent(true);
+        setResetEmailCooldown(COOLDOWN_DURATION);
+        toast.success(t.resetEmailSent);
+      } else {
+        toast.error(t.resetEmailError, {
+          description: error.message
+        });
+      }
     } finally {
       setIsSendingResetEmail(false);
     }
-  };
+  }, [user?.email, resetEmailCooldown, isSendingResetEmail, checkRateLimit, recordAttempt, t]);
 
-  const handleChangePassword = async () => {
-    if (!isFormValid) return;
+  const handleChangePassword = useCallback(async () => {
+    if (!isFormValid || isChanging) return;
 
     if (newPassword !== confirmPassword) {
       toast.error(t.passwordsNoMatch);
@@ -190,23 +275,28 @@ const PasswordChangeCard = ({ isTurkish }: PasswordChangeCardProps) => {
 
     try {
       // First verify current password by re-authenticating
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
       
-      if (!user?.email) {
+      if (!currentUser?.email) {
         throw new Error('User not found');
       }
 
+      console.log('Verifying current password...');
+
       // Try to sign in with current password to verify it
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email,
+        email: currentUser.email,
         password: currentPassword,
       });
 
       if (signInError) {
+        console.error('Current password verification failed:', signInError);
         toast.error(t.wrongPassword);
         setIsChanging(false);
         return;
       }
+
+      console.log('Current password verified, updating to new password...');
 
       // Update password
       const { error: updateError } = await supabase.auth.updateUser({
@@ -214,9 +304,11 @@ const PasswordChangeCard = ({ isTurkish }: PasswordChangeCardProps) => {
       });
 
       if (updateError) {
+        console.error('Password update error:', updateError);
         throw updateError;
       }
 
+      console.log('Password updated successfully');
       toast.success(t.success);
       
       // Reset form
@@ -230,15 +322,15 @@ const PasswordChangeCard = ({ isTurkish }: PasswordChangeCardProps) => {
     } finally {
       setIsChanging(false);
     }
-  };
+  }, [isFormValid, isChanging, currentPassword, newPassword, confirmPassword, t]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
     setIsExpanded(false);
     setResetEmailSent(false);
-  };
+  }, []);
 
   const RequirementItem = ({ met, label }: { met: boolean; label: string }) => (
     <div className={`flex items-center gap-2 text-xs ${met ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
@@ -302,10 +394,17 @@ const PasswordChangeCard = ({ isTurkish }: PasswordChangeCardProps) => {
                       <p className="text-sm text-green-600/80 dark:text-green-400/80 mt-1">
                         {t.resetEmailSentDesc}
                       </p>
+                      <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {t.checkSpam}
+                      </p>
                       {resetEmailCooldown > 0 && (
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {t.resendIn(resetEmailCooldown)}
-                        </p>
+                        <div className="flex items-center gap-2 mt-3">
+                          <RefreshCw className="h-3 w-3 text-muted-foreground" />
+                          <p className="text-xs text-muted-foreground">
+                            {t.resendIn(resetEmailCooldown)}
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>
