@@ -52,12 +52,12 @@ const DubaiAirportTransferGuide = () => {
       <SEOHead
         title={t("blogDubaiSeoTitle")}
         description={t("blogDubaiSeoDesc")}
-        keywords="Dubai airport transfer, DXB private transfer, Dubai Airport to Downtown, Palm Jumeirah transfer, Dubai VIP transfer, Dubai luxury transfer, Dubai Marina transfer, Burj Khalifa transfer, JBR transfer, Business Bay transfer, Dubai Airport to hotel, DWC airport transfer, Al Maktoum airport"
+        keywords="Dubai airport transfer 2025, DXB private transfer, Dubai Airport to Downtown, Palm Jumeirah transfer, Dubai VIP transfer, Dubai luxury transfer, Dubai Marina transfer, Burj Khalifa transfer, JBR transfer, Business Bay transfer, Dubai Airport to hotel, DWC airport transfer, Al Maktoum airport, Abu Dhabi transfer, Dubai chauffeur service"
         canonicalPath="/blog/dubai-airport-transfer-guide"
         ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
         ogType="article"
         articlePublishedTime="2024-12-26"
-        articleModifiedTime="2025-01-05"
+        articleModifiedTime="2025-01-10"
         articleSection="Travel Guide"
       />
       <SchemaOrg
@@ -69,9 +69,9 @@ const DubaiAirportTransferGuide = () => {
             description: t("blogDubaiSeoDesc"),
             image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
             datePublished: '2024-12-26',
-            dateModified: '2025-01-01',
+            dateModified: '2025-01-10',
             author: 'Meet Transfer',
-            readingTime: '14',
+            readingTime: '16',
           },
           {
             type: 'FAQPage',
@@ -113,11 +113,11 @@ const DubaiAirportTransferGuide = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              December 26, 2024
+              {t("lastUpdated")}: January 10, 2025
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              14 {t("minRead")}
+              16 {t("minRead")}
             </span>
           </div>
         </header>

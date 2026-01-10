@@ -43,12 +43,12 @@ const PrivateVsTaxiTurkey = () => {
       <SEOHead
         title={t('blogPrivateTaxiTitle')}
         description={t('blogPrivateTaxiDesc')}
-        keywords="private transfer Turkey, Turkey airport transfer, private car Turkey, Turkish transport tips, airport transfer comparison, is private transfer worth it"
+        keywords="private transfer vs taxi Turkey 2025, Turkey airport transfer, private car Turkey, Turkish transport tips, airport transfer comparison, is private transfer worth it, Istanbul taxi vs private, Antalya taxi comparison, Turkey airport taxi safety"
         canonicalPath="/blog/private-vs-taxi-transfer-turkey"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
         ogType="article"
         articlePublishedTime="2024-12-05"
-        articleModifiedTime="2025-01-05"
+        articleModifiedTime="2025-01-10"
         articleSection="Travel Tips"
       />
       <SchemaOrg
@@ -60,9 +60,17 @@ const PrivateVsTaxiTurkey = () => {
             description: t('blogPrivateTaxiDesc'),
             image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
             datePublished: '2024-12-05',
-            dateModified: '2025-12-31',
+            dateModified: '2025-01-10',
             author: 'Meet Transfer',
-            readingTime: '11',
+            readingTime: '13',
+          },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Blog', url: '/blog' },
+              { name: 'Private Transfer vs Taxi Turkey', url: '/blog/private-vs-taxi-transfer-turkey' },
+            ],
           },
           {
             type: 'FAQPage',

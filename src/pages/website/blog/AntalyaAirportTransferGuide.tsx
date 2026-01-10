@@ -45,12 +45,12 @@ const AntalyaAirportTransferGuide = () => {
       <SEOHead
         title={t("blogAntalyaSeoTitle")}
         description={t("blogAntalyaSeoDesc")}
-        keywords="Antalya airport transfer, AYT airport hotel transfer, Antalya to Belek transfer, Antalya to Side transfer, Lara Beach transfer, private transfer Antalya"
+        keywords="Antalya airport transfer 2025, AYT airport hotel transfer, Antalya to Belek transfer, Antalya to Side transfer, Lara Beach transfer, private transfer Antalya, Kemer transfer, Alanya airport transfer, Antalya VIP transfer price, Antalya airport taxi cost"
         canonicalPath="/blog/antalya-airport-transfer-to-hotels"
         ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
         ogType="article"
         articlePublishedTime="2024-11-28"
-        articleModifiedTime="2025-01-05"
+        articleModifiedTime="2025-01-10"
         articleSection="Travel Guide"
       />
       <SchemaOrg
@@ -62,9 +62,17 @@ const AntalyaAirportTransferGuide = () => {
             description: t("blogAntalyaSeoDesc"),
             image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
             datePublished: '2024-11-28',
-            dateModified: '2025-12-31',
+            dateModified: '2025-01-10',
             author: 'Meet Transfer',
-            readingTime: '13',
+            readingTime: '15',
+          },
+          {
+            type: 'BreadcrumbList',
+            items: [
+              { name: 'Home', url: '/' },
+              { name: 'Blog', url: '/blog' },
+              { name: 'Antalya Airport Transfer Guide', url: '/blog/antalya-airport-transfer-to-hotels' },
+            ],
           },
           {
             type: 'FAQPage',
@@ -98,11 +106,11 @@ const AntalyaAirportTransferGuide = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              November 28, 2024
+              {t("lastUpdated")}: January 10, 2025
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              13 {t("minRead")}
+              15 {t("minRead")}
             </span>
           </div>
         </header>
@@ -111,8 +119,9 @@ const AntalyaAirportTransferGuide = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
             src="/images/meet-transfer-vip-mercedes-vito.jpg" 
-            alt="Private transfer from Antalya Airport"
+            alt="Antalya Airport Transfer 2025 - Private VIP Transfer to Belek, Side, Kemer, Lara Beach and All-Inclusive Hotels"
             className="w-full h-full object-cover"
+            loading="eager"
           />
         </div>
 
