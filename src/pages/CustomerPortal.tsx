@@ -36,6 +36,10 @@ import {
   ChevronRight,
   Sparkles,
   RefreshCw,
+  Award,
+  Star,
+  ArrowRight,
+  History,
 } from "lucide-react";
 
 // Language options
@@ -390,80 +394,115 @@ export default function CustomerPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10">
-      {/* Header with Logo and Language Selector */}
+    <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
+      {/* Premium Header */}
       <motion.header 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-primary text-primary-foreground py-3 px-4 sticky top-0 z-10 shadow-lg backdrop-blur-sm"
+        className="bg-primary text-primary-foreground py-3 px-3 sm:py-4 sm:px-6 sticky top-0 z-10 safe-area-inset-top shadow-lg"
       >
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center gap-2">
-              <img 
-                src={meetTransferLogo} 
-                alt="Meet Transfer" 
-                className="h-10 w-10 rounded-lg shadow-md"
-              />
-              <span className="text-lg font-serif font-bold hidden sm:block">Meet Transfer</span>
-            </div>
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+            <img 
+              src={meetTransferLogo} 
+              alt="Meet Transfer" 
+              className="h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-primary-foreground/20"
+            />
+            <span className="text-lg sm:text-xl font-serif font-bold">Meet Transfer</span>
+          </div>
+          
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Language Selector */}
+            <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
+              <SelectTrigger className="w-auto gap-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 h-8 sm:h-9 px-2 text-sm">
+                <Globe className="h-4 w-4" />
+                <SelectValue>
+                  {LANGUAGES.find((l) => l.code === language)?.flag}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.flag} {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             
-            <div className="flex items-center gap-3">
-              {/* Language Selector */}
-              <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
-                <SelectTrigger className="w-auto gap-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 h-9 px-2 shadow-sm">
-                  <Globe className="h-4 w-4" />
-                  <SelectValue>
-                    {LANGUAGES.find((l) => l.code === language)?.flag}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {LANGUAGES.map((lang) => (
-                    <SelectItem key={lang.code} value={lang.code}>
-                      {lang.flag} {lang.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {/* Phone Badge */}
-              <div className="flex items-center gap-1.5 text-sm bg-primary-foreground/10 px-2.5 py-1.5 rounded-lg">
-                <Phone className="h-4 w-4" />
-                <span className="hidden sm:inline font-medium">{portalData?.phone}</span>
-              </div>
+            {/* Phone Badge */}
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm bg-primary-foreground/10 px-2 py-1.5 rounded-lg">
+              <Phone className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline font-medium">{portalData?.phone}</span>
             </div>
           </div>
         </div>
       </motion.header>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-24">
         <motion.div 
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="max-w-4xl mx-auto space-y-6"
+          className="max-w-4xl mx-auto space-y-4 sm:space-y-6"
         >
-          {/* Welcome Section */}
-          <motion.div variants={itemVariants} className="text-center py-2">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <span className="text-sm text-muted-foreground font-medium">
-                {language === 'TR' ? 'Hoş Geldiniz' : 'Welcome'}
-              </span>
-            </div>
-            <h2 className="text-xl font-bold text-foreground">
-              {portalData?.reservations?.[0]?.customer_name || (language === 'TR' ? 'Değerli Müşterimiz' : 'Valued Customer')}
-            </h2>
+          {/* Premium Welcome Card */}
+          <motion.div variants={itemVariants}>
+            <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 shadow-lg overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-4">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                    className="relative"
+                  >
+                    <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+                      <User className="h-8 w-8 sm:h-10 sm:w-10 text-primary-foreground" />
+                    </div>
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-accent flex items-center justify-center shadow-md border-2 border-background"
+                    >
+                      <Award className="h-4 w-4 text-accent-foreground" />
+                    </motion.div>
+                  </motion.div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <motion.div
+                        animate={{ rotate: [0, 15, -15, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <Sparkles className="h-4 w-4 text-primary" />
+                      </motion.div>
+                      <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+                        {language === 'TR' ? 'Hoş Geldiniz' : 'Welcome back'}
+                      </span>
+                      <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">
+                        VIP
+                      </Badge>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-foreground truncate">
+                      {portalData?.reservations?.[0]?.customer_name || (language === 'TR' ? 'Değerli Müşterimiz' : 'Valued Customer')}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                      {language === 'TR' ? 'Premium transfer hizmetiniz hazır' : 'Your premium transfer service awaits'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
-          {/* Quick Support & Navigation Actions - 4 Shortcuts */}
+          {/* Quick Support & Navigation Actions */}
           <motion.div variants={itemVariants} className="grid grid-cols-4 gap-2">
             {/* Home */}
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
                 variant="outline" 
-                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-white/80 dark:bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all"
+                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:border-primary/40 shadow-sm hover:shadow-md transition-all"
                 onClick={() => navigate('/')}
               >
                 <Home className="h-5 w-5 text-primary" />
@@ -474,42 +513,42 @@ export default function CustomerPortal() {
             </motion.div>
             
             {/* WhatsApp */}
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
                 variant="outline" 
-                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-green-50/80 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all"
+                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 hover:border-green-500/40 shadow-sm hover:shadow-md transition-all"
                 onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
               >
-                <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                <MessageCircle className="h-5 w-5 text-green-500" />
+                <span className="text-xs font-medium">
                   WhatsApp
                 </span>
               </Button>
             </motion.div>
             
-            {/* Emergency */}
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            {/* Emergency Call */}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
                 variant="outline" 
-                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-red-50/80 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all"
+                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-red-500/5 to-red-500/10 border-red-500/20 hover:border-red-500/40 shadow-sm hover:shadow-md transition-all"
                 onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
               >
-                <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
-                <span className="text-xs font-medium text-red-700 dark:text-red-300">
+                <PhoneCall className="h-5 w-5 text-red-500" />
+                <span className="text-xs font-medium">
                   {language === 'TR' ? 'Acil' : 'Call'}
                 </span>
               </Button>
             </motion.div>
             
             {/* Security */}
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
                 variant="outline" 
-                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-blue-50/80 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all"
+                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/40 shadow-sm hover:shadow-md transition-all"
                 onClick={() => navigate('/security-settings')}
               >
-                <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                <Shield className="h-5 w-5 text-emerald-500" />
+                <span className="text-xs font-medium">
                   {language === 'TR' ? 'Güvenlik' : 'Security'}
                 </span>
               </Button>
@@ -627,30 +666,54 @@ export default function CustomerPortal() {
             </Card>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold">{t('yourBookings')}</h2>
-              <p className="text-muted-foreground">
-                {t('viewAndManageBookings')}
-              </p>
-            </div>
+          {/* Your Bookings Header */}
+          <motion.div variants={itemVariants}>
+            <Card className="bg-gradient-to-r from-muted/50 to-transparent border-0 shadow-none">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <History className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold">{t('yourBookings')}</h2>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {t('viewAndManageBookings')}
+                      </p>
+                    </div>
+                  </div>
+                  {portalData?.reservations && portalData.reservations.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {portalData.reservations.length} {language === 'TR' ? 'transfer' : 'transfers'}
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
           {/* Return Transfer Discount Banner */}
           <motion.div variants={itemVariants}>
-            <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 shadow-sm backdrop-blur-sm">
-              <CardContent className="py-4">
+            <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 border-green-500/30 overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-green-400/20 to-transparent rounded-bl-full" />
+              <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <motion.div 
-                    className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center shadow-inner"
-                    animate={{ rotate: [0, 10, -10, 0] }}
+                    className="h-12 w-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg"
+                    animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.05, 1] }}
                     transition={{ duration: 3, repeat: Infinity }}
                   >
-                    <Percent className="h-5 w-5 text-primary" />
+                    <Percent className="h-6 w-6 text-white" />
                   </motion.div>
-                  <div>
-                    <p className="font-semibold">{t('returnTransferDiscount')}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <Badge className="bg-green-500 text-white text-xs font-bold px-2 py-0.5">
+                        30% OFF
+                      </Badge>
+                      <Sparkles className="h-4 w-4 text-green-500" />
+                    </div>
+                    <p className="font-semibold text-sm sm:text-base">{t('returnTransferDiscount')}</p>
+                    <p className="text-xs text-muted-foreground">
                       {t('returnTransferDiscountDesc')}
                     </p>
                   </div>
@@ -679,53 +742,83 @@ export default function CustomerPortal() {
               </Card>
             </motion.div>
           ) : (
-            <motion.div variants={itemVariants} className="space-y-4">
-              {portalData?.reservations.map((reservation, index) => (
-                <motion.div
-                  key={reservation.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -2 }}
-                >
-                  <Card id={`reservation-${reservation.id}`} className="scroll-mt-20 shadow-md hover:shadow-lg transition-all border-border/50 backdrop-blur-sm bg-white/80 dark:bg-card/80">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            {reservation.reservation_code && (
-                              <Badge variant="outline" className="font-mono shadow-sm">
-                                {reservation.reservation_code}
+            <motion.div variants={itemVariants} className="space-y-3">
+              {portalData?.reservations.map((reservation, index) => {
+                const isActive = !['cancelled', 'completed'].includes(reservation.status);
+                const statusConfig: Record<string, { label: string; labelTr: string; color: string; bgColor: string }> = {
+                  'awaiting-price': { label: 'Awaiting Price', labelTr: 'Fiyat Bekleniyor', color: 'text-amber-700', bgColor: 'bg-amber-100' },
+                  'waiting_for_customer_approval': { label: 'Awaiting Approval', labelTr: 'Onay Bekliyor', color: 'text-orange-700', bgColor: 'bg-orange-100' },
+                  'customer_approved': { label: 'Approved', labelTr: 'Onaylandı', color: 'text-blue-700', bgColor: 'bg-blue-100' },
+                  'confirmed': { label: 'Confirmed', labelTr: 'Onaylandı', color: 'text-green-700', bgColor: 'bg-green-100' },
+                  'sent_to_driver': { label: 'Driver Assigned', labelTr: 'Şoför Atandı', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
+                  'completed': { label: 'Completed', labelTr: 'Tamamlandı', color: 'text-green-700', bgColor: 'bg-green-100' },
+                  'cancelled': { label: 'Cancelled', labelTr: 'İptal Edildi', color: 'text-red-700', bgColor: 'bg-red-100' },
+                  'pending_admin_review': { label: 'Under Review', labelTr: 'İnceleniyor', color: 'text-purple-700', bgColor: 'bg-purple-100' },
+                };
+                const status = statusConfig[reservation.status] || { label: reservation.status, labelTr: reservation.status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
+                
+                return (
+                  <motion.div
+                    key={reservation.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.08 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                  >
+                    <Card 
+                      id={`reservation-${reservation.id}`} 
+                      className={`scroll-mt-20 shadow-md hover:shadow-lg transition-all border-l-4 overflow-hidden ${
+                        isActive ? 'border-l-primary/60' : reservation.status === 'completed' ? 'border-l-green-500/60 opacity-80' : 'border-l-red-500/60 opacity-70'
+                      }`}
+                    >
+                      <CardHeader className="pb-2 pt-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            {/* Header with code and status */}
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              {reservation.reservation_code && (
+                                <span className="font-mono text-sm font-semibold text-primary">
+                                  {reservation.reservation_code}
+                                </span>
+                              )}
+                              <Badge className={`text-xs font-medium ${status.bgColor} ${status.color}`}>
+                                {language === 'TR' ? status.labelTr : status.label}
                               </Badge>
-                            )}
-                            {getStatusBadge(reservation.status)}
-                            {reservation.is_return_transfer && (
-                              <Badge variant="secondary" className="gap-1 shadow-sm">
-                                <Percent className="h-3 w-3" />
-                                {t('returnLabel')}
-                              </Badge>
-                            )}
+                              {reservation.is_return_transfer && (
+                                <Badge className="gap-1 bg-green-100 text-green-700 text-xs">
+                                  <Percent className="h-3 w-3" />
+                                  {t('returnLabel')}
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {/* Route info */}
+                            <div className="flex items-center gap-2 text-sm mb-1">
+                              <MapPin className="h-4 w-4 flex-shrink-0 text-primary" />
+                              <span className="truncate font-medium">{reservation.pickup.split(',')[0]}</span>
+                              <ArrowRight className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                              <span className="truncate font-medium">{reservation.dropoff.split(',')[0]}</span>
+                            </div>
                           </div>
-                          <CardTitle className="text-lg">
-                            {reservation.pickup} → {reservation.dropoff}
-                          </CardTitle>
-                        </div>
-                        {reservation.price && (
-                          <div className="text-right">
-                            {reservation.discount_amount > 0 && (
-                              <p className="text-sm text-muted-foreground line-through">
+                          
+                          {/* Price */}
+                          {reservation.price && (
+                            <div className="text-right flex-shrink-0">
+                              {reservation.discount_amount > 0 && (
+                                <p className="text-xs text-muted-foreground line-through">
+                                  {reservation.price_currency === "EUR" ? "€" : reservation.price_currency === "USD" ? "$" : reservation.price_currency === "GBP" ? "£" : reservation.price_currency === "AED" ? "د.إ" : reservation.price_currency === "AUD" ? "A$" : "₺"}
+                                  {(reservation.price + reservation.discount_amount).toFixed(0)}
+                                </p>
+                              )}
+                              <p className="text-lg font-bold text-primary">
                                 {reservation.price_currency === "EUR" ? "€" : reservation.price_currency === "USD" ? "$" : reservation.price_currency === "GBP" ? "£" : reservation.price_currency === "AED" ? "د.إ" : reservation.price_currency === "AUD" ? "A$" : "₺"}
-                                {(reservation.price + reservation.discount_amount).toFixed(2)}
+                                {reservation.price}
                               </p>
-                            )}
-                            <p className="text-xl font-bold text-primary">
-                              {reservation.price_currency === "EUR" ? "€" : reservation.price_currency === "USD" ? "$" : reservation.price_currency === "GBP" ? "£" : reservation.price_currency === "AED" ? "د.إ" : reservation.price_currency === "AUD" ? "A$" : "₺"}
-                              {reservation.price}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </CardHeader>
+                            </div>
+                          )}
+                        </div>
+                      </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div className="flex items-center gap-2">
@@ -785,7 +878,8 @@ export default function CustomerPortal() {
                     </CardContent>
                   </Card>
                 </motion.div>
-              ))}
+                );
+              })}
             </motion.div>
           )}
         </motion.div>
