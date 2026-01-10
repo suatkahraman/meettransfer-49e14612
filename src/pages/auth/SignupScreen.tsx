@@ -136,9 +136,9 @@ const SignupScreen = () => {
         password 
       });
 
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/customer`;
 
-      // Create auth user
+      // Create auth user - with auto-confirm enabled, user will be logged in immediately
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: validation.email,
         password: validation.password,
@@ -160,15 +160,46 @@ const SignupScreen = () => {
         return;
       }
 
-      if (signUpData.user) {
+      if (signUpData.user && signUpData.session) {
+        // User is now logged in automatically (auto-confirm enabled)
         // Update profile with phone number
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ 
+          .upsert({ 
+            id: signUpData.user.id,
             full_name: validation.fullName,
-            phone: validation.phone 
-          })
-          .eq('id', signUpData.user.id);
+            phone: validation.phone,
+            updated_at: new Date().toISOString()
+          });
+
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+        }
+
+        toast.success(t('accountCreated'));
+        // Navigate to customer panel - user is already authenticated
+        navigate('/customer', { replace: true });
+      } else if (signUpData.user && !signUpData.session) {
+        // Fallback: If somehow session is not created, try to sign in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: validation.email,
+          password: validation.password,
+        });
+
+        if (signInError) {
+          toast.error(signInError.message);
+          return;
+        }
+
+        // Update profile after sign in
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({ 
+            id: signUpData.user.id,
+            full_name: validation.fullName,
+            phone: validation.phone,
+            updated_at: new Date().toISOString()
+          });
 
         if (profileError) {
           console.error('Profile update error:', profileError);
