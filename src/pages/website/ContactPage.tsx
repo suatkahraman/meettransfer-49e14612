@@ -3,10 +3,10 @@ import PageHeader from "@/components/website/PageHeader";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Mail, MapPin, Clock, MessageCircle, Headphones, Globe } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, MessageCircle, Globe } from "lucide-react";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
-import { GLOBAL_OFFICES, EMERGENCY_PHONE, SUPPORT_EMAIL } from "@/lib/contact";
+import { GLOBAL_OFFICES, SUPPORT_EMAIL } from "@/lib/contact";
 import { motion } from "framer-motion";
 
 const ContactPage = () => {
@@ -73,7 +73,7 @@ const ContactPage = () => {
           </p>
 
           {/* Quick Contact Cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <div className="grid sm:grid-cols-2 gap-4 mb-8">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -92,27 +92,7 @@ const ContactPage = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/20 rounded-2xl p-6 text-center"
-            >
-              <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Phone className="h-6 w-6 text-accent" />
-              </div>
-              <h3 className="font-semibold text-foreground mb-1">{t("emergencyLine")}</h3>
-              <p className="text-sm text-muted-foreground mb-3">{t("emergencyLineDesc")}</p>
-              <a 
-                href={`tel:${EMERGENCY_PHONE}`}
-                className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-medium transition-colors"
-              >
-                <Headphones className="h-4 w-4" />
-                {EMERGENCY_PHONE}
-              </a>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 }}
-              className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-6 text-center sm:col-span-2 lg:col-span-1"
+              className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-6 text-center"
             >
               <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Mail className="h-6 w-6 text-primary" />
