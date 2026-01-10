@@ -43,6 +43,9 @@ interface VehicleSelectionCardProps {
   currency?: string;
   showPrice?: boolean;
   isRecommended?: boolean;
+  available?: boolean;
+  previousPrice?: number | null;
+  showDiscountAnimation?: boolean;
 }
 
 export function VehicleSelectionCard({
@@ -53,6 +56,9 @@ export function VehicleSelectionCard({
   currency = "EUR",
   showPrice = false,
   isRecommended = false,
+  available = true,
+  previousPrice,
+  showDiscountAnimation = false,
 }: VehicleSelectionCardProps) {
   const { t, language } = useLanguage();
   const [imageModalOpen, setImageModalOpen] = useState(false);
@@ -77,12 +83,14 @@ export function VehicleSelectionCard({
   return (
     <>
       <div
-        onClick={() => onSelect(vehicleType)}
+        onClick={() => available && onSelect(vehicleType)}
         className={`
           relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 group
           ${isSelected 
             ? 'ring-2 ring-primary shadow-xl scale-[1.01]' 
-            : 'hover:shadow-lg hover:scale-[1.005]'
+            : available 
+              ? 'hover:shadow-lg hover:scale-[1.005]' 
+              : 'opacity-50 cursor-not-allowed'
           }
         `}
       >
@@ -231,20 +239,37 @@ export function VehicleSelectionCard({
             <div className={`
               mt-4 pt-3 border-t flex items-center justify-between transition-all duration-500
               ${isSelected ? 'border-primary/20' : 'border-border/40'}
+              ${showDiscountAnimation && previousPrice ? 'bg-green-50 dark:bg-green-900/20 rounded-lg px-2 -mx-2' : ''}
             `}>
               <span className="text-sm text-muted-foreground">
                 {isTurkish ? "Tek yön transfer" : "One-way transfer"}
               </span>
-              {price ? (
-                <span className={`
-                  text-2xl sm:text-3xl font-extrabold tracking-tight transition-all duration-300
-                  ${isSelected ? 'text-primary' : 'text-foreground'}
-                `}>
-                  {getCurrencySymbol(currency)}{price}
-                </span>
+              {available && price ? (
+                <div className="text-right flex items-center gap-2">
+                  {/* Show old price strikethrough when discount just applied */}
+                  {showDiscountAnimation && previousPrice && previousPrice > price && (
+                    <span className="text-lg line-through text-muted-foreground">
+                      {getCurrencySymbol(currency)}{previousPrice}
+                    </span>
+                  )}
+                  <span className={`
+                    text-2xl sm:text-3xl font-extrabold tracking-tight transition-all duration-300
+                    ${showDiscountAnimation && previousPrice 
+                      ? 'text-green-600 dark:text-green-400 scale-110' 
+                      : isSelected ? 'text-primary' : 'text-foreground'}
+                  `}>
+                    {getCurrencySymbol(currency)}{price}
+                  </span>
+                  {/* Discount badge */}
+                  {showDiscountAnimation && previousPrice && previousPrice > price && (
+                    <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded-full animate-pulse">
+                      -{getCurrencySymbol(currency)}{previousPrice - price}
+                    </span>
+                  )}
+                </div>
               ) : (
                 <span className="text-sm text-muted-foreground italic">
-                  {isTurkish ? "Fiyat bekleniyor" : "Price pending"}
+                  {available ? (isTurkish ? "Fiyat bekleniyor" : "Price pending") : (isTurkish ? "Uygun değil" : "Not available")}
                 </span>
               )}
             </div>
