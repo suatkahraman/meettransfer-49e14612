@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -27,7 +28,24 @@ import {
   X,
   Briefcase,
   Baby,
+  Home,
+  PhoneCall,
+  Shield,
+  Globe,
 } from "lucide-react";
+
+// Language options
+const LANGUAGES = [
+  { code: "EN" as Language, label: "English", flag: "🇬🇧" },
+  { code: "TR" as Language, label: "Türkçe", flag: "🇹🇷" },
+  { code: "DE" as Language, label: "Deutsch", flag: "🇩🇪" },
+  { code: "FR" as Language, label: "Français", flag: "🇫🇷" },
+  { code: "RU" as Language, label: "Русский", flag: "🇷🇺" },
+  { code: "AR" as Language, label: "العربية", flag: "🇸🇦" },
+] as const;
+
+const WHATSAPP_NUMBER = '905321748390';
+const EMERGENCY_PHONE = '+905321748390';
 
 interface Reservation {
   id: string;
@@ -68,7 +86,7 @@ interface PortalData {
 export default function CustomerPortal() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [portalData, setPortalData] = useState<PortalData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -336,20 +354,92 @@ export default function CustomerPortal() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4">
+      {/* Header with Language Selector */}
+      <header className="bg-primary text-primary-foreground py-3 px-4 sticky top-0 z-10">
+        <div className="container mx-auto">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Meet Transfer</h1>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Phone className="h-4 w-4" />
-              {portalData?.phone}
+            <h1 className="text-xl font-serif font-bold">Meet Transfer</h1>
+            <div className="flex items-center gap-3">
+              {/* Language Selector */}
+              <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
+                <SelectTrigger className="w-auto gap-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 h-9 px-2">
+                  <Globe className="h-4 w-4" />
+                  <SelectValue>
+                    {LANGUAGES.find((l) => l.code === language)?.flag}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      {lang.flag} {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {/* Phone */}
+              <div className="flex items-center gap-1 text-sm text-primary-foreground/80">
+                <Phone className="h-4 w-4" />
+                <span className="hidden sm:inline">{portalData?.phone}</span>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6">
         <div className="max-w-4xl mx-auto space-y-6">
+          {/* Quick Support & Navigation Actions - 4 Shortcuts */}
+          <div className="grid grid-cols-4 gap-2">
+            {/* Home */}
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 flex flex-col items-center gap-1"
+              onClick={() => navigate('/')}
+            >
+              <Home className="h-5 w-5 text-primary" />
+              <span className="text-xs font-medium">
+                {language === 'TR' ? 'Anasayfa' : 'Home'}
+              </span>
+            </Button>
+            
+            {/* WhatsApp */}
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 flex flex-col items-center gap-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
+              onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
+            >
+              <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                WhatsApp
+              </span>
+            </Button>
+            
+            {/* Emergency */}
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 flex flex-col items-center gap-1 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
+              onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
+            >
+              <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
+              <span className="text-xs font-medium text-red-700 dark:text-red-300">
+                {language === 'TR' ? 'Acil' : 'SOS'}
+              </span>
+            </Button>
+            
+            {/* New Booking */}
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 flex flex-col items-center gap-1 bg-primary/5 border-primary/20 hover:bg-primary/10"
+              onClick={() => navigate('/book')}
+            >
+              <Plus className="h-5 w-5 text-primary" />
+              <span className="text-xs font-medium text-primary">
+                {language === 'TR' ? 'Rezerve' : 'Book'}
+              </span>
+            </Button>
+          </div>
+
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">{t('yourBookings')}</h2>
@@ -357,10 +447,6 @@ export default function CustomerPortal() {
                 {t('viewAndManageBookings')}
               </p>
             </div>
-            <Button onClick={() => navigate("/book")}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t('newBooking')}
-            </Button>
           </div>
 
           {/* Return Transfer Discount Banner */}
