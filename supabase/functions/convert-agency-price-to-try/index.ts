@@ -102,6 +102,35 @@ Deno.serve(async (req) => {
     const currency = agencyDetail.agency_price_currency || 'TRY'
     const amount = agencyDetail.company_amount || 0
 
+    // If company_amount is 0 or null, set TRY amount to 0 (no conversion needed)
+    if (!amount || amount === 0) {
+      console.log('Company amount is 0, setting TRY to 0:', reservation_id)
+      
+      const { error: updateError } = await supabaseClient
+        .from('agency_reservation_details')
+        .update({
+          company_amount_try: 0,
+          exchange_rate_used: null,
+          conversion_date: null
+        })
+        .eq('id', agencyDetail.id)
+
+      if (updateError) {
+        console.error('Error updating agency details:', updateError)
+        throw updateError
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          reservation_id,
+          message: 'Company amount is 0, no conversion needed',
+          try_amount: 0
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Get exchange rate
     const { rate, isFallback } = await getExchangeRate(currency)
     const tryAmount = amount * rate
