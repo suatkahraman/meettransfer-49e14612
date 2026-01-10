@@ -13,7 +13,7 @@ import {
   LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, 
   Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
   ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall, Sparkles, 
-  Clock, Star, ArrowRight, Loader2
+  Clock, Star, ArrowRight, Loader2, Home
 } from 'lucide-react';
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
@@ -503,8 +503,21 @@ const CustomerHome = () => {
           </Card>
         </div>
 
-        {/* Quick Support Actions */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        {/* Quick Support & Navigation Actions */}
+        <div className="grid grid-cols-4 gap-2 mb-6">
+          {/* Home */}
+          <Button 
+            variant="outline" 
+            className="h-auto py-3 flex flex-col items-center gap-1"
+            onClick={() => navigate('/')}
+          >
+            <Home className="h-5 w-5 text-primary" />
+            <span className="text-xs font-medium">
+              {language === 'TR' ? 'Anasayfa' : 'Home'}
+            </span>
+          </Button>
+          
+          {/* WhatsApp */}
           <Button 
             variant="outline" 
             className="h-auto py-3 flex flex-col items-center gap-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
@@ -512,9 +525,11 @@ const CustomerHome = () => {
           >
             <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
             <span className="text-xs font-medium text-green-700 dark:text-green-300">
-              {language === 'TR' ? 'WhatsApp' : 'WhatsApp'}
+              WhatsApp
             </span>
           </Button>
+          
+          {/* Emergency */}
           <Button 
             variant="outline" 
             className="h-auto py-3 flex flex-col items-center gap-1 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
@@ -522,7 +537,19 @@ const CustomerHome = () => {
           >
             <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
             <span className="text-xs font-medium text-red-700 dark:text-red-300">
-              {language === 'TR' ? 'Acil Arama' : 'Emergency'}
+              {language === 'TR' ? 'Acil' : 'Call'}
+            </span>
+          </Button>
+          
+          {/* Security */}
+          <Button 
+            variant="outline" 
+            className="h-auto py-3 flex flex-col items-center gap-1 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+            onClick={() => navigate('/security-settings')}
+          >
+            <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+              {language === 'TR' ? 'Güvenlik' : 'Security'}
             </span>
           </Button>
         </div>
