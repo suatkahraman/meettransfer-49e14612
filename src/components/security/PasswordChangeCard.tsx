@@ -468,6 +468,26 @@ const PasswordChangeCard = ({ isTurkish }: PasswordChangeCardProps) => {
       setLastPasswordChange(now);
 
       console.log('Password updated successfully');
+
+      // Send password change notification email
+      try {
+        const { error: notifyError } = await supabase.functions.invoke('send-password-change-notification', {
+          body: {
+            email: currentUser.email,
+            user_name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0],
+            language: isTurkish ? 'tr' : 'en',
+          }
+        });
+        
+        if (notifyError) {
+          console.error('Failed to send password change notification:', notifyError);
+        } else {
+          console.log('Password change notification email sent');
+        }
+      } catch (emailError) {
+        console.error('Error sending password change notification:', emailError);
+        // Don't fail the password change if notification fails
+      }
       
       setChangeSuccess(true);
       
