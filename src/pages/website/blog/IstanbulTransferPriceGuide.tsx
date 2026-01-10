@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
+import RelatedArticles from "@/components/website/RelatedArticles";
 
 const IstanbulTransferPriceGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -332,25 +333,7 @@ const IstanbulTransferPriceGuide = () => {
         </section>
 
         {/* Related Articles */}
-        <section className="my-12">
-          <h2 className="font-serif text-2xl font-bold mb-6">{t("relatedArticles")}</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <Link 
-              to={getLocalizedPath("/blog/istanbul-airport-to-city-guide")}
-              className="group p-4 border border-border rounded-lg hover:border-primary transition-colors"
-            >
-              <Badge variant="outline" className="mb-2">Istanbul</Badge>
-              <h3 className="font-semibold group-hover:text-primary transition-colors">{t("blogIstanbul1Title")}</h3>
-            </Link>
-            <Link 
-              to={getLocalizedPath("/blog/private-transfer-vs-taxi-turkey")}
-              className="group p-4 border border-border rounded-lg hover:border-primary transition-colors"
-            >
-              <Badge variant="outline" className="mb-2">{t("travelTips")}</Badge>
-              <h3 className="font-semibold group-hover:text-primary transition-colors">{t("blogPrivateTaxiTitle")}</h3>
-            </Link>
-          </div>
-        </section>
+        <RelatedArticles currentArticleId="istanbul-airport-transfer-price-guide" />
       </article>
 
       <Footer />
