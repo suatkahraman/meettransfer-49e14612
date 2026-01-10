@@ -16,7 +16,7 @@ import {
   Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe, History,
   Bookmark, TrendingUp, Briefcase, Baby, MessageSquare, CheckCircle,
   Snowflake, Armchair, Wifi, BatteryCharging, Droplets, Stars, Wine, Crown, Tv,
-  Award, Zap, Tag
+  Award, Zap, Tag, Heart, HeartOff, Route
 } from 'lucide-react';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -133,6 +133,16 @@ const CustomerHome = () => {
   const [profileData, setProfileData] = useState({ full_name: '', phone: '' });
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [recentSearches, setRecentSearches] = useState<{pickup: string; dropoff: string}[]>([]);
+  const [favoriteRoutes, setFavoriteRoutes] = useState<Array<{
+    id: string;
+    name: string;
+    pickup_location: string;
+    dropoff_location: string;
+    notes: string | null;
+    usage_count: number;
+  }>>([]);
+  const [isAddingFavorite, setIsAddingFavorite] = useState(false);
+  const [newFavoriteRoute, setNewFavoriteRoute] = useState({ name: '', pickup: '', dropoff: '', notes: '' });
   const [formData, setFormData] = useState({
     pickup: '',
     dropoff: '',
@@ -214,6 +224,16 @@ const CustomerHome = () => {
       
       setCompletedReservations(pastReservations || []);
 
+      // Fetch favorite routes
+      const { data: favorites } = await supabase
+        .from('favorite_routes')
+        .select('id, name, pickup_location, dropoff_location, notes, usage_count')
+        .eq('user_id', user.id)
+        .order('usage_count', { ascending: false })
+        .limit(10);
+      
+      setFavoriteRoutes(favorites || []);
+
       // Load recent searches from localStorage
       const savedSearches = localStorage.getItem(`recentSearches_${user.id}`);
       if (savedSearches) {
@@ -284,6 +304,93 @@ const CustomerHome = () => {
     } finally {
       setIsSavingProfile(false);
     }
+  };
+
+  // Favorite routes functions
+  const handleAddFavoriteRoute = async () => {
+    if (!user?.id) return;
+    if (!newFavoriteRoute.name.trim() || !newFavoriteRoute.pickup.trim() || !newFavoriteRoute.dropoff.trim()) {
+      toast.error(language === 'TR' ? 'Lütfen tüm alanları doldurun' : 'Please fill in all fields');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('favorite_routes')
+        .insert({
+          user_id: user.id,
+          name: newFavoriteRoute.name.trim(),
+          pickup_location: newFavoriteRoute.pickup.trim(),
+          dropoff_location: newFavoriteRoute.dropoff.trim(),
+          notes: newFavoriteRoute.notes.trim() || null,
+        });
+
+      if (error) throw error;
+
+      toast.success(language === 'TR' ? 'Favori rota eklendi!' : 'Favorite route added!');
+      setNewFavoriteRoute({ name: '', pickup: '', dropoff: '', notes: '' });
+      setIsAddingFavorite(false);
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add favorite route');
+    }
+  };
+
+  const handleDeleteFavoriteRoute = async (routeId: string) => {
+    if (!user?.id) return;
+
+    try {
+      const { error } = await supabase
+        .from('favorite_routes')
+        .delete()
+        .eq('id', routeId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast.success(language === 'TR' ? 'Favori rota silindi' : 'Favorite route deleted');
+      setFavoriteRoutes(prev => prev.filter(r => r.id !== routeId));
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete route');
+    }
+  };
+
+  const handleUseFavoriteRoute = async (route: typeof favoriteRoutes[0]) => {
+    // Update usage count
+    if (user?.id) {
+      supabase
+        .from('favorite_routes')
+        .update({ usage_count: route.usage_count + 1 })
+        .eq('id', route.id)
+        .then(() => {});
+    }
+
+    // Fill form with favorite route
+    setFormData(prev => ({
+      ...prev,
+      pickup: route.pickup_location,
+      dropoff: route.dropoff_location,
+      customerNotes: route.notes || '',
+    }));
+    setIsBookingFormOpen(true);
+    setTimeout(() => {
+      const formElement = document.getElementById('booking-form');
+      formElement?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  const handleSaveCurrentRouteAsFavorite = () => {
+    if (!formData.pickup || !formData.dropoff) {
+      toast.error(language === 'TR' ? 'Önce alış ve bırakış noktalarını girin' : 'Please enter pickup and dropoff locations first');
+      return;
+    }
+    setNewFavoriteRoute({
+      name: '',
+      pickup: formData.pickup,
+      dropoff: formData.dropoff,
+      notes: formData.customerNotes || '',
+    });
+    setIsAddingFavorite(true);
   };
 
   const addPassenger = () => {
@@ -1206,6 +1313,204 @@ const CustomerHome = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Favorite Routes Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="mb-6"
+        >
+          <Card className="shadow-md border-border/50 overflow-hidden">
+            <CardHeader className="pb-3 bg-gradient-to-r from-rose-500/10 to-pink-500/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
+                    <Heart className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base font-semibold">
+                      {language === 'TR' ? 'Favori Rotalarım' : 'My Favorite Routes'}
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      {language === 'TR' ? 'Sık kullandığın rotalar' : 'Your frequently used routes'}
+                    </CardDescription>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                  onClick={() => setIsAddingFavorite(true)}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  {language === 'TR' ? 'Ekle' : 'Add'}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              {/* Add New Favorite Route Form */}
+              <AnimatePresence>
+                {isAddingFavorite && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-4 p-4 bg-muted/50 rounded-lg border border-rose-200 dark:border-rose-800"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <Route className="h-4 w-4 text-rose-500" />
+                        {language === 'TR' ? 'Yeni Favori Rota' : 'New Favorite Route'}
+                      </h4>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => {
+                          setIsAddingFavorite(false);
+                          setNewFavoriteRoute({ name: '', pickup: '', dropoff: '', notes: '' });
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">
+                          {language === 'TR' ? 'Rota Adı' : 'Route Name'}
+                        </Label>
+                        <Input
+                          placeholder={language === 'TR' ? 'Örn: Eve, İşe, Havalimanı' : 'E.g: Home, Work, Airport'}
+                          value={newFavoriteRoute.name}
+                          onChange={(e) => setNewFavoriteRoute(prev => ({ ...prev, name: e.target.value }))}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">
+                          {language === 'TR' ? 'Alış Noktası' : 'Pickup Location'}
+                        </Label>
+                        <GooglePlacesAutocomplete
+                          initialValue={newFavoriteRoute.pickup}
+                          onPlaceSelected={(val) => setNewFavoriteRoute(prev => ({ ...prev, pickup: val }))}
+                          onInputChange={(val) => setNewFavoriteRoute(prev => ({ ...prev, pickup: val }))}
+                          placeholder={language === 'TR' ? 'Adres girin...' : 'Enter address...'}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">
+                          {language === 'TR' ? 'Bırakış Noktası' : 'Dropoff Location'}
+                        </Label>
+                        <GooglePlacesAutocomplete
+                          initialValue={newFavoriteRoute.dropoff}
+                          onPlaceSelected={(val) => setNewFavoriteRoute(prev => ({ ...prev, dropoff: val }))}
+                          onInputChange={(val) => setNewFavoriteRoute(prev => ({ ...prev, dropoff: val }))}
+                          placeholder={language === 'TR' ? 'Adres girin...' : 'Enter address...'}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">
+                          {language === 'TR' ? 'Notlar (Opsiyonel)' : 'Notes (Optional)'}
+                        </Label>
+                        <Input
+                          placeholder={language === 'TR' ? 'Özel notlar...' : 'Special notes...'}
+                          value={newFavoriteRoute.notes}
+                          onChange={(e) => setNewFavoriteRoute(prev => ({ ...prev, notes: e.target.value }))}
+                          className="mt-1"
+                        />
+                      </div>
+                      <Button
+                        onClick={handleAddFavoriteRoute}
+                        className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
+                      >
+                        <Heart className="h-4 w-4 mr-2" />
+                        {language === 'TR' ? 'Favorilere Ekle' : 'Add to Favorites'}
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Favorite Routes List */}
+              {favoriteRoutes.length > 0 ? (
+                <div className="space-y-2">
+                  {favoriteRoutes.map((route, index) => (
+                    <motion.div
+                      key={route.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.05 * index }}
+                      className="group"
+                    >
+                      <div
+                        className="flex items-center gap-3 p-3 bg-muted/30 hover:bg-muted/50 rounded-lg border border-border/50 hover:border-rose-300 dark:hover:border-rose-700 transition-all cursor-pointer"
+                        onClick={() => handleUseFavoriteRoute(route)}
+                      >
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 flex items-center justify-center flex-shrink-0">
+                          <Heart className="h-5 w-5 text-rose-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-semibold text-sm truncate">{route.name}</span>
+                            {route.usage_count > 0 && (
+                              <Badge variant="secondary" className="text-xs bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
+                                {route.usage_count}x
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <MapPin className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate max-w-[100px]">{route.pickup_location.split(',')[0]}</span>
+                            <ArrowRight className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate max-w-[100px]">{route.dropoff_location.split(',')[0]}</span>
+                          </div>
+                          {route.notes && (
+                            <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">{route.notes}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteFavoriteRoute(route.id);
+                            }}
+                          >
+                            <HeartOff className="h-4 w-4" />
+                          </Button>
+                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : !isAddingFavorite ? (
+                <div className="text-center py-6">
+                  <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                    <Heart className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {language === 'TR' ? 'Henüz favori rotanız yok' : 'No favorite routes yet'}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsAddingFavorite(true)}
+                    className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:hover:bg-rose-900/20"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    {language === 'TR' ? 'İlk Rotanı Ekle' : 'Add Your First Route'}
+                  </Button>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Booking Form with Enhanced Styling */}
         <motion.div
