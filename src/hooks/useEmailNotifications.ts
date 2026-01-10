@@ -11,6 +11,7 @@ type EmailType =
   | 'reservation_updated_driver'
   | 'reservation_updated_customer'
   | 'reservation_cancelled_customer'
+  | 'reservation_cancelled_driver'
   | 'trip_completed_customer'
   | 'payment_request_customer'
   | 'payment_confirmed_customer'
@@ -282,6 +283,19 @@ export const useEmailNotifications = () => {
     });
   }, [sendEmail]);
 
+  // 20. When reservation is cancelled → Email to driver
+  const emailDriverReservationCancelled = useCallback(async (
+    reservationId: string,
+    driverEmail?: string,
+    driverName?: string
+  ) => {
+    return sendEmail({
+      type: 'reservation_cancelled_driver',
+      reservation_id: reservationId,
+      additional_data: { driver_email: driverEmail, driver_name: driverName },
+    });
+  }, [sendEmail]);
+
   return {
     sendEmail,
     emailAdminNewReservation,
@@ -290,6 +304,7 @@ export const useEmailNotifications = () => {
     emailCustomerPriceSet,
     emailDriverAssigned,
     emailDriverReservationUpdated,
+    emailDriverReservationCancelled,
     emailCustomerDriverAssigned,
     emailPaymentRequest,
     emailPaymentConfirmed,

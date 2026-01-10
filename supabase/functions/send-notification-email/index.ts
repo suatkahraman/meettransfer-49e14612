@@ -20,6 +20,7 @@ type EmailType =
   | 'reservation_updated_driver' // Reservation updated → Driver (new assignment or changes)
   | 'reservation_updated_customer' // Reservation updated → Customer
   | 'reservation_cancelled_customer' // Reservation cancelled → Customer
+  | 'reservation_cancelled_driver' // Reservation cancelled by customer → Driver
   | 'trip_completed_customer'    // Trip completed → Customer
   | 'payment_request_customer'   // Admin sends payment link → Customer
   | 'payment_confirmed_customer' // Admin confirms payment → Customer
@@ -1623,6 +1624,67 @@ const getEmailTemplate = (type: EmailType, data: any) => {
         `,
       };
 
+    case 'reservation_cancelled_driver':
+      return {
+        subject: `❌ Reservation Cancelled - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #f44336 0%, #c62828 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">❌ Transfer Cancelled</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">A reservation assigned to you has been cancelled</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #f44336; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <div style="background: #ffebee; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 25px; border: 1px solid #ffcdd2;">
+                <p style="margin: 0; color: #c62828; font-weight: bold; font-size: 16px;">⚠️ This transfer has been cancelled by the customer</p>
+                <p style="margin: 10px 0 0; color: #d32f2f; font-size: 13px;">You no longer need to perform this transfer.</p>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Customer Name</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.customer_name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Original Date & Time</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff_display}</td>
+                </tr>
+              </table>
+
+              <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center;">
+                <p style="margin: 0; color: #666; font-size: 14px;">
+                  If you have any questions, please contact the admin.
+                </p>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
     default:
       throw new Error(`Unknown email type: ${type}`);
   }
@@ -1685,7 +1747,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get driver email if needed
     let driverEmail = "";
-    if (type === 'driver_assigned_driver' || type === 'reservation_updated_driver') {
+    if (type === 'driver_assigned_driver' || type === 'reservation_updated_driver' || type === 'reservation_cancelled_driver') {
       console.log('=== DRIVER EMAIL LOOKUP START ===');
       console.log('Reservation ID:', reservation_id);
       console.log('Driver ID from reservation:', reservation.driver_id);
@@ -1820,6 +1882,7 @@ const handler = async (req: Request): Promise<Response> => {
         break;
       case 'driver_assigned_driver':
       case 'reservation_updated_driver':
+      case 'reservation_cancelled_driver':
         recipient = driverEmail;
         break;
       case 'agency_approved_agency':
