@@ -555,6 +555,19 @@ const CustomerHome = () => {
                   <span className="text-xs text-red-600 dark:text-red-400 font-mono">{EMERGENCY_PHONE.replace('+90', '+90 ')}</span>
                 </Button>
 
+                {/* Edit Profile */}
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate('/customer/profile')}
+                >
+                  <span className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    {language === 'TR' ? 'Profili Düzenle' : 'Edit Profile'}
+                  </span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+
                 {/* Security Settings */}
                 <Button 
                   variant="outline" 
@@ -651,39 +664,15 @@ const CustomerHome = () => {
                         : 'Please add your phone number for reservations.'}
                     </p>
                   </div>
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button size="sm" variant="outline" className="border-amber-500 text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/50">
-                        <Edit2 className="h-3 w-3 mr-1" />
-                        {language === 'TR' ? 'Ekle' : 'Add'}
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-full sm:max-w-md">
-                      <SheetHeader>
-                        <SheetTitle className="flex items-center gap-2">
-                          <Phone className="h-5 w-5" />
-                          {language === 'TR' ? 'Telefon Numarası Ekle' : 'Add Phone Number'}
-                        </SheetTitle>
-                      </SheetHeader>
-                      <div className="mt-6 space-y-4">
-                        <div className="space-y-2">
-                          <Label>{language === 'TR' ? 'Telefon Numarası' : 'Phone Number'}</Label>
-                          <PhoneInput
-                            value={profileData.phone}
-                            onChange={(value) => setProfileData({ ...profileData, phone: value })}
-                          />
-                        </div>
-                        <Button 
-                          className="w-full" 
-                          onClick={handleSaveProfile}
-                          disabled={isSavingProfile || !profileData.phone}
-                        >
-                          {isSavingProfile ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                          {language === 'TR' ? 'Kaydet' : 'Save'}
-                        </Button>
-                      </div>
-                    </SheetContent>
-                  </Sheet>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="border-amber-500 text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/50"
+                    onClick={() => navigate('/customer/profile')}
+                  >
+                    <Edit2 className="h-3 w-3 mr-1" />
+                    {language === 'TR' ? 'Ekle' : 'Add'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
