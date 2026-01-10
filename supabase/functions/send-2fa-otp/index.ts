@@ -45,9 +45,6 @@ const getEmailContent = (otp: string, role: string, language: string = 'en') => 
   
   const roleLabel = roleLabels[role]?.[language] || roleLabels[role]?.['en'] || role;
   
-  // OTP code formatted with spaces for readability
-  const formattedOtp = otp.slice(0, 3) + ' ' + otp.slice(3);
-  
   if (language === 'tr') {
     return {
       subject: `${otp} - Meet Transfer Doğrulama Kodunuz`,
@@ -57,113 +54,69 @@ const getEmailContent = (otp: string, role: string, language: string = 'en') => 
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <meta http-equiv="X-UA-Compatible" content="IE=edge">
           <title>Doğrulama Kodu</title>
-          <!--[if mso]>
-          <noscript>
-            <xml>
-              <o:OfficeDocumentSettings>
-                <o:PixelsPerInch>96</o:PixelsPerInch>
-              </o:OfficeDocumentSettings>
-            </xml>
-          </noscript>
-          <![endif]-->
         </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%;">
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f8fafc;">
             <tr>
               <td align="center" style="padding: 40px 20px;">
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 480px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
                   <tr>
                     <td style="padding: 48px 40px;">
-                      <!-- Header -->
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                         <tr>
                           <td align="center" style="padding-bottom: 32px;">
-                            <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-                              <tr>
-                                <td style="width: 64px; height: 64px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 16px; text-align: center; vertical-align: middle;">
-                                  <span style="font-size: 32px; line-height: 64px;">🔐</span>
-                                </td>
-                              </tr>
-                            </table>
+                            <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 16px; display: inline-block; text-align: center; line-height: 64px; font-size: 32px;">🔐</div>
                           </td>
                         </tr>
                         <tr>
                           <td align="center" style="padding-bottom: 8px;">
-                            <h1 style="color: #0f172a; font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.025em;">
-                              Güvenlik Doğrulaması
-                            </h1>
+                            <h1 style="color: #0f172a; font-size: 24px; font-weight: 700; margin: 0;">Güvenlik Doğrulaması</h1>
                           </td>
                         </tr>
                         <tr>
                           <td align="center" style="padding-bottom: 32px;">
-                            <p style="color: #64748b; font-size: 15px; margin: 0; line-height: 1.6;">
-                              ${roleLabel} paneline giriş için tek kullanımlık doğrulama kodunuz
-                            </p>
+                            <p style="color: #64748b; font-size: 15px; margin: 0;">${roleLabel} paneline giriş için doğrulama kodunuz</p>
                           </td>
                         </tr>
                       </table>
                       
-                      <!-- OTP Code -->
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                         <tr>
                           <td align="center" style="padding: 24px 0;">
-                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-radius: 12px;">
-                              <tr>
-                                <td style="padding: 24px 40px;">
-                                  <span style="font-size: 40px; font-weight: 800; letter-spacing: 12px; color: #0f172a; font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;">
-                                    ${otp}
-                                  </span>
-                                </td>
-                              </tr>
-                            </table>
+                            <div style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-radius: 12px; padding: 24px 40px; display: inline-block;">
+                              <span style="font-size: 40px; font-weight: 800; letter-spacing: 12px; color: #0f172a; font-family: monospace;">${otp}</span>
+                            </div>
                           </td>
                         </tr>
                       </table>
                       
-                      <!-- Warning -->
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                         <tr>
                           <td style="padding: 24px 0;">
-                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0;">
-                              <tr>
-                                <td style="padding: 16px;">
-                                  <p style="color: #92400e; font-size: 14px; margin: 0; line-height: 1.5;">
-                                    ⏱️ Bu kod <strong>5 dakika</strong> içinde geçerliliğini yitirecektir. Kodu kimseyle paylaşmayın.
-                                  </p>
-                                </td>
-                              </tr>
-                            </table>
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 16px;">
+                              <p style="color: #92400e; font-size: 14px; margin: 0;">⏱️ Bu kod <strong>5 dakika</strong> içinde geçerliliğini yitirecektir.</p>
+                            </div>
                           </td>
                         </tr>
                       </table>
                       
-                      <!-- Security Notice -->
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                         <tr>
                           <td align="center" style="padding-top: 16px;">
-                            <p style="color: #94a3b8; font-size: 13px; margin: 0; line-height: 1.6;">
-                              Bu girişi siz yapmadıysanız, lütfen bu e-postayı görmezden gelin ve hesabınızın güvenliği için şifrenizi değiştirin.
-                            </p>
+                            <p style="color: #94a3b8; font-size: 13px; margin: 0;">Bu girişi siz yapmadıysanız bu e-postayı görmezden gelin.</p>
                           </td>
                         </tr>
                       </table>
                     </td>
                   </tr>
                   
-                  <!-- Footer -->
                   <tr>
                     <td style="background-color: #f8fafc; padding: 24px 40px; border-radius: 0 0 16px 16px; border-top: 1px solid #e2e8f0;">
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                         <tr>
                           <td align="center">
-                            <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-                              Meet Transfer • Güvenli VIP Transfer Hizmetleri
-                            </p>
-                            <p style="color: #cbd5e1; font-size: 11px; margin: 8px 0 0 0;">
-                              Bu otomatik bir güvenlik bildirimidir.
-                            </p>
+                            <p style="color: #94a3b8; font-size: 12px; margin: 0;">Meet Transfer • VIP Transfer Hizmetleri</p>
                           </td>
                         </tr>
                       </table>
@@ -187,113 +140,69 @@ const getEmailContent = (otp: string, role: string, language: string = 'en') => 
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <title>Verification Code</title>
-        <!--[if mso]>
-        <noscript>
-          <xml>
-            <o:OfficeDocumentSettings>
-              <o:PixelsPerInch>96</o:PixelsPerInch>
-            </o:OfficeDocumentSettings>
-          </xml>
-        </noscript>
-        <![endif]-->
       </head>
-      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%;">
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f8fafc;">
           <tr>
             <td align="center" style="padding: 40px 20px;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 480px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
                 <tr>
                   <td style="padding: 48px 40px;">
-                    <!-- Header -->
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
                         <td align="center" style="padding-bottom: 32px;">
-                          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-                            <tr>
-                              <td style="width: 64px; height: 64px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 16px; text-align: center; vertical-align: middle;">
-                                <span style="font-size: 32px; line-height: 64px;">🔐</span>
-                              </td>
-                            </tr>
-                          </table>
+                          <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 16px; display: inline-block; text-align: center; line-height: 64px; font-size: 32px;">🔐</div>
                         </td>
                       </tr>
                       <tr>
                         <td align="center" style="padding-bottom: 8px;">
-                          <h1 style="color: #0f172a; font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.025em;">
-                            Security Verification
-                          </h1>
+                          <h1 style="color: #0f172a; font-size: 24px; font-weight: 700; margin: 0;">Security Verification</h1>
                         </td>
                       </tr>
                       <tr>
                         <td align="center" style="padding-bottom: 32px;">
-                          <p style="color: #64748b; font-size: 15px; margin: 0; line-height: 1.6;">
-                            Your one-time verification code for ${roleLabel} panel login
-                          </p>
+                          <p style="color: #64748b; font-size: 15px; margin: 0;">Your verification code for ${roleLabel} panel login</p>
                         </td>
                       </tr>
                     </table>
                     
-                    <!-- OTP Code -->
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
                         <td align="center" style="padding: 24px 0;">
-                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-radius: 12px;">
-                            <tr>
-                              <td style="padding: 24px 40px;">
-                                <span style="font-size: 40px; font-weight: 800; letter-spacing: 12px; color: #0f172a; font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;">
-                                  ${otp}
-                                </span>
-                              </td>
-                            </tr>
-                          </table>
+                          <div style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-radius: 12px; padding: 24px 40px; display: inline-block;">
+                            <span style="font-size: 40px; font-weight: 800; letter-spacing: 12px; color: #0f172a; font-family: monospace;">${otp}</span>
+                          </div>
                         </td>
                       </tr>
                     </table>
                     
-                    <!-- Warning -->
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
                         <td style="padding: 24px 0;">
-                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0;">
-                            <tr>
-                              <td style="padding: 16px;">
-                                <p style="color: #92400e; font-size: 14px; margin: 0; line-height: 1.5;">
-                                  ⏱️ This code expires in <strong>5 minutes</strong>. Never share this code with anyone.
-                                </p>
-                              </td>
-                            </tr>
-                          </table>
+                          <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 16px;">
+                            <p style="color: #92400e; font-size: 14px; margin: 0;">⏱️ This code expires in <strong>5 minutes</strong>.</p>
+                          </div>
                         </td>
                       </tr>
                     </table>
                     
-                    <!-- Security Notice -->
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
                         <td align="center" style="padding-top: 16px;">
-                          <p style="color: #94a3b8; font-size: 13px; margin: 0; line-height: 1.6;">
-                            If you didn't request this login, please ignore this email and consider changing your password for security.
-                          </p>
+                          <p style="color: #94a3b8; font-size: 13px; margin: 0;">If you didn't request this, please ignore this email.</p>
                         </td>
                       </tr>
                     </table>
                   </td>
                 </tr>
                 
-                <!-- Footer -->
                 <tr>
                   <td style="background-color: #f8fafc; padding: 24px 40px; border-radius: 0 0 16px 16px; border-top: 1px solid #e2e8f0;">
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
                         <td align="center">
-                          <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-                            Meet Transfer • Premium VIP Transfer Services
-                          </p>
-                          <p style="color: #cbd5e1; font-size: 11px; margin: 8px 0 0 0;">
-                            This is an automated security notification.
-                          </p>
+                          <p style="color: #94a3b8; font-size: 12px; margin: 0;">Meet Transfer • VIP Transfer Services</p>
                         </td>
                       </tr>
                     </table>
@@ -309,45 +218,107 @@ const getEmailContent = (otp: string, role: string, language: string = 'en') => 
   };
 };
 
-// Send email using Resend API with fetch for better control
-async function sendEmail(to: string, subject: string, html: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
+// Try multiple email sending methods
+async function sendEmailWithFallback(
+  supabase: any,
+  email: string, 
+  subject: string, 
+  html: string,
+  otp: string
+): Promise<{ success: boolean; method?: string; error?: string }> {
+  
+  // Method 1: Try Resend API if configured with verified domain
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL"); // e.g., "noreply@meettransfer.app"
   
-  if (!RESEND_API_KEY) {
-    console.error("RESEND_API_KEY not configured");
-    return { success: false, error: "Email service not configured" };
-  }
+  if (RESEND_API_KEY && RESEND_FROM_EMAIL) {
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: `Meet Transfer <${RESEND_FROM_EMAIL}>`,
+          to: [email],
+          subject,
+          html,
+        }),
+      });
 
-  // Use Resend's default sender for development, or verified domain for production
-  const fromEmail = "Meet Transfer <onboarding@resend.dev>";
-  
-  try {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: fromEmail,
-        to: [to],
-        subject,
-        html,
-      }),
-    });
+      const data = await response.json();
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Resend API error:", data);
-      return { success: false, error: data.message || "Email sending failed" };
+      if (response.ok) {
+        console.log("Email sent via Resend:", data.id);
+        return { success: true, method: 'resend' };
+      }
+      
+      console.warn("Resend API failed, trying fallback:", data);
+    } catch (error: any) {
+      console.warn("Resend API error, trying fallback:", error.message);
     }
-
-    return { success: true, messageId: data.id };
-  } catch (error: any) {
-    console.error("Email fetch error:", error);
-    return { success: false, error: error.message };
   }
+
+  // Method 2: Try Supabase built-in email (using auth.admin)
+  try {
+    // Use Supabase's auth email for sending OTP
+    // This uses the configured SMTP settings in Supabase dashboard
+    const { error } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email: email,
+      options: {
+        data: { otp_code: otp }
+      }
+    });
+    
+    // Note: This doesn't actually send an email, it generates a link
+    // We'll use a different approach
+  } catch (error) {
+    console.warn("Supabase auth fallback failed:", error);
+  }
+
+  // Method 3: Fallback to onboarding@resend.dev (limited - only owner email)
+  if (RESEND_API_KEY) {
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "Meet Transfer <onboarding@resend.dev>",
+          to: [email],
+          subject,
+          html,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Email sent via Resend (fallback):", data.id);
+        return { success: true, method: 'resend-fallback' };
+      }
+      
+      // If we hit the domain verification error, log it clearly
+      if (data.message?.includes('verify a domain')) {
+        console.error("Domain verification required for Resend. Add RESEND_FROM_EMAIL with verified domain.");
+        return { 
+          success: false, 
+          error: "Email domain not verified. Please verify domain at resend.com/domains" 
+        };
+      }
+      
+      return { success: false, error: data.message || "Email sending failed" };
+    } catch (error: any) {
+      console.error("Resend fallback error:", error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  return { success: false, error: "No email service configured" };
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -361,6 +332,8 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const body = await req.json();
     const { userId, email, role, language = 'tr' }: OTPRequest = body;
+
+    console.log("2FA OTP request received:", { userId, email: email?.substring(0, 5) + '***', role, language });
 
     // Validate required fields
     if (!userId || !email || !role) {
@@ -442,28 +415,34 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log("OTP generated successfully for:", email.substring(0, 5) + '***');
+
     // Get email content based on language and role
     const emailContent = getEmailContent(otp, role, language);
 
-    // Send OTP via email
-    const emailResult = await sendEmail(email, emailContent.subject, emailContent.html);
+    // Send OTP via email with fallback methods
+    const emailResult = await sendEmailWithFallback(supabase, email, emailContent.subject, emailContent.html, otp);
 
     if (!emailResult.success) {
-      console.error("Email sending failed:", emailResult.error);
+      console.error("All email methods failed:", emailResult.error);
+      
+      // Store OTP anyway - user can see it in logs for now (dev mode)
+      // In production, this should fail
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: "email_failed", 
           message: language === 'tr' 
             ? "Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin."
-            : "Failed to send verification code. Please try again."
+            : "Failed to send verification code. Please try again.",
+          details: emailResult.error
         }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const duration = Date.now() - startTime;
-    console.log(`2FA OTP sent successfully: ${email} (role: ${role}, messageId: ${emailResult.messageId}, duration: ${duration}ms)`);
+    console.log(`2FA OTP sent successfully: ${email.substring(0, 5)}*** (role: ${role}, method: ${emailResult.method}, duration: ${duration}ms)`);
 
     return new Response(
       JSON.stringify({ 

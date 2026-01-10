@@ -344,6 +344,8 @@ const LoginScreen = () => {
         // Check if device is trusted
         const isTrusted = await checkTrustedDevice(authData.user.id);
         
+        console.log('2FA check:', { isTrusted, require2FADueToFailedAttempts, userRole });
+        
         // Require 2FA if: device not trusted OR there were failed login attempts
         if (!isTrusted || require2FADueToFailedAttempts) {
           // Sign out temporarily - user needs to verify via 2FA
@@ -352,9 +354,19 @@ const LoginScreen = () => {
           // Device not trusted or suspicious activity - require 2FA
           setPendingRole(userRole);
           setViewMode('2fa');
+          
           const langCode = language === 'TR' ? 'tr' : 'en';
-          await initiate2FA(authData.user.id, validation.email, userRole, langCode);
-          toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
+          console.log('Initiating 2FA for:', validation.email);
+          
+          const result = await initiate2FA(authData.user.id, validation.email, userRole, langCode);
+          
+          if (result.success) {
+            toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
+          } else {
+            console.error('2FA initiation failed:', result.error);
+            toast.error(result.error || 'Doğrulama kodu gönderilemedi');
+            // Stay on 2FA page to allow retry
+          }
           
           // Clear the flag after initiating 2FA
           localStorage.removeItem(require2FAKey);
