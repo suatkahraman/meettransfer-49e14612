@@ -21,6 +21,11 @@ import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
+import BlogImageGallery from "@/components/website/BlogImageGallery";
+import vitoVip1 from "@/assets/vito-vip-1.jpg";
+import vitoVip2 from "@/assets/vito-vip-2.jpg";
+import sprinterInteriorBlue from "@/assets/sprinter-interior-blue.jpg";
+import vitoAirportAnime from "@/assets/vito-airport-anime.jpg";
 
 const IstanbulTransferPriceGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -366,6 +371,36 @@ const IstanbulTransferPriceGuide = () => {
             <li><strong>Request child seats early:</strong> If traveling with children, mention this when booking</li>
             <li><strong>Consider return transfer:</strong> Book round-trip for better rates and guaranteed service</li>
           </ul>
+
+          {/* Image Gallery */}
+          <h3>{t("galleryTitle") || "Our Fleet Gallery"}</h3>
+          <div className="not-prose my-8">
+            <BlogImageGallery 
+              images={[
+                { 
+                  src: vitoVip1, 
+                  alt: "Mercedes Vito VIP Transfer Istanbul",
+                  caption: "Mercedes Vito VIP - Luxury Airport Transfer"
+                },
+                { 
+                  src: vitoVip2, 
+                  alt: "VIP Interior Istanbul Transfer",
+                  caption: "Premium leather interior with starlight ceiling"
+                },
+                { 
+                  src: sprinterInteriorBlue, 
+                  alt: "Mercedes Sprinter VIP Minibus",
+                  caption: "Sprinter VIP - Perfect for groups"
+                },
+                { 
+                  src: vitoAirportAnime, 
+                  alt: "Airport pickup service Istanbul",
+                  caption: "Professional meet & greet service"
+                },
+              ]}
+              columns={2}
+            />
+          </div>
 
           <h2 id="conclusion">{t("blogPriceConclusion")}</h2>
           <p>

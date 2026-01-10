@@ -21,6 +21,11 @@ import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
+import BlogImageGallery from "@/components/website/BlogImageGallery";
+import vitoCappadociaBalloon from "@/assets/vito-cappadocia-balloon.jpg";
+import vitoVipCouple from "@/assets/vito-vip-couple-starlight.jpg";
+import vitoPassengerCouple from "@/assets/vito-passenger-couple.jpg";
+import vitoAirportWelcome from "@/assets/vito-airport-welcome.jpg";
 
 const CappadociaAirportTransferGuide = () => {
   const { getLocalizedPath, t, language } = useLanguage();
@@ -443,6 +448,40 @@ const CappadociaAirportTransferGuide = () => {
                 <span className="text-sm font-medium">{hotel}</span>
               </div>
             ))}
+          </div>
+
+          {/* Image Gallery */}
+          <h3>
+            {language === 'TR' 
+              ? "Kapadokya Transfer Galerisi" 
+              : "Cappadocia Transfer Gallery"}
+          </h3>
+          <div className="not-prose my-8">
+            <BlogImageGallery 
+              images={[
+                { 
+                  src: vitoCappadociaBalloon, 
+                  alt: language === 'TR' ? "Kapadokya balon manzarası ile VIP transfer" : "VIP transfer with Cappadocia balloon view",
+                  caption: language === 'TR' ? "Balon turları için sabah erken transfer" : "Early morning transfer for balloon tours"
+                },
+                { 
+                  src: vitoAirportWelcome, 
+                  alt: language === 'TR' ? "Havalimanı karşılama servisi" : "Airport meet & greet service",
+                  caption: language === 'TR' ? "İsim tabelası ile profesyonel karşılama" : "Professional welcome with name sign"
+                },
+                { 
+                  src: vitoVipCouple, 
+                  alt: language === 'TR' ? "VIP Mercedes iç mekan" : "VIP Mercedes interior",
+                  caption: language === 'TR' ? "Lüks ve konforlu iç mekan" : "Luxurious and comfortable interior"
+                },
+                { 
+                  src: vitoPassengerCouple, 
+                  alt: language === 'TR' ? "Mutlu müşteriler" : "Happy customers",
+                  caption: language === 'TR' ? "Rahat yolculuk deneyimi" : "Comfortable travel experience"
+                },
+              ]}
+              columns={2}
+            />
           </div>
 
           <h2 id="cappadocia-why-choose">
