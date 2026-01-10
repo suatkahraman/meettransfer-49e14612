@@ -1006,7 +1006,7 @@ export default function QuickBookingConfirm() {
                         (v.price && (!min.price || v.price < min.price)) ? v : min, availableVehicles[0])
                     : null;
                   
-                  return allVehiclePrices.map((vehicle) => {
+                  return allVehiclePrices.map((vehicle, index) => {
                     const isSelected = (selectedVehicle || booking.vehicle_type) === vehicle.vehicleType;
                     const recommendedVehicle = getRecommendedVehicle(booking.passengers, booking.luggage_count || 0);
                     const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
@@ -1027,6 +1027,9 @@ export default function QuickBookingConfirm() {
                       return null;
                     };
                     
+                    // Calculate staggered animation delay for badges (150ms between each)
+                    const badgeAnimationDelay = index * 150;
+                    
                     return (
                       <VehicleSelectionCard
                         key={vehicle.vehicleType}
@@ -1041,6 +1044,7 @@ export default function QuickBookingConfirm() {
                         previousPrice={previousVehiclePrices[vehicle.vehicleType] || null}
                         showDiscountAnimation={discountJustApplied && !!previousVehiclePrices[vehicle.vehicleType]}
                         badge={getVehicleBadge(vehicle.vehicleType)}
+                        badgeAnimationDelay={badgeAnimationDelay}
                       />
                     );
                   });

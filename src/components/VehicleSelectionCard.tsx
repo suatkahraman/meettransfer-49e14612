@@ -93,6 +93,7 @@ interface VehicleSelectionCardProps {
   showDiscountAnimation?: boolean;
   isLoading?: boolean;
   badge?: VehicleBadgeType;
+  badgeAnimationDelay?: number; // Stagger delay in ms for badge animation
 }
 
 // Badge configuration
@@ -150,6 +151,7 @@ export function VehicleSelectionCard({
   showDiscountAnimation = false,
   isLoading = false,
   badge = null,
+  badgeAnimationDelay = 0,
 }: VehicleSelectionCardProps) {
   const { t, language } = useLanguage();
   const [imageModalOpen, setImageModalOpen] = useState(false);
@@ -234,16 +236,31 @@ return (
           </div>
         )}
         
-        {/* Custom Badge - Popular, Best Value, Premium, etc. */}
+        {/* Custom Badge - Popular, Best Value, Premium, etc. with staggered animation */}
         {badge && (() => {
           const badgeConfig = getBadgeConfig(badge, isTurkish);
           if (!badgeConfig) return null;
           const BadgeIcon = badgeConfig.icon;
           return (
-            <div className="absolute top-0 left-0 z-10">
-              <div className={`bg-gradient-to-r ${badgeConfig.gradient} ${badgeConfig.textColor} px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-br-xl sm:rounded-br-2xl rounded-tl-xl sm:rounded-tl-2xl shadow-lg`}>
-                <span className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wide">
-                  <BadgeIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            <div 
+              className="absolute top-0 left-0 z-10 opacity-0"
+              style={{ 
+                animation: `badgeSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${badgeAnimationDelay}ms forwards`
+              }}
+            >
+              <div className={`bg-gradient-to-r ${badgeConfig.gradient} ${badgeConfig.textColor} px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-br-xl sm:rounded-br-2xl rounded-tl-xl sm:rounded-tl-2xl shadow-lg relative overflow-hidden`}>
+                {/* Shimmer effect */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  style={{ 
+                    animation: `shimmerBadge 2s ease-in-out ${badgeAnimationDelay + 500}ms infinite`
+                  }}
+                />
+                <span className="relative flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wide">
+                  <BadgeIcon 
+                    className="h-3 w-3 sm:h-3.5 sm:w-3.5" 
+                    style={{ animation: `iconPop 0.3s ease-out ${badgeAnimationDelay + 300}ms both` }}
+                  />
                   <span>{isTurkish ? badgeConfig.labelTr : badgeConfig.label}</span>
                 </span>
               </div>
@@ -452,6 +469,42 @@ return (
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Badge Animation Styles */}
+      <style>{`
+        @keyframes badgeSlideIn {
+          0% {
+            opacity: 0;
+            transform: translateX(-20px) scale(0.8);
+          }
+          60% {
+            opacity: 1;
+            transform: translateX(5px) scale(1.05);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
+        
+        @keyframes shimmerBadge {
+          0% {
+            transform: translateX(-100%);
+          }
+          50%, 100% {
+            transform: translateX(100%);
+          }
+        }
+        
+        @keyframes iconPop {
+          0% {
+            transform: scale(0) rotate(-180deg);
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+          }
+        }
+      `}</style>
     </>
   );
 }
