@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins, Sparkles, Loader2 } from 'lucide-react';
 import { VehicleSelectionCard } from '@/components/VehicleSelectionCard';
 import { cn } from '@/lib/utils';
 import { CURRENCY_OPTIONS } from '@/lib/currency';
@@ -93,6 +93,22 @@ const ReservationForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // New flow states for logged-in customer price selection
+  const [showPricePreparation, setShowPricePreparation] = useState(false);
+  const [showVehicleSelection, setShowVehicleSelection] = useState(false);
+  const [fetchedVehiclePrices, setFetchedVehiclePrices] = useState<Array<{
+    vehicleType: string;
+    vehicleLabel: string;
+    price: number | null;
+    currency: string;
+    passengers: number;
+    luggage: number;
+    available: boolean;
+  }>>([]);
+  const [selectedVehicleForConfirm, setSelectedVehicleForConfirm] = useState<string>('');
+  const [pendingFormData, setPendingFormData] = useState<typeof defaultFormData | null>(null);
+  const [pendingPassengerNames, setPendingPassengerNames] = useState<string[]>([]);
   
   // Check if coming from QuickBooking flow
   const quickBookingIdParam = searchParams.get('quickBookingId') || '';
@@ -377,6 +393,52 @@ const ReservationForm = () => {
       setErrors(fieldErrors);
       toast.error('Please fix the validation errors');
       return;
+    }
+
+    // For logged-in users NOT coming from QuickBooking, show price preparation flow
+    if (isLoggedIn && !isFromQuickBooking && !hasPendingReservation) {
+      setIsLoading(true);
+      setShowPricePreparation(true);
+      setPendingFormData({ ...formData });
+      setPendingPassengerNames([...validPassengerNames]);
+      
+      try {
+        // Fetch all vehicle prices
+        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
+          body: {
+            pickup: formData.pickup,
+            dropoff: formData.dropoff,
+            customerCurrency: preferredCurrency,
+          },
+        });
+
+        // Wait 3 seconds for animation
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        if (data?.prices && data.prices.length > 0) {
+          setFetchedVehiclePrices(data.prices);
+          // Set initial selection to the form's vehicle type
+          setSelectedVehicleForConfirm(formData.vehicleType);
+        } else {
+          // No prices found - set empty array
+          setFetchedVehiclePrices([]);
+          setSelectedVehicleForConfirm(formData.vehicleType);
+        }
+        
+        setShowPricePreparation(false);
+        setShowVehicleSelection(true);
+        setIsLoading(false);
+        return;
+      } catch (error) {
+        console.error("Error fetching prices:", error);
+        // Continue with normal flow if price fetching fails
+        setShowPricePreparation(false);
+        setFetchedVehiclePrices([]);
+        setSelectedVehicleForConfirm(formData.vehicleType);
+        setShowVehicleSelection(true);
+        setIsLoading(false);
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -679,6 +741,473 @@ const ReservationForm = () => {
       setIsLoading(false);
     }
   };
+
+  // Function to create reservation after vehicle selection
+  const handleConfirmVehicleSelection = async () => {
+    if (!pendingFormData || !user) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const validPassengerNames = pendingPassengerNames;
+      const primaryPassengerName = validPassengerNames[0].trim();
+      const userId = user.id;
+      
+      // Update profile if needed
+      await supabase
+        .from('profiles')
+        .update({ phone: pendingFormData.phone.trim(), full_name: primaryPassengerName })
+        .eq('id', userId);
+      
+      // Get selected vehicle's price
+      const selectedPriceInfo = fetchedVehiclePrices.find(v => v.vehicleType === selectedVehicleForConfirm);
+      const reservationPrice = selectedPriceInfo?.price || null;
+      const reservationCurrency = selectedPriceInfo?.currency || preferredCurrency;
+      const hasPrice = reservationPrice !== null;
+      
+      // Create reservation
+      const { data: newReservation, error: reservationError } = await supabase
+        .from('reservations')
+        .insert({
+          customer_id: userId,
+          customer_name: primaryPassengerName,
+          customer_phone: pendingFormData.phone.trim(),
+          passenger_names: validPassengerNames.map(n => n.trim()),
+          pickup: pendingFormData.pickup,
+          dropoff: pendingFormData.dropoff.trim(),
+          pickup_date: pendingFormData.date,
+          pickup_time: pendingFormData.time,
+          flight_number: pendingFormData.flightNumber?.trim() || null,
+          vehicle_type: selectedVehicleForConfirm,
+          payment_type: pendingFormData.paymentMethod,
+          status: hasPrice ? 'customer_approved' : 'awaiting-price',
+          price: reservationPrice,
+          price_currency: reservationCurrency,
+          pickup_place_name: pendingFormData.pickup_place_name || null,
+          pickup_lat: pendingFormData.pickup_lat,
+          pickup_lng: pendingFormData.pickup_lng,
+          dropoff_place_name: pendingFormData.dropoff_place_name || null,
+          dropoff_lat: pendingFormData.dropoff_lat,
+          dropoff_lng: pendingFormData.dropoff_lng,
+          promo_code: isPromoCodeValid ? promoCode.trim() : null,
+        })
+        .select()
+        .single();
+
+      if (reservationError) throw reservationError;
+
+      // Notify admin
+      try {
+        await supabase.functions.invoke('notify-admin-new-reservation', {
+          body: {
+            reservation_id: newReservation.id,
+            customer_name: primaryPassengerName,
+            pickup: pendingFormData.pickup,
+            dropoff: pendingFormData.dropoff.trim(),
+            pickup_date: pendingFormData.date,
+          }
+        });
+      } catch (notifyError) {
+        console.error('Failed to notify admin:', notifyError);
+      }
+
+      // Send email notification
+      try {
+        await emailAdminNewReservation(newReservation.id);
+      } catch (emailError) {
+        console.error('Failed to send admin email:', emailError);
+      }
+
+      // Create return trip if enabled
+      if (hasReturnTrip && returnTripData.date && returnTripData.time) {
+        const returnPrice = isPromoCodeValid && reservationPrice ? Math.round(reservationPrice * 0.7) : reservationPrice;
+        
+        const { data: returnReservation, error: returnError } = await supabase
+          .from('reservations')
+          .insert({
+            customer_id: userId,
+            customer_name: primaryPassengerName,
+            customer_phone: pendingFormData.phone.trim(),
+            passenger_names: validPassengerNames.map(n => n.trim()),
+            pickup: pendingFormData.dropoff.trim(),
+            dropoff: pendingFormData.pickup,
+            pickup_date: returnTripData.date,
+            pickup_time: returnTripData.time,
+            flight_number: returnTripData.flightNumber?.trim() || null,
+            vehicle_type: selectedVehicleForConfirm,
+            payment_type: pendingFormData.paymentMethod,
+            status: hasPrice ? 'customer_approved' : 'awaiting-price',
+            price: returnPrice,
+            price_currency: reservationCurrency,
+            promo_code: isPromoCodeValid ? promoCode.trim() : null,
+            pickup_place_name: pendingFormData.dropoff_place_name || null,
+            pickup_lat: pendingFormData.dropoff_lat,
+            pickup_lng: pendingFormData.dropoff_lng,
+            dropoff_place_name: pendingFormData.pickup_place_name || null,
+            dropoff_lat: pendingFormData.pickup_lat,
+            dropoff_lng: pendingFormData.pickup_lng,
+          })
+          .select()
+          .single();
+
+        if (returnError) {
+          console.error('Return reservation error:', returnError);
+          toast.error('Outbound trip created, but return trip failed.');
+        } else {
+          try {
+            await supabase.functions.invoke('notify-admin-new-reservation', {
+              body: {
+                reservation_id: returnReservation.id,
+                customer_name: primaryPassengerName,
+                pickup: pendingFormData.dropoff.trim(),
+                dropoff: pendingFormData.pickup,
+                pickup_date: returnTripData.date,
+              }
+            });
+            await emailAdminNewReservation(returnReservation.id);
+          } catch (notifyError) {
+            console.error('Failed to notify admin about return trip:', notifyError);
+          }
+        }
+      }
+
+      toast.success(hasReturnTrip 
+        ? 'Both reservations submitted successfully!'
+        : 'Reservation submitted successfully!');
+      
+      localStorage.removeItem(FORM_STORAGE_KEY);
+      trackConversion(CONVERSION_LABELS.RESERVATION_SUBMIT);
+      
+      // Reset states
+      setShowVehicleSelection(false);
+      setPendingFormData(null);
+      setPendingPassengerNames([]);
+      setFetchedVehiclePrices([]);
+      setIsSubmitted(true);
+    } catch (error: any) {
+      console.error('Reservation error:', error);
+      toast.error(error.message || 'Failed to submit reservation');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Get recommended vehicle based on passenger count
+  const getRecommendedVehicle = (passengers: number): string => {
+    if (passengers >= 7) return 'minibus';
+    if (passengers >= 5) return 'mercedes-vito';
+    return 'vip-mercedes';
+  };
+
+  // Price preparation animation screen
+  if (showPricePreparation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
+        <Card className="max-w-lg w-full">
+          <CardContent className="pt-8 pb-8">
+            <div className="text-center">
+              {/* Animated car icon */}
+              <div className="relative mb-6">
+                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center animate-pulse">
+                  <Car className="h-10 w-10 text-white" />
+                </div>
+                <div className="absolute inset-0 w-20 h-20 mx-auto rounded-full bg-green-400/30 animate-ping" />
+              </div>
+              
+              {/* Main title with shimmer effect */}
+              <h1 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_2s_linear_infinite]">
+                {t('language') === 'TR' ? 'En İyi Fiyat Hazırlanıyor' : 'Preparing Best Price'}
+              </h1>
+              
+              {/* Subtitle */}
+              <p className="text-muted-foreground mb-8 text-sm">
+                {t('language') === 'TR' 
+                  ? 'Araç seçenekleri ve fiyatlar yükleniyor...' 
+                  : 'Loading vehicle options and prices...'}
+              </p>
+              
+              {/* Progress bar animation */}
+              <div className="w-full max-w-xs mx-auto mb-6">
+                <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-full"
+                    style={{ animation: 'progressSlide 3s ease-out forwards' }}
+                  />
+                </div>
+              </div>
+              
+              {/* Feature badges */}
+              <div className="flex flex-wrap justify-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-sm font-medium shadow-sm">
+                  <CheckCircle2 className="h-4 w-4" />
+                  {t('language') === 'TR' ? 'En İyi Fiyat Garantisi' : 'Best Price Guarantee'}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-sm font-medium shadow-sm">
+                  <Sparkles className="h-4 w-4" />
+                  {t('language') === 'TR' ? 'Gizli Ücret Yok' : 'No Hidden Fees'}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <style>{`
+          @keyframes shimmer {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+          }
+          @keyframes progressSlide {
+            0% { width: 0%; }
+            100% { width: 100%; }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Vehicle selection screen after price preparation
+  if (showVehicleSelection && pendingFormData) {
+    const recommendedVehicle = getRecommendedVehicle(pendingPassengerNames.length);
+    const selectedPriceInfo = fetchedVehiclePrices.find(v => v.vehicleType === selectedVehicleForConfirm);
+    const selectedPrice = selectedPriceInfo?.price || null;
+    const selectedCurrency = selectedPriceInfo?.currency || preferredCurrency;
+    
+    // Calculate return price
+    const getReturnPrice = () => {
+      if (!hasReturnTrip || !selectedPrice) return null;
+      if (isPromoCodeValid) return Math.round(selectedPrice * 0.7);
+      return selectedPrice;
+    };
+    
+    const returnPrice = getReturnPrice();
+    const totalPrice = selectedPrice ? selectedPrice + (returnPrice || 0) : null;
+    const discountAmount = hasReturnTrip && isPromoCodeValid && selectedPrice ? Math.round(selectedPrice * 0.3) : null;
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background p-4">
+        <Card className="max-w-2xl mx-auto">
+          <CardContent className="pt-6">
+            {/* Header */}
+            <div className="text-center mb-6">
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Coins className="h-8 w-8 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold mb-2">
+                {t('language') === 'TR' ? 'Aracınızı Seçin' : 'Select Your Vehicle'}
+              </h1>
+              <p className="text-muted-foreground">
+                {t('language') === 'TR' 
+                  ? 'Transferiniz için en uygun aracı seçin' 
+                  : 'Choose the best vehicle for your transfer'}
+              </p>
+            </div>
+
+            {/* Transfer Details */}
+            <div className="bg-muted/50 rounded-lg p-4 mb-6 space-y-3">
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('pickupPoint')}</p>
+                  <p className="font-medium">{pendingFormData.pickup}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-accent mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('dropoffLocation')}</p>
+                  <p className="font-medium">{pendingFormData.dropoff}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('date')}</p>
+                    <p className="font-medium">{pendingFormData.date}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('time')}</p>
+                    <p className="font-medium">{pendingFormData.time}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('passengers')}</p>
+                  <p className="font-medium">{pendingPassengerNames.length}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Vehicle Selection */}
+            <div className="mb-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Car className="h-5 w-5" />
+                {t('vehicleType')}
+              </h3>
+              
+              {fetchedVehiclePrices.length > 0 ? (
+                <div className="grid gap-4">
+                  {fetchedVehiclePrices.map((vehicle) => {
+                    const isSelected = selectedVehicleForConfirm === vehicle.vehicleType;
+                    const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
+                    
+                    return (
+                      <VehicleSelectionCard
+                        key={vehicle.vehicleType}
+                        vehicleType={vehicle.vehicleType}
+                        isSelected={isSelected}
+                        onSelect={(v) => setSelectedVehicleForConfirm(v)}
+                        price={vehicle.price}
+                        currency={vehicle.currency}
+                        showPrice={true}
+                        isRecommended={isRecommended}
+                        available={vehicle.available}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                /* No prices found - show all vehicles without prices */
+                <div className="space-y-4">
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 mb-4">
+                    <Coins className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium">
+                        {t('language') === 'TR' 
+                          ? 'Bu güzergah için otomatik fiyat bulunamadı' 
+                          : 'No automatic pricing found for this route'}
+                      </p>
+                      <p className="text-amber-700 dark:text-amber-300 mt-1">
+                        {t('language') === 'TR'
+                          ? 'Rezervasyon onaylandıktan sonra fiyat bilgisi tarafınıza iletilecektir.'
+                          : 'Price will be provided after your reservation is confirmed.'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {vehicleTypes.map(vehicle => (
+                    <VehicleSelectionCard
+                      key={vehicle.value}
+                      vehicleType={vehicle.value}
+                      isSelected={selectedVehicleForConfirm === vehicle.value}
+                      onSelect={(v) => setSelectedVehicleForConfirm(v)}
+                      price={null}
+                      currency={preferredCurrency}
+                      showPrice={false}
+                      isRecommended={vehicle.value === recommendedVehicle}
+                      available={true}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Return Trip Info */}
+            {hasReturnTrip && (
+              <div className="bg-muted/50 rounded-lg p-4 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <ArrowLeftRight className="h-4 w-4 text-primary" />
+                  <span className="font-medium">{t('returnTrip')}</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {returnTripData.date} - {returnTripData.time}
+                </p>
+              </div>
+            )}
+
+            {/* Price Summary */}
+            {selectedPrice && (
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">{t('language') === 'TR' ? 'Gidiş' : 'Outbound'}</span>
+                    <span className="font-semibold">{selectedPrice} {selectedCurrency}</span>
+                  </div>
+                  
+                  {hasReturnTrip && returnPrice && (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">{t('returnTrip')}</span>
+                        <div className="text-right">
+                          {discountAmount && (
+                            <span className="text-sm line-through text-muted-foreground mr-2">
+                              {selectedPrice} {selectedCurrency}
+                            </span>
+                          )}
+                          <span className="font-semibold">{returnPrice} {selectedCurrency}</span>
+                        </div>
+                      </div>
+                      
+                      {discountAmount && (
+                        <div className="flex items-center justify-between text-green-600 dark:text-green-400">
+                          <span className="flex items-center gap-1">
+                            <Tag className="h-4 w-4" />
+                            {t('language') === 'TR' ? '30% İndirim' : '30% Discount'}
+                          </span>
+                          <span>-{discountAmount} {selectedCurrency}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex items-center justify-between text-lg font-bold">
+                      <span>{t('language') === 'TR' ? 'Toplam' : 'Total'}</span>
+                      <span className="text-primary">{totalPrice} {selectedCurrency}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <Button 
+                onClick={handleConfirmVehicleSelection} 
+                className="w-full" 
+                size="lg"
+                disabled={isLoading || !selectedVehicleForConfirm}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t('submitting')}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    {t('language') === 'TR' ? 'Rezervasyonu Onayla' : 'Confirm Reservation'}
+                  </>
+                )}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowVehicleSelection(false);
+                  setPendingFormData(null);
+                  setPendingPassengerNames([]);
+                  setFetchedVehiclePrices([]);
+                }}
+                className="w-full"
+                disabled={isLoading}
+              >
+                {t('language') === 'TR' ? 'Geri Dön' : 'Go Back'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Success state after submission
   if (isSubmitted) {
