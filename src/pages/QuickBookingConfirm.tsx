@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase, Sparkles, ThumbsUp } from "lucide-react";
+import confetti from "canvas-confetti";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -554,6 +555,13 @@ export default function QuickBookingConfirm() {
             const currencySymbol = getCurrencySymbol(discountResult.currency);
             const oldPrice = booking.price;
             const newPrice = discountResult.new_price;
+            
+            // Fire confetti for discount!
+            confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 }
+            });
             
             toast.success(
               t("autoDiscountApplied") || 
