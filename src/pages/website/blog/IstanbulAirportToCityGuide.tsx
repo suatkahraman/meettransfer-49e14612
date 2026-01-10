@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
+import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 
 const IstanbulAirportToCityGuide = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -86,6 +87,7 @@ const IstanbulAirportToCityGuide = () => {
 
   return (
     <WebsiteLayout>
+      <ReadingProgressBar />
       <SEOHead
         title={t('blogIstanbul1Title')}
         description={t('blogIstanbul1Desc')}

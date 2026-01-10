@@ -18,6 +18,7 @@ import uludagImage from "@/assets/uludag-cable-car.jpg";
 import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
+import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 
 const BursaDayTourGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -33,6 +34,7 @@ const BursaDayTourGuide = () => {
 
   return (
     <WebsiteLayout>
+      <ReadingProgressBar />
       <SEOHead
         title={t("blogBursaSeoTitle")}
         description={t("blogBursaSeoDesc")}

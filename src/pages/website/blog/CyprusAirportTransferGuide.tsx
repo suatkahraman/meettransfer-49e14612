@@ -19,6 +19,7 @@ import {
 import { getWhatsAppUrl } from "@/lib/contact";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
+import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 
 const CyprusAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -62,6 +63,7 @@ const CyprusAirportTransferGuide = () => {
 
   return (
     <WebsiteLayout>
+      <ReadingProgressBar />
       <SEOHead
         title={t("blogCyprusSeoTitle")}
         description={t("blogCyprusSeoDesc")}

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
+import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 
 const PrivateVsTaxiTurkey = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -43,6 +44,7 @@ const PrivateVsTaxiTurkey = () => {
 
   return (
     <WebsiteLayout>
+      <ReadingProgressBar />
       <SEOHead
         title={t('blogPrivateTaxiTitle')}
         description={t('blogPrivateTaxiDesc')}
