@@ -357,7 +357,7 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Cavusin': { priority: 2, keywords: ['cavusin', 'çavuşin'], city: 'Cappadocia' },
   
   // Bursa - Each district separate
-  'Osmangazi': { priority: 1, keywords: ['osmangazi', 'bursa center', 'bursa merkez', 'heykel', 'bursa city', 'setbasi', 'setbaşı', 'altiparmak', 'altıparmak', 'ulucami', 'ulu cami'], city: 'Bursa' },
+  'Osmangazi': { priority: 1, keywords: ['osmangazi', 'bursa center', 'bursa merkez', 'heykel', 'bursa city', 'setbasi', 'setbaşı', 'altiparmak', 'altıparmak', 'ulucami', 'ulu cami', 'bursa otogar', 'otogar', 'bus station', 'otobus terminali', 'otobüs terminali', 'terminal cd', 'terminal caddesi', 'demirtas', 'demirtaş', 'dumlupinar', 'dumlupınar'], city: 'Bursa' },
   'Nilufer': { priority: 2, keywords: ['nilufer', 'nilüfer', 'gorukle', 'görükle', 'ozluece', 'özlüce'], city: 'Bursa' },
   'Yildirim': { priority: 2, keywords: ['yildirim', 'yıldırım'], city: 'Bursa' },
   'Mudanya': { priority: 1, keywords: ['mudanya', 'guzelyali', 'güzelyalı', 'tirilye', 'trilye', 'mudanya iskele'], city: 'Bursa' },
