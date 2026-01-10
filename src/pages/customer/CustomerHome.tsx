@@ -694,7 +694,7 @@ const CustomerHome = () => {
           </motion.div>
         </motion.div>
 
-        {/* Quick Support & Navigation Actions */}
+        {/* Quick Support & Navigation Actions - Same Design as CustomerBookings */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -705,7 +705,7 @@ const CustomerHome = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button 
               variant="outline" 
-              className="h-auto py-3 w-full flex flex-col items-center gap-1 shadow-sm"
+              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:border-primary/40"
               onClick={() => navigate('/')}
             >
               <Home className="h-5 w-5 text-primary" />
@@ -719,25 +719,25 @@ const CustomerHome = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button 
               variant="outline" 
-              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 shadow-sm"
+              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 hover:border-green-500/40"
               onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
             >
-              <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-              <span className="text-xs font-medium text-green-700 dark:text-green-300">
+              <MessageCircle className="h-5 w-5 text-green-500" />
+              <span className="text-xs font-medium">
                 WhatsApp
               </span>
             </Button>
           </motion.div>
           
-          {/* Emergency */}
+          {/* Emergency Call */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button 
               variant="outline" 
-              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 shadow-sm"
+              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-red-500/5 to-red-500/10 border-red-500/20 hover:border-red-500/40"
               onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
             >
-              <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
-              <span className="text-xs font-medium text-red-700 dark:text-red-300">
+              <PhoneCall className="h-5 w-5 text-red-500" />
+              <span className="text-xs font-medium">
                 {language === 'TR' ? 'Acil' : 'Call'}
               </span>
             </Button>
@@ -747,11 +747,11 @@ const CustomerHome = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button 
               variant="outline" 
-              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 shadow-sm"
+              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/40"
               onClick={() => navigate('/security-settings')}
             >
-              <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+              <Shield className="h-5 w-5 text-emerald-500" />
+              <span className="text-xs font-medium">
                 {language === 'TR' ? 'Güvenlik' : 'Security'}
               </span>
             </Button>
