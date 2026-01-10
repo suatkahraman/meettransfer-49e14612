@@ -114,6 +114,18 @@ const CustomerHome = () => {
     status: string;
     vehicle_type: string;
   }>>([]);
+  const [completedReservations, setCompletedReservations] = useState<Array<{
+    id: string;
+    reservation_code: string | null;
+    pickup: string;
+    dropoff: string;
+    pickup_place_name: string | null;
+    dropoff_place_name: string | null;
+    pickup_date: string;
+    pickup_time: string;
+    status: string;
+    vehicle_type: string;
+  }>>([]);
   const [nextTransfer, setNextTransfer] = useState<{date: string; time: string; pickup: string; dropoff: string; reservationCode?: string} | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({ full_name: '', phone: '' });
@@ -187,6 +199,18 @@ const CustomerHome = () => {
       } else {
         setNextTransfer(null);
       }
+
+      // Fetch completed reservations
+      const { data: pastReservations } = await supabase
+        .from('reservations')
+        .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, status, vehicle_type')
+        .eq('customer_id', user.id)
+        .in('status', ['completed', 'cancelled'])
+        .order('pickup_date', { ascending: false })
+        .order('pickup_time', { ascending: false })
+        .limit(5);
+      
+      setCompletedReservations(pastReservations || []);
 
       // Load recent searches from localStorage
       const savedSearches = localStorage.getItem(`recentSearches_${user.id}`);
@@ -894,6 +918,101 @@ const CustomerHome = () => {
                           
                           {/* Arrow indicator */}
                           <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Completed Reservations History */}
+        {completedReservations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-6"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <History className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold text-muted-foreground">
+                  {language === 'TR' ? 'Geçmiş Transferler' : 'Past Transfers'}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => navigate('/customer/bookings#past-reservations')}
+              >
+                {language === 'TR' ? 'Tümünü Gör' : 'View All'}
+                <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {completedReservations.slice(0, 3).map((reservation, index) => {
+                const isCompleted = reservation.status === 'completed';
+                const statusConfig = isCompleted
+                  ? { label: 'Completed', labelTr: 'Tamamlandı', color: 'text-green-700', bgColor: 'bg-green-100', icon: CheckCircle }
+                  : { label: 'Cancelled', labelTr: 'İptal Edildi', color: 'text-red-700', bgColor: 'bg-red-100', icon: X };
+                
+                const vehicleLabels: Record<string, string> = {
+                  'mercedes-vito': 'Mercedes Vito',
+                  'mercedes-vito-vip': 'Mercedes Vito VIP',
+                  'mercedes-sprinter': 'Sprinter',
+                  'minibus': 'Minibüs',
+                  'maybach': 'Maybach',
+                };
+                
+                return (
+                  <motion.div
+                    key={reservation.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                  >
+                    <Card
+                      className={cn(
+                        "cursor-pointer shadow-sm hover:shadow-md transition-all overflow-hidden opacity-80 hover:opacity-100",
+                        isCompleted ? "border-l-4 border-l-green-500/60" : "border-l-4 border-l-red-500/60"
+                      )}
+                      onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            {/* Header with code and status */}
+                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                              <span className="font-mono text-xs font-medium text-muted-foreground">
+                                {reservation.reservation_code || 'N/A'}
+                              </span>
+                              <Badge className={cn("text-xs font-medium", statusConfig.bgColor, statusConfig.color)}>
+                                {language === 'TR' ? statusConfig.labelTr : statusConfig.label}
+                              </Badge>
+                            </div>
+                            
+                            {/* Route and date info */}
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span className="truncate max-w-[100px]">
+                                {(reservation.pickup_place_name || reservation.pickup).split(',')[0]}
+                              </span>
+                              <ArrowRight className="h-3 w-3 flex-shrink-0" />
+                              <span className="truncate max-w-[100px]">
+                                {(reservation.dropoff_place_name || reservation.dropoff).split(',')[0]}
+                              </span>
+                              <span className="text-muted-foreground/60">•</span>
+                              <span>{new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}</span>
+                            </div>
+                          </div>
+                          
+                          {/* Arrow indicator */}
+                          <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         </div>
                       </CardContent>
                     </Card>
