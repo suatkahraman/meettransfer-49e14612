@@ -18,7 +18,7 @@ import dubaiHero from "@/assets/blog/dubai-transfer-hero.jpg";
 import cyprusHero from "@/assets/blog/cyprus-transfer-hero.jpg";
 import istanbulCityHero from "@/assets/blog/istanbul-airport-city-hero.jpg";
 import istanbulTransferHero from "@/assets/blog/istanbul-transfer-hero.jpg";
-import privateVsTaxiHero from "@/assets/blog/private-vs-taxi-hero.jpg";
+import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
 import antalyaHero from "@/assets/blog/antalya-transfer-hero.jpg";
 import privateWorthHero from "@/assets/blog/private-transfer-worth-hero.jpg";
 
@@ -97,7 +97,7 @@ const BlogPage = () => {
       categoryKey: "travelTips",
       readTime: 13,
       date: "2025-01-10",
-      image: privateVsTaxiHero,
+      image: vitoVipStarlightPurple,
     },
     {
       id: "antalya-airport-transfer-to-hotels",
