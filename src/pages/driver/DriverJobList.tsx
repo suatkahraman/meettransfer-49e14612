@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,6 +48,7 @@ type JobType = 'pending' | 'active' | 'completed';
 
 const DriverJobList = () => {
   const { type } = useParams<{ type: JobType }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { driverId } = useUserRole();
   const { t } = useDriverTranslations();
@@ -64,6 +65,19 @@ const DriverJobList = () => {
   const PULL_THRESHOLD = 80;
 
   const jobType = type as JobType || 'pending';
+  
+  // Get month/year filter from URL params (for future months filtering)
+  const filterMonth = searchParams.get('month') ? parseInt(searchParams.get('month')!) : null;
+  const filterYear = searchParams.get('year') ? parseInt(searchParams.get('year')!) : null;
+
+  // Get month name helper
+  const getMonthName = (month: number): string => {
+    const monthKeys = [
+      'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'
+    ];
+    return t(monthKeys[month]) || monthKeys[month];
+  };
 
   const getStatusFilter = useCallback(() => {
     switch (jobType) {
@@ -101,6 +115,13 @@ const DriverJobList = () => {
       query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
     }
 
+    // Apply month/year filter if present (for future months)
+    if (filterMonth !== null && filterYear !== null) {
+      const firstDay = new Date(filterYear, filterMonth - 1, 1).toISOString().split('T')[0];
+      const lastDay = new Date(filterYear, filterMonth, 0).toISOString().split('T')[0];
+      query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
+    }
+
     const { data, error } = await query;
 
     if (error) {
@@ -135,13 +156,13 @@ const DriverJobList = () => {
     }
     setLoading(false);
     setRefreshing(false);
-  }, [driverId, jobType, getStatusFilter, t]);
+  }, [driverId, jobType, getStatusFilter, t, filterMonth, filterYear]);
 
   useEffect(() => {
     if (driverId) {
       fetchReservations();
     }
-  }, [driverId, fetchReservations]);
+  }, [driverId, fetchReservations, filterMonth, filterYear]);
 
   // Real-time subscription
   useEffect(() => {
@@ -415,7 +436,11 @@ const DriverJobList = () => {
           </Button>
           <div className="flex items-center gap-2">
             <PageIcon className={cn("h-6 w-6", config.iconColor)} />
-            <h1 className="text-xl font-bold">{config.title}</h1>
+            <h1 className="text-xl font-bold">
+              {filterMonth !== null && filterYear !== null 
+                ? `${getMonthName(filterMonth - 1)} ${filterYear}` 
+                : config.title}
+            </h1>
             <Badge variant="secondary" className="ml-1">
               {reservations.length}
             </Badge>
