@@ -664,18 +664,18 @@ const CustomerHome = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      {/* Header with Logo & Language */}
-      <header className="bg-primary text-primary-foreground py-3 px-3 sm:py-4 sm:px-6 sticky top-0 z-10 safe-area-inset-top shadow-lg">
+      {/* Header with Logo & Language - More compact on mobile */}
+      <header className="bg-primary text-primary-foreground py-2 px-2 sm:py-4 sm:px-6 sticky top-0 z-10 safe-area-inset-top shadow-lg">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer" onClick={() => navigate('/')}>
             <img 
               src={meetTransferLogo} 
               alt="Meet Transfer" 
-              className="h-9 w-9 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-primary-foreground/20"
+              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-primary-foreground/20"
             />
-            <span className="text-lg sm:text-xl font-serif font-bold">Meet Transfer</span>
+            <span className="text-base sm:text-xl font-serif font-bold">Meet Transfer</span>
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-0.5 sm:gap-2">
             {/* Language Selector in Header */}
             <UniversalLanguageSelector variant="header" />
             
@@ -687,9 +687,9 @@ const CustomerHome = () => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
+                className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10"
               >
-                <Settings className="h-5 w-5 sm:h-6 sm:w-6" />
+                <Settings className="h-4 w-4 sm:h-6 sm:w-6" />
               </Button>
             </SheetTrigger>
             <SheetContent className="w-full sm:max-w-md overflow-y-auto">
@@ -1025,39 +1025,39 @@ const CustomerHome = () => {
           </motion.div>
         )}
 
-        {/* Promo Campaign Banner */}
+        {/* Promo Campaign Banner - More compact on mobile */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.15 }}
-          className="mb-6"
+          className="mb-4 sm:mb-6"
         >
           <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 border-green-500/30 overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-400/20 to-transparent rounded-bl-full" />
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
+            <div className="absolute top-0 right-0 w-20 h-20 sm:w-32 sm:h-32 bg-gradient-to-bl from-green-400/20 to-transparent rounded-bl-full" />
+            <CardContent className="p-2.5 sm:p-4">
+              <div className="flex items-center gap-2.5 sm:gap-4">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="h-14 w-14 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-lg"
+                  className="h-10 w-10 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-lg"
                 >
-                  <Tag className="h-7 w-7 text-white" />
+                  <Tag className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
                 </motion.div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge className="bg-green-500 text-white text-xs font-bold px-2 py-0.5">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                    <Badge className="bg-green-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5">
                       {t('promo')}
                     </Badge>
-                    <Sparkles className="h-4 w-4 text-green-500" />
+                    <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                   </div>
-                  <h3 className="font-bold text-foreground text-sm sm:text-base">
+                  <h3 className="font-bold text-foreground text-xs sm:text-base line-clamp-1">
                     {t('roundTrip30Off')}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 hidden xs:block">
                     {t('autoDiscountReturn')}
                   </p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-green-600 flex-shrink-0" />
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
               </div>
             </CardContent>
           </Card>
@@ -1118,12 +1118,12 @@ const CustomerHome = () => {
           )}
         </AnimatePresence>
 
-        {/* Quick Actions Grid with Stagger Animation */}
+        {/* Quick Actions Grid - More compact on mobile */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="grid grid-cols-2 gap-3 mb-6"
+          className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6"
         >
           {/* New Reservation Card */}
           <motion.div
@@ -1141,14 +1141,14 @@ const CustomerHome = () => {
               }}
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.15),_transparent_50%)]" />
-              <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[110px] relative z-10">
-                <div className="bg-primary-foreground/20 rounded-full p-2.5 mb-2 backdrop-blur-sm">
-                  <Plus className="h-6 w-6" />
+              <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center min-h-[90px] sm:min-h-[110px] relative z-10">
+                <div className="bg-primary-foreground/20 rounded-full p-2 sm:p-2.5 mb-1.5 sm:mb-2 backdrop-blur-sm">
+                  <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <span className="font-semibold text-sm">
+                <span className="font-semibold text-xs sm:text-sm">
                   {t('newReservationBtn')}
                 </span>
-                <span className="text-xs opacity-80 mt-1">
+                <span className="text-[10px] sm:text-xs opacity-80 mt-0.5 sm:mt-1 hidden xs:block">
                   {t('startNowDesc')}
                 </span>
               </CardContent>
@@ -1164,14 +1164,14 @@ const CustomerHome = () => {
               className="cursor-pointer shadow-md hover:shadow-xl transition-all relative overflow-hidden bg-gradient-to-br from-background to-muted/50"
               onClick={() => navigate('/customer/bookings')}
             >
-              <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[110px]">
-                <div className="bg-primary/10 rounded-full p-2.5 mb-2">
-                  <ClipboardList className="h-6 w-6 text-primary" />
+              <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center min-h-[90px] sm:min-h-[110px]">
+                <div className="bg-primary/10 rounded-full p-2 sm:p-2.5 mb-1.5 sm:mb-2">
+                  <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
-                <span className="font-semibold text-sm">
+                <span className="font-semibold text-xs sm:text-sm">
                   {t('myBookingsBtn')}
                 </span>
-                <span className="text-xs text-muted-foreground mt-1">
+                <span className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
                   {activeBookingsCount > 0 
                     ? `${activeBookingsCount} ${t('activeLabel')}`
                     : t('viewAllLabel')}
@@ -1182,7 +1182,7 @@ const CustomerHome = () => {
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 500, damping: 25 }}
                   >
-                    <Badge className="absolute top-2 right-2 bg-orange-500 hover:bg-orange-600 shadow-lg">
+                    <Badge className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-orange-500 hover:bg-orange-600 shadow-lg text-[10px] sm:text-xs px-1.5 sm:px-2">
                       {activeBookingsCount}
                     </Badge>
                   </motion.div>
@@ -1192,22 +1192,22 @@ const CustomerHome = () => {
           </motion.div>
         </motion.div>
 
-        {/* Quick Support & Navigation Actions - Same Design as CustomerBookings */}
+        {/* Quick Support & Navigation Actions - More compact on mobile */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="grid grid-cols-4 gap-2 mb-6"
+          className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-6"
         >
           {/* Home */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button 
               variant="outline" 
-              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:border-primary/40"
+              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:border-primary/40"
               onClick={() => navigate('/')}
             >
-              <Home className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">
+              <Home className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <span className="text-[10px] sm:text-xs font-medium">
                 {t('homeBtn')}
               </span>
             </Button>
@@ -1217,11 +1217,11 @@ const CustomerHome = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button 
               variant="outline" 
-              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 hover:border-green-500/40"
+              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 hover:border-green-500/40"
               onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank')}
             >
-              <MessageCircle className="h-5 w-5 text-green-500" />
-              <span className="text-xs font-medium">
+              <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+              <span className="text-[10px] sm:text-xs font-medium truncate max-w-full">
                 WhatsApp
               </span>
             </Button>
@@ -1231,11 +1231,11 @@ const CustomerHome = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button 
               variant="outline" 
-              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-red-500/5 to-red-500/10 border-red-500/20 hover:border-red-500/40"
+              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-red-500/5 to-red-500/10 border-red-500/20 hover:border-red-500/40"
               onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
             >
-              <PhoneCall className="h-5 w-5 text-red-500" />
-              <span className="text-xs font-medium">
+              <PhoneCall className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+              <span className="text-[10px] sm:text-xs font-medium truncate max-w-full">
                 {t('emergencyBtn')}
               </span>
             </Button>
@@ -1245,11 +1245,11 @@ const CustomerHome = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button 
               variant="outline" 
-              className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/40"
+              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/40"
               onClick={() => navigate('/security-settings')}
             >
-              <Shield className="h-5 w-5 text-emerald-500" />
-              <span className="text-xs font-medium">
+              <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
+              <span className="text-[10px] sm:text-xs font-medium truncate max-w-full">
                 {t('securityBtn')}
               </span>
             </Button>
@@ -2107,8 +2107,8 @@ const CustomerHome = () => {
         </Card>
         </motion.div>
 
-        {/* Sticky FABs */}
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+        {/* Sticky FABs - Smaller on mobile */}
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col gap-2 sm:gap-3">
           {/* WhatsApp Support Button */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -2123,10 +2123,10 @@ const CustomerHome = () => {
                   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
                 }}
                 size="lg"
-                className="h-12 w-12 rounded-full shadow-lg bg-[#25D366] hover:bg-[#22c55e] text-white"
+                className="h-10 w-10 sm:h-12 sm:w-12 rounded-full shadow-lg bg-[#25D366] hover:bg-[#22c55e] text-white"
                 title={t('whatsAppSupportTooltip')}
               >
-                <MessageCircle className="h-5 w-5" />
+                <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </motion.div>
           </motion.div>
@@ -2142,10 +2142,10 @@ const CustomerHome = () => {
                 type="button"
                 onClick={() => navigate('/customer/bookings')}
                 size="lg"
-                className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
+                className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
                 title={t('myBookingsTooltip')}
               >
-                <ClipboardList className="h-6 w-6" />
+                <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6" />
               </Button>
             </motion.div>
           </motion.div>

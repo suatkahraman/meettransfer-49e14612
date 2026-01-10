@@ -36,47 +36,41 @@ const getFeatureIconWithColor = (iconName: string) => {
   return iconConfig[iconName] || { icon: Sparkles, color: 'text-purple-500' };
 };
 
-// Skeleton Loading Component
+// Skeleton Loading Component - Mobile optimized
 export function VehicleSelectionCardSkeleton() {
   return (
-    <div className="relative overflow-hidden rounded-2xl border-2 border-border/60 bg-gradient-to-br from-muted/80 via-muted/50 to-background">
-      <div className="relative p-4 sm:p-5">
-        <div className="flex gap-4">
+    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border sm:border-2 border-border/60 bg-gradient-to-br from-muted/80 via-muted/50 to-background">
+      <div className="relative p-3 sm:p-5">
+        <div className="flex gap-3 sm:gap-5">
           {/* Image Skeleton */}
-          <Skeleton className="w-32 sm:w-40 h-24 sm:h-28 rounded-xl flex-shrink-0" />
+          <Skeleton className="w-24 h-20 sm:w-36 sm:h-28 rounded-lg sm:rounded-xl flex-shrink-0" />
           
           {/* Details Skeleton */}
           <div className="flex-1 min-w-0 flex flex-col justify-between">
             <div>
               {/* Title */}
-              <Skeleton className="h-6 w-32 mb-2" />
+              <Skeleton className="h-4 sm:h-6 w-24 sm:w-32 mb-1.5 sm:mb-2" />
               
               {/* Capacity Pills */}
-              <div className="flex items-center gap-2 mb-3">
-                <Skeleton className="h-6 w-16 rounded-lg" />
-                <Skeleton className="h-6 w-14 rounded-lg" />
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                <Skeleton className="h-5 sm:h-6 w-12 sm:w-16 rounded-md sm:rounded-lg" />
+                <Skeleton className="h-5 sm:h-6 w-10 sm:w-14 rounded-md sm:rounded-lg" />
               </div>
             </div>
             
             {/* Feature Icons */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Skeleton className="h-6 w-20 rounded-md" />
-              <Skeleton className="h-6 w-16 rounded-md" />
-              <Skeleton className="h-6 w-18 rounded-md" />
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+              <Skeleton className="h-5 sm:h-6 w-6 sm:w-20 rounded-md" />
+              <Skeleton className="h-5 sm:h-6 w-6 sm:w-16 rounded-md" />
+              <Skeleton className="h-5 sm:h-6 w-6 sm:w-18 rounded-md" />
             </div>
           </div>
         </div>
         
         {/* Price Section Skeleton */}
-        <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-8 w-20" />
-        </div>
-        
-        {/* Description Skeleton */}
-        <div className="mt-3 space-y-1">
-          <Skeleton className="h-3 w-full" />
-          <Skeleton className="h-3 w-3/4" />
+        <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-border/40 flex items-center justify-between">
+          <Skeleton className="h-3 sm:h-4 w-16 sm:w-24" />
+          <Skeleton className="h-7 sm:h-8 w-16 sm:w-20" />
         </div>
       </div>
     </div>
@@ -135,21 +129,21 @@ export function VehicleSelectionCard({
     return symbols[curr] || curr;
   };
 
-  return (
+return (
     <>
       <div
         onClick={() => available && onSelect(vehicleType)}
         className={`
-          relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 group
+          relative overflow-hidden rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-300 group
           ${isSelected 
-            ? 'ring-3 ring-primary shadow-2xl scale-[1.02] z-10' 
+            ? 'ring-2 sm:ring-3 ring-primary shadow-xl sm:shadow-2xl scale-[1.01] sm:scale-[1.02] z-10' 
             : available 
-              ? 'hover:shadow-xl hover:scale-[1.01] hover:ring-2 hover:ring-primary/30' 
+              ? 'hover:shadow-lg sm:hover:shadow-xl hover:scale-[1.005] sm:hover:scale-[1.01] hover:ring-1 sm:hover:ring-2 hover:ring-primary/30' 
               : 'opacity-50 cursor-not-allowed grayscale'
           }
         `}
       >
-        {/* Gradient Background - More vibrant */}
+        {/* Gradient Background */}
         <div className={`
           absolute inset-0 transition-all duration-300
           ${isSelected 
@@ -160,9 +154,9 @@ export function VehicleSelectionCard({
           }
         `} />
         
-        {/* Border - More prominent */}
+        {/* Border */}
         <div className={`
-          absolute inset-0 rounded-2xl border-2 transition-all duration-300
+          absolute inset-0 rounded-xl sm:rounded-2xl border sm:border-2 transition-all duration-300
           ${isSelected 
             ? 'border-primary shadow-inner' 
             : isRecommended
@@ -171,32 +165,33 @@ export function VehicleSelectionCard({
           }
         `} />
         
-        {/* Selection Indicator - Larger and more visible */}
+        {/* Selection Indicator - Compact on mobile */}
         {isSelected && (
-          <div className="absolute top-3 right-3 z-10">
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shadow-lg animate-scale-in">
-              <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary flex items-center justify-center shadow-lg animate-scale-in">
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
             </div>
           </div>
         )}
         
-        {/* Recommended Badge - More prominent */}
+        {/* Recommended Badge - Compact on mobile */}
         {isRecommended && (
           <div className="absolute top-0 left-0 z-10">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-5 py-2 rounded-br-2xl rounded-tl-2xl shadow-lg">
-              <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide">
-                <ThumbsUp className="h-4 w-4" />
-                {isTurkish ? "Önerilen" : "Recommended"}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2.5 py-1 sm:px-5 sm:py-2 rounded-br-xl sm:rounded-br-2xl rounded-tl-xl sm:rounded-tl-2xl shadow-lg">
+              <span className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-bold uppercase tracking-wide">
+                <ThumbsUp className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">{isTurkish ? "Önerilen" : "Recommended"}</span>
+                <span className="xs:hidden">★</span>
               </span>
             </div>
           </div>
         )}
         
-        <div className="relative p-5 sm:p-6">
-          <div className="flex gap-5">
-            {/* Vehicle Image - Larger */}
+        <div className="relative p-3 sm:p-5">
+          <div className="flex gap-3 sm:gap-5">
+            {/* Vehicle Image - Compact on mobile */}
             <div 
-              className="w-36 sm:w-44 h-28 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 relative cursor-pointer shadow-lg ring-1 ring-border/50"
+              className="w-24 h-20 sm:w-36 sm:h-28 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 relative cursor-pointer shadow-md sm:shadow-lg ring-1 ring-border/50"
               onClick={(e) => {
                 e.stopPropagation();
                 if (vehicleImages.length > 0) {
@@ -223,65 +218,63 @@ export function VehicleSelectionCard({
                       ))}
                     </CarouselContent>
                   </Carousel>
-                  {/* Zoom overlay on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-3">
-                    <span className="flex items-center gap-1.5 text-white text-xs font-semibold bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
-                      <ZoomIn className="h-3.5 w-3.5" />
-                      {isTurkish ? "Galeri" : "View Gallery"}
+                  {/* Zoom overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-1.5 sm:pb-3">
+                    <span className="flex items-center gap-1 text-white text-[10px] sm:text-xs font-semibold bg-black/30 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full backdrop-blur-sm">
+                      <ZoomIn className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
+                      <span className="hidden sm:inline">{isTurkish ? "Galeri" : "Gallery"}</span>
                     </span>
                   </div>
                 </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <Car className="h-12 w-12 text-muted-foreground" />
+                  <Car className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground" />
                 </div>
               )}
             </div>
             
-            {/* Vehicle Details */}
-            <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+            {/* Vehicle Details - Compact layout */}
+            <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
               {/* Header: Name */}
               <div>
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <h4 className="font-bold text-lg sm:text-xl leading-tight">
-                    {vehicleInfo.label}
-                  </h4>
-                </div>
+                <h4 className="font-bold text-sm sm:text-lg leading-tight mb-1.5 sm:mb-3 line-clamp-1">
+                  {vehicleInfo.label}
+                </h4>
                 
-                {/* Capacity Pills - More prominent */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-sm font-bold shadow-sm">
-                    <Users className="h-4 w-4" />
+                {/* Capacity Pills - Compact on mobile */}
+                <div className="flex items-center gap-1.5 sm:gap-3 mb-2 sm:mb-4">
+                  <div className="inline-flex items-center gap-1 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg bg-primary/15 text-primary text-xs sm:text-sm font-bold">
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span>{vehicleInfo.passengers}</span>
                   </div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/15 text-accent-foreground text-sm font-bold shadow-sm">
-                    <Briefcase className="h-4 w-4" />
+                  <div className="inline-flex items-center gap-1 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg bg-accent/15 text-accent-foreground text-xs sm:text-sm font-bold">
+                    <Briefcase className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span>{vehicleInfo.luggage}</span>
                   </div>
                 </div>
               </div>
               
-              {/* Feature Icons - Colorful and more visible */}
+              {/* Feature Icons - Compact on mobile, icons only */}
               {vehicleInfo.features && vehicleInfo.features.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  {vehicleInfo.features.slice(0, 4).map((feature, idx) => {
+                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                  {vehicleInfo.features.slice(0, 3).map((feature, idx) => {
                     const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
                     return (
                       <div 
                         key={idx}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-background/90 border border-border/60 text-xs font-medium hover:border-primary/40 hover:bg-background transition-colors shadow-sm"
+                        className="flex items-center gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md sm:rounded-lg bg-background/90 border border-border/60 text-[10px] sm:text-xs font-medium"
                         title={isTurkish ? feature.labelTr : feature.label}
                       >
-                        <FeatureIcon className={`h-3.5 w-3.5 flex-shrink-0 ${color}`} />
-                        <span className="hidden sm:inline truncate max-w-[80px] text-muted-foreground">
+                        <FeatureIcon className={`h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0 ${color}`} />
+                        <span className="hidden sm:inline truncate max-w-[60px] text-muted-foreground">
                           {isTurkish ? feature.labelTr : feature.label}
                         </span>
                       </div>
                     );
                   })}
-                  {vehicleInfo.features.length > 4 && (
-                    <span className="text-xs text-muted-foreground font-medium bg-muted px-2 py-1 rounded-md">
-                      +{vehicleInfo.features.length - 4}
+                  {vehicleInfo.features.length > 3 && (
+                    <span className="text-[10px] sm:text-xs text-muted-foreground font-medium bg-muted px-1.5 py-0.5 sm:px-2 sm:py-1 rounded">
+                      +{vehicleInfo.features.length - 3}
                     </span>
                   )}
                 </div>
@@ -289,26 +282,25 @@ export function VehicleSelectionCard({
             </div>
           </div>
           
-          {/* Price Section - MUCH more prominent */}
+          {/* Price Section - Compact on mobile */}
           {showPrice && (
             <div className={`
-              mt-5 pt-4 border-t-2 flex items-center justify-between transition-all duration-500
+              mt-3 sm:mt-5 pt-3 sm:pt-4 border-t sm:border-t-2 flex items-center justify-between transition-all duration-500
               ${isSelected ? 'border-primary/30' : 'border-border/60'}
-              ${showDiscountAnimation && previousPrice ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-4 -mx-2' : ''}
+              ${showDiscountAnimation && previousPrice ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg sm:rounded-xl p-2 sm:p-4 -mx-1 sm:-mx-2' : ''}
             `}>
-              <span className="text-sm text-muted-foreground font-medium">
-                {isTurkish ? "Tek yön transfer" : "One-way transfer"}
+              <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+                {isTurkish ? "Tek yön" : "One-way"}
               </span>
               {available && price ? (
-                <div className="text-right flex items-center gap-3">
-                  {/* Show old price strikethrough when discount just applied */}
+                <div className="text-right flex items-center gap-2 sm:gap-3">
                   {showDiscountAnimation && previousPrice && previousPrice > price && (
-                    <span className="text-lg line-through text-muted-foreground/70">
+                    <span className="text-sm sm:text-lg line-through text-muted-foreground/70">
                       {getCurrencySymbol(currency)}{previousPrice}
                     </span>
                   )}
                   <div className={`
-                    relative px-5 py-2 rounded-xl transition-all duration-300
+                    relative px-3 py-1.5 sm:px-5 sm:py-2 rounded-lg sm:rounded-xl transition-all duration-300
                     ${isSelected 
                       ? 'bg-primary text-primary-foreground shadow-lg' 
                       : showDiscountAnimation && previousPrice 
@@ -317,29 +309,28 @@ export function VehicleSelectionCard({
                     }
                   `}>
                     <span className={`
-                      text-2xl sm:text-3xl font-extrabold tracking-tight
+                      text-lg sm:text-2xl font-extrabold tracking-tight
                       ${showDiscountAnimation && previousPrice ? 'animate-pulse' : ''}
                     `}>
                       {getCurrencySymbol(currency)}{price}
                     </span>
                   </div>
-                  {/* Discount badge */}
                   {showDiscountAnimation && previousPrice && previousPrice > price && (
-                    <span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white px-2 py-1 rounded-full font-bold animate-bounce shadow-md">
+                    <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 text-[10px] sm:text-xs bg-red-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full font-bold animate-bounce shadow-md">
                       -{getCurrencySymbol(currency)}{previousPrice - price}
                     </span>
                   )}
                 </div>
               ) : (
-                <span className="text-sm text-muted-foreground italic bg-muted px-3 py-2 rounded-lg">
-                  {available ? (isTurkish ? "Fiyat bekleniyor" : "Price pending") : (isTurkish ? "Uygun değil" : "Not available")}
+                <span className="text-xs sm:text-sm text-muted-foreground italic bg-muted px-2 py-1 sm:px-3 sm:py-2 rounded-md sm:rounded-lg">
+                  {available ? (isTurkish ? "Fiyat bekleniyor" : "Pending") : (isTurkish ? "Uygun değil" : "N/A")}
                 </span>
               )}
             </div>
           )}
           
-          {/* Description - Slightly larger */}
-          <p className="text-sm text-muted-foreground mt-4 line-clamp-2 leading-relaxed">
+          {/* Description - Hidden on mobile, visible on larger screens */}
+          <p className="hidden sm:block text-sm text-muted-foreground mt-4 line-clamp-2 leading-relaxed">
             {isTurkish ? vehicleInfo.descriptionTr : vehicleInfo.description}
           </p>
         </div>
