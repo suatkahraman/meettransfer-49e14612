@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins, Sparkles, Loader2 } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins, Sparkles, Loader2, Baby, Luggage, Minus, Plus } from 'lucide-react';
 import { VehicleSelectionCard } from '@/components/VehicleSelectionCard';
 import { cn } from '@/lib/utils';
 import { CURRENCY_OPTIONS } from '@/lib/currency';
@@ -210,6 +210,10 @@ const ReservationForm = () => {
     time: urlReturnTime,
     flightNumber: '',
   });
+  
+  // Baby seat and luggage counts for vehicle selection screen
+  const [babySeatCount, setBabySeatCount] = useState(0);
+  const [luggageCount, setLuggageCount] = useState(0);
   
   // Quick booking pre-filled price display
   const isFromQuickBooking = !!quickBookingId;
@@ -790,6 +794,8 @@ const ReservationForm = () => {
           dropoff_lat: pendingFormData.dropoff_lat,
           dropoff_lng: pendingFormData.dropoff_lng,
           promo_code: isPromoCodeValid ? promoCode.trim() : null,
+          baby_seat_count: babySeatCount > 0 ? babySeatCount : null,
+          luggage_count: luggageCount > 0 ? luggageCount : null,
         })
         .select()
         .single();
@@ -1117,6 +1123,71 @@ const ReservationForm = () => {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Baby Seat and Luggage */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {/* Baby Seat Count */}
+              <div className="bg-muted/50 rounded-lg p-4">
+                <Label className="flex items-center gap-2 text-sm font-medium mb-3">
+                  <Baby className="h-4 w-4 text-primary" />
+                  {t('language') === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}
+                </Label>
+                <div className="flex items-center justify-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setBabySeatCount(Math.max(0, babySeatCount - 1))}
+                    disabled={babySeatCount === 0}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-xl font-semibold w-8 text-center">{babySeatCount}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setBabySeatCount(Math.min(3, babySeatCount + 1))}
+                    disabled={babySeatCount >= 3}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Luggage Count */}
+              <div className="bg-muted/50 rounded-lg p-4">
+                <Label className="flex items-center gap-2 text-sm font-medium mb-3">
+                  <Luggage className="h-4 w-4 text-primary" />
+                  {t('language') === 'TR' ? 'Bagaj Sayısı' : 'Luggage Count'}
+                </Label>
+                <div className="flex items-center justify-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setLuggageCount(Math.max(0, luggageCount - 1))}
+                    disabled={luggageCount === 0}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-xl font-semibold w-8 text-center">{luggageCount}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setLuggageCount(Math.min(20, luggageCount + 1))}
+                    disabled={luggageCount >= 20}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {/* Return Trip Option with Date/Time Selection */}
