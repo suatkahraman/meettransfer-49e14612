@@ -8,11 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2, User, Phone, Mail, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, User, Phone, Mail, CheckCircle, AlertCircle, Sparkles, Shield, History, Star, Award } from 'lucide-react';
 import { PhoneInput } from '@/components/ui/phone-input';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 import meetTransferLogo from '@/assets/meet-transfer-logo-small.webp';
+import { Badge } from '@/components/ui/badge';
 
 const profileSchema = z.object({
   full_name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
@@ -319,44 +320,92 @@ const CustomerProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border/50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      {/* Premium Header */}
+      <header className="bg-primary text-primary-foreground py-3 px-4 sticky top-0 z-40 shadow-lg">
+        <div className="container mx-auto flex items-center justify-between max-w-lg">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/customer')}
-              className="rounded-full"
+              className="rounded-full text-primary-foreground hover:bg-primary-foreground/10"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <img 
-              src={meetTransferLogo} 
-              alt="Meet Transfer" 
-              className="h-8 w-auto"
-            />
+            <div className="flex items-center gap-2">
+              <img 
+                src={meetTransferLogo} 
+                alt="Meet Transfer" 
+                className="h-9 w-9 rounded-full object-cover border-2 border-primary-foreground/20"
+              />
+              <span className="text-lg font-serif font-bold">Meet Transfer</span>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-lg">
+        {/* Premium Title Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
+          className="mb-6"
         >
-          <Card className="border-0 shadow-xl bg-card/50 backdrop-blur-sm">
-            <CardHeader className="text-center pb-2">
-              <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mb-4">
-                <User className="h-10 w-10 text-primary" />
+          <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden relative">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(var(--primary),0.1),_transparent_50%)]" />
+            <CardContent className="p-5 relative z-10">
+              <div className="flex items-center gap-4">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                  className="relative"
+                >
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center ring-4 ring-primary/20">
+                    <User className="h-10 w-10 text-primary" />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1.5 shadow-lg">
+                    <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+                  </div>
+                </motion.div>
+                <div className="flex-1">
+                  <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground mb-1">
+                    {txt.title}
+                  </h1>
+                  <p className="text-sm text-muted-foreground">{txt.subtitle}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
+                      <Award className="h-3 w-3 mr-1" />
+                      {language === 'TR' ? 'VIP Müşteri' : 'VIP Customer'}
+                    </Badge>
+                  </div>
+                </div>
               </div>
-              <CardTitle className="text-2xl font-bold">{txt.title}</CardTitle>
-              <CardDescription>{txt.subtitle}</CardDescription>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Profile Form Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          <Card className="shadow-lg border-border/50 overflow-hidden">
+            <CardHeader className="pb-4 bg-muted/30 border-b border-border/50">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-base">{language === 'TR' ? 'Kişisel Bilgiler' : 'Personal Information'}</CardTitle>
+                  <CardDescription className="text-xs">{language === 'TR' ? 'Profil detaylarınızı güncelleyin' : 'Update your profile details'}</CardDescription>
+                </div>
+              </div>
             </CardHeader>
 
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-6">
               {/* Full Name */}
               <div className="space-y-2">
                 <Label htmlFor="full_name" className="flex items-center gap-2">
@@ -475,35 +524,83 @@ const CustomerProfile = () => {
               </div>
 
               {/* Save Button */}
+              <AnimatePresence>
+                {hasChanges() && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center justify-center gap-2 text-sm text-amber-600 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200 dark:border-amber-800"
+                  >
+                    <AlertCircle className="h-4 w-4" />
+                    {language === 'TR' ? 'Kaydedilmemiş değişiklikler var' : 'You have unsaved changes'}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <Button
                 onClick={handleSave}
                 disabled={isSaving || !hasChanges()}
-                className="w-full mt-6"
+                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
                 size="lg"
               >
                 {isSaving ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                     {txt.saving}
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-5 w-5 mr-2" />
                     {txt.save}
                   </>
                 )}
               </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-              {hasChanges() && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center justify-center gap-2 text-sm text-amber-600"
-                >
-                  <AlertCircle className="h-4 w-4" />
-                  {language === 'TR' ? 'Kaydedilmemiş değişiklikler var' : 'You have unsaved changes'}
-                </motion.div>
-              )}
+        {/* Quick Actions Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="mt-6"
+        >
+          <Card className="shadow-md border-border/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2 text-muted-foreground">
+                <Star className="h-4 w-4" />
+                {language === 'TR' ? 'Hızlı Erişim' : 'Quick Access'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button
+                variant="outline"
+                className="w-full justify-between hover:bg-muted/50"
+                onClick={() => navigate('/security-settings')}
+              >
+                <span className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Shield className="h-4 w-4 text-primary" />
+                  </div>
+                  <span>{language === 'TR' ? 'Güvenlik Ayarları' : 'Security Settings'}</span>
+                </span>
+                <ArrowLeft className="h-4 w-4 rotate-180" />
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-between hover:bg-muted/50"
+                onClick={() => navigate('/customer/bookings')}
+              >
+                <span className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                    <History className="h-4 w-4 text-green-600" />
+                  </div>
+                  <span>{language === 'TR' ? 'Rezervasyonlarım' : 'My Bookings'}</span>
+                </span>
+                <ArrowLeft className="h-4 w-4 rotate-180" />
+              </Button>
             </CardContent>
           </Card>
         </motion.div>
