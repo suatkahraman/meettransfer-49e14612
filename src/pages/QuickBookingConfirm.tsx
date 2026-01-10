@@ -556,16 +556,59 @@ export default function QuickBookingConfirm() {
             const oldPrice = booking.price;
             const newPrice = discountResult.new_price;
             
-            // Fire confetti for discount!
-            confetti({
-              particleCount: 100,
-              spread: 70,
-              origin: { y: 0.6 }
-            });
+            // Multi-burst confetti celebration for discount!
+            const celebrateDiscount = () => {
+              // First burst - center
+              confetti({
+                particleCount: 80,
+                spread: 100,
+                origin: { y: 0.5, x: 0.5 },
+                colors: ['#22c55e', '#16a34a', '#15803d', '#fbbf24', '#f59e0b']
+              });
+              
+              // Left burst
+              setTimeout(() => {
+                confetti({
+                  particleCount: 50,
+                  angle: 60,
+                  spread: 55,
+                  origin: { x: 0, y: 0.6 },
+                  colors: ['#22c55e', '#16a34a', '#fbbf24']
+                });
+              }, 150);
+              
+              // Right burst
+              setTimeout(() => {
+                confetti({
+                  particleCount: 50,
+                  angle: 120,
+                  spread: 55,
+                  origin: { x: 1, y: 0.6 },
+                  colors: ['#22c55e', '#16a34a', '#fbbf24']
+                });
+              }, 300);
+              
+              // Star shower from top
+              setTimeout(() => {
+                confetti({
+                  particleCount: 30,
+                  spread: 180,
+                  origin: { y: 0, x: 0.5 },
+                  gravity: 0.8,
+                  shapes: ['star'],
+                  colors: ['#fbbf24', '#f59e0b', '#22c55e']
+                });
+              }, 450);
+            };
+            
+            celebrateDiscount();
             
             toast.success(
               t("autoDiscountApplied") || 
-              `Fiyat indirildi! Yeni fiyat: ${currencySymbol}${newPrice}`
+              `🎉 Fiyat indirildi! Yeni fiyat: ${currencySymbol}${newPrice}`,
+              {
+                duration: 5000,
+              }
             );
             
             // Store previous prices for animation (including all vehicles)
@@ -604,12 +647,12 @@ export default function QuickBookingConfirm() {
             setIsDiscountedOffer(true);
             setCanReject(false);
             
-            // Clear animation after 4 seconds
+            // Clear animation after 5 seconds (longer for better celebration)
             setTimeout(() => {
               setDiscountJustApplied(false);
               setPreviousPrice(null);
               setPreviousVehiclePrices({});
-            }, 4000);
+            }, 5000);
             
             return; // Don't proceed to waiting state
           }
@@ -1224,11 +1267,11 @@ export default function QuickBookingConfirm() {
                   </span>
                 </Button>
 
-                {/* Confirm Button */}
+                {/* Confirm Button - Enhanced Green Style */}
                 <Button
                   onClick={handleConfirm}
                   disabled={confirming || rejecting}
-                  className="h-auto min-h-[52px] sm:min-h-[60px] flex-col py-2 sm:py-3"
+                  className="h-auto min-h-[52px] sm:min-h-[60px] flex-col py-2 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-2 border-green-400 shadow-lg shadow-green-500/25 transition-all hover:shadow-xl hover:shadow-green-500/30"
                 >
                   <div className="flex items-center">
                     {confirming ? (
@@ -1238,8 +1281,9 @@ export default function QuickBookingConfirm() {
                     )}
                     <span className="text-sm sm:text-base font-semibold">{t("qbConfirmBooking")}</span>
                   </div>
-                  <span className="text-[10px] sm:text-xs text-primary-foreground/80 mt-1">
-                    {t("confirmButtonHint") || "Book this transfer"}
+                  <span className="text-[10px] sm:text-xs text-white/80 mt-1 flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    {t("confirmButtonHint") || "Secure your ride now"}
                   </span>
                 </Button>
               </div>
