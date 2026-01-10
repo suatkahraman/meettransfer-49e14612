@@ -165,6 +165,9 @@ const ReservationForm = () => {
   const urlPromoCode = searchParams.get('promoCode') || '';
   const urlAllVehiclePrices = searchParams.get('allVehiclePrices') || '';
   
+  // Check if prices were pre-fetched during animation (from CustomerHome)
+  const pricesPreFetched = searchParams.get('pricesPreFetched') === 'true';
+  
   // State for vehicle prices and loading
   const [vehiclePrices, setVehiclePrices] = useState<Record<string, number>>({});
   const [isPricesLoading, setIsPricesLoading] = useState(false);
@@ -181,6 +184,75 @@ const ReservationForm = () => {
     }
   }, [urlAllVehiclePrices]);
   
+  // If prices were pre-fetched (from CustomerHome animation), show vehicle selection immediately
+  useEffect(() => {
+    // Use `user` instead of `isLoggedIn` since isLoggedIn is set after user check
+    if (pricesPreFetched && user && urlPickup && urlDropoff && !showVehicleSelection) {
+      // Load pre-fetched vehicle prices from sessionStorage
+      const storedPrices = sessionStorage.getItem('preFetchedVehiclePrices');
+      if (storedPrices) {
+        try {
+          const parsedPrices = JSON.parse(storedPrices);
+          setFetchedVehiclePrices(parsedPrices);
+          sessionStorage.removeItem('preFetchedVehiclePrices');
+        } catch {
+          // If parsing fails, use vehiclePrices from URL
+          const pricesArray = Object.entries(vehiclePrices).map(([vehicleType, price]) => ({
+            vehicleType,
+            vehicleLabel: vehicleType,
+            price,
+            currency: preferredCurrency,
+            passengers: 6,
+            luggage: 6,
+            available: true,
+          }));
+          setFetchedVehiclePrices(pricesArray);
+        }
+      } else if (Object.keys(vehiclePrices).length > 0) {
+        // Fallback to URL prices
+        const pricesArray = Object.entries(vehiclePrices).map(([vehicleType, price]) => ({
+          vehicleType,
+          vehicleLabel: vehicleType,
+          price,
+          currency: preferredCurrency,
+          passengers: 6,
+          luggage: 6,
+          available: true,
+        }));
+        setFetchedVehiclePrices(pricesArray);
+      }
+      
+      // Load passenger names from sessionStorage
+      const savedPassengerNames = sessionStorage.getItem('customerPassengerNames');
+      if (savedPassengerNames) {
+        try {
+          const names = JSON.parse(savedPassengerNames);
+          if (Array.isArray(names) && names.length > 0) {
+            setPendingPassengerNames(names);
+          }
+        } catch {
+          setPendingPassengerNames(passengerNames.filter(n => n.trim() !== ''));
+        }
+      } else {
+        setPendingPassengerNames(passengerNames.filter(n => n.trim() !== ''));
+      }
+      
+      // Set pending form data and show vehicle selection immediately
+      setPendingFormData({
+        ...defaultFormData,
+        pickup: urlPickup,
+        dropoff: urlDropoff,
+        date: urlDate,
+        time: urlTime,
+        vehicleType: urlVehicleType || 'mercedes-vito',
+        paymentMethod: (urlPaymentMethod === 'cash' || urlPaymentMethod === 'payment_link') ? urlPaymentMethod : '' as '' | 'cash' | 'payment_link',
+        notes: urlCustomerNotes || '',
+      });
+      setSelectedVehicleForConfirm(urlVehicleType || 'mercedes-vito');
+      setShowVehicleSelection(true);
+    }
+  }, [pricesPreFetched, user, urlPickup, urlDropoff, vehiclePrices, showVehicleSelection]);
+  
   // Fetch prices when pickup/dropoff change (only for logged-in users without pre-loaded prices)
   useEffect(() => {
     const fetchPrices = async () => {
@@ -188,6 +260,7 @@ const ReservationForm = () => {
       if (!user || !urlPickup || !urlDropoff) return;
       if (Object.keys(vehiclePrices).length > 0) return;
       if (urlAllVehiclePrices) return; // Already have prices from URL
+      if (pricesPreFetched) return; // Already pre-fetched during animation
       
       setIsPricesLoading(true);
       try {
@@ -216,7 +289,7 @@ const ReservationForm = () => {
     };
     
     fetchPrices();
-  }, [user, urlPickup, urlDropoff, urlCurrency, urlAllVehiclePrices, vehiclePrices]);
+  }, [user, urlPickup, urlDropoff, urlCurrency, urlAllVehiclePrices, vehiclePrices, pricesPreFetched]);
   
   const [hasReturnTrip, setHasReturnTrip] = useState(urlHasReturn);
   const [promoCode, setPromoCode] = useState(urlPromoCode);
