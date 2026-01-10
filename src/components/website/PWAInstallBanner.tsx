@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Download, Share, Plus } from "lucide-react";
+import { X, Download, Share, Plus, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,7 +10,7 @@ const BANNER_DISMISSED_KEY = "pwa-banner-dismissed";
 const BANNER_DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export function PWAInstallBanner() {
-  const { canInstall, isInstalled, isStandalone, isIOS, promptInstall } = usePWAInstall();
+  const { canInstall, isInstalled, isStandalone, isIOS, promptInstall, browserInfo } = usePWAInstall();
   const { language } = useLanguage();
   const [isVisible, setIsVisible] = useState(false);
   const [showIOSSteps, setShowIOSSteps] = useState(false);
@@ -35,14 +35,14 @@ export function PWAInstallBanner() {
 
     // Show banner after a short delay for better UX
     const timer = setTimeout(() => {
-      // Show on iOS or when native install is available
-      if (isIOS || canInstall) {
+      // Show on iOS Safari or when native install is available
+      if ((isIOS && browserInfo?.name === 'Safari') || canInstall) {
         setIsVisible(true);
       }
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [isIOS, canInstall, isStandalone, isInstalled]);
+  }, [isIOS, canInstall, isStandalone, isInstalled, browserInfo]);
 
   const handleDismiss = () => {
     setIsVisible(false);
@@ -64,14 +64,27 @@ export function PWAInstallBanner() {
         setIsVisible(false);
       }
     } else if (isIOS) {
-      setShowIOSSteps(true);
+      if (browserInfo?.name === 'Safari') {
+        setShowIOSSteps(true);
+      } else {
+        // Not Safari - show warning toast
+        toast.warning(
+          isTurkish ? 'Safari Gerekli' : 'Safari Required',
+          {
+            description: isTurkish
+              ? 'iOS\'ta uygulamayı yüklemek için Safari tarayıcısını kullanın'
+              : 'Use Safari browser to install the app on iOS',
+            duration: 5000,
+          }
+        );
+      }
     }
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-20 left-0 right-0 z-40 px-3 animate-fade-in">
+    <div className="fixed bottom-20 left-0 right-0 z-40 px-3 animate-fade-in safe-area-pb">
       <div className="max-w-lg mx-auto bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
         {/* iOS Steps Panel */}
         {showIOSSteps && isIOS ? (
@@ -82,11 +95,19 @@ export function PWAInstallBanner() {
               </h4>
               <button 
                 onClick={() => setShowIOSSteps(false)}
-                className="p-1 hover:bg-muted rounded-full transition-colors"
+                className="p-1.5 hover:bg-muted rounded-full transition-colors"
               >
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
+            
+            {/* Safari check */}
+            {browserInfo?.name !== 'Safari' && (
+              <div className="flex items-center gap-2 p-2 bg-amber-500/10 rounded-lg text-amber-600 text-xs">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>{isTurkish ? 'Safari tarayıcısı gerekli' : 'Safari browser required'}</span>
+              </div>
+            )}
             
             <div className="space-y-2.5">
               <div className="flex items-center gap-3 text-sm">
