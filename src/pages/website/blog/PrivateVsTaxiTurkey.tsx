@@ -17,30 +17,12 @@ const PrivateVsTaxiTurkey = () => {
   const { t, getLocalizedPath } = useLanguage();
 
   const faqItems = [
-    {
-      question: "Is private transfer safer than regular transport in Turkey?",
-      answer: "Yes, private transfers are generally safer. Vehicles are regularly maintained, drivers are professionally trained and vetted, and companies are fully licensed and insured. You also know exactly who is picking you up."
-    },
-    {
-      question: "How much more expensive is private transfer than regular transport?",
-      answer: "Private transfers typically cost 2-3 times more than regular transport for short distances. However, when traveling with 2+ people, the per-person cost becomes comparable. For longer distances, the difference is smaller."
-    },
-    {
-      question: "Can I get transport at Turkish airports 24/7?",
-      answer: "Yes, transport options are available 24/7 at all major Turkish airports. However, late-night availability may be limited, and night tariffs (50% extra) apply between midnight and 6 AM."
-    },
-    {
-      question: "Do Turkish drivers speak English?",
-      answer: "English proficiency varies widely. Drivers in tourist areas like Istanbul, Antalya, and Bodrum may have basic English, but communication can still be challenging. Private transfer drivers are typically fluent in English."
-    },
-    {
-      question: "What happens if my flight is delayed?",
-      answer: "With private transfer, your driver monitors your flight and adjusts accordingly - no extra charge. With regular transport, you simply take whatever is available when you arrive, but there's no pre-arranged pickup."
-    },
-    {
-      question: "Which option is better for families with children?",
-      answer: "Private transfer is strongly recommended for families. You can request child seats, have space for strollers, and the door-to-door service eliminates stress of navigating with kids and luggage."
-    }
+    { question: t("blogTaxiFaq1Q"), answer: t("blogTaxiFaq1A") },
+    { question: t("blogTaxiFaq2Q"), answer: t("blogTaxiFaq2A") },
+    { question: t("blogTaxiFaq3Q"), answer: t("blogTaxiFaq3A") },
+    { question: t("blogTaxiFaq4Q"), answer: t("blogTaxiFaq4A") },
+    { question: t("blogTaxiFaq5Q"), answer: t("blogTaxiFaq5A") },
+    { question: t("blogTaxiFaq6Q"), answer: t("blogTaxiFaq6A") },
   ];
 
   return (
