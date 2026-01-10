@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby, Edit, RefreshCw, Sparkles, Shield, History, Phone } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby, Edit, RefreshCw, Sparkles, Shield, History, Phone, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -856,23 +856,50 @@ const CustomerBookings = () => {
         </div>
       </main>
 
-      {/* Sticky FAB - New Reservation */}
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-        className="fixed bottom-6 right-6 z-50"
-      >
-        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-          <Button
-            onClick={() => navigate('/customer#booking-form')}
-            size="lg"
-            className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
-          >
-            <Plus className="h-6 w-6" />
-          </Button>
+      {/* Sticky FABs */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+        {/* WhatsApp Support Button */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+        >
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <Button
+              onClick={() => {
+                const message = encodeURIComponent(
+                  language === 'TR' 
+                    ? 'Merhaba, destek almak istiyorum.' 
+                    : 'Hello, I would like to get support.'
+                );
+                window.open(`https://wa.me/15558051101?text=${message}`, '_blank');
+              }}
+              size="lg"
+              className="h-12 w-12 rounded-full shadow-lg bg-[#25D366] hover:bg-[#22c55e] text-white"
+              title={language === 'TR' ? 'WhatsApp Destek' : 'WhatsApp Support'}
+            >
+              <MessageCircle className="h-5 w-5" />
+            </Button>
+          </motion.div>
         </motion.div>
-      </motion.div>
+
+        {/* New Reservation Button */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+        >
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <Button
+              onClick={() => navigate('/customer#booking-form')}
+              size="lg"
+              className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
+            >
+              <Plus className="h-6 w-6" />
+            </Button>
+          </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };
