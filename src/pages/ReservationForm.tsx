@@ -116,6 +116,7 @@ const ReservationForm = () => {
   const [isDiscountedOffer, setIsDiscountedOffer] = useState(false);
   const [discountJustApplied, setDiscountJustApplied] = useState(false);
   const [previousVehiclePrices, setPreviousVehiclePrices] = useState<Record<string, number>>({});
+  const [appliedDiscountInfo, setAppliedDiscountInfo] = useState<{ amount: number; percentage: number; currency: string } | null>(null);
   
   // Check if coming from QuickBooking flow
   const quickBookingIdParam = searchParams.get('quickBookingId') || '';
@@ -985,6 +986,10 @@ const ReservationForm = () => {
         }))
       );
 
+      // Store discount info for badge display
+      const actualPercentage = Math.round((discountAmount / selectedPriceInfo.price) * 100);
+      setAppliedDiscountInfo({ amount: discountAmount, percentage: actualPercentage, currency });
+      
       setDiscountJustApplied(true);
       setIsDiscountedOffer(true);
       setCanReject(false);
@@ -1521,13 +1526,25 @@ const ReservationForm = () => {
               )}
               
               {/* Discount Applied Badge - Show after discount */}
-              {isDiscountedOffer && (
-                <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300">
-                  <Gift className="h-5 w-5" />
-                  <span className="font-medium">
-                    {t('language') === 'TR' ? 'Özel İndiriminiz Uygulandı!' : 'Your Special Discount Applied!'}
-                  </span>
-                  <CheckCircle className="h-5 w-5" />
+              {isDiscountedOffer && appliedDiscountInfo && (
+                <div className="flex flex-col items-center gap-2 py-4 px-5 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300">
+                  <div className="flex items-center gap-2">
+                    <Gift className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <span className="font-semibold text-base">
+                      {t('language') === 'TR' ? 'Özel İndiriminiz Uygulandı!' : 'Your Special Discount Applied!'}
+                    </span>
+                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/50 font-bold text-green-800 dark:text-green-200">
+                      <Tag className="h-3.5 w-3.5" />
+                      -{appliedDiscountInfo.amount} {appliedDiscountInfo.currency}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 font-bold text-emerald-800 dark:text-emerald-200">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      %{appliedDiscountInfo.percentage} {t('language') === 'TR' ? 'İndirim' : 'Off'}
+                    </span>
+                  </div>
                 </div>
               )}
               
@@ -1542,6 +1559,7 @@ const ReservationForm = () => {
                   setIsDiscountedOffer(false);
                   setDiscountJustApplied(false);
                   setPreviousVehiclePrices({});
+                  setAppliedDiscountInfo(null);
                 }}
                 className="w-full"
                 disabled={isLoading || isRejecting}
