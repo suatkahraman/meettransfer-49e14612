@@ -1137,13 +1137,13 @@ const ReservationForm = () => {
       <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background p-4">
         <Card className="max-w-2xl mx-auto">
           <CardContent className="pt-6">
-            {/* Header */}
+            {/* Header with Best Price Animation */}
             <div className="text-center mb-6">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Coins className="h-8 w-8 text-primary" />
+              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <Sparkles className="h-8 w-8 text-primary animate-pulse" />
               </div>
-              <h1 className="text-2xl font-bold mb-2">
-                {t('language') === 'TR' ? 'Aracınızı Seçin' : 'Select Your Vehicle'}
+              <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                {t('language') === 'TR' ? 'En İyi Fiyatlarımız' : 'Our Best Prices'}
               </h1>
               <p className="text-muted-foreground">
                 {t('language') === 'TR' 
@@ -1245,17 +1245,32 @@ const ReservationForm = () => {
               
               {fetchedVehiclePrices.length > 0 ? (
                 <div className="grid gap-4">
-                  {fetchedVehiclePrices.map((vehicle) => {
+                  {fetchedVehiclePrices.map((vehicle, index) => {
                     const isSelected = selectedVehicleForConfirm === vehicle.vehicleType;
                     const isRecommended = vehicle.vehicleType === recommendedVehicle && vehicle.available;
                     const previousPrice = previousVehiclePrices[vehicle.vehicleType];
                     const hasDiscount = previousPrice && vehicle.price && previousPrice > vehicle.price;
                     
                     return (
-                      <div key={vehicle.vehicleType} className={cn(
-                        "relative transition-all duration-500",
-                        discountJustApplied && hasDiscount && "animate-fade-in"
-                      )}>
+                      <div 
+                        key={vehicle.vehicleType} 
+                        className={cn(
+                          "relative transition-all duration-500 opacity-0 translate-y-4",
+                          "animate-[slideUp_0.5s_ease-out_forwards]",
+                          discountJustApplied && hasDiscount && "animate-fade-in"
+                        )}
+                        style={{ animationDelay: `${index * 150}ms` }}
+                      >
+                        {/* Best Price Badge for first available vehicle */}
+                        {index === 0 && vehicle.available && vehicle.price && !discountJustApplied && (
+                          <div className="absolute -top-3 left-4 z-10">
+                            <span className="inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-lg">
+                              <Sparkles className="h-3 w-3" />
+                              {t('language') === 'TR' ? 'En İyi Fiyat' : 'Best Price'}
+                            </span>
+                          </div>
+                        )}
+                        
                         {/* Previous Price Strike-through */}
                         {hasDiscount && discountJustApplied && (
                           <div className="absolute -top-2 right-4 z-10">
@@ -2234,8 +2249,8 @@ const ReservationForm = () => {
                   {t('vehicleType')}
                 </Label>
                 
-                {/* Price not found warning */}
-                {user && !isPricesLoading && Object.keys(vehiclePrices).length === 0 && urlPickup && urlDropoff && (
+                {/* Price not found warning - only show for QuickBooking flow */}
+                {isFromQuickBooking && !isPricesLoading && Object.keys(vehiclePrices).length === 0 && urlPickup && urlDropoff && (
                   <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200">
                     <Coins className="h-5 w-5 flex-shrink-0 mt-0.5" />
                     <div className="text-sm">
@@ -2255,8 +2270,10 @@ const ReservationForm = () => {
                 
                 <div className="grid gap-4">
                   {vehicleTypes.map(vehicle => {
-                    const vehiclePrice = vehiclePrices[vehicle.value] || null;
-                    const hasAnyPrices = Object.keys(vehiclePrices).length > 0;
+                    // For logged-in users NOT coming from QuickBooking, don't show prices in main form
+                    // Price will be shown after form submission in vehicle selection screen
+                    const showPriceInMainForm = isFromQuickBooking;
+                    const vehiclePrice = showPriceInMainForm ? (vehiclePrices[vehicle.value] || null) : null;
                     return (
                       <VehicleSelectionCard
                         key={vehicle.value}
@@ -2265,9 +2282,9 @@ const ReservationForm = () => {
                         onSelect={(v) => setFormData({...formData, vehicleType: v})}
                         price={vehiclePrice}
                         currency={prefilledCurrency}
-                        showPrice={hasAnyPrices || isPricesLoading}
+                        showPrice={showPriceInMainForm}
                         isRecommended={isFromQuickBooking && vehicle.value === formData.vehicleType && !!vehiclePrice}
-                        isLoading={isPricesLoading}
+                        isLoading={isFromQuickBooking && isPricesLoading}
                       />
                     );
                   })}
