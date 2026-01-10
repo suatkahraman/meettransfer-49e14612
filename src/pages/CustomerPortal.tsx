@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import meetTransferLogo from "@/assets/meet-transfer-logo.webp";
 import {
   Car,
   Calendar,
@@ -33,6 +34,8 @@ import {
   Shield,
   Globe,
   ChevronRight,
+  Sparkles,
+  RefreshCw,
 } from "lucide-react";
 
 // Language options
@@ -325,45 +328,91 @@ export default function CustomerPortal() {
     navigate(`/book?return=true&original=${originalReservation.id}`);
   };
 
+  // Animation variants
+  const containerVariants = useMemo(() => ({
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }), []);
+
+  const itemVariants = useMemo(() => ({
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  }), []);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">{t('loadingYourAccount')}</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-primary/10">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <Loader2 className="h-10 w-10 mx-auto mb-4 text-primary" />
+          </motion.div>
+          <p className="text-muted-foreground font-medium">{t('loadingYourAccount')}</p>
+        </motion.div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="pt-6 text-center">
-            <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">❌</span>
-            </div>
-            <h2 className="text-xl font-semibold mb-2">{t('accessDenied')}</h2>
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={() => navigate("/")}>{t('goToHomepage')}</Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-destructive/5 via-background to-destructive/10 p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card className="max-w-md w-full shadow-xl border-destructive/20">
+            <CardContent className="pt-6 text-center">
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+                className="h-14 w-14 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4"
+              >
+                <span className="text-3xl">❌</span>
+              </motion.div>
+              <h2 className="text-xl font-semibold mb-2">{t('accessDenied')}</h2>
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button onClick={() => navigate("/")} className="shadow-lg">{t('goToHomepage')}</Button>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header with Language Selector */}
-      <header className="bg-primary text-primary-foreground py-3 px-4 sticky top-0 z-10">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10">
+      {/* Header with Logo and Language Selector */}
+      <motion.header 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="bg-primary text-primary-foreground py-3 px-4 sticky top-0 z-10 shadow-lg backdrop-blur-sm"
+      >
         <div className="container mx-auto">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-serif font-bold">Meet Transfer</h1>
+            {/* Logo */}
+            <div className="flex items-center gap-2">
+              <img 
+                src={meetTransferLogo} 
+                alt="Meet Transfer" 
+                className="h-10 w-10 rounded-lg shadow-md"
+              />
+              <span className="text-lg font-serif font-bold hidden sm:block">Meet Transfer</span>
+            </div>
+            
             <div className="flex items-center gap-3">
               {/* Language Selector */}
               <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
-                <SelectTrigger className="w-auto gap-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 h-9 px-2">
+                <SelectTrigger className="w-auto gap-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 h-9 px-2 shadow-sm">
                   <Globe className="h-4 w-4" />
                   <SelectValue>
                     {LANGUAGES.find((l) => l.code === language)?.flag}
@@ -378,282 +427,368 @@ export default function CustomerPortal() {
                 </SelectContent>
               </Select>
               
-              {/* Phone */}
-              <div className="flex items-center gap-1 text-sm text-primary-foreground/80">
+              {/* Phone Badge */}
+              <div className="flex items-center gap-1.5 text-sm bg-primary-foreground/10 px-2.5 py-1.5 rounded-lg">
                 <Phone className="h-4 w-4" />
-                <span className="hidden sm:inline">{portalData?.phone}</span>
+                <span className="hidden sm:inline font-medium">{portalData?.phone}</span>
               </div>
             </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       <main className="container mx-auto px-4 py-6">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Quick Support & Navigation Actions - 4 Shortcuts */}
-          <div className="grid grid-cols-4 gap-2">
-            {/* Home */}
-            <Button 
-              variant="outline" 
-              className="h-auto py-3 flex flex-col items-center gap-1"
-              onClick={() => navigate('/')}
-            >
-              <Home className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">
-                {language === 'TR' ? 'Anasayfa' : 'Home'}
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="max-w-4xl mx-auto space-y-6"
+        >
+          {/* Welcome Section */}
+          <motion.div variants={itemVariants} className="text-center py-2">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <span className="text-sm text-muted-foreground font-medium">
+                {language === 'TR' ? 'Hoş Geldiniz' : 'Welcome'}
               </span>
-            </Button>
+            </div>
+            <h2 className="text-xl font-bold text-foreground">
+              {portalData?.reservations?.[0]?.customer_name || (language === 'TR' ? 'Değerli Müşterimiz' : 'Valued Customer')}
+            </h2>
+          </motion.div>
+
+          {/* Quick Support & Navigation Actions - 4 Shortcuts */}
+          <motion.div variants={itemVariants} className="grid grid-cols-4 gap-2">
+            {/* Home */}
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                variant="outline" 
+                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-white/80 dark:bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all"
+                onClick={() => navigate('/')}
+              >
+                <Home className="h-5 w-5 text-primary" />
+                <span className="text-xs font-medium">
+                  {language === 'TR' ? 'Anasayfa' : 'Home'}
+                </span>
+              </Button>
+            </motion.div>
             
             {/* WhatsApp */}
-            <Button 
-              variant="outline" 
-              className="h-auto py-3 flex flex-col items-center gap-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
-              onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
-            >
-              <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-              <span className="text-xs font-medium text-green-700 dark:text-green-300">
-                WhatsApp
-              </span>
-            </Button>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                variant="outline" 
+                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-green-50/80 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all"
+                onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
+              >
+                <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                  WhatsApp
+                </span>
+              </Button>
+            </motion.div>
             
             {/* Emergency */}
-            <Button 
-              variant="outline" 
-              className="h-auto py-3 flex flex-col items-center gap-1 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
-              onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
-            >
-              <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
-              <span className="text-xs font-medium text-red-700 dark:text-red-300">
-                {language === 'TR' ? 'Acil' : 'Call'}
-              </span>
-            </Button>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                variant="outline" 
+                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-red-50/80 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all"
+                onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
+              >
+                <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
+                <span className="text-xs font-medium text-red-700 dark:text-red-300">
+                  {language === 'TR' ? 'Acil' : 'Call'}
+                </span>
+              </Button>
+            </motion.div>
             
             {/* Security */}
-            <Button 
-              variant="outline" 
-              className="h-auto py-3 flex flex-col items-center gap-1 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50"
-              onClick={() => navigate('/security-settings')}
-            >
-              <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
-                {language === 'TR' ? 'Güvenlik' : 'Security'}
-              </span>
-            </Button>
-          </div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                variant="outline" 
+                className="h-auto py-3 w-full flex flex-col items-center gap-1 bg-blue-50/80 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all"
+                onClick={() => navigate('/security-settings')}
+              >
+                <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                  {language === 'TR' ? 'Güvenlik' : 'Security'}
+                </span>
+              </Button>
+            </motion.div>
+          </motion.div>
 
           {/* Next Transfer Card - Show first upcoming reservation */}
-          {portalData?.reservations && portalData.reservations.length > 0 && (
-            () => {
-              const upcomingReservations = portalData.reservations.filter(
-                r => !['cancelled', 'completed'].includes(r.status)
-              );
-              if (upcomingReservations.length === 0) return null;
-              
-              const nextTransfer = upcomingReservations[0];
-              return (
-                <Card 
-                  className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => {
-                    // Scroll to the reservation card
-                    const element = document.getElementById(`reservation-${nextTransfer.id}`);
-                    element?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <Clock className="h-4 w-4 text-primary" />
-                          <span className="text-sm font-medium text-primary">
-                            {language === 'TR' ? 'Yaklaşan Transferiniz' : 'Your Next Transfer'}
-                          </span>
-                          {nextTransfer.reservation_code && (
-                            <Badge variant="outline" className="font-mono text-xs bg-primary/10 border-primary/30">
-                              {nextTransfer.reservation_code}
-                            </Badge>
-                          )}
+          <AnimatePresence>
+            {portalData?.reservations && portalData.reservations.length > 0 && (
+              () => {
+                const upcomingReservations = portalData.reservations.filter(
+                  r => !['cancelled', 'completed'].includes(r.status)
+                );
+                if (upcomingReservations.length === 0) return null;
+                
+                const nextTransfer = upcomingReservations[0];
+                return (
+                  <motion.div 
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                  >
+                    <Card 
+                      className="bg-gradient-to-r from-primary/15 to-primary/5 border-primary/20 cursor-pointer hover:shadow-lg transition-all backdrop-blur-sm"
+                      onClick={() => {
+                        const element = document.getElementById(`reservation-${nextTransfer.id}`);
+                        element?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <motion.div
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                              >
+                                <Clock className="h-4 w-4 text-primary" />
+                              </motion.div>
+                              <span className="text-sm font-medium text-primary">
+                                {language === 'TR' ? 'Yaklaşan Transferiniz' : 'Your Next Transfer'}
+                              </span>
+                              {nextTransfer.reservation_code && (
+                                <Badge variant="outline" className="font-mono text-xs bg-primary/10 border-primary/30 shadow-sm">
+                                  {nextTransfer.reservation_code}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-semibold text-sm sm:text-base">
+                                {new Date(nextTransfer.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { 
+                                  weekday: 'long', 
+                                  day: 'numeric', 
+                                  month: 'long' 
+                                })} • {nextTransfer.pickup_time}
+                              </p>
+                              <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                                {nextTransfer.pickup.substring(0, 35)}{nextTransfer.pickup.length > 35 ? '...' : ''}
+                              </p>
+                            </div>
+                          </div>
+                          <motion.div
+                            animate={{ x: [0, 5, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          >
+                            <ChevronRight className="h-5 w-5 text-primary flex-shrink-0" />
+                          </motion.div>
                         </div>
-                        <div className="space-y-1">
-                          <p className="font-semibold text-sm sm:text-base">
-                            {new Date(nextTransfer.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { 
-                              weekday: 'long', 
-                              day: 'numeric', 
-                              month: 'long' 
-                            })} • {nextTransfer.pickup_time}
-                          </p>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                            {nextTransfer.pickup.substring(0, 35)}{nextTransfer.pickup.length > 35 ? '...' : ''}
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-primary flex-shrink-0" />
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            }
-          )()}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              }
+            )()}
+          </AnimatePresence>
 
           {/* New Reservation Card */}
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01] bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0"
-            onClick={() => navigate('/book')}
+          <motion.div 
+            variants={itemVariants}
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary-foreground/20 rounded-full p-3">
-                  <Plus className="h-6 w-6" />
+            <Card 
+              className="cursor-pointer shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground border-0 overflow-hidden relative"
+              onClick={() => navigate('/book')}
+            >
+              {/* Decorative Background */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary-foreground/10 to-transparent" />
+              
+              <CardContent className="p-5 flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-4">
+                  <motion.div 
+                    className="bg-primary-foreground/20 rounded-full p-3 shadow-inner"
+                    whileHover={{ rotate: 90 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Plus className="h-6 w-6" />
+                  </motion.div>
+                  <div>
+                    <p className="font-bold text-lg">
+                      {language === 'TR' ? 'Yeni Rezervasyon' : 'New Reservation'}
+                    </p>
+                    <p className="text-sm opacity-80">
+                      {language === 'TR' ? 'Hemen transfer rezervasyonu yapın' : 'Book your transfer now'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-lg">
-                    {language === 'TR' ? 'Yeni Rezervasyon' : 'New Reservation'}
-                  </p>
-                  <p className="text-sm opacity-80">
-                    {language === 'TR' ? 'Hemen transfer rezervasyonu yapın' : 'Book your transfer now'}
-                  </p>
-                </div>
-              </div>
-              <Car className="h-8 w-8 opacity-60" />
-            </CardContent>
-          </Card>
+                <motion.div
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Car className="h-10 w-10 opacity-70" />
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <div className="flex items-center justify-between">
+          <motion.div variants={itemVariants} className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">{t('yourBookings')}</h2>
               <p className="text-muted-foreground">
                 {t('viewAndManageBookings')}
               </p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Return Transfer Discount Banner */}
-          <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-            <CardContent className="py-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Percent className="h-5 w-5 text-primary" />
+          <motion.div variants={itemVariants}>
+            <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 shadow-sm backdrop-blur-sm">
+              <CardContent className="py-4">
+                <div className="flex items-center gap-3">
+                  <motion.div 
+                    className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center shadow-inner"
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Percent className="h-5 w-5 text-primary" />
+                  </motion.div>
+                  <div>
+                    <p className="font-semibold">{t('returnTransferDiscount')}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t('returnTransferDiscountDesc')}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold">{t('returnTransferDiscount')}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t('returnTransferDiscountDesc')}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {portalData?.reservations.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Car className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                <h3 className="text-lg font-medium mb-2">{t('noBookingsYet')}</h3>
-                <p className="text-muted-foreground mb-4">
-                  {t('createFirstBooking')}
-                </p>
-                <Button onClick={() => navigate("/book")}>{t('bookATransferPortal')}</Button>
               </CardContent>
             </Card>
-          ) : (
-            <div className="space-y-4">
-              {portalData?.reservations.map((reservation) => (
-                <Card key={reservation.id} id={`reservation-${reservation.id}`} className="scroll-mt-20">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          {reservation.reservation_code && (
-                            <Badge variant="outline" className="font-mono">
-                              {reservation.reservation_code}
-                            </Badge>
-                          )}
-                          {getStatusBadge(reservation.status)}
-                          {reservation.is_return_transfer && (
-                            <Badge variant="secondary" className="gap-1">
-                              <Percent className="h-3 w-3" />
-                              {t('returnLabel')}
-                            </Badge>
-                          )}
-                        </div>
-                        <CardTitle className="text-lg">
-                          {reservation.pickup} → {reservation.dropoff}
-                        </CardTitle>
-                      </div>
-                      {reservation.price && (
-                        <div className="text-right">
-                          {reservation.discount_amount > 0 && (
-                            <p className="text-sm text-muted-foreground line-through">
-                              {reservation.price_currency === "EUR" ? "€" : reservation.price_currency === "USD" ? "$" : reservation.price_currency === "GBP" ? "£" : reservation.price_currency === "AED" ? "د.إ" : reservation.price_currency === "AUD" ? "A$" : "₺"}
-                              {(reservation.price + reservation.discount_amount).toFixed(2)}
-                            </p>
-                          )}
-                          <p className="text-xl font-bold text-primary">
-                            {reservation.price_currency === "EUR" ? "€" : reservation.price_currency === "USD" ? "$" : reservation.price_currency === "GBP" ? "£" : reservation.price_currency === "AED" ? "د.إ" : reservation.price_currency === "AUD" ? "A$" : "₺"}
-                            {reservation.price}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {format(new Date(reservation.pickup_date), "MMM d, yyyy")}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>{reservation.pickup_time}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Car className="h-4 w-4 text-muted-foreground" />
-                        <span className="capitalize">
-                          {reservation.vehicle_type.replace(/-/g, " ")}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span>{reservation.customer_name}</span>
-                      </div>
-                      {(reservation.luggage_count && reservation.luggage_count > 0) && (
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="h-4 w-4 text-orange-500" />
-                          <span>{reservation.luggage_count} {t('luggage') || 'Valiz'}</span>
-                        </div>
-                      )}
-                      {(reservation.baby_seat_count && reservation.baby_seat_count > 0) && (
-                        <div className="flex items-center gap-2">
-                          <Baby className="h-4 w-4 text-pink-500" />
-                          <span>{reservation.baby_seat_count} {t('babySeat') || 'Bebek Koltuğu'}</span>
-                        </div>
-                      )}
-                    </div>
+          </motion.div>
 
-                    {!reservation.is_return_transfer && 
-                     reservation.status !== "cancelled" && 
-                     reservation.status !== "completed" && (
-                      <>
-                        <Separator className="my-4" />
-                        <div className="flex justify-end">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleCreateReturnTransfer(reservation)}
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            {t('addReturnTransferDiscount')}
-                          </Button>
+          {portalData?.reservations.length === 0 ? (
+            <motion.div variants={itemVariants}>
+              <Card className="shadow-lg border-border/50 backdrop-blur-sm">
+                <CardContent className="py-12 text-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                  >
+                    <Car className="h-14 w-14 mx-auto mb-4 text-muted-foreground/50" />
+                  </motion.div>
+                  <h3 className="text-lg font-medium mb-2">{t('noBookingsYet')}</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {t('createFirstBooking')}
+                  </p>
+                  <Button onClick={() => navigate("/book")} className="shadow-lg">{t('bookATransferPortal')}</Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ) : (
+            <motion.div variants={itemVariants} className="space-y-4">
+              {portalData?.reservations.map((reservation, index) => (
+                <motion.div
+                  key={reservation.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -2 }}
+                >
+                  <Card id={`reservation-${reservation.id}`} className="scroll-mt-20 shadow-md hover:shadow-lg transition-all border-border/50 backdrop-blur-sm bg-white/80 dark:bg-card/80">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            {reservation.reservation_code && (
+                              <Badge variant="outline" className="font-mono shadow-sm">
+                                {reservation.reservation_code}
+                              </Badge>
+                            )}
+                            {getStatusBadge(reservation.status)}
+                            {reservation.is_return_transfer && (
+                              <Badge variant="secondary" className="gap-1 shadow-sm">
+                                <Percent className="h-3 w-3" />
+                                {t('returnLabel')}
+                              </Badge>
+                            )}
+                          </div>
+                          <CardTitle className="text-lg">
+                            {reservation.pickup} → {reservation.dropoff}
+                          </CardTitle>
                         </div>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
+                        {reservation.price && (
+                          <div className="text-right">
+                            {reservation.discount_amount > 0 && (
+                              <p className="text-sm text-muted-foreground line-through">
+                                {reservation.price_currency === "EUR" ? "€" : reservation.price_currency === "USD" ? "$" : reservation.price_currency === "GBP" ? "£" : reservation.price_currency === "AED" ? "د.إ" : reservation.price_currency === "AUD" ? "A$" : "₺"}
+                                {(reservation.price + reservation.discount_amount).toFixed(2)}
+                              </p>
+                            )}
+                            <p className="text-xl font-bold text-primary">
+                              {reservation.price_currency === "EUR" ? "€" : reservation.price_currency === "USD" ? "$" : reservation.price_currency === "GBP" ? "£" : reservation.price_currency === "AED" ? "د.إ" : reservation.price_currency === "AUD" ? "A$" : "₺"}
+                              {reservation.price}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>
+                            {format(new Date(reservation.pickup_date), "MMM d, yyyy")}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>{reservation.pickup_time}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Car className="h-4 w-4 text-muted-foreground" />
+                          <span className="capitalize">
+                            {reservation.vehicle_type.replace(/-/g, " ")}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span>{reservation.customer_name}</span>
+                        </div>
+                        {(reservation.luggage_count && reservation.luggage_count > 0) && (
+                          <div className="flex items-center gap-2">
+                            <Briefcase className="h-4 w-4 text-orange-500" />
+                            <span>{reservation.luggage_count} {t('luggage') || 'Valiz'}</span>
+                          </div>
+                        )}
+                        {(reservation.baby_seat_count && reservation.baby_seat_count > 0) && (
+                          <div className="flex items-center gap-2">
+                            <Baby className="h-4 w-4 text-pink-500" />
+                            <span>{reservation.baby_seat_count} {t('babySeat') || 'Bebek Koltuğu'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {!reservation.is_return_transfer && 
+                       reservation.status !== "cancelled" && 
+                       reservation.status !== "completed" && (
+                        <>
+                          <Separator className="my-4" />
+                          <div className="flex justify-end">
+                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="shadow-sm"
+                                onClick={() => handleCreateReturnTransfer(reservation)}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                {t('addReturnTransferDiscount')}
+                              </Button>
+                            </motion.div>
+                          </div>
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </main>
 
       {/* Floating Chat Button */}
