@@ -11,7 +11,9 @@ interface UpdateCustomerRequest {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
-  customerPassword: string;
+  customerPassword?: string;
+  customerId?: string; // For Google auth - existing user ID
+  isGoogleAuth?: boolean;
   returnReservationCode?: string;
 }
 
@@ -28,69 +30,86 @@ serve(async (req) => {
 
     const requestData: UpdateCustomerRequest = await req.json();
     
-    console.log("Updating reservation with customer info:", requestData.reservationId);
+    console.log("Updating reservation with customer info:", requestData.reservationId, "isGoogleAuth:", requestData.isGoogleAuth);
 
-    // Validate password
-    if (!requestData.customerPassword || requestData.customerPassword.length < 6) {
+    // Validate password only for non-Google auth
+    if (!requestData.isGoogleAuth && (!requestData.customerPassword || requestData.customerPassword.length < 6)) {
       throw new Error("Password must be at least 6 characters");
     }
 
-    // Check if user already exists with this email
-    const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const existingUser = existingUsers?.users?.find(u => u.email === requestData.customerEmail);
-
     let userId: string;
 
-    if (existingUser) {
-      // User exists - update their password so they can login
-      const { error: updateError } = await supabase.auth.admin.updateUserById(
-        existingUser.id,
-        { password: requestData.customerPassword }
-      );
+    // If Google auth and customerId is provided, use that directly
+    if (requestData.isGoogleAuth && requestData.customerId) {
+      userId = requestData.customerId;
+      console.log("Using Google auth user:", userId);
       
-      if (updateError) {
-        console.error("Error updating user password:", updateError);
-        // Continue anyway - they might already know their password
-      }
-      
-      userId = existingUser.id;
-      console.log("Using existing user:", userId);
-      
-      // Update profile
+      // Update profile with provided info
       await supabase
         .from("profiles")
         .upsert({
           id: userId,
           full_name: requestData.customerName,
-          phone: requestData.customerPhone,
+          phone: requestData.customerPhone || null,
         }, { onConflict: "id" });
     } else {
-      // Create a new user account WITH password
-      const { data: newUser, error: createUserError } = await supabase.auth.admin.createUser({
-        email: requestData.customerEmail,
-        password: requestData.customerPassword,
-        email_confirm: true,
-        user_metadata: {
-          full_name: requestData.customerName,
-        },
-      });
+      // Check if user already exists with this email
+      const { data: existingUsers } = await supabase.auth.admin.listUsers();
+      const existingUser = existingUsers?.users?.find(u => u.email === requestData.customerEmail);
 
-      if (createUserError) {
-        console.error("Error creating user:", createUserError);
-        throw new Error(`Failed to create user account: ${createUserError.message}`);
+      if (existingUser) {
+        // User exists - update their password so they can login
+        if (requestData.customerPassword) {
+          const { error: updateError } = await supabase.auth.admin.updateUserById(
+            existingUser.id,
+            { password: requestData.customerPassword }
+          );
+          
+          if (updateError) {
+            console.error("Error updating user password:", updateError);
+            // Continue anyway - they might already know their password
+          }
+        }
+        
+        userId = existingUser.id;
+        console.log("Using existing user:", userId);
+        
+        // Update profile
+        await supabase
+          .from("profiles")
+          .upsert({
+            id: userId,
+            full_name: requestData.customerName,
+            phone: requestData.customerPhone,
+          }, { onConflict: "id" });
+      } else {
+        // Create a new user account WITH password
+        const { data: newUser, error: createUserError } = await supabase.auth.admin.createUser({
+          email: requestData.customerEmail,
+          password: requestData.customerPassword,
+          email_confirm: true,
+          user_metadata: {
+            full_name: requestData.customerName,
+          },
+        });
+
+        if (createUserError) {
+          console.error("Error creating user:", createUserError);
+          throw new Error(`Failed to create user account: ${createUserError.message}`);
+        }
+
+        userId = newUser.user.id;
+        console.log("Created new user:", userId);
+
+        // Ensure profile exists
+        await supabase
+          .from("profiles")
+          .upsert({
+            id: userId,
+            full_name: requestData.customerName,
+            phone: requestData.customerPhone,
+          }, { onConflict: "id" });
       }
-
-      userId = newUser.user.id;
-      console.log("Created new user:", userId);
-
-      // Ensure profile exists
-      await supabase
-        .from("profiles")
-        .upsert({
-          id: userId,
-          full_name: requestData.customerName,
-          phone: requestData.customerPhone,
-        }, { onConflict: "id" });
     }
 
     // Assign customer role if not exists
