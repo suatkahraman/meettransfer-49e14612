@@ -169,42 +169,26 @@ const CyprusAirportTransferGuide = () => {
           <p>{t("blogCyprusSection1P1")}</p>
           <p>{t("blogCyprusSection1P2")}</p>
           
-          <p>
-            Cyprus, the third-largest island in the Mediterranean, offers a unique blend of Greek and 
-            Turkish influences, ancient history, and stunning beaches. With over 4 million tourists 
-            visiting annually, efficient airport transfers are essential for a stress-free holiday. 
-            Whether you're heading to the party beaches of Ayia Napa or the cultural treasures of Paphos, 
-            planning your transportation ensures a smooth arrival.
-          </p>
+          <p>{t("blogCyprusIslandIntro")}</p>
 
-          <h3>Why Cyprus is a Popular Destination</h3>
+          <h3>{t("blogCyprusWhyPopular")}</h3>
           <ul>
-            <li><strong>Year-round sunshine:</strong> Over 340 days of sun annually</li>
-            <li><strong>Rich history:</strong> UNESCO World Heritage sites including Paphos Archaeological Park</li>
-            <li><strong>Beautiful beaches:</strong> Crystal-clear waters and Blue Flag beaches</li>
-            <li><strong>Diverse landscapes:</strong> Mountains, vineyards, and coastal scenery</li>
-            <li><strong>English widely spoken:</strong> Former British colony with excellent English</li>
+            <li>{t("blogCyprusPopular1")}</li>
+            <li>{t("blogCyprusPopular2")}</li>
+            <li>{t("blogCyprusPopular3")}</li>
+            <li>{t("blogCyprusPopular4")}</li>
+            <li>{t("blogCyprusPopular5")}</li>
           </ul>
 
           <h2 id="cyprus-airports">{t("blogCyprusSection2Title")}</h2>
           
           <h3>{t("blogCyprusLarnacaTitle")}</h3>
           <p>{t("blogCyprusLarnacaDesc")}</p>
-          <p>
-            Larnaca International Airport (LCA) is Cyprus's primary airport, handling approximately 8 million 
-            passengers annually. Located just 4 km from Larnaca city center, it's the main hub for flights 
-            from Europe and the Middle East. The airport features modern facilities, duty-free shopping, 
-            and various dining options. It's strategically positioned for easy access to all major resort areas.
-          </p>
+          <p>{t("blogCyprusLarnacaAirportP1")}</p>
 
           <h3>{t("blogCyprusPaphosAirportTitle")}</h3>
           <p>{t("blogCyprusPaphosAirportDesc")}</p>
-          <p>
-            Paphos International Airport (PFO) serves the western part of Cyprus and handles about 3 million 
-            passengers per year. It's particularly convenient for travelers staying in Paphos, Coral Bay, or 
-            Polis Chrysochous. Many UK charter flights arrive here, making it popular with British holidaymakers 
-            exploring the Akamas Peninsula and archaeological sites.
-          </p>
+          <p>{t("blogCyprusPaphosAirportP1")}</p>
 
           <h2 id="cyprus-larnaca">{t("blogCyprusSection3Title")}</h2>
           <div className="overflow-x-auto not-prose my-8">
@@ -228,12 +212,8 @@ const CyprusAirportTransferGuide = () => {
             </Table>
           </div>
 
-          <h3>Understanding Larnaca Airport Transfers</h3>
-          <p>
-            Larnaca Airport's central location makes it convenient for most destinations. The A1 motorway 
-            provides fast connections to Limassol and Paphos, while the A3 leads to Ayia Napa and Protaras. 
-            Traffic is generally light, though summer weekends can see increased congestion on coastal routes.
-          </p>
+          <h3>{t("blogCyprusUnderstandingLarnaca")}</h3>
+          <p>{t("blogCyprusUnderstandingLarnacaP1")}</p>
 
           <h2 id="cyprus-paphos">{t("blogCyprusSection4Title")}</h2>
           <div className="overflow-x-auto not-prose my-8">
@@ -262,13 +242,8 @@ const CyprusAirportTransferGuide = () => {
             <Link to={getLocalizedPath("/cyprus-transfer")} className="text-primary hover:underline">{t("blogCyprusPrivateTransfer")}</Link> {t("blogCyprusSection5P1")}
           </p>
 
-          <h3>Why Private Transfer in Cyprus?</h3>
-          <p>
-            While Cyprus has public buses and regular transportation options, private transfers offer significant advantages.
-            Resort areas like Ayia Napa, Protaras, and the Paphos region are spread across large areas, 
-            often with hotels located outside main transport hubs. Private transfer ensures door-to-door 
-            service without the hassle of multiple connections or language barriers.
-          </p>
+          <h3>{t("blogCyprusWhyPrivate")}</h3>
+          <p>{t("blogCyprusWhyPrivateP1")}</p>
 
           <h3>{t("blogCyprusSection5SubTitle")}</h3>
           <ul>
@@ -313,13 +288,13 @@ const CyprusAirportTransferGuide = () => {
           <h2 id="cyprus-tips">{t("blogCyprusSection6Title")}</h2>
           <p>{t("blogCyprusSection6Intro")}</p>
 
-          <h3>Essential Cyprus Travel Tips</h3>
+          <h3>{t("blogCyprusEssentialTips")}</h3>
           <ul>
-            <li><strong>Currency:</strong> Euro (€) is used throughout the Republic of Cyprus</li>
-            <li><strong>Driving:</strong> Left-hand traffic (like UK), international license accepted</li>
-            <li><strong>Language:</strong> Greek is official, but English is widely spoken</li>
-            <li><strong>Power sockets:</strong> UK-style three-pin plugs (Type G)</li>
-            <li><strong>Tipping:</strong> 10% in restaurants is customary</li>
+            <li>{t("blogCyprusTip1")}</li>
+            <li>{t("blogCyprusTip2")}</li>
+            <li>{t("blogCyprusTip3")}</li>
+            <li>{t("blogCyprusTip4")}</li>
+            <li>{t("blogCyprusTip5")}</li>
           </ul>
 
           <h2 id="cyprus-destinations">{t("blogCyprusSection7Title")}</h2>
@@ -339,43 +314,22 @@ const CyprusAirportTransferGuide = () => {
             ))}
           </div>
 
-          <h3>Discovering Cyprus Beyond the Beaches</h3>
-          <p>
-            While Cyprus is famous for its beaches, the island offers much more. The Troodos Mountains 
-            provide hiking trails and traditional villages, with Byzantine-era painted churches that are 
-            UNESCO World Heritage sites. Wine enthusiasts can explore the Commandaria wine region, producing 
-            one of the world's oldest named wines. The divided capital Nicosia offers a unique glimpse into 
-            the island's complex history.
-          </p>
+          <h3>{t("blogCyprusDiscovering")}</h3>
+          <p>{t("blogCyprusDiscoveringP1")}</p>
 
           <h2 id="cyprus-north">{t("blogCyprusSection8Title")}</h2>
           <p>{t("blogCyprusSection8Intro")}</p>
-          <p>
-            Northern Cyprus (Turkish Republic of Northern Cyprus) can be accessed via checkpoints from the 
-            Republic of Cyprus. Popular destinations include the historic harbor town of Kyrenia (Girne), 
-            the ancient ruins of Salamis near Famagusta (Gazimağusa), and the pristine Karpaz Peninsula. 
-            We offer transfers across the island, including to these lesser-visited treasures.
-          </p>
+          <p>{t("blogCyprusNorthernP1")}</p>
 
           <h2 id="cyprus-booking">{t("blogCyprusSection9Title")}</h2>
           <p>{t("blogCyprusSection9Intro")}</p>
 
-          <h3>Booking Your Cyprus Transfer</h3>
-          <p>
-            We recommend booking your transfer at least 48 hours in advance, especially during peak season 
-            (June-September). Our simple booking process requires your flight details, hotel address, and 
-            passenger count. Confirmation is sent instantly via email, and our driver will be waiting with 
-            a personalized name board when you exit arrivals.
-          </p>
+          <h3>{t("blogCyprusBookingTips")}</h3>
+          <p>{t("blogCyprusBookingTipsP1")}</p>
 
           <h2>{t("blogCyprusConclusion")}</h2>
           <p>{t("blogCyprusConclusionP1")}</p>
-          <p>
-            Cyprus offers an incredible combination of Mediterranean beauty, ancient history, and warm 
-            hospitality. From the legendary birthplace of Aphrodite to the vibrant nightlife of Ayia Napa, 
-            this island has something for everyone. Start your Cypriot adventure right with a comfortable, 
-            reliable private transfer that takes you directly to where the memories begin.
-          </p>
+          <p>{t("blogCyprusConclusionP2")}</p>
         </div>
 
         {/* CTA Section */}
