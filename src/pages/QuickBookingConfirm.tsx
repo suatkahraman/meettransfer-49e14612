@@ -1132,36 +1132,89 @@ export default function QuickBookingConfirm() {
           </div>
 
           {/* Price Display - Mobile Optimized */}
-          <div className={`rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 text-center transition-all duration-500 ${
+          <div className={`relative rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 text-center transition-all duration-500 overflow-hidden ${
             discountJustApplied 
-              ? 'bg-green-100 dark:bg-green-900/30 ring-2 ring-green-500 animate-pulse' 
+              ? 'bg-gradient-to-br from-green-100 via-emerald-50 to-teal-100 dark:from-green-900/40 dark:via-emerald-900/30 dark:to-teal-900/40 ring-2 ring-green-500 shadow-lg shadow-green-500/20' 
               : 'bg-primary/10'
           }`}>
+            {/* Animated Discount Badge */}
+            {discountJustApplied && (
+              <div className="absolute -top-1 -right-1 z-10">
+                <div className="relative">
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-md opacity-75 animate-pulse" />
+                  {/* Badge */}
+                  <div 
+                    className="relative flex items-center gap-1.5 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-lg"
+                    style={{ animation: 'discountBadgePop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards' }}
+                  >
+                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" style={{ animation: 'sparkle 1s ease-in-out infinite' }} />
+                    <span className="font-bold text-xs sm:text-sm whitespace-nowrap">
+                      {t("discounted") || "İndirimli!"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Animated sparkle particles */}
+            {discountJustApplied && (
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {[...Array(8)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-1.5 h-1.5 bg-green-400 rounded-full opacity-0"
+                    style={{
+                      left: `${10 + i * 12}%`,
+                      top: `${20 + (i % 3) * 25}%`,
+                      animation: `sparkleFloat 2s ease-in-out ${i * 0.2}s infinite`,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            
             {!hasReturnTrip ? (
               <>
                 <p className="text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2">{t("qbYourTransferPrice")}</p>
                 {discountJustApplied && previousPrice && (
-                  <div className="mb-1 sm:mb-2">
-                    <span className="text-lg sm:text-xl line-through text-muted-foreground">
+                  <div className="mb-2 sm:mb-3 flex items-center justify-center gap-2 flex-wrap">
+                    <span 
+                      className="text-lg sm:text-xl line-through text-muted-foreground"
+                      style={{ animation: 'strikeThrough 0.5s ease-out forwards' }}
+                    >
                       {currencySymbol}{previousPrice}
                     </span>
-                    <span className="ml-1.5 sm:ml-2 text-xs sm:text-sm bg-green-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full animate-bounce inline-block">
-                      -€3 {t("discount") || "İndirim"}!
+                    <span 
+                      className="inline-flex items-center gap-1 text-xs sm:text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 sm:px-3 py-1 rounded-full shadow-md"
+                      style={{ animation: 'savingsBadge 0.5s ease-out 0.3s both' }}
+                    >
+                      <Tag className="h-3 w-3" />
+                      -{currencySymbol}{previousPrice - (selectedPrice || 0)} {t("savings") || "Tasarruf"}
                     </span>
                   </div>
                 )}
-                <p className={`text-3xl sm:text-4xl font-bold transition-all duration-300 ${
-                  discountJustApplied ? 'text-green-600 dark:text-green-400 scale-110' : 'text-primary'
-                }`}>
+                <p 
+                  className={`text-3xl sm:text-4xl font-bold transition-all duration-300 ${
+                    discountJustApplied ? 'text-green-600 dark:text-green-400' : 'text-primary'
+                  }`}
+                  style={discountJustApplied ? { animation: 'priceReveal 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards' } : {}}
+                >
                   {currencySymbol}{selectedPrice}
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
                   {booking.price_currency}
                 </p>
                 {discountJustApplied && (
-                  <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 mt-1 sm:mt-2 font-medium">
-                    ✨ {t("specialDiscountApplied") || "Sizin için özel indirim uygulandı!"}
-                  </p>
+                  <div 
+                    className="mt-3 inline-flex items-center gap-2 bg-green-500/10 dark:bg-green-500/20 text-green-700 dark:text-green-300 px-3 py-1.5 rounded-full"
+                    style={{ animation: 'fadeInUp 0.5s ease-out 0.5s both' }}
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span className="text-xs sm:text-sm font-medium">
+                      {t("specialDiscountApplied") || "Sizin için özel indirim uygulandı!"}
+                    </span>
+                  </div>
                 )}
               </>
             ) : (
@@ -1339,6 +1392,90 @@ export default function QuickBookingConfirm() {
           </p>
         </CardContent>
       </Card>
+      
+      {/* Discount Badge Animation Styles */}
+      <style>{`
+        @keyframes discountBadgePop {
+          0% { 
+            transform: scale(0) rotate(-15deg); 
+            opacity: 0; 
+          }
+          50% { 
+            transform: scale(1.2) rotate(5deg); 
+          }
+          100% { 
+            transform: scale(1) rotate(0deg); 
+            opacity: 1; 
+          }
+        }
+        
+        @keyframes sparkle {
+          0%, 100% { 
+            transform: scale(1) rotate(0deg); 
+            opacity: 1; 
+          }
+          50% { 
+            transform: scale(1.3) rotate(180deg); 
+            opacity: 0.7; 
+          }
+        }
+        
+        @keyframes sparkleFloat {
+          0%, 100% { 
+            transform: translateY(0) scale(0); 
+            opacity: 0; 
+          }
+          50% { 
+            transform: translateY(-20px) scale(1); 
+            opacity: 0.8; 
+          }
+        }
+        
+        @keyframes strikeThrough {
+          0% { 
+            text-decoration-color: transparent; 
+          }
+          100% { 
+            text-decoration-color: currentColor; 
+          }
+        }
+        
+        @keyframes savingsBadge {
+          0% { 
+            transform: translateX(-10px) scale(0.8); 
+            opacity: 0; 
+          }
+          100% { 
+            transform: translateX(0) scale(1); 
+            opacity: 1; 
+          }
+        }
+        
+        @keyframes priceReveal {
+          0% { 
+            transform: scale(0.5); 
+            opacity: 0; 
+          }
+          50% { 
+            transform: scale(1.1); 
+          }
+          100% { 
+            transform: scale(1); 
+            opacity: 1; 
+          }
+        }
+        
+        @keyframes fadeInUp {
+          0% { 
+            opacity: 0; 
+            transform: translateY(10px); 
+          }
+          100% { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+      `}</style>
     </div>
   );
 }
