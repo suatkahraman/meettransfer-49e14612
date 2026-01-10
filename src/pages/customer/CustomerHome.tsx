@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,7 +13,7 @@ import {
   LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, 
   Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
   ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall, Sparkles, 
-  Clock, Star, ArrowRight, Loader2, Home
+  Clock, Star, ArrowRight, Loader2, Home, RefreshCw
 } from 'lucide-react';
 import { z } from 'zod';
 import NotificationBell from '@/components/NotificationBell';
@@ -21,11 +21,10 @@ import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomp
 import { PhoneInput } from '@/components/ui/phone-input';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 
+// Validation schema - memoized outside component
 const reservationSchema = z.object({
   pickup: z.string().trim().min(2, "Pick-up point must be at least 2 characters").max(200, "Pick-up point is too long"),
   dropoff: z.string().trim().min(2, "Drop-off location must be at least 2 characters").max(200, "Drop-off location is too long"),
@@ -37,27 +36,37 @@ const reservationSchema = z.object({
   paymentType: z.string().min(1, "Please select a payment type"),
 });
 
-// Use centralized vehicle types
-import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
-
-// Payment types will use translations
 const MAX_PASSENGERS = 15;
+const WHATSAPP_NUMBER = '905321748390';
+const EMERGENCY_PHONE = '+905321748390';
+
+// Helper function - outside component for better performance
+const getGreeting = (language: string): string => {
+  const hour = new Date().getHours();
+  if (language === 'TR') {
+    if (hour < 12) return 'Günaydın';
+    if (hour < 18) return 'İyi günler';
+    return 'İyi akşamlar';
+  }
+  if (hour < 12) return 'Good Morning';
+  if (hour < 18) return 'Good Afternoon';
+  return 'Good Evening';
+};
 
 const CustomerHome = () => {
   const { user, signOut } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  
+  // State - organized by purpose
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [activeBookingsCount, setActiveBookingsCount] = useState(0);
   const [nextTransfer, setNextTransfer] = useState<{date: string; time: string; pickup: string; dropoff: string} | null>(null);
-  const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profileData, setProfileData] = useState({
-    full_name: '',
-    phone: ''
-  });
+  const [profileData, setProfileData] = useState({ full_name: '', phone: '' });
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [formData, setFormData] = useState({
     pickup: '',
@@ -70,24 +79,20 @@ const CustomerHome = () => {
     paymentType: 'cash',
   });
 
-  // Get greeting based on time of day
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (language === 'TR') {
-      if (hour < 12) return 'Günaydın';
-      if (hour < 18) return 'İyi günler';
-      return 'İyi akşamlar';
-    }
-    if (hour < 12) return 'Good Morning';
-    if (hour < 18) return 'Good Afternoon';
-    return 'Good Evening';
-  };
+  // Memoized greeting
+  const greeting = useMemo(() => getGreeting(language), [language]);
 
-  // Fetch active bookings count and profile
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user?.id) return;
-      
+  // Memoized display name
+  const displayName = useMemo(() => {
+    return profileData.full_name || user?.email?.split('@')[0] || (language === 'TR' ? 'Değerli Müşterimiz' : 'Valued Customer');
+  }, [profileData.full_name, user?.email, language]);
+
+  // Fetch data function - extracted for refresh capability
+  const fetchData = useCallback(async () => {
+    if (!user?.id) return;
+    
+    setIsRefreshing(true);
+    try {
       // Fetch active bookings with next transfer info
       const { data: activeReservations, count } = await supabase
         .from('reservations')
@@ -109,6 +114,8 @@ const CustomerHome = () => {
           pickup: next.pickup_place_name || next.pickup,
           dropoff: next.dropoff_place_name || next.dropoff
         });
+      } else {
+        setNextTransfer(null);
       }
 
       // Fetch profile
@@ -123,11 +130,21 @@ const CustomerHome = () => {
           full_name: profile.full_name || '',
           phone: profile.phone || ''
         });
+        // Auto-fill phone if empty
+        if (!formData.passengerPhone && profile.phone) {
+          setFormData(prev => ({ ...prev, passengerPhone: profile.phone || '' }));
+        }
       }
-    };
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [user?.id, formData.passengerPhone]);
 
+  useEffect(() => {
     fetchData();
-  }, [user?.id]);
+  }, [fetchData]);
 
   const handleSaveProfile = async () => {
     if (!user?.id) return;
@@ -356,7 +373,7 @@ const CustomerHome = () => {
                 <Button 
                   variant="outline" 
                   className="w-full justify-between bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
-                  onClick={() => window.open('https://wa.me/905321748390?text=' + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
+                  onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
                 >
                   <span className="flex items-center gap-2 text-green-700 dark:text-green-300">
                     <MessageCircle className="h-4 w-4" />
@@ -369,13 +386,13 @@ const CustomerHome = () => {
                 <Button 
                   variant="outline" 
                   className="w-full justify-between bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
-                  onClick={() => window.open('tel:+905321748390', '_self')}
+                  onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
                 >
                   <span className="flex items-center gap-2 text-red-700 dark:text-red-300">
                     <PhoneCall className="h-4 w-4" />
                     {language === 'TR' ? 'Acil Durum Hattı' : 'Emergency Hotline'}
                   </span>
-                  <span className="text-xs text-red-600 dark:text-red-400 font-mono">+90 532 174 8390</span>
+                  <span className="text-xs text-red-600 dark:text-red-400 font-mono">{EMERGENCY_PHONE.replace('+90', '+90 ')}</span>
                 </Button>
 
                 {/* Security Settings */}
@@ -409,14 +426,25 @@ const CustomerHome = () => {
       <main className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-4xl">
         {/* Welcome Section */}
         <div className="mb-6">
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <h2 className="text-lg sm:text-xl font-medium text-muted-foreground">
-              {getGreeting()},
-            </h2>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h2 className="text-lg sm:text-xl font-medium text-muted-foreground">
+                {greeting},
+              </h2>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={fetchData}
+              disabled={isRefreshing}
+              className="h-8 w-8"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
           </div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold">
-            {profileData.full_name || user?.email?.split('@')[0] || (language === 'TR' ? 'Değerli Müşterimiz' : 'Valued Customer')}
+            {displayName}
           </h1>
         </div>
 
@@ -521,7 +549,7 @@ const CustomerHome = () => {
           <Button 
             variant="outline" 
             className="h-auto py-3 flex flex-col items-center gap-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
-            onClick={() => window.open('https://wa.me/905321748390?text=' + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
+            onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(language === 'TR' ? 'Merhaba, destek almak istiyorum.' : 'Hello, I need support.'), '_blank')}
           >
             <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
             <span className="text-xs font-medium text-green-700 dark:text-green-300">
@@ -533,7 +561,7 @@ const CustomerHome = () => {
           <Button 
             variant="outline" 
             className="h-auto py-3 flex flex-col items-center gap-1 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
-            onClick={() => window.open('tel:+905321748390', '_self')}
+            onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
           >
             <PhoneCall className="h-5 w-5 text-red-600 dark:text-red-400" />
             <span className="text-xs font-medium text-red-700 dark:text-red-300">
