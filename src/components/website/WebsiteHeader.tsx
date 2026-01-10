@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogIn, LogOut, User, Download, Building2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import LanguageSelector from "./LanguageSelector";
+import UniversalLanguageSelector from "@/components/UniversalLanguageSelector";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { InstallAppButton } from "./InstallAppButton";
 import {
@@ -242,7 +242,7 @@ const WebsiteHeader = () => {
           <div className="hidden md:block">
             <PushNotificationToggle />
           </div>
-          <LanguageSelector />
+          <UniversalLanguageSelector variant="compact" />
           
           {/* Auth Buttons - Desktop */}
           {user ? (
