@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Separator } from '@/components/ui/separator';
 import { z } from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle, Share2, Check, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle, Share2, Check, ShieldAlert, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
 import TwoFactorVerification from '@/components/auth/TwoFactorVerification';
@@ -83,6 +83,7 @@ const LoginScreen = () => {
     return localStorage.getItem('guestSavedEmail') || '';
   });
   const [copied, setCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [lockoutCountdown, setLockoutCountdown] = useState<number | null>(null);
   const [pendingRole, setPendingRole] = useState<string | null>(null);
   const { signIn, user, loading: authLoading } = useAuth();
@@ -686,15 +687,30 @@ const LoginScreen = () => {
                       {t('forgotPassword')}
                     </button>
                   </div>
-                  <Input 
-                    id="password" 
-                    name="password" 
-                    type="password" 
-                    placeholder="••••••••" 
-                    required 
-                    className="h-12"
-                    autoComplete="current-password"
-                  />
+                  <div className="relative">
+                    <Input 
+                      id="password" 
+                      name="password" 
+                      type={showPassword ? 'text' : 'password'} 
+                      placeholder="••••••••" 
+                      required 
+                      className="h-12 pr-12"
+                      autoComplete="current-password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 
