@@ -1221,6 +1221,7 @@ export type Database = {
           price: number | null
           price_currency: string | null
           promo_code: string | null
+          reminder_sent_at: string | null
           reservation_code: string | null
           status: string
           updated_at: string | null
@@ -1273,6 +1274,7 @@ export type Database = {
           price?: number | null
           price_currency?: string | null
           promo_code?: string | null
+          reminder_sent_at?: string | null
           reservation_code?: string | null
           status?: string
           updated_at?: string | null
@@ -1325,6 +1327,7 @@ export type Database = {
           price?: number | null
           price_currency?: string | null
           promo_code?: string | null
+          reminder_sent_at?: string | null
           reservation_code?: string | null
           status?: string
           updated_at?: string | null
