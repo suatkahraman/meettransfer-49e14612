@@ -427,15 +427,15 @@ export default function CustomerPortal() {
               </span>
             </Button>
             
-            {/* New Booking */}
+            {/* Security */}
             <Button 
               variant="outline" 
-              className="h-auto py-3 flex flex-col items-center gap-1 bg-primary/5 border-primary/20 hover:bg-primary/10"
-              onClick={() => navigate('/book')}
+              className="h-auto py-3 flex flex-col items-center gap-1"
+              onClick={() => navigate('/security-settings')}
             >
-              <Plus className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium text-primary">
-                {language === 'TR' ? 'Rezerve' : 'Book'}
+              <Shield className="h-5 w-5 text-primary" />
+              <span className="text-xs font-medium">
+                {language === 'TR' ? 'Güvenlik' : 'Security'}
               </span>
             </Button>
           </div>
