@@ -172,12 +172,12 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <UpdateNotification />
       <BrowserRouter>
         <HashScroll />
         <LanguageQueryRedirect />
         <OAuthCallbackHandler>
           <LanguageProvider>
+            <UpdateNotification />
             <AuthProvider>
               <Routes>
               {/* Localized Website Pages - Support all languages */}
