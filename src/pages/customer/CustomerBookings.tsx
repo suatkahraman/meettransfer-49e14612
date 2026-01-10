@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby, Edit, RefreshCw, Sparkles, Shield, History, Phone, MessageCircle } from 'lucide-react';
+import { LogOut, ArrowLeft, MapPin, Calendar, Clock, Car, ChevronRight, Plus, AlertCircle, CheckCircle, Loader2, XCircle, Truck, User, Banknote, Home, Bell, BellOff, Plane, AlertTriangle, Volume2, Settings, Briefcase, Baby, Edit, RefreshCw, Sparkles, Shield, History, Phone, MessageCircle, ClipboardList } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -392,24 +392,62 @@ const CustomerBookings = () => {
           language={language === 'TR' ? 'TR' : 'EN'}
         />
         <div className="container mx-auto py-6 px-4 max-w-2xl">
-        {/* Title Section */}
+        {/* Premium Title Section */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4"
+          className="mb-6"
         >
-          <div className="flex items-center gap-2 mb-1">
-            <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-            >
-              <Sparkles className="h-5 w-5 text-primary" />
-            </motion.div>
-            <h1 className="text-2xl font-serif font-bold text-foreground">{t('myReservationsTitle')}</h1>
-          </div>
+          <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden">
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <motion.div
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    className="bg-primary/20 p-2.5 rounded-full"
+                  >
+                    <ClipboardList className="h-5 w-5 text-primary" />
+                  </motion.div>
+                  <div>
+                    <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t('myReservationsTitle')}</h1>
+                    <p className="text-sm text-muted-foreground">
+                      {reservations.length > 0 
+                        ? (language === 'TR' 
+                            ? `${reservations.length} rezervasyon bulundu` 
+                            : `${reservations.length} reservations found`)
+                        : (language === 'TR' ? 'Henüz rezervasyon yok' : 'No reservations yet')}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Stats */}
+                <div className="hidden sm:flex items-center gap-4">
+                  {actionRequired.length > 0 && (
+                    <div className="text-center">
+                      <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto">
+                        <AlertCircle className="h-5 w-5 text-purple-500" />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">{language === 'TR' ? 'Bekleyen' : 'Pending'}</p>
+                      <p className="font-bold text-purple-600">{actionRequired.length}</p>
+                    </div>
+                  )}
+                  {sortedActiveReservations.length > 0 && (
+                    <div className="text-center">
+                      <div className="h-10 w-10 rounded-full bg-cyan-500/20 flex items-center justify-center mx-auto">
+                        <Car className="h-5 w-5 text-cyan-500" />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">{language === 'TR' ? 'Aktif' : 'Active'}</p>
+                      <p className="font-bold text-cyan-600">{sortedActiveReservations.length}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
-        {/* Quick Actions Bar */}
+        {/* Quick Actions Bar - Enhanced */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -419,52 +457,66 @@ const CustomerBookings = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-1 h-auto py-3 w-full bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:border-primary/40"
+              className="flex flex-col items-center gap-1.5 h-auto py-3 w-full bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30 hover:border-primary/50 hover:bg-primary/15 shadow-sm"
               onClick={() => navigate('/customer#booking-form')}
             >
-              <Plus className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">{language === 'TR' ? 'Yeni' : 'New'}</span>
+              <div className="bg-primary/20 p-1.5 rounded-full">
+                <Plus className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-xs font-semibold">{language === 'TR' ? 'Yeni' : 'New'}</span>
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-1 h-auto py-3 w-full bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20 hover:border-blue-500/40"
+              className="flex flex-col items-center gap-1.5 h-auto py-3 w-full bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/15 shadow-sm"
               onClick={() => {
                 const historySection = document.getElementById('past-reservations');
                 historySection?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              <History className="h-5 w-5 text-blue-500" />
-              <span className="text-xs font-medium">{language === 'TR' ? 'Geçmiş' : 'History'}</span>
+              <div className="bg-blue-500/20 p-1.5 rounded-full">
+                <History className="h-4 w-4 text-blue-500" />
+              </div>
+              <span className="text-xs font-semibold">{language === 'TR' ? 'Geçmiş' : 'History'}</span>
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-1 h-auto py-3 w-full bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/40"
-              onClick={() => navigate('/security-settings')}
+              className="flex flex-col items-center gap-1.5 h-auto py-3 w-full bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/30 hover:border-green-500/50 hover:bg-green-500/15 shadow-sm"
+              onClick={() => {
+                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                  language === 'TR' 
+                    ? 'Merhaba, rezervasyonum hakkında bilgi almak istiyorum.' 
+                    : 'Hello, I would like to get information about my reservation.'
+                )}`, '_blank');
+              }}
             >
-              <Shield className="h-5 w-5 text-emerald-500" />
-              <span className="text-xs font-medium">{language === 'TR' ? 'Güvenlik' : 'Security'}</span>
+              <div className="bg-green-500/20 p-1.5 rounded-full">
+                <MessageCircle className="h-4 w-4 text-green-500" />
+              </div>
+              <span className="text-xs font-semibold">WhatsApp</span>
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-1 h-auto py-3 w-full bg-gradient-to-br from-orange-500/5 to-orange-500/10 border-orange-500/20 hover:border-orange-500/40"
+              className="flex flex-col items-center gap-1.5 h-auto py-3 w-full bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/30 hover:border-orange-500/50 hover:bg-orange-500/15 shadow-sm"
               onClick={() => setShowNotificationSettings(!showNotificationSettings)}
             >
-              <Settings className="h-5 w-5 text-orange-500" />
-              <span className="text-xs font-medium">{language === 'TR' ? 'Ayarlar' : 'Settings'}</span>
+              <div className="bg-orange-500/20 p-1.5 rounded-full">
+                <Settings className="h-4 w-4 text-orange-500" />
+              </div>
+              <span className="text-xs font-semibold">{language === 'TR' ? 'Ayarlar' : 'Settings'}</span>
             </Button>
           </motion.div>
         </motion.div>
 
-        {/* Notification Settings Panel */}
+        {/* Notification Settings Panel - Collapsible */}
         <AnimatePresence>
           {showNotificationSettings && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
