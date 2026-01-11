@@ -52,6 +52,9 @@ export const Hero = () => {
   const [passengers, setPassengers] = useState("2");
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [transferPrice, setTransferPrice] = useState<number | null>(null);
+  const [transferPriceCurrency, setTransferPriceCurrency] = useState<string>("EUR");
+  const [loadingTransferPrice, setLoadingTransferPrice] = useState(false);
 
   // Hourly form state
   const [hourlyCity, setHourlyCity] = useState("");
@@ -112,6 +115,47 @@ export const Hero = () => {
 
     fetchCitiesAndDurations();
   }, []);
+
+  // Fetch transfer price when pickup and dropoff are selected
+  useEffect(() => {
+    const fetchTransferPrice = async () => {
+      if (!pickup || !dropoff) {
+        setTransferPrice(null);
+        return;
+      }
+
+      setLoadingTransferPrice(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
+          body: {
+            pickup,
+            dropoff,
+            customerCurrency: "EUR",
+          },
+        });
+
+        if (error) throw error;
+
+        // Get the lowest price from available vehicles (usually Vito)
+        if (data?.vehicles && data.vehicles.length > 0) {
+          const lowestPrice = Math.min(...data.vehicles.map((v: any) => v.price));
+          setTransferPrice(lowestPrice);
+          setTransferPriceCurrency(data.currency || "EUR");
+        } else {
+          setTransferPrice(null);
+        }
+      } catch (error) {
+        console.error("Error fetching transfer price:", error);
+        setTransferPrice(null);
+      } finally {
+        setLoadingTransferPrice(false);
+      }
+    };
+
+    // Debounce the fetch
+    const timer = setTimeout(fetchTransferPrice, 500);
+    return () => clearTimeout(timer);
+  }, [pickup, dropoff]);
 
   // Get available durations for selected city
   const availableDurations = hourlyCity ? (cityDurations[hourlyCity] || []) : [];
@@ -439,6 +483,31 @@ export const Hero = () => {
                       </Select>
                     </div>
                   </div>
+
+                  {/* Price Preview */}
+                  {(pickup && dropoff) && (
+                    <div className="bg-primary/5 border-2 border-primary/20 rounded-xl p-4 text-center">
+                      {loadingTransferPrice ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                          <span className="text-muted-foreground">{t("loadingPrice") || "Loading price..."}</span>
+                        </div>
+                      ) : transferPrice !== null ? (
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">{t("startingFrom") || "Starting from"}</p>
+                          <p className="text-3xl font-bold text-primary">
+                            {transferPriceCurrency === "EUR" ? "€" : transferPriceCurrency === "USD" ? "$" : transferPriceCurrency === "GBP" ? "£" : "₺"}
+                            {transferPrice.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {t("allVehicleTypes") || "View all vehicle options"}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">{t("enterRouteForPrice") || "Enter route to see prices"}</p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Continue Button */}
                   <Button 
