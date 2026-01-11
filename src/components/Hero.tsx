@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
@@ -27,10 +27,23 @@ const generateTimeOptions = () => {
 
 const timeOptions = generateTimeOptions();
 
+// Hourly rental duration options
+const hourlyDurationOptions = [
+  { value: "4", label: "4 hours" },
+  { value: "6", label: "6 hours" },
+  { value: "8", label: "8 hours" },
+  { value: "10", label: "10 hours" },
+  { value: "12", label: "12 hours" },
+];
+
 export const Hero = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   
+  // Tab state
+  const [activeTab, setActiveTab] = useState<"ride" | "hourly">("ride");
+  
+  // Ride form state
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -38,7 +51,14 @@ export const Hero = () => {
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleContinue = () => {
+  // Hourly form state
+  const [hourlyCity, setHourlyCity] = useState("");
+  const [hourlyDate, setHourlyDate] = useState<Date | undefined>(undefined);
+  const [hourlyTime, setHourlyTime] = useState("");
+  const [hourlyDuration, setHourlyDuration] = useState("4");
+  const [hourlyDatePopoverOpen, setHourlyDatePopoverOpen] = useState(false);
+
+  const handleRideContinue = () => {
     const missingFields: string[] = [];
     if (!pickup) missingFields.push(t("pickupPoint") || "Pickup");
     if (!dropoff) missingFields.push(t("dropoffLocation") || "Drop-off");
@@ -61,12 +81,39 @@ export const Hero = () => {
     navigate(`/book?${params.toString()}`);
   };
 
+  const handleHourlyContinue = () => {
+    const missingFields: string[] = [];
+    if (!hourlyCity) missingFields.push(t("city") || "City");
+    if (!hourlyDate) missingFields.push(t("pickupDate") || "Date");
+    if (!hourlyTime) missingFields.push(t("pickupTime") || "Time");
+    
+    if (missingFields.length > 0) {
+      toast.error(`${t("pleaseFilAllFields") || "Please fill in"}: ${missingFields.join(", ")}`);
+      return;
+    }
+
+    setSubmitting(true);
+    
+    const params = new URLSearchParams();
+    params.set("city", hourlyCity);
+    params.set("date", format(hourlyDate!, "yyyy-MM-dd"));
+    params.set("time", hourlyTime);
+    params.set("duration", hourlyDuration);
+    params.set("type", "hourly");
+    
+    navigate(`/book?${params.toString()}`);
+  };
+
   const handlePickupSelected = (value: string, details?: PlaceDetails) => {
     setPickup(details?.displayText || value);
   };
 
   const handleDropoffSelected = (value: string, details?: PlaceDetails) => {
     setDropoff(details?.displayText || value);
+  };
+
+  const handleHourlyCitySelected = (value: string, details?: PlaceDetails) => {
+    setHourlyCity(details?.displayText || value);
   };
   
   return (
@@ -102,102 +149,254 @@ export const Hero = () => {
             </p>
           </div>
 
-          {/* Clean Minimal Booking Form */}
-          <div className="bg-white rounded-2xl p-6 md:p-8 shadow-2xl max-w-2xl mx-auto">
-            <div className="space-y-4">
-              {/* Location Fields */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="relative">
-                  <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupPoint")}</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
-                    <GooglePlacesAutocomplete 
-                      onPlaceSelected={handlePickupSelected} 
-                      placeholder={t("enterPickupPoint") || "Airport, hotel, address..."} 
-                      className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-primary text-foreground placeholder:text-muted-foreground rounded-xl transition-all" 
-                    />
-                  </div>
-                </div>
-                <div className="relative">
-                  <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("dropoffLocation")}</label>
-                  <div className="relative">
-                    <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-accent z-10" />
-                    <GooglePlacesAutocomplete 
-                      onPlaceSelected={handleDropoffSelected} 
-                      placeholder={t("hotelOrAddress") || "Where to?"} 
-                      className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-accent text-foreground placeholder:text-muted-foreground rounded-xl transition-all" 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Date & Time */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="relative">
-                  <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupDate")}</label>
-                  <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        className={cn(
-                          "w-full h-14 justify-start text-left font-normal bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all",
-                          !date && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
-                        {date ? format(date, "dd MMM yyyy") : <span>{t("selectDate")}</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-50" align="start">
-                      <Calendar 
-                        mode="single" 
-                        selected={date} 
-                        onSelect={(selectedDate) => { setDate(selectedDate); setDatePopoverOpen(false); }} 
-                        disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-                        initialFocus 
-                        className="p-3 pointer-events-auto" 
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="relative">
-                  <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupTime")}</label>
-                  <Select value={time} onValueChange={setTime}>
-                    <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
-                      <div className="flex items-center">
-                        <Clock className="mr-2 h-5 w-5 text-primary" />
-                        <SelectValue placeholder={t("selectTime")} />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[300px] z-50">
-                      {timeOptions.map((opt) => (
-                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Continue Button */}
-              <Button 
-                onClick={handleContinue} 
-                size="lg" 
-                variant="accent" 
-                className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl group" 
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    {t("loading") || "Loading..."}
-                  </>
-                ) : (
-                  <>
-                    {t("getPrice") || "Get Price"}
-                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                  </>
+          {/* Booking Form with Tabs */}
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl mx-auto overflow-hidden">
+            {/* Tab Switcher */}
+            <div className="flex border-b border-border">
+              <button
+                onClick={() => setActiveTab("ride")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-4 px-6 font-semibold transition-all relative",
+                  activeTab === "ride"
+                    ? "text-primary bg-primary/5"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
-              </Button>
+              >
+                <Car className="h-5 w-5" />
+                <span>{t("pointToPoint") || "Transfer"}</span>
+                {activeTab === "ride" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("hourly")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-4 px-6 font-semibold transition-all relative",
+                  activeTab === "hourly"
+                    ? "text-primary bg-primary/5"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
+              >
+                <Timer className="h-5 w-5" />
+                <span>{t("perHour") || "Per Hour"}</span>
+                {activeTab === "hourly" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                )}
+              </button>
+            </div>
+
+            {/* Form Content */}
+            <div className="p-6 md:p-8">
+              {activeTab === "ride" ? (
+                /* Ride Form */
+                <div className="space-y-4">
+                  {/* Location Fields */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupPoint")}</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
+                        <GooglePlacesAutocomplete 
+                          onPlaceSelected={handlePickupSelected} 
+                          placeholder={t("enterPickupPoint") || "Airport, hotel, address..."} 
+                          className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-primary text-foreground placeholder:text-muted-foreground rounded-xl transition-all" 
+                        />
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("dropoffLocation")}</label>
+                      <div className="relative">
+                        <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-accent z-10" />
+                        <GooglePlacesAutocomplete 
+                          onPlaceSelected={handleDropoffSelected} 
+                          placeholder={t("hotelOrAddress") || "Where to?"} 
+                          className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-accent text-foreground placeholder:text-muted-foreground rounded-xl transition-all" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Date & Time */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="relative">
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupDate")}</label>
+                      <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            className={cn(
+                              "w-full h-14 justify-start text-left font-normal bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all",
+                              !date && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
+                            {date ? format(date, "dd MMM yyyy") : <span>{t("selectDate")}</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 z-50" align="start">
+                          <Calendar 
+                            mode="single" 
+                            selected={date} 
+                            onSelect={(selectedDate) => { setDate(selectedDate); setDatePopoverOpen(false); }} 
+                            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+                            initialFocus 
+                            className="p-3 pointer-events-auto" 
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="relative">
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupTime")}</label>
+                      <Select value={time} onValueChange={setTime}>
+                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                          <div className="flex items-center">
+                            <Clock className="mr-2 h-5 w-5 text-primary" />
+                            <SelectValue placeholder={t("selectTime")} />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px] z-50">
+                          {timeOptions.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Continue Button */}
+                  <Button 
+                    onClick={handleRideContinue} 
+                    size="lg" 
+                    variant="accent" 
+                    className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl group" 
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        {t("loading") || "Loading..."}
+                      </>
+                    ) : (
+                      <>
+                        {t("getPrice") || "Get Price"}
+                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                /* Hourly Rental Form */
+                <div className="space-y-4">
+                  {/* City & Duration */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("city") || "City"}</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
+                        <GooglePlacesAutocomplete 
+                          onPlaceSelected={handleHourlyCitySelected} 
+                          placeholder={t("selectCity") || "Istanbul, Antalya, Dubai..."} 
+                          className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-primary text-foreground placeholder:text-muted-foreground rounded-xl transition-all" 
+                        />
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("duration") || "Duration"}</label>
+                      <Select value={hourlyDuration} onValueChange={setHourlyDuration}>
+                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                          <div className="flex items-center">
+                            <Timer className="mr-2 h-5 w-5 text-primary" />
+                            <SelectValue />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="z-50">
+                          {hourlyDurationOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label.replace("hours", t("hours") || "hours")}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Date & Time */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="relative">
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupDate")}</label>
+                      <Popover open={hourlyDatePopoverOpen} onOpenChange={setHourlyDatePopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            className={cn(
+                              "w-full h-14 justify-start text-left font-normal bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all",
+                              !hourlyDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
+                            {hourlyDate ? format(hourlyDate, "dd MMM yyyy") : <span>{t("selectDate")}</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 z-50" align="start">
+                          <Calendar 
+                            mode="single" 
+                            selected={hourlyDate} 
+                            onSelect={(selectedDate) => { setHourlyDate(selectedDate); setHourlyDatePopoverOpen(false); }} 
+                            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+                            initialFocus 
+                            className="p-3 pointer-events-auto" 
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="relative">
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupTime")}</label>
+                      <Select value={hourlyTime} onValueChange={setHourlyTime}>
+                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                          <div className="flex items-center">
+                            <Clock className="mr-2 h-5 w-5 text-primary" />
+                            <SelectValue placeholder={t("selectTime")} />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px] z-50">
+                          {timeOptions.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Info Box */}
+                  <div className="bg-accent/10 rounded-xl p-4 text-left">
+                    <p className="text-sm text-accent font-medium flex items-center gap-2">
+                      <Timer className="h-4 w-4" />
+                      {t("hourlyRentalInfo") || "Driver at your disposal for the selected duration. Visit multiple locations!"}
+                    </p>
+                  </div>
+
+                  {/* Continue Button */}
+                  <Button 
+                    onClick={handleHourlyContinue} 
+                    size="lg" 
+                    variant="accent" 
+                    className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl group" 
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        {t("loading") || "Loading..."}
+                      </>
+                    ) : (
+                      <>
+                        {t("getHourlyPrice") || "Get Hourly Price"}
+                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
