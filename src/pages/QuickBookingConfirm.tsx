@@ -15,6 +15,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { getCurrencySymbol } from "@/lib/currency";
 import { VEHICLE_TYPE_MAP } from "@/lib/vehicleTypes";
 import { VehicleSelectionCard, VehicleBadgeType } from "@/components/VehicleSelectionCard";
+import { CompactRouteMap } from "@/components/ui/compact-route-map";
 
 interface BookingRequest {
   id: string;
@@ -936,6 +937,13 @@ export default function QuickBookingConfirm() {
               {t("qbReviewAndConfirm")}
             </p>
           </div>
+
+          {/* Route Map */}
+          <CompactRouteMap 
+            pickup={booking.pickup} 
+            dropoff={booking.dropoff}
+            className="mb-4 sm:mb-6"
+          />
 
           {/* Transfer Details - Mobile Optimized */}
           <div className="bg-muted/50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 space-y-2 sm:space-y-3">

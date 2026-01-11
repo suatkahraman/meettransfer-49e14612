@@ -15,6 +15,7 @@ import { z } from "zod";
 import { VehicleSelectionCard } from "@/components/VehicleSelectionCard";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CompactRouteMap } from "@/components/ui/compact-route-map";
 
 // Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
 const passwordSchema = z.string()
@@ -541,6 +542,15 @@ export default function QuickBookingCustomerInfo() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Route Map */}
+          {reservationData && (
+            <CompactRouteMap 
+              pickup={reservationData.pickup} 
+              dropoff={reservationData.dropoff}
+              className="mb-4"
+            />
+          )}
+
           {/* Reservation Summary */}
           {reservationData && (
             <div className="bg-muted/50 rounded-lg p-4 mb-6 space-y-3">
