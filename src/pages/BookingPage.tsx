@@ -672,12 +672,38 @@ const BookingPage = () => {
   // Countdown state for loading animation
   const [countdown, setCountdown] = useState(5);
   const [progressWidth, setProgressWidth] = useState(100);
+  const [tipIndex, setTipIndex] = useState(0);
+
+  // Loading tips
+  const loadingTips = {
+    TR: [
+      "💡 VIP araçlarımız profesyonel şoförler tarafından kullanılmaktadır",
+      "✈️ Uçuş gecikmelerini otomatik olarak takip ediyoruz",
+      "🎒 Tüm araçlarımızda ücretsiz bagaj taşıma hizmeti",
+      "📱 7/24 WhatsApp destek hattımız aktif",
+      "⭐ Google üzerinde 5.0 puan ortalamamız var",
+      "🚗 Mercedes Vito ve Sprinter araç filomuz sizin için hazır",
+      "💳 Nakit veya kredi kartı ile ödeme yapabilirsiniz",
+      "👶 Ücretsiz bebek koltuğu hizmeti sunuyoruz",
+    ],
+    EN: [
+      "💡 Our VIP vehicles are operated by professional drivers",
+      "✈️ We automatically track flight delays",
+      "🎒 Free luggage service in all our vehicles",
+      "📱 24/7 WhatsApp support line is active",
+      "⭐ We have a 5.0 rating average on Google",
+      "🚗 Our Mercedes Vito and Sprinter fleet is ready for you",
+      "💳 You can pay by cash or credit card",
+      "👶 We offer free baby seat service",
+    ]
+  };
 
   // Countdown timer effect
   useEffect(() => {
     if (!isPricesLoading) {
       setCountdown(5);
       setProgressWidth(100);
+      setTipIndex(0);
       return;
     }
 
@@ -695,11 +721,19 @@ const BookingPage = () => {
       });
     }, 1000);
 
+    // Tip rotation
+    const tips = language === 'TR' ? loadingTips.TR : loadingTips.EN;
+    setTipIndex(Math.floor(Math.random() * tips.length));
+    const tipInterval = setInterval(() => {
+      setTipIndex(prev => (prev + 1) % tips.length);
+    }, 2000);
+
     return () => {
       clearInterval(progressInterval);
       clearInterval(countdownInterval);
+      clearInterval(tipInterval);
     };
-  }, [isPricesLoading]);
+  }, [isPricesLoading, language]);
 
   // Professional Loading Animation Component
   if (isPricesLoading) {
@@ -771,6 +805,19 @@ const BookingPage = () => {
               </div>
             </div>
             
+            {/* Random Tips */}
+            <div className="mb-6 px-4">
+              <div 
+                className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-xl p-4 border border-primary/20 shadow-sm"
+                key={tipIndex}
+                style={{ animation: 'tipFadeIn 0.5s ease-out' }}
+              >
+                <p className="text-sm font-medium text-foreground">
+                  {(language === 'TR' ? loadingTips.TR : loadingTips.EN)[tipIndex]}
+                </p>
+              </div>
+            </div>
+            
             {/* Progress dots */}
             <div className="flex items-center justify-center gap-2 mb-6">
               <div className="w-3 h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite]" />
@@ -809,6 +856,16 @@ const BookingPage = () => {
           @keyframes shimmer {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
+          }
+          @keyframes tipFadeIn {
+            0% { 
+              opacity: 0; 
+              transform: translateY(10px) scale(0.98);
+            }
+            100% { 
+              opacity: 1; 
+              transform: translateY(0) scale(1);
+            }
           }
         `}</style>
       </WebsiteLayout>
