@@ -670,7 +670,7 @@ const BookingPage = () => {
   };
 
   // Countdown state for loading animation
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(8);
   const [progressWidth, setProgressWidth] = useState(100);
   const [tipIndex, setTipIndex] = useState(0);
 
@@ -710,7 +710,7 @@ const BookingPage = () => {
     // Start progress animation
     setProgressWidth(100);
     const progressInterval = setInterval(() => {
-      setProgressWidth(prev => Math.max(0, prev - 2)); // Decrease by 2% every 100ms (5 seconds total)
+      setProgressWidth(prev => Math.max(0, prev - 1.25)); // Decrease by 1.25% every 100ms (8 seconds total)
     }, 100);
 
     // Countdown timer
