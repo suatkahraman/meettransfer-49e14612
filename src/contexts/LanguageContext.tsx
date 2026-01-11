@@ -143,7 +143,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Get Best Price Now",
-    heroSubtitle: "✈️ Round-Trip Transfers – 30% OFF! Book your Arrival & Return Airport Transfer Together on Reservations forms and Save 30% instantly 🎁 Use Promo Code on Return: Meet40Return. Best Airport Transfer Company in All Major Airport in TURKİYE - DUBAI - CYPRUS",
+    heroSubtitle: "✈️ 30% OFF Round-Trip Transfers! 🎁 Code: Meet40Return | Turkey • Dubai • Cyprus",
     pointToPoint: "Transfer",
     perHour: "Per Hour",
     bookYourTransfer: "Book Your Transfer",
@@ -1631,7 +1631,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Jetzt besten Preis erhalten",
-    heroSubtitle: "✈️ Hin- und Rücktransfers – 30% RABATT! Buchen Sie Ihre Ankunft & Rückreise Flughafentransfer zusammen im Reservierungsformular und sparen Sie sofort 30% 🎁 Promo-Code für Rückreise: Meet40Return. Bestes Flughafentransfer-Unternehmen an allen großen Flughäfen in TÜRKİYE - DUBAI - ZYPERN",
+    heroSubtitle: "✈️ 30% RABATT auf Hin- und Rücktransfers! 🎁 Code: Meet40Return | Türkei • Dubai • Zypern",
     pointToPoint: "Transfer",
     perHour: "Pro Stunde",
     bookYourTransfer: "Transfer buchen",
@@ -3153,7 +3153,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Obtenez le Meilleur Prix Maintenant",
-    heroSubtitle: "✈️ Transferts Aller-Retour – 30% DE RÉDUCTION! Réservez votre Transfert Aéroport Aller & Retour ensemble sur les formulaires de réservation et économisez 30% instantanément 🎁 Code Promo pour le Retour: Meet40Return. Meilleure Société de Transfert Aéroport dans tous les Grands Aéroports de TURKİYE - DUBAI - CHYPRE",
+    heroSubtitle: "✈️ 30% DE RÉDUCTION sur les transferts aller-retour! 🎁 Code: Meet40Return | Turquie • Dubai • Chypre",
     pointToPoint: "Transfert",
     perHour: "À l'heure",
     bookYourTransfer: "Réserver votre transfert",
@@ -4285,7 +4285,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Получите лучшую цену сейчас",
-    heroSubtitle: "✈️ Трансферы Туда-Обратно – СКИДКА 30%! Забронируйте трансфер из/в аэропорт вместе в форме бронирования и сэкономьте 30% мгновенно 🎁 Промокод для обратного трансфера: Meet40Return. Лучшая компания по трансферу во всех крупных аэропортах ТУРЦİИ - ДУБАЙ - КИПР",
+    heroSubtitle: "✈️ СКИДКА 30% на трансферы туда-обратно! 🎁 Код: Meet40Return | Турция • Дубай • Кипр",
     pointToPoint: "Трансфер",
     perHour: "Почасовая",
     bookYourTransfer: "Забронировать трансфер",
@@ -5360,7 +5360,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Ottieni il Miglior Prezzo Ora",
-    heroSubtitle: "✈️ Trasferimenti Andata e Ritorno – 30% DI SCONTO! Prenota il tuo Trasferimento Aeroportuale Andata & Ritorno insieme nei moduli di prenotazione e risparmia subito il 30% 🎁 Codice Promo per il Ritorno: Meet40Return. Migliore Compagnia di Trasferimento in tutti i Principali Aeroporti di TURCHİA - DUBAI - CIPRO",
+    heroSubtitle: "✈️ 30% DI SCONTO sui trasferimenti andata e ritorno! 🎁 Codice: Meet40Return | Turchia • Dubai • Cipro",
     pointToPoint: "Trasferimento",
     perHour: "All'ora",
     bookYourTransfer: "Prenota il tuo trasferimento",
@@ -6488,7 +6488,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Obtén el Mejor Precio Ahora",
-    heroSubtitle: "✈️ Traslados de Ida y Vuelta – ¡30% DE DESCUENTO! Reserva tu Traslado Aeropuerto de Llegada y Regreso juntos en los formularios de reserva y ahorra 30% al instante 🎁 Código Promocional para Regreso: Meet40Return. Mejor Compañía de Traslados en Todos los Principales Aeropuertos de TURQUİA - DUBAI - CHIPRE",
+    heroSubtitle: "✈️ ¡30% DE DESCUENTO en traslados ida y vuelta! 🎁 Código: Meet40Return | Turquía • Dubai • Chipre",
     pointToPoint: "Traslado",
     perHour: "Por hora",
     bookYourTransfer: "Reserva tu traslado",
@@ -7616,7 +7616,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "احصل على أفضل سعر الآن",
-    heroSubtitle: "✈️ نقل ذهاب وإياب – خصم 30%! احجز نقل المطار للوصول والعودة معًا في نماذج الحجز ووفر 30% فورًا 🎁 رمز العرض للعودة: Meet40Return. أفضل شركة نقل في جميع المطارات الرئيسية في تُركِيَا - دبي - قبرص",
+    heroSubtitle: "✈️ خصم 30% على النقل ذهاب وإياب! 🎁 الرمز: Meet40Return | تركيا • دبي • قبرص",
     pointToPoint: "نقل",
     perHour: "بالساعة",
     bookYourTransfer: "احجز نقلك",
@@ -9912,7 +9912,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Отримайте найкращу ціну зараз",
-    heroSubtitle: "✈️ Трансфери туди-назад – ЗНИЖКА 30%! Забронюйте трансфер прибуття та повернення разом і заощадьте 30% миттєво 🎁 Промокод на повернення: Meet40Return. Найкраща компанія з трансферу аеропортів у ТУРЕЧЧИНІ - ДУБАЇ - КІПРІ",
+    heroSubtitle: "✈️ ЗНИЖКА 30% на трансфери туди-назад! 🎁 Код: Meet40Return | Туреччина • Дубай • Кіпр",
     pointToPoint: "Трансфер",
     perHour: "Погодинно",
     bookYourTransfer: "Забронювати трансфер",
@@ -10994,7 +10994,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "今すぐ最高の価格を取得",
-    heroSubtitle: "✈️ 往復送迎 – 30%オフ！到着と出発の空港送迎を一緒に予約すると30%割引 🎁 復路プロモコード: Meet40Return。トルコ・ドバイ・キプロスの主要空港で最高の空港送迎サービス",
+    heroSubtitle: "✈️ 往復送迎30%オフ！🎁 コード: Meet40Return | トルコ • ドバイ • キプロス",
     pointToPoint: "送迎",
     perHour: "時間制",
     bookYourTransfer: "送迎を予約",
