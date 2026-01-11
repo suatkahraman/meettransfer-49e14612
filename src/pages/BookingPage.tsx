@@ -716,70 +716,101 @@ const BookingPage = () => {
                       const isDisabled = isCapacityInsufficient;
                       
                       return (
-                        <button
+                        <div
                           key={vehicleOption.value}
-                          type="button"
-                          disabled={isDisabled}
-                          onClick={() => setVehicleType(vehicleOption.value)}
                           className={cn(
-                            "relative overflow-hidden rounded-xl p-4 transition-all duration-300 text-left border-2",
+                            "relative overflow-hidden rounded-xl transition-all duration-300 border-2",
                             "hover:shadow-lg",
                             isSelected
                               ? "border-primary bg-primary/5 shadow-md"
                               : "border-border hover:border-primary/50",
-                            isDisabled && "opacity-50 cursor-not-allowed"
+                            isDisabled && "opacity-50"
                           )}
                         >
                           {isSelected && (
-                            <div className="absolute top-3 right-3">
+                            <div className="absolute top-3 right-3 z-10">
                               <CheckCircle className="h-5 w-5 text-primary" />
                             </div>
                           )}
                           
                           {isDisabled && (
-                            <div className="absolute top-3 left-3 bg-red-500/90 text-white text-xs px-2 py-1 rounded">
+                            <div className="absolute top-3 left-3 z-10 bg-red-500/90 text-white text-xs px-2 py-1 rounded">
                               Max {vehicleCapacity}
                             </div>
                           )}
                           
-                          <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-muted">
-                            <img
-                              src={v.images[0]?.src}
-                              alt={v.label}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
+                          {/* Vehicle Image Carousel */}
+                          <div className="relative">
+                            <Carousel className="w-full" opts={{ loop: true }}>
+                              <CarouselContent>
+                                {v.images.slice(0, 6).map((image, index) => (
+                                  <CarouselItem key={index}>
+                                    <div className="aspect-video bg-muted">
+                                      <img
+                                        src={image.src}
+                                        alt={image.alt || v.label}
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                      />
+                                    </div>
+                                  </CarouselItem>
+                                ))}
+                              </CarouselContent>
+                              {v.images.length > 1 && (
+                                <>
+                                  <CarouselPrevious className="left-1 h-7 w-7 bg-white/80 hover:bg-white" />
+                                  <CarouselNext className="right-1 h-7 w-7 bg-white/80 hover:bg-white" />
+                                </>
+                              )}
+                            </Carousel>
+                            {/* Image counter */}
+                            {v.images.length > 1 && (
+                              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded">
+                                {Math.min(v.images.length, 6)}
+                              </div>
+                            )}
                           </div>
                           
-                          <h3 className="font-semibold text-foreground mb-2">{v.label}</h3>
-                          
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                            <span className={cn(
-                              "flex items-center gap-1",
-                              isDisabled && "text-red-500"
-                            )}>
-                              <Users className="h-4 w-4" />
-                              {v.passengers}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Briefcase className="h-4 w-4" />
-                              {v.luggage}
-                            </span>
-                          </div>
-                          
-                          {isPricesLoading ? (
-                            <div className="h-6 w-20 bg-muted animate-pulse rounded" />
-                          ) : price ? (
-                            <p className="text-lg font-bold text-primary">
-                              {price} {preferredCurrency}
-                              {isHourlyBooking && <span className="text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
-                            </p>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">
-                              {t("priceOnRequest") || "Price on request"}
-                            </p>
-                          )}
-                        </button>
+                          {/* Clickable content area */}
+                          <button
+                            type="button"
+                            disabled={isDisabled}
+                            onClick={() => setVehicleType(vehicleOption.value)}
+                            className={cn(
+                              "w-full p-4 text-left",
+                              isDisabled && "cursor-not-allowed"
+                            )}
+                          >
+                            <h3 className="font-semibold text-foreground mb-2">{v.label}</h3>
+                            
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                              <span className={cn(
+                                "flex items-center gap-1",
+                                isDisabled && "text-red-500"
+                              )}>
+                                <Users className="h-4 w-4" />
+                                {v.passengers}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Briefcase className="h-4 w-4" />
+                                {v.luggage}
+                              </span>
+                            </div>
+                            
+                            {isPricesLoading ? (
+                              <div className="h-6 w-20 bg-muted animate-pulse rounded" />
+                            ) : price ? (
+                              <p className="text-lg font-bold text-primary">
+                                {price} {preferredCurrency}
+                                {isHourlyBooking && <span className="text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
+                              </p>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">
+                                {t("priceOnRequest") || "Price on request"}
+                              </p>
+                            )}
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
