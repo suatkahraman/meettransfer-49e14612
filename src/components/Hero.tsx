@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
+import { GooglePlacesAutocomplete, PlaceDetails, GooglePlacesAutocompleteProps } from "@/components/ui/google-places-autocomplete";
 import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import CityMarquee from "@/components/website/CityMarquee";
@@ -219,29 +219,54 @@ export const Hero = () => {
                 /* Ride Form */
                 <div className="space-y-4">
                   {/* Location Fields */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="relative">
-                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupPoint")}</label>
+                  <div className="relative">
+                    <div className="grid md:grid-cols-2 gap-4">
                       <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
-                        <GooglePlacesAutocomplete 
-                          onPlaceSelected={handlePickupSelected} 
-                          placeholder={t("enterPickupPoint") || "Airport, hotel, address..."} 
-                          className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-primary text-foreground placeholder:text-muted-foreground rounded-xl transition-all" 
-                        />
+                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupPoint")}</label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
+                          <GooglePlacesAutocomplete 
+                            onPlaceSelected={handlePickupSelected} 
+                            placeholder={t("enterPickupPoint") || "Airport, hotel, address..."} 
+                            className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-primary text-foreground placeholder:text-muted-foreground rounded-xl transition-all"
+                            value={pickup}
+                          />
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("dropoffLocation")}</label>
+                        <div className="relative">
+                          <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-accent z-10" />
+                          <GooglePlacesAutocomplete 
+                            onPlaceSelected={handleDropoffSelected} 
+                            placeholder={t("hotelOrAddress") || "Where to?"} 
+                            className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-accent text-foreground placeholder:text-muted-foreground rounded-xl transition-all"
+                            value={dropoff}
+                          />
+                        </div>
                       </div>
                     </div>
-                    <div className="relative">
-                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("dropoffLocation")}</label>
-                      <div className="relative">
-                        <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-accent z-10" />
-                        <GooglePlacesAutocomplete 
-                          onPlaceSelected={handleDropoffSelected} 
-                          placeholder={t("hotelOrAddress") || "Where to?"} 
-                          className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-accent text-foreground placeholder:text-muted-foreground rounded-xl transition-all" 
-                        />
-                      </div>
-                    </div>
+                    {/* Swap Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const temp = pickup;
+                        setPickup(dropoff);
+                        setDropoff(temp);
+                      }}
+                      disabled={!pickup && !dropoff}
+                      className={cn(
+                        "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20",
+                        "hidden md:flex items-center justify-center",
+                        "w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-lg",
+                        "hover:bg-primary/90 hover:scale-110 active:scale-95",
+                        "transition-all duration-200",
+                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                      )}
+                      title={t("swapLocations") || "Swap locations"}
+                    >
+                      <ArrowUpDown className="h-4 w-4" />
+                    </button>
                   </div>
 
                   {/* Date & Time */}
