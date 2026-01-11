@@ -73,7 +73,7 @@ export const Hero = () => {
   const [hourlyTime, setHourlyTime] = useState("");
   const [hourlyDuration, setHourlyDuration] = useState("");
   const [hourlyPassengers, setHourlyPassengers] = useState("2");
-  const [hourlyVehicleType, setHourlyVehicleType] = useState("vito");
+  const [hourlyVehicleType, setHourlyVehicleType] = useState("mercedes-vito");
   const [hourlyDatePopoverOpen, setHourlyDatePopoverOpen] = useState(false);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [cityDurations, setCityDurations] = useState<Record<string, string[]>>({});
@@ -907,7 +907,17 @@ export const Hero = () => {
                       )}
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                         {VEHICLE_TYPES.filter(v => v.value !== 'minibus').map((vehicle) => {
-                          const vehiclePrice = allHourlyPrices.find(v => v.vehicleType === vehicle.value);
+                          // Map DB vehicle types to our frontend types
+                          const dbToFrontendMap: Record<string, string> = {
+                            'vito': 'mercedes-vito',
+                            'vito_vip': 'vip-mercedes',
+                            'maybach': 'maybach-minibus',
+                            'sprinter': 'minibus'
+                          };
+                          const vehiclePrice = allHourlyPrices.find(v => 
+                            v.vehicleType === vehicle.value || 
+                            dbToFrontendMap[v.vehicleType] === vehicle.value
+                          );
                           const isSelected = hourlyVehicleType === vehicle.value;
                           const passengerCount = parseInt(hourlyPassengers);
                           const isDisabled = vehicle.passengers < passengerCount;
