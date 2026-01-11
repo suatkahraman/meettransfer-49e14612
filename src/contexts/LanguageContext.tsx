@@ -166,6 +166,8 @@ const translations: Record<Language, Record<string, string>> = {
     emailOptional: "Email (Optional)",
     emailPlaceholder: "email@example.com",
     emailPriceNotification: "Your price quote will also be sent to you via email.",
+    emailInfoDescription: "Your reservation details will be sent to your email. You can complete your reservation later using the link provided.",
+    freeCancellation24h: "Free cancellation 24 hours before",
     
     // Booking Process
     howBookingWorks: "How Our Booking Process Works",
@@ -1652,6 +1654,8 @@ const translations: Record<Language, Record<string, string>> = {
     emailOptional: "E-Mail (Optional)",
     emailPlaceholder: "email@beispiel.de",
     emailPriceNotification: "Ihr Preisangebot wird Ihnen auch per E-Mail zugesandt.",
+    emailInfoDescription: "Ihre Reservierungsdetails werden an Ihre E-Mail gesendet. Sie können Ihre Reservierung später über den bereitgestellten Link abschließen.",
+    freeCancellation24h: "Kostenlose Stornierung 24 Stunden vorher",
     
     // Booking Process
     howBookingWorks: "So funktioniert unser Buchungsprozess",
@@ -3172,6 +3176,8 @@ const translations: Record<Language, Record<string, string>> = {
     emailOptional: "Email (Optionnel)",
     emailPlaceholder: "email@exemple.fr",
     emailPriceNotification: "Votre devis vous sera également envoyé par email.",
+    emailInfoDescription: "Les détails de votre réservation seront envoyés à votre email. Vous pouvez compléter votre réservation plus tard en utilisant le lien fourni.",
+    freeCancellation24h: "Annulation gratuite 24 heures avant",
     
     // Booking Process
     howBookingWorks: "Comment fonctionne notre processus de réservation",
@@ -4302,6 +4308,8 @@ const translations: Record<Language, Record<string, string>> = {
     emailOptional: "Email (Необязательно)",
     emailPlaceholder: "email@example.com",
     emailPriceNotification: "Ваше ценовое предложение также будет отправлено на вашу электронную почту.",
+    emailInfoDescription: "Детали вашего бронирования будут отправлены на вашу почту. Вы можете завершить бронирование позже по предоставленной ссылке.",
+    freeCancellation24h: "Бесплатная отмена за 24 часа до",
     
     // Booking Process
     howBookingWorks: "Как работает наш процесс бронирования",
@@ -5375,6 +5383,8 @@ const translations: Record<Language, Record<string, string>> = {
     emailOptional: "Email (Opzionale)",
     emailPlaceholder: "email@esempio.it",
     emailPriceNotification: "Il tuo preventivo ti sarà inviato anche via email.",
+    emailInfoDescription: "I dettagli della tua prenotazione saranno inviati alla tua email. Puoi completare la prenotazione in un secondo momento utilizzando il link fornito.",
+    freeCancellation24h: "Cancellazione gratuita 24 ore prima",
     
     // Booking Process
     howBookingWorks: "Come funziona il nostro processo di prenotazione",
@@ -6501,6 +6511,8 @@ const translations: Record<Language, Record<string, string>> = {
     emailOptional: "Correo electrónico (Opcional)",
     emailPlaceholder: "email@ejemplo.es",
     emailPriceNotification: "Su cotización también le será enviada por correo electrónico.",
+    emailInfoDescription: "Los detalles de su reserva se enviarán a su correo electrónico. Puede completar su reserva más tarde utilizando el enlace proporcionado.",
+    freeCancellation24h: "Cancelación gratuita 24 horas antes",
     
     // Booking Process
     howBookingWorks: "Cómo funciona nuestro proceso de reserva",
@@ -7627,6 +7639,8 @@ const translations: Record<Language, Record<string, string>> = {
     emailOptional: "البريد الإلكتروني (اختياري)",
     emailPlaceholder: "email@example.com",
     emailPriceNotification: "سيتم إرسال عرض السعر الخاص بك أيضًا عبر البريد الإلكتروني.",
+    emailInfoDescription: "سيتم إرسال تفاصيل حجزك إلى بريدك الإلكتروني. يمكنك إكمال حجزك لاحقًا باستخدام الرابط المقدم.",
+    freeCancellation24h: "إلغاء مجاني قبل 24 ساعة",
     
     // Booking Process
     howBookingWorks: "كيف تعمل عملية الحجز",
@@ -8700,6 +8714,8 @@ const translations: Record<Language, Record<string, string>> = {
     emailOptional: "E-posta (Opsiyonel)",
     emailPlaceholder: "email@ornek.com",
     emailPriceNotification: "Fiyat teklifiniz size e-posta ile de gönderilecektir.",
+    emailInfoDescription: "Rezervasyon detaylarınız e-postanıza gönderilecektir. İlerleyen zamanlarda verilen link ile rezervasyonunuzu tamamlayabilirsiniz.",
+    freeCancellation24h: "24 saat önce ücretsiz iptal",
     
     // Booking Process
     howBookingWorks: "Rezervasyon Sürecimiz Nasıl İşliyor",
@@ -9919,6 +9935,8 @@ const translations: Record<Language, Record<string, string>> = {
     emailOptional: "Електронна пошта (Необов'язково)",
     emailPlaceholder: "email@example.com",
     emailPriceNotification: "Ваша цінова пропозиція також буде надіслана на вашу електронну пошту.",
+    emailInfoDescription: "Деталі вашого бронювання будуть надіслані на вашу пошту. Ви можете завершити бронювання пізніше за наданим посиланням.",
+    freeCancellation24h: "Безкоштовне скасування за 24 години до",
     
     // Booking Process
     howBookingWorks: "Як працює наш процес бронювання",
@@ -10999,6 +11017,8 @@ const translations: Record<Language, Record<string, string>> = {
     emailOptional: "メールアドレス（任意）",
     emailPlaceholder: "email@example.com",
     emailPriceNotification: "お見積もりはメールでもお送りします。",
+    emailInfoDescription: "予約詳細がメールで送信されます。提供されたリンクを使用して、後で予約を完了できます。",
+    freeCancellation24h: "24時間前まで無料キャンセル",
     
     // Booking Process
     howBookingWorks: "予約の流れ",

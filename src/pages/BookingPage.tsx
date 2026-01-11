@@ -1100,7 +1100,7 @@ const BookingPage = () => {
 
                   <div>
                     <Label className="text-sm text-muted-foreground mb-2 block">
-                      {t("phoneNumber") || "Phone"} <span className="text-red-500">*</span>
+                      {t("phoneNumber") || "Phone"} <span className="text-muted-foreground text-xs">({t("optional")})</span>
                     </Label>
                     <PhoneInput
                       value={customerPhone}
@@ -1282,6 +1282,9 @@ const BookingPage = () => {
                             </p>
                             <p className="text-3xl font-bold text-primary">
                               {selectedPrice} {preferredCurrency}
+                            </p>
+                            <p className="text-xs text-green-600 mt-2 flex items-center justify-center gap-1">
+                              ✓ {t("freeCancellation24h") || "Free cancellation 24 hours before"}
                             </p>
                           </div>
                         ) : (

@@ -157,6 +157,7 @@ const emailTexts: Record<string, {
   freeWait: string;
   proDrivers: string;
   payAtArrival: string;
+  freeCancellation: string;
   roundTripDiscount: string;
   bookReturn: string;
   offReturn: string;
@@ -180,6 +181,7 @@ const emailTexts: Record<string, {
     freeWait: "60 Min Free Wait",
     proDrivers: "Pro Drivers",
     payAtArrival: "Pay at Arrival",
+    freeCancellation: "Free Cancellation 24h Before",
     roundTripDiscount: "Round-Trip Discount!",
     bookReturn: "Book a return transfer and get",
     offReturn: "OFF",
@@ -203,6 +205,7 @@ const emailTexts: Record<string, {
     freeWait: "60 Dk Ücretsiz Bekleme",
     proDrivers: "Profesyonel Sürücüler",
     payAtArrival: "Varışta Ödeme",
+    freeCancellation: "24 Saat Önce Ücretsiz İptal",
     roundTripDiscount: "Gidiş-Dönüş İndirimi!",
     bookReturn: "Dönüş transferi rezerve edin ve",
     offReturn: "indirim kazanın",
@@ -226,6 +229,7 @@ const emailTexts: Record<string, {
     freeWait: "60 Min Gratis Wartezeit",
     proDrivers: "Profi-Fahrer",
     payAtArrival: "Zahlung bei Ankunft",
+    freeCancellation: "Kostenlose Stornierung 24h vorher",
     roundTripDiscount: "Hin- und Rückfahrt Rabatt!",
     bookReturn: "Buchen Sie eine Rückfahrt und erhalten Sie",
     offReturn: "Rabatt",
@@ -249,6 +253,7 @@ const emailTexts: Record<string, {
     freeWait: "60 мин бесплатного ожидания",
     proDrivers: "Профи-водители",
     payAtArrival: "Оплата по прибытии",
+    freeCancellation: "Бесплатная отмена за 24ч",
     roundTripDiscount: "Скидка на туда-обратно!",
     bookReturn: "Забронируйте обратный трансфер и получите",
     offReturn: "скидку",
@@ -272,6 +277,7 @@ const emailTexts: Record<string, {
     freeWait: "60 دقيقة انتظار مجاني",
     proDrivers: "سائقون محترفون",
     payAtArrival: "الدفع عند الوصول",
+    freeCancellation: "إلغاء مجاني قبل 24 ساعة",
     roundTripDiscount: "خصم ذهاب وعودة!",
     bookReturn: "احجز رحلة العودة واحصل على",
     offReturn: "خصم",
@@ -479,21 +485,25 @@ ${getEmailHeader(`💰 ${t.yourPriceQuote}`, undefined, lang)}
         <td style="padding: 16px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td width="25%" style="text-align: center; padding: 8px;">
+              <td width="20%" style="text-align: center; padding: 8px;">
                 <p style="margin: 0; font-size: 20px;">✈️</p>
                 <p style="margin: 4px 0 0; color: #2d3748; font-size: 11px;">${t.flightTracking}</p>
               </td>
-              <td width="25%" style="text-align: center; padding: 8px;">
+              <td width="20%" style="text-align: center; padding: 8px;">
                 <p style="margin: 0; font-size: 20px;">⏰</p>
                 <p style="margin: 4px 0 0; color: #2d3748; font-size: 11px;">${t.freeWait}</p>
               </td>
-              <td width="25%" style="text-align: center; padding: 8px;">
+              <td width="20%" style="text-align: center; padding: 8px;">
                 <p style="margin: 0; font-size: 20px;">👨‍✈️</p>
                 <p style="margin: 4px 0 0; color: #2d3748; font-size: 11px;">${t.proDrivers}</p>
               </td>
-              <td width="25%" style="text-align: center; padding: 8px;">
+              <td width="20%" style="text-align: center; padding: 8px;">
                 <p style="margin: 0; font-size: 20px;">💳</p>
                 <p style="margin: 4px 0 0; color: #2d3748; font-size: 11px;">${t.payAtArrival}</p>
+              </td>
+              <td width="20%" style="text-align: center; padding: 8px;">
+                <p style="margin: 0; font-size: 20px;">✅</p>
+                <p style="margin: 4px 0 0; color: #2d3748; font-size: 11px;">${t.freeCancellation}</p>
               </td>
             </tr>
           </table>
