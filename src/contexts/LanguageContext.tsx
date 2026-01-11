@@ -38,6 +38,19 @@ const LANGUAGE_TO_PREFIX: Record<Language, string> = {
 
 const translations: Record<Language, Record<string, string>> = {
   EN: {
+    // AI Assistant Promo
+    aiPromoBadge: "AI-Powered Booking",
+    aiPromoTitle: "Book Your Transfer by Simply Chatting",
+    aiPromoDesc: "Our intelligent AI assistant understands your needs and creates your reservation instantly. Just tell us where and when you want to go – we'll handle the rest!",
+    aiPromoFeature1: "24/7 Instant Response",
+    aiPromoFeature2: "Speaks Your Language",
+    aiPromoFeature3: "Smart Recommendations",
+    aiPromoFeature4: "Automatic Booking",
+    aiPromoButton: "Start Chat Now",
+    aiPromoHint: "Try: \"Tomorrow 3pm from Istanbul Airport to Taksim for 4 people\"",
+    aiPromoImageAlt: "AI Chat Assistant for booking transfers",
+    aiPromoOnline: "AI Online",
+    
     // Best Price Animation
     preparingBestPrice: "Preparing Your Best Price",
     preparingBestPriceDesc: "We're calculating the best possible price for you...",
@@ -1526,6 +1539,19 @@ const translations: Record<Language, Record<string, string>> = {
     blogCappadociaMapP1: "Cappadocia region covers Nevşehir, Ürgüp, Göreme, Uçhisar and Avanos. We offer transfer service to all these areas from both airports.",
   },
   DE: {
+    // AI Assistant Promo
+    aiPromoBadge: "KI-gestützte Buchung",
+    aiPromoTitle: "Buchen Sie Ihren Transfer einfach per Chat",
+    aiPromoDesc: "Unser intelligenter KI-Assistent versteht Ihre Bedürfnisse und erstellt Ihre Reservierung sofort. Sagen Sie uns einfach, wohin und wann Sie möchten – wir erledigen den Rest!",
+    aiPromoFeature1: "24/7 Sofortige Antwort",
+    aiPromoFeature2: "Spricht Ihre Sprache",
+    aiPromoFeature3: "Intelligente Empfehlungen",
+    aiPromoFeature4: "Automatische Buchung",
+    aiPromoButton: "Chat jetzt starten",
+    aiPromoHint: "Versuchen Sie: \"Morgen 15:00 vom Istanbul Flughafen zum Taksim für 4 Personen\"",
+    aiPromoImageAlt: "KI-Chat-Assistent für Transfer-Buchungen",
+    aiPromoOnline: "KI Online",
+    
     // Best Price Animation
     preparingBestPrice: "Wir bereiten Ihren besten Preis vor",
     preparingBestPriceDesc: "Wir berechnen den bestmöglichen Preis für Sie...",
@@ -3047,6 +3073,19 @@ const translations: Record<Language, Record<string, string>> = {
     blogCappadociaMapP1: "Die Region Kappadokien umfasst Nevşehir, Ürgüp, Göreme, Uçhisar und Avanos. Wir bieten Transferservice in alle diese Gebiete von beiden Flughäfen.",
   },
   FR: {
+    // AI Assistant Promo
+    aiPromoBadge: "Réservation par IA",
+    aiPromoTitle: "Réservez votre transfert en discutant simplement",
+    aiPromoDesc: "Notre assistant IA intelligent comprend vos besoins et crée votre réservation instantanément. Dites-nous simplement où et quand vous voulez aller – nous nous occupons du reste !",
+    aiPromoFeature1: "Réponse instantanée 24/7",
+    aiPromoFeature2: "Parle votre langue",
+    aiPromoFeature3: "Recommandations intelligentes",
+    aiPromoFeature4: "Réservation automatique",
+    aiPromoButton: "Démarrer le chat",
+    aiPromoHint: "Essayez : \"Demain 15h de l'aéroport d'Istanbul à Taksim pour 4 personnes\"",
+    aiPromoImageAlt: "Assistant IA pour réserver des transferts",
+    aiPromoOnline: "IA En ligne",
+    
     // Best Price Animation
     preparingBestPrice: "Préparation de votre meilleur prix",
     preparingBestPriceDesc: "Nous calculons le meilleur prix possible pour vous...",
@@ -4179,6 +4218,19 @@ const translations: Record<Language, Record<string, string>> = {
     galleryTitle: "Galerie de notre flotte",
   },
   RU: {
+    // AI Assistant Promo
+    aiPromoBadge: "Бронирование с ИИ",
+    aiPromoTitle: "Забронируйте трансфер просто общаясь",
+    aiPromoDesc: "Наш умный ИИ-ассистент понимает ваши потребности и мгновенно создает бронирование. Просто скажите, куда и когда вы хотите поехать – мы позаботимся об остальном!",
+    aiPromoFeature1: "Мгновенный ответ 24/7",
+    aiPromoFeature2: "Говорит на вашем языке",
+    aiPromoFeature3: "Умные рекомендации",
+    aiPromoFeature4: "Автоматическое бронирование",
+    aiPromoButton: "Начать чат",
+    aiPromoHint: "Попробуйте: \"Завтра в 15:00 из аэропорта Стамбула в Таксим на 4 человека\"",
+    aiPromoImageAlt: "ИИ-ассистент для бронирования трансферов",
+    aiPromoOnline: "ИИ Онлайн",
+    
     // Best Price Animation
     preparingBestPrice: "Готовим лучшую цену для вас",
     preparingBestPriceDesc: "Мы рассчитываем лучшую возможную цену для вас...",
@@ -5254,6 +5306,19 @@ const translations: Record<Language, Record<string, string>> = {
     galleryTitle: "Галерея нашего автопарка",
   },
   IT: {
+    // AI Assistant Promo
+    aiPromoBadge: "Prenotazione con IA",
+    aiPromoTitle: "Prenota il tuo transfer semplicemente chattando",
+    aiPromoDesc: "Il nostro assistente IA intelligente comprende le tue esigenze e crea la tua prenotazione istantaneamente. Dicci dove e quando vuoi andare – pensiamo a tutto noi!",
+    aiPromoFeature1: "Risposta istantanea 24/7",
+    aiPromoFeature2: "Parla la tua lingua",
+    aiPromoFeature3: "Raccomandazioni intelligenti",
+    aiPromoFeature4: "Prenotazione automatica",
+    aiPromoButton: "Inizia la chat",
+    aiPromoHint: "Prova: \"Domani alle 15 dall'aeroporto di Istanbul a Taksim per 4 persone\"",
+    aiPromoImageAlt: "Assistente IA per prenotare transfer",
+    aiPromoOnline: "IA Online",
+    
     // Best Price Animation
     preparingBestPrice: "Prepariamo il miglior prezzo per te",
     preparingBestPriceDesc: "Stiamo calcolando il miglior prezzo possibile per te...",
@@ -6382,6 +6447,19 @@ const translations: Record<Language, Record<string, string>> = {
     galleryTitle: "Galleria della nostra flotta",
   },
   ES: {
+    // AI Assistant Promo
+    aiPromoBadge: "Reserva con IA",
+    aiPromoTitle: "Reserva tu transfer simplemente chateando",
+    aiPromoDesc: "Nuestro asistente IA inteligente entiende tus necesidades y crea tu reserva al instante. Solo dinos dónde y cuándo quieres ir – ¡nosotros nos encargamos del resto!",
+    aiPromoFeature1: "Respuesta instantánea 24/7",
+    aiPromoFeature2: "Habla tu idioma",
+    aiPromoFeature3: "Recomendaciones inteligentes",
+    aiPromoFeature4: "Reserva automática",
+    aiPromoButton: "Iniciar chat",
+    aiPromoHint: "Prueba: \"Mañana a las 15:00 del aeropuerto de Estambul a Taksim para 4 personas\"",
+    aiPromoImageAlt: "Asistente IA para reservar transfers",
+    aiPromoOnline: "IA En línea",
+    
     // Best Price Animation
     preparingBestPrice: "Preparando tu mejor precio",
     preparingBestPriceDesc: "Estamos calculando el mejor precio posible para ti...",
@@ -7510,6 +7588,19 @@ const translations: Record<Language, Record<string, string>> = {
     galleryTitle: "Galería de nuestra flota",
   },
   AR: {
+    // AI Assistant Promo
+    aiPromoBadge: "حجز بالذكاء الاصطناعي",
+    aiPromoTitle: "احجز نقلتك ببساطة عبر الدردشة",
+    aiPromoDesc: "مساعدنا الذكي يفهم احتياجاتك وينشئ حجزك فوراً. فقط أخبرنا أين ومتى تريد الذهاب - سنتولى الباقي!",
+    aiPromoFeature1: "استجابة فورية 24/7",
+    aiPromoFeature2: "يتحدث لغتك",
+    aiPromoFeature3: "توصيات ذكية",
+    aiPromoFeature4: "حجز تلقائي",
+    aiPromoButton: "ابدأ المحادثة",
+    aiPromoHint: "جرب: \"غداً الساعة 3 من مطار اسطنبول إلى تقسيم لـ 4 أشخاص\"",
+    aiPromoImageAlt: "مساعد الدردشة الذكي لحجز النقل",
+    aiPromoOnline: "الذكاء الاصطناعي متصل",
+    
     // Best Price Animation
     preparingBestPrice: "نحضر لك أفضل سعر",
     preparingBestPriceDesc: "نحن نحسب أفضل سعر ممكن لك...",
@@ -8585,6 +8676,19 @@ const translations: Record<Language, Record<string, string>> = {
     galleryTitle: "معرض أسطولنا",
   },
   TR: {
+    // AI Assistant Promo
+    aiPromoBadge: "Yapay Zeka ile Rezervasyon",
+    aiPromoTitle: "Sadece Sohbet Ederek Transferinizi Rezerve Edin",
+    aiPromoDesc: "Akıllı yapay zeka asistanımız ihtiyaçlarınızı anlar ve rezervasyonunuzu anında oluşturur. Nereye ve ne zaman gitmek istediğinizi söyleyin – gerisini biz halledelim!",
+    aiPromoFeature1: "7/24 Anında Yanıt",
+    aiPromoFeature2: "Sizin Dilinizi Konuşur",
+    aiPromoFeature3: "Akıllı Öneriler",
+    aiPromoFeature4: "Otomatik Rezervasyon",
+    aiPromoButton: "Sohbete Başla",
+    aiPromoHint: "Deneyin: \"Yarın saat 15:00'te İstanbul Havalimanı'ndan Taksim'e 4 kişiyiz\"",
+    aiPromoImageAlt: "Transfer rezervasyonu için yapay zeka sohbet asistanı",
+    aiPromoOnline: "AI Çevrimiçi",
+    
     // Best Price Animation
     preparingBestPrice: "En İyi Fiyatımız Hazırlanıyor",
     preparingBestPriceDesc: "Sizin için en iyi fiyatı hesaplıyoruz...",
@@ -9806,6 +9910,19 @@ const translations: Record<Language, Record<string, string>> = {
     galleryTitle: "Filo Galerimiz",
   },
   UK: {
+    // AI Assistant Promo
+    aiPromoBadge: "Бронювання з ШІ",
+    aiPromoTitle: "Забронюйте трансфер просто спілкуючись",
+    aiPromoDesc: "Наш розумний ШІ-асистент розуміє ваші потреби та миттєво створює бронювання. Просто скажіть, куди і коли ви хочете поїхати – ми подбаємо про решту!",
+    aiPromoFeature1: "Миттєва відповідь 24/7",
+    aiPromoFeature2: "Говорить вашою мовою",
+    aiPromoFeature3: "Розумні рекомендації",
+    aiPromoFeature4: "Автоматичне бронювання",
+    aiPromoButton: "Почати чат",
+    aiPromoHint: "Спробуйте: \"Завтра о 15:00 з аеропорту Стамбула до Таксим на 4 особи\"",
+    aiPromoImageAlt: "ШІ-асистент для бронювання трансферів",
+    aiPromoOnline: "ШІ Онлайн",
+    
     // Best Price Animation
     preparingBestPrice: "Готуємо найкращу ціну для вас",
     preparingBestPriceDesc: "Ми розраховуємо найкращу можливу ціну для вас...",
@@ -10888,6 +11005,19 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq6A: "Так! Зима ідеальна для катання на лижах на Улудаг. Село Куамликизик та історичні місця працюють цілий рік.",
   },
   JA: {
+    // AI Assistant Promo
+    aiPromoBadge: "AI搭載予約",
+    aiPromoTitle: "チャットするだけで送迎を予約",
+    aiPromoDesc: "インテリジェントなAIアシスタントがお客様のニーズを理解し、即座に予約を作成します。行き先と時間を教えてください – 残りは私たちにお任せください！",
+    aiPromoFeature1: "24時間年中無休の即時対応",
+    aiPromoFeature2: "あなたの言語で対応",
+    aiPromoFeature3: "スマートな提案",
+    aiPromoFeature4: "自動予約",
+    aiPromoButton: "チャットを開始",
+    aiPromoHint: "試してみて：「明日15時にイスタンブール空港からタクシムまで4人で」",
+    aiPromoImageAlt: "送迎予約用AIチャットアシスタント",
+    aiPromoOnline: "AI オンライン",
+    
     // Best Price Animation
     preparingBestPrice: "最高の価格を準備中",
     preparingBestPriceDesc: "お客様に最適な価格を計算しています...",
