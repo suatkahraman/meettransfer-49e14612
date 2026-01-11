@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,117 @@ interface BookingChatAssistantProps {
   onApplyBooking?: (data: BookingData) => void;
 }
 
+// Voice recording hook
+function useVoiceRecorder(onTranscription: (text: string) => void, language: string) {
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+      
+      streamRef.current = stream;
+      
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
+      });
+      
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        setIsProcessing(true);
+        try {
+          const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+          
+          // Convert blob to base64
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            const base64Audio = (reader.result as string).split(',')[1];
+            
+            try {
+              const { data, error } = await supabase.functions.invoke('voice-to-text', {
+                body: { audio: base64Audio, language }
+              });
+
+              if (error) throw error;
+              
+              if (data?.text) {
+                onTranscription(data.text);
+              }
+            } catch (err) {
+              console.error('Transcription error:', err);
+            }
+          };
+          reader.readAsDataURL(audioBlob);
+        } finally {
+          setIsProcessing(false);
+          // Stop all tracks
+          if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+          }
+        }
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error starting recording:', error);
+    }
+  }, [language, onTranscription]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  }, [isRecording]);
+
+  return { isRecording, isProcessing, startRecording, stopRecording };
+}
+
+const placeholderMessages: Record<string, string> = {
+  EN: "e.g., 'Tomorrow at 3pm from Istanbul Airport to Taksim for 4 people'",
+  TR: "örn: 'Yarın 15:00'te İstanbul Havalimanı'ndan Taksim'e 4 kişi'",
+  DE: "z.B. 'Morgen um 15 Uhr vom Flughafen Istanbul nach Taksim für 4 Personen'",
+  FR: "ex: 'Demain à 15h de l'aéroport d'Istanbul à Taksim pour 4 personnes'",
+  RU: "напр: 'Завтра в 15:00 из аэропорта Стамбула в Таксим на 4 человека'",
+  AR: "مثال: 'غداً الساعة 3 عصراً من مطار إسطنبول إلى تقسيم لـ 4 أشخاص'",
+  ES: "ej: 'Mañana a las 15h del aeropuerto de Estambul a Taksim para 4 personas'",
+  IT: "es: 'Domani alle 15 dall'aeroporto di Istanbul a Taksim per 4 persone'",
+  UK: "напр: 'Завтра о 15:00 з аеропорту Стамбула до Таксим на 4 особи'",
+  JA: "例: '明日15時にイスタンブール空港からタクシムへ4人で'"
+};
+
+const welcomeMessages: Record<string, string> = {
+  EN: "Hi! 👋 I'm your AI booking assistant. Tell me where and when you need a transfer, and I'll help you book it instantly! You can also use the 🎤 microphone to speak.",
+  TR: "Merhaba! 👋 Ben AI rezervasyon asistanınızım. Nereye ve ne zaman transfer istediğinizi söyleyin, hemen sizin için ayarlayayım! 🎤 Mikrofon ile de konuşabilirsiniz.",
+  DE: "Hallo! 👋 Ich bin Ihr KI-Buchungsassistent. Sagen Sie mir, wohin und wann Sie einen Transfer benötigen! Sie können auch 🎤 das Mikrofon verwenden.",
+  FR: "Bonjour! 👋 Je suis votre assistant de réservation IA. Dites-moi où et quand vous avez besoin d'un transfert! Vous pouvez aussi utiliser le 🎤 microphone.",
+  RU: "Привет! 👋 Я ваш AI-ассистент по бронированию. Скажите, куда и когда вам нужен трансфер! Вы также можете использовать 🎤 микрофон.",
+  AR: "مرحباً! 👋 أنا مساعد الحجز الذكي. أخبرني أين ومتى تحتاج النقل! يمكنك أيضاً استخدام 🎤 الميكروفون.",
+  ES: "¡Hola! 👋 Soy tu asistente de reservas IA. ¡Dime dónde y cuándo necesitas un transfer! También puedes usar el 🎤 micrófono.",
+  IT: "Ciao! 👋 Sono il tuo assistente AI per le prenotazioni. Dimmi dove e quando hai bisogno di un transfer! Puoi anche usare il 🎤 microfono.",
+  UK: "Привіт! 👋 Я ваш AI-асистент з бронювання. Скажіть, куди і коли вам потрібен трансфер! Ви також можете використовувати 🎤 мікрофон.",
+  JA: "こんにちは！👋 AI予約アシスタントです。どこへ、いつ送迎が必要か教えてください！🎤 マイクも使えます。"
+};
+
 export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssistantProps) {
   const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
@@ -40,31 +151,15 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const placeholderMessages = {
-    EN: "e.g., 'Tomorrow at 3pm from Istanbul Airport to Taksim for 4 people'",
-    TR: "örn: 'Yarın 15:00'te İstanbul Havalimanı'ndan Taksim'e 4 kişi'",
-    DE: "z.B. 'Morgen um 15 Uhr vom Flughafen Istanbul nach Taksim für 4 Personen'",
-    FR: "ex: 'Demain à 15h de l'aéroport d'Istanbul à Taksim pour 4 personnes'",
-    RU: "напр: 'Завтра в 15:00 из аэропорта Стамбула в Таксим на 4 человека'",
-    AR: "مثال: 'غداً الساعة 3 عصراً من مطار إسطنبول إلى تقسيم لـ 4 أشخاص'",
-    ES: "ej: 'Mañana a las 15h del aeropuerto de Estambul a Taksim para 4 personas'",
-    IT: "es: 'Domani alle 15 dall'aeroporto di Istanbul a Taksim per 4 persone'",
-    UK: "напр: 'Завтра о 15:00 з аеропорту Стамбула до Таксим на 4 особи'",
-    JA: "例: '明日15時にイスタンブール空港からタクシムへ4人で'"
-  };
-
-  const welcomeMessages = {
-    EN: "Hi! 👋 I'm your AI booking assistant. Tell me where and when you need a transfer, and I'll help you book it instantly!",
-    TR: "Merhaba! 👋 Ben AI rezervasyon asistanınızım. Nereye ve ne zaman transfer istediğinizi söyleyin, hemen sizin için ayarlayayım!",
-    DE: "Hallo! 👋 Ich bin Ihr KI-Buchungsassistent. Sagen Sie mir, wohin und wann Sie einen Transfer benötigen!",
-    FR: "Bonjour! 👋 Je suis votre assistant de réservation IA. Dites-moi où et quand vous avez besoin d'un transfert!",
-    RU: "Привет! 👋 Я ваш AI-ассистент по бронированию. Скажите, куда и когда вам нужен трансфер!",
-    AR: "مرحباً! 👋 أنا مساعد الحجز الذكي. أخبرني أين ومتى تحتاج النقل!",
-    ES: "¡Hola! 👋 Soy tu asistente de reservas IA. ¡Dime dónde y cuándo necesitas un transfer!",
-    IT: "Ciao! 👋 Sono il tuo assistente AI per le prenotazioni. Dimmi dove e quando hai bisogno di un transfer!",
-    UK: "Привіт! 👋 Я ваш AI-асистент з бронювання. Скажіть, куди і коли вам потрібен трансфер!",
-    JA: "こんにちは！👋 AI予約アシスタントです。どこへ、いつ送迎が必要か教えてください！"
-  };
+  // Voice recording
+  const handleTranscription = useCallback((text: string) => {
+    setInput(text);
+  }, []);
+  
+  const { isRecording, isProcessing, startRecording, stopRecording } = useVoiceRecorder(
+    handleTranscription,
+    language
+  );
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
@@ -75,7 +170,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
         content: welcomeMessages[language] || welcomeMessages.EN
       }]);
     }
-  }, [isOpen, language]);
+  }, [isOpen, language, messages.length]);
 
   useEffect(() => {
     // Scroll to bottom when new messages added
@@ -195,8 +290,9 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                   {t("new") || "NEW"}
                 </span>
               </h3>
-              <p className="text-xs text-muted-foreground">
-                {t("aiAssistantHint") || "Tell me your transfer needs in any language"}
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Mic className="h-3 w-3" />
+                {t("aiAssistantHint") || "Voice & text in any language"}
               </p>
             </div>
           </div>
@@ -291,18 +387,42 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
               {/* Input */}
               <div className="p-3 border-t bg-muted/30">
                 <div className="flex gap-2">
+                  {/* Voice Recording Button */}
+                  <Button
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isLoading || isProcessing}
+                    size="icon"
+                    variant={isRecording ? "destructive" : "outline"}
+                    className={cn(
+                      "flex-shrink-0 transition-all",
+                      isRecording && "animate-pulse"
+                    )}
+                    title={isRecording ? "Stop Recording" : "Voice Input"}
+                  >
+                    {isProcessing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isRecording ? (
+                      <Square className="h-4 w-4" />
+                    ) : (
+                      <Mic className="h-4 w-4" />
+                    )}
+                  </Button>
+                  
                   <Input
                     ref={inputRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={placeholderMessages[language] || placeholderMessages.EN}
-                    disabled={isLoading}
+                    placeholder={isRecording 
+                      ? (language === "TR" ? "🎤 Dinliyorum..." : "🎤 Listening...") 
+                      : (placeholderMessages[language] || placeholderMessages.EN)
+                    }
+                    disabled={isLoading || isRecording}
                     className="flex-1 bg-white border-border focus:border-primary"
                   />
                   <Button
                     onClick={sendMessage}
-                    disabled={!input.trim() || isLoading}
+                    disabled={!input.trim() || isLoading || isRecording}
                     size="icon"
                     className="bg-primary hover:bg-primary/90"
                   >
@@ -313,6 +433,21 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                     )}
                   </Button>
                 </div>
+                
+                {/* Recording indicator */}
+                <AnimatePresence>
+                  {isRecording && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-2 flex items-center justify-center gap-2 text-xs text-destructive"
+                    >
+                      <span className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
+                      {language === "TR" ? "Kayıt yapılıyor... Durdurmak için tekrar tıklayın" : "Recording... Click again to stop"}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           )}
