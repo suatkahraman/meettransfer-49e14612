@@ -18,7 +18,7 @@ import confetti from "canvas-confetti";
 import { 
   MapPin, Navigation, Calendar, Clock, Users, Briefcase, Baby, 
   ArrowRight, Loader2, CheckCircle, ArrowLeftRight, Tag, Mail, 
-  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent
+  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired } from "@/lib/vehicleTypes";
@@ -31,6 +31,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 interface VehiclePrice {
   vehicleType: string;
@@ -668,6 +669,90 @@ const BookingPage = () => {
     })).filter(v => VEHICLE_TYPE_MAP[v.value]);
   };
 
+  // Professional Loading Animation Component
+  if (isPricesLoading) {
+    return (
+      <WebsiteLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5">
+          <div className="text-center px-4 max-w-md">
+            {/* Animated Car Icon */}
+            <div className="relative mb-8">
+              <div className="w-32 h-32 mx-auto relative">
+                {/* Outer ring animation */}
+                <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-[ping_2s_ease-in-out_infinite]" />
+                <div className="absolute inset-2 rounded-full border-4 border-primary/30 animate-[ping_2s_ease-in-out_infinite_0.5s]" />
+                <div className="absolute inset-4 rounded-full border-4 border-primary/40 animate-[ping_2s_ease-in-out_infinite_1s]" />
+                
+                {/* Center icon */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-xl animate-pulse">
+                    <Car className="h-10 w-10 text-primary-foreground animate-bounce" />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Sparkle decorations */}
+              <div className="absolute top-0 left-1/4 animate-[pulse_1.5s_ease-in-out_infinite]">
+                <Sparkles className="h-6 w-6 text-accent" />
+              </div>
+              <div className="absolute top-1/4 right-1/4 animate-[pulse_1.5s_ease-in-out_infinite_0.3s]">
+                <Sparkles className="h-4 w-4 text-primary" />
+              </div>
+              <div className="absolute bottom-1/4 left-1/3 animate-[pulse_1.5s_ease-in-out_infinite_0.6s]">
+                <Sparkles className="h-5 w-5 text-amber-500" />
+              </div>
+            </div>
+            
+            {/* Text content */}
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4 animate-fade-in">
+              {language === 'TR' 
+                ? "En İyi Fiyatlarımız Sizin İçin Hazırlanıyor"
+                : "Best Prices Being Prepared for You"
+              }
+            </h2>
+            <p className="text-muted-foreground mb-6 animate-fade-in">
+              {language === 'TR'
+                ? "Lütfen bekleyin, sizin için en uygun fiyatları buluyoruz..."
+                : "Please wait, we are finding the best rates for you..."
+              }
+            </p>
+            
+            {/* Progress dots */}
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite]" />
+              <div className="w-3 h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite_0.2s]" />
+              <div className="w-3 h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite_0.4s]" />
+            </div>
+            
+            {/* Trip summary card */}
+            <div className="mt-8 bg-card rounded-xl p-4 shadow-lg border border-border/50 animate-fade-in">
+              <div className="text-sm text-muted-foreground space-y-2">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <span className="truncate">{urlPickup}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ArrowRight className="h-4 w-4 text-accent" />
+                  <span className="truncate">{urlDropoff}</span>
+                </div>
+                <div className="flex items-center gap-4 pt-2 border-t border-border/50">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    {displayDate}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    {urlTime}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </WebsiteLayout>
+    );
+  }
+
   return (
     <WebsiteLayout>
       <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background py-8 md:py-12">
@@ -836,9 +921,19 @@ const BookingPage = () => {
                             </div>
                           )}
                           
-                          {/* Vehicle Image Carousel */}
+                          {/* Vehicle Image Carousel with Autoplay */}
                           <div className="relative">
-                            <Carousel className="w-full" opts={{ loop: true }}>
+                            <Carousel 
+                              className="w-full" 
+                              opts={{ loop: true }}
+                              plugins={[
+                                Autoplay({
+                                  delay: 3000,
+                                  stopOnInteraction: true,
+                                  stopOnMouseEnter: true,
+                                })
+                              ]}
+                            >
                               <CarouselContent>
                                 {v.images.slice(0, 6).map((image, index) => (
                                   <CarouselItem key={index}>
