@@ -80,7 +80,7 @@ export default function QuickBookingCustomerInfo() {
     password: "",
   });
   const [selectedVehicle, setSelectedVehicle] = useState<string>("");
-  const [vehicleSectionOpen, setVehicleSectionOpen] = useState(false);
+  const [vehicleSectionOpen, setVehicleSectionOpen] = useState(true);
   const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
@@ -587,43 +587,36 @@ export default function QuickBookingCustomerInfo() {
 
           {/* Vehicle Selection Section */}
           {reservationData && (
-            <Collapsible open={vehicleSectionOpen} onOpenChange={setVehicleSectionOpen} className="mb-6">
-              <CollapsibleTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between h-12 text-left"
-                  type="button"
-                >
-                  <span className="flex items-center gap-2">
-                    <Car className="h-4 w-4" />
-                    {t("changeVehicle") || "Change Vehicle"}
-                  </span>
-                  {vehicleSectionOpen ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-4 space-y-3">
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Car className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">{t("selectVehicle") || "Select Vehicle"}</h3>
+              </div>
+              <div className="space-y-3">
                 {VEHICLE_TYPES.map((vehicle, index) => {
                   const vehiclePrice = reservationData.all_vehicle_prices?.[vehicle.value];
+                  const isSelected = selectedVehicle === vehicle.value;
                   return (
-                    <VehicleSelectionCard
+                    <div 
                       key={vehicle.value}
-                      vehicleType={vehicle.value}
-                      isSelected={selectedVehicle === vehicle.value}
-                      onSelect={(type) => setSelectedVehicle(type)}
-                      price={vehiclePrice || null}
-                      currency={reservationData.price_currency}
-                      showPrice={!!vehiclePrice}
-                      available={true}
-                      badgeAnimationDelay={index * 100}
-                    />
+                      className={`transition-all duration-300 ${isSelected ? 'scale-[1.02]' : ''}`}
+                    >
+                      <VehicleSelectionCard
+                        vehicleType={vehicle.value}
+                        isSelected={isSelected}
+                        onSelect={(type) => setSelectedVehicle(type)}
+                        price={vehiclePrice || null}
+                        currency={reservationData.price_currency}
+                        showPrice={!!vehiclePrice}
+                        available={true}
+                        badgeAnimationDelay={index * 100}
+                        isRecommended={isSelected}
+                      />
+                    </div>
                   );
                 })}
-              </CollapsibleContent>
-            </Collapsible>
+              </div>
+            </div>
           )}
 
           {/* Google Sign In Option */}
