@@ -42,6 +42,7 @@ const timeOptions = generateTimeOptions();
 // Hourly rental duration options
 const hourlyDurationOptions = [
   { value: "4", labelKey: "halfDay", defaultLabel: "4 Hours (Half Day)" },
+  { value: "6", labelKey: "sixHours", defaultLabel: "6 Hours" },
   { value: "8", labelKey: "fullDay", defaultLabel: "8 Hours (Full Day)" },
   { value: "custom", labelKey: "customHourly", defaultLabel: "9+ Hours (Custom)" },
 ];
