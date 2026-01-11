@@ -2,8 +2,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, Settings2, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -163,10 +164,21 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
   return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning };
 }
 
+// Voice option type
+interface VoiceOption {
+  id: string;
+  name: string;
+  lang: string;
+  gender: 'male' | 'female' | 'neutral';
+}
+
 // Text-to-Speech hook using Web Speech API (no API key required)
 function useTextToSpeech(language: string) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
+  const [availableVoices, setAvailableVoices] = useState<VoiceOption[]>([]);
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
+  const [speechRate, setSpeechRate] = useState(1.0);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   // Map language codes to BCP-47 format for Web Speech API
@@ -185,6 +197,53 @@ function useTextToSpeech(language: string) {
     };
     return languageMap[lang] || 'en-US';
   }, []);
+
+  // Detect gender from voice name
+  const detectGender = useCallback((voice: SpeechSynthesisVoice): 'male' | 'female' | 'neutral' => {
+    const nameLower = voice.name.toLowerCase();
+    const femaleKeywords = ['female', 'woman', 'girl', 'kadın', 'kız', 'femme', 'mujer', 'donna', 'frau', 'женщина', 'zira', 'hazel', 'susan', 'samantha', 'victoria', 'karen', 'moira', 'fiona', 'tessa', 'veena', 'yelda', 'filiz'];
+    const maleKeywords = ['male', 'man', 'boy', 'erkek', 'homme', 'hombre', 'uomo', 'mann', 'мужчина', 'david', 'mark', 'alex', 'daniel', 'james', 'thomas', 'tolga', 'ahmet'];
+    
+    if (femaleKeywords.some(kw => nameLower.includes(kw))) return 'female';
+    if (maleKeywords.some(kw => nameLower.includes(kw))) return 'male';
+    return 'neutral';
+  }, []);
+
+  // Load and filter voices for current language
+  const loadVoices = useCallback(() => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    
+    const voices = window.speechSynthesis.getVoices();
+    const langCode = getLanguageCode(language);
+    const langPrefix = langCode.split('-')[0];
+    
+    const filteredVoices: VoiceOption[] = voices
+      .filter(voice => voice.lang.startsWith(langPrefix))
+      .map(voice => ({
+        id: voice.voiceURI,
+        name: voice.name.replace(/Microsoft |Google |Apple /, '').split(' ')[0],
+        lang: voice.lang,
+        gender: detectGender(voice)
+      }));
+    
+    // Add fallback voices if none found for the language
+    if (filteredVoices.length === 0) {
+      const defaultVoices = voices.slice(0, 3).map(voice => ({
+        id: voice.voiceURI,
+        name: voice.name.replace(/Microsoft |Google |Apple /, '').split(' ')[0],
+        lang: voice.lang,
+        gender: detectGender(voice)
+      }));
+      setAvailableVoices(defaultVoices);
+    } else {
+      setAvailableVoices(filteredVoices);
+    }
+    
+    // Auto-select first voice if none selected
+    if (!selectedVoiceId && filteredVoices.length > 0) {
+      setSelectedVoiceId(filteredVoices[0].id);
+    }
+  }, [language, getLanguageCode, detectGender, selectedVoiceId]);
 
   const speak = useCallback((text: string) => {
     if (!isVoiceEnabled || !text || typeof window === 'undefined') return;
@@ -214,16 +273,24 @@ function useTextToSpeech(language: string) {
     utteranceRef.current = utterance;
 
     utterance.lang = getLanguageCode(language);
-    utterance.rate = 1.0;
+    utterance.rate = speechRate;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
 
-    // Try to find a voice for the language
+    // Use selected voice if available
     const voices = window.speechSynthesis.getVoices();
-    const langCode = getLanguageCode(language);
-    const matchingVoice = voices.find(voice => voice.lang.startsWith(langCode.split('-')[0]));
-    if (matchingVoice) {
-      utterance.voice = matchingVoice;
+    if (selectedVoiceId) {
+      const selectedVoice = voices.find(v => v.voiceURI === selectedVoiceId);
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+    } else {
+      // Fallback to any matching voice
+      const langCode = getLanguageCode(language);
+      const matchingVoice = voices.find(voice => voice.lang.startsWith(langCode.split('-')[0]));
+      if (matchingVoice) {
+        utterance.voice = matchingVoice;
+      }
     }
 
     utterance.onstart = () => setIsSpeaking(true);
@@ -231,7 +298,7 @@ function useTextToSpeech(language: string) {
     utterance.onerror = () => setIsSpeaking(false);
 
     window.speechSynthesis.speak(utterance);
-  }, [language, getLanguageCode, isVoiceEnabled]);
+  }, [language, getLanguageCode, isVoiceEnabled, selectedVoiceId, speechRate]);
 
   const stopSpeaking = useCallback(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -250,17 +317,34 @@ function useTextToSpeech(language: string) {
     });
   }, [stopSpeaking]);
 
-  // Load voices on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
-    }
+  const selectVoice = useCallback((voiceId: string) => {
+    setSelectedVoiceId(voiceId);
   }, []);
 
-  return { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice };
+  const changeRate = useCallback((rate: number) => {
+    setSpeechRate(rate);
+  }, []);
+
+  // Load voices on mount and language change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, [loadVoices]);
+
+  return { 
+    isSpeaking, 
+    isVoiceEnabled, 
+    speak, 
+    stopSpeaking, 
+    toggleVoice, 
+    availableVoices, 
+    selectedVoiceId, 
+    selectVoice,
+    speechRate,
+    changeRate
+  };
 }
 
 const placeholderMessages: Record<string, string> = {
@@ -309,7 +393,8 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
   );
 
   // Text-to-Speech
-  const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice } = useTextToSpeech(language);
+  const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate } = useTextToSpeech(language);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
@@ -492,6 +577,90 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
           </div>
           
           <div className="flex items-center gap-2">
+            {/* Voice Settings Popover */}
+            {isOpen && isVoiceEnabled && (
+              <Popover open={showVoiceSettings} onOpenChange={setShowVoiceSettings}>
+                <PopoverTrigger asChild>
+                  <motion.button
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center transition-all hover:bg-primary/10"
+                    title={language === "TR" ? "Ses Ayarları" : "Voice Settings"}
+                  >
+                    <Settings2 className="h-4 w-4 text-muted-foreground" />
+                  </motion.button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  className="w-64 p-3" 
+                  align="end"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="space-y-4">
+                    {/* Voice Selection */}
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                        {language === "TR" ? "Ses Tonu" : "Voice"}
+                      </label>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {availableVoices.length > 0 ? (
+                          availableVoices.map((voice) => (
+                            <button
+                              key={voice.id}
+                              onClick={() => selectVoice(voice.id)}
+                              className={cn(
+                                "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all text-left",
+                                selectedVoiceId === voice.id
+                                  ? "bg-primary/20 text-primary"
+                                  : "hover:bg-muted"
+                              )}
+                            >
+                              <span className="text-lg">
+                                {voice.gender === 'female' ? '👩' : voice.gender === 'male' ? '👨' : '🤖'}
+                              </span>
+                              <span className="flex-1 truncate">{voice.name}</span>
+                              {selectedVoiceId === voice.id && (
+                                <span className="w-2 h-2 bg-primary rounded-full" />
+                              )}
+                            </button>
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground px-3 py-2">
+                            {language === "TR" ? "Bu dil için ses bulunamadı" : "No voices found for this language"}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Speech Rate */}
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                        {language === "TR" ? "Konuşma Hızı" : "Speech Rate"}
+                      </label>
+                      <div className="flex items-center gap-2">
+                        {[0.75, 1.0, 1.25, 1.5].map((rate) => (
+                          <button
+                            key={rate}
+                            onClick={() => changeRate(rate)}
+                            className={cn(
+                              "flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all",
+                              speechRate === rate
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted hover:bg-muted/80"
+                            )}
+                          >
+                            {rate === 0.75 ? '0.75x' : rate === 1.0 ? '1x' : rate === 1.25 ? '1.25x' : '1.5x'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+
             {/* Voice Toggle Button */}
             {isOpen && (
               <motion.button
