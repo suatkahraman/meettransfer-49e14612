@@ -120,12 +120,20 @@ const AdminAgencies = () => {
     // Calculate balance for each agency based on completed reservations and payments
     const agenciesWithBalances = await Promise.all(
       (agenciesData || []).map(async (agency) => {
-        // Get all completed reservations for this agency with their agency_reservation_details
-        const { data: reservations } = await supabase
+        const balanceCutoffDate = agency.agency_name === 'MEET TRANSFER ONLİNE' ? '2026-01-01' : null;
+
+        // Get completed reservations for this agency (optionally after cutoff date)
+        let reservationsQuery = supabase
           .from('reservations')
           .select('id, status, passenger_cash_amount, passenger_cash_currency')
           .eq('agency_id', agency.id)
           .eq('status', 'completed');
+
+        if (balanceCutoffDate) {
+          reservationsQuery = reservationsQuery.gte('pickup_date', balanceCutoffDate);
+        }
+
+        const { data: reservations } = await reservationsQuery;
 
         // Group totals by currency
         const currencyTotals: Record<string, { agencyPrice: number; passengerCash: number }> = {};
@@ -158,11 +166,17 @@ const AdminAgencies = () => {
           });
         }
 
-        // Get total payments received for this agency - grouped by currency
-        const { data: payments } = await supabase
+        // Get total payments received for this agency - grouped by currency (optionally after cutoff date)
+        let paymentsQuery = supabase
           .from('agency_payments')
-          .select('amount, currency')
+          .select('amount, currency, payment_date')
           .eq('agency_id', agency.id);
+
+        if (balanceCutoffDate) {
+          paymentsQuery = paymentsQuery.gte('payment_date', balanceCutoffDate);
+        }
+
+        const { data: payments } = await paymentsQuery;
 
         // Group payments by currency
         const paymentsByCurrency: Record<string, number> = {};
