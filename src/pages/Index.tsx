@@ -13,6 +13,7 @@ import GoogleReviewsCarousel from "@/components/website/GoogleReviewsCarousel";
 import VideoPromo from "@/components/website/VideoPromo";
 import HourlyRentalSection from "@/components/website/HourlyRentalSection";
 import StatsCounter from "@/components/website/StatsCounter";
+import LivePriceCalculator from "@/components/website/LivePriceCalculator";
 
 
 const Index = () => {
@@ -38,6 +39,7 @@ const Index = () => {
       />
       <Hero />
       <BookingForm />
+      <LivePriceCalculator />
       <StatsCounter />
       <WhyChooseUs />
       <Destinations />
