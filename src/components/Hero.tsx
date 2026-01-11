@@ -64,12 +64,12 @@ export const Hero = () => {
   const [hourlyTime, setHourlyTime] = useState("");
   const [hourlyDuration, setHourlyDuration] = useState("");
   const [hourlyPassengers, setHourlyPassengers] = useState("2");
+  const [hourlyVehicleType, setHourlyVehicleType] = useState("vito");
   const [hourlyDatePopoverOpen, setHourlyDatePopoverOpen] = useState(false);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [cityDurations, setCityDurations] = useState<Record<string, string[]>>({});
   const [loadingCities, setLoadingCities] = useState(false);
-  const [hourlyPrice, setHourlyPrice] = useState<number | null>(null);
-  const [hourlyPriceCurrency, setHourlyPriceCurrency] = useState<string>("EUR");
+  const [allHourlyPrices, setAllHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
   const [loadingPrice, setLoadingPrice] = useState(false);
 
   // Fetch available cities and their durations from hourly_rental_prices
@@ -171,15 +171,15 @@ export const Hero = () => {
     } else if (!hourlyCity) {
       setHourlyDuration("");
     }
-    // Reset price when city changes
-    setHourlyPrice(null);
+    // Reset prices when city changes
+    setAllHourlyPrices([]);
   }, [hourlyCity, availableDurations]);
 
-  // Fetch price when city and duration are selected
+  // Fetch all vehicle prices when city and duration are selected
   useEffect(() => {
-    const fetchPrice = async () => {
+    const fetchAllPrices = async () => {
       if (!hourlyCity || !hourlyDuration) {
-        setHourlyPrice(null);
+        setAllHourlyPrices([]);
         return;
       }
 
@@ -189,49 +189,69 @@ export const Hero = () => {
         const durationKeyShort = `${hourlyDuration}h`;
         const durationKeyLong = `${hourlyDuration}_hours`;
         
-        let data = null;
-        let error = null;
-        
-        // Try short format first (4h, 8h, etc.)
-        const result1 = await supabase
+        // Fetch all vehicle types for this city and duration
+        const { data: shortData, error: shortError } = await supabase
           .from("hourly_rental_prices")
-          .select("price, price_currency")
+          .select("vehicle_type, price, price_currency")
           .eq("city", hourlyCity)
           .eq("duration_type", durationKeyShort)
-          .eq("is_active", true)
-          .limit(1)
-          .maybeSingle();
+          .eq("is_active", true);
         
-        if (result1.data) {
-          data = result1.data;
-        } else {
-          // Try long format (4_hours, 8_hours, etc.)
-          const result2 = await supabase
-            .from("hourly_rental_prices")
-            .select("price, price_currency")
-            .eq("city", hourlyCity)
-            .eq("duration_type", durationKeyLong)
-            .eq("is_active", true)
-            .limit(1)
-            .maybeSingle();
-          
-          data = result2.data;
-          error = result2.error;
-        }
-
-        if (error) throw error;
-
-        setHourlyPrice(data?.price || null);
-        setHourlyPriceCurrency(data?.price_currency || "EUR");
+        const { data: longData, error: longError } = await supabase
+          .from("hourly_rental_prices")
+          .select("vehicle_type, price, price_currency")
+          .eq("city", hourlyCity)
+          .eq("duration_type", durationKeyLong)
+          .eq("is_active", true);
+        
+        // Combine results, preferring short format
+        const combinedData = [...(shortData || []), ...(longData || [])];
+        
+        // Map to vehicle types, removing duplicates
+        const vehiclePriceMap = new Map<string, { price: number; currency: string }>();
+        combinedData.forEach(item => {
+          if (!vehiclePriceMap.has(item.vehicle_type)) {
+            vehiclePriceMap.set(item.vehicle_type, {
+              price: item.price,
+              currency: item.price_currency
+            });
+          }
+        });
+        
+        // Convert to array with mapped vehicle types
+        const prices: Array<{ vehicleType: string; price: number; currency: string }> = [];
+        
+        // Map database vehicle types to our VEHICLE_TYPES
+        const vehicleTypeMapping: Record<string, string> = {
+          'vito': 'mercedes-vito',
+          'vito_vip': 'vip-mercedes',
+          'maybach': 'maybach-minibus',
+          'sprinter': 'sprinter-minibus',
+          'mercedes-vito': 'mercedes-vito',
+          'vip-mercedes': 'vip-mercedes',
+          'maybach-minibus': 'maybach-minibus',
+          'sprinter-minibus': 'sprinter-minibus'
+        };
+        
+        vehiclePriceMap.forEach((value, key) => {
+          const mappedType = vehicleTypeMapping[key] || key;
+          prices.push({
+            vehicleType: mappedType,
+            price: value.price,
+            currency: value.currency
+          });
+        });
+        
+        setAllHourlyPrices(prices);
       } catch (error) {
-        console.error("Error fetching hourly price:", error);
-        setHourlyPrice(null);
+        console.error("Error fetching hourly prices:", error);
+        setAllHourlyPrices([]);
       } finally {
         setLoadingPrice(false);
       }
     };
 
-    fetchPrice();
+    fetchAllPrices();
   }, [hourlyCity, hourlyDuration]);
 
   const handleRideContinue = () => {
@@ -278,6 +298,7 @@ export const Hero = () => {
     params.set("time", hourlyTime);
     params.set("duration", hourlyDuration);
     params.set("passengers", hourlyPassengers);
+    params.set("vehicle", hourlyVehicleType);
     params.set("type", "hourly");
     
     navigate(`/book?${params.toString()}`);
@@ -717,34 +738,60 @@ export const Hero = () => {
                     </div>
                   </div>
 
-                  {/* Price Preview & Info Box */}
-                  <div className="space-y-3">
-                    {/* Price Preview */}
-                    {(hourlyCity && hourlyDuration) && (
-                      <div className="bg-primary/5 border-2 border-primary/20 rounded-xl p-4 text-center">
-                        {loadingPrice ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                            <span className="text-muted-foreground">{t("loadingPrice") || "Loading price..."}</span>
-                          </div>
-                        ) : hourlyPrice !== null ? (
-                          <div className="space-y-1">
-                            <p className="text-sm text-muted-foreground">{t("startingFrom") || "Starting from"}</p>
-                            <p className="text-3xl font-bold text-primary">
-                              {hourlyPriceCurrency === "EUR" ? "€" : hourlyPriceCurrency === "USD" ? "$" : hourlyPriceCurrency === "GBP" ? "£" : "₺"}
-                              {hourlyPrice.toLocaleString()}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {hourlyCity} • {hourlyDuration} {t("hours") || "hours"}
-                            </p>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">{t("priceNotAvailable") || "Price not available for this selection"}</p>
-                        )}
+                  {/* Vehicle Type Selection with Prices */}
+                  {(hourlyCity && hourlyDuration) && (
+                    <div>
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("vehicleType") || "Vehicle Type"}</label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {VEHICLE_TYPES.filter(v => v.value !== 'sprinter-minibus').map((vehicle) => {
+                          const vehiclePrice = allHourlyPrices.find(v => v.vehicleType === vehicle.value);
+                          const isSelected = hourlyVehicleType === vehicle.value;
+                          return (
+                            <button
+                              key={vehicle.value}
+                              type="button"
+                              onClick={() => setHourlyVehicleType(vehicle.value)}
+                              className={cn(
+                                "relative p-3 rounded-xl border-2 transition-all text-left",
+                                isSelected
+                                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                  : "border-border hover:border-primary/50 bg-muted/30"
+                              )}
+                            >
+                              <div className="flex items-center gap-2 mb-1">
+                                {vehicle.value === 'maybach-minibus' ? (
+                                  <Sparkles className="h-4 w-4 text-amber-500" />
+                                ) : vehicle.value === 'vip-mercedes' ? (
+                                  <Sparkles className="h-4 w-4 text-purple-500" />
+                                ) : (
+                                  <Car className="h-4 w-4 text-primary" />
+                                )}
+                                <span className="font-medium text-sm truncate">{vehicle.label.split(' ')[1] || vehicle.label}</span>
+                              </div>
+                              <div className="text-xs text-muted-foreground mb-1">
+                                {vehicle.passengers} {t("passengers") || "pax"}
+                              </div>
+                              {loadingPrice ? (
+                                <div className="h-5">
+                                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                </div>
+                              ) : vehiclePrice ? (
+                                <div className="text-lg font-bold text-primary">
+                                  {vehiclePrice.currency === "EUR" ? "€" : vehiclePrice.currency === "USD" ? "$" : vehiclePrice.currency === "GBP" ? "£" : "₺"}
+                                  {vehiclePrice.price}
+                                </div>
+                              ) : (
+                                <div className="text-xs text-muted-foreground">-</div>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
-                    )}
-                    
-                    {/* Info Box */}
+                    </div>
+                  )}
+
+                  {/* Info Box */}
+                  <div className="space-y-3">
                     <div className="bg-accent/10 rounded-xl p-4 text-left">
                       <p className="text-sm text-accent font-medium flex items-center gap-2">
                         <Timer className="h-4 w-4" />
