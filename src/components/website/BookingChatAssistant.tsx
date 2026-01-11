@@ -715,11 +715,11 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="relative flex flex-col z-10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="relative flex flex-col z-10 overflow-hidden"
               style={{ height: "calc(100% - 88px)" }}
             >
               {/* Messages Area */}
