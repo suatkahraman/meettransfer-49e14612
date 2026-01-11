@@ -246,7 +246,7 @@ export const Hero = () => {
                         </div>
                       </div>
                     </div>
-                    {/* Swap Button */}
+                    {/* Swap Button - Mobile: bottom right, Desktop: center between fields */}
                     <button
                       type="button"
                       onClick={() => {
@@ -256,16 +256,19 @@ export const Hero = () => {
                       }}
                       disabled={!pickup && !dropoff}
                       className={cn(
-                        "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20",
-                        "hidden md:flex items-center justify-center",
+                        "z-20 flex items-center justify-center",
                         "w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-lg",
                         "hover:bg-primary/90 hover:scale-110 active:scale-95",
                         "transition-all duration-200",
-                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
+                        // Mobile: positioned below the fields, centered
+                        "relative mx-auto -mt-2 mb-2 md:mt-0 md:mb-0",
+                        // Desktop: absolute center between fields
+                        "md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:mx-0"
                       )}
                       title={t("swapLocations") || "Swap locations"}
                     >
-                      <ArrowUpDown className="h-4 w-4" />
+                      <ArrowUpDown className="h-4 w-4 md:rotate-0 rotate-90" />
                     </button>
                   </div>
 
