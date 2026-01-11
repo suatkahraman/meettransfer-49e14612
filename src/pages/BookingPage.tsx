@@ -172,12 +172,15 @@ const BookingPage = () => {
     }
   }, [user]);
 
-  // Fetch vehicle prices for transfer bookings
+  // Fetch vehicle prices for transfer bookings with minimum 8 second loading animation
   useEffect(() => {
     const fetchPrices = async () => {
       if (isHourlyBooking || !urlPickup || !urlDropoff) return;
       
       setIsPricesLoading(true);
+      const startTime = Date.now();
+      const minLoadingTime = 8000; // 8 seconds minimum
+      
       try {
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
           body: {
@@ -190,6 +193,14 @@ const BookingPage = () => {
         if (data?.prices) {
           setVehiclePrices(data.prices);
         }
+        
+        // Wait for remaining time to complete 8 seconds
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        if (remainingTime > 0) {
+          await new Promise(resolve => setTimeout(resolve, remainingTime));
+        }
       } catch (error) {
         console.error("Error fetching prices:", error);
       } finally {
@@ -200,12 +211,15 @@ const BookingPage = () => {
     fetchPrices();
   }, [urlPickup, urlDropoff, preferredCurrency, isHourlyBooking]);
 
-  // Fetch hourly rental prices
+  // Fetch hourly rental prices with minimum 8 second loading animation
   useEffect(() => {
     const fetchHourlyPrices = async () => {
       if (!isHourlyBooking || !urlCity) return;
       
       setIsPricesLoading(true);
+      const startTime = Date.now();
+      const minLoadingTime = 8000; // 8 seconds minimum
+      
       try {
         const { data, error } = await supabase
           .from("hourly_rental_prices")
@@ -215,6 +229,14 @@ const BookingPage = () => {
 
         if (error) throw error;
         setHourlyPrices(data || []);
+        
+        // Wait for remaining time to complete 8 seconds
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        if (remainingTime > 0) {
+          await new Promise(resolve => setTimeout(resolve, remainingTime));
+        }
       } catch (error) {
         console.error("Error fetching hourly prices:", error);
       } finally {
@@ -1106,9 +1128,9 @@ const BookingPage = () => {
                               opts={{ loop: true }}
                               plugins={[
                                 Autoplay({
-                                  delay: 3000,
-                                  stopOnInteraction: true,
-                                  stopOnMouseEnter: true,
+                                  delay: 2500,
+                                  stopOnInteraction: false,
+                                  stopOnMouseEnter: false,
                                 })
                               ]}
                             >
