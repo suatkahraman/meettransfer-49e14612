@@ -22,6 +22,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import BookingChatAssistant from "@/components/website/BookingChatAssistant";
+import { CompactRouteMap } from "@/components/ui/compact-route-map";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -533,6 +534,15 @@ export const Hero = () => {
                     >
                       <ArrowUpDown className="h-4 w-4 md:rotate-0 rotate-90" />
                     </button>
+                    
+                    {/* Route Map - shows when both locations are entered */}
+                    {pickup && dropoff && (
+                      <CompactRouteMap 
+                        pickup={pickup} 
+                        dropoff={dropoff}
+                        className="mt-4"
+                      />
+                    )}
                   </div>
 
                   {/* Date, Time & Passengers - 2 rows on mobile, 3 cols on desktop */}
