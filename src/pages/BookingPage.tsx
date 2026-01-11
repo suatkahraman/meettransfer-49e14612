@@ -1129,7 +1129,25 @@ const BookingPage = () => {
                           <button
                             type="button"
                             disabled={isDisabled}
-                            onClick={() => setVehicleType(vehicleOption.value)}
+                            onClick={(e) => {
+                              if (vehicleType !== vehicleOption.value) {
+                                setVehicleType(vehicleOption.value);
+                                // Mini celebration confetti
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const x = (rect.left + rect.width / 2) / window.innerWidth;
+                                const y = (rect.top + rect.height / 2) / window.innerHeight;
+                                confetti({
+                                  particleCount: 30,
+                                  spread: 60,
+                                  origin: { x, y },
+                                  colors: ['#FFD700', '#4ECDC4', '#45B7D1'],
+                                  ticks: 50,
+                                  gravity: 1.2,
+                                  scalar: 0.8,
+                                  zIndex: 9999,
+                                });
+                              }
+                            }}
                             className={cn(
                               "w-full p-4 text-left",
                               isDisabled && "cursor-not-allowed"
