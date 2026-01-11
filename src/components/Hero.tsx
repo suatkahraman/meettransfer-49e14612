@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { GooglePlacesAutocomplete, PlaceDetails, GooglePlacesAutocompleteProps } from "@/components/ui/google-places-autocomplete";
@@ -13,6 +13,7 @@ import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import CityMarquee from "@/components/website/CityMarquee";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -50,9 +51,10 @@ export const Hero = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState("");
   const [passengers, setPassengers] = useState("2");
+  const [vehicleType, setVehicleType] = useState("mercedes-vito");
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [transferPrice, setTransferPrice] = useState<number | null>(null);
+  const [allVehiclePrices, setAllVehiclePrices] = useState<any[]>([]);
   const [transferPriceCurrency, setTransferPriceCurrency] = useState<string>("EUR");
   const [loadingTransferPrice, setLoadingTransferPrice] = useState(false);
 
@@ -120,7 +122,7 @@ export const Hero = () => {
   useEffect(() => {
     const fetchTransferPrice = async () => {
       if (!pickup || !dropoff) {
-        setTransferPrice(null);
+        setAllVehiclePrices([]);
         return;
       }
 
@@ -136,17 +138,15 @@ export const Hero = () => {
 
         if (error) throw error;
 
-        // Get the lowest price from available vehicles (usually Vito)
         if (data?.vehicles && data.vehicles.length > 0) {
-          const lowestPrice = Math.min(...data.vehicles.map((v: any) => v.price));
-          setTransferPrice(lowestPrice);
+          setAllVehiclePrices(data.vehicles);
           setTransferPriceCurrency(data.currency || "EUR");
         } else {
-          setTransferPrice(null);
+          setAllVehiclePrices([]);
         }
       } catch (error) {
         console.error("Error fetching transfer price:", error);
-        setTransferPrice(null);
+        setAllVehiclePrices([]);
       } finally {
         setLoadingTransferPrice(false);
       }
@@ -228,6 +228,7 @@ export const Hero = () => {
     params.set("date", format(date!, "yyyy-MM-dd"));
     params.set("time", time);
     params.set("passengers", passengers);
+    params.set("vehicle", vehicleType);
     
     navigate(`/book?${params.toString()}`);
   };
@@ -484,30 +485,55 @@ export const Hero = () => {
                     </div>
                   </div>
 
-                  {/* Price Preview */}
-                  {(pickup && dropoff) && (
-                    <div className="bg-primary/5 border-2 border-primary/20 rounded-xl p-4 text-center">
-                      {loadingTransferPrice ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                          <span className="text-muted-foreground">{t("loadingPrice") || "Loading price..."}</span>
-                        </div>
-                      ) : transferPrice !== null ? (
-                        <div className="space-y-1">
-                          <p className="text-sm text-muted-foreground">{t("startingFrom") || "Starting from"}</p>
-                          <p className="text-3xl font-bold text-primary">
-                            {transferPriceCurrency === "EUR" ? "€" : transferPriceCurrency === "USD" ? "$" : transferPriceCurrency === "GBP" ? "£" : "₺"}
-                            {transferPrice.toLocaleString()}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {t("allVehicleTypes") || "View all vehicle options"}
-                          </p>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">{t("enterRouteForPrice") || "Enter route to see prices"}</p>
-                      )}
+                  {/* Vehicle Type Selection */}
+                  <div>
+                    <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("vehicleType") || "Vehicle Type"}</label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {VEHICLE_TYPES.map((vehicle) => {
+                        const vehiclePrice = allVehiclePrices.find(v => v.vehicleType === vehicle.value);
+                        const isSelected = vehicleType === vehicle.value;
+                        return (
+                          <button
+                            key={vehicle.value}
+                            type="button"
+                            onClick={() => setVehicleType(vehicle.value)}
+                            className={cn(
+                              "relative p-3 rounded-xl border-2 transition-all text-left",
+                              isSelected
+                                ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                : "border-border hover:border-primary/50 bg-muted/30"
+                            )}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              {vehicle.value === 'maybach-minibus' ? (
+                                <Sparkles className="h-4 w-4 text-amber-500" />
+                              ) : vehicle.value === 'vip-mercedes' ? (
+                                <Sparkles className="h-4 w-4 text-purple-500" />
+                              ) : (
+                                <Car className="h-4 w-4 text-primary" />
+                              )}
+                              <span className="font-medium text-sm truncate">{vehicle.label.split(' ')[1] || vehicle.label}</span>
+                            </div>
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {vehicle.passengers} {t("passengers") || "pax"}
+                            </div>
+                            {loadingTransferPrice ? (
+                              <div className="h-5">
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              </div>
+                            ) : vehiclePrice ? (
+                              <div className="text-lg font-bold text-primary">
+                                {transferPriceCurrency === "EUR" ? "€" : transferPriceCurrency === "USD" ? "$" : transferPriceCurrency === "GBP" ? "£" : "₺"}
+                                {vehiclePrice.price}
+                              </div>
+                            ) : pickup && dropoff ? (
+                              <div className="text-xs text-muted-foreground">-</div>
+                            ) : null}
+                          </button>
+                        );
+                      })}
                     </div>
-                  )}
+                  </div>
 
                   {/* Continue Button */}
                   <Button 
