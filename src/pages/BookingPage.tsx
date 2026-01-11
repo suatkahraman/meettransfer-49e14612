@@ -1085,33 +1085,57 @@ const BookingPage = () => {
                       return (
                         <div
                           key={vehicleOption.value}
+                          onClick={() => {
+                            if (!isDisabled && vehicleType !== vehicleOption.value) {
+                              setVehicleType(vehicleOption.value);
+                              setJustSelectedVehicle(vehicleOption.value);
+                              // Mini celebration confetti
+                              confetti({
+                                particleCount: 30,
+                                spread: 60,
+                                origin: { x: 0.5, y: 0.6 },
+                                colors: ['#FFD700', '#4ECDC4', '#45B7D1'],
+                                ticks: 50,
+                                gravity: 1.2,
+                                scalar: 0.8,
+                                zIndex: 9999,
+                              });
+                            }
+                          }}
                           className={cn(
-                            "relative overflow-hidden rounded-xl transition-all duration-300 border-2",
+                            "relative overflow-hidden rounded-xl transition-all duration-300 border-2 cursor-pointer",
                             "hover:shadow-lg",
                             isSelected
-                              ? "border-primary bg-primary/5 shadow-md"
-                              : "border-border hover:border-primary/50",
-                            isDisabled && "opacity-50",
+                              ? "border-primary bg-primary/10 shadow-lg ring-2 ring-primary/50 scale-[1.02]"
+                              : "border-border hover:border-primary/50 hover:bg-muted/50",
+                            isDisabled && "opacity-50 cursor-not-allowed",
                             justSelectedVehicle === vehicleOption.value && "animate-[vehicleShake_0.4s_ease-in-out]"
                           )}
                           onAnimationEnd={() => setJustSelectedVehicle(null)}
                         >
                           <style>{`
                             @keyframes vehicleShake {
-                              0%, 100% { transform: translateX(0) scale(1); }
-                              10% { transform: translateX(-3px) scale(1.02); }
-                              20% { transform: translateX(3px) scale(1.02); }
-                              30% { transform: translateX(-3px) scale(1.01); }
-                              40% { transform: translateX(3px) scale(1.01); }
-                              50% { transform: translateX(-2px) scale(1.01); }
-                              60% { transform: translateX(2px) scale(1); }
-                              70% { transform: translateX(-1px) scale(1); }
-                              80% { transform: translateX(1px) scale(1); }
+                              0%, 100% { transform: translateX(0) scale(1.02); }
+                              10% { transform: translateX(-3px) scale(1.04); }
+                              20% { transform: translateX(3px) scale(1.04); }
+                              30% { transform: translateX(-3px) scale(1.03); }
+                              40% { transform: translateX(3px) scale(1.03); }
+                              50% { transform: translateX(-2px) scale(1.03); }
+                              60% { transform: translateX(2px) scale(1.02); }
+                              70% { transform: translateX(-1px) scale(1.02); }
+                              80% { transform: translateX(1px) scale(1.02); }
                             }
                           `}</style>
                           {isSelected && (
-                            <div className="absolute top-3 right-3 z-10">
-                              <CheckCircle className="h-5 w-5 text-primary" />
+                            <div className="absolute top-3 right-3 z-10 bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg animate-[pulse_1.5s_ease-in-out_infinite]">
+                              <CheckCircle className="h-5 w-5" />
+                            </div>
+                          )}
+                          
+                          {/* Selected Banner */}
+                          {isSelected && (
+                            <div className="absolute top-0 left-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-br-lg z-10">
+                              {language === 'TR' ? 'SEÇİLDİ' : 'SELECTED'}
                             </div>
                           )}
                           
@@ -1163,35 +1187,8 @@ const BookingPage = () => {
                             )}
                           </div>
                           
-                          {/* Clickable content area */}
-                          <button
-                            type="button"
-                            disabled={isDisabled}
-                            onClick={(e) => {
-                              if (vehicleType !== vehicleOption.value) {
-                                setVehicleType(vehicleOption.value);
-                                setJustSelectedVehicle(vehicleOption.value);
-                                // Mini celebration confetti
-                                const rect = e.currentTarget.getBoundingClientRect();
-                                const x = (rect.left + rect.width / 2) / window.innerWidth;
-                                const y = (rect.top + rect.height / 2) / window.innerHeight;
-                                confetti({
-                                  particleCount: 30,
-                                  spread: 60,
-                                  origin: { x, y },
-                                  colors: ['#FFD700', '#4ECDC4', '#45B7D1'],
-                                  ticks: 50,
-                                  gravity: 1.2,
-                                  scalar: 0.8,
-                                  zIndex: 9999,
-                                });
-                              }
-                            }}
-                            className={cn(
-                              "w-full p-4 text-left",
-                              isDisabled && "cursor-not-allowed"
-                            )}
-                          >
+                          {/* Content area */}
+                          <div className="w-full p-4 text-left">
                             <h3 className="font-semibold text-foreground mb-2">{v.label}</h3>
                             
                             <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
@@ -1220,7 +1217,7 @@ const BookingPage = () => {
                                 {t("priceOnRequest") || "Price on request"}
                               </p>
                             )}
-                          </button>
+                          </div>
                         </div>
                       );
                     })}
