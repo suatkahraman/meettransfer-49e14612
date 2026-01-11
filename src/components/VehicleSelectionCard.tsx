@@ -495,16 +495,26 @@ return (
             <h3 className="text-xl font-bold mb-4">{vehicleInfo.label}</h3>
             
             {vehicleImages.length > 0 && (
-              <Carousel className="w-full" opts={{ loop: true }}>
+              <Carousel 
+                className="w-full" 
+                opts={{ loop: true }}
+                plugins={[Autoplay({ delay: 3500, stopOnInteraction: false, stopOnMouseEnter: true })]}
+              >
                 <CarouselContent>
                   {vehicleImages.map((img, idx) => (
                     <CarouselItem key={idx}>
-                      <div className="aspect-video rounded-xl overflow-hidden">
+                      <div className="relative aspect-video rounded-xl overflow-hidden">
                         <img
                           src={img.src}
                           alt={img.alt}
                           className="w-full h-full object-cover"
                         />
+                        {/* Image Caption */}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
+                          <p className="text-white text-sm font-medium drop-shadow-lg">
+                            {img.alt}
+                          </p>
+                        </div>
                       </div>
                     </CarouselItem>
                   ))}
