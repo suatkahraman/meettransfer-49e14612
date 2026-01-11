@@ -563,39 +563,73 @@ export default function QuickBookingCustomerInfo() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Car className="h-4 w-4 text-muted-foreground" />
-                  <span>{vehicleLabels[selectedVehicle] || selectedVehicle}</span>
+                  <span className="font-medium text-primary">{vehicleLabels[selectedVehicle] || selectedVehicle}</span>
                 </div>
               </div>
               
-              {/* Current Price Display */}
-              {reservationData.all_vehicle_prices && reservationData.all_vehicle_prices[selectedVehicle] && (
-                <div className="pt-2 border-t border-border">
-                  <p className="text-lg font-bold text-primary">
-                    {reservationData.all_vehicle_prices[selectedVehicle]} {reservationData.price_currency}
-                  </p>
+              {/* Current Price Display with animation */}
+              <div className="pt-3 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">{t("totalPrice") || "Total Price"}</p>
+                  <div className="text-right">
+                    {reservationData.all_vehicle_prices?.[selectedVehicle] ? (
+                      <p className="text-2xl font-bold text-primary transition-all duration-300">
+                        {reservationData.all_vehicle_prices[selectedVehicle]} {reservationData.price_currency}
+                      </p>
+                    ) : reservationData.price ? (
+                      <p className="text-2xl font-bold text-primary">
+                        {reservationData.price} {reservationData.price_currency}
+                      </p>
+                    ) : (
+                      <p className="text-lg text-muted-foreground">{t("priceOnRequest") || "Price on request"}</p>
+                    )}
+                  </div>
                 </div>
-              )}
-              {!reservationData.all_vehicle_prices && reservationData.price && (
-                <div className="pt-2 border-t border-border">
-                  <p className="text-lg font-bold text-primary">
-                    {reservationData.price} {reservationData.price_currency}
+                {selectedVehicle !== reservationData.vehicle_type && reservationData.all_vehicle_prices?.[selectedVehicle] && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
+                    <Car className="h-3 w-3" />
+                    {t("vehicleChanged") || "Vehicle changed from original selection"}
                   </p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
 
           {/* Vehicle Selection Section */}
           {reservationData && (
             <div className="mb-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Car className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-lg">{t("selectVehicle") || "Select Vehicle"}</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Car className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold text-lg">{t("selectVehicle") || "Select Vehicle"}</h3>
+                </div>
+                {/* Show selected vehicle price prominently */}
+                {reservationData.all_vehicle_prices?.[selectedVehicle] && (
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">{t("totalPrice") || "Total Price"}</p>
+                    <p className="text-xl font-bold text-primary">
+                      {reservationData.all_vehicle_prices[selectedVehicle]} {reservationData.price_currency}
+                    </p>
+                  </div>
+                )}
               </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                {t("changeVehicleHint") || "You can change your vehicle selection below. Price will update automatically."}
+              </p>
               <div className="space-y-3">
                 {VEHICLE_TYPES.map((vehicle, index) => {
                   const vehiclePrice = reservationData.all_vehicle_prices?.[vehicle.value];
                   const isSelected = selectedVehicle === vehicle.value;
+                  const isOriginal = vehicle.value === reservationData.vehicle_type;
+                  
+                  // Determine badge
+                  const getBadge = (): 'popular' | 'best-value' | 'premium' | 'family-friendly' | 'luxury' | null => {
+                    if (vehicle.value === 'vip-mercedes') return 'popular';
+                    if (vehicle.value === 'maybach-minibus') return 'luxury';
+                    if (vehicle.value === 'minibus') return 'family-friendly';
+                    return null;
+                  };
+                  
                   return (
                     <div 
                       key={vehicle.value}
@@ -608,9 +642,10 @@ export default function QuickBookingCustomerInfo() {
                         price={vehiclePrice || null}
                         currency={reservationData.price_currency}
                         showPrice={!!vehiclePrice}
-                        available={true}
+                        available={!!vehiclePrice}
                         badgeAnimationDelay={index * 100}
-                        isRecommended={isSelected}
+                        isRecommended={isOriginal}
+                        badge={getBadge()}
                       />
                     </div>
                   );
