@@ -1793,34 +1793,42 @@ const BookingPage = () => {
         </div>
       </div>
       
-      {/* Mobile Sticky Footer */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-3 sm:p-4 shadow-lg z-50 safe-area-inset-bottom">
-        <div className="flex items-center gap-3">
+      {/* Mobile Sticky Footer - Always visible on mobile */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t-2 border-primary/20 p-3 sm:p-4 shadow-2xl z-[100]" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+        <div className="flex items-center gap-3 max-w-lg mx-auto">
           <div className="flex-1 min-w-0">
-            {selectedPrice ? (
+            {isPricesLoading ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">{t("loadingPrices") || "Loading..."}</p>
+              </div>
+            ) : selectedPrice ? (
               <>
                 <p className="text-xs text-muted-foreground">{t("totalPrice") || "Total"}</p>
-                <p className="text-lg sm:text-xl font-bold text-primary">
+                <p className="text-xl sm:text-2xl font-bold text-primary">
                   {selectedPrice} {preferredCurrency}
                 </p>
               </>
             ) : (
-              <p className="text-sm text-muted-foreground">{t("priceOnRequest") || "Price on request"}</p>
+              <div>
+                <p className="text-sm font-medium text-foreground">{t("priceOnRequest") || "Price on request"}</p>
+                <p className="text-xs text-muted-foreground">{t("weWillContactYou") || "We'll send you the price"}</p>
+              </div>
             )}
           </div>
           <Button
             onClick={handleSubmit}
             size="lg"
             variant="accent"
-            className="h-12 px-6 text-base font-semibold shrink-0"
+            className="h-14 px-6 sm:px-8 text-base sm:text-lg font-bold shrink-0 shadow-xl animate-pulse hover:animate-none min-w-[140px]"
             disabled={submitting}
           >
             {submitting ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <>
-                {user ? (t("confirm") || "Confirm") : (t("continue") || "Continue")}
-                <ArrowRight className="ml-1.5 h-4 w-4" />
+                {user ? (t("confirmNow") || "Confirm") : (t("continue") || "Continue")}
+                <ArrowRight className="ml-2 h-5 w-5" />
               </>
             )}
           </Button>
@@ -1828,7 +1836,7 @@ const BookingPage = () => {
       </div>
       
       {/* Spacer for mobile sticky footer */}
-      <div className="lg:hidden h-20" />
+      <div className="lg:hidden h-24" />
     </WebsiteLayout>
   );
 };
