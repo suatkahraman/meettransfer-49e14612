@@ -15,6 +15,8 @@ interface UpdateCustomerRequest {
   customerId?: string; // For Google auth - existing user ID
   isGoogleAuth?: boolean;
   returnReservationCode?: string;
+  selectedVehicle?: string;
+  newPrice?: number;
 }
 
 serve(async (req) => {
@@ -120,15 +122,26 @@ serve(async (req) => {
         role: "customer",
       }, { onConflict: "user_id,role" });
 
+    // Build update object - include vehicle change if provided
+    const updateData: Record<string, any> = {
+      customer_id: userId,
+      customer_name: requestData.customerName,
+      customer_phone: requestData.customerPhone,
+      status: "customer_approved",
+    };
+
+    // Update vehicle type and price if changed
+    if (requestData.selectedVehicle) {
+      updateData.vehicle_type = requestData.selectedVehicle;
+    }
+    if (requestData.newPrice !== undefined && requestData.newPrice !== null) {
+      updateData.price = requestData.newPrice;
+    }
+
     // Update the main reservation
     const { data: updatedReservation, error: updateError } = await supabase
       .from("reservations")
-      .update({
-        customer_id: userId,
-        customer_name: requestData.customerName,
-        customer_phone: requestData.customerPhone,
-        status: "customer_approved",
-      })
+      .update(updateData)
       .eq("id", requestData.reservationId)
       .select()
       .single();
@@ -142,14 +155,23 @@ serve(async (req) => {
 
     // Update return reservation if exists
     if (requestData.returnReservationCode) {
+      const returnUpdateData: Record<string, any> = {
+        customer_id: userId,
+        customer_name: requestData.customerName,
+        customer_phone: requestData.customerPhone,
+        status: "customer_approved",
+      };
+      
+      if (requestData.selectedVehicle) {
+        returnUpdateData.vehicle_type = requestData.selectedVehicle;
+      }
+      if (requestData.newPrice !== undefined && requestData.newPrice !== null) {
+        returnUpdateData.price = requestData.newPrice;
+      }
+
       const { error: returnUpdateError } = await supabase
         .from("reservations")
-        .update({
-          customer_id: userId,
-          customer_name: requestData.customerName,
-          customer_phone: requestData.customerPhone,
-          status: "customer_approved",
-        })
+        .update(returnUpdateData)
         .eq("reservation_code", requestData.returnReservationCode);
 
       if (returnUpdateError) {

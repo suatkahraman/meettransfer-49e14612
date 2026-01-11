@@ -53,10 +53,10 @@ serve(async (req) => {
       );
     }
 
-    // Try to find matching quick_booking_request to get pre-filled customer info
+    // Try to find matching quick_booking_request to get pre-filled customer info and all vehicle prices
     const { data: quickBooking } = await supabase
       .from("quick_booking_requests")
-      .select("customer_email, customer_phone, customer_name, customer_notes")
+      .select("customer_email, customer_phone, customer_name, customer_notes, all_vehicle_prices")
       .eq("pickup", reservation.pickup)
       .eq("dropoff", reservation.dropoff)
       .eq("pickup_date", reservation.pickup_date)
@@ -66,15 +66,28 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
+    // Parse all_vehicle_prices if it exists
+    let allVehiclePrices: Record<string, number> | null = null;
+    if (quickBooking?.all_vehicle_prices) {
+      try {
+        allVehiclePrices = typeof quickBooking.all_vehicle_prices === 'string' 
+          ? JSON.parse(quickBooking.all_vehicle_prices) 
+          : quickBooking.all_vehicle_prices;
+      } catch (e) {
+        console.error("Error parsing all_vehicle_prices:", e);
+      }
+    }
+
     // Merge quick booking customer info into reservation response
     const reservationWithCustomerInfo = {
       ...reservation,
       prefilled_email: quickBooking?.customer_email || null,
       prefilled_phone: quickBooking?.customer_phone || null,
       prefilled_name: quickBooking?.customer_name || null,
+      all_vehicle_prices: allVehiclePrices,
     };
 
-    console.log("Quick booking customer info found:", !!quickBooking);
+    console.log("Quick booking customer info found:", !!quickBooking, "Has vehicle prices:", !!allVehiclePrices);
 
     console.log("Reservation found:", reservation.id, "Status:", reservation.status);
 
