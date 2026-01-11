@@ -1028,6 +1028,30 @@ export type Database = {
           },
         ]
       }
+      price_thresholds: {
+        Row: {
+          created_at: string
+          id: string
+          min_price_eur: number
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          min_price_eur?: number
+          updated_at?: string
+          vehicle_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          min_price_eur?: number
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null

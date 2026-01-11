@@ -1,7 +1,7 @@
 // Minimum price thresholds by vehicle type (in EUR)
-// These are used to warn admins when auto-pricing seems too low
+// These are default fallbacks - actual values come from database via usePriceThresholds hook
 
-export const MIN_PRICE_THRESHOLDS: Record<string, number> = {
+export const DEFAULT_MIN_PRICE_THRESHOLDS: Record<string, number> = {
   'mercedes-vito': 50,
   'vip-mercedes': 60,
   'maybach-minibus': 70,
@@ -31,14 +31,17 @@ export interface PriceValidationResult {
  * @param price - The price to check
  * @param currency - The currency of the price
  * @param vehicleType - The vehicle type
+ * @param thresholds - Optional custom thresholds map (from database)
  * @returns Validation result with warning info
  */
 export function validatePrice(
   price: number,
   currency: string,
-  vehicleType: string
+  vehicleType: string,
+  thresholds?: Record<string, number>
 ): PriceValidationResult {
-  const minThreshold = MIN_PRICE_THRESHOLDS[vehicleType] || 50;
+  const thresholdsMap = thresholds || DEFAULT_MIN_PRICE_THRESHOLDS;
+  const minThreshold = thresholdsMap[vehicleType] || 50;
   const conversionRate = CURRENCY_TO_EUR[currency] || 1;
   const priceInEur = price * conversionRate;
   
@@ -59,14 +62,15 @@ export function validatePrice(
  */
 export function validateAllVehiclePrices(
   prices: Record<string, string>,
-  currency: string
+  currency: string,
+  thresholds?: Record<string, number>
 ): Record<string, PriceValidationResult> {
   const results: Record<string, PriceValidationResult> = {};
   
   Object.entries(prices).forEach(([vehicleType, priceStr]) => {
     const price = parseFloat(priceStr);
     if (price && price > 0) {
-      results[vehicleType] = validatePrice(price, currency, vehicleType);
+      results[vehicleType] = validatePrice(price, currency, vehicleType, thresholds);
     }
   });
   
@@ -78,9 +82,10 @@ export function validateAllVehiclePrices(
  */
 export function hasAnyLowPrice(
   prices: Record<string, string>,
-  currency: string
+  currency: string,
+  thresholds?: Record<string, number>
 ): boolean {
-  const results = validateAllVehiclePrices(prices, currency);
+  const results = validateAllVehiclePrices(prices, currency, thresholds);
   return Object.values(results).some(r => r.isLow);
 }
 
@@ -90,9 +95,10 @@ export function hasAnyLowPrice(
 export function getLowPriceWarnings(
   prices: Record<string, string>,
   currency: string,
-  vehicleLabels: Record<string, string>
+  vehicleLabels: Record<string, string>,
+  thresholds?: Record<string, number>
 ): string[] {
-  const results = validateAllVehiclePrices(prices, currency);
+  const results = validateAllVehiclePrices(prices, currency, thresholds);
   const warnings: string[] = [];
   
   Object.entries(results).forEach(([vehicleType, result]) => {

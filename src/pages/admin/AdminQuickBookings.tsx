@@ -68,6 +68,7 @@ import PriceHistoryCard from "@/components/admin/PriceHistoryCard";
 import { cn } from "@/lib/utils";
 import { getCurrencySymbol } from "@/lib/currency";
 import { validateAllVehiclePrices, validatePrice, hasAnyLowPrice, getLowPriceWarnings } from "@/lib/priceValidation";
+import { usePriceThresholds } from "@/hooks/usePriceThresholds";
 
 interface QuickBookingRequest {
   id: string;
@@ -128,6 +129,7 @@ type TabValue = "all" | "pending" | "price_sent" | "confirmed" | "other";
 
 export default function AdminQuickBookings() {
   const navigate = useNavigate();
+  const { thresholdsMap } = usePriceThresholds();
   const [requests, setRequests] = useState<QuickBookingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<QuickBookingRequest | null>(null);
@@ -948,13 +950,13 @@ export default function AdminQuickBookings() {
                 {selectedRequest.price && (
                   <Card className={cn(
                     "border-blue-200",
-                    validatePrice(selectedRequest.price, selectedRequest.price_currency, selectedRequest.vehicle_type).isLow 
+                    validatePrice(selectedRequest.price, selectedRequest.price_currency, selectedRequest.vehicle_type, thresholdsMap).isLow 
                       ? "bg-amber-50 dark:bg-amber-900/20 border-amber-300" 
                       : "bg-blue-50 dark:bg-blue-900/20"
                   )}>
                     <CardContent className="p-3">
                       {/* Low price warning */}
-                      {validatePrice(selectedRequest.price, selectedRequest.price_currency, selectedRequest.vehicle_type).isLow && (
+                      {validatePrice(selectedRequest.price, selectedRequest.price_currency, selectedRequest.vehicle_type, thresholdsMap).isLow && (
                         <div className="flex items-center gap-2 mb-2 pb-2 border-b border-amber-200">
                           <AlertTriangle className="h-4 w-4 text-amber-600" />
                           <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
@@ -968,7 +970,7 @@ export default function AdminQuickBookings() {
                         </span>
                         <span className={cn(
                           "text-lg font-bold",
-                          validatePrice(selectedRequest.price, selectedRequest.price_currency, selectedRequest.vehicle_type).isLow
+                          validatePrice(selectedRequest.price, selectedRequest.price_currency, selectedRequest.vehicle_type, thresholdsMap).isLow
                             ? "text-amber-600 line-through"
                             : "text-green-600"
                         )}>
@@ -1303,7 +1305,7 @@ export default function AdminQuickBookings() {
               const singlePrice = parseFloat(price);
               
               if (hasMultiVehiclePrices) {
-                const warnings = getLowPriceWarnings(allVehiclePrices, currency, vehicleLabels);
+                const warnings = getLowPriceWarnings(allVehiclePrices, currency, vehicleLabels, thresholdsMap);
                 if (warnings.length > 0) {
                   return (
                     <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg p-3">
@@ -1330,7 +1332,7 @@ export default function AdminQuickBookings() {
                   );
                 }
               } else if (singlePrice > 0 && selectedRequest) {
-                const validation = validatePrice(singlePrice, currency, selectedRequest.vehicle_type);
+                const validation = validatePrice(singlePrice, currency, selectedRequest.vehicle_type, thresholdsMap);
                 if (validation.isLow) {
                   return (
                     <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg p-3">

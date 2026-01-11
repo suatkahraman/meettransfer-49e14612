@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft, Settings, Users, Shield, ShieldAlert, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Settings, Users, Shield, ShieldAlert, ChevronRight, Euro } from 'lucide-react';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 
 const AdminSettings = () => {
@@ -54,6 +54,26 @@ const AdminSettings = () => {
             <CardContent>
               <p className="text-muted-foreground text-sm">
                 Rate limiting aktif: 5 dakikada 5 başarısız deneme sonrası hesap 15 dakika kilitlenir.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/admin/price-thresholds')}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Euro className="h-5 w-5 text-amber-600" />
+                  Minimum Fiyat Eşikleri
+                </CardTitle>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <CardDescription>
+                Otomatik fiyat uyarı limitlerini yönetin
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground text-sm">
+                Araç tiplerine göre minimum fiyat eşikleri belirleyin. Bu eşiklerin altındaki fiyatlar için uyarı gösterilir.
               </p>
             </CardContent>
           </Card>
