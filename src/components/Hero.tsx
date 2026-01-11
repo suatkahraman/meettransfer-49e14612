@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import CityMarquee from "@/components/website/CityMarquee";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -57,6 +58,33 @@ export const Hero = () => {
   const [hourlyTime, setHourlyTime] = useState("");
   const [hourlyDuration, setHourlyDuration] = useState("4");
   const [hourlyDatePopoverOpen, setHourlyDatePopoverOpen] = useState(false);
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
+
+  // Fetch available cities from hourly_rental_prices
+  useEffect(() => {
+    const fetchCities = async () => {
+      setLoadingCities(true);
+      try {
+        const { data, error } = await supabase
+          .from("hourly_rental_prices")
+          .select("city")
+          .order("city");
+        
+        if (error) throw error;
+        
+        // Get unique cities
+        const uniqueCities = [...new Set(data?.map(item => item.city) || [])];
+        setAvailableCities(uniqueCities);
+      } catch (error) {
+        console.error("Error fetching cities:", error);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+
+    fetchCities();
+  }, []);
 
   const handleRideContinue = () => {
     const missingFields: string[] = [];
@@ -291,14 +319,21 @@ export const Hero = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="relative">
                       <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("city") || "City"}</label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
-                        <GooglePlacesAutocomplete 
-                          onPlaceSelected={handleHourlyCitySelected} 
-                          placeholder={t("selectCity") || "Istanbul, Antalya, Dubai..."} 
-                          className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-primary text-foreground placeholder:text-muted-foreground rounded-xl transition-all" 
-                        />
-                      </div>
+                      <Select value={hourlyCity} onValueChange={setHourlyCity}>
+                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                          <div className="flex items-center">
+                            <MapPin className="mr-2 h-5 w-5 text-primary" />
+                            <SelectValue placeholder={loadingCities ? (t("loading") || "Loading...") : (t("selectCity") || "Select city")} />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="z-50 max-h-[300px]">
+                          {availableCities.map((city) => (
+                            <SelectItem key={city} value={city}>
+                              {city}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="relative">
                       <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("duration") || "Duration"}</label>
