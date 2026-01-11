@@ -451,7 +451,7 @@ const BookingPage = () => {
         if (customerEmail) customerInfoParams.set("email", customerEmail.trim());
         if (customerName) customerInfoParams.set("name", customerName.trim());
         
-        navigate(`/quick-booking-customer-info?${customerInfoParams.toString()}`);
+        navigate(`/quick-booking-info?${customerInfoParams.toString()}`);
         toast.success(t("bookingConfirmed") || "Booking confirmed! Please complete your details.");
       } else {
         // No price available - use old flow (waiting for admin to set price)
