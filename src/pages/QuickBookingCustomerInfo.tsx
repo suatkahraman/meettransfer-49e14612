@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, User, Phone, Mail, MapPin, Calendar, Clock, Car, CheckCircle, Lock, Eye, EyeOff } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -414,12 +415,10 @@ export default function QuickBookingCustomerInfo() {
                   <Phone className="h-4 w-4" />
                   Phone Number *
                 </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+90 555 123 4567"
+                <PhoneInput
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(value) => setFormData({ ...formData, phone: value })}
+                  defaultCountry="TR"
                   className={errors.phone ? "border-destructive" : ""}
                 />
                 {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
@@ -631,12 +630,10 @@ export default function QuickBookingCustomerInfo() {
                 <Phone className="h-4 w-4" />
                 Phone Number *
               </Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+90 555 123 4567"
+              <PhoneInput
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(value) => setFormData({ ...formData, phone: value })}
+                defaultCountry="TR"
                 className={errors.phone ? "border-destructive" : ""}
               />
               {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
