@@ -633,6 +633,48 @@ export type Database = {
         }
         Relationships: []
       }
+      hourly_rental_prices: {
+        Row: {
+          city: string
+          created_at: string
+          created_by: string | null
+          duration_type: string
+          hourly_rate: number | null
+          id: string
+          is_active: boolean
+          price: number
+          price_currency: string
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          created_by?: string | null
+          duration_type: string
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean
+          price: number
+          price_currency?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          created_by?: string | null
+          duration_type?: string
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean
+          price?: number
+          price_currency?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       intercity_prices: {
         Row: {
           created_at: string

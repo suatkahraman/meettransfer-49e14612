@@ -1,0 +1,619 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { ArrowLeft, Plus, Pencil, Trash2, Clock, Car, MapPin, Euro, DollarSign, PoundSterling } from "lucide-react";
+
+interface HourlyRentalPrice {
+  id: string;
+  city: string;
+  vehicle_type: string;
+  duration_type: string;
+  price: number;
+  price_currency: string;
+  hourly_rate: number | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+const vehicleTypes = [
+  { value: "vito", label: "Mercedes Vito" },
+  { value: "vito_vip", label: "Mercedes Vito VIP" },
+  { value: "maybach", label: "Mercedes Maybach" },
+  { value: "sprinter", label: "Mercedes Sprinter" },
+];
+
+const durationTypes = [
+  { value: "4h", label: "4 Saat (Yarım Gün)" },
+  { value: "8h", label: "8 Saat (Tam Gün)" },
+  { value: "custom", label: "Özel (Saatlik)" },
+];
+
+const currencies = [
+  { value: "EUR", label: "Euro (€)", icon: Euro },
+  { value: "USD", label: "Dolar ($)", icon: DollarSign },
+  { value: "GBP", label: "Sterlin (£)", icon: PoundSterling },
+];
+
+const defaultCities = [
+  "Istanbul",
+  "Antalya",
+  "Bodrum",
+  "Dalaman",
+  "Izmir",
+  "Cappadocia",
+  "Bursa",
+  "Dubai",
+  "Cyprus",
+];
+
+const AdminHourlyRentalPrices = () => {
+  const navigate = useNavigate();
+  const { role, loading: roleLoading } = useUserRole();
+  const [prices, setPrices] = useState<HourlyRentalPrice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingPrice, setEditingPrice] = useState<HourlyRentalPrice | null>(null);
+  const [filterCity, setFilterCity] = useState<string>("all");
+  const [filterVehicle, setFilterVehicle] = useState<string>("all");
+
+  // Form state
+  const [formData, setFormData] = useState({
+    city: "",
+    vehicle_type: "vito",
+    duration_type: "4h",
+    price: "",
+    price_currency: "EUR",
+    hourly_rate: "",
+    is_active: true,
+  });
+
+  useEffect(() => {
+    if (!roleLoading && role !== "admin") {
+      navigate("/");
+      return;
+    }
+    if (role === "admin") {
+      fetchPrices();
+    }
+  }, [role, roleLoading, navigate]);
+
+  const fetchPrices = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("hourly_rental_prices")
+        .select("*")
+        .order("city", { ascending: true })
+        .order("vehicle_type", { ascending: true })
+        .order("duration_type", { ascending: true });
+
+      if (error) throw error;
+      setPrices(data || []);
+    } catch (error: any) {
+      toast.error("Fiyatlar yüklenirken hata oluştu");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.city || !formData.price) {
+      toast.error("Şehir ve fiyat zorunludur");
+      return;
+    }
+
+    try {
+      const payload = {
+        city: formData.city.trim(),
+        vehicle_type: formData.vehicle_type,
+        duration_type: formData.duration_type,
+        price: parseFloat(formData.price) || 0,
+        price_currency: formData.price_currency,
+        hourly_rate: formData.duration_type === "custom" ? parseFloat(formData.hourly_rate) || null : null,
+        is_active: formData.is_active,
+      };
+
+      if (editingPrice) {
+        const { error } = await supabase
+          .from("hourly_rental_prices")
+          .update(payload)
+          .eq("id", editingPrice.id);
+
+        if (error) throw error;
+        toast.success("Fiyat güncellendi");
+      } else {
+        const { error } = await supabase
+          .from("hourly_rental_prices")
+          .insert(payload);
+
+        if (error) {
+          if (error.code === "23505") {
+            toast.error("Bu şehir, araç ve süre kombinasyonu zaten mevcut");
+            return;
+          }
+          throw error;
+        }
+        toast.success("Fiyat eklendi");
+      }
+
+      setIsDialogOpen(false);
+      resetForm();
+      fetchPrices();
+    } catch (error: any) {
+      toast.error(error.message || "Bir hata oluştu");
+      console.error(error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Bu fiyatı silmek istediğinize emin misiniz?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("hourly_rental_prices")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      toast.success("Fiyat silindi");
+      fetchPrices();
+    } catch (error: any) {
+      toast.error("Silme işlemi başarısız");
+      console.error(error);
+    }
+  };
+
+  const handleEdit = (price: HourlyRentalPrice) => {
+    setEditingPrice(price);
+    setFormData({
+      city: price.city,
+      vehicle_type: price.vehicle_type,
+      duration_type: price.duration_type,
+      price: price.price.toString(),
+      price_currency: price.price_currency,
+      hourly_rate: price.hourly_rate?.toString() || "",
+      is_active: price.is_active,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const resetForm = () => {
+    setEditingPrice(null);
+    setFormData({
+      city: "",
+      vehicle_type: "vito",
+      duration_type: "4h",
+      price: "",
+      price_currency: "EUR",
+      hourly_rate: "",
+      is_active: true,
+    });
+  };
+
+  const toggleActive = async (id: string, currentState: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("hourly_rental_prices")
+        .update({ is_active: !currentState })
+        .eq("id", id);
+
+      if (error) throw error;
+      toast.success(currentState ? "Fiyat deaktif edildi" : "Fiyat aktif edildi");
+      fetchPrices();
+    } catch (error: any) {
+      toast.error("Durum güncellenemedi");
+      console.error(error);
+    }
+  };
+
+  const getCurrencySymbol = (currency: string) => {
+    switch (currency) {
+      case "EUR": return "€";
+      case "USD": return "$";
+      case "GBP": return "£";
+      default: return currency;
+    }
+  };
+
+  const getVehicleLabel = (value: string) => {
+    return vehicleTypes.find(v => v.value === value)?.label || value;
+  };
+
+  const getDurationLabel = (value: string) => {
+    return durationTypes.find(d => d.value === value)?.label || value;
+  };
+
+  // Filter prices
+  const filteredPrices = prices.filter(p => {
+    if (filterCity !== "all" && p.city !== filterCity) return false;
+    if (filterVehicle !== "all" && p.vehicle_type !== filterVehicle) return false;
+    return true;
+  });
+
+  // Get unique cities from prices
+  const uniqueCities = [...new Set(prices.map(p => p.city))].sort();
+
+  if (roleLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Saatlik Kiralama Fiyatları</h1>
+              <p className="text-muted-foreground">Şehir ve araç bazlı saatlik kiralama fiyatlarını yönetin</p>
+            </div>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) resetForm();
+          }}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Yeni Fiyat Ekle
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>{editingPrice ? "Fiyat Düzenle" : "Yeni Fiyat Ekle"}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {/* City */}
+                <div className="space-y-2">
+                  <Label htmlFor="city">Şehir</Label>
+                  <Select
+                    value={formData.city}
+                    onValueChange={(value) => setFormData({ ...formData, city: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Şehir seçin veya yazın" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {defaultCities.map((city) => (
+                        <SelectItem key={city} value={city}>
+                          {city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    placeholder="Veya yeni şehir adı yazın"
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  />
+                </div>
+
+                {/* Vehicle Type */}
+                <div className="space-y-2">
+                  <Label>Araç Tipi</Label>
+                  <Select
+                    value={formData.vehicle_type}
+                    onValueChange={(value) => setFormData({ ...formData, vehicle_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vehicleTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Duration Type */}
+                <div className="space-y-2">
+                  <Label>Süre Tipi</Label>
+                  <Select
+                    value={formData.duration_type}
+                    onValueChange={(value) => setFormData({ ...formData, duration_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {durationTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Price & Currency */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Fiyat</Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Para Birimi</Label>
+                    <Select
+                      value={formData.price_currency}
+                      onValueChange={(value) => setFormData({ ...formData, price_currency: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currencies.map((c) => (
+                          <SelectItem key={c.value} value={c.value}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Hourly Rate (for custom) */}
+                {formData.duration_type === "custom" && (
+                  <div className="space-y-2">
+                    <Label>Saatlik Ücret</Label>
+                    <Input
+                      type="number"
+                      placeholder="30"
+                      value={formData.hourly_rate}
+                      onChange={(e) => setFormData({ ...formData, hourly_rate: e.target.value })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Özel süre için saatlik ücret (örn: 30 €/saat)
+                    </p>
+                  </div>
+                )}
+
+                {/* Active Status */}
+                <div className="flex items-center justify-between">
+                  <Label>Aktif</Label>
+                  <Switch
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">İptal</Button>
+                </DialogClose>
+                <Button onClick={handleSubmit}>
+                  {editingPrice ? "Güncelle" : "Ekle"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <MapPin className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{uniqueCities.length}</p>
+                  <p className="text-sm text-muted-foreground">Şehir</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-accent/10">
+                  <Car className="h-5 w-5 text-accent" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{prices.length}</p>
+                  <p className="text-sm text-muted-foreground">Fiyat Kaydı</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-500/10">
+                  <Clock className="h-5 w-5 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{prices.filter(p => p.is_active).length}</p>
+                  <p className="text-sm text-muted-foreground">Aktif</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-orange-500/10">
+                  <Euro className="h-5 w-5 text-orange-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {prices.length > 0 ? Math.min(...prices.filter(p => p.price > 0).map(p => p.price)) : 0}€
+                  </p>
+                  <p className="text-sm text-muted-foreground">Min Fiyat</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Filtreler</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4">
+              <div className="w-48">
+                <Label className="text-sm mb-2 block">Şehir</Label>
+                <Select value={filterCity} onValueChange={setFilterCity}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tüm Şehirler</SelectItem>
+                    {uniqueCities.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-48">
+                <Label className="text-sm mb-2 block">Araç Tipi</Label>
+                <Select value={filterVehicle} onValueChange={setFilterVehicle}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tüm Araçlar</SelectItem>
+                    {vehicleTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Prices Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Fiyat Listesi</CardTitle>
+            <CardDescription>
+              {filteredPrices.length} kayıt gösteriliyor
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Şehir</TableHead>
+                    <TableHead>Araç</TableHead>
+                    <TableHead>Süre</TableHead>
+                    <TableHead className="text-right">Fiyat</TableHead>
+                    <TableHead className="text-right">Saatlik</TableHead>
+                    <TableHead className="text-center">Durum</TableHead>
+                    <TableHead className="text-right">İşlemler</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredPrices.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        Henüz fiyat kaydı bulunmuyor
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredPrices.map((price) => (
+                      <TableRow key={price.id} className={!price.is_active ? "opacity-50" : ""}>
+                        <TableCell className="font-medium">{price.city}</TableCell>
+                        <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
+                        <TableCell>{getDurationLabel(price.duration_type)}</TableCell>
+                        <TableCell className="text-right font-semibold">
+                          {price.price > 0 ? `${getCurrencySymbol(price.price_currency)}${price.price}` : "-"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {price.hourly_rate ? `${getCurrencySymbol(price.price_currency)}${price.hourly_rate}/saat` : "-"}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Switch
+                            checked={price.is_active}
+                            onCheckedChange={() => toggleActive(price.id, price.is_active)}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEdit(price)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => handleDelete(price.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default AdminHourlyRentalPrices;

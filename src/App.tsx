@@ -71,6 +71,7 @@ const AdminFilteredReservations = lazy(() => import("./pages/admin/AdminFiltered
 const AdminMonthlyProfit = lazy(() => import("./pages/admin/AdminMonthlyProfit"));
 const AdminRegionPrices = lazy(() => import("./pages/admin/AdminRegionPrices"));
 const AdminLoginAttempts = lazy(() => import("./pages/admin/AdminLoginAttempts"));
+const AdminHourlyRentalPrices = lazy(() => import("./pages/admin/AdminHourlyRentalPrices"));
 // Customer Portal Pages
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const ConfirmBooking = lazy(() => import("./pages/ConfirmBooking"));
@@ -281,6 +282,7 @@ const App = () => (
               <Route path="/admin/monthly-profit" element={<AdminRoute><LazyRoute><AdminMonthlyProfit /></LazyRoute></AdminRoute>} />
               <Route path="/admin/region-prices" element={<AdminRoute><LazyRoute><AdminRegionPrices /></LazyRoute></AdminRoute>} />
               <Route path="/admin/login-attempts" element={<AdminRoute><LazyRoute><AdminLoginAttempts /></LazyRoute></AdminRoute>} />
+              <Route path="/admin/hourly-rental-prices" element={<AdminRoute><LazyRoute><AdminHourlyRentalPrices /></LazyRoute></AdminRoute>} />
               
               {/* Agency Routes - Protected */}
               <Route path="/agency" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyHome /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
