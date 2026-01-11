@@ -616,12 +616,20 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
       <motion.div 
         layout
         className={cn(
-          "relative overflow-hidden rounded-3xl transition-all duration-500",
+          "relative overflow-hidden transition-all duration-500",
           "bg-gradient-to-br from-card via-card to-muted/30",
           "shadow-2xl border border-border/50",
           "backdrop-blur-xl",
-          isOpen ? "h-[450px]" : "h-auto"
+          // Mobile: full screen when open
+          isOpen 
+            ? "fixed inset-0 z-[100] rounded-none md:relative md:inset-auto md:rounded-3xl md:h-[500px]" 
+            : "h-auto rounded-3xl"
         )}
+        style={{ 
+          // Mobile safe areas
+          paddingTop: isOpen ? 'env(safe-area-inset-top)' : undefined,
+          paddingBottom: isOpen ? 'env(safe-area-inset-bottom)' : undefined,
+        }}
       >
         {/* Decorative gradient orbs */}
         <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl pointer-events-none" />
@@ -835,11 +843,14 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="relative flex flex-col z-10 overflow-hidden"
-              style={{ height: "calc(100% - 88px)" }}
+              className="relative flex flex-col z-10 overflow-hidden h-[calc(100%-88px)] md:h-[calc(100%-88px)]"
+              style={{ 
+                // On mobile, account for safe areas in content height
+                height: 'calc(100% - 88px - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+              }}
             >
               {/* Messages Area */}
-              <ScrollArea className="flex-1 px-5 py-4">
+              <ScrollArea className="flex-1 px-4 py-4 md:px-5">
                 <div className="space-y-5">
                   {messages.map((msg, index) => (
                     <motion.div
@@ -861,7 +872,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                         </motion.div>
                       )}
                       
-                      <div className="flex flex-col gap-2 max-w-[80%]">
+                      <div className="flex flex-col gap-2 max-w-[85%] md:max-w-[80%]">
                         <div className="flex items-start gap-2">
                           <motion.div
                             whileHover={{ scale: 1.01 }}
@@ -971,7 +982,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
               </ScrollArea>
 
               {/* Input Area */}
-              <div className="p-4 border-t border-border/30 bg-gradient-to-t from-muted/50 to-transparent">
+              <div className="p-3 md:p-4 border-t border-border/30 bg-gradient-to-t from-muted/50 to-transparent" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
                 {/* Browser Support Warning */}
                 <AnimatePresence>
                   {showBrowserWarning && (
@@ -1027,7 +1038,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                       size="icon"
                       variant="outline"
                       className={cn(
-                        "h-12 w-12 rounded-xl border-2 transition-all relative",
+                        "h-11 w-11 md:h-12 md:w-12 rounded-xl border-2 transition-all relative touch-manipulation",
                         isRecording 
                           ? "bg-destructive/10 border-destructive text-destructive hover:bg-destructive/20" 
                           : !isSpeechSupported
@@ -1071,7 +1082,8 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                         : (placeholderMessages[language] || placeholderMessages.EN)
                       }
                       disabled={isLoading || isRecording}
-                      className="h-12 pr-4 rounded-xl bg-background border-2 border-border focus:border-primary transition-all placeholder:text-muted-foreground/60"
+                      className="h-11 md:h-12 pr-4 rounded-xl bg-background border-2 border-border focus:border-primary transition-all placeholder:text-muted-foreground/60 text-base touch-manipulation"
+                      style={{ fontSize: '16px' }} // Prevents iOS zoom on focus
                     />
                   </div>
                   
@@ -1082,7 +1094,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                       disabled={isLoading || !input.trim()}
                       size="icon"
                       className={cn(
-                        "h-12 w-12 rounded-xl transition-all",
+                        "h-11 w-11 md:h-12 md:w-12 rounded-xl transition-all touch-manipulation",
                         input.trim() 
                           ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg hover:shadow-xl" 
                           : "bg-muted text-muted-foreground"
