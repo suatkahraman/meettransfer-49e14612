@@ -11,44 +11,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Fallback exchange rates
-const FALLBACK_RATES: Record<string, Record<string, number>> = {
-  'EUR': { 'USD': 1.08, 'TRY': 37.5, 'GBP': 0.85, 'AED': 3.97, 'AUD': 1.65 },
-  'USD': { 'EUR': 0.93, 'TRY': 34.5, 'GBP': 0.79, 'AED': 3.67, 'AUD': 1.53 },
-  'TRY': { 'EUR': 0.027, 'USD': 0.029, 'GBP': 0.023, 'AED': 0.11, 'AUD': 0.044 },
-  'GBP': { 'EUR': 1.18, 'USD': 1.27, 'TRY': 44.1, 'AED': 4.67, 'AUD': 1.94 },
-  'AED': { 'EUR': 0.25, 'USD': 0.27, 'TRY': 9.4, 'GBP': 0.21, 'AUD': 0.42 },
-  'AUD': { 'EUR': 0.61, 'USD': 0.65, 'TRY': 22.5, 'GBP': 0.52, 'AED': 2.40 },
-};
 
-// Convert €3 to target currency
-async function convertEuroToTargetCurrency(targetCurrency: string): Promise<number> {
-  const discountEuros = 3;
-  
-  if (targetCurrency === 'EUR') {
-    return discountEuros;
-  }
-  
-  try {
-    const response = await fetch(
-      `https://api.frankfurter.app/latest?from=EUR&to=${targetCurrency}`,
-      { signal: AbortSignal.timeout(3000) }
-    );
-    if (response.ok) {
-      const data = await response.json();
-      const rate = data.rates[targetCurrency];
-      if (rate) {
-        return Math.round(discountEuros * rate);
-      }
-    }
-  } catch (e) {
-    console.error("Currency conversion API error:", e);
-  }
-  
-  // Fallback
-  const rate = FALLBACK_RATES['EUR']?.[targetCurrency] || 1;
-  console.log(`Using fallback rate for discount: EUR -> ${targetCurrency} = ${rate}`);
-  return Math.round(discountEuros * rate);
+// Calculate 3% discount
+function calculatePercentageDiscount(price: number): number {
+  const discountPercentage = 3;
+  return Math.round(price * discountPercentage / 100);
 }
 
 // Multi-language translations for discount email
@@ -359,11 +326,11 @@ serve(async (req) => {
 
     console.log(`Current price: ${currentPrice} ${currentCurrency}`);
 
-    // Calculate discount in target currency (€3 equivalent)
-    const discountAmount = await convertEuroToTargetCurrency(currentCurrency);
+    // Calculate 3% discount
+    const discountAmount = calculatePercentageDiscount(currentPrice);
     const newPrice = Math.max(currentPrice - discountAmount, 1); // Ensure price doesn't go below 1
 
-    console.log(`Discount: ${discountAmount} ${currentCurrency}, New price: ${newPrice}`);
+    console.log(`Discount (3%): ${discountAmount} ${currentCurrency}, New price: ${newPrice}`);
 
     // Update the booking with new price and reset status
     if (bookingType === 'reservation') {
@@ -373,6 +340,7 @@ serve(async (req) => {
           price: newPrice,
           status: 'waiting_for_customer_approval',
           discount_amount: discountAmount,
+          discount_percentage: 3,
         })
         .eq('id', reservation_id);
 
@@ -384,7 +352,7 @@ serve(async (req) => {
         price: newPrice,
         price_currency: currentCurrency,
         action: 'auto_discount',
-        customer_note: `Otomatik indirim: €3 = ${discountAmount} ${currentCurrency}`,
+        customer_note: `Otomatik indirim: %3 = ${discountAmount} ${currentCurrency}`,
       });
 
       // Notify admins
@@ -392,7 +360,7 @@ serve(async (req) => {
         body: {
           type: 'auto_discount_applied',
           title: 'Auto Discount Applied',
-          message: `Customer rejected price. Auto discount of €3 (${discountAmount} ${currentCurrency}) applied. New price: ${newPrice} ${currentCurrency}`,
+          message: `Customer rejected price. 3% discount (${discountAmount} ${currentCurrency}) applied. New price: ${newPrice} ${currentCurrency}`,
           notify_admins: true,
           reservation_id: reservation_id,
           send_push: true,
@@ -415,7 +383,7 @@ serve(async (req) => {
         price: newPrice,
         price_currency: currentCurrency,
         action: 'auto_discount',
-        customer_note: `Otomatik indirim: €3 = ${discountAmount} ${currentCurrency}`,
+        customer_note: `Otomatik indirim: %3 = ${discountAmount} ${currentCurrency}`,
       });
 
       // Notify admins
@@ -423,7 +391,7 @@ serve(async (req) => {
         body: {
           type: 'auto_discount_applied',
           title: 'Auto Discount Applied (Quick Booking)',
-          message: `Customer rejected price. Auto discount of €3 (${discountAmount} ${currentCurrency}) applied. New price: ${newPrice} ${currentCurrency}`,
+          message: `Customer rejected price. 3% discount (${discountAmount} ${currentCurrency}) applied. New price: ${newPrice} ${currentCurrency}`,
           notify_admins: true,
           send_push: true,
         }
