@@ -643,7 +643,7 @@ export default function QuickBookingCustomerInfo() {
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                Email Address *
+                {t("emailAddress") || "Email Address"} *
               </Label>
               <Input
                 id="email"
@@ -654,6 +654,9 @@ export default function QuickBookingCustomerInfo() {
                 className={errors.email ? "border-destructive" : ""}
               />
               {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+              <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-md">
+                📧 {t("emailInfoDescription") || "Your reservation details will be sent to your email. You can complete your reservation later using the link provided."}
+              </p>
             </div>
 
             <div className="space-y-2">
