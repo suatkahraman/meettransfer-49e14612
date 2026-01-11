@@ -189,3 +189,33 @@ All colors MUST be HSL.
 .animate-scale-in {
   animation: scaleIn 0.3s ease-out forwards;
 }
+
+/* Mobile AI Chat fullscreen styles */
+@supports (padding: env(safe-area-inset-top)) {
+  .ai-chat-mobile-fullscreen {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Prevent iOS zoom on input focus */
+@media screen and (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Mobile touch improvements */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth keyboard handling for mobile chat */
+@supports (height: 100dvh) {
+  .mobile-chat-height {
+    height: 100dvh;
+  }
+}
