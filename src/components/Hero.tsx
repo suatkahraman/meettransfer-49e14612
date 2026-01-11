@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { GooglePlacesAutocomplete, PlaceDetails, GooglePlacesAutocompleteProps } from "@/components/ui/google-places-autocomplete";
@@ -49,6 +49,7 @@ export const Hero = () => {
   const [dropoff, setDropoff] = useState("");
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState("");
+  const [passengers, setPassengers] = useState("2");
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -141,6 +142,7 @@ export const Hero = () => {
     params.set("dropoff", dropoff);
     params.set("date", format(date!, "yyyy-MM-dd"));
     params.set("time", time);
+    params.set("passengers", passengers);
     
     navigate(`/book?${params.toString()}`);
   };
@@ -308,8 +310,8 @@ export const Hero = () => {
                     </button>
                   </div>
 
-                  {/* Date & Time */}
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Date, Time & Passengers */}
+                  <div className="grid grid-cols-3 gap-4">
                     <div className="relative">
                       <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupDate")}</label>
                       <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
@@ -321,8 +323,8 @@ export const Hero = () => {
                               !date && "text-muted-foreground"
                             )}
                           >
-                            <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
-                            {date ? format(date, "dd MMM yyyy") : <span>{t("selectDate")}</span>}
+                            <CalendarIcon className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
+                            <span className="truncate">{date ? format(date, "dd MMM") : t("selectDate")}</span>
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 z-50" align="start">
@@ -342,13 +344,31 @@ export const Hero = () => {
                       <Select value={time} onValueChange={setTime}>
                         <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
                           <div className="flex items-center">
-                            <Clock className="mr-2 h-5 w-5 text-primary" />
+                            <Clock className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
                             <SelectValue placeholder={t("selectTime")} />
                           </div>
                         </SelectTrigger>
                         <SelectContent className="max-h-[300px] z-50">
                           {timeOptions.map((opt) => (
                             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("passengers") || "Passengers"}</label>
+                      <Select value={passengers} onValueChange={setPassengers}>
+                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                          <div className="flex items-center">
+                            <Users className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
+                            <SelectValue />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px] z-50">
+                          {Array.from({ length: 18 }, (_, i) => i + 1).map((num) => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num} {num === 1 ? (t("passenger") || "passenger") : (t("passengers") || "passengers")}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
