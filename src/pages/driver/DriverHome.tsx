@@ -21,6 +21,8 @@ import DriverInfoEditor from '@/components/driver/DriverInfoEditor';
 import DriverStatsCard from '@/components/driver/DriverStatsCard';
 import JobCategoryCard from '@/components/driver/JobCategoryCard';
 import FutureMonthCard from '@/components/driver/FutureMonthCard';
+import DayJobCard from '@/components/driver/DayJobCard';
+
 interface Reservation {
   id: string;
   customer_id: string;
@@ -207,23 +209,30 @@ const DriverHome = () => {
 
   // Get current date/time for separating upcoming vs past
   const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
 
   // Separate reservations by status and time
-  // Pending = awaiting driver confirmation (sent_to_driver, assigned) OR confirmed but driver_confirmed=false (updated after initial confirmation)
+  // Pending = awaiting driver confirmation (sent_to_driver, assigned) OR confirmed but driver_confirmed=false
   const pendingJobs = reservations.filter(r => 
     r.status === 'sent_to_driver' || 
     r.status === 'assigned' ||
     (r.status === 'confirmed' && r.driver_confirmed === false)
   );
-  // Active = driver confirmed and status is confirmed/active
-  const activeJobs = reservations.filter(r => 
-    r.status === 'active' || 
-    (r.status === 'confirmed' && r.driver_confirmed === true)
-  );
   
-  // Only show completed jobs from current month (older ones go to history)
+  // Confirmed jobs (driver_confirmed = true) for current month - these go to day cards
+  const confirmedCurrentMonthJobs = reservations.filter(r => {
+    if (r.status !== 'active' && !(r.status === 'confirmed' && r.driver_confirmed === true)) return false;
+    const pickupDate = new Date(r.pickup_date);
+    const jobMonth = pickupDate.getMonth();
+    const jobYear = pickupDate.getFullYear();
+    
+    // Only current month jobs
+    return jobYear === currentYear && jobMonth === currentMonth;
+  });
+  
+  // Completed jobs (past dates or status=completed) for current month
   const completedJobs = reservations.filter(r => {
     if (r.status !== 'completed') return false;
     const pickupDate = new Date(r.pickup_date);
@@ -238,6 +247,43 @@ const DriverHome = () => {
     ];
     return t(monthKeys[month]) || monthKeys[month];
   };
+
+  // Day name helper
+  const getDayName = (date: Date): string => {
+    const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayNamesMap: Record<string, Record<string, string>> = {
+      TR: { sunday: 'Pazar', monday: 'Pazartesi', tuesday: 'Salı', wednesday: 'Çarşamba', thursday: 'Perşembe', friday: 'Cuma', saturday: 'Cumartesi' },
+      EN: { sunday: 'Sunday', monday: 'Monday', tuesday: 'Tuesday', wednesday: 'Wednesday', thursday: 'Thursday', friday: 'Friday', saturday: 'Saturday' },
+      DE: { sunday: 'Sonntag', monday: 'Montag', tuesday: 'Dienstag', wednesday: 'Mittwoch', thursday: 'Donnerstag', friday: 'Freitag', saturday: 'Samstag' },
+      FR: { sunday: 'Dimanche', monday: 'Lundi', tuesday: 'Mardi', wednesday: 'Mercredi', thursday: 'Jeudi', friday: 'Vendredi', saturday: 'Samedi' },
+      RU: { sunday: 'Воскресенье', monday: 'Понедельник', tuesday: 'Вторник', wednesday: 'Среда', thursday: 'Четверг', friday: 'Пятница', saturday: 'Суббота' },
+      AR: { sunday: 'الأحد', monday: 'الاثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس', friday: 'الجمعة', saturday: 'السبت' }
+    };
+    const lang = navigator.language.split('-')[0].toUpperCase();
+    const dayKey = dayKeys[date.getDay()];
+    return dayNamesMap[lang]?.[dayKey] || dayNamesMap['TR'][dayKey];
+  };
+
+  // Group current month confirmed jobs by day
+  const currentMonthDayCards = useMemo(() => {
+    const grouped: Record<string, { date: Date; jobs: Reservation[] }> = {};
+    
+    confirmedCurrentMonthJobs.forEach(job => {
+      const pickupDate = new Date(job.pickup_date);
+      const key = job.pickup_date; // YYYY-MM-DD format
+      
+      if (!grouped[key]) {
+        grouped[key] = {
+          date: pickupDate,
+          jobs: []
+        };
+      }
+      grouped[key].jobs.push(job);
+    });
+
+    // Convert to array and sort by date
+    return Object.values(grouped).sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [confirmedCurrentMonthJobs]);
 
   // Future months reservations (active/confirmed jobs for months after current month)
   const futureMonthsData = useMemo(() => {
@@ -277,15 +323,18 @@ const DriverHome = () => {
     });
   }, [reservations, currentMonth, currentYear]);
 
+  // Count for header badges
+  const activeJobsCount = confirmedCurrentMonthJobs.length;
+
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Compact mobile-optimized header */}
       <header className="bg-primary text-primary-foreground py-2.5 px-3 sm:py-3 sm:px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg safe-area-inset-top">
         <div className="flex items-center gap-2 min-w-0">
           <h1 className="text-base sm:text-lg font-serif font-bold truncate">{t('driverPanel')}</h1>
-          {activeJobs.length > 0 && (
+          {activeJobsCount > 0 && (
             <Badge variant="secondary" className="bg-green-500 text-white hover:bg-green-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
-              {activeJobs.length}
+              {activeJobsCount}
             </Badge>
           )}
           {pendingJobs.length > 0 && (
@@ -522,50 +571,69 @@ const DriverHome = () => {
               </Button>
             </div>
 
-            {/* Job Category Cards */}
+            {/* Job Category Cards - New Order: Pending → Completed → Day Cards → Future Months */}
             <div className="space-y-3">
-              {/* Pending Jobs Card */}
-              <JobCategoryCard
-                icon={AlertCircle}
-                title={t('pendingJobs')}
-                count={pendingJobs.length}
-                colorClass="orange"
-                subtitle={pendingJobs.length > 0 ? t('tapToView') || 'Görüntülemek için dokun' : t('noPendingJobs') || 'Bekleyen iş yok'}
-                nextJob={pendingJobs.length > 0 ? {
-                  time: pendingJobs[0].pickup_time.slice(0, 5),
-                  route: `${pendingJobs[0].pickup_place_name || pendingJobs[0].pickup.slice(0, 20)} → ${pendingJobs[0].dropoff_place_name || pendingJobs[0].dropoff.slice(0, 20)}`
-                } : undefined}
-                onClick={() => navigate('/driver/jobs/pending')}
-              />
+              {/* 1. Pending Jobs Card */}
+              {pendingJobs.length > 0 && (
+                <JobCategoryCard
+                  icon={AlertCircle}
+                  title={t('pendingJobs')}
+                  count={pendingJobs.length}
+                  colorClass="orange"
+                  subtitle={t('tapToView') || 'Görüntülemek için dokun'}
+                  nextJob={{
+                    time: pendingJobs[0].pickup_time.slice(0, 5),
+                    route: `${pendingJobs[0].pickup_place_name || pendingJobs[0].pickup.slice(0, 20)} → ${pendingJobs[0].dropoff_place_name || pendingJobs[0].dropoff.slice(0, 20)}`
+                  }}
+                  onClick={() => navigate('/driver/jobs/pending')}
+                />
+              )}
 
-              {/* Active Jobs Card */}
-              <JobCategoryCard
-                icon={Car}
-                title={t('activeJobs')}
-                count={activeJobs.length}
-                colorClass="blue"
-                subtitle={activeJobs.length > 0 ? t('tapToView') || 'Görüntülemek için dokun' : t('noActiveJobs') || 'Aktif iş yok'}
-                nextJob={activeJobs.length > 0 ? {
-                  time: activeJobs[0].pickup_time.slice(0, 5),
-                  route: `${activeJobs[0].pickup_place_name || activeJobs[0].pickup.slice(0, 20)} → ${activeJobs[0].dropoff_place_name || activeJobs[0].dropoff.slice(0, 20)}`
-                } : undefined}
-                onClick={() => navigate('/driver/jobs/active')}
-              />
-
-              {/* Completed Jobs Card */}
-              <JobCategoryCard
-                icon={CheckCircle2}
-                title={t('completedJobs')}
-                count={completedJobs.length}
-                colorClass="green"
-                subtitle={completedJobs.length > 0 ? `${t('thisMonth') || 'Bu ay'} - ${t('tapToView') || 'Görüntülemek için dokun'}` : t('noCompletedJobs') || 'Bu ay tamamlanan iş yok'}
-                onClick={() => navigate('/driver/jobs/completed')}
-              />
+              {/* 2. Completed Jobs Card */}
+              {completedJobs.length > 0 && (
+                <JobCategoryCard
+                  icon={CheckCircle2}
+                  title={t('completedJobs')}
+                  count={completedJobs.length}
+                  colorClass="green"
+                  subtitle={`${t('thisMonth') || 'Bu ay'} - ${t('tapToView') || 'Görüntülemek için dokun'}`}
+                  onClick={() => navigate('/driver/jobs/completed')}
+                />
+              )}
             </div>
 
-            {/* Future Months Section */}
+            {/* 3. Current Month Day Cards - Only days with confirmed jobs */}
+            {currentMonthDayCards.length > 0 && (
+              <div className="mt-4 space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground px-1">
+                  {getMonthName(currentMonth)} {currentYear} - {t('activeJobs') || 'Onaylanan İşler'}
+                </h3>
+                <div className="space-y-2">
+                  {currentMonthDayCards.map((dayData) => {
+                    const firstJob = dayData.jobs.sort((a, b) => a.pickup_time.localeCompare(b.pickup_time))[0];
+                    const activeCount = dayData.jobs.filter(j => j.status === 'active').length;
+                    
+                    return (
+                      <DayJobCard
+                        key={dayData.date.toISOString()}
+                        dayNumber={dayData.date.getDate()}
+                        monthName={getMonthName(dayData.date.getMonth())}
+                        dayName={getDayName(dayData.date)}
+                        totalJobs={dayData.jobs.length}
+                        activeJobs={activeCount}
+                        firstJobTime={firstJob.pickup_time.slice(0, 5)}
+                        firstJobRoute={`${firstJob.pickup_place_name || firstJob.pickup.slice(0, 15)} → ${firstJob.dropoff_place_name || firstJob.dropoff.slice(0, 15)}`}
+                        onClick={() => navigate(`/driver/jobs/active?date=${dayData.jobs[0].pickup_date}`)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 4. Future Months Section */}
             {futureMonthsData.length > 0 && (
-              <div className="mt-6 space-y-3">
+              <div className="mt-4 space-y-3">
                 <h3 className="text-sm font-semibold text-muted-foreground px-1">
                   {t('futureReservations') || 'İleri Tarihli Rezervasyonlar'}
                 </h3>
@@ -588,6 +656,14 @@ const DriverHome = () => {
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {/* Empty state when no jobs at all */}
+            {pendingJobs.length === 0 && completedJobs.length === 0 && currentMonthDayCards.length === 0 && futureMonthsData.length === 0 && (
+              <div className="text-center py-8">
+                <Car className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
+                <p className="text-sm text-muted-foreground">{t('noJobsAssigned')}</p>
               </div>
             )}
 
