@@ -14,6 +14,9 @@ import VideoPromo from "@/components/website/VideoPromo";
 import HourlyRentalSection from "@/components/website/HourlyRentalSection";
 import StatsCounter from "@/components/website/StatsCounter";
 import LivePriceCalculator from "@/components/website/LivePriceCalculator";
+import TrustBar from "@/components/website/TrustBar";
+import FleetIconsBar from "@/components/website/FleetIconsBar";
+import ReviewPlatformLogos from "@/components/website/ReviewPlatformLogos";
 
 
 const Index = () => {
@@ -38,14 +41,17 @@ const Index = () => {
         ]}
       />
       <Hero />
+      <TrustBar />
       <BookingForm />
       <LivePriceCalculator />
+      <FleetIconsBar />
       <StatsCounter />
       <WhyChooseUs />
       <Destinations />
       <HourlyRentalSection />
       <VideoPromo />
       <GoogleReviewsCarousel />
+      <ReviewPlatformLogos />
       <TrustedPartners />
       <PWAPromoBanner />
       <Footer />
