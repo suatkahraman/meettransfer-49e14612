@@ -186,19 +186,11 @@ serve(async (req) => {
     try {
       await supabase.functions.invoke("send-confirmation-email", {
         body: {
-          email: requestData.customerEmail,
-          customerName: requestData.customerName,
-          reservationCode: updatedReservation.reservation_code,
-          pickup: updatedReservation.pickup,
-          dropoff: updatedReservation.dropoff,
-          pickupDate: updatedReservation.pickup_date,
-          pickupTime: updatedReservation.pickup_time,
-          vehicleType: updatedReservation.vehicle_type,
-          price: updatedReservation.price,
-          currency: updatedReservation.price_currency,
+          reservation_id: updatedReservation.id,
+          lang: "en", // Default to English, could be passed from request
         },
       });
-      console.log("Confirmation email sent to:", requestData.customerEmail);
+      console.log("Confirmation email sent to customer for reservation:", updatedReservation.reservation_code);
     } catch (emailError) {
       console.error("Failed to send confirmation email:", emailError);
       // Don't fail the operation
