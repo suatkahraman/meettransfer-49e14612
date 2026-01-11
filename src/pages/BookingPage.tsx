@@ -292,10 +292,18 @@ const BookingPage = () => {
     
     try {
       const sessionId = getSessionId();
+      const currentPrice = isHourlyBooking 
+        ? getHourlyPrice(vehicleType, selectedDuration) 
+        : selectedPrice;
+      
+      // Calculate return price with discount if applicable
+      const returnPrice = hasReturnTrip && currentPrice
+        ? (isPromoCodeValid ? Math.round(currentPrice * 0.7) : currentPrice)
+        : null;
       
       const bookingData = isHourlyBooking 
         ? {
-            pickup: urlCity, // Use city as pickup for hourly
+            pickup: urlCity,
             dropoff: `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}`,
             pickup_date: urlDate,
             pickup_time: urlTime,
@@ -304,7 +312,7 @@ const BookingPage = () => {
             luggage_count: luggageCount,
             baby_seat_count: babySeatCount,
             customer_session_id: sessionId,
-            price: getHourlyPrice(vehicleType, selectedDuration),
+            price: currentPrice,
             price_currency: preferredCurrency,
             customer_notes: `[${selectedDuration} Hourly Rental] ${customerNotes.trim()}`.trim(),
             customer_phone: customerPhone.trim() || null,
@@ -321,6 +329,7 @@ const BookingPage = () => {
             luggage_count: luggageCount,
             baby_seat_count: babySeatCount,
             customer_session_id: sessionId,
+            price: currentPrice,
             price_currency: preferredCurrency,
             customer_notes: customerNotes.trim() || null,
             customer_phone: customerPhone.trim() || null,
@@ -329,9 +338,11 @@ const BookingPage = () => {
             has_return_trip: hasReturnTrip && returnDate && returnTime ? true : false,
             return_date: hasReturnTrip && returnDate ? returnDate : null,
             return_time: hasReturnTrip && returnTime ? returnTime : null,
+            return_price: returnPrice,
             promo_code: hasReturnTrip && isPromoCodeValid && promoCode ? promoCode : null,
           };
 
+      // Create quick booking request first
       const { data, error } = await supabase
         .from("quick_booking_requests")
         .insert(bookingData)
@@ -340,48 +351,54 @@ const BookingPage = () => {
 
       if (error) throw error;
 
-      // For hourly, we already have the price
-      if (isHourlyBooking) {
-        // Notify admin
-        try {
-          await supabase.functions.invoke("notify-admin-quick-booking-new", {
-            body: {
-              bookingId: data.id,
-              pickup: urlCity,
-              dropoff: `${selectedDuration} Hourly Rental`,
-              pickupDate: urlDate,
-              pickupTime: urlTime,
-              vehicleType,
-              passengers,
-              priceCurrency: preferredCurrency,
-              customerEmail: customerEmail.trim() || null,
-              customerPhone: customerPhone.trim() || null,
-              customerNotes: customerNotes.trim() || null,
-            },
-          });
-        } catch (notifyError) {
-          console.error("Failed to notify admin:", notifyError);
-        }
-      } else {
-        // Try auto-pricing for transfers
-        let autoPriceResult: { matched?: boolean } | null = null;
-        try {
-          const { data: autoPriceData } = await supabase.functions.invoke("auto-price-quick-booking", {
-            body: { quick_booking_id: data.id },
-          });
-          autoPriceResult = autoPriceData;
-        } catch (autoPriceError) {
-          console.error("Auto-pricing failed:", autoPriceError);
+      // If we have a price, directly create the reservation and go to customer info page
+      if (currentPrice) {
+        // Trigger confetti for successful booking
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+
+        // Create reservation directly
+        const { data: reservationData, error: reservationError } = await supabase.functions.invoke("create-quick-booking-reservation", {
+          body: {
+            bookingId: data.id,
+            pickup: isHourlyBooking ? urlCity : urlPickup,
+            dropoff: isHourlyBooking ? `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}` : urlDropoff,
+            pickupDate: urlDate,
+            pickupTime: urlTime,
+            vehicleType,
+            passengers,
+            price: currentPrice,
+            priceCurrency: preferredCurrency,
+            paymentMethod: "cash",
+            hasReturnTrip: hasReturnTrip && returnDate && returnTime ? true : false,
+            returnDate: hasReturnTrip && returnDate ? returnDate : null,
+            returnTime: hasReturnTrip && returnTime ? returnTime : null,
+            returnPrice: returnPrice,
+            promoCode: hasReturnTrip && isPromoCodeValid && promoCode ? promoCode : null,
+          },
+        });
+
+        if (reservationError) {
+          console.error("Reservation creation error:", reservationError);
+          throw new Error("Failed to create reservation");
         }
 
-        // Notify admin if auto-pricing didn't work
-        if (!autoPriceResult?.matched) {
+        // Navigate to customer info page with reservation code
+        navigate(`/quick-booking-customer-info?reservationCode=${reservationData.reservation.reservationCode}`);
+        toast.success(t("bookingConfirmed") || "Booking confirmed! Please complete your details.");
+      } else {
+        // No price available - use old flow (waiting for admin to set price)
+        // For hourly, we already have the price
+        if (isHourlyBooking) {
           try {
             await supabase.functions.invoke("notify-admin-quick-booking-new", {
               body: {
                 bookingId: data.id,
-                pickup: urlPickup,
-                dropoff: urlDropoff,
+                pickup: urlCity,
+                dropoff: `${selectedDuration} Hourly Rental`,
                 pickupDate: urlDate,
                 pickupTime: urlTime,
                 vehicleType,
@@ -395,19 +412,52 @@ const BookingPage = () => {
           } catch (notifyError) {
             console.error("Failed to notify admin:", notifyError);
           }
-        }
-      }
+        } else {
+          // Try auto-pricing for transfers
+          let autoPriceResult: { matched?: boolean } | null = null;
+          try {
+            const { data: autoPriceData } = await supabase.functions.invoke("auto-price-quick-booking", {
+              body: { quick_booking_id: data.id },
+            });
+            autoPriceResult = autoPriceData;
+          } catch (autoPriceError) {
+            console.error("Auto-pricing failed:", autoPriceError);
+          }
 
-      let url = `/quick-booking-confirm?token=${data.confirmation_token}&new=true`;
-      if (!isHourlyBooking && hasReturnTrip && returnDate && returnTime) {
-        url += `&hasReturn=true&returnDate=${returnDate}&returnTime=${returnTime}`;
-        if (isPromoCodeValid && promoCode) {
-          url += `&promoCode=${encodeURIComponent(promoCode)}`;
+          // Notify admin if auto-pricing didn't work
+          if (!autoPriceResult?.matched) {
+            try {
+              await supabase.functions.invoke("notify-admin-quick-booking-new", {
+                body: {
+                  bookingId: data.id,
+                  pickup: urlPickup,
+                  dropoff: urlDropoff,
+                  pickupDate: urlDate,
+                  pickupTime: urlTime,
+                  vehicleType,
+                  passengers,
+                  priceCurrency: preferredCurrency,
+                  customerEmail: customerEmail.trim() || null,
+                  customerPhone: customerPhone.trim() || null,
+                  customerNotes: customerNotes.trim() || null,
+                },
+              });
+            } catch (notifyError) {
+              console.error("Failed to notify admin:", notifyError);
+            }
+          }
         }
-      }
-      navigate(url);
 
-      toast.success(t("priceRequestSent") || "Your request has been sent!");
+        let url = `/quick-booking-confirm?token=${data.confirmation_token}&new=true`;
+        if (!isHourlyBooking && hasReturnTrip && returnDate && returnTime) {
+          url += `&hasReturn=true&returnDate=${returnDate}&returnTime=${returnTime}`;
+          if (isPromoCodeValid && promoCode) {
+            url += `&promoCode=${encodeURIComponent(promoCode)}`;
+          }
+        }
+        navigate(url);
+        toast.success(t("priceRequestSent") || "Your request has been sent!");
+      }
     } catch (error: unknown) {
       console.error("Error submitting:", error);
       toast.error((error as Error).message || "Failed to submit request");
