@@ -448,6 +448,10 @@ export const Hero = () => {
 
           {/* AI Chat Assistant */}
           <div className="max-w-2xl mx-auto">
+            <p className="text-white/90 text-sm md:text-base font-medium mb-3 flex items-center justify-center gap-2">
+              <Sparkles className="h-4 w-4 text-accent" />
+              {t("bookAirportTransferWithAI") || "Book Airport Transfer With AI"}
+            </p>
             <BookingChatAssistant onApplyBooking={handleApplyBooking} />
           </div>
 

@@ -185,6 +185,7 @@ const translations: Record<Language, Record<string, string>> = {
     getPrice: "Get Price",
     aiAssistant: "AI Assistant",
     aiAssistantHint: "Ask me anything about your transfer",
+    bookAirportTransferWithAI: "Book Airport Transfer With AI",
     new: "New",
     
     // Booking Process
@@ -1729,6 +1730,7 @@ const translations: Record<Language, Record<string, string>> = {
     getPrice: "Preis erhalten",
     aiAssistant: "KI-Assistent",
     aiAssistantHint: "Fragen Sie mich alles über Ihren Transfer",
+    bookAirportTransferWithAI: "Flughafentransfer mit KI buchen",
     new: "Neu",
     
     // Booking Process
@@ -3307,6 +3309,7 @@ const translations: Record<Language, Record<string, string>> = {
     getPrice: "Obtenir le prix",
     aiAssistant: "Assistant IA",
     aiAssistantHint: "Posez-moi vos questions sur votre transfert",
+    bookAirportTransferWithAI: "Réservez votre transfert aéroport avec l'IA",
     new: "Nouveau",
     
     // Booking Process
@@ -4495,6 +4498,7 @@ const translations: Record<Language, Record<string, string>> = {
     getPrice: "Узнать цену",
     aiAssistant: "ИИ-ассистент",
     aiAssistantHint: "Задайте любой вопрос о вашем трансфере",
+    bookAirportTransferWithAI: "Забронируйте трансфер из аэропорта с ИИ",
     new: "Новый",
     
     // Booking Process
@@ -5626,6 +5630,7 @@ const translations: Record<Language, Record<string, string>> = {
     getPrice: "Ottieni prezzo",
     aiAssistant: "Assistente IA",
     aiAssistantHint: "Chiedimi qualsiasi cosa sul tuo trasferimento",
+    bookAirportTransferWithAI: "Prenota il trasferimento aeroportuale con l'IA",
     new: "Nuovo",
     
     // Booking Process
@@ -6810,6 +6815,7 @@ const translations: Record<Language, Record<string, string>> = {
     getPrice: "Obtener precio",
     aiAssistant: "Asistente IA",
     aiAssistantHint: "Pregúntame cualquier cosa sobre tu traslado",
+    bookAirportTransferWithAI: "Reserva tu traslado al aeropuerto con IA",
     new: "Nuevo",
     
     // Booking Process
@@ -7994,6 +8000,7 @@ const translations: Record<Language, Record<string, string>> = {
     getPrice: "احصل على السعر",
     aiAssistant: "المساعد الذكي",
     aiAssistantHint: "اسألني أي شيء عن نقلك",
+    bookAirportTransferWithAI: "احجز نقل المطار مع الذكاء الاصطناعي",
     new: "جديد",
     
     // Booking Process
@@ -9125,6 +9132,7 @@ const translations: Record<Language, Record<string, string>> = {
     getPrice: "Fiyat Al",
     aiAssistant: "AI Asistan",
     aiAssistantHint: "Transferiniz hakkında bana soru sorun",
+    bookAirportTransferWithAI: "Havalimanı Transferini AI ile Rezerve Et",
     new: "Yeni",
     
     // Booking Process
@@ -10402,6 +10410,7 @@ const translations: Record<Language, Record<string, string>> = {
     getPrice: "Отримати ціну",
     aiAssistant: "ШІ-асистент",
     aiAssistantHint: "Запитайте мене будь-що про ваш трансфер",
+    bookAirportTransferWithAI: "Забронюйте трансфер з аеропорту зі ШІ",
     new: "Новий",
     
     // Booking Process
@@ -11526,6 +11535,7 @@ const translations: Record<Language, Record<string, string>> = {
     getPrice: "料金を取得",
     aiAssistant: "AIアシスタント",
     aiAssistantHint: "送迎について何でもお聞きください",
+    bookAirportTransferWithAI: "AIで空港送迎を予約",
     new: "新着",
     
     // Booking Process
