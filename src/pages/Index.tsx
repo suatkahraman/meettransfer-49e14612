@@ -12,6 +12,7 @@ import WhyChooseUs from "@/components/website/WhyChooseUs";
 import GoogleReviewsCarousel from "@/components/website/GoogleReviewsCarousel";
 import VideoPromo from "@/components/website/VideoPromo";
 import HourlyRentalSection from "@/components/website/HourlyRentalSection";
+import StatsCounter from "@/components/website/StatsCounter";
 
 
 const Index = () => {
@@ -37,6 +38,7 @@ const Index = () => {
       />
       <Hero />
       <BookingForm />
+      <StatsCounter />
       <WhyChooseUs />
       <Destinations />
       <HourlyRentalSection />
