@@ -51,6 +51,13 @@ import meetTransferFamilyGreeting from "@/assets/meet-transfer-family-greeting.j
 import bodrumAirportCartoon from "@/assets/bodrum-airport-cartoon.jpg";
 import meetTransferHandshake from "@/assets/meet-transfer-handshake.jpg";
 
+// New promotional images
+import vipPassengerStarlight from "@/assets/vip-passenger-starlight.jpg";
+import erciyesSkiTransfer from "@/assets/erciyes-ski-transfer.jpg";
+import meetTransferAirportIllustration from "@/assets/meet-transfer-airport-illustration.jpg";
+import luxuryChauffeurVito from "@/assets/luxury-chauffeur-vito.jpg";
+import luxuryAirportTransferTurkey from "@/assets/luxury-airport-transfer-turkey.jpg";
+
 export interface VehicleImage {
   src: string;
   alt: string;
@@ -92,10 +99,14 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     images: [
       { src: vitoAirportPremium, alt: "Mercedes Vito VIP airport transfer with professional chauffeur" },
+      { src: luxuryAirportTransferTurkey, alt: "Luxury airport transfer Turkey with professional chauffeur" },
       { src: vitoLuxuryInterior, alt: "Mercedes Vito luxury white leather interior passengers" },
+      { src: luxuryChauffeurVito, alt: "Professional luxury chauffeur with Mercedes Vito" },
       { src: vitoAirportAnime, alt: "Mercedes Vito private transfer at airport terminal" },
+      { src: meetTransferAirportIllustration, alt: "Meet Transfer airport illustration Mercedes fleet" },
       { src: meetTransferFamilyWelcome, alt: "Meet Transfer airport family welcome service" },
       { src: vitoAirportWelcome, alt: "Mercedes Vito airport pickup with welcome service" },
+      { src: erciyesSkiTransfer, alt: "Kayseri Airport to Erciyes ski resort transfer" },
       { src: meetTransferCyprus, alt: "Meet Transfer VIP service in Cyprus" },
       { src: bodrumAirportPassengers, alt: "Bodrum Airport passengers with Meet Transfer" },
       { src: vitoCappadociaBalloon, alt: "Mercedes Vito transfer to Cappadocia hot air balloons" },
@@ -130,8 +141,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     images: [
       { src: vipVitoStarlightLuxury, alt: "Mercedes VIP Vito couple champagne starlight ceiling luxury" },
+      { src: vipPassengerStarlight, alt: "VIP passenger enjoying starlight ceiling luxury interior" },
+      { src: luxuryAirportTransferTurkey, alt: "Luxury VIP airport transfer Turkey chauffeur" },
       { src: meetTransferHandshake, alt: "Meet Transfer professional VIP greeting" },
       { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple starlight roof interior" },
+      { src: luxuryChauffeurVito, alt: "Professional luxury chauffeur service Germany" },
       { src: meetTransferDubai, alt: "Meet Transfer VIP service in Dubai UAE" },
       { src: vitoVipStarlightRoof, alt: "Mercedes VIP Vito starlight ceiling ambient lighting" },
       { src: bodrumAirportPassengers, alt: "VIP passengers at Bodrum Airport Meet Transfer" },
@@ -163,6 +177,7 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     images: [
       { src: maybachUltraLuxury, alt: "Mercedes Maybach ultra luxury orange leather galaxy starlight ceiling" },
+      { src: vipPassengerStarlight, alt: "VIP passenger Maybach starlight ceiling luxury experience" },
       { src: meetTransferHandshake, alt: "Meet Transfer Maybach VIP greeting service" },
       { src: maybachInterior, alt: "Mercedes Maybach starlight ceiling luxury interior" },
       { src: maybachPassengersBlue, alt: "VIP passengers in Mercedes Maybach blue ambient lighting" },
@@ -190,9 +205,12 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     images: [
       { src: sprinterHotelArrival, alt: "Mercedes Sprinter VIP red carpet hotel arrival luxury" },
+      { src: meetTransferAirportIllustration, alt: "Meet Transfer airport illustration Mercedes fleet" },
       { src: bodrumAirportPassengers, alt: "Bodrum Airport group transfer with Meet Transfer" },
+      { src: erciyesSkiTransfer, alt: "Kayseri Airport Erciyes ski resort family transfer" },
       { src: sprinterVipInterior, alt: "Mercedes Sprinter VIP blue starlight interior seats" },
       { src: sprinterExteriorVip, alt: "Mercedes Sprinter VIP exterior luxury design" },
+      { src: luxuryAirportTransferTurkey, alt: "Luxury airport transfer Turkey Sprinter chauffeur" },
       { src: meetTransferFamilyWelcome, alt: "Meet Transfer Sprinter group family welcome" },
       { src: sprinterInteriorGrey, alt: "Mercedes Sprinter grey leather interior design" },
       { src: meetTransferDubai, alt: "Meet Transfer Sprinter minibus Dubai" },
