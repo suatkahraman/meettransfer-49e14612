@@ -669,6 +669,38 @@ const BookingPage = () => {
     })).filter(v => VEHICLE_TYPE_MAP[v.value]);
   };
 
+  // Countdown state for loading animation
+  const [countdown, setCountdown] = useState(5);
+  const [progressWidth, setProgressWidth] = useState(100);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!isPricesLoading) {
+      setCountdown(5);
+      setProgressWidth(100);
+      return;
+    }
+
+    // Start progress animation
+    setProgressWidth(100);
+    const progressInterval = setInterval(() => {
+      setProgressWidth(prev => Math.max(0, prev - 2)); // Decrease by 2% every 100ms (5 seconds total)
+    }, 100);
+
+    // Countdown timer
+    const countdownInterval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) return 1;
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearInterval(countdownInterval);
+    };
+  }, [isPricesLoading]);
+
   // Professional Loading Animation Component
   if (isPricesLoading) {
     return (
@@ -717,15 +749,37 @@ const BookingPage = () => {
               }
             </p>
             
+            {/* Progress Bar with Countdown */}
+            <div className="mb-6 px-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted-foreground">
+                  {language === 'TR' ? 'Fiyatlar yükleniyor...' : 'Loading prices...'}
+                </span>
+                <span className="text-sm font-semibold text-primary flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {countdown}s
+                </span>
+              </div>
+              <div className="h-3 bg-muted rounded-full overflow-hidden shadow-inner">
+                <div 
+                  className="h-full bg-gradient-to-r from-primary via-primary/80 to-accent rounded-full transition-all duration-100 ease-linear relative"
+                  style={{ width: `${progressWidth}%` }}
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shimmer_1.5s_ease-in-out_infinite]" />
+                </div>
+              </div>
+            </div>
+            
             {/* Progress dots */}
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 mb-6">
               <div className="w-3 h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite]" />
               <div className="w-3 h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite_0.2s]" />
               <div className="w-3 h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite_0.4s]" />
             </div>
             
             {/* Trip summary card */}
-            <div className="mt-8 bg-card rounded-xl p-4 shadow-lg border border-border/50 animate-fade-in">
+            <div className="bg-card rounded-xl p-4 shadow-lg border border-border/50 animate-fade-in">
               <div className="text-sm text-muted-foreground space-y-2">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-primary" />
@@ -749,6 +803,14 @@ const BookingPage = () => {
             </div>
           </div>
         </div>
+        
+        {/* Shimmer animation keyframe */}
+        <style>{`
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+        `}</style>
       </WebsiteLayout>
     );
   }
