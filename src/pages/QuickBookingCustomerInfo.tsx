@@ -6,12 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, User, Phone, Mail, MapPin, Calendar, Clock, Car, CheckCircle, Lock, Eye, EyeOff } from "lucide-react";
+import { Loader2, User, Phone, Mail, MapPin, Calendar, Clock, Car, CheckCircle, Lock, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { z } from "zod";
+import { VehicleSelectionCard } from "@/components/VehicleSelectionCard";
+import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 // Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
 const passwordSchema = z.string()
@@ -37,6 +40,7 @@ const vehicleLabels: Record<string, string> = {
   "mercedes-vclass": "Vip Mercedes",
   maybach: "Maybach Minibus",
 };
+
 
 export default function QuickBookingCustomerInfo() {
   const { t } = useLanguage();
@@ -66,6 +70,7 @@ export default function QuickBookingCustomerInfo() {
     prefilled_email?: string | null;
     prefilled_phone?: string | null;
     prefilled_name?: string | null;
+    all_vehicle_prices?: Record<string, number> | null;
   } | null>(null);
 
   const [formData, setFormData] = useState({
@@ -74,6 +79,8 @@ export default function QuickBookingCustomerInfo() {
     email: prefilledEmail,
     password: "",
   });
+  const [selectedVehicle, setSelectedVehicle] = useState<string>("");
+  const [vehicleSectionOpen, setVehicleSectionOpen] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
@@ -124,6 +131,7 @@ export default function QuickBookingCustomerInfo() {
       }
 
       setReservationData(data);
+      setSelectedVehicle(data.vehicle_type || "mercedes-vito");
       
       // Pre-fill form with customer info from quick booking
       if (data.prefilled_email || data.prefilled_phone || data.prefilled_name) {
@@ -174,6 +182,8 @@ export default function QuickBookingCustomerInfo() {
             customerEmail: formData.email.trim(),
             customerPassword: formData.password,
             returnReservationCode: returnReservationCode || null,
+            selectedVehicle: selectedVehicle,
+            newPrice: reservationData?.all_vehicle_prices?.[selectedVehicle] || reservationData?.price,
           },
         }
       );
@@ -537,7 +547,7 @@ export default function QuickBookingCustomerInfo() {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-muted-foreground">Route</p>
+                  <p className="text-sm text-muted-foreground">{t("route") || "Route"}</p>
                   <p className="font-medium truncate">{reservationData.pickup}</p>
                   <p className="text-sm text-muted-foreground">→ {reservationData.dropoff}</p>
                 </div>
@@ -553,10 +563,19 @@ export default function QuickBookingCustomerInfo() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Car className="h-4 w-4 text-muted-foreground" />
-                  <span>{vehicleLabels[reservationData.vehicle_type] || reservationData.vehicle_type}</span>
+                  <span>{vehicleLabels[selectedVehicle] || selectedVehicle}</span>
                 </div>
               </div>
-              {reservationData.price && (
+              
+              {/* Current Price Display */}
+              {reservationData.all_vehicle_prices && reservationData.all_vehicle_prices[selectedVehicle] && (
+                <div className="pt-2 border-t border-border">
+                  <p className="text-lg font-bold text-primary">
+                    {reservationData.all_vehicle_prices[selectedVehicle]} {reservationData.price_currency}
+                  </p>
+                </div>
+              )}
+              {!reservationData.all_vehicle_prices && reservationData.price && (
                 <div className="pt-2 border-t border-border">
                   <p className="text-lg font-bold text-primary">
                     {reservationData.price} {reservationData.price_currency}
@@ -564,6 +583,47 @@ export default function QuickBookingCustomerInfo() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* Vehicle Selection Section */}
+          {reservationData && (
+            <Collapsible open={vehicleSectionOpen} onOpenChange={setVehicleSectionOpen} className="mb-6">
+              <CollapsibleTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between h-12 text-left"
+                  type="button"
+                >
+                  <span className="flex items-center gap-2">
+                    <Car className="h-4 w-4" />
+                    {t("changeVehicle") || "Change Vehicle"}
+                  </span>
+                  {vehicleSectionOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-4 space-y-3">
+                {VEHICLE_TYPES.map((vehicle, index) => {
+                  const vehiclePrice = reservationData.all_vehicle_prices?.[vehicle.value];
+                  return (
+                    <VehicleSelectionCard
+                      key={vehicle.value}
+                      vehicleType={vehicle.value}
+                      isSelected={selectedVehicle === vehicle.value}
+                      onSelect={(type) => setSelectedVehicle(type)}
+                      price={vehiclePrice || null}
+                      currency={reservationData.price_currency}
+                      showPrice={!!vehiclePrice}
+                      available={true}
+                      badgeAnimationDelay={index * 100}
+                    />
+                  );
+                })}
+              </CollapsibleContent>
+            </Collapsible>
           )}
 
           {/* Google Sign In Option */}
