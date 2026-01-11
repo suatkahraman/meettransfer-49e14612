@@ -17,12 +17,19 @@ import { toast } from "sonner";
 import { 
   MapPin, Navigation, Calendar, Clock, Users, Briefcase, Baby, 
   ArrowRight, Loader2, CheckCircle, ArrowLeftRight, Tag, Mail, 
-  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer
+  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired } from "@/lib/vehicleTypes";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface VehiclePrice {
   vehicleType: string;
@@ -1077,48 +1084,90 @@ const BookingPage = () => {
                   <CardHeader className="bg-primary text-white rounded-t-xl">
                     <CardTitle>{t("priceSummary") || "Price Summary"}</CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">{t("vehicle") || "Vehicle"}</span>
-                      <span className="font-medium">{VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}</span>
-                    </div>
-                    
-                    {isHourlyBooking && (
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-muted-foreground">{t("duration") || "Duration"}</span>
-                        <span className="font-medium">{selectedDuration}</span>
+                  <CardContent className="p-0">
+                    {/* Vehicle Image Carousel */}
+                    {VEHICLE_TYPE_MAP[vehicleType]?.images && VEHICLE_TYPE_MAP[vehicleType].images.length > 0 && (
+                      <div className="relative">
+                        <Carousel className="w-full" opts={{ loop: true }}>
+                          <CarouselContent>
+                            {VEHICLE_TYPE_MAP[vehicleType].images.map((image, index) => (
+                              <CarouselItem key={index}>
+                                <div className="aspect-video">
+                                  <img
+                                    src={image.src}
+                                    alt={image.alt || VEHICLE_TYPE_MAP[vehicleType].label}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              </CarouselItem>
+                            ))}
+                          </CarouselContent>
+                          <CarouselPrevious className="left-2 h-8 w-8 bg-white/80 hover:bg-white" />
+                          <CarouselNext className="right-2 h-8 w-8 bg-white/80 hover:bg-white" />
+                        </Carousel>
+                        {/* Image counter */}
+                        <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                          {VEHICLE_TYPE_MAP[vehicleType].images.length} {t("photos") || "photos"}
+                        </div>
                       </div>
                     )}
                     
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">{t("passengers")}</span>
-                      <span className="font-medium">{passengers}</span>
-                    </div>
-                    
-                    <div className="border-t pt-4">
-                      {isPricesLoading ? (
-                        <div className="flex items-center justify-center py-4">
-                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        </div>
-                      ) : selectedPrice ? (
-                        <div className="text-center">
-                          <p className="text-sm text-muted-foreground mb-1">
-                            {isHourlyBooking ? (t("totalForDuration") || "Total for") + ` ${selectedDuration}` : (t("totalPrice") || "Total")}
-                          </p>
-                          <p className="text-3xl font-bold text-primary">
-                            {selectedPrice} {preferredCurrency}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <p className="text-muted-foreground text-sm">
-                            {t("priceOnRequestDesc") || "Price will be sent to you shortly"}
-                          </p>
+                    <div className="p-6 space-y-4">
+                      <div className="flex justify-between items-start">
+                        <span className="text-muted-foreground text-sm">{t("vehicle") || "Vehicle"}</span>
+                        <span className="font-semibold text-right">{VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}</span>
+                      </div>
+                      
+                      {/* Vehicle features */}
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Users className="h-4 w-4" />
+                          {VEHICLE_TYPE_MAP[vehicleType]?.passengers || 0} {t("passengers") || "passengers"}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Briefcase className="h-4 w-4" />
+                          {VEHICLE_TYPE_MAP[vehicleType]?.luggage || 0} {t("luggage") || "luggage"}
+                        </span>
+                      </div>
+                      
+                      {isHourlyBooking && (
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-muted-foreground">{t("duration") || "Duration"}</span>
+                          <span className="font-medium">{selectedDuration}</span>
                         </div>
                       )}
+                      
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">{t("selectedPassengers") || "Selected Passengers"}</span>
+                        <span className="font-medium">{passengers}</span>
+                      </div>
+                      
+                      <div className="border-t pt-4">
+                        {isPricesLoading ? (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                          </div>
+                        ) : selectedPrice ? (
+                          <div className="text-center">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              {isHourlyBooking ? (t("totalForDuration") || "Total for") + ` ${selectedDuration}` : (t("totalPrice") || "Total")}
+                            </p>
+                            <p className="text-3xl font-bold text-primary">
+                              {selectedPrice} {preferredCurrency}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <p className="text-muted-foreground text-sm">
+                              {t("priceOnRequestDesc") || "Price will be sent to you shortly"}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    <Button
+                    <div className="p-6 pt-0">
+                      <Button
                       onClick={handleSubmit}
                       size="lg"
                       variant="accent"
@@ -1136,18 +1185,19 @@ const BookingPage = () => {
                           <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </>
                       )}
-                    </Button>
+                      </Button>
 
-                    {user && (
-                      <div className="flex items-center justify-center gap-2 text-xs text-green-600 bg-green-50 rounded-lg py-2">
-                        <CheckCircle className="h-3 w-3" />
-                        {t("directReservation") || "Direct reservation - no confirmation needed"}
-                      </div>
-                    )}
+                      {user && (
+                        <div className="flex items-center justify-center gap-2 text-xs text-green-600 bg-green-50 rounded-lg py-2 mt-4">
+                          <CheckCircle className="h-3 w-3" />
+                          {t("directReservation") || "Direct reservation - no confirmation needed"}
+                        </div>
+                      )}
 
-                    <p className="text-xs text-center text-muted-foreground">
-                      {t("freeCancel") || "Free cancellation up to 24h before"}
-                    </p>
+                      <p className="text-xs text-center text-muted-foreground mt-3">
+                        {t("freeCancel") || "Free cancellation up to 24h before"}
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
