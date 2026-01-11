@@ -1,9 +1,10 @@
-import { Star, Quote } from "lucide-react";
+import { Star, Quote, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Review {
   name: string;
@@ -13,7 +14,8 @@ interface Review {
   avatar?: string;
 }
 
-const reviews: Review[] = [
+// Fallback reviews in case API fails
+const fallbackReviews: Review[] = [
   {
     name: "James Wilson",
     rating: 5,
@@ -44,33 +46,49 @@ const reviews: Review[] = [
     text: "Flight was delayed by 2 hours but driver was still there waiting. Real-time flight tracking works perfectly. Great experience!",
     date: "2 months ago",
   },
-  {
-    name: "Emma Thompson",
-    rating: 5,
-    text: "Booked the Sprinter for our group of 12. Smooth ride, professional service, and excellent communication via WhatsApp.",
-    date: "1 month ago",
-  },
-  {
-    name: "Kenji Tanaka",
-    rating: 5,
-    text: "From Antalya Airport to our hotel was seamless. Driver spoke English well and gave us great tips about the area.",
-    date: "3 weeks ago",
-  },
-  {
-    name: "Isabella Rossi",
-    rating: 5,
-    text: "Used Meet Transfer for our honeymoon trip. The VIP Vito with starlight ceiling was magical. Unforgettable experience!",
-    date: "1 month ago",
-  },
 ];
 
 const GoogleReviewsCarousel = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [reviews, setReviews] = useState<Review[]>(fallbackReviews);
+  const [overallRating, setOverallRating] = useState(4.9);
+  const [totalReviews, setTotalReviews] = useState(488);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: "start", slidesToScroll: 1 },
     [Autoplay({ delay: 5000, stopOnInteraction: true })]
   );
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // Fetch real reviews from Google Places API
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase.functions.invoke('get-google-reviews', {
+          body: { language: language }
+        });
+        
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          return;
+        }
+        
+        if (data?.reviews && data.reviews.length > 0) {
+          setReviews(data.reviews);
+          setOverallRating(data.rating || 4.9);
+          setTotalReviews(data.totalReviews || 488);
+        }
+      } catch (error) {
+        console.error('Failed to fetch Google reviews:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [language]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -116,6 +134,7 @@ const GoogleReviewsCarousel = () => {
               />
             </svg>
             <span className="font-semibold text-sm">Google Reviews</span>
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
           </div>
           <h2 className="text-3xl md:text-4xl font-bold">
             {t("customerReviewsTitle") || "What Our Customers Say"}
@@ -123,11 +142,14 @@ const GoogleReviewsCarousel = () => {
           <div className="flex items-center justify-center gap-2">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                <Star 
+                  key={i} 
+                  className={`h-5 w-5 ${i < Math.floor(overallRating) ? 'fill-yellow-400 text-yellow-400' : 'fill-muted text-muted'}`} 
+                />
               ))}
             </div>
-            <span className="font-bold text-lg">4.9</span>
-            <span className="text-muted-foreground">({reviews.length * 61}+ reviews)</span>
+            <span className="font-bold text-lg">{overallRating.toFixed(1)}</span>
+            <span className="text-muted-foreground">({totalReviews}+ reviews)</span>
           </div>
         </div>
 
@@ -142,11 +164,22 @@ const GoogleReviewsCarousel = () => {
                 <Card className="h-full bg-card hover:shadow-lg transition-shadow">
                   <CardContent className="p-6 space-y-4">
                     <Quote className="h-8 w-8 text-primary/20" />
-                    <p className="text-muted-foreground leading-relaxed min-h-[100px]">
+                    <p className="text-muted-foreground leading-relaxed min-h-[100px] line-clamp-4">
                       "{review.text}"
                     </p>
                     <div className="flex items-center gap-3 pt-4 border-t">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      {review.avatar ? (
+                        <img 
+                          src={review.avatar} 
+                          alt={review.name}
+                          className="w-10 h-10 rounded-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center ${review.avatar ? 'hidden' : ''}`}>
                         <span className="font-bold text-primary">
                           {review.name.charAt(0)}
                         </span>
