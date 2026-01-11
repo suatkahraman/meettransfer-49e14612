@@ -40,11 +40,9 @@ const timeOptions = generateTimeOptions();
 
 // Hourly rental duration options
 const hourlyDurationOptions = [
-  { value: "4", label: "4 hours" },
-  { value: "6", label: "6 hours" },
-  { value: "8", label: "8 hours" },
-  { value: "10", label: "10 hours" },
-  { value: "12", label: "12 hours" },
+  { value: "4", labelKey: "halfDay", defaultLabel: "4 Hours (Half Day)" },
+  { value: "8", labelKey: "fullDay", defaultLabel: "8 Hours (Full Day)" },
+  { value: "custom", labelKey: "customHourly", defaultLabel: "9+ Hours (Custom)" },
 ];
 
 export const Hero = () => {
@@ -104,18 +102,30 @@ export const Hero = () => {
           if (!durationsMap[item.city]) {
             durationsMap[item.city] = [];
           }
-          // Extract hours from duration_type (e.g., "4h" -> "4" or "4_hours" -> "4")
-          // Skip "custom" duration type for the hero form
-          if (item.duration_type === "custom") return;
-          const hours = item.duration_type.replace("_hours", "").replace("h", "");
-          if (!durationsMap[item.city].includes(hours)) {
-            durationsMap[item.city].push(hours);
+          // Map duration_type to our fixed options
+          const durationType = item.duration_type.replace("_hours", "").replace("h", "");
+          
+          // Map to our fixed durations: 4, 8, or custom (9+)
+          let mappedDuration: string;
+          if (durationType === "4") {
+            mappedDuration = "4";
+          } else if (durationType === "8") {
+            mappedDuration = "8";
+          } else if (durationType === "custom" || parseInt(durationType) >= 9) {
+            mappedDuration = "custom";
+          } else {
+            return; // Skip other durations
+          }
+          
+          if (!durationsMap[item.city].includes(mappedDuration)) {
+            durationsMap[item.city].push(mappedDuration);
           }
         });
         
-        // Sort durations numerically for each city
+        // Sort durations: 4, 8, custom
+        const sortOrder = ["4", "8", "custom"];
         Object.keys(durationsMap).forEach(city => {
-          durationsMap[city].sort((a, b) => parseInt(a) - parseInt(b));
+          durationsMap[city].sort((a, b) => sortOrder.indexOf(a) - sortOrder.indexOf(b));
         });
         
         setCityDurations(durationsMap);
@@ -798,11 +808,17 @@ export const Hero = () => {
                           </div>
                         </SelectTrigger>
                         <SelectContent className="z-50">
-                          {availableDurations.map((hours) => (
-                            <SelectItem key={hours} value={hours}>
-                              {hours} {t("hours") || "hours"}
-                            </SelectItem>
-                          ))}
+                          {availableDurations.map((duration) => {
+                            const option = hourlyDurationOptions.find(o => o.value === duration);
+                            const label = option 
+                              ? (t(option.labelKey) || option.defaultLabel)
+                              : `${duration} ${t("hours") || "hours"}`;
+                            return (
+                              <SelectItem key={duration} value={duration}>
+                                {label}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                     </div>
