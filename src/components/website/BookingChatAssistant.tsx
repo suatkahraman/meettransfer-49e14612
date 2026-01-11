@@ -250,59 +250,104 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
 
   return (
     <>
-      {/* Floating Toggle Button */}
+      {/* Floating Toggle Button - Mobile */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-24 right-4 z-50 md:hidden flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-full shadow-xl hover:shadow-2xl transition-all"
+            className="fixed bottom-24 right-4 z-50 md:hidden flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
           >
-            <Sparkles className="h-5 w-5" />
-            <span className="font-medium">AI</span>
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ repeat: Infinity, duration: 2, repeatDelay: 3 }}
+            >
+              <Sparkles className="h-5 w-5" />
+            </motion.div>
+            <span className="font-semibold">AI</span>
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Inline Chat Panel for Hero */}
-      <div className={cn(
-        "bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-border overflow-hidden transition-all duration-300",
-        isOpen ? "h-[400px]" : "h-auto"
-      )}>
+      {/* Modern Chat Panel */}
+      <motion.div 
+        layout
+        className={cn(
+          "relative overflow-hidden rounded-3xl transition-all duration-500",
+          "bg-gradient-to-br from-card via-card to-muted/30",
+          "shadow-2xl border border-border/50",
+          "backdrop-blur-xl",
+          isOpen ? "h-[450px]" : "h-auto"
+        )}
+      >
+        {/* Decorative gradient orbs */}
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-tr from-accent/20 to-primary/20 rounded-full blur-3xl pointer-events-none" />
+        
         {/* Header */}
-        <button
+        <motion.button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 transition-all"
+          whileHover={{ backgroundColor: "hsl(var(--muted) / 0.5)" }}
+          className="relative w-full flex items-center justify-between p-5 transition-all z-10"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            {/* Animated Avatar */}
             <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-white" />
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+              <motion.div 
+                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg"
+                whileHover={{ rotate: 5 }}
+              >
+                <Sparkles className="h-6 w-6 text-primary-foreground" />
+              </motion.div>
+              {/* Pulse ring */}
+              <motion.div 
+                className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary to-accent"
+                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+              />
+              {/* Online indicator */}
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-card shadow-md" />
             </div>
+            
             <div className="text-left">
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
+              <h3 className="font-bold text-lg text-foreground flex items-center gap-2">
                 {t("aiAssistant") || "AI Booking Assistant"}
-                <span className="text-xs px-2 py-0.5 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full text-primary font-medium">
+                <motion.span 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="text-[10px] px-2.5 py-1 bg-gradient-to-r from-accent to-accent/80 rounded-full text-accent-foreground font-bold uppercase tracking-wide shadow-sm"
+                >
                   {t("new") || "NEW"}
-                </span>
+                </motion.span>
               </h3>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Mic className="h-3 w-3" />
+              <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                >
+                  <Mic className="h-3.5 w-3.5 text-primary" />
+                </motion.div>
                 {t("aiAssistantHint") || "Voice & text in any language"}
               </p>
             </div>
           </div>
-          <div className={cn(
-            "transform transition-transform duration-200",
-            isOpen ? "rotate-180" : ""
-          )}>
-            {isOpen ? <X className="h-5 w-5 text-muted-foreground" /> : <MessageCircle className="h-5 w-5 text-primary" />}
-          </div>
-        </button>
+          
+          <motion.div
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center"
+          >
+            {isOpen ? (
+              <X className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <MessageCircle className="h-5 w-5 text-primary" />
+            )}
+          </motion.div>
+        </motion.button>
 
         {/* Chat Content */}
         <AnimatePresence>
@@ -311,47 +356,57 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="flex flex-col"
-              style={{ height: "calc(100% - 72px)" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="relative flex flex-col z-10"
+              style={{ height: "calc(100% - 88px)" }}
             >
-              {/* Messages */}
-              <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-                <div className="space-y-4">
-                  {messages.map((msg) => (
-                    <div
+              {/* Messages Area */}
+              <ScrollArea className="flex-1 px-5 py-4" ref={scrollRef}>
+                <div className="space-y-5">
+                  {messages.map((msg, index) => (
+                    <motion.div
                       key={msg.id}
+                      initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "flex gap-2",
+                        "flex gap-3",
                         msg.role === "user" ? "justify-end" : "justify-start"
                       )}
                     >
                       {msg.role === "assistant" && (
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
-                          <Bot className="h-4 w-4 text-white" />
-                        </div>
+                        <motion.div 
+                          className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-md"
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                        >
+                          <Bot className="h-4 w-4 text-primary-foreground" />
+                        </motion.div>
                       )}
-                      <div className="flex flex-col gap-2 max-w-[85%]">
-                        <div
+                      
+                      <div className="flex flex-col gap-2 max-w-[80%]">
+                        <motion.div
+                          whileHover={{ scale: 1.01 }}
                           className={cn(
-                            "rounded-2xl px-4 py-2.5 text-sm",
+                            "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
                             msg.role === "user"
-                              ? "bg-primary text-primary-foreground rounded-br-md"
-                              : "bg-muted text-foreground rounded-bl-md"
+                              ? "bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-br-lg"
+                              : "bg-gradient-to-br from-muted to-muted/80 text-foreground rounded-bl-lg border border-border/30"
                           )}
                         >
                           {msg.content}
-                        </div>
+                        </motion.div>
                         
-                        {/* Booking Data Action Button */}
+                        {/* Booking Action Button */}
                         {msg.bookingData?.isComplete && (
                           <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ delay: 0.2 }}
                           >
                             <Button
                               size="sm"
                               onClick={() => handleApplyBooking(msg.bookingData!)}
-                              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white gap-2"
+                              className="bg-gradient-to-r from-accent via-accent to-accent/90 hover:from-accent/90 hover:to-accent text-accent-foreground font-semibold gap-2 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
                             >
                               <ArrowRight className="h-4 w-4" />
                               {t("applyToForm") || "Apply to Form"}
@@ -359,100 +414,141 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                           </motion.div>
                         )}
                       </div>
+                      
                       {msg.role === "user" && (
-                        <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                        <motion.div 
+                          className="w-8 h-8 rounded-xl bg-gradient-to-br from-muted to-muted/80 flex items-center justify-center flex-shrink-0 border border-border/30"
+                          whileHover={{ scale: 1.1, rotate: -5 }}
+                        >
                           <User className="h-4 w-4 text-muted-foreground" />
-                        </div>
+                        </motion.div>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
                   
+                  {/* Loading State */}
                   {isLoading && (
-                    <div className="flex gap-2 items-center">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                        <Bot className="h-4 w-4 text-white" />
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex gap-3 items-start"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md">
+                        <Bot className="h-4 w-4 text-primary-foreground" />
                       </div>
-                      <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
-                        <div className="flex gap-1">
-                          <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                          <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                          <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      <div className="bg-gradient-to-br from-muted to-muted/80 rounded-2xl rounded-bl-lg px-5 py-4 border border-border/30">
+                        <div className="flex gap-1.5">
+                          <motion.span 
+                            className="w-2.5 h-2.5 bg-primary/60 rounded-full"
+                            animate={{ y: [-3, 3, -3] }}
+                            transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
+                          />
+                          <motion.span 
+                            className="w-2.5 h-2.5 bg-primary/60 rounded-full"
+                            animate={{ y: [-3, 3, -3] }}
+                            transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
+                          />
+                          <motion.span 
+                            className="w-2.5 h-2.5 bg-primary/60 rounded-full"
+                            animate={{ y: [-3, 3, -3] }}
+                            transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
+                          />
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               </ScrollArea>
 
-              {/* Input */}
-              <div className="p-3 border-t bg-muted/30">
-                <div className="flex gap-2">
-                  {/* Voice Recording Button */}
-                  <Button
-                    onClick={isRecording ? stopRecording : startRecording}
-                    disabled={isLoading || isProcessing}
-                    size="icon"
-                    variant={isRecording ? "destructive" : "outline"}
-                    className={cn(
-                      "flex-shrink-0 transition-all",
-                      isRecording && "animate-pulse"
-                    )}
-                    title={isRecording ? "Stop Recording" : "Voice Input"}
-                  >
-                    {isProcessing ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : isRecording ? (
-                      <Square className="h-4 w-4" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
-                    )}
-                  </Button>
-                  
-                  <Input
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={isRecording 
-                      ? (language === "TR" ? "🎤 Dinliyorum..." : "🎤 Listening...") 
-                      : (placeholderMessages[language] || placeholderMessages.EN)
-                    }
-                    disabled={isLoading || isRecording}
-                    className="flex-1 bg-white border-border focus:border-primary"
-                  />
-                  <Button
-                    onClick={sendMessage}
-                    disabled={!input.trim() || isLoading || isRecording}
-                    size="icon"
-                    className="bg-primary hover:bg-primary/90"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                
-                {/* Recording indicator */}
+              {/* Input Area */}
+              <div className="p-4 border-t border-border/30 bg-gradient-to-t from-muted/50 to-transparent">
+                {/* Recording Indicator */}
                 <AnimatePresence>
                   {isRecording && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="mt-2 flex items-center justify-center gap-2 text-xs text-destructive"
+                      className="mb-3 flex items-center justify-center gap-2 text-sm text-destructive font-medium"
                     >
-                      <span className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
-                      {language === "TR" ? "Kayıt yapılıyor... Durdurmak için tekrar tıklayın" : "Recording... Click again to stop"}
+                      <motion.div
+                        animate={{ scale: [1, 1.3, 1] }}
+                        transition={{ repeat: Infinity, duration: 0.8 }}
+                        className="w-3 h-3 bg-destructive rounded-full"
+                      />
+                      {language === "TR" ? "Dinleniyor... Durdurmak için tekrar tıklayın" : "Listening... Click again to stop"}
                     </motion.div>
                   )}
                 </AnimatePresence>
+                
+                <div className="flex gap-2">
+                  {/* Voice Button */}
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      onClick={isRecording ? stopRecording : startRecording}
+                      disabled={isLoading || isProcessing}
+                      size="icon"
+                      variant="outline"
+                      className={cn(
+                        "h-12 w-12 rounded-xl border-2 transition-all",
+                        isRecording 
+                          ? "bg-destructive/10 border-destructive text-destructive hover:bg-destructive/20" 
+                          : "border-border hover:border-primary hover:bg-primary/5"
+                      )}
+                      title={isRecording ? "Stop Recording" : "Voice Input"}
+                    >
+                      {isProcessing ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : isRecording ? (
+                        <Square className="h-5 w-5 fill-current" />
+                      ) : (
+                        <Mic className="h-5 w-5" />
+                      )}
+                    </Button>
+                  </motion.div>
+                  
+                  {/* Text Input */}
+                  <div className="relative flex-1">
+                    <Input
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder={isRecording 
+                        ? (language === "TR" ? "🎤 Dinliyorum..." : "🎤 Listening...") 
+                        : (placeholderMessages[language] || placeholderMessages.EN)
+                      }
+                      disabled={isLoading || isRecording}
+                      className="h-12 pr-4 rounded-xl bg-background border-2 border-border focus:border-primary transition-all placeholder:text-muted-foreground/60"
+                    />
+                  </div>
+                  
+                  {/* Send Button */}
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      onClick={sendMessage}
+                      disabled={isLoading || !input.trim()}
+                      size="icon"
+                      className={cn(
+                        "h-12 w-12 rounded-xl transition-all",
+                        input.trim() 
+                          ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg hover:shadow-xl" 
+                          : "bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {isLoading ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <Send className="h-5 w-5" />
+                      )}
+                    </Button>
+                  </motion.div>
+                </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </>
   );
 }
