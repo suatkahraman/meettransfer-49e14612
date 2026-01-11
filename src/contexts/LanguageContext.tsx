@@ -1,5 +1,6 @@
-import React, { createContext, useContext, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, ReactNode, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
+import { blogTranslations } from "./BlogTranslations";
 
 export type Language = "EN" | "DE" | "FR" | "RU" | "IT" | "ES" | "AR" | "TR" | "UK" | "JA";
 
@@ -12017,14 +12018,29 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const { language, fromPrefix } = resolveLanguage(location.pathname);
 
+  // Merge base translations with blog translations
+  const mergedTranslations = useMemo(() => {
+    const result: Record<Language, Record<string, string>> = {} as Record<Language, Record<string, string>>;
+    const languages: Language[] = ["EN", "DE", "FR", "RU", "IT", "ES", "AR", "TR", "UK", "JA"];
+    
+    for (const lang of languages) {
+      result[lang] = {
+        ...translations[lang],
+        ...blogTranslations[lang],
+      };
+    }
+    
+    return result;
+  }, []);
+
   const t = (key: string): string => {
-    const translation = translations[language][key];
+    const translation = mergedTranslations[language][key];
     if (translation) {
       return translation;
     }
     
     // Fallback to English
-    const englishTranslation = translations["EN"][key];
+    const englishTranslation = mergedTranslations["EN"][key];
     if (englishTranslation) {
       // Only log in development and for non-blog keys to reduce noise
       if (import.meta.env.DEV && !key.startsWith("blog") && !key.startsWith("seo")) {
