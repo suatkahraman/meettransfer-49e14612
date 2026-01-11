@@ -23,7 +23,7 @@ const passwordSchema = z.string()
 
 const customerInfoSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
-  phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20).regex(/^[+\d\s\-()]+$/, "Invalid phone format"),
+  phone: z.string().trim().max(20).regex(/^[+\d\s\-()]*$/, "Invalid phone format").optional().or(z.literal("")),
   email: z.string().trim().email("Invalid email address").max(255),
   password: passwordSchema,
 });
