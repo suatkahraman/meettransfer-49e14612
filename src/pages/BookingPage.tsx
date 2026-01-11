@@ -117,6 +117,7 @@ const BookingPage = () => {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [originalPrice, setOriginalPrice] = useState<number | null>(null);
   const [rejectingPrice, setRejectingPrice] = useState(false);
+  const [justSelectedVehicle, setJustSelectedVehicle] = useState<string | null>(null);
 
   // Logged-in user state
   const [customerName, setCustomerName] = useState("");
@@ -1068,9 +1069,24 @@ const BookingPage = () => {
                             isSelected
                               ? "border-primary bg-primary/5 shadow-md"
                               : "border-border hover:border-primary/50",
-                            isDisabled && "opacity-50"
+                            isDisabled && "opacity-50",
+                            justSelectedVehicle === vehicleOption.value && "animate-[vehicleShake_0.4s_ease-in-out]"
                           )}
+                          onAnimationEnd={() => setJustSelectedVehicle(null)}
                         >
+                          <style>{`
+                            @keyframes vehicleShake {
+                              0%, 100% { transform: translateX(0) scale(1); }
+                              10% { transform: translateX(-3px) scale(1.02); }
+                              20% { transform: translateX(3px) scale(1.02); }
+                              30% { transform: translateX(-3px) scale(1.01); }
+                              40% { transform: translateX(3px) scale(1.01); }
+                              50% { transform: translateX(-2px) scale(1.01); }
+                              60% { transform: translateX(2px) scale(1); }
+                              70% { transform: translateX(-1px) scale(1); }
+                              80% { transform: translateX(1px) scale(1); }
+                            }
+                          `}</style>
                           {isSelected && (
                             <div className="absolute top-3 right-3 z-10">
                               <CheckCircle className="h-5 w-5 text-primary" />
@@ -1132,6 +1148,7 @@ const BookingPage = () => {
                             onClick={(e) => {
                               if (vehicleType !== vehicleOption.value) {
                                 setVehicleType(vehicleOption.value);
+                                setJustSelectedVehicle(vehicleOption.value);
                                 // Mini celebration confetti
                                 const rect = e.currentTarget.getBoundingClientRect();
                                 const x = (rect.left + rect.width / 2) / window.innerWidth;
