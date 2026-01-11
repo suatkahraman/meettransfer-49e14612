@@ -95,8 +95,10 @@ export const Hero = () => {
           if (!durationsMap[item.city]) {
             durationsMap[item.city] = [];
           }
-          // Extract hours from duration_type (e.g., "4_hours" -> "4")
-          const hours = item.duration_type.replace("_hours", "");
+          // Extract hours from duration_type (e.g., "4h" -> "4" or "4_hours" -> "4")
+          // Skip "custom" duration type for the hero form
+          if (item.duration_type === "custom") return;
+          const hours = item.duration_type.replace("_hours", "").replace("h", "");
           if (!durationsMap[item.city].includes(hours)) {
             durationsMap[item.city].push(hours);
           }
@@ -183,15 +185,39 @@ export const Hero = () => {
 
       setLoadingPrice(true);
       try {
-        const durationKey = `${hourlyDuration}_hours`;
-        const { data, error } = await supabase
+        // Try both formats: "4h" and "4_hours"
+        const durationKeyShort = `${hourlyDuration}h`;
+        const durationKeyLong = `${hourlyDuration}_hours`;
+        
+        let data = null;
+        let error = null;
+        
+        // Try short format first (4h, 8h, etc.)
+        const result1 = await supabase
           .from("hourly_rental_prices")
           .select("price, price_currency")
           .eq("city", hourlyCity)
-          .eq("duration_type", durationKey)
+          .eq("duration_type", durationKeyShort)
           .eq("is_active", true)
           .limit(1)
-          .single();
+          .maybeSingle();
+        
+        if (result1.data) {
+          data = result1.data;
+        } else {
+          // Try long format (4_hours, 8_hours, etc.)
+          const result2 = await supabase
+            .from("hourly_rental_prices")
+            .select("price, price_currency")
+            .eq("city", hourlyCity)
+            .eq("duration_type", durationKeyLong)
+            .eq("is_active", true)
+            .limit(1)
+            .maybeSingle();
+          
+          data = result2.data;
+          error = result2.error;
+        }
 
         if (error) throw error;
 
