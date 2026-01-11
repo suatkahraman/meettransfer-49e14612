@@ -698,14 +698,57 @@ const BookingPage = () => {
     ]
   };
 
+  // Track previous loading state for confetti
+  const [wasLoading, setWasLoading] = useState(false);
+
+  // Confetti celebration when loading completes
+  useEffect(() => {
+    if (wasLoading && !isPricesLoading && vehiclePrices.length > 0) {
+      // Fire confetti celebration
+      const duration = 2000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+      const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+      const interval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+          colors: ['#FFD700', '#FFA500', '#FF6B6B', '#4ECDC4', '#45B7D1'],
+        });
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+          colors: ['#FFD700', '#FFA500', '#FF6B6B', '#4ECDC4', '#45B7D1'],
+        });
+      }, 250);
+
+      return () => clearInterval(interval);
+    }
+  }, [isPricesLoading, wasLoading, vehiclePrices.length]);
+
   // Countdown timer effect
   useEffect(() => {
     if (!isPricesLoading) {
-      setCountdown(5);
+      setCountdown(8);
       setProgressWidth(100);
       setTipIndex(0);
       return;
     }
+
+    // Track that loading has started
+    setWasLoading(true);
 
     // Start progress animation
     setProgressWidth(100);
