@@ -67,6 +67,7 @@ import { useNavigate } from "react-router-dom";
 import PriceHistoryCard from "@/components/admin/PriceHistoryCard";
 import { cn } from "@/lib/utils";
 import { getCurrencySymbol } from "@/lib/currency";
+import { validateAllVehiclePrices, validatePrice, hasAnyLowPrice, getLowPriceWarnings } from "@/lib/priceValidation";
 
 interface QuickBookingRequest {
   id: string;
@@ -945,13 +946,32 @@ export default function AdminQuickBookings() {
 
                 {/* Price Info */}
                 {selectedRequest.price && (
-                  <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200">
+                  <Card className={cn(
+                    "border-blue-200",
+                    validatePrice(selectedRequest.price, selectedRequest.price_currency, selectedRequest.vehicle_type).isLow 
+                      ? "bg-amber-50 dark:bg-amber-900/20 border-amber-300" 
+                      : "bg-blue-50 dark:bg-blue-900/20"
+                  )}>
                     <CardContent className="p-3">
+                      {/* Low price warning */}
+                      {validatePrice(selectedRequest.price, selectedRequest.price_currency, selectedRequest.vehicle_type).isLow && (
+                        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-amber-200">
+                          <AlertTriangle className="h-4 w-4 text-amber-600" />
+                          <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                            Otomatik fiyat düşük! Manuel fiyat girin.
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">
                           {selectedRequest.has_return_trip ? "Gidiş Fiyatı" : "Fiyat"}
                         </span>
-                        <span className="text-lg font-bold text-green-600">
+                        <span className={cn(
+                          "text-lg font-bold",
+                          validatePrice(selectedRequest.price, selectedRequest.price_currency, selectedRequest.vehicle_type).isLow
+                            ? "text-amber-600 line-through"
+                            : "text-green-600"
+                        )}>
                           {getCurrencySymbol(selectedRequest.price_currency)}{selectedRequest.price}
                         </span>
                       </div>
@@ -1276,6 +1296,64 @@ export default function AdminQuickBookings() {
                 )}
               </div>
             )}
+
+            {/* Low Price Warning */}
+            {(() => {
+              const hasMultiVehiclePrices = Object.values(allVehiclePrices).some(p => p && parseFloat(p) > 0);
+              const singlePrice = parseFloat(price);
+              
+              if (hasMultiVehiclePrices) {
+                const warnings = getLowPriceWarnings(allVehiclePrices, currency, vehicleLabels);
+                if (warnings.length > 0) {
+                  return (
+                    <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg p-3">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-amber-800 dark:text-amber-200">
+                            Düşük Fiyat Uyarısı!
+                          </p>
+                          <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                            Aşağıdaki fiyatlar minimum eşiğin altında:
+                          </p>
+                          <ul className="text-sm text-amber-600 dark:text-amber-400 mt-1 list-disc list-inside">
+                            {warnings.map((warning, i) => (
+                              <li key={i}>{warning}</li>
+                            ))}
+                          </ul>
+                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 italic">
+                            Fiyatı onaylarsanız, sistem bu rotayı öğrenecek ve gelecekte doğru fiyatı verecektir.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              } else if (singlePrice > 0 && selectedRequest) {
+                const validation = validatePrice(singlePrice, currency, selectedRequest.vehicle_type);
+                if (validation.isLow) {
+                  return (
+                    <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg p-3">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-amber-800 dark:text-amber-200">
+                            Düşük Fiyat Uyarısı!
+                          </p>
+                          <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                            {validation.warningMessage}
+                          </p>
+                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 italic">
+                            Fiyatı onaylarsanız, sistem bu rotayı öğrenecek ve gelecekte doğru fiyatı verecektir.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              }
+              return null;
+            })()}
 
             <Button
               onClick={sendPrice}
