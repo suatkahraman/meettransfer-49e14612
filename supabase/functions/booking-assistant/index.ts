@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, language = 'EN' } = await req.json();
+    const { message, language = 'EN', conversationHistory = [], visitorId } = await req.json();
     
     if (!message || typeof message !== 'string') {
       console.error("Invalid message format");
@@ -51,6 +51,11 @@ serve(async (req) => {
     // Build pricing context
     const pricingContext = buildPricingContext(regionPrices || [], hourlyPrices || []);
 
+    // Get today's date for context
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
     const systemPrompt = `You are a friendly AI booking assistant for Meet Transfer, a premium airport transfer service. Your role is to help customers book transfers by understanding their needs and extracting booking information.
 
 ## Your Capabilities:
@@ -58,6 +63,7 @@ serve(async (req) => {
 - Extract booking details: pickup location, dropoff location, date, time, passengers, vehicle preference
 - Provide price estimates based on available pricing data
 - Answer questions about services, vehicles, and destinations
+- Remember previous messages in the conversation
 
 ## Vehicle Types Available:
 1. **Mercedes Vito** (mercedes-vito): Standard comfortable transfer, up to 5 passengers
@@ -69,6 +75,12 @@ serve(async (req) => {
 - Turkey: Istanbul (IST, SAW airports), Antalya (AYT), Bodrum (BJV), Dalaman (DLM), Izmir (ADB), Cappadocia (NAV, ASR)
 - Dubai: DXB Airport
 - Cyprus: Larnaca (LCA), Ercan (ECN)
+
+## Current Date Context:
+- Today: ${todayStr}
+- Tomorrow: ${tomorrowStr}
+- When user says "yarın" or "tomorrow", use: ${tomorrowStr}
+- When user says "bugün" or "today", use: ${todayStr}
 
 ## Current Pricing Data:
 ${pricingContext}
@@ -86,9 +98,19 @@ When you understand a booking request, include a JSON block at the end of your r
   "vehicleType": "mercedes-vito|vip-mercedes|maybach-minibus|minibus or null",
   "estimatedPrice": number or null,
   "currency": "EUR|USD|TRY or null",
-  "isComplete": true if all required fields are present (pickup, dropoff, date, time)
+  "isComplete": true if ALL required fields are present (pickup, dropoff, date, time, passengers)
 }
 \`\`\`
+
+## CRITICAL - isComplete Rules:
+Set isComplete to TRUE **ONLY** when ALL of these are present:
+- pickup (not null)
+- dropoff (not null)  
+- date (not null, in YYYY-MM-DD format)
+- time (not null, in HH:MM format)
+- passengers (not null, must be a number >= 1)
+
+If ANY of these is missing or null, isComplete MUST be false.
 
 ## Important Rules:
 1. Be conversational and helpful
@@ -97,20 +119,21 @@ When you understand a booking request, include a JSON block at the end of your r
 4. Always include the booking JSON when you detect transfer intent
 5. For hourly rentals, extract city and duration instead of dropoff
 6. Current language: ${language}
+7. When isComplete is true, tell the user their reservation is being created automatically!
 
 ## Example Interaction:
 User: "Yarın 15:00'te İstanbul Havalimanı'ndan Taksim'e 4 kişiyiz"
-Assistant: "Harika! 🚗 Yarın 15:00'te İstanbul Havalimanı'ndan Taksim'e 4 kişilik bir transfer için size yardımcı olabilirim.
+Assistant: "Harika! 🚗 Yarın 15:00'te İstanbul Havalimanı'ndan Taksim'e 4 kişilik bir transfer için rezervasyonunuzu oluşturuyorum!
 
 4 kişi için Mercedes Vito VIP öneriyorum - geniş, konforlu ve bagaj için bol alan. Fiyatınız yaklaşık **€65** olacaktır.
 
-Rezervasyonu onaylayalım mı? Formu sizin için doldurdum! ✅
+Rezervasyonunuz oluşturuluyor... ✅
 
 \`\`\`booking
 {
   "pickup": "İstanbul Havalimanı",
   "dropoff": "Taksim",
-  "date": "2025-01-12",
+  "date": "${tomorrowStr}",
   "time": "15:00",
   "passengers": 4,
   "vehicleType": "vip-mercedes",
@@ -120,7 +143,17 @@ Rezervasyonu onaylayalım mı? Formu sizin için doldurdum! ✅
 }
 \`\`\`"`;
 
-    console.log("Sending request to AI gateway");
+    // Build messages array with conversation history
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...conversationHistory.map((msg: any) => ({
+        role: msg.role,
+        content: msg.content
+      })),
+      { role: "user", content: message },
+    ];
+
+    console.log("Sending request to AI gateway with", messages.length, "messages");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -130,10 +163,7 @@ Rezervasyonu onaylayalım mı? Formu sizin için doldurdum! ✅
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message },
-        ],
+        messages,
         stream: false,
       }),
     });
@@ -163,9 +193,47 @@ Rezervasyonu onaylayalım mı? Formu sizin için doldurdum! ✅
 
     console.log("AI Response received, booking data:", bookingData);
 
+    // If booking is complete, create a quick_booking_request
+    let quickBookingId = null;
+    let confirmationToken = null;
+
+    if (bookingData?.isComplete && bookingData.pickup && bookingData.dropoff && bookingData.date && bookingData.time && bookingData.passengers) {
+      console.log("Creating quick booking request...");
+      
+      const sessionId = visitorId || `ai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const { data: quickBooking, error: qbError } = await supabase
+        .from('quick_booking_requests')
+        .insert({
+          pickup: bookingData.pickup,
+          dropoff: bookingData.dropoff,
+          pickup_date: bookingData.date,
+          pickup_time: bookingData.time,
+          passengers: bookingData.passengers,
+          vehicle_type: bookingData.vehicleType || 'mercedes-vito',
+          price: bookingData.estimatedPrice || null,
+          price_currency: bookingData.currency || 'EUR',
+          customer_session_id: sessionId,
+          status: 'pending',
+          language: language
+        })
+        .select('id, confirmation_token')
+        .single();
+
+      if (qbError) {
+        console.error("Failed to create quick booking:", qbError);
+      } else {
+        quickBookingId = quickBooking.id;
+        confirmationToken = quickBooking.confirmation_token;
+        console.log("Quick booking created:", quickBookingId);
+      }
+    }
+
     return new Response(JSON.stringify({ 
       response: aiResponse,
-      bookingData 
+      bookingData,
+      quickBookingId,
+      confirmationToken
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
