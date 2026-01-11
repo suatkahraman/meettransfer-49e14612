@@ -8691,7 +8691,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "En İyi Fiyatı Şimdi Alın",
-    heroSubtitle: "✈️ Gidiş-Dönüş Transferler – %30 İNDİRİM! Varış ve Dönüş Havalimanı Transferinizi birlikte rezervasyon formlarında ayırtın ve anında %30 tasarruf edin 🎁 Dönüş için Promosyon Kodu: Meet40Return. TÜRKİYE - DUBAI - KIBRIS'ın Tüm Büyük Havalimanlarında En İyi Havalimanı Transfer Şirketi",
+    heroSubtitle: "✈️ Gidiş-Dönüş Transferlerde %30 İNDİRİM! 🎁 Kod: Meet40Return | Türkiye • Dubai • Kıbrıs",
     pointToPoint: "Transfer",
     perHour: "Saatlik",
     bookYourTransfer: "Transferinizi Ayırtın",
