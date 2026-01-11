@@ -14,10 +14,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
+import confetti from "canvas-confetti";
 import { 
   MapPin, Navigation, Calendar, Clock, Users, Briefcase, Baby, 
   ArrowRight, Loader2, CheckCircle, ArrowLeftRight, Tag, Mail, 
-  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight
+  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired } from "@/lib/vehicleTypes";
@@ -109,6 +110,12 @@ const BookingPage = () => {
   const [hourlyPrices, setHourlyPrices] = useState<HourlyPrice[]>([]);
   const [isPricesLoading, setIsPricesLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  
+  // Discount state
+  const [discountApplied, setDiscountApplied] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [originalPrice, setOriginalPrice] = useState<number | null>(null);
+  const [rejectingPrice, setRejectingPrice] = useState(false);
 
   // Logged-in user state
   const [customerName, setCustomerName] = useState("");
@@ -1218,26 +1225,138 @@ const BookingPage = () => {
                       )}
                       </Button>
 
-                      {/* Reject for Better Price Button */}
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="w-full h-12 text-base font-medium mt-3 border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400"
-                        onClick={() => {
-                          const whatsappMessage = encodeURIComponent(
-                            `Hi, I'd like to negotiate a better price for:\n\n` +
-                            `📍 ${urlPickup} → ${urlDropoff}\n` +
-                            `📅 ${urlDate} at ${urlTime}\n` +
-                            `🚗 ${VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}\n` +
-                            `👥 ${passengers} passengers\n` +
-                            `💰 Current price: ${selectedPrice || 'TBD'} ${preferredCurrency}\n\n` +
-                            `Can you offer a better price?`
-                          );
-                          window.open(`https://wa.me/905322529127?text=${whatsappMessage}`, '_blank');
-                        }}
-                      >
-                        {t("rejectForBetterPrice") || "Reject for Better Price"}
-                      </Button>
+                      {/* Reject for Better Price Button - Only show if discount not yet applied and there's a price */}
+                      {selectedPrice && !discountApplied && (
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className="w-full h-12 text-base font-medium mt-3 border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400"
+                          disabled={rejectingPrice}
+                          onClick={async () => {
+                            if (!selectedPrice) return;
+                            
+                            setRejectingPrice(true);
+                            
+                            try {
+                              // Calculate €3 discount equivalent in selected currency
+                              let discountInCurrency = 3; // €3 default
+                              
+                              if (preferredCurrency !== 'EUR') {
+                                try {
+                                  const response = await fetch(
+                                    `https://api.frankfurter.app/latest?from=EUR&to=${preferredCurrency}`,
+                                    { signal: AbortSignal.timeout(3000) }
+                                  );
+                                  if (response.ok) {
+                                    const data = await response.json();
+                                    const rate = data.rates[preferredCurrency];
+                                    if (rate) {
+                                      discountInCurrency = Math.round(3 * rate);
+                                    }
+                                  }
+                                } catch (e) {
+                                  // Fallback rates
+                                  const fallbackRates: Record<string, number> = {
+                                    'USD': 1.08, 'TRY': 37.5, 'GBP': 0.85, 'AED': 3.97, 'AUD': 1.65
+                                  };
+                                  discountInCurrency = Math.round(3 * (fallbackRates[preferredCurrency] || 1));
+                                }
+                              }
+                              
+                              const newPrice = Math.max(selectedPrice - discountInCurrency, 1);
+                              
+                              // Store original price for display
+                              setOriginalPrice(selectedPrice);
+                              setDiscountAmount(discountInCurrency);
+                              
+                              // Update vehicle prices with discount
+                              setVehiclePrices(prev => 
+                                prev.map(v => ({
+                                  ...v,
+                                  price: v.price ? Math.max(v.price - discountInCurrency, 1) : v.price
+                                }))
+                              );
+                              
+                              // Also update hourly prices if applicable
+                              if (isHourlyBooking) {
+                                setHourlyPrices(prev => 
+                                  prev.map(h => ({
+                                    ...h,
+                                    price: Math.max(h.price - discountInCurrency, 1)
+                                  }))
+                                );
+                              }
+                              
+                              setDiscountApplied(true);
+                              
+                              // Celebrate with confetti!
+                              confetti({
+                                particleCount: 80,
+                                spread: 100,
+                                origin: { y: 0.5, x: 0.5 },
+                                colors: ['#22c55e', '#16a34a', '#15803d', '#fbbf24', '#f59e0b']
+                              });
+                              
+                              setTimeout(() => {
+                                confetti({
+                                  particleCount: 50,
+                                  angle: 60,
+                                  spread: 55,
+                                  origin: { x: 0, y: 0.6 },
+                                  colors: ['#22c55e', '#16a34a', '#fbbf24']
+                                });
+                              }, 150);
+                              
+                              setTimeout(() => {
+                                confetti({
+                                  particleCount: 50,
+                                  angle: 120,
+                                  spread: 55,
+                                  origin: { x: 1, y: 0.6 },
+                                  colors: ['#22c55e', '#16a34a', '#fbbf24']
+                                });
+                              }, 300);
+                              
+                              const currencySymbol = preferredCurrency === 'EUR' ? '€' : preferredCurrency === 'USD' ? '$' : preferredCurrency === 'GBP' ? '£' : preferredCurrency === 'TRY' ? '₺' : preferredCurrency;
+                              
+                              toast.success(
+                                `🎉 ${t("discountApplied") || "Discount applied!"} -${currencySymbol}${discountInCurrency}`,
+                                { duration: 5000 }
+                              );
+                            } catch (err) {
+                              console.error("Failed to apply discount:", err);
+                              toast.error(t("discountError") || "Failed to apply discount");
+                            } finally {
+                              setRejectingPrice(false);
+                            }
+                          }}
+                        >
+                          {rejectingPrice ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                          ) : (
+                            <>
+                              <Percent className="mr-2 h-5 w-5" />
+                              {t("rejectForBetterPrice") || "Get Better Price"}
+                            </>
+                          )}
+                        </Button>
+                      )}
+                      
+                      {/* Show discount applied badge */}
+                      {discountApplied && originalPrice && (
+                        <div className="flex items-center justify-center gap-2 text-sm text-green-600 bg-green-50 rounded-lg py-2 mt-3 animate-pulse">
+                          <Tag className="h-4 w-4" />
+                          <span>
+                            {t("discountAppliedLabel") || "Discount Applied:"} 
+                            <span className="line-through ml-1 text-muted-foreground">
+                              {preferredCurrency === 'EUR' ? '€' : preferredCurrency === 'USD' ? '$' : preferredCurrency === 'GBP' ? '£' : preferredCurrency === 'TRY' ? '₺' : preferredCurrency}{originalPrice}
+                            </span>
+                            <span className="font-bold ml-1">
+                              → {preferredCurrency === 'EUR' ? '€' : preferredCurrency === 'USD' ? '$' : preferredCurrency === 'GBP' ? '£' : preferredCurrency === 'TRY' ? '₺' : preferredCurrency}{selectedPrice}
+                            </span>
+                          </span>
+                        </div>
+                      )}
 
                       {user && (
                         <div className="flex items-center justify-center gap-2 text-xs text-green-600 bg-green-50 rounded-lg py-2 mt-3">
