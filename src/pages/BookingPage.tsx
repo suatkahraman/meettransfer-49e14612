@@ -353,6 +353,38 @@ const BookingPage = () => {
 
       // If we have a price, directly create the reservation and go to customer info page
       if (currentPrice) {
+        // Send vehicle prices email if customer provided email
+        if (customerEmail && customerEmail.trim()) {
+          try {
+            await supabase.functions.invoke("send-vehicle-prices-email", {
+              body: {
+                customerEmail: customerEmail.trim(),
+                pickup: isHourlyBooking ? urlCity : urlPickup,
+                dropoff: isHourlyBooking ? `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}` : urlDropoff,
+                pickupDate: urlDate,
+                pickupTime: urlTime,
+                passengers,
+                vehiclePrices: isHourlyBooking 
+                  ? hourlyPrices.map(hp => ({
+                      vehicleType: hp.vehicle_type === "vito" ? "mercedes-vito" : 
+                                   hp.vehicle_type === "vito_vip" ? "vip-mercedes" :
+                                   hp.vehicle_type === "sprinter" ? "minibus" : hp.vehicle_type,
+                      price: hp.price,
+                      currency: preferredCurrency
+                    }))
+                  : vehiclePrices,
+                selectedVehicle: vehicleType,
+                selectedPrice: currentPrice,
+                language: language.toLowerCase(),
+              },
+            });
+            console.log("Vehicle prices email sent to:", customerEmail);
+          } catch (emailError) {
+            console.error("Failed to send vehicle prices email:", emailError);
+            // Don't fail the booking if email fails
+          }
+        }
+
         // Trigger confetti for successful booking
         confetti({
           particleCount: 100,

@@ -164,3 +164,6 @@ verify_jwt = false
 
 [functions.send-transfer-reminder]
 verify_jwt = true
+
+[functions.send-vehicle-prices-email]
+verify_jwt = false
