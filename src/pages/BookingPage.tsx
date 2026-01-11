@@ -32,6 +32,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import Fade from "embla-carousel-fade";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
 
 interface VehiclePrice {
@@ -1164,6 +1165,7 @@ const BookingPage = () => {
                               className="w-full" 
                               opts={{ loop: true }}
                               plugins={[
+                                Fade(),
                                 Autoplay({
                                   delay: 2500,
                                   stopOnInteraction: false,

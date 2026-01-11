@@ -4,6 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import Fade from "embla-carousel-fade";
 
 interface VehicleImage {
   src: string;
@@ -37,7 +38,8 @@ const VehicleCard = ({
   const images: VehicleImage[] = imagesProp || (image ? [{ src: image, alt: `${name} transfer vehicle` }] : []);
   const { t } = useLanguage();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
-    Autoplay({ delay: 4000, stopOnInteraction: true }),
+    Fade(),
+    Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: false }),
   ]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
