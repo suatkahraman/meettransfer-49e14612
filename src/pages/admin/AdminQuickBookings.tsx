@@ -316,23 +316,37 @@ export default function AdminQuickBookings() {
         console.error("Failed to record price history:", e);
       }
 
-      // Save manual price to region_prices/intercity_prices for future auto-matching
+      // Save manual prices to region_prices/intercity_prices for ALL vehicle types
       try {
-        const { data: saveResult } = await supabase.functions.invoke('save-manual-price-to-region', {
-          body: {
-            pickup: selectedRequest.pickup,
-            dropoff: selectedRequest.dropoff,
-            vehicle_type: selectedRequest.vehicle_type,
-            price: priceValue,
-            price_currency: currency,
-            quick_booking_id: selectedRequest.id,
+        // If we have all vehicle prices, save each one
+        const pricesToSave = Object.keys(vehiclePricesJson).length > 0 
+          ? vehiclePricesJson 
+          : { [selectedRequest.vehicle_type]: priceValue };
+        
+        const savePromises = Object.entries(pricesToSave).map(async ([vehicleType, vehiclePrice]) => {
+          if (vehiclePrice && Number(vehiclePrice) > 0) {
+            const { data: saveResult } = await supabase.functions.invoke('save-manual-price-to-region', {
+              body: {
+                pickup: selectedRequest.pickup,
+                dropoff: selectedRequest.dropoff,
+                vehicle_type: vehicleType,
+                price: Number(vehiclePrice),
+                price_currency: currency,
+                quick_booking_id: selectedRequest.id,
+              }
+            });
+            if (saveResult?.success) {
+              console.log(`Manual price saved for ${vehicleType}:`, saveResult.saved_location);
+            }
+            return saveResult;
           }
+          return null;
         });
-        if (saveResult?.success) {
-          console.log('Manual price saved to prices table:', saveResult.saved_location);
-        }
+        
+        await Promise.all(savePromises);
+        console.log(`Saved ${Object.keys(pricesToSave).length} vehicle prices to prices table`);
       } catch (e) {
-        console.error('Failed to save manual price to region:', e);
+        console.error('Failed to save manual prices to region:', e);
       }
 
       try {
