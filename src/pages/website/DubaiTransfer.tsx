@@ -10,10 +10,22 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
-import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
-import mercedesMaybachInterior from "@/assets/mercedes-maybach-interior.webp";
 import dubaiHeroImage from "@/assets/dubai-transfer-hero.jpg";
+// Vito VIP images
+import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
+import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
+import vitoVip1 from "@/assets/vito-vip-1.jpg";
+import vitoVip2 from "@/assets/vito-vip-2.jpg";
+// Vito images
+import vito1 from "@/assets/vito-1.jpg";
+import vito2 from "@/assets/vito-2.jpg";
+import vito3 from "@/assets/vito-3.jpg";
+// Maybach images
+import maybachUltraLuxury from "@/assets/maybach-ultra-luxury.jpg";
+import maybach1 from "@/assets/maybach-1.jpg";
+import maybach2 from "@/assets/maybach-2.jpg";
+import maybach3 from "@/assets/maybach-3.jpg";
 
 const destinations = [
   "Burj Khalifa", "Palm Jumeirah", "Dubai Marina", "Downtown Dubai",
@@ -65,7 +77,13 @@ const vehicles = [
     passengers: 6,
     luggage: 6,
     features: ["Leather seats", "WiFi", "Water", "USB charger", "Air Condition"],
-    image: mercedesVipImage,
+    images: [
+      { src: vitoAirportPremium, alt: "Mercedes Vito VIP Dubai airport transfer" },
+      { src: vitoLuxuryInterior, alt: "Mercedes Vito VIP luxury interior Dubai" },
+      { src: vipVitoStarlightLuxury, alt: "Mercedes Vito VIP starlight ceiling" },
+      { src: vitoVip1, alt: "Mercedes Vito VIP exterior Dubai" },
+      { src: vitoVip2, alt: "Mercedes Vito VIP premium service Dubai" },
+    ],
   },
   {
     name: "Mercedes Vito",
@@ -73,7 +91,11 @@ const vehicles = [
     passengers: 7,
     luggage: 7,
     features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-    image: mercedesVitoFamilyImage,
+    images: [
+      { src: vito1, alt: "Mercedes Vito family transfer Dubai" },
+      { src: vito2, alt: "Mercedes Vito comfortable interior Dubai" },
+      { src: vito3, alt: "Mercedes Vito airport service Dubai" },
+    ],
   },
   {
     name: "Mercedes Maybach",
@@ -81,7 +103,12 @@ const vehicles = [
     passengers: 3,
     luggage: 3,
     features: ["Executive seating", "Premium leather", "Privacy glass", "Champagne cooler", "WiFi"],
-    image: mercedesMaybachInterior,
+    images: [
+      { src: maybachUltraLuxury, alt: "Mercedes Maybach ultra luxury interior Dubai" },
+      { src: maybach1, alt: "Mercedes Maybach VIP transfer Dubai" },
+      { src: maybach2, alt: "Mercedes Maybach executive service Dubai" },
+      { src: maybach3, alt: "Mercedes Maybach starlight ceiling Dubai" },
+    ],
   },
 ];
 
