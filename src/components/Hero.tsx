@@ -58,6 +58,7 @@ export const Hero = () => {
   const [hourlyDate, setHourlyDate] = useState<Date | undefined>(undefined);
   const [hourlyTime, setHourlyTime] = useState("");
   const [hourlyDuration, setHourlyDuration] = useState("");
+  const [hourlyPassengers, setHourlyPassengers] = useState("2");
   const [hourlyDatePopoverOpen, setHourlyDatePopoverOpen] = useState(false);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [cityDurations, setCityDurations] = useState<Record<string, string[]>>({});
@@ -205,6 +206,7 @@ export const Hero = () => {
     params.set("date", format(hourlyDate!, "yyyy-MM-dd"));
     params.set("time", hourlyTime);
     params.set("duration", hourlyDuration);
+    params.set("passengers", hourlyPassengers);
     params.set("type", "hourly");
     
     navigate(`/book?${params.toString()}`);
@@ -506,47 +508,88 @@ export const Hero = () => {
                     </div>
                   </div>
 
-                  {/* Date & Time */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="relative">
-                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupDate")}</label>
-                      <Popover open={hourlyDatePopoverOpen} onOpenChange={setHourlyDatePopoverOpen}>
-                        <PopoverTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            className={cn(
-                              "w-full h-14 justify-start text-left font-normal bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all",
-                              !hourlyDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
-                            {hourlyDate ? format(hourlyDate, "dd MMM yyyy") : <span>{t("selectDate")}</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 z-50" align="start">
-                          <Calendar 
-                            mode="single" 
-                            selected={hourlyDate} 
-                            onSelect={(selectedDate) => { setHourlyDate(selectedDate); setHourlyDatePopoverOpen(false); }} 
-                            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-                            initialFocus 
-                            className="p-3 pointer-events-auto" 
-                          />
-                        </PopoverContent>
-                      </Popover>
+                  {/* Date, Time & Passengers - 2 rows on mobile, 3 cols on desktop */}
+                  <div className="space-y-4 md:space-y-0">
+                    {/* First row: Date & Time */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div className="relative">
+                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupDate")}</label>
+                        <Popover open={hourlyDatePopoverOpen} onOpenChange={setHourlyDatePopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              className={cn(
+                                "w-full h-14 justify-start text-left font-normal bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all",
+                                !hourlyDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
+                              <span className="truncate">{hourlyDate ? format(hourlyDate, "dd MMM") : t("selectDate")}</span>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 z-50" align="start">
+                            <Calendar 
+                              mode="single" 
+                              selected={hourlyDate} 
+                              onSelect={(selectedDate) => { setHourlyDate(selectedDate); setHourlyDatePopoverOpen(false); }} 
+                              disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+                              initialFocus 
+                              className="p-3 pointer-events-auto" 
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div className="relative">
+                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupTime")}</label>
+                        <Select value={hourlyTime} onValueChange={setHourlyTime}>
+                          <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                            <div className="flex items-center">
+                              <Clock className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
+                              <SelectValue placeholder={t("selectTime")} />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[300px] z-50">
+                            {timeOptions.map((opt) => (
+                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {/* Passengers - hidden on mobile, shown on desktop in same row */}
+                      <div className="relative hidden md:block">
+                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("passengers") || "Passengers"}</label>
+                        <Select value={hourlyPassengers} onValueChange={setHourlyPassengers}>
+                          <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                            <div className="flex items-center">
+                              <Users className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
+                              <SelectValue />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[300px] z-50">
+                            {Array.from({ length: 18 }, (_, i) => i + 1).map((num) => (
+                              <SelectItem key={num} value={num.toString()}>
+                                {num} {num === 1 ? (t("passenger") || "passenger") : (t("passengers") || "passengers")}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="relative">
-                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupTime")}</label>
-                      <Select value={hourlyTime} onValueChange={setHourlyTime}>
+                    {/* Second row: Passengers - shown only on mobile */}
+                    <div className="md:hidden">
+                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("passengers") || "Passengers"}</label>
+                      <Select value={hourlyPassengers} onValueChange={setHourlyPassengers}>
                         <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
                           <div className="flex items-center">
-                            <Clock className="mr-2 h-5 w-5 text-primary" />
-                            <SelectValue placeholder={t("selectTime")} />
+                            <Users className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
+                            <SelectValue />
                           </div>
                         </SelectTrigger>
                         <SelectContent className="max-h-[300px] z-50">
-                          {timeOptions.map((opt) => (
-                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          {Array.from({ length: 18 }, (_, i) => i + 1).map((num) => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num} {num === 1 ? (t("passenger") || "passenger") : (t("passengers") || "passengers")}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
