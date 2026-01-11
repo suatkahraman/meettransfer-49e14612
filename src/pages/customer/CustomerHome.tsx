@@ -926,9 +926,9 @@ const CustomerHome = () => {
         />
         {/* Welcome Section */}
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.2 }}
           className="mb-4"
         >
           <div className="flex items-center justify-between mb-4">
@@ -963,9 +963,9 @@ const CustomerHome = () => {
 
         {/* Dashboard Summary Cards */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ duration: 0.2 }}
           className="grid grid-cols-3 gap-2 sm:gap-3 mb-4"
         >
           {/* Active Reservations */}
@@ -1016,9 +1016,9 @@ const CustomerHome = () => {
 
         {/* Quick Book Button */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={false}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.15 }}
+          transition={{ duration: 0.2 }}
           className="mb-4"
         >
           <Button
@@ -1035,7 +1035,7 @@ const CustomerHome = () => {
         {/* Missing Phone Warning */}
         {!profileData.phone && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={false}
             animate={{ opacity: 1, scale: 1 }}
             className="mb-4"
           >
@@ -1070,9 +1070,9 @@ const CustomerHome = () => {
 
         {/* Promo Campaign Banner - More compact on mobile */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={false}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.15 }}
+          transition={{ duration: 0.2 }}
           className="mb-4 sm:mb-6"
         >
           <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 border-green-500/30 overflow-hidden relative">
@@ -1163,9 +1163,9 @@ const CustomerHome = () => {
 
         {/* Quick Actions Grid - More compact on mobile */}
         <motion.div 
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
+          transition={{ duration: 0.2 }}
           className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6"
         >
           {/* New Reservation Card */}
@@ -1235,9 +1235,9 @@ const CustomerHome = () => {
 
         {/* Quick Support & Navigation Actions - More compact on mobile */}
         <motion.div 
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          transition={{ duration: 0.2 }}
           className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-6"
         >
           {/* Home */}
