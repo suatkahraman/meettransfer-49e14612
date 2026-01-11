@@ -562,7 +562,7 @@ const BookingPage = () => {
             price_currency: preferredCurrency,
             luggage_count: luggageCount,
             baby_seat_count: babySeatCount,
-            status: "pending",
+            status: getHourlyPrice(vehicleType, selectedDuration) ? "confirmed" : "awaiting-price",
           }
         : {
             pickup: urlPickup,
@@ -579,7 +579,7 @@ const BookingPage = () => {
             price_currency: preferredCurrency,
             luggage_count: luggageCount,
             baby_seat_count: babySeatCount,
-            status: "pending",
+            status: selectedPrice ? "confirmed" : "awaiting-price",
           };
 
       const { data: reservation, error } = await supabase
