@@ -924,69 +924,112 @@ const CustomerHome = () => {
           isPulling={isPulling}
           language={language === 'TR' ? 'TR' : 'EN'}
         />
-        {/* Welcome Section with Premium Design */}
+        {/* Welcome Section */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-6"
+          className="mb-4"
         >
-          <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden relative">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(var(--primary),0.1),_transparent_50%)]" />
-            <CardContent className="p-5 sm:p-6 relative z-10">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <motion.div
-                    animate={{ rotate: [0, 15, -15, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                    className="bg-primary/20 p-2.5 rounded-full"
-                  >
-                    <Sparkles className="h-5 w-5 text-primary" />
-                  </motion.div>
-                  <div>
-                    <p className="text-sm text-muted-foreground font-medium">
-                      {greeting}
-                    </p>
-                    <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
-                      {displayName}
-                    </h1>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={fetchData}
-                  disabled={isRefreshing}
-                  className="h-10 w-10 rounded-full bg-background/50 hover:bg-background"
-                >
-                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                </Button>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <motion.div
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                className="bg-primary/20 p-2.5 rounded-full"
+              >
+                <Sparkles className="h-5 w-5 text-primary" />
+              </motion.div>
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">
+                  {greeting}
+                </p>
+                <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
+                  {displayName}
+                </h1>
               </div>
-              
-              {/* Stats Row */}
-              <div className="flex items-center gap-4 pt-3 border-t border-primary/10">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-                    <ClipboardList className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('activeCount')}</p>
-                    <p className="font-bold text-foreground">{activeBookingsCount}</p>
-                  </div>
-                </div>
-                <div className="h-8 w-px bg-border/50" />
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('completedCount')}</p>
-                    <p className="font-bold text-foreground">{completedReservations.length}</p>
-                  </div>
-                </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={fetchData}
+              disabled={isRefreshing}
+              className="h-10 w-10 rounded-full bg-muted/50 hover:bg-muted"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Dashboard Summary Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-3 gap-2 sm:gap-3 mb-4"
+        >
+          {/* Active Reservations */}
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-all bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20"
+            onClick={() => navigate('/customer/bookings')}
+          >
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-2">
+                <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
+              <p className="text-2xl sm:text-3xl font-bold text-primary">{activeBookingsCount}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('activeCount')}</p>
             </CardContent>
           </Card>
+
+          {/* Completed Transfers */}
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-all bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20"
+            onClick={() => navigate('/customer/bookings#past-reservations')}
+          >
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 mx-auto rounded-full bg-green-500/20 flex items-center justify-center mb-2">
+                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold text-green-600">{completedReservations.length}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('completedCount')}</p>
+            </CardContent>
+          </Card>
+
+          {/* Favorite Routes */}
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-all bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20"
+            onClick={() => {
+              const favSection = document.getElementById('favorite-routes-section');
+              favSection?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 mx-auto rounded-full bg-accent/20 flex items-center justify-center mb-2">
+                <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold text-accent">{favoriteRoutes.length}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('favoritesCount') || t('favorites')}</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Quick Book Button */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15 }}
+          className="mb-4"
+        >
+          <Button
+            size="lg"
+            className="w-full h-14 bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary text-lg font-semibold shadow-lg group"
+            onClick={() => navigate('/')}
+          >
+            <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform" />
+            {t('bookNewTransfer') || 'Book New Transfer'}
+            <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+          </Button>
         </motion.div>
 
         {/* Missing Phone Warning */}
