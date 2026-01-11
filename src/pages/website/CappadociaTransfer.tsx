@@ -10,8 +10,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
-import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
+// Premium images
+import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
+import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
+import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
 
 const destinations = [
   "Göreme", "Ürgüp", "Uçhisar", "Avanos", "Ortahisar",
@@ -55,7 +58,10 @@ const vehicles = [
     passengers: 6,
     luggage: 6,
     features: ["Leather seats", "WiFi", "Water", "USB charger"],
-    image: mercedesVipImage,
+    images: [
+      { src: vipVitoStarlightLuxury, alt: "Mercedes VIP Vito couple champagne starlight ceiling luxury Cappadocia" },
+      { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple starlight roof interior Cappadocia" },
+    ],
   },
   {
     name: "Mercedes Vito",
@@ -63,7 +69,10 @@ const vehicles = [
     passengers: 7,
     luggage: 7,
     features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-    image: mercedesVitoFamilyImage,
+    images: [
+      { src: vitoAirportPremium, alt: "Mercedes Vito VIP airport transfer Cappadocia with chauffeur" },
+      { src: vitoLuxuryInterior, alt: "Mercedes Vito luxury interior passengers Cappadocia transfer" },
+    ],
   },
 ];
 

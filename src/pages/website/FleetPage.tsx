@@ -42,6 +42,14 @@ import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
 import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 import meetTransferPromoBanner from "@/assets/meet-transfer-promo-banner.png";
 
+// New premium images
+import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
+import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
+import maybachUltraLuxury from "@/assets/maybach-ultra-luxury.jpg";
+import sprinterHotelArrival from "@/assets/sprinter-hotel-arrival.jpg";
+import sprinterVipInterior from "@/assets/sprinter-vip-interior.jpg";
+
 const FleetPage = () => {
   const { t } = useLanguage();
 
@@ -53,6 +61,7 @@ const FleetPage = () => {
       luggage: 5,
       features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
       images: [
+        { src: vipVitoStarlightLuxury, alt: "Mercedes VIP Vito couple champagne starlight ceiling luxury" },
         { src: meetTransferPromoBanner, alt: "Meet Transfer Premier VIP Airport Transfer - All Major Airports" },
         { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple starlight roof interior" },
         { src: meetTransferDubai, alt: "Meet Transfer VIP service in Dubai UAE" },
@@ -72,6 +81,8 @@ const FleetPage = () => {
       luggage: 6,
       features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
       images: [
+        { src: vitoAirportPremium, alt: "Mercedes Vito VIP airport transfer with professional chauffeur" },
+        { src: vitoLuxuryInterior, alt: "Mercedes Vito luxury white leather interior passengers" },
         { src: meetTransferPromoBanner, alt: "Meet Transfer Premier VIP Airport Transfer - All Major Airports" },
         { src: vitoAirportAnime, alt: "Mercedes Vito private transfer at airport terminal" },
         { src: vitoAirportWelcome, alt: "Mercedes Vito airport pickup with welcome service" },
@@ -94,6 +105,7 @@ const FleetPage = () => {
       luggage: 4,
       features: ["Leather seats", "Rear entertainment", "Ambient lighting", "Mini bar", "Star ceiling", "TV"],
       images: [
+        { src: maybachUltraLuxury, alt: "Mercedes Maybach ultra luxury orange leather galaxy starlight ceiling" },
         { src: meetTransferPromoBanner, alt: "Meet Transfer Premier VIP Airport Transfer - All Major Airports" },
         { src: meetTransferDubai, alt: "Meet Transfer Maybach luxury service Dubai" },
         { src: maybachInterior, alt: "Mercedes Maybach starlight ceiling luxury interior" },
@@ -110,6 +122,8 @@ const FleetPage = () => {
       luggage: 16,
       features: ["Leather Seats", "Large luggage space", "WiFi", "USB"],
       images: [
+        { src: sprinterHotelArrival, alt: "Mercedes Sprinter VIP red carpet hotel arrival luxury" },
+        { src: sprinterVipInterior, alt: "Mercedes Sprinter VIP blue starlight interior seats" },
         { src: meetTransferPromoBanner, alt: "Meet Transfer Premier VIP Airport Transfer - All Major Airports" },
         { src: sprinterExteriorVip, alt: "Mercedes Sprinter VIP exterior luxury design" },
         { src: sprinterInteriorGrey, alt: "Mercedes Sprinter grey leather interior design" },

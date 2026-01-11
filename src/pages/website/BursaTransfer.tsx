@@ -11,9 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
-import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 import bursaHeroImage from "@/assets/bursa-transfer-hero.jpg";
+
+// Premium images
+import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
+import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
+import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
 
 // Popular destinations in Bursa and between Istanbul-Bursa
 const destinations = [
@@ -99,7 +103,10 @@ const vehicles = [
     passengers: 6,
     luggage: 6,
     features: ["Leather seats", "WiFi", "Water", "USB charger", "Climate control"],
-    image: mercedesVipImage,
+    images: [
+      { src: vipVitoStarlightLuxury, alt: "Mercedes VIP Vito starlight luxury transfer Bursa" },
+      { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple interior Bursa" },
+    ],
   },
   {
     name: "Mercedes Vito",
@@ -107,7 +114,10 @@ const vehicles = [
     passengers: 7,
     luggage: 7,
     features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-    image: mercedesVitoFamilyImage,
+    images: [
+      { src: vitoAirportPremium, alt: "Mercedes Vito airport transfer Bursa with chauffeur" },
+      { src: vitoLuxuryInterior, alt: "Mercedes Vito luxury interior Bursa transfer" },
+    ],
   },
 ];
 
