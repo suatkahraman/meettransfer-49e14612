@@ -188,6 +188,17 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Book Airport Transfer With AI",
     new: "New",
     
+    // Hourly Rental Form
+    city: "City",
+    selectCity: "Select city",
+    duration: "Duration",
+    selectDuration: "Select duration",
+    selectCityFirst: "Select city first",
+    halfDay: "4 Hours (Half Day)",
+    fullDay: "8 Hours (Full Day)",
+    customHourly: "9+ Hours (Custom)",
+    hourlyMaxPassengers: "Hourly rental is available for up to 6 passengers",
+    
     // Booking Process
     howBookingWorks: "How Our Booking Process Works",
     bookingProcessIntro: "Request your price first – then confirm your booking",
@@ -1732,6 +1743,17 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistantHint: "Fragen Sie mich alles über Ihren Transfer",
     bookAirportTransferWithAI: "Flughafentransfer mit KI buchen",
     new: "Neu",
+    
+    // Hourly Rental Form
+    city: "Stadt",
+    selectCity: "Stadt auswählen",
+    duration: "Dauer",
+    selectDuration: "Dauer auswählen",
+    selectCityFirst: "Zuerst Stadt auswählen",
+    halfDay: "4 Stunden (Halbtag)",
+    fullDay: "8 Stunden (Ganztag)",
+    customHourly: "9+ Stunden (Individuell)",
+    hourlyMaxPassengers: "Stündliche Miete ist für bis zu 6 Passagiere verfügbar",
     
     // Booking Process
     howBookingWorks: "So funktioniert unser Buchungsprozess",
@@ -3312,6 +3334,17 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Réservez votre transfert aéroport avec l'IA",
     new: "Nouveau",
     
+    // Hourly Rental Form
+    city: "Ville",
+    selectCity: "Sélectionner une ville",
+    duration: "Durée",
+    selectDuration: "Sélectionner la durée",
+    selectCityFirst: "Sélectionnez d'abord une ville",
+    halfDay: "4 Heures (Demi-journée)",
+    fullDay: "8 Heures (Journée complète)",
+    customHourly: "9+ Heures (Personnalisé)",
+    hourlyMaxPassengers: "La location horaire est disponible pour jusqu'à 6 passagers",
+    
     // Booking Process
     howBookingWorks: "Comment fonctionne notre processus de réservation",
     bookingProcessIntro: "Demandez d'abord votre prix – puis confirmez votre réservation",
@@ -4501,6 +4534,17 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Забронируйте трансфер из аэропорта с ИИ",
     new: "Новый",
     
+    // Hourly Rental Form
+    city: "Город",
+    selectCity: "Выберите город",
+    duration: "Продолжительность",
+    selectDuration: "Выберите продолжительность",
+    selectCityFirst: "Сначала выберите город",
+    halfDay: "4 Часа (Полдня)",
+    fullDay: "8 Часов (Весь день)",
+    customHourly: "9+ Часов (Индивидуально)",
+    hourlyMaxPassengers: "Почасовая аренда доступна для до 6 пассажиров",
+    
     // Booking Process
     howBookingWorks: "Как работает наш процесс бронирования",
     bookingProcessIntro: "Сначала запросите цену – затем подтвердите бронирование",
@@ -5632,6 +5676,17 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistantHint: "Chiedimi qualsiasi cosa sul tuo trasferimento",
     bookAirportTransferWithAI: "Prenota il trasferimento aeroportuale con l'IA",
     new: "Nuovo",
+    
+    // Hourly Rental Form
+    city: "Città",
+    selectCity: "Seleziona città",
+    duration: "Durata",
+    selectDuration: "Seleziona durata",
+    selectCityFirst: "Prima seleziona una città",
+    halfDay: "4 Ore (Mezza giornata)",
+    fullDay: "8 Ore (Giornata intera)",
+    customHourly: "9+ Ore (Personalizzato)",
+    hourlyMaxPassengers: "Il noleggio orario è disponibile per un massimo di 6 passeggeri",
     
     // Booking Process
     howBookingWorks: "Come funziona il nostro processo di prenotazione",
@@ -6818,6 +6873,17 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Reserva tu traslado al aeropuerto con IA",
     new: "Nuevo",
     
+    // Hourly Rental Form
+    city: "Ciudad",
+    selectCity: "Seleccionar ciudad",
+    duration: "Duración",
+    selectDuration: "Seleccionar duración",
+    selectCityFirst: "Primero seleccione una ciudad",
+    halfDay: "4 Horas (Medio día)",
+    fullDay: "8 Horas (Día completo)",
+    customHourly: "9+ Horas (Personalizado)",
+    hourlyMaxPassengers: "El alquiler por hora está disponible para hasta 6 pasajeros",
+    
     // Booking Process
     howBookingWorks: "Cómo funciona nuestro proceso de reserva",
     bookingProcessIntro: "Solicita primero tu precio – luego confirma tu reserva",
@@ -8003,6 +8069,17 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "احجز نقل المطار مع الذكاء الاصطناعي",
     new: "جديد",
     
+    // Hourly Rental Form
+    city: "المدينة",
+    selectCity: "اختر المدينة",
+    duration: "المدة",
+    selectDuration: "اختر المدة",
+    selectCityFirst: "اختر المدينة أولاً",
+    halfDay: "4 ساعات (نصف يوم)",
+    fullDay: "8 ساعات (يوم كامل)",
+    customHourly: "9+ ساعات (مخصص)",
+    hourlyMaxPassengers: "التأجير بالساعة متاح لما يصل إلى 6 ركاب",
+    
     // Booking Process
     howBookingWorks: "كيف تعمل عملية الحجز",
     bookingProcessIntro: "اطلب سعرك أولاً - ثم أكد حجزك",
@@ -9134,6 +9211,17 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistantHint: "Transferiniz hakkında bana soru sorun",
     bookAirportTransferWithAI: "Havalimanı Transferini AI ile Rezerve Et",
     new: "Yeni",
+    
+    // Hourly Rental Form
+    city: "Şehir",
+    selectCity: "Şehir seçin",
+    duration: "Süre",
+    selectDuration: "Süre seçin",
+    selectCityFirst: "Önce şehir seçin",
+    halfDay: "4 Saat (Yarım Gün)",
+    fullDay: "8 Saat (Tam Gün)",
+    customHourly: "9+ Saat (Özel)",
+    hourlyMaxPassengers: "Saatlik kiralama maksimum 6 yolcu içindir",
     
     // Booking Process
     howBookingWorks: "Rezervasyon Sürecimiz Nasıl İşliyor",
@@ -10413,6 +10501,17 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Забронюйте трансфер з аеропорту зі ШІ",
     new: "Новий",
     
+    // Hourly Rental Form
+    city: "Місто",
+    selectCity: "Виберіть місто",
+    duration: "Тривалість",
+    selectDuration: "Виберіть тривалість",
+    selectCityFirst: "Спочатку виберіть місто",
+    halfDay: "4 Години (Півдня)",
+    fullDay: "8 Годин (Весь день)",
+    customHourly: "9+ Годин (Індивідуально)",
+    hourlyMaxPassengers: "Погодинна оренда доступна для до 6 пасажирів",
+    
     // Booking Process
     howBookingWorks: "Як працює наш процес бронювання",
     bookingProcessIntro: "Спочатку запитайте ціну – потім підтвердіть бронювання",
@@ -11537,6 +11636,18 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistantHint: "送迎について何でもお聞きください",
     bookAirportTransferWithAI: "AIで空港送迎を予約",
     new: "新着",
+    
+    // Hourly Rental Form
+    city: "都市",
+    selectCity: "都市を選択",
+    duration: "期間",
+    selectDuration: "期間を選択",
+    selectCityFirst: "まず都市を選択してください",
+    halfDay: "4時間（半日）",
+    fullDay: "8時間（終日）",
+    customHourly: "9時間以上（カスタム）",
+    hourlyMaxPassengers: "時間貸しは最大6名様までご利用いただけます",
+    
     
     // Booking Process
     howBookingWorks: "予約の流れ",
