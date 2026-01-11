@@ -56,19 +56,21 @@ export const Hero = () => {
   const [hourlyCity, setHourlyCity] = useState("");
   const [hourlyDate, setHourlyDate] = useState<Date | undefined>(undefined);
   const [hourlyTime, setHourlyTime] = useState("");
-  const [hourlyDuration, setHourlyDuration] = useState("4");
+  const [hourlyDuration, setHourlyDuration] = useState("");
   const [hourlyDatePopoverOpen, setHourlyDatePopoverOpen] = useState(false);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [cityDurations, setCityDurations] = useState<Record<string, string[]>>({});
   const [loadingCities, setLoadingCities] = useState(false);
 
-  // Fetch available cities from hourly_rental_prices
+  // Fetch available cities and their durations from hourly_rental_prices
   useEffect(() => {
-    const fetchCities = async () => {
+    const fetchCitiesAndDurations = async () => {
       setLoadingCities(true);
       try {
         const { data, error } = await supabase
           .from("hourly_rental_prices")
-          .select("city")
+          .select("city, duration_type")
+          .eq("is_active", true)
           .order("city");
         
         if (error) throw error;
@@ -76,6 +78,26 @@ export const Hero = () => {
         // Get unique cities
         const uniqueCities = [...new Set(data?.map(item => item.city) || [])];
         setAvailableCities(uniqueCities);
+        
+        // Build city -> durations map
+        const durationsMap: Record<string, string[]> = {};
+        data?.forEach(item => {
+          if (!durationsMap[item.city]) {
+            durationsMap[item.city] = [];
+          }
+          // Extract hours from duration_type (e.g., "4_hours" -> "4")
+          const hours = item.duration_type.replace("_hours", "");
+          if (!durationsMap[item.city].includes(hours)) {
+            durationsMap[item.city].push(hours);
+          }
+        });
+        
+        // Sort durations numerically for each city
+        Object.keys(durationsMap).forEach(city => {
+          durationsMap[city].sort((a, b) => parseInt(a) - parseInt(b));
+        });
+        
+        setCityDurations(durationsMap);
       } catch (error) {
         console.error("Error fetching cities:", error);
       } finally {
@@ -83,8 +105,22 @@ export const Hero = () => {
       }
     };
 
-    fetchCities();
+    fetchCitiesAndDurations();
   }, []);
+
+  // Get available durations for selected city
+  const availableDurations = hourlyCity ? (cityDurations[hourlyCity] || []) : [];
+  
+  // Reset duration when city changes if current duration is not available
+  useEffect(() => {
+    if (hourlyCity && availableDurations.length > 0) {
+      if (!availableDurations.includes(hourlyDuration)) {
+        setHourlyDuration(availableDurations[0]);
+      }
+    } else if (!hourlyCity) {
+      setHourlyDuration("");
+    }
+  }, [hourlyCity, availableDurations]);
 
   const handleRideContinue = () => {
     const missingFields: string[] = [];
@@ -365,17 +401,21 @@ export const Hero = () => {
                     </div>
                     <div className="relative">
                       <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("duration") || "Duration"}</label>
-                      <Select value={hourlyDuration} onValueChange={setHourlyDuration}>
-                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                      <Select 
+                        value={hourlyDuration} 
+                        onValueChange={setHourlyDuration}
+                        disabled={!hourlyCity || availableDurations.length === 0}
+                      >
+                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all disabled:opacity-50">
                           <div className="flex items-center">
                             <Timer className="mr-2 h-5 w-5 text-primary" />
-                            <SelectValue />
+                            <SelectValue placeholder={!hourlyCity ? (t("selectCityFirst") || "Select city first") : (t("selectDuration") || "Select duration")} />
                           </div>
                         </SelectTrigger>
                         <SelectContent className="z-50">
-                          {hourlyDurationOptions.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label.replace("hours", t("hours") || "hours")}
+                          {availableDurations.map((hours) => (
+                            <SelectItem key={hours} value={hours}>
+                              {hours} {t("hours") || "hours"}
                             </SelectItem>
                           ))}
                         </SelectContent>
