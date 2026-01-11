@@ -200,6 +200,10 @@ const translations: Record<Language, Record<string, string>> = {
     benefit2: "No hidden fees",
     benefit3: "You only confirm if you agree with the price",
     
+    // Customer Reviews Section
+    customerReviewsTitle: "What Our Customers Say",
+    seeAllReviews: "See All Reviews",
+    
     // Features Section
     whyChooseUs: "Why Choose Us",
     experienceTheDifference: "Experience the difference with our premium transfer service",
@@ -1725,6 +1729,10 @@ const translations: Record<Language, Record<string, string>> = {
     benefit1: "Keine automatische Preisgestaltung",
     benefit2: "Keine versteckten Gebühren",
     benefit3: "Sie bestätigen nur, wenn Sie mit dem Preis einverstanden sind",
+    
+    // Customer Reviews Section
+    customerReviewsTitle: "Was unsere Kunden sagen",
+    seeAllReviews: "Alle Bewertungen ansehen",
     
     // Features Section
     whyChooseUs: "Warum uns wählen",
@@ -3286,6 +3294,10 @@ const translations: Record<Language, Record<string, string>> = {
     benefit2: "Pas de frais cachés",
     benefit3: "Vous ne confirmez que si vous acceptez le prix",
 
+    // Customer Reviews Section
+    customerReviewsTitle: "Ce que disent nos clients",
+    seeAllReviews: "Voir tous les avis",
+
     // Features Section
     whyChooseUs: "Pourquoi nous choisir",
     experienceTheDifference: "Découvrez la différence avec notre service de transfert premium",
@@ -4456,6 +4468,10 @@ const translations: Record<Language, Record<string, string>> = {
     benefit2: "Нет скрытых платежей",
     benefit3: "Вы подтверждаете только если согласны с ценой",
 
+    // Customer Reviews Section
+    customerReviewsTitle: "Что говорят наши клиенты",
+    seeAllReviews: "Смотреть все отзывы",
+
     // Features Section
     whyChooseUs: "Почему выбирают нас",
     experienceTheDifference: "Почувствуйте разницу с нашим премиальным трансфер-сервисом",
@@ -5568,6 +5584,10 @@ const translations: Record<Language, Record<string, string>> = {
     benefit1: "Nessun prezzo automatico",
     benefit2: "Nessun costo nascosto",
     benefit3: "Confermi solo se sei d'accordo con il prezzo",
+
+    // Customer Reviews Section
+    customerReviewsTitle: "Cosa dicono i nostri clienti",
+    seeAllReviews: "Vedi tutte le recensioni",
 
     // Features Section
     whyChooseUs: "Perché sceglierci",
@@ -6735,6 +6755,10 @@ const translations: Record<Language, Record<string, string>> = {
     benefit2: "Sin cargos ocultos",
     benefit3: "Solo confirmas si estás de acuerdo con el precio",
 
+    // Customer Reviews Section
+    customerReviewsTitle: "Lo que dicen nuestros clientes",
+    seeAllReviews: "Ver todas las reseñas",
+
     // Features Section
     whyChooseUs: "Por qué elegirnos",
     experienceTheDifference: "Experimenta la diferencia con nuestro servicio de traslado premium",
@@ -7901,6 +7925,10 @@ const translations: Record<Language, Record<string, string>> = {
     benefit2: "بدون رسوم خفية",
     benefit3: "تؤكد فقط إذا وافقت على السعر",
     
+    // Customer Reviews Section
+    customerReviewsTitle: "ماذا يقول عملاؤنا",
+    seeAllReviews: "عرض جميع التقييمات",
+    
     // Features Section
     whyChooseUs: "لماذا تختارنا",
     experienceTheDifference: "اكتشف الفرق مع خدمة النقل الفاخرة لدينا",
@@ -9013,6 +9041,10 @@ const translations: Record<Language, Record<string, string>> = {
     benefit1: "Otomatik fiyatlandırma yok",
     benefit2: "Gizli ücret yok",
     benefit3: "Sadece fiyatı kabul ederseniz onaylarsınız",
+    
+    // Customer Reviews Section
+    customerReviewsTitle: "Müşterilerimiz Ne Diyor",
+    seeAllReviews: "Tüm Yorumları Gör",
     
     // Features Section
     whyChooseUs: "Neden Bizi Seçmelisiniz",
@@ -10273,6 +10305,10 @@ const translations: Record<Language, Record<string, string>> = {
     benefit2: "Без прихованих платежів",
     benefit3: "Ви підтверджуєте лише якщо погоджуєтесь з ціною",
     
+    // Customer Reviews Section
+    customerReviewsTitle: "Що кажуть наші клієнти",
+    seeAllReviews: "Дивитись усі відгуки",
+    
     // Features Section
     whyChooseUs: "Чому обирають нас",
     experienceTheDifference: "Відчуйте різницю з нашим преміум-сервісом трансферу",
@@ -11392,6 +11428,10 @@ const translations: Record<Language, Record<string, string>> = {
     benefit1: "自動価格設定なし",
     benefit2: "隠れた料金なし",
     benefit3: "料金に同意した場合のみ確定",
+    
+    // Customer Reviews Section
+    customerReviewsTitle: "お客様の声",
+    seeAllReviews: "すべてのレビューを見る",
     
     // Features Section
     whyChooseUs: "選ばれる理由",
