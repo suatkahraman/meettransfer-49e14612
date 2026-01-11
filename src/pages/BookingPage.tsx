@@ -1225,6 +1225,158 @@ const BookingPage = () => {
                 </CardContent>
               </Card>
 
+              {/* Selected Vehicle & Price Card */}
+              {selectedPrice && (
+                <Card className="border-2 border-primary/50 bg-gradient-to-br from-primary/5 to-accent/5 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <CheckCircle className="h-5 w-5 text-primary" />
+                      {language === 'TR' ? 'Seçtiğiniz Araç ve Fiyatı' : 'Selected Vehicle & Price'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4">
+                      {/* Vehicle Image */}
+                      {VEHICLE_TYPE_MAP[vehicleType]?.images?.[0] && (
+                        <div className="w-24 h-16 rounded-lg overflow-hidden shrink-0">
+                          <img
+                            src={VEHICLE_TYPE_MAP[vehicleType].images[0].src}
+                            alt={VEHICLE_TYPE_MAP[vehicleType].label}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-foreground">
+                          {VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}
+                        </h4>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3.5 w-3.5" />
+                            {VEHICLE_TYPE_MAP[vehicleType]?.passengers}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Briefcase className="h-3.5 w-3.5" />
+                            {VEHICLE_TYPE_MAP[vehicleType]?.luggage}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        {discountApplied && originalPrice && (
+                          <p className="text-sm line-through text-muted-foreground">
+                            {originalPrice} {preferredCurrency}
+                          </p>
+                        )}
+                        <p className="text-2xl font-bold text-primary">
+                          {selectedPrice} {preferredCurrency}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Reject for Better Price Button */}
+                    {!discountApplied && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-4 border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400"
+                        disabled={rejectingPrice}
+                        onClick={async () => {
+                          if (!selectedPrice) return;
+                          
+                          setRejectingPrice(true);
+                          
+                          try {
+                            let discountInCurrency = 3;
+                            
+                            if (preferredCurrency !== 'EUR') {
+                              try {
+                                const response = await fetch(
+                                  `https://api.frankfurter.app/latest?from=EUR&to=${preferredCurrency}`,
+                                  { signal: AbortSignal.timeout(3000) }
+                                );
+                                if (response.ok) {
+                                  const data = await response.json();
+                                  const rate = data.rates[preferredCurrency];
+                                  if (rate) {
+                                    discountInCurrency = Math.round(3 * rate);
+                                  }
+                                }
+                              } catch (e) {
+                                const fallbackRates: Record<string, number> = {
+                                  'USD': 1.08, 'TRY': 37.5, 'GBP': 0.85, 'AED': 3.97, 'AUD': 1.65
+                                };
+                                discountInCurrency = Math.round(3 * (fallbackRates[preferredCurrency] || 1));
+                              }
+                            }
+                            
+                            setOriginalPrice(selectedPrice);
+                            setDiscountAmount(discountInCurrency);
+                            
+                            setVehiclePrices(prev => 
+                              prev.map(v => ({
+                                ...v,
+                                price: v.price ? Math.max(v.price - discountInCurrency, 1) : v.price
+                              }))
+                            );
+                            
+                            if (isHourlyBooking) {
+                              setHourlyPrices(prev => 
+                                prev.map(h => ({
+                                  ...h,
+                                  price: Math.max(h.price - discountInCurrency, 1)
+                                }))
+                              );
+                            }
+                            
+                            setDiscountApplied(true);
+                            
+                            confetti({
+                              particleCount: 80,
+                              spread: 100,
+                              origin: { y: 0.5, x: 0.5 },
+                              colors: ['#22c55e', '#16a34a', '#15803d', '#fbbf24', '#f59e0b']
+                            });
+                            
+                            const currencySymbol = preferredCurrency === 'EUR' ? '€' : preferredCurrency === 'USD' ? '$' : preferredCurrency === 'GBP' ? '£' : preferredCurrency === 'TRY' ? '₺' : preferredCurrency;
+                            
+                            toast.success(
+                              `🎉 ${t("discountApplied") || "Discount applied!"} -${currencySymbol}${discountInCurrency}`,
+                              { duration: 5000 }
+                            );
+                          } catch (err) {
+                            console.error("Failed to apply discount:", err);
+                            toast.error(t("discountError") || "Failed to apply discount");
+                          } finally {
+                            setRejectingPrice(false);
+                          }
+                        }}
+                      >
+                        {rejectingPrice ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Percent className="mr-2 h-4 w-4" />
+                            {t("rejectForBetterPrice") || "Get Better Price"}
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    
+                    {/* Discount Applied Badge */}
+                    {discountApplied && (
+                      <div className="flex items-center justify-center gap-2 text-sm text-green-600 bg-green-50 rounded-lg py-2 mt-4">
+                        <Tag className="h-4 w-4" />
+                        <span className="font-medium">
+                          {language === 'TR' ? 'İndirim Uygulandı!' : 'Discount Applied!'}
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Passengers & Options */}
               <Card>
                 <CardHeader>
@@ -1600,157 +1752,24 @@ const BookingPage = () => {
 
                     <div className="p-6 pt-0">
                       <Button
-                      onClick={handleSubmit}
-                      size="lg"
-                      variant="accent"
-                      className="w-full h-14 text-lg font-semibold group"
-                      disabled={submitting}
-                    >
-                      {submitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          {t("sending") || "Sending..."}
-                        </>
-                      ) : (
-                        <>
-                          {user ? (t("createReservation") || "Create Reservation") : (t("confirmBooking") || "Confirm Booking")}
-                          <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                        </>
-                      )}
+                        onClick={handleSubmit}
+                        size="lg"
+                        variant="accent"
+                        className="w-full h-14 text-lg font-semibold group"
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            {t("sending") || "Sending..."}
+                          </>
+                        ) : (
+                          <>
+                            {user ? (t("createReservation") || "Create Reservation") : (t("confirmBooking") || "Confirm Booking")}
+                            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                          </>
+                        )}
                       </Button>
-
-                      {/* Reject for Better Price Button - Only show if discount not yet applied and there's a price */}
-                      {selectedPrice && !discountApplied && (
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          className="w-full h-12 text-base font-medium mt-3 border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400"
-                          disabled={rejectingPrice}
-                          onClick={async () => {
-                            if (!selectedPrice) return;
-                            
-                            setRejectingPrice(true);
-                            
-                            try {
-                              // Calculate €3 discount equivalent in selected currency
-                              let discountInCurrency = 3; // €3 default
-                              
-                              if (preferredCurrency !== 'EUR') {
-                                try {
-                                  const response = await fetch(
-                                    `https://api.frankfurter.app/latest?from=EUR&to=${preferredCurrency}`,
-                                    { signal: AbortSignal.timeout(3000) }
-                                  );
-                                  if (response.ok) {
-                                    const data = await response.json();
-                                    const rate = data.rates[preferredCurrency];
-                                    if (rate) {
-                                      discountInCurrency = Math.round(3 * rate);
-                                    }
-                                  }
-                                } catch (e) {
-                                  // Fallback rates
-                                  const fallbackRates: Record<string, number> = {
-                                    'USD': 1.08, 'TRY': 37.5, 'GBP': 0.85, 'AED': 3.97, 'AUD': 1.65
-                                  };
-                                  discountInCurrency = Math.round(3 * (fallbackRates[preferredCurrency] || 1));
-                                }
-                              }
-                              
-                              const newPrice = Math.max(selectedPrice - discountInCurrency, 1);
-                              
-                              // Store original price for display
-                              setOriginalPrice(selectedPrice);
-                              setDiscountAmount(discountInCurrency);
-                              
-                              // Update vehicle prices with discount
-                              setVehiclePrices(prev => 
-                                prev.map(v => ({
-                                  ...v,
-                                  price: v.price ? Math.max(v.price - discountInCurrency, 1) : v.price
-                                }))
-                              );
-                              
-                              // Also update hourly prices if applicable
-                              if (isHourlyBooking) {
-                                setHourlyPrices(prev => 
-                                  prev.map(h => ({
-                                    ...h,
-                                    price: Math.max(h.price - discountInCurrency, 1)
-                                  }))
-                                );
-                              }
-                              
-                              setDiscountApplied(true);
-                              
-                              // Celebrate with confetti!
-                              confetti({
-                                particleCount: 80,
-                                spread: 100,
-                                origin: { y: 0.5, x: 0.5 },
-                                colors: ['#22c55e', '#16a34a', '#15803d', '#fbbf24', '#f59e0b']
-                              });
-                              
-                              setTimeout(() => {
-                                confetti({
-                                  particleCount: 50,
-                                  angle: 60,
-                                  spread: 55,
-                                  origin: { x: 0, y: 0.6 },
-                                  colors: ['#22c55e', '#16a34a', '#fbbf24']
-                                });
-                              }, 150);
-                              
-                              setTimeout(() => {
-                                confetti({
-                                  particleCount: 50,
-                                  angle: 120,
-                                  spread: 55,
-                                  origin: { x: 1, y: 0.6 },
-                                  colors: ['#22c55e', '#16a34a', '#fbbf24']
-                                });
-                              }, 300);
-                              
-                              const currencySymbol = preferredCurrency === 'EUR' ? '€' : preferredCurrency === 'USD' ? '$' : preferredCurrency === 'GBP' ? '£' : preferredCurrency === 'TRY' ? '₺' : preferredCurrency;
-                              
-                              toast.success(
-                                `🎉 ${t("discountApplied") || "Discount applied!"} -${currencySymbol}${discountInCurrency}`,
-                                { duration: 5000 }
-                              );
-                            } catch (err) {
-                              console.error("Failed to apply discount:", err);
-                              toast.error(t("discountError") || "Failed to apply discount");
-                            } finally {
-                              setRejectingPrice(false);
-                            }
-                          }}
-                        >
-                          {rejectingPrice ? (
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                          ) : (
-                            <>
-                              <Percent className="mr-2 h-5 w-5" />
-                              {t("rejectForBetterPrice") || "Get Better Price"}
-                            </>
-                          )}
-                        </Button>
-                      )}
-                      
-                      {/* Show discount applied badge */}
-                      {discountApplied && originalPrice && (
-                        <div className="flex items-center justify-center gap-2 text-sm text-green-600 bg-green-50 rounded-lg py-2 mt-3 animate-pulse">
-                          <Tag className="h-4 w-4" />
-                          <span>
-                            {t("discountAppliedLabel") || "Discount Applied:"} 
-                            <span className="line-through ml-1 text-muted-foreground">
-                              {preferredCurrency === 'EUR' ? '€' : preferredCurrency === 'USD' ? '$' : preferredCurrency === 'GBP' ? '£' : preferredCurrency === 'TRY' ? '₺' : preferredCurrency}{originalPrice}
-                            </span>
-                            <span className="font-bold ml-1">
-                              → {preferredCurrency === 'EUR' ? '€' : preferredCurrency === 'USD' ? '$' : preferredCurrency === 'GBP' ? '£' : preferredCurrency === 'TRY' ? '₺' : preferredCurrency}{selectedPrice}
-                            </span>
-                          </span>
-                        </div>
-                      )}
 
                       {user && (
                         <div className="flex items-center justify-center gap-2 text-xs text-green-600 bg-green-50 rounded-lg py-2 mt-3">
