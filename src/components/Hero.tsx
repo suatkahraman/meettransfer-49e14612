@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { GooglePlacesAutocomplete, PlaceDetails, GooglePlacesAutocompleteProps } from "@/components/ui/google-places-autocomplete";
@@ -14,6 +14,13 @@ import CityMarquee from "@/components/website/CityMarquee";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES, isMinibusRequired } from "@/lib/vehicleTypes";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -575,15 +582,13 @@ export const Hero = () => {
                         const passengerCount = parseInt(passengers);
                         const isDisabled = vehicle.passengers < passengerCount;
                         const isOnlyOption = isMinibusRequired(passengerCount, 0) && vehicle.value === 'minibus';
+                        const vehicleImages = vehicle.images?.slice(0, 4) || [];
                         
                         return (
-                          <button
+                          <div
                             key={vehicle.value}
-                            type="button"
-                            onClick={() => !isDisabled && setVehicleType(vehicle.value)}
-                            disabled={isDisabled}
                             className={cn(
-                              "relative p-3 rounded-xl border-2 transition-all text-left",
+                              "relative rounded-xl border-2 transition-all overflow-hidden",
                               isDisabled
                                 ? "border-border bg-muted/20 opacity-50 cursor-not-allowed"
                                 : isSelected
@@ -592,38 +597,78 @@ export const Hero = () => {
                               isOnlyOption && "ring-2 ring-amber-400/50"
                             )}
                           >
-                            <div className="flex items-center gap-2 mb-1">
-                              {vehicle.value === 'maybach-minibus' ? (
-                                <Sparkles className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-amber-500")} />
-                              ) : vehicle.value === 'vip-mercedes' ? (
-                                <Sparkles className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-purple-500")} />
-                              ) : (
-                                <Car className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-primary")} />
-                              )}
-                              <span className={cn("font-medium text-sm truncate", isDisabled && "text-muted-foreground")}>
-                                {vehicle.label.split(' ')[1] || vehicle.label}
-                              </span>
-                            </div>
-                            <div className={cn("text-xs mb-1", isDisabled ? "text-red-400" : "text-muted-foreground")}>
-                              {isDisabled ? (
-                                <>{t("maxPassengers") || "Max"} {vehicle.passengers}</>
-                              ) : (
-                                <>{vehicle.passengers} {t("passengers") || "pax"}</>
-                              )}
-                            </div>
-                            {loadingTransferPrice ? (
-                              <div className="h-5">
-                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            {/* Image Carousel */}
+                            {vehicleImages.length > 0 && (
+                              <div className="relative group">
+                                <Carousel className="w-full">
+                                  <CarouselContent>
+                                    {vehicleImages.map((image, imgIdx) => (
+                                      <CarouselItem key={imgIdx}>
+                                        <div className="aspect-[16/10] overflow-hidden">
+                                          <img
+                                            src={image.src}
+                                            alt={image.alt}
+                                            className="w-full h-full object-cover"
+                                          />
+                                        </div>
+                                      </CarouselItem>
+                                    ))}
+                                  </CarouselContent>
+                                  {vehicleImages.length > 1 && (
+                                    <>
+                                      <CarouselPrevious className="absolute left-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                      <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </>
+                                  )}
+                                </Carousel>
+                                {vehicleImages.length > 1 && (
+                                  <div className="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
+                                    1/{vehicleImages.length}
+                                  </div>
+                                )}
                               </div>
-                            ) : vehiclePrice && !isDisabled ? (
-                              <div className="text-lg font-bold text-primary">
-                                {transferPriceCurrency === "EUR" ? "€" : transferPriceCurrency === "USD" ? "$" : transferPriceCurrency === "GBP" ? "£" : "₺"}
-                                {vehiclePrice.price}
+                            )}
+                            
+                            {/* Vehicle Info */}
+                            <button
+                              type="button"
+                              onClick={() => !isDisabled && setVehicleType(vehicle.value)}
+                              disabled={isDisabled}
+                              className="w-full p-2 text-left"
+                            >
+                              <div className="flex items-center gap-1 mb-0.5">
+                                {vehicle.value === 'maybach-minibus' ? (
+                                  <Sparkles className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-amber-500")} />
+                                ) : vehicle.value === 'vip-mercedes' ? (
+                                  <Sparkles className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-purple-500")} />
+                                ) : (
+                                  <Car className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-primary")} />
+                                )}
+                                <span className={cn("font-medium text-xs truncate", isDisabled && "text-muted-foreground")}>
+                                  {vehicle.label}
+                                </span>
                               </div>
-                            ) : pickup && dropoff && !isDisabled ? (
-                              <div className="text-xs text-muted-foreground">-</div>
-                            ) : null}
-                          </button>
+                              <div className={cn("text-[10px] mb-0.5", isDisabled ? "text-red-400" : "text-muted-foreground")}>
+                                {isDisabled ? (
+                                  <>{t("maxPassengers") || "Max"} {vehicle.passengers}</>
+                                ) : (
+                                  <>{vehicle.passengers} {t("passengers") || "pax"}</>
+                                )}
+                              </div>
+                              {loadingTransferPrice ? (
+                                <div className="h-4">
+                                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                                </div>
+                              ) : vehiclePrice && !isDisabled ? (
+                                <div className="text-base font-bold text-primary">
+                                  {transferPriceCurrency === "EUR" ? "€" : transferPriceCurrency === "USD" ? "$" : transferPriceCurrency === "GBP" ? "£" : "₺"}
+                                  {vehiclePrice.price}
+                                </div>
+                              ) : pickup && dropoff && !isDisabled ? (
+                                <div className="text-[10px] text-muted-foreground">-</div>
+                              ) : null}
+                            </button>
+                          </div>
                         );
                       })}
                     </div>
@@ -800,15 +845,13 @@ export const Hero = () => {
                           const isSelected = hourlyVehicleType === vehicle.value;
                           const passengerCount = parseInt(hourlyPassengers);
                           const isDisabled = vehicle.passengers < passengerCount;
+                          const vehicleImages = vehicle.images?.slice(0, 4) || [];
                           
                           return (
-                            <button
+                            <div
                               key={vehicle.value}
-                              type="button"
-                              onClick={() => !isDisabled && setHourlyVehicleType(vehicle.value)}
-                              disabled={isDisabled}
                               className={cn(
-                                "relative p-3 rounded-xl border-2 transition-all text-left",
+                                "relative rounded-xl border-2 transition-all overflow-hidden",
                                 isDisabled
                                   ? "border-border bg-muted/20 opacity-50 cursor-not-allowed"
                                   : isSelected
@@ -816,38 +859,78 @@ export const Hero = () => {
                                     : "border-border hover:border-primary/50 bg-muted/30"
                               )}
                             >
-                              <div className="flex items-center gap-2 mb-1">
-                                {vehicle.value === 'maybach-minibus' ? (
-                                  <Sparkles className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-amber-500")} />
-                                ) : vehicle.value === 'vip-mercedes' ? (
-                                  <Sparkles className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-purple-500")} />
-                                ) : (
-                                  <Car className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-primary")} />
-                                )}
-                                <span className={cn("font-medium text-sm truncate", isDisabled && "text-muted-foreground")}>
-                                  {vehicle.label.split(' ')[1] || vehicle.label}
-                                </span>
-                              </div>
-                              <div className={cn("text-xs mb-1", isDisabled ? "text-red-400" : "text-muted-foreground")}>
-                                {isDisabled ? (
-                                  <>{t("maxPassengers") || "Max"} {vehicle.passengers}</>
-                                ) : (
-                                  <>{vehicle.passengers} {t("passengers") || "pax"}</>
-                                )}
-                              </div>
-                              {loadingPrice ? (
-                                <div className="h-5">
-                                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              {/* Image Carousel */}
+                              {vehicleImages.length > 0 && (
+                                <div className="relative group">
+                                  <Carousel className="w-full">
+                                    <CarouselContent>
+                                      {vehicleImages.map((image, imgIdx) => (
+                                        <CarouselItem key={imgIdx}>
+                                          <div className="aspect-[16/10] overflow-hidden">
+                                            <img
+                                              src={image.src}
+                                              alt={image.alt}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          </div>
+                                        </CarouselItem>
+                                      ))}
+                                    </CarouselContent>
+                                    {vehicleImages.length > 1 && (
+                                      <>
+                                        <CarouselPrevious className="absolute left-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                      </>
+                                    )}
+                                  </Carousel>
+                                  {vehicleImages.length > 1 && (
+                                    <div className="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
+                                      1/{vehicleImages.length}
+                                    </div>
+                                  )}
                                 </div>
-                              ) : vehiclePrice && !isDisabled ? (
-                                <div className="text-lg font-bold text-primary">
-                                  {vehiclePrice.currency === "EUR" ? "€" : vehiclePrice.currency === "USD" ? "$" : vehiclePrice.currency === "GBP" ? "£" : "₺"}
-                                  {vehiclePrice.price}
+                              )}
+                              
+                              {/* Vehicle Info */}
+                              <button
+                                type="button"
+                                onClick={() => !isDisabled && setHourlyVehicleType(vehicle.value)}
+                                disabled={isDisabled}
+                                className="w-full p-2 text-left"
+                              >
+                                <div className="flex items-center gap-1 mb-0.5">
+                                  {vehicle.value === 'maybach-minibus' ? (
+                                    <Sparkles className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-amber-500")} />
+                                  ) : vehicle.value === 'vip-mercedes' ? (
+                                    <Sparkles className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-purple-500")} />
+                                  ) : (
+                                    <Car className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-primary")} />
+                                  )}
+                                  <span className={cn("font-medium text-xs truncate", isDisabled && "text-muted-foreground")}>
+                                    {vehicle.label}
+                                  </span>
                                 </div>
-                              ) : !isDisabled ? (
-                                <div className="text-xs text-muted-foreground">-</div>
-                              ) : null}
-                            </button>
+                                <div className={cn("text-[10px] mb-0.5", isDisabled ? "text-red-400" : "text-muted-foreground")}>
+                                  {isDisabled ? (
+                                    <>{t("maxPassengers") || "Max"} {vehicle.passengers}</>
+                                  ) : (
+                                    <>{vehicle.passengers} {t("passengers") || "pax"}</>
+                                  )}
+                                </div>
+                                {loadingPrice ? (
+                                  <div className="h-4">
+                                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                                  </div>
+                                ) : vehiclePrice && !isDisabled ? (
+                                  <div className="text-base font-bold text-primary">
+                                    {vehiclePrice.currency === "EUR" ? "€" : vehiclePrice.currency === "USD" ? "$" : vehiclePrice.currency === "GBP" ? "£" : "₺"}
+                                    {vehiclePrice.price}
+                                  </div>
+                                ) : !isDisabled ? (
+                                  <div className="text-[10px] text-muted-foreground">-</div>
+                                ) : null}
+                              </button>
+                            </div>
                           );
                         })}
                       </div>
