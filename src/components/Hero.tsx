@@ -62,6 +62,9 @@ export const Hero = () => {
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [cityDurations, setCityDurations] = useState<Record<string, string[]>>({});
   const [loadingCities, setLoadingCities] = useState(false);
+  const [hourlyPrice, setHourlyPrice] = useState<number | null>(null);
+  const [hourlyPriceCurrency, setHourlyPriceCurrency] = useState<string>("EUR");
+  const [loadingPrice, setLoadingPrice] = useState(false);
 
   // Fetch available cities and their durations from hourly_rental_prices
   useEffect(() => {
@@ -121,7 +124,44 @@ export const Hero = () => {
     } else if (!hourlyCity) {
       setHourlyDuration("");
     }
+    // Reset price when city changes
+    setHourlyPrice(null);
   }, [hourlyCity, availableDurations]);
+
+  // Fetch price when city and duration are selected
+  useEffect(() => {
+    const fetchPrice = async () => {
+      if (!hourlyCity || !hourlyDuration) {
+        setHourlyPrice(null);
+        return;
+      }
+
+      setLoadingPrice(true);
+      try {
+        const durationKey = `${hourlyDuration}_hours`;
+        const { data, error } = await supabase
+          .from("hourly_rental_prices")
+          .select("price, price_currency")
+          .eq("city", hourlyCity)
+          .eq("duration_type", durationKey)
+          .eq("is_active", true)
+          .limit(1)
+          .single();
+
+        if (error) throw error;
+
+        setHourlyPrice(data?.price || null);
+        setHourlyPriceCurrency(data?.price_currency || "EUR");
+      } catch (error) {
+        console.error("Error fetching hourly price:", error);
+        setHourlyPrice(null);
+      } finally {
+        setLoadingPrice(false);
+      }
+    };
+
+    fetchPrice();
+  }, [hourlyCity, hourlyDuration]);
 
   const handleRideContinue = () => {
     const missingFields: string[] = [];
@@ -490,12 +530,40 @@ export const Hero = () => {
                     </div>
                   </div>
 
-                  {/* Info Box */}
-                  <div className="bg-accent/10 rounded-xl p-4 text-left">
-                    <p className="text-sm text-accent font-medium flex items-center gap-2">
-                      <Timer className="h-4 w-4" />
-                      {t("hourlyRentalInfo") || "Driver at your disposal for the selected duration. Visit multiple locations!"}
-                    </p>
+                  {/* Price Preview & Info Box */}
+                  <div className="space-y-3">
+                    {/* Price Preview */}
+                    {(hourlyCity && hourlyDuration) && (
+                      <div className="bg-primary/5 border-2 border-primary/20 rounded-xl p-4 text-center">
+                        {loadingPrice ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                            <span className="text-muted-foreground">{t("loadingPrice") || "Loading price..."}</span>
+                          </div>
+                        ) : hourlyPrice !== null ? (
+                          <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground">{t("startingFrom") || "Starting from"}</p>
+                            <p className="text-3xl font-bold text-primary">
+                              {hourlyPriceCurrency === "EUR" ? "€" : hourlyPriceCurrency === "USD" ? "$" : hourlyPriceCurrency === "GBP" ? "£" : "₺"}
+                              {hourlyPrice.toLocaleString()}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {hourlyCity} • {hourlyDuration} {t("hours") || "hours"}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">{t("priceNotAvailable") || "Price not available for this selection"}</p>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Info Box */}
+                    <div className="bg-accent/10 rounded-xl p-4 text-left">
+                      <p className="text-sm text-accent font-medium flex items-center gap-2">
+                        <Timer className="h-4 w-4" />
+                        {t("hourlyRentalInfo") || "Driver at your disposal for the selected duration. Visit multiple locations!"}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Continue Button */}
