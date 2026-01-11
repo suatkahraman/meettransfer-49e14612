@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { getWhatsAppUrl } from "@/lib/contact";
+import BlogHourlyRentalPromo from "@/components/website/BlogHourlyRentalPromo";
 
 // Import blog hero images
 import cappadociaHero from "@/assets/blog/cappadocia-transfer-hero.jpg";
@@ -336,6 +337,9 @@ const BlogPage = () => {
           )}
         </div>
       </section>
+
+      {/* Hourly Rental Promo */}
+      <BlogHourlyRentalPromo />
 
       {/* CTA Section */}
       <section className="py-16 px-4 bg-primary/5">
