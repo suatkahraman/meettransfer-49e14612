@@ -27,6 +27,7 @@ const AgencySignupScreen = lazy(() => import("./pages/auth/AgencySignupScreen"))
 const AgencyLoginScreen = lazy(() => import("./pages/auth/AgencyLoginScreen"));
 const DriverLoginScreen = lazy(() => import("./pages/auth/DriverLoginScreen"));
 const ReservationForm = lazy(() => import("./pages/ReservationForm"));
+const BookingPage = lazy(() => import("./pages/BookingPage"));
 const InstallApp = lazy(() => import("./pages/InstallApp"));
 const SecuritySettings = lazy(() => import("./pages/SecuritySettings"));
 
@@ -205,7 +206,8 @@ const App = () => (
               {localizedRoutes("/dubai-transfer", <DubaiTransfer />)}
               {localizedRoutes("/cyprus-transfer", <CyprusTransfer />)}
               {localizedRoutes("/bursa-transfer", <BursaTransfer />)}
-              {localizedRoutes("/book", <ReservationForm />)}
+              {localizedRoutes("/book", <BookingPage />)}
+              {localizedRoutes("/book/complete", <ReservationForm />)}
               
               {/* SEO Landing Pages */}
               {localizedRoutes("/istanbul-airport-transfer", <IstanbulAirportTransfer />)}
