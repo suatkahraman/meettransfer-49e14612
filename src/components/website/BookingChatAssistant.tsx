@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -67,11 +68,19 @@ interface BookingChatAssistantProps {
   onApplyBooking?: (data: BookingData) => void;
 }
 
+// Check if Speech Recognition is supported
+function isSpeechRecognitionSupported(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+
 // Voice recording hook using Web Speech API (no API key required)
 function useVoiceRecorder(onTranscription: (text: string) => void, language: string) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showBrowserWarning, setShowBrowserWarning] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const isSupported = isSpeechRecognitionSupported();
 
   // Map language codes to BCP-47 format for Web Speech API
   const getLanguageCode = useCallback((lang: string): string => {
@@ -90,12 +99,17 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     return languageMap[lang] || 'en-US';
   }, []);
 
+  const dismissWarning = useCallback(() => {
+    setShowBrowserWarning(false);
+  }, []);
+
   const startRecording = useCallback(() => {
     // Check for browser support
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
       console.error('Speech recognition not supported in this browser');
+      setShowBrowserWarning(true);
       return;
     }
 
@@ -146,7 +160,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     }
   }, [isRecording]);
 
-  return { isRecording, isProcessing, startRecording, stopRecording };
+  return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning };
 }
 
 // Text-to-Speech hook using Web Speech API (no API key required)
@@ -289,7 +303,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
     setInput(text);
   }, []);
   
-  const { isRecording, isProcessing, startRecording, stopRecording } = useVoiceRecorder(
+  const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning } = useVoiceRecorder(
     handleTranscription,
     language
   );
@@ -669,6 +683,33 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
 
               {/* Input Area */}
               <div className="p-4 border-t border-border/30 bg-gradient-to-t from-muted/50 to-transparent">
+                {/* Browser Support Warning */}
+                <AnimatePresence>
+                  {showBrowserWarning && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mb-3"
+                    >
+                      <Alert variant="destructive" className="relative py-2 px-3">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className="text-xs pr-6">
+                          {language === "TR" 
+                            ? "Tarayıcınız ses tanıma özelliğini desteklemiyor. Chrome, Edge veya Safari kullanın." 
+                            : "Your browser doesn't support speech recognition. Please use Chrome, Edge, or Safari."}
+                        </AlertDescription>
+                        <button 
+                          onClick={dismissWarning}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-destructive-foreground/70 hover:text-destructive-foreground"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </Alert>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
                 {/* Recording Indicator */}
                 <AnimatePresence>
                   {isRecording && (
@@ -697,19 +738,34 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                       size="icon"
                       variant="outline"
                       className={cn(
-                        "h-12 w-12 rounded-xl border-2 transition-all",
+                        "h-12 w-12 rounded-xl border-2 transition-all relative",
                         isRecording 
                           ? "bg-destructive/10 border-destructive text-destructive hover:bg-destructive/20" 
-                          : "border-border hover:border-primary hover:bg-primary/5"
+                          : !isSpeechSupported
+                            ? "border-muted text-muted-foreground/50 cursor-not-allowed"
+                            : "border-border hover:border-primary hover:bg-primary/5"
                       )}
-                      title={isRecording ? "Stop Recording" : "Voice Input"}
+                      title={
+                        !isSpeechSupported 
+                          ? (language === "TR" ? "Tarayıcı desteklemiyor" : "Browser not supported")
+                          : isRecording 
+                            ? "Stop Recording" 
+                            : "Voice Input"
+                      }
                     >
                       {isProcessing ? (
                         <Loader2 className="h-5 w-5 animate-spin" />
                       ) : isRecording ? (
                         <Square className="h-5 w-5 fill-current" />
                       ) : (
-                        <Mic className="h-5 w-5" />
+                        <>
+                          <Mic className="h-5 w-5" />
+                          {!isSpeechSupported && (
+                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full flex items-center justify-center">
+                              <X className="h-2.5 w-2.5 text-destructive-foreground" />
+                            </span>
+                          )}
+                        </>
                       )}
                     </Button>
                   </motion.div>
