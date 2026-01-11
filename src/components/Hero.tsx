@@ -21,6 +21,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 import BookingChatAssistant from "@/components/website/BookingChatAssistant";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
 
@@ -680,7 +681,19 @@ export const Hero = () => {
                             {/* Image Carousel */}
                             {vehicleImages.length > 0 && (
                               <div className="relative group">
-                                <Carousel className="w-full">
+                                <Carousel 
+                                  className="w-full"
+                                  plugins={[
+                                    Autoplay({
+                                      delay: 3000,
+                                      stopOnInteraction: true,
+                                      stopOnMouseEnter: true,
+                                    }),
+                                  ]}
+                                  opts={{
+                                    loop: true,
+                                  }}
+                                >
                                   <CarouselContent>
                                     {vehicleImages.map((image, imgIdx) => (
                                       <CarouselItem key={imgIdx}>
@@ -958,7 +971,19 @@ export const Hero = () => {
                               {/* Image Carousel */}
                               {vehicleImages.length > 0 && (
                                 <div className="relative group">
-                                  <Carousel className="w-full">
+                                  <Carousel 
+                                    className="w-full"
+                                    plugins={[
+                                      Autoplay({
+                                        delay: 3000,
+                                        stopOnInteraction: true,
+                                        stopOnMouseEnter: true,
+                                      }),
+                                    ]}
+                                    opts={{
+                                      loop: true,
+                                    }}
+                                  >
                                     <CarouselContent>
                                       {vehicleImages.map((image, imgIdx) => (
                                         <CarouselItem key={imgIdx}>
