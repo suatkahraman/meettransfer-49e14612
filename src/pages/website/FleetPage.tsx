@@ -59,6 +59,7 @@ const FleetPage = () => {
       description: t("vitoVipDesc"),
       passengers: 5,
       luggage: 5,
+      startingPrice: "€60",
       features: ["Leather seats", "Individual climate control", "WiFi", "USB chargers", "Complimentary water", "Tinted windows"],
       images: [
         { src: vipVitoStarlightLuxury, alt: "Mercedes VIP Vito couple champagne starlight ceiling luxury" },
@@ -79,6 +80,7 @@ const FleetPage = () => {
       description: t("vitoDesc"),
       passengers: 6,
       luggage: 6,
+      startingPrice: "€50",
       features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
       images: [
         { src: vitoAirportPremium, alt: "Mercedes Vito VIP airport transfer with professional chauffeur" },
@@ -103,6 +105,7 @@ const FleetPage = () => {
       description: t("maybachDesc"),
       passengers: 4,
       luggage: 4,
+      startingPrice: "€150",
       features: ["Leather seats", "Rear entertainment", "Ambient lighting", "Mini bar", "Star ceiling", "TV"],
       images: [
         { src: maybachUltraLuxury, alt: "Mercedes Maybach ultra luxury orange leather galaxy starlight ceiling" },
@@ -120,6 +123,7 @@ const FleetPage = () => {
       description: t("sprinterDesc"),
       passengers: 16,
       luggage: 16,
+      startingPrice: "€80",
       features: ["Leather Seats", "Large luggage space", "WiFi", "USB"],
       images: [
         { src: sprinterHotelArrival, alt: "Mercedes Sprinter VIP red carpet hotel arrival luxury" },

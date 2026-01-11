@@ -18,6 +18,8 @@ interface VehicleCardProps {
   features?: string[];
   image?: string;
   images?: VehicleImage[];
+  startingPrice?: string;
+  priceLabel?: string;
 }
 
 const VehicleCard = ({
@@ -28,6 +30,8 @@ const VehicleCard = ({
   features = [],
   image,
   images: imagesProp,
+  startingPrice,
+  priceLabel,
 }: VehicleCardProps) => {
   // Support both single image and multiple images with SEO alt tags
   const images: VehicleImage[] = imagesProp || (image ? [{ src: image, alt: `${name} transfer vehicle` }] : []);
@@ -112,7 +116,17 @@ const VehicleCard = ({
         )}
       </div>
       <CardContent className="p-4">
-        <h3 className="text-xl font-bold mb-2">{name}</h3>
+        <div className="flex items-start justify-between mb-2">
+          <h3 className="text-xl font-bold">{name}</h3>
+          {startingPrice && (
+            <div className="text-right">
+              <div className="text-xs text-muted-foreground">
+                {priceLabel || t("startingFrom") || "Starting from"}
+              </div>
+              <div className="text-lg font-bold text-primary">{startingPrice}</div>
+            </div>
+          )}
+        </div>
         <p className="text-muted-foreground text-sm mb-4">{description}</p>
         <div className="flex items-center gap-4 mb-4">
           <div className="flex items-center gap-1 text-sm">
