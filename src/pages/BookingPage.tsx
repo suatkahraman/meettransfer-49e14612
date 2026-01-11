@@ -8,15 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { 
   MapPin, Navigation, Calendar, Clock, Users, Briefcase, Baby, 
   ArrowRight, Loader2, CheckCircle, ArrowLeftRight, Tag, Mail, 
-  Phone, MessageSquare, Car, Coins
+  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired } from "@/lib/vehicleTypes";
@@ -70,6 +71,11 @@ const BookingPage = () => {
   const [isPricesLoading, setIsPricesLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Logged-in user state
+  const [customerName, setCustomerName] = useState("");
+  const [paymentType, setPaymentType] = useState<"cash" | "credit_card" | "online">("cash");
+  const [userProfile, setUserProfile] = useState<{ full_name: string | null; phone: string | null } | null>(null);
+
   // Computed values
   const availableVehicles = getAvailableVehicles(passengers, luggageCount);
   const minibusRequired = isMinibusRequired(passengers, luggageCount);
@@ -92,6 +98,23 @@ const BookingPage = () => {
   useEffect(() => {
     if (user) {
       setCustomerEmail(user.email || "");
+      
+      // Fetch profile data for logged-in users
+      const fetchProfile = async () => {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, phone")
+          .eq("id", user.id)
+          .single();
+        
+        if (profile) {
+          setUserProfile(profile);
+          setCustomerName(profile.full_name || "");
+          if (profile.phone) setCustomerPhone(profile.phone);
+        }
+      };
+      
+      fetchProfile();
     }
   }, [user]);
 
@@ -141,8 +164,8 @@ const BookingPage = () => {
     }
   };
 
-  // Handle form submission
-  const handleSubmit = async () => {
+  // Handle form submission for guests (quick booking flow)
+  const handleGuestSubmit = async () => {
     // Validation
     if (!customerPhone || customerPhone.length < 8) {
       toast.error(t("phoneRequired") || "Phone number is required");
@@ -239,6 +262,115 @@ const BookingPage = () => {
       toast.error((error as Error).message || "Failed to submit request");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Handle form submission for logged-in users (direct reservation)
+  const handleLoggedInSubmit = async () => {
+    // Validation
+    if (!customerName.trim()) {
+      toast.error(t("nameRequired") || "Name is required");
+      return;
+    }
+
+    if (!customerPhone || customerPhone.length < 8) {
+      toast.error(t("phoneRequired") || "Phone number is required");
+      return;
+    }
+
+    setSubmitting(true);
+    
+    try {
+      // Create reservation directly
+      const { data: reservation, error } = await supabase
+        .from("reservations")
+        .insert({
+          pickup: urlPickup,
+          dropoff: urlDropoff,
+          pickup_date: urlDate,
+          pickup_time: urlTime,
+          vehicle_type: vehicleType,
+          customer_name: customerName.trim(),
+          customer_phone: customerPhone.trim(),
+          customer_notes: customerNotes.trim() || null,
+          customer_id: user!.id,
+          payment_type: paymentType,
+          price: selectedPrice || null,
+          price_currency: preferredCurrency,
+          luggage_count: luggageCount,
+          baby_seat_count: babySeatCount,
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // If return trip, create return reservation
+      if (hasReturnTrip && returnDate && returnTime) {
+        const returnPrice = isPromoCodeValid && selectedPrice 
+          ? Math.round(selectedPrice * 0.7) // 30% discount
+          : selectedPrice;
+
+        await supabase
+          .from("reservations")
+          .insert({
+            pickup: urlDropoff, // Swap pickup and dropoff
+            dropoff: urlPickup,
+            pickup_date: returnDate,
+            pickup_time: returnTime,
+            vehicle_type: vehicleType,
+            customer_name: customerName.trim(),
+            customer_phone: customerPhone.trim(),
+            customer_notes: customerNotes.trim() || null,
+            customer_id: user!.id,
+            payment_type: paymentType,
+            price: returnPrice || null,
+            price_currency: preferredCurrency,
+            luggage_count: luggageCount,
+            baby_seat_count: babySeatCount,
+            status: "pending",
+            is_return_transfer: true,
+            original_reservation_id: reservation.id,
+            promo_code: isPromoCodeValid && promoCode ? promoCode : null,
+          });
+      }
+
+      // Notify admin about new reservation
+      try {
+        await supabase.functions.invoke("notify-admin-new-reservation", {
+          body: {
+            reservationId: reservation.id,
+            pickup: urlPickup,
+            dropoff: urlDropoff,
+            pickupDate: urlDate,
+            pickupTime: urlTime,
+            vehicleType,
+            customerName: customerName.trim(),
+            customerPhone: customerPhone.trim(),
+          },
+        });
+      } catch (notifyError) {
+        console.error("Failed to notify admin:", notifyError);
+      }
+
+      // Navigate to customer portal with success message
+      navigate(`/customer/reservations/${reservation.id}?success=true`);
+      toast.success(t("reservationCreated") || "Reservation created successfully!");
+    } catch (error: unknown) {
+      console.error("Error creating reservation:", error);
+      toast.error((error as Error).message || "Failed to create reservation");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Main submit handler
+  const handleSubmit = () => {
+    if (user) {
+      handleLoggedInSubmit();
+    } else {
+      handleGuestSubmit();
     }
   };
 
@@ -531,11 +663,31 @@ const BookingPage = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Phone className="h-5 w-5 text-primary" />
-                    {t("contactInfo") || "Contact Information"}
+                    {user ? <User className="h-5 w-5 text-primary" /> : <Phone className="h-5 w-5 text-primary" />}
+                    {user ? (t("passengerInfo") || "Passenger Information") : (t("contactInfo") || "Contact Information")}
                   </CardTitle>
+                  {user && (
+                    <CardDescription className="flex items-center gap-2 text-green-600">
+                      <Shield className="h-4 w-4" />
+                      {t("loggedInAs") || "Logged in as"} {user.email}
+                    </CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Name field for logged-in users */}
+                  {user && (
+                    <div>
+                      <Label className="text-sm text-muted-foreground mb-2 block">
+                        {t("fullName") || "Full Name"} <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        placeholder={t("enterFullName") || "Enter your full name"}
+                      />
+                    </div>
+                  )}
+
                   <div>
                     <Label className="text-sm text-muted-foreground mb-2 block">
                       {t("phoneNumber") || "Phone"} <span className="text-red-500">*</span>
@@ -546,18 +698,22 @@ const BookingPage = () => {
                       placeholder="555 123 4567"
                     />
                   </div>
-                  <div>
-                    <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      {t("email") || "Email"} <span className="text-muted-foreground text-xs">({t("optional")})</span>
-                    </Label>
-                    <Input
-                      type="email"
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      placeholder="email@example.com"
-                    />
-                  </div>
+
+                  {!user && (
+                    <div>
+                      <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        {t("email") || "Email"} <span className="text-muted-foreground text-xs">({t("optional")})</span>
+                      </Label>
+                      <Input
+                        type="email"
+                        value={customerEmail}
+                        onChange={(e) => setCustomerEmail(e.target.value)}
+                        placeholder="email@example.com"
+                      />
+                    </div>
+                  )}
+
                   <div>
                     <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
                       <MessageSquare className="h-4 w-4" />
@@ -573,6 +729,67 @@ const BookingPage = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Payment Options - Only for logged-in users */}
+              {user && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                      {t("paymentMethod") || "Payment Method"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <RadioGroup
+                      value={paymentType}
+                      onValueChange={(value) => setPaymentType(value as "cash" | "credit_card" | "online")}
+                      className="space-y-3"
+                    >
+                      <div className={cn(
+                        "flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer",
+                        paymentType === "cash" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                      )}>
+                        <RadioGroupItem value="cash" id="cash" />
+                        <Label htmlFor="cash" className="flex items-center gap-3 cursor-pointer flex-1">
+                          <Banknote className="h-5 w-5 text-green-600" />
+                          <div>
+                            <p className="font-medium">{t("payWithCash") || "Pay with Cash"}</p>
+                            <p className="text-sm text-muted-foreground">{t("payDriverDirectly") || "Pay the driver directly"}</p>
+                          </div>
+                        </Label>
+                      </div>
+
+                      <div className={cn(
+                        "flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer",
+                        paymentType === "credit_card" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                      )}>
+                        <RadioGroupItem value="credit_card" id="credit_card" />
+                        <Label htmlFor="credit_card" className="flex items-center gap-3 cursor-pointer flex-1">
+                          <CreditCard className="h-5 w-5 text-blue-600" />
+                          <div>
+                            <p className="font-medium">{t("payWithCard") || "Credit Card in Vehicle"}</p>
+                            <p className="text-sm text-muted-foreground">{t("payCardInVehicle") || "Pay by card in the vehicle"}</p>
+                          </div>
+                        </Label>
+                      </div>
+
+                      <div className={cn(
+                        "flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer",
+                        paymentType === "online" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                      )}>
+                        <RadioGroupItem value="online" id="online" />
+                        <Label htmlFor="online" className="flex items-center gap-3 cursor-pointer flex-1">
+                          <Shield className="h-5 w-5 text-purple-600" />
+                          <div>
+                            <p className="font-medium">{t("payOnline") || "Pay Online"}</p>
+                            <p className="text-sm text-muted-foreground">{t("secureOnlinePayment") || "Secure online payment (link will be sent)"}</p>
+                          </div>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Sidebar - Price Summary */}
@@ -627,11 +844,18 @@ const BookingPage = () => {
                         </>
                       ) : (
                         <>
-                          {t("confirmBooking") || "Confirm Booking"}
+                          {user ? (t("createReservation") || "Create Reservation") : (t("confirmBooking") || "Confirm Booking")}
                           <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </>
                       )}
                     </Button>
+
+                    {user && (
+                      <div className="flex items-center justify-center gap-2 text-xs text-green-600 bg-green-50 rounded-lg py-2">
+                        <CheckCircle className="h-3 w-3" />
+                        {t("directReservation") || "Direct reservation - no confirmation needed"}
+                      </div>
+                    )}
 
                     <p className="text-xs text-center text-muted-foreground">
                       {t("freeCancel") || "Free cancellation up to 24h before"}
