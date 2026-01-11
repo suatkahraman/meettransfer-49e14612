@@ -635,16 +635,16 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
           onClick={() => setIsOpen(!isOpen)}
           data-chat-trigger
           whileHover={{ backgroundColor: "hsl(var(--muted) / 0.5)" }}
-          className="relative w-full flex items-center justify-between p-5 transition-all z-10"
+          className="relative w-full flex items-center justify-between p-4 md:p-5 transition-all z-10"
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
             {/* Animated Avatar */}
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <motion.div 
-                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg"
                 whileHover={{ rotate: 5 }}
               >
-                <Sparkles className="h-6 w-6 text-primary-foreground" />
+                <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
               </motion.div>
               {/* Pulse ring */}
               <motion.div 
@@ -653,33 +653,34 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                 transition={{ repeat: Infinity, duration: 2 }}
               />
               {/* Online indicator */}
-              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-card shadow-md" />
+              <span className="absolute -bottom-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full border-2 border-card shadow-md" />
             </div>
             
-            <div className="text-left">
-              <h3 className="font-bold text-lg text-foreground flex items-center gap-2">
-                {t("aiAssistant") || "AI Booking Assistant"}
+            <div className="text-left min-w-0 flex-1">
+              <h3 className="font-bold text-base md:text-lg text-foreground flex items-center gap-2">
+                <span className="truncate">{t("aiAssistant") || "AI Booking Assistant"}</span>
                 <motion.span 
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="text-[10px] px-2.5 py-1 bg-gradient-to-r from-accent to-accent/80 rounded-full text-accent-foreground font-bold uppercase tracking-wide shadow-sm"
+                  className="text-[9px] md:text-[10px] px-2 py-0.5 md:px-2.5 md:py-1 bg-gradient-to-r from-accent to-accent/80 rounded-full text-accent-foreground font-bold uppercase tracking-wide shadow-sm flex-shrink-0"
                 >
                   {t("new") || "NEW"}
                 </motion.span>
               </h3>
-              <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
+              <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5 truncate">
                 <motion.div
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="flex-shrink-0"
                 >
-                  <Mic className="h-3.5 w-3.5 text-primary" />
+                  <Mic className="h-3 w-3 md:h-3.5 md:w-3.5 text-primary" />
                 </motion.div>
-                {t("aiAssistantHint") || "Voice & text in any language"}
+                <span className="truncate">{t("aiAssistantHint") || "Voice & text in any language"}</span>
               </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
             {/* Voice Settings Popover */}
             {isOpen && isVoiceEnabled && (
               <Popover open={showVoiceSettings} onOpenChange={setShowVoiceSettings}>
@@ -690,10 +691,10 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center transition-all hover:bg-primary/10"
+                    className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-muted/50 flex items-center justify-center transition-all hover:bg-primary/10"
                     title={language === "TR" ? "Ses Ayarları" : "Voice Settings"}
                   >
-                    <Settings2 className="h-4 w-4 text-muted-foreground" />
+                    <Settings2 className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
                   </motion.button>
                 </PopoverTrigger>
                 <PopoverContent 
@@ -775,10 +776,10 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                   e.stopPropagation();
                   clearConversation();
                 }}
-                className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center transition-all hover:bg-destructive/20 hover:text-destructive"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-muted/50 flex items-center justify-center transition-all hover:bg-destructive/20 hover:text-destructive"
                 title={language === "TR" ? "Sohbeti Temizle" : "Clear Chat"}
               >
-                <Trash2 className="h-5 w-5" />
+                <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
               </motion.button>
             )}
 
@@ -794,7 +795,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                   toggleVoice();
                 }}
                 className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                  "w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center transition-all",
                   isVoiceEnabled 
                     ? "bg-primary/20 text-primary" 
                     : "bg-muted/50 text-muted-foreground"
@@ -806,12 +807,12 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ repeat: Infinity, duration: 0.5 }}
                   >
-                    <Volume2 className="h-5 w-5" />
+                    <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
                   </motion.div>
                 ) : isVoiceEnabled ? (
-                  <Volume2 className="h-5 w-5" />
+                  <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
                 ) : (
-                  <VolumeX className="h-5 w-5" />
+                  <VolumeX className="h-4 w-4 md:h-5 md:w-5" />
                 )}
               </motion.button>
             )}
@@ -819,12 +820,12 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
             <motion.div
               animate={{ rotate: isOpen ? 180 : 0 }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-muted/50 flex items-center justify-center"
             >
               {isOpen ? (
-                <X className="h-5 w-5 text-muted-foreground" />
+                <X className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
               ) : (
-                <MessageCircle className="h-5 w-5 text-primary" />
+                <MessageCircle className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               )}
             </motion.div>
           </div>
