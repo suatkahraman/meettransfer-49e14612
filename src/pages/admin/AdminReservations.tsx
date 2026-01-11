@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +20,8 @@ import NotificationBell from '@/components/NotificationBell';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
 import ReservationSearch from '@/components/ReservationSearch';
+import AdminDayCard from '@/components/admin/AdminDayCard';
+import AdminMonthCard from '@/components/admin/AdminMonthCard';
 
 interface Reservation {
   id: string;
@@ -143,7 +145,8 @@ const AdminReservations = () => {
   });
   const [deleting, setDeleting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
+  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchReservations();
@@ -419,6 +422,77 @@ const AdminReservations = () => {
   };
 
   const clearSelection = () => setSelectedIds(new Set());
+
+  // Toggle day expansion
+  const toggleDayExpanded = (date: string) => {
+    setExpandedDays(prev => {
+      const next = new Set(prev);
+      if (next.has(date)) {
+        next.delete(date);
+      } else {
+        next.add(date);
+      }
+      return next;
+    });
+  };
+
+  // Toggle month expansion
+  const toggleMonthExpanded = (monthKey: string) => {
+    setExpandedMonths(prev => {
+      const next = new Set(prev);
+      if (next.has(monthKey)) {
+        next.delete(monthKey);
+      } else {
+        next.add(monthKey);
+      }
+      return next;
+    });
+  };
+
+  // Group reservations by month and day for display
+  const groupedReservations = useMemo(() => {
+    // Filter out special section reservations (agency requests, pending reviews, needs assignment)
+    const regularReservations = reservations.filter(r => {
+      // Exclude agency pending review
+      if (r.agency_id && r.status === 'pending_admin_review') return false;
+      // Exclude non-agency pending review
+      if (r.status === 'pending_admin_review' && !r.agency_id) return false;
+      // Exclude needs assignment (already shown in special section)
+      if ((r.status === 'confirmed' || r.status === 'customer_approved') && !r.driver_id) return false;
+      return true;
+    });
+
+    // Group by month
+    const monthGroups: Record<string, Record<string, Reservation[]>> = {};
+    
+    regularReservations.forEach(reservation => {
+      const date = reservation.pickup_date;
+      const monthKey = date.slice(0, 7); // "2026-01"
+      
+      if (!monthGroups[monthKey]) {
+        monthGroups[monthKey] = {};
+      }
+      if (!monthGroups[monthKey][date]) {
+        monthGroups[monthKey][date] = [];
+      }
+      monthGroups[monthKey][date].push(reservation);
+    });
+
+    // Sort months descending, days descending within each month
+    const sortedMonths = Object.keys(monthGroups).sort((a, b) => b.localeCompare(a));
+    
+    return sortedMonths.map(monthKey => ({
+      monthKey,
+      days: Object.keys(monthGroups[monthKey])
+        .sort((a, b) => b.localeCompare(a))
+        .map(date => ({
+          date,
+          reservations: monthGroups[monthKey][date].sort((a, b) => 
+            a.pickup_time.localeCompare(b.pickup_time)
+          )
+        }))
+    }));
+  }, [reservations]);
 
   const handleBulkAssign = async () => {
     if (!selectedDriver || selectedIds.size === 0) return;
@@ -947,196 +1021,210 @@ const AdminReservations = () => {
           );
         })()}
 
-        {/* All Reservations List */}
+        {/* All Reservations List - Grouped by Month and Day */}
         {loading ? (
           <div className="text-center py-12">Yükleniyor...</div>
-        ) : reservations.length === 0 ? (
+        ) : groupedReservations.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">Rezervasyon bulunamadı</div>
         ) : (
-          <div className="space-y-4">
-            {reservations.map((reservation) => (
-              <Card key={reservation.id}>
-                <CardContent className="py-4">
-                  <div className="flex flex-wrap justify-between items-start gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        {reservation.reservation_code && (
-                          <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded">{reservation.reservation_code}</span>
-                        )}
-                        <Badge className={statusColors[reservation.status] || 'bg-muted'}>
-                          {statusLabels[reservation.status] || reservation.status}
-                        </Badge>
-                        <span className="flex items-center gap-1 text-sm">
-                          <Calendar className="h-4 w-4" />
-                          {format(new Date(reservation.pickup_date), 'PPP', { locale: tr })}
-                        </span>
-                        <span className="flex items-center gap-1 text-sm">
-                          <Clock className="h-4 w-4" />
-                          {reservation.pickup_time}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{reservation.customer_name}</span>
-                        <span className="text-muted-foreground">·</span>
-                        <span className="text-sm text-muted-foreground">{reservation.customer_phone}</span>
-                      </div>
+          <div className="space-y-2">
+            {groupedReservations.map(({ monthKey, days }) => (
+              <AdminMonthCard
+                key={monthKey}
+                monthKey={monthKey}
+                totalJobs={days.reduce((sum, d) => sum + d.reservations.length, 0)}
+                isExpanded={expandedMonths.has(monthKey)}
+                onToggle={() => toggleMonthExpanded(monthKey)}
+              >
+                {days.map(({ date, reservations: dayReservations }) => (
+                  <AdminDayCard
+                    key={date}
+                    date={date}
+                    totalJobs={dayReservations.length}
+                    isExpanded={expandedDays.has(date)}
+                    onToggle={() => toggleDayExpanded(date)}
+                  >
+                    {dayReservations.map((reservation) => (
+                      <Card key={reservation.id} className="ml-2">
+                        <CardContent className="py-3">
+                          <div className="flex flex-wrap justify-between items-start gap-3">
+                            <div className="space-y-1.5 flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {reservation.reservation_code && (
+                                  <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded">{reservation.reservation_code}</span>
+                                )}
+                                <Badge className={statusColors[reservation.status] || 'bg-muted'}>
+                                  {statusLabels[reservation.status] || reservation.status}
+                                </Badge>
+                                <span className="flex items-center gap-1 text-sm font-medium">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  {reservation.pickup_time}
+                                </span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span className="font-medium text-sm">{reservation.customer_name}</span>
+                                <span className="text-muted-foreground text-xs">·</span>
+                                <span className="text-xs text-muted-foreground">{reservation.customer_phone}</span>
+                              </div>
 
-                      <div className="space-y-1">
-                        <LocationDisplay
-                          placeName={reservation.pickup_place_name}
-                          address={reservation.pickup}
-                          type="pickup"
-                          size="sm"
-                        />
-                        <LocationDisplay
-                          placeName={reservation.dropoff_place_name}
-                          address={reservation.dropoff}
-                          type="dropoff"
-                          size="sm"
-                        />
-                      </div>
+                              <div className="space-y-0.5">
+                                <LocationDisplay
+                                  placeName={reservation.pickup_place_name}
+                                  address={reservation.pickup}
+                                  type="pickup"
+                                  size="sm"
+                                />
+                                <LocationDisplay
+                                  placeName={reservation.dropoff_place_name}
+                                  address={reservation.dropoff}
+                                  type="dropoff"
+                                  size="sm"
+                                />
+                              </div>
 
-                      {/* Vehicle & Capacity Info */}
-                      <div className="flex items-center gap-3 text-sm flex-wrap">
-                        <span className="flex items-center gap-1.5 text-muted-foreground">
-                          <Car className="h-3.5 w-3.5 text-primary" />
-                          <span className="font-medium">{vehicleLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
-                        </span>
-                        {reservation.luggage_count !== null && reservation.luggage_count > 0 && (
-                          <span className="flex items-center gap-1 text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded text-xs">
-                            <Briefcase className="h-3 w-3" />
-                            {reservation.luggage_count} valiz
-                          </span>
-                        )}
-                        {reservation.baby_seat_count !== null && reservation.baby_seat_count > 0 && (
-                          <span className="flex items-center gap-1 text-pink-600 bg-pink-50 dark:bg-pink-900/30 px-1.5 py-0.5 rounded text-xs">
-                            <Baby className="h-3 w-3" />
-                            {reservation.baby_seat_count} bebek koltuğu
-                          </span>
-                        )}
-                      </div>
+                              {/* Vehicle & Capacity Info */}
+                              <div className="flex items-center gap-2 text-xs flex-wrap">
+                                <span className="flex items-center gap-1 text-muted-foreground">
+                                  <Car className="h-3 w-3 text-primary" />
+                                  <span className="font-medium">{vehicleLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
+                                </span>
+                                {reservation.luggage_count !== null && reservation.luggage_count > 0 && (
+                                  <span className="flex items-center gap-1 text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-1 py-0.5 rounded">
+                                    <Briefcase className="h-2.5 w-2.5" />
+                                    {reservation.luggage_count}
+                                  </span>
+                                )}
+                                {reservation.baby_seat_count !== null && reservation.baby_seat_count > 0 && (
+                                  <span className="flex items-center gap-1 text-pink-600 bg-pink-50 dark:bg-pink-900/30 px-1 py-0.5 rounded">
+                                    <Baby className="h-2.5 w-2.5" />
+                                    {reservation.baby_seat_count}
+                                  </span>
+                                )}
+                              </div>
 
-                      <div className="flex items-center gap-4 text-sm flex-wrap">
-                        {reservation.payment_type === 'payment_link' ? (
-                          <>
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                              <CreditCard className="h-3 w-3 mr-1" />
-                              Payment Link
-                            </Badge>
-                            {reservation.payment_status === 'paid' ? (
-                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                                Ödendi
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                                <Clock3 className="h-3 w-3 mr-1" />
-                                Ödeme Bekliyor
-                              </Badge>
-                            )}
-                          </>
-                        ) : reservation.payment_type === 'agency_pay' ? (
-                          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                            <Building2 className="h-3 w-3 mr-1" />
-                            Acenta Öder
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                            <Banknote className="h-3 w-3 mr-1" />
-                            Nakit
-                          </Badge>
-                        )}
-                        <span className={`font-bold ${isPriceModifiedByDriver(reservation) ? 'text-amber-600' : 'text-primary'}`}>
-                          {formatPrice(reservation.price, reservation.price_currency)}
-                          {isPriceModifiedByDriver(reservation) && (
-                            <span className="ml-2 inline-flex items-center gap-1 text-xs font-normal bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                              <AlertTriangle className="h-3 w-3" />
-                              Değiştirildi (önceki: {formatPrice(reservation.admin_set_price, reservation.price_currency)})
-                            </span>
-                          )}
-                        </span>
-                        {/* Yolcudan Alınacak Nakit */}
-                        {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
-                          <span className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                            💵 {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
-                          </span>
-                        )}
-                        {reservation.drivers && (
-                          <span className="flex items-center gap-1">
-                            <UserCheck className="h-4 w-4 text-green-600" />
-                            {reservation.drivers.name}
-                          </span>
-                        )}
-                        {reservation.agencies && (
-                          <span className="flex items-center gap-1 text-blue-600">
-                            <Building2 className="h-4 w-4" />
-                            {reservation.agencies.agency_name}
-                            {reservation.agency_reservation_details?.customer_price && (
-                              <span className="font-bold ml-1">
-                                ({formatPrice(reservation.agency_reservation_details.customer_price, reservation.agency_reservation_details.agency_price_currency || 'USD')})
-                              </span>
-                            )}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                              <div className="flex items-center gap-3 text-xs flex-wrap">
+                                {reservation.payment_type === 'payment_link' ? (
+                                  <>
+                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs px-1.5 py-0">
+                                      <CreditCard className="h-2.5 w-2.5 mr-0.5" />
+                                      Link
+                                    </Badge>
+                                    {reservation.payment_status === 'paid' ? (
+                                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs px-1.5 py-0">
+                                        <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
+                                        Ödendi
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs px-1.5 py-0">
+                                        <Clock3 className="h-2.5 w-2.5 mr-0.5" />
+                                        Bekliyor
+                                      </Badge>
+                                    )}
+                                  </>
+                                ) : reservation.payment_type === 'agency_pay' ? (
+                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-xs px-1.5 py-0">
+                                    <Building2 className="h-2.5 w-2.5 mr-0.5" />
+                                    Acenta
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs px-1.5 py-0">
+                                    <Banknote className="h-2.5 w-2.5 mr-0.5" />
+                                    Nakit
+                                  </Badge>
+                                )}
+                                <span className={`font-bold ${isPriceModifiedByDriver(reservation) ? 'text-amber-600' : 'text-primary'}`}>
+                                  {formatPrice(reservation.price, reservation.price_currency)}
+                                  {isPriceModifiedByDriver(reservation) && (
+                                    <span className="ml-1 inline-flex items-center gap-0.5 font-normal bg-amber-100 text-amber-700 px-1 py-0 rounded-full">
+                                      <AlertTriangle className="h-2.5 w-2.5" />
+                                    </span>
+                                  )}
+                                </span>
+                                {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
+                                  <span className="flex items-center gap-0.5 text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                                    💵 {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount}
+                                  </span>
+                                )}
+                                {reservation.drivers && (
+                                  <span className="flex items-center gap-1">
+                                    <UserCheck className="h-3 w-3 text-green-600" />
+                                    {reservation.drivers.name}
+                                  </span>
+                                )}
+                                {reservation.agencies && (
+                                  <span className="flex items-center gap-1 text-blue-600">
+                                    <Building2 className="h-3 w-3" />
+                                    {reservation.agencies.agency_name}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
 
-                    <div className="flex gap-2">
-                      {(reservation.status === 'customer_approved' || reservation.status === 'confirmed') && !reservation.driver_id && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            setAssignDialog({ open: true, reservationId: reservation.id });
-                            setSelectedDriver(reservation.driver_id || '');
-                          }}
-                        >
-                          <UserCheck className="h-4 w-4 mr-1" />
-                          Şoför Ata
-                        </Button>
-                      )}
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          const params = new URLSearchParams({
-                            customer_name: reservation.customer_name,
-                            customer_phone: reservation.customer_phone,
-                            pickup: reservation.pickup,
-                            dropoff: reservation.dropoff,
-                            vehicle_type: reservation.vehicle_type,
-                            payment_type: reservation.payment_type,
-                            price: reservation.price?.toString() || '',
-                            price_currency: reservation.price_currency || 'TRY',
-                            flight_number: reservation.flight_number || '',
-                          });
-                          navigate(`/admin/reservations/create?${params.toString()}`);
-                        }}
-                        title="Rezervasyonu kopyala"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => navigate(`/admin/reservations/${reservation.id}`)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => openDeleteDialog(reservation.id, reservation.customer_name)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                            <div className="flex gap-1 flex-shrink-0">
+                              {(reservation.status === 'customer_approved' || reservation.status === 'confirmed') && !reservation.driver_id && (
+                                <Button 
+                                  variant="outline" 
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={() => {
+                                    setAssignDialog({ open: true, reservationId: reservation.id });
+                                    setSelectedDriver(reservation.driver_id || '');
+                                  }}
+                                  title="Şoför Ata"
+                                >
+                                  <UserCheck className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                              <Button 
+                                variant="outline" 
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => {
+                                  const params = new URLSearchParams({
+                                    customer_name: reservation.customer_name,
+                                    customer_phone: reservation.customer_phone,
+                                    pickup: reservation.pickup,
+                                    dropoff: reservation.dropoff,
+                                    vehicle_type: reservation.vehicle_type,
+                                    payment_type: reservation.payment_type,
+                                    price: reservation.price?.toString() || '',
+                                    price_currency: reservation.price_currency || 'TRY',
+                                    flight_number: reservation.flight_number || '',
+                                  });
+                                  navigate(`/admin/reservations/create?${params.toString()}`);
+                                }}
+                                title="Kopyala"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => navigate(`/admin/reservations/${reservation.id}`)}
+                                title="Düzenle"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="icon"
+                                className="h-7 w-7 text-destructive hover:text-destructive"
+                                onClick={() => openDeleteDialog(reservation.id, reservation.customer_name)}
+                                title="Sil"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </AdminDayCard>
+                ))}
+              </AdminMonthCard>
             ))}
           </div>
         )}
