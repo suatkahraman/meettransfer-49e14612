@@ -425,6 +425,7 @@ const BookingPage = () => {
         });
         if (customerPhone) customerInfoParams.set("phone", customerPhone.trim());
         if (customerEmail) customerInfoParams.set("email", customerEmail.trim());
+        if (customerName) customerInfoParams.set("name", customerName.trim());
         
         navigate(`/quick-booking-customer-info?${customerInfoParams.toString()}`);
         toast.success(t("bookingConfirmed") || "Booking confirmed! Please complete your details.");

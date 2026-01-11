@@ -53,6 +53,7 @@ export default function QuickBookingCustomerInfo() {
   const returnReservationCode = searchParams.get("returnReservationCode") || "";
   const prefilledPhone = searchParams.get("phone") || "";
   const prefilledEmail = searchParams.get("email") || "";
+  const prefilledName = searchParams.get("name") || "";
 
   const [reservationData, setReservationData] = useState<{
     pickup: string;
@@ -68,7 +69,7 @@ export default function QuickBookingCustomerInfo() {
   } | null>(null);
 
   const [formData, setFormData] = useState({
-    name: "",
+    name: prefilledName,
     phone: prefilledPhone,
     email: prefilledEmail,
     password: "",
