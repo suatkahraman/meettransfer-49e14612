@@ -410,7 +410,9 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
   useEffect(() => {
     // Scroll to bottom when new messages added
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      setTimeout(() => {
+        scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 100);
     }
   }, [messages]);
 
@@ -721,7 +723,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
               style={{ height: "calc(100% - 88px)" }}
             >
               {/* Messages Area */}
-              <ScrollArea className="flex-1 px-5 py-4" ref={scrollRef}>
+              <ScrollArea className="flex-1 px-5 py-4">
                 <div className="space-y-5">
                   {messages.map((msg, index) => (
                     <motion.div
@@ -847,6 +849,8 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                       </div>
                     </motion.div>
                   )}
+                  {/* Auto-scroll anchor */}
+                  <div ref={scrollRef} />
                 </div>
               </ScrollArea>
 
