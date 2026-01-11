@@ -1486,19 +1486,6 @@ const BookingPage = () => {
                         </Label>
                       </div>
 
-                      <div className={cn(
-                        "flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer",
-                        paymentType === "credit_card" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                      )}>
-                        <RadioGroupItem value="credit_card" id="credit_card" />
-                        <Label htmlFor="credit_card" className="flex items-center gap-3 cursor-pointer flex-1">
-                          <CreditCard className="h-5 w-5 text-blue-600" />
-                          <div>
-                            <p className="font-medium">{t("payWithCard") || "Credit Card in Vehicle"}</p>
-                            <p className="text-sm text-muted-foreground">{t("payCardInVehicle") || "Pay by card in the vehicle"}</p>
-                          </div>
-                        </Label>
-                      </div>
 
                       <div className={cn(
                         "flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer",
