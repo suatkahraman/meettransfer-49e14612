@@ -26,6 +26,7 @@ import PriceHistoryCard from '@/components/admin/PriceHistoryCard';
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 import { getCurrencySymbol, CURRENCY_OPTIONS as currencies } from '@/lib/currency';
 import { validatePrice } from '@/lib/priceValidation';
+import { usePriceThresholds } from '@/hooks/usePriceThresholds';
 const paymentTypes = [
   { value: 'cash', label: 'Şoföre Nakit' },
   { value: 'payment_link', label: 'Online Ödeme Linki' },
@@ -103,6 +104,7 @@ const AdminEditReservation = () => {
   const returnToParam = searchParams.get('returnTo');
   const returnTo = returnToParam ? decodeURIComponent(returnToParam) : '/admin/reservations';
   const { logAction } = useAuditLog();
+  const { thresholdsMap } = usePriceThresholds();
   const { emailCustomerPriceSet, emailDriverAssigned, emailDriverReservationUpdated, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed, emailAgencyApproved, emailAgencyRejected, emailAgencyPriceSet } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -2410,15 +2412,15 @@ ${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '�
                       min="0"
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
-                      className={`pl-8 ${formData.price && validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type).isLow ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30' : ''}`}
+                      className={`pl-8 ${formData.price && validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type, thresholdsMap).isLow ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30' : ''}`}
                     />
                   </div>
                   {/* Low Price Warning */}
-                  {formData.price && parseFloat(formData.price) > 0 && validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type).isLow && (
+                  {formData.price && parseFloat(formData.price) > 0 && validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type, thresholdsMap).isLow && (
                     <div className="flex items-center gap-2 p-2 bg-amber-100 dark:bg-amber-900/40 rounded-md border border-amber-300">
                       <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
                       <span className="text-xs text-amber-700 dark:text-amber-300">
-                        {validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type).warningMessage}
+                        {validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type, thresholdsMap).warningMessage}
                       </span>
                     </div>
                   )}
