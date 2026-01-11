@@ -183,16 +183,51 @@ return (
       <div
         onClick={() => available && onSelect(vehicleType)}
         className={`
-          relative overflow-hidden rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-300 group
+          relative overflow-hidden rounded-xl sm:rounded-2xl cursor-pointer group
+          transition-all duration-500 ease-out
           ${isSelected 
             ? 'ring-2 sm:ring-3 ring-primary shadow-xl sm:shadow-2xl scale-[1.02] sm:scale-[1.03] z-10' 
             : available 
-              ? 'hover:shadow-lg sm:hover:shadow-xl hover:scale-[1.005] sm:hover:scale-[1.01] hover:ring-1 sm:hover:ring-2 hover:ring-primary/30' 
+              ? 'hover:shadow-2xl sm:hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] hover:ring-1 sm:hover:ring-2 hover:ring-primary/40' 
               : 'opacity-50 cursor-not-allowed grayscale'
           }
         `}
-        style={isSelected ? { animation: 'selectedPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' } : {}}
+        style={{
+          transformStyle: 'preserve-3d',
+          perspective: '1000px',
+          ...(isSelected ? { animation: 'selectedPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' } : {})
+        }}
+        onMouseMove={(e) => {
+          if (!available || isSelected) return;
+          const card = e.currentTarget;
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = (y - centerY) / 20;
+          const rotateY = (centerX - x) / 20;
+          card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        }}
+        onMouseLeave={(e) => {
+          if (!available || isSelected) return;
+          const card = e.currentTarget;
+          card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        }}
       >
+        {/* 3D Hover Shine Effect */}
+        <div 
+          className="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl sm:rounded-2xl overflow-hidden"
+        >
+          <div 
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            style={{
+              backgroundSize: '200% 100%',
+              animation: 'cardShine 1.5s ease-in-out infinite',
+            }}
+          />
+        </div>
+        
         {/* Animated Glow Effect for Selected */}
         {isSelected && (
           <div 
@@ -203,12 +238,12 @@ return (
         
         {/* Gradient Background */}
         <div className={`
-          absolute inset-0 transition-all duration-300
+          absolute inset-0 transition-all duration-500
           ${isSelected 
             ? 'bg-gradient-to-br from-primary/25 via-primary/15 to-primary/5' 
             : isRecommended
               ? 'bg-gradient-to-br from-green-500/15 via-green-500/10 to-emerald-500/5 group-hover:from-green-500/20'
-              : 'bg-gradient-to-br from-muted via-muted/70 to-background group-hover:from-muted/90'
+              : 'bg-gradient-to-br from-muted via-muted/70 to-background group-hover:from-primary/5'
           }
         `} />
         
@@ -600,6 +635,24 @@ return (
           100% {
             transform: scale(1) rotate(0deg);
             opacity: 1;
+          }
+        }
+        
+        @keyframes cardFloat {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-4px);
+          }
+        }
+        
+        @keyframes cardShine {
+          0% {
+            background-position: -200% center;
+          }
+          100% {
+            background-position: 200% center;
           }
         }
       `}</style>
