@@ -271,6 +271,7 @@ const AdminHourlyRentalPrices = () => {
     try {
       let successCount = 0;
       let errorCount = 0;
+      let errorMessages: string[] = [];
 
       for (const vp of vehiclePrices) {
         const payload = {
@@ -283,14 +284,21 @@ const AdminHourlyRentalPrices = () => {
           is_active: true,
         };
 
-        // Check if exists
-        const { data: existing } = await supabase
+        // Check if exists - use maybeSingle() instead of single() to avoid error when no rows
+        const { data: existing, error: checkError } = await supabase
           .from("hourly_rental_prices")
           .select("id")
           .eq("city", payload.city)
           .eq("vehicle_type", payload.vehicle_type)
           .eq("duration_type", payload.duration_type)
-          .single();
+          .maybeSingle();
+
+        if (checkError) {
+          console.error(`Check error for ${vp.type}:`, checkError);
+          errorCount++;
+          errorMessages.push(`${vp.type}: ${checkError.message}`);
+          continue;
+        }
 
         if (existing) {
           // Update
@@ -300,7 +308,9 @@ const AdminHourlyRentalPrices = () => {
             .eq("id", existing.id);
 
           if (error) {
+            console.error(`Update error for ${vp.type}:`, error);
             errorCount++;
+            errorMessages.push(`${vp.type}: ${error.message}`);
           } else {
             successCount++;
           }
@@ -311,7 +321,9 @@ const AdminHourlyRentalPrices = () => {
             .insert(payload);
 
           if (error) {
+            console.error(`Insert error for ${vp.type}:`, error);
             errorCount++;
+            errorMessages.push(`${vp.type}: ${error.message}`);
           } else {
             successCount++;
           }
@@ -320,16 +332,20 @@ const AdminHourlyRentalPrices = () => {
 
       if (successCount > 0) {
         toast.success(`${successCount} araç fiyatı kaydedildi${errorCount > 0 ? `, ${errorCount} hata` : ''}`);
-      } else if (errorCount > 0) {
-        toast.error(`${errorCount} hata oluştu`);
+      } 
+      
+      if (errorCount > 0) {
+        toast.error(`${errorCount} hata oluştu: ${errorMessages.join(', ')}`);
       }
 
-      setIsBulkDialogOpen(false);
-      resetBulkForm();
+      if (successCount > 0 || errorCount === 0) {
+        setIsBulkDialogOpen(false);
+        resetBulkForm();
+      }
       fetchPrices();
     } catch (error: any) {
       toast.error(error.message || "Bir hata oluştu");
-      console.error(error);
+      console.error("Bulk submit error:", error);
     }
   };
 
