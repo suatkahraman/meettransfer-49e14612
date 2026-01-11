@@ -26,7 +26,7 @@ const VideoPromo = ({ variant = "section" }: VideoPromoProps) => {
               <X className="h-5 w-5 text-white" />
             </button>
             <iframe
-              src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&rel=0`}
+              src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=0&rel=0&playsinline=1`}
               title="Meet Transfer Promo Video"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -102,7 +102,7 @@ const VideoPromo = ({ variant = "section" }: VideoPromoProps) => {
                   <X className="h-5 w-5 text-white" />
                 </button>
                 <iframe
-                  src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&rel=0`}
+                  src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=0&rel=0&playsinline=1`}
                   title="Meet Transfer Promo Video"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen

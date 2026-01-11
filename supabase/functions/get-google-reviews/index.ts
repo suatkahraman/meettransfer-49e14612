@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,6 +8,9 @@ const corsHeaders = {
 
 // Meet Transfer's Google Place ID - Get this from Google Business Profile
 const PLACE_ID = "ChIJxWLW5C_byxQRxSUmLFnp2dU";
+
+// Cache duration in hours
+const CACHE_DURATION_HOURS = 24;
 
 interface GoogleReview {
   author_name: string;
@@ -34,6 +38,48 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get language from request body or default to 'en'
+    let language = 'en';
+    let forceRefresh = false;
+    try {
+      const body = await req.json();
+      language = body.language?.toLowerCase() || 'en';
+      forceRefresh = body.forceRefresh || false;
+    } catch {
+      // No body, use defaults
+    }
+
+    console.log(`Fetching reviews for language: ${language}, forceRefresh: ${forceRefresh}`);
+
+    // Check cache first (unless force refresh)
+    if (!forceRefresh) {
+      const { data: cachedData, error: cacheError } = await supabase
+        .from('google_reviews_cache')
+        .select('*')
+        .eq('language', language)
+        .gt('expires_at', new Date().toISOString())
+        .single();
+
+      if (!cacheError && cachedData) {
+        console.log('Returning cached reviews');
+        return new Response(
+          JSON.stringify({
+            reviews: cachedData.reviews,
+            rating: cachedData.rating,
+            totalReviews: cachedData.total_reviews,
+            cached: true,
+            cachedAt: cachedData.fetched_at,
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // No valid cache, fetch from Google Places API
     const apiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
     
     if (!apiKey) {
@@ -44,16 +90,7 @@ serve(async (req) => {
       );
     }
 
-    // Get language from request body or default to 'en'
-    let language = 'en';
-    try {
-      const body = await req.json();
-      language = body.language || 'en';
-    } catch {
-      // No body, use default
-    }
-
-    console.log(`Fetching Google reviews for place: ${PLACE_ID}, language: ${language}`);
+    console.log(`Fetching fresh reviews from Google Places API for place: ${PLACE_ID}`);
 
     // Fetch place details including reviews
     const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,rating,user_ratings_total&key=${apiKey}&language=${language}&reviews_sort=newest`;
@@ -65,6 +102,28 @@ serve(async (req) => {
 
     if (data.status !== 'OK') {
       console.error('Google Places API error:', data.error_message || data.status);
+      
+      // Try to return stale cache if available
+      const { data: staleCache } = await supabase
+        .from('google_reviews_cache')
+        .select('*')
+        .eq('language', language)
+        .single();
+      
+      if (staleCache) {
+        console.log('Returning stale cache due to API error');
+        return new Response(
+          JSON.stringify({
+            reviews: staleCache.reviews,
+            rating: staleCache.rating,
+            totalReviews: staleCache.total_reviews,
+            cached: true,
+            stale: true,
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ 
           error: data.error_message || data.status, 
@@ -85,13 +144,41 @@ serve(async (req) => {
       timestamp: review.time,
     })) || [];
 
-    console.log(`Found ${reviews.length} reviews`);
+    const rating = data.result?.rating || 0;
+    const totalReviews = data.result?.user_ratings_total || 0;
+
+    console.log(`Fetched ${reviews.length} reviews, caching...`);
+
+    // Update cache (upsert based on language)
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + CACHE_DURATION_HOURS);
+
+    const { error: upsertError } = await supabase
+      .from('google_reviews_cache')
+      .upsert({
+        language,
+        reviews,
+        rating,
+        total_reviews: totalReviews,
+        fetched_at: new Date().toISOString(),
+        expires_at: expiresAt.toISOString(),
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'language',
+      });
+
+    if (upsertError) {
+      console.error('Error caching reviews:', upsertError);
+    } else {
+      console.log('Reviews cached successfully');
+    }
 
     return new Response(
       JSON.stringify({
         reviews,
-        rating: data.result?.rating || 0,
-        totalReviews: data.result?.user_ratings_total || 0,
+        rating,
+        totalReviews,
+        cached: false,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

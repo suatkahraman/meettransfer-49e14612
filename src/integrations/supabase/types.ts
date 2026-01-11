@@ -633,6 +633,42 @@ export type Database = {
         }
         Relationships: []
       }
+      google_reviews_cache: {
+        Row: {
+          created_at: string
+          expires_at: string
+          fetched_at: string
+          id: string
+          language: string
+          rating: number | null
+          reviews: Json
+          total_reviews: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          fetched_at?: string
+          id?: string
+          language?: string
+          rating?: number | null
+          reviews?: Json
+          total_reviews?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          fetched_at?: string
+          id?: string
+          language?: string
+          rating?: number | null
+          reviews?: Json
+          total_reviews?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hourly_rental_prices: {
         Row: {
           city: string
