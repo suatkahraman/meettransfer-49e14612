@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -149,6 +149,106 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
   return { isRecording, isProcessing, startRecording, stopRecording };
 }
 
+// Text-to-Speech hook using Web Speech API (no API key required)
+function useTextToSpeech(language: string) {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Map language codes to BCP-47 format for Web Speech API
+  const getLanguageCode = useCallback((lang: string): string => {
+    const languageMap: Record<string, string> = {
+      'TR': 'tr-TR',
+      'EN': 'en-US',
+      'DE': 'de-DE',
+      'FR': 'fr-FR',
+      'RU': 'ru-RU',
+      'AR': 'ar-SA',
+      'ES': 'es-ES',
+      'IT': 'it-IT',
+      'UK': 'uk-UA',
+      'JA': 'ja-JP'
+    };
+    return languageMap[lang] || 'en-US';
+  }, []);
+
+  const speak = useCallback((text: string) => {
+    if (!isVoiceEnabled || !text || typeof window === 'undefined') return;
+
+    // Check for browser support
+    if (!('speechSynthesis' in window)) {
+      console.error('Speech synthesis not supported in this browser');
+      return;
+    }
+
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+
+    // Clean text for speech (remove emojis and special characters)
+    const cleanText = text
+      .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // emoticons
+      .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // symbols & pictographs
+      .replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // transport & map symbols
+      .replace(/[\u{2600}-\u{26FF}]/gu, '')   // misc symbols
+      .replace(/[\u{2700}-\u{27BF}]/gu, '')   // dingbats
+      .replace(/👋|🎤|📍|📅|👥|🚗|💰/g, '')  // specific emojis
+      .trim();
+
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utteranceRef.current = utterance;
+
+    utterance.lang = getLanguageCode(language);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    // Try to find a voice for the language
+    const voices = window.speechSynthesis.getVoices();
+    const langCode = getLanguageCode(language);
+    const matchingVoice = voices.find(voice => voice.lang.startsWith(langCode.split('-')[0]));
+    if (matchingVoice) {
+      utterance.voice = matchingVoice;
+    }
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  }, [language, getLanguageCode, isVoiceEnabled]);
+
+  const stopSpeaking = useCallback(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  }, []);
+
+  const toggleVoice = useCallback(() => {
+    setIsVoiceEnabled(prev => {
+      if (prev) {
+        // If turning off, stop any current speech
+        stopSpeaking();
+      }
+      return !prev;
+    });
+  }, [stopSpeaking]);
+
+  // Load voices on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  }, []);
+
+  return { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice };
+}
+
 const placeholderMessages: Record<string, string> = {
   EN: "e.g., 'Tomorrow at 3pm from Istanbul Airport to Taksim for 4 people'",
   TR: "örn: 'Yarın 15:00'te İstanbul Havalimanı'ndan Taksim'e 4 kişi'",
@@ -193,6 +293,9 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
     handleTranscription,
     language
   );
+
+  // Text-to-Speech
+  const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice } = useTextToSpeech(language);
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
@@ -247,6 +350,11 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+
+      // Speak the assistant response
+      if (isVoiceEnabled) {
+        speak(assistantMessage.content);
+      }
 
     } catch (error) {
       console.error("Chat error:", error);
@@ -369,17 +477,53 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
             </div>
           </div>
           
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ type: "spring", stiffness: 300 }}
-            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center"
-          >
-            {isOpen ? (
-              <X className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <MessageCircle className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-2">
+            {/* Voice Toggle Button */}
+            {isOpen && (
+              <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleVoice();
+                }}
+                className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                  isVoiceEnabled 
+                    ? "bg-primary/20 text-primary" 
+                    : "bg-muted/50 text-muted-foreground"
+                )}
+                title={isVoiceEnabled ? "Sesi Kapat" : "Sesi Aç"}
+              >
+                {isSpeaking ? (
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ repeat: Infinity, duration: 0.5 }}
+                  >
+                    <Volume2 className="h-5 w-5" />
+                  </motion.div>
+                ) : isVoiceEnabled ? (
+                  <Volume2 className="h-5 w-5" />
+                ) : (
+                  <VolumeX className="h-5 w-5" />
+                )}
+              </motion.button>
             )}
-          </motion.div>
+            
+            <motion.div
+              animate={{ rotate: isOpen ? 180 : 0 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center"
+            >
+              {isOpen ? (
+                <X className="h-5 w-5 text-muted-foreground" />
+              ) : (
+                <MessageCircle className="h-5 w-5 text-primary" />
+              )}
+            </motion.div>
+          </div>
         </motion.button>
 
         {/* Chat Content */}
@@ -417,17 +561,47 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                       )}
                       
                       <div className="flex flex-col gap-2 max-w-[80%]">
-                        <motion.div
-                          whileHover={{ scale: 1.01 }}
-                          className={cn(
-                            "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
-                            msg.role === "user"
-                              ? "bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-br-lg"
-                              : "bg-gradient-to-br from-muted to-muted/80 text-foreground rounded-bl-lg border border-border/30"
+                        <div className="flex items-start gap-2">
+                          <motion.div
+                            whileHover={{ scale: 1.01 }}
+                            className={cn(
+                              "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm flex-1",
+                              msg.role === "user"
+                                ? "bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-br-lg"
+                                : "bg-gradient-to-br from-muted to-muted/80 text-foreground rounded-bl-lg border border-border/30"
+                            )}
+                          >
+                            {msg.content}
+                          </motion.div>
+                          
+                          {/* Speak button for assistant messages */}
+                          {msg.role === "assistant" && msg.id !== "welcome" && (
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => {
+                                if (isSpeaking) {
+                                  stopSpeaking();
+                                } else {
+                                  speak(msg.content);
+                                }
+                              }}
+                              className={cn(
+                                "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
+                                isSpeaking 
+                                  ? "bg-primary/20 text-primary" 
+                                  : "bg-muted/50 text-muted-foreground hover:text-primary"
+                              )}
+                              title={isSpeaking ? "Durdur" : "Sesli oku"}
+                            >
+                              {isSpeaking ? (
+                                <Square className="h-3.5 w-3.5" />
+                              ) : (
+                                <Volume2 className="h-3.5 w-3.5" />
+                              )}
+                            </motion.button>
                           )}
-                        >
-                          {msg.content}
-                        </motion.div>
+                        </div>
                         
                         {/* Booking Action Button */}
                         {msg.bookingData?.isComplete && (
