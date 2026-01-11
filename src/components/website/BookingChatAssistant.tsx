@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, Settings2, ChevronDown, Trash2 } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, Settings2, ChevronDown, Trash2, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
@@ -391,11 +392,13 @@ function getConversationKey(visitorId: string): string {
 
 export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssistantProps) {
   const { t, language } = useLanguage();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [visitorId] = useState(() => getVisitorId());
+  const [bookingCreated, setBookingCreated] = useState<{ id: string; token: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const hasLoadedRef = useRef(false);
@@ -485,8 +488,18 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
     setIsLoading(true);
 
     try {
+      // Build conversation history for context (exclude welcome message)
+      const conversationHistory = messages
+        .filter(m => m.id !== "welcome")
+        .map(m => ({ role: m.role, content: m.content }));
+
       const { data, error } = await supabase.functions.invoke("booking-assistant", {
-        body: { message: userMessage.content, language }
+        body: { 
+          message: userMessage.content, 
+          language,
+          conversationHistory,
+          visitorId
+        }
       });
 
       if (error) throw error;
@@ -503,6 +516,28 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
       // Speak the assistant response
       if (isVoiceEnabled) {
         speak(assistantMessage.content);
+      }
+
+      // If booking was created, show success and redirect
+      if (data.quickBookingId && data.confirmationToken) {
+        setBookingCreated({ id: data.quickBookingId, token: data.confirmationToken });
+        
+        // Show success message with redirect countdown
+        setTimeout(() => {
+          const successMessage: Message = {
+            id: (Date.now() + 2).toString(),
+            role: "assistant",
+            content: language === "TR" 
+              ? "✅ Rezervasyonunuz oluşturuldu! İletişim bilgilerinizi girmek için yönlendiriliyorsunuz..."
+              : "✅ Your reservation has been created! Redirecting you to enter your contact details..."
+          };
+          setMessages(prev => [...prev, successMessage]);
+          
+          // Redirect after 2 seconds
+          setTimeout(() => {
+            navigate(`/quick-booking-customer-info?token=${data.confirmationToken}`);
+          }, 2000);
+        }, 1000);
       }
 
     } catch (error) {
