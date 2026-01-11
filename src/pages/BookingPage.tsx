@@ -301,9 +301,9 @@ const BookingPage = () => {
 
   // Handle form submission for guests (quick booking flow)
   const handleGuestSubmit = async () => {
-    // Validation
-    if (!customerPhone || customerPhone.length < 8) {
-      toast.error(t("phoneRequired") || "Phone number is required");
+    // Validation - phone is optional but if provided, validate format
+    if (customerPhone && customerPhone.length > 0 && customerPhone.length < 8) {
+      toast.error(t("invalidPhone") || "Please enter a valid phone number");
       return;
     }
 
@@ -538,8 +538,8 @@ const BookingPage = () => {
       return;
     }
 
-    if (!customerPhone || customerPhone.length < 8) {
-      toast.error(t("phoneRequired") || "Phone number is required");
+    if (customerPhone && customerPhone.length > 0 && customerPhone.length < 8) {
+      toast.error(t("invalidPhone") || "Please enter a valid phone number");
       return;
     }
 
