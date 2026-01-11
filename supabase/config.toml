@@ -158,3 +158,9 @@ verify_jwt = true
 
 [functions.get-customer-reservations]
 verify_jwt = false
+
+[functions.get-google-reviews]
+verify_jwt = false
+
+[functions.send-transfer-reminder]
+verify_jwt = true
