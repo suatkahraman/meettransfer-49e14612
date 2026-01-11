@@ -72,14 +72,16 @@ const BookingPage = () => {
   const urlDropoff = searchParams.get("dropoff") || "";
   const urlDate = searchParams.get("date") || "";
   const urlTime = searchParams.get("time") || "";
+  const urlPassengers = searchParams.get("passengers");
+  const urlVehicleType = searchParams.get("vehicleType");
   
   // Hourly-specific params
   const urlCity = searchParams.get("city") || "";
   const urlDuration = searchParams.get("duration") || "4h";
 
-  // Form state
-  const [vehicleType, setVehicleType] = useState("mercedes-vito");
-  const [passengers, setPassengers] = useState(1);
+  // Form state - initialize from URL params if available
+  const [vehicleType, setVehicleType] = useState(urlVehicleType || "mercedes-vito");
+  const [passengers, setPassengers] = useState(urlPassengers ? parseInt(urlPassengers) : 1);
   const [luggageCount, setLuggageCount] = useState(1);
   const [babySeatCount, setBabySeatCount] = useState(0);
   const [preferredCurrency, setPreferredCurrency] = useState("EUR");
@@ -681,6 +683,16 @@ const BookingPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {/* Warning for 7+ passengers */}
+                  {passengers >= 7 && !isHourlyBooking && (
+                    <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                      <p className="text-sm text-amber-600 dark:text-amber-400 font-medium flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        {t("minibusRequiredForPassengers") || "Sprinter minibus is required for 7+ passengers"}
+                      </p>
+                    </div>
+                  )}
+                  
                   <div className="grid sm:grid-cols-2 gap-4">
                     {(isHourlyBooking ? getHourlyVehicleOptions() : availableVehicles.map(v => ({ value: v.value, dbType: v.value }))).map((vehicleOption) => {
                       const v = VEHICLE_TYPE_MAP[vehicleOption.value];
@@ -690,7 +702,11 @@ const BookingPage = () => {
                         ? getHourlyPrice(vehicleOption.value, selectedDuration)
                         : getPriceForVehicle(vehicleOption.value);
                       const isSelected = vehicleType === vehicleOption.value;
-                      const isDisabled = !isHourlyBooking && minibusRequired && vehicleOption.value !== 'minibus';
+                      
+                      // Disable vehicles that can't accommodate the passenger count
+                      const vehicleCapacity = v.passengers;
+                      const isCapacityInsufficient = passengers > vehicleCapacity;
+                      const isDisabled = isCapacityInsufficient;
                       
                       return (
                         <button
@@ -713,6 +729,12 @@ const BookingPage = () => {
                             </div>
                           )}
                           
+                          {isDisabled && (
+                            <div className="absolute top-3 left-3 bg-red-500/90 text-white text-xs px-2 py-1 rounded">
+                              Max {vehicleCapacity}
+                            </div>
+                          )}
+                          
                           <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-muted">
                             <img
                               src={v.images[0]?.src}
@@ -725,7 +747,10 @@ const BookingPage = () => {
                           <h3 className="font-semibold text-foreground mb-2">{v.label}</h3>
                           
                           <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                            <span className="flex items-center gap-1">
+                            <span className={cn(
+                              "flex items-center gap-1",
+                              isDisabled && "text-red-500"
+                            )}>
                               <Users className="h-4 w-4" />
                               {v.passengers}
                             </span>

@@ -302,7 +302,7 @@ export const Hero = () => {
     params.set("date", format(date!, "yyyy-MM-dd"));
     params.set("time", time);
     params.set("passengers", passengers);
-    params.set("vehicle", vehicleType);
+    params.set("vehicleType", vehicleType);
     
     navigate(`/book?${params.toString()}`);
   };
@@ -326,7 +326,7 @@ export const Hero = () => {
     params.set("time", hourlyTime);
     params.set("duration", hourlyDuration);
     params.set("passengers", hourlyPassengers);
-    params.set("vehicle", hourlyVehicleType);
+    params.set("vehicleType", hourlyVehicleType);
     params.set("type", "hourly");
     
     navigate(`/book?${params.toString()}`);
