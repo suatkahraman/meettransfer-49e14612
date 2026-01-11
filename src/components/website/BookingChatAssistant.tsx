@@ -620,16 +620,11 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
           "bg-gradient-to-br from-card via-card to-muted/30",
           "shadow-2xl border border-border/50",
           "backdrop-blur-xl",
-          // Mobile: full screen when open
+          // Mobile: max height when open, not full screen
           isOpen 
-            ? "fixed inset-0 z-[100] rounded-none md:relative md:inset-auto md:rounded-3xl md:h-[500px]" 
+            ? "max-h-[70vh] md:max-h-none md:h-[500px] rounded-3xl" 
             : "h-auto rounded-3xl"
         )}
-        style={{ 
-          // Mobile safe areas
-          paddingTop: isOpen ? 'env(safe-area-inset-top)' : undefined,
-          paddingBottom: isOpen ? 'env(safe-area-inset-bottom)' : undefined,
-        }}
       >
         {/* Decorative gradient orbs */}
         <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl pointer-events-none" />
@@ -843,11 +838,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="relative flex flex-col z-10 overflow-hidden h-[calc(100%-88px)] md:h-[calc(100%-88px)]"
-              style={{ 
-                // On mobile, account for safe areas in content height
-                height: 'calc(100% - 88px - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
-              }}
+              className="relative flex flex-col z-10 overflow-hidden h-[calc(70vh-88px)] md:h-[calc(500px-88px)]"
             >
               {/* Messages Area */}
               <ScrollArea className="flex-1 px-4 py-4 md:px-5">
