@@ -36,6 +36,14 @@ import sprinterAirportNight from "@/assets/sprinter-airport-night.jpg";
 import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
 import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 
+// New premium images
+import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
+import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
+import maybachUltraLuxury from "@/assets/maybach-ultra-luxury.jpg";
+import sprinterHotelArrival from "@/assets/sprinter-hotel-arrival.jpg";
+import sprinterVipInterior from "@/assets/sprinter-vip-interior.jpg";
+
 export interface VehicleImage {
   src: string;
   alt: string;
@@ -76,6 +84,8 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'luggage', label: 'Large Luggage Space', labelTr: 'Geniş Bagaj Alanı' },
     ],
     images: [
+      { src: vitoAirportPremium, alt: "Mercedes Vito VIP airport transfer with professional chauffeur" },
+      { src: vitoLuxuryInterior, alt: "Mercedes Vito luxury white leather interior passengers" },
       { src: vitoAirportAnime, alt: "Mercedes Vito private transfer at airport terminal" },
       { src: vitoAirportWelcome, alt: "Mercedes Vito airport pickup with welcome service" },
       { src: meetTransferCyprus, alt: "Meet Transfer VIP service in Cyprus" },
@@ -107,6 +117,7 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'sparkles', label: 'Ambient Lighting', labelTr: 'Ambiyans Aydınlatma' },
     ],
     images: [
+      { src: vipVitoStarlightLuxury, alt: "Mercedes VIP Vito couple champagne starlight ceiling luxury" },
       { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple starlight roof interior" },
       { src: meetTransferDubai, alt: "Meet Transfer VIP service in Dubai UAE" },
       { src: vitoVipStarlightRoof, alt: "Mercedes VIP Vito starlight ceiling ambient lighting" },
@@ -136,6 +147,7 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'sparkles', label: 'RGB Ambient Lighting', labelTr: 'RGB Ambiyans' },
     ],
     images: [
+      { src: maybachUltraLuxury, alt: "Mercedes Maybach ultra luxury orange leather galaxy starlight ceiling" },
       { src: maybachInterior, alt: "Mercedes Maybach starlight ceiling luxury interior" },
       { src: maybachPassengersBlue, alt: "VIP passengers in Mercedes Maybach blue ambient lighting" },
       { src: maybachInteriorPurple, alt: "Mercedes Maybach purple starlight ceiling with TV entertainment" },
@@ -160,6 +172,8 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'droplets', label: 'Refreshment Bar', labelTr: 'İkram Barı' },
     ],
     images: [
+      { src: sprinterHotelArrival, alt: "Mercedes Sprinter VIP red carpet hotel arrival luxury" },
+      { src: sprinterVipInterior, alt: "Mercedes Sprinter VIP blue starlight interior seats" },
       { src: sprinterExteriorVip, alt: "Mercedes Sprinter VIP exterior luxury design" },
       { src: sprinterInteriorGrey, alt: "Mercedes Sprinter grey leather interior design" },
       { src: meetTransferDubai, alt: "Meet Transfer Sprinter minibus Dubai" },
