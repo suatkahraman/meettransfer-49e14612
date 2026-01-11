@@ -110,6 +110,8 @@ const CappadociaAirportTransferGuide = () => {
             dateModified: '2025-01-10',
             author: 'Meet Transfer',
             readingTime: '18',
+            wordCount: 2800,
+            keywords: ['Cappadocia transfer', 'Kayseri airport', 'Nevsehir airport', 'Göreme', 'balloon tour transfer'],
           },
           {
             type: 'BreadcrumbList',

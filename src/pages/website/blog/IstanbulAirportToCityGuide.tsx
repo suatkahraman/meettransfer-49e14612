@@ -95,6 +95,8 @@ const IstanbulAirportToCityGuide = () => {
             dateModified: '2025-01-10',
             author: 'Meet Transfer',
             readingTime: '14',
+            wordCount: 2100,
+            keywords: ['Istanbul Airport to city', 'IST transfer', 'Taksim transfer', 'Sultanahmet', 'metro M11'],
           },
           {
             type: 'BreadcrumbList',

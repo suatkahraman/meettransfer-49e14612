@@ -83,6 +83,8 @@ const AntalyaAirportTransferGuide = () => {
             dateModified: '2025-01-10',
             author: 'Meet Transfer',
             readingTime: '15',
+            wordCount: 2200,
+            keywords: ['Antalya airport transfer', 'AYT transfer', 'Belek transfer', 'Side transfer', 'Lara Beach'],
           },
           {
             type: 'BreadcrumbList',

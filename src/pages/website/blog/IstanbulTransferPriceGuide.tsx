@@ -93,6 +93,8 @@ const IstanbulTransferPriceGuide = () => {
             dateModified: '2025-01-10',
             author: 'Meet Transfer',
             readingTime: '12',
+            wordCount: 2400,
+            keywords: ['Istanbul airport transfer', 'IST transfer price', 'Taksim transfer', 'Sultanahmet transfer', 'private transfer Istanbul'],
           },
           {
             type: 'BreadcrumbList',
