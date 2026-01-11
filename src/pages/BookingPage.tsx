@@ -386,8 +386,15 @@ const BookingPage = () => {
           throw new Error("Failed to create reservation");
         }
 
-        // Navigate to customer info page with reservation code
-        navigate(`/quick-booking-customer-info?reservationCode=${reservationData.reservation.reservationCode}`);
+        // Navigate to customer info page with reservation code and pre-filled data
+        const customerInfoParams = new URLSearchParams({
+          reservationCode: reservationData.reservation.reservationCode,
+          reservationId: reservationData.reservation.id,
+        });
+        if (customerPhone) customerInfoParams.set("phone", customerPhone.trim());
+        if (customerEmail) customerInfoParams.set("email", customerEmail.trim());
+        
+        navigate(`/quick-booking-customer-info?${customerInfoParams.toString()}`);
         toast.success(t("bookingConfirmed") || "Booking confirmed! Please complete your details.");
       } else {
         // No price available - use old flow (waiting for admin to set price)
