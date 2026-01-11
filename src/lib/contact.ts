@@ -64,6 +64,15 @@ export const GLOBAL_OFFICES: OfficeLocation[] = [
     whatsappOnly: true,
     email: null,
   },
+  {
+    flag: "🇦🇺",
+    country: "Australia",
+    city: "Sydney",
+    address: "10 Ettolong St, Auburn NSW 2144",
+    phone: WHATSAPP_DISPLAY,
+    whatsappOnly: true,
+    email: null,
+  },
 ];
 
 /**
