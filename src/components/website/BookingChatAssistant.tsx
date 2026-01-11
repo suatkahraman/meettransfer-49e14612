@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, Settings2, ChevronDown } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, Settings2, ChevronDown, Trash2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
@@ -373,14 +373,32 @@ const welcomeMessages: Record<string, string> = {
   JA: "こんにちは！👋 AI予約アシスタントです。どこへ、いつ送迎が必要か教えてください！🎤 マイクも使えます。"
 };
 
+// Generate or get visitor ID for conversation persistence
+function getVisitorId(): string {
+  const STORAGE_KEY = 'meet_transfer_visitor_id';
+  let visitorId = localStorage.getItem(STORAGE_KEY);
+  if (!visitorId) {
+    visitorId = `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem(STORAGE_KEY, visitorId);
+  }
+  return visitorId;
+}
+
+// Get conversation storage key for a visitor
+function getConversationKey(visitorId: string): string {
+  return `meet_transfer_chat_${visitorId}`;
+}
+
 export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssistantProps) {
   const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [visitorId] = useState(() => getVisitorId());
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hasLoadedRef = useRef(false);
 
   // Voice recording
   const handleTranscription = useCallback((text: string) => {
@@ -396,9 +414,39 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
   const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate } = useTextToSpeech(language);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
 
+  // Load saved conversation on mount
+  useEffect(() => {
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+    
+    try {
+      const savedConversation = localStorage.getItem(getConversationKey(visitorId));
+      if (savedConversation) {
+        const parsed = JSON.parse(savedConversation) as Message[];
+        if (parsed.length > 0) {
+          setMessages(parsed);
+          return;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load conversation:', e);
+    }
+  }, [visitorId]);
+
+  // Save conversation whenever messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        localStorage.setItem(getConversationKey(visitorId), JSON.stringify(messages));
+      } catch (e) {
+        console.error('Failed to save conversation:', e);
+      }
+    }
+  }, [messages, visitorId]);
+
+  // Add welcome message when opened and no messages
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      // Add welcome message when opened
       setMessages([{
         id: "welcome",
         role: "assistant",
@@ -487,6 +535,19 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  };
+
+  const clearConversation = () => {
+    try {
+      localStorage.removeItem(getConversationKey(visitorId));
+      setMessages([{
+        id: "welcome",
+        role: "assistant",
+        content: welcomeMessages[language] || welcomeMessages.EN
+      }]);
+    } catch (e) {
+      console.error('Failed to clear conversation:', e);
     }
   };
 
@@ -661,6 +722,24 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                   </div>
                 </PopoverContent>
               </Popover>
+            )}
+
+            {/* Clear Conversation Button */}
+            {isOpen && messages.length > 1 && (
+              <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearConversation();
+                }}
+                className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center transition-all hover:bg-destructive/20 hover:text-destructive"
+                title={language === "TR" ? "Sohbeti Temizle" : "Clear Chat"}
+              >
+                <Trash2 className="h-5 w-5" />
+              </motion.button>
             )}
 
             {/* Voice Toggle Button */}
