@@ -186,6 +186,7 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistant: "AI Assistant",
     aiAssistantHint: "Ask me anything about your transfer",
     bookAirportTransferWithAI: "Book Airport Transfer With AI",
+    bookTransferOrHourlyWithAI: "Book Transfer & Hourly Rental With AI",
     new: "New",
     
     // Hourly Rental Form
@@ -1742,6 +1743,7 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistant: "KI-Assistent",
     aiAssistantHint: "Fragen Sie mich alles über Ihren Transfer",
     bookAirportTransferWithAI: "Flughafentransfer mit KI buchen",
+    bookTransferOrHourlyWithAI: "Transfer & Stundenvermietung mit KI buchen",
     new: "Neu",
     
     // Hourly Rental Form
@@ -3332,6 +3334,7 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistant: "Assistant IA",
     aiAssistantHint: "Posez-moi vos questions sur votre transfert",
     bookAirportTransferWithAI: "Réservez votre transfert aéroport avec l'IA",
+    bookTransferOrHourlyWithAI: "Réservez transfert & location horaire avec l'IA",
     new: "Nouveau",
     
     // Hourly Rental Form
@@ -4532,6 +4535,7 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistant: "ИИ-ассистент",
     aiAssistantHint: "Задайте любой вопрос о вашем трансфере",
     bookAirportTransferWithAI: "Забронируйте трансфер из аэропорта с ИИ",
+    bookTransferOrHourlyWithAI: "Забронируйте трансфер и почасовую аренду с ИИ",
     new: "Новый",
     
     // Hourly Rental Form
@@ -5675,6 +5679,7 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistant: "Assistente IA",
     aiAssistantHint: "Chiedimi qualsiasi cosa sul tuo trasferimento",
     bookAirportTransferWithAI: "Prenota il trasferimento aeroportuale con l'IA",
+    bookTransferOrHourlyWithAI: "Prenota trasferimento e noleggio orario con l'IA",
     new: "Nuovo",
     
     // Hourly Rental Form
@@ -6871,6 +6876,7 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistant: "Asistente IA",
     aiAssistantHint: "Pregúntame cualquier cosa sobre tu traslado",
     bookAirportTransferWithAI: "Reserva tu traslado al aeropuerto con IA",
+    bookTransferOrHourlyWithAI: "Reserva traslado y alquiler por horas con IA",
     new: "Nuevo",
     
     // Hourly Rental Form
@@ -8067,6 +8073,7 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistant: "المساعد الذكي",
     aiAssistantHint: "اسألني أي شيء عن نقلك",
     bookAirportTransferWithAI: "احجز نقل المطار مع الذكاء الاصطناعي",
+    bookTransferOrHourlyWithAI: "احجز النقل والإيجار بالساعة مع الذكاء الاصطناعي",
     new: "جديد",
     
     // Hourly Rental Form
@@ -9210,6 +9217,7 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistant: "AI Asistan",
     aiAssistantHint: "Transferiniz hakkında bana soru sorun",
     bookAirportTransferWithAI: "Havalimanı Transferini AI ile Rezerve Et",
+    bookTransferOrHourlyWithAI: "Transfer & Saatlik Kiralama AI ile Rezerve Et",
     new: "Yeni",
     
     // Hourly Rental Form
@@ -10499,6 +10507,7 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistant: "ШІ-асистент",
     aiAssistantHint: "Запитайте мене будь-що про ваш трансфер",
     bookAirportTransferWithAI: "Забронюйте трансфер з аеропорту зі ШІ",
+    bookTransferOrHourlyWithAI: "Забронюйте трансфер і погодинну оренду зі ШІ",
     new: "Новий",
     
     // Hourly Rental Form
@@ -11635,6 +11644,7 @@ const translations: Record<Language, Record<string, string>> = {
     aiAssistant: "AIアシスタント",
     aiAssistantHint: "送迎について何でもお聞きください",
     bookAirportTransferWithAI: "AIで空港送迎を予約",
+    bookTransferOrHourlyWithAI: "AIで送迎と時間貸しを予約",
     new: "新着",
     
     // Hourly Rental Form
