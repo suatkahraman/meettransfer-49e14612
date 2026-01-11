@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { useState, useEffect, useCallback } from "react";
+import { format, parse } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -21,6 +21,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import BookingChatAssistant from "@/components/website/BookingChatAssistant";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -350,6 +351,56 @@ export const Hero = () => {
   const handleHourlyCitySelected = (value: string, details?: PlaceDetails) => {
     setHourlyCity(details?.displayText || value);
   };
+
+  // Handle booking data from AI chat assistant
+  const handleApplyBooking = useCallback((bookingData: {
+    pickup?: string | null;
+    dropoff?: string | null;
+    date?: string | null;
+    time?: string | null;
+    passengers?: number | null;
+    vehicleType?: string | null;
+  }) => {
+    if (bookingData.pickup) {
+      setPickup(bookingData.pickup);
+    }
+    if (bookingData.dropoff) {
+      setDropoff(bookingData.dropoff);
+    }
+    if (bookingData.date) {
+      try {
+        const parsedDate = parse(bookingData.date, "yyyy-MM-dd", new Date());
+        if (!isNaN(parsedDate.getTime())) {
+          setDate(parsedDate);
+        }
+      } catch (e) {
+        console.error("Failed to parse date:", e);
+      }
+    }
+    if (bookingData.time) {
+      setTime(bookingData.time);
+    }
+    if (bookingData.passengers) {
+      setPassengers(bookingData.passengers.toString());
+    }
+    if (bookingData.vehicleType) {
+      // Map AI vehicle types to our format
+      const vehicleMap: Record<string, string> = {
+        'mercedes-vito': 'mercedes-vito',
+        'vip-mercedes': 'vip-mercedes',
+        'maybach-minibus': 'maybach-minibus',
+        'minibus': 'minibus'
+      };
+      const mappedType = vehicleMap[bookingData.vehicleType] || 'mercedes-vito';
+      setVehicleType(mappedType);
+    }
+    
+    // Show success toast
+    toast.success(t("bookingDetailsApplied") || "Booking details applied to form!");
+    
+    // Scroll to form
+    document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [t]);
   
   return (
     <section id="booking-form" className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/80">
@@ -382,6 +433,11 @@ export const Hero = () => {
             <p className="text-lg md:text-xl text-white/90 max-w-xl mx-auto font-sans">
               {t("heroSubtitle")}
             </p>
+          </div>
+
+          {/* AI Chat Assistant */}
+          <div className="max-w-2xl mx-auto">
+            <BookingChatAssistant onApplyBooking={handleApplyBooking} />
           </div>
 
           {/* Booking Form with Tabs */}
