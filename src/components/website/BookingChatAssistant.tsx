@@ -598,6 +598,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
+            data-chat-trigger
             className="fixed bottom-24 right-4 z-50 md:hidden flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
           >
             <motion.div
@@ -629,6 +630,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
         {/* Header */}
         <motion.button
           onClick={() => setIsOpen(!isOpen)}
+          data-chat-trigger
           whileHover={{ backgroundColor: "hsl(var(--muted) / 0.5)" }}
           className="relative w-full flex items-center justify-between p-5 transition-all z-10"
         >

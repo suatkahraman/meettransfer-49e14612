@@ -17,6 +17,7 @@ import LivePriceCalculator from "@/components/website/LivePriceCalculator";
 import TrustBar from "@/components/website/TrustBar";
 import FleetIconsBar from "@/components/website/FleetIconsBar";
 import ReviewPlatformLogos from "@/components/website/ReviewPlatformLogos";
+import AIAssistantPromo from "@/components/website/AIAssistantPromo";
 
 
 const Index = () => {
@@ -45,6 +46,7 @@ const Index = () => {
       <BookingForm />
       <LivePriceCalculator />
       <FleetIconsBar />
+      <AIAssistantPromo />
       <StatsCounter />
       <WhyChooseUs />
       <Destinations />
