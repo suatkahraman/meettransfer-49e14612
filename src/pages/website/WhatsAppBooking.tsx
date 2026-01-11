@@ -26,7 +26,10 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { WHATSAPP_NUMBER } from "@/lib/contact";
 
-// Vehicle images - only landscape orientation
+// Vehicle images - premium collection
+import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
+import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
 import vitoAirportAnime from "@/assets/vito-airport-anime.jpg";
 import vitoAirportWelcome from "@/assets/vito-airport-welcome.jpg";
 import vitoCappadociaBalloon from "@/assets/vito-cappadocia-balloon.jpg";
@@ -44,10 +47,13 @@ import vitoVipStarlightRoof from "@/assets/vito-vip-starlight-roof.jpg";
 import vitoVipLuxuryWhite from "@/assets/vito-vip-luxury-white.jpg";
 import vitoVipCoupleStarlight from "@/assets/vito-vip-couple-starlight.jpg";
 import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
+import maybachUltraLuxury from "@/assets/maybach-ultra-luxury.jpg";
 import maybachInterior from "@/assets/maybach-interior-starlight.jpg";
 import maybachPassengersBlue from "@/assets/maybach-passengers-blue.jpg";
 import maybachInteriorPurple from "@/assets/maybach-interior-purple.jpg";
 import maybachInteriorOrange from "@/assets/maybach-interior-orange.jpg";
+import sprinterHotelArrival from "@/assets/sprinter-hotel-arrival.jpg";
+import sprinterVipInterior from "@/assets/sprinter-vip-interior.jpg";
 import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
 import sprinterExteriorVip from "@/assets/sprinter-exterior-vip.jpg";
 import sprinterAirportFront from "@/assets/sprinter-airport-front.jpg";
@@ -66,6 +72,8 @@ import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 const vehicleData = {
   "Mercedes Vito": {
     images: [
+      { src: vitoAirportPremium, alt: "Mercedes Vito premium airport transfer service" },
+      { src: vitoLuxuryInterior, alt: "Mercedes Vito luxury white leather interior" },
       { src: vitoAirportAnime, alt: "Mercedes Vito private transfer at airport terminal" },
       { src: vitoAirportWelcome, alt: "Mercedes Vito airport pickup with welcome service" },
       { src: meetTransferCyprus, alt: "Meet Transfer VIP service in Cyprus" },
@@ -83,6 +91,7 @@ const vehicleData = {
   },
   "Mercedes Vip Vito": {
     images: [
+      { src: vipVitoStarlightLuxury, alt: "Mercedes VIP Vito starlight luxury ceiling" },
       { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple starlight roof interior" },
       { src: meetTransferDubai, alt: "Meet Transfer VIP service in Dubai UAE" },
       { src: vitoVipStarlightRoof, alt: "Mercedes VIP Vito starlight ceiling ambient lighting" },
@@ -98,6 +107,7 @@ const vehicleData = {
   },
   "Maybach": {
     images: [
+      { src: maybachUltraLuxury, alt: "Mercedes Maybach ultra luxury interior with starlight galaxy ceiling" },
       { src: meetTransferCyprus, alt: "Meet Transfer Maybach service in Cyprus" },
       { src: maybachInterior, alt: "Mercedes Maybach starlight ceiling luxury interior" },
       { src: maybachPassengersBlue, alt: "VIP passengers in Mercedes Maybach blue ambient lighting" },
@@ -110,6 +120,8 @@ const vehicleData = {
   },
   "Minibus": {
     images: [
+      { src: sprinterHotelArrival, alt: "Mercedes Sprinter VIP minibus at luxury hotel" },
+      { src: sprinterVipInterior, alt: "Mercedes Sprinter VIP blue LED starlight interior" },
       { src: sprinterExteriorVip, alt: "Mercedes Sprinter VIP exterior luxury design" },
       { src: sprinterInteriorGrey, alt: "Mercedes Sprinter grey leather interior design" },
       { src: meetTransferDubai, alt: "Meet Transfer Sprinter minibus Dubai" },
@@ -128,7 +140,6 @@ const vehicleData = {
     luggage: 16,
   },
 };
-
 const vehicleTypes = Object.keys(vehicleData);
 
 const WhatsAppBooking = () => {

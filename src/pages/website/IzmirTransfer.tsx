@@ -10,8 +10,17 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
-import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
+// Vito VIP images
+import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
+import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
+import vitoVip1 from "@/assets/vito-vip-1.jpg";
+import vitoVip2 from "@/assets/vito-vip-2.jpg";
+// Vito images
+import vito1 from "@/assets/vito-1.jpg";
+import vito2 from "@/assets/vito-2.jpg";
+import vito3 from "@/assets/vito-3.jpg";
+import vito4 from "@/assets/vito-4.jpg";
 
 const destinations = [
   "Çeşme", "Alaçatı", "Foça", "Kuşadası", "Seferihisar",
@@ -53,7 +62,13 @@ const vehicles = [
     passengers: 6,
     luggage: 6,
     features: ["Leather seats", "WiFi", "Water", "USB charger"],
-    image: mercedesVipImage,
+    images: [
+      { src: vitoAirportPremium, alt: "Mercedes Vito VIP airport transfer Izmir" },
+      { src: vitoLuxuryInterior, alt: "Mercedes Vito VIP luxury interior" },
+      { src: vipVitoStarlightLuxury, alt: "Mercedes Vito VIP starlight ceiling" },
+      { src: vitoVip1, alt: "Mercedes Vito VIP Çeşme transfer" },
+      { src: vitoVip2, alt: "Mercedes Vito VIP Alaçatı service" },
+    ],
   },
   {
     name: "Mercedes Vito",
@@ -61,7 +76,12 @@ const vehicles = [
     passengers: 7,
     luggage: 7,
     features: ["Leather seats", "WiFi", "Complimentary water", "USB chargers", "Air Condition", "Extra legroom"],
-    image: mercedesVitoFamilyImage,
+    images: [
+      { src: vito1, alt: "Mercedes Vito family transfer Izmir" },
+      { src: vito2, alt: "Mercedes Vito comfortable interior" },
+      { src: vito3, alt: "Mercedes Vito Ephesus transfer" },
+      { src: vito4, alt: "Mercedes Vito Aegean Coast service" },
+    ],
   },
 ];
 
