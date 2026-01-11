@@ -32,6 +32,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { CompactRouteMap } from "@/components/ui/compact-route-map";
 
 interface VehiclePrice {
   vehicleType: string;
@@ -960,6 +961,15 @@ const BookingPage = () => {
                 }
               </h1>
             </div>
+            
+            {/* Route Map for Transfer bookings */}
+            {!isHourlyBooking && urlPickup && urlDropoff && (
+              <CompactRouteMap 
+                pickup={urlPickup} 
+                dropoff={urlDropoff}
+                className="mb-4"
+              />
+            )}
             
             <div className="grid grid-cols-2 gap-2 sm:gap-4">
               {isHourlyBooking ? (
