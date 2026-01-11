@@ -6,8 +6,8 @@ interface VideoPromoProps {
   variant?: "hero" | "section";
 }
 
-// YouTube video ID - Meet Transfer promo video
-const YOUTUBE_VIDEO_ID = "VQMWP-q47YI"; // Replace with your actual YouTube video ID
+// YouTube video ID - Meet Transfer promo video (Shorts format)
+const YOUTUBE_VIDEO_ID = "bCt0pzE3HMA";
 
 const VideoPromo = ({ variant = "section" }: VideoPromoProps) => {
   const { t } = useLanguage();
