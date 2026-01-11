@@ -246,7 +246,9 @@ const App = () => (
               <Route path="/customer/bookings" element={<CustomerRoute><LazyRoute><CustomerBookings /></LazyRoute></CustomerRoute>} />
               <Route path="/customer/reservations" element={<CustomerRoute><LazyRoute><CustomerBookings /></LazyRoute></CustomerRoute>} />
               <Route path="/customer/reservation/:id" element={<CustomerRoute><LazyRoute><CustomerReservationDetail /></LazyRoute></CustomerRoute>} />
+              <Route path="/customer/reservations/:id" element={<CustomerRoute><LazyRoute><CustomerReservationDetail /></LazyRoute></CustomerRoute>} />
               <Route path="/customer/reservation/:id/edit" element={<CustomerRoute><LazyRoute><CustomerEditReservation /></LazyRoute></CustomerRoute>} />
+              <Route path="/customer/reservations/:id/edit" element={<CustomerRoute><LazyRoute><CustomerEditReservation /></LazyRoute></CustomerRoute>} />
               <Route path="/customer/review/:reservationId" element={<CustomerRoute><LazyRoute><CustomerReviewPage /></LazyRoute></CustomerRoute>} />
               <Route path="/customer/profile" element={<CustomerRoute><LazyRoute><CustomerProfile /></LazyRoute></CustomerRoute>} />
               
