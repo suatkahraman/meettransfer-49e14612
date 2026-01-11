@@ -7,6 +7,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import Fade from "embla-carousel-fade";
 import {
   Dialog,
   DialogContent,
@@ -349,7 +350,7 @@ return (
                 <>
                   <Carousel 
                     className="w-full h-full"
-                    plugins={[Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: false })]}
+                    plugins={[Fade(), Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: false })]}
                     opts={{ loop: true }}
                   >
                     <CarouselContent className="h-full">
@@ -498,7 +499,7 @@ return (
               <Carousel 
                 className="w-full" 
                 opts={{ loop: true }}
-                plugins={[Autoplay({ delay: 3500, stopOnInteraction: false, stopOnMouseEnter: true })]}
+                plugins={[Fade(), Autoplay({ delay: 3500, stopOnInteraction: false, stopOnMouseEnter: true })]}
               >
                 <CarouselContent>
                   {vehicleImages.map((img, idx) => (
