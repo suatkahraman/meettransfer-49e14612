@@ -1121,6 +1121,9 @@ const BookingPage = () => {
                         onChange={(e) => setCustomerEmail(e.target.value)}
                         placeholder="email@example.com"
                       />
+                      <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                        {t("emailInfoDescription") || "Your reservation details will be sent to your email address. You can complete your reservation later using the link provided."}
+                      </p>
                     </div>
                   )}
 
