@@ -1218,8 +1218,29 @@ const BookingPage = () => {
                       )}
                       </Button>
 
+                      {/* Reject for Better Price Button */}
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full h-12 text-base font-medium mt-3 border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400"
+                        onClick={() => {
+                          const whatsappMessage = encodeURIComponent(
+                            `Hi, I'd like to negotiate a better price for:\n\n` +
+                            `📍 ${urlPickup} → ${urlDropoff}\n` +
+                            `📅 ${urlDate} at ${urlTime}\n` +
+                            `🚗 ${VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}\n` +
+                            `👥 ${passengers} passengers\n` +
+                            `💰 Current price: ${selectedPrice || 'TBD'} ${preferredCurrency}\n\n` +
+                            `Can you offer a better price?`
+                          );
+                          window.open(`https://wa.me/905322529127?text=${whatsappMessage}`, '_blank');
+                        }}
+                      >
+                        {t("rejectForBetterPrice") || "Reject for Better Price"}
+                      </Button>
+
                       {user && (
-                        <div className="flex items-center justify-center gap-2 text-xs text-green-600 bg-green-50 rounded-lg py-2 mt-4">
+                        <div className="flex items-center justify-center gap-2 text-xs text-green-600 bg-green-50 rounded-lg py-2 mt-3">
                           <CheckCircle className="h-3 w-3" />
                           {t("directReservation") || "Direct reservation - no confirmation needed"}
                         </div>
