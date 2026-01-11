@@ -8,6 +8,42 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Web Speech API type declarations
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  maxAlternatives: number;
+  onstart: ((this: SpeechRecognition, ev: Event) => void) | null;
+  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void) | null;
+  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void) | null;
+  onend: ((this: SpeechRecognition, ev: Event) => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognition;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: SpeechRecognitionConstructor;
+    webkitSpeechRecognition: SpeechRecognitionConstructor;
+  }
+}
+
 interface BookingData {
   pickup?: string | null;
   dropoff?: string | null;
@@ -31,84 +67,81 @@ interface BookingChatAssistantProps {
   onApplyBooking?: (data: BookingData) => void;
 }
 
-// Voice recording hook
+// Voice recording hook using Web Speech API (no API key required)
 function useVoiceRecorder(onTranscription: (text: string) => void, language: string) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const streamRef = useRef<MediaStream | null>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  const startRecording = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        } 
-      });
-      
-      streamRef.current = stream;
-      
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
-      });
-      
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
+  // Map language codes to BCP-47 format for Web Speech API
+  const getLanguageCode = useCallback((lang: string): string => {
+    const languageMap: Record<string, string> = {
+      'TR': 'tr-TR',
+      'EN': 'en-US',
+      'DE': 'de-DE',
+      'FR': 'fr-FR',
+      'RU': 'ru-RU',
+      'AR': 'ar-SA',
+      'ES': 'es-ES',
+      'IT': 'it-IT',
+      'UK': 'uk-UA',
+      'JA': 'ja-JP'
+    };
+    return languageMap[lang] || 'en-US';
+  }, []);
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          chunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = async () => {
-        setIsProcessing(true);
-        try {
-          const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-          
-          // Convert blob to base64
-          const reader = new FileReader();
-          reader.onloadend = async () => {
-            const base64Audio = (reader.result as string).split(',')[1];
-            
-            try {
-              const { data, error } = await supabase.functions.invoke('voice-to-text', {
-                body: { audio: base64Audio, language }
-              });
-
-              if (error) throw error;
-              
-              if (data?.text) {
-                onTranscription(data.text);
-              }
-            } catch (err) {
-              console.error('Transcription error:', err);
-            }
-          };
-          reader.readAsDataURL(audioBlob);
-        } finally {
-          setIsProcessing(false);
-          // Stop all tracks
-          if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-            streamRef.current = null;
-          }
-        }
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-    } catch (error) {
-      console.error('Error starting recording:', error);
+  const startRecording = useCallback(() => {
+    // Check for browser support
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      console.error('Speech recognition not supported in this browser');
+      return;
     }
-  }, [language, onTranscription]);
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+
+      recognition.lang = getLanguageCode(language);
+      recognition.interimResults = false;
+      recognition.continuous = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setIsRecording(true);
+        setIsProcessing(false);
+      };
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        setIsProcessing(true);
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          onTranscription(transcript);
+        }
+        setIsProcessing(false);
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Speech recognition error:', event.error);
+        setIsRecording(false);
+        setIsProcessing(false);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognition.start();
+    } catch (error) {
+      console.error('Error starting speech recognition:', error);
+      setIsRecording(false);
+    }
+  }, [language, getLanguageCode, onTranscription]);
 
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
+    if (recognitionRef.current && isRecording) {
+      recognitionRef.current.stop();
       setIsRecording(false);
     }
   }, [isRecording]);
