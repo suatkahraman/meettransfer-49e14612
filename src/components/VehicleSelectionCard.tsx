@@ -349,7 +349,7 @@ return (
                 <>
                   <Carousel 
                     className="w-full h-full"
-                    plugins={[Autoplay({ delay: 3500, stopOnInteraction: false })]}
+                    plugins={[Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: false })]}
                     opts={{ loop: true }}
                   >
                     <CarouselContent className="h-full">
