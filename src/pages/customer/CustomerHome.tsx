@@ -1202,12 +1202,16 @@ const CustomerHome = () => {
           <motion.div
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
+            className="relative z-10"
           >
             <Card 
-              className="cursor-pointer shadow-md hover:shadow-xl transition-all relative overflow-hidden bg-gradient-to-br from-background to-muted/50"
+              className="cursor-pointer shadow-md hover:shadow-xl transition-all relative overflow-hidden bg-gradient-to-br from-background to-muted/50 border-2 border-transparent hover:border-primary/30 active:bg-muted/70"
               onClick={() => navigate('/customer/bookings')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('/customer/bookings')}
             >
-              <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center min-h-[90px] sm:min-h-[110px]">
+              <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center min-h-[90px] sm:min-h-[110px] pointer-events-none">
                 <div className="bg-primary/10 rounded-full p-2 sm:p-2.5 mb-1.5 sm:mb-2">
                   <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
@@ -1220,15 +1224,9 @@ const CustomerHome = () => {
                     : t('viewAllLabel')}
                 </span>
                 {activeBookingsCount > 0 && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                  >
-                    <Badge className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-orange-500 hover:bg-orange-600 shadow-lg text-[10px] sm:text-xs px-1.5 sm:px-2">
-                      {activeBookingsCount}
-                    </Badge>
-                  </motion.div>
+                  <Badge className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-orange-500 hover:bg-orange-600 shadow-lg text-[10px] sm:text-xs px-1.5 sm:px-2 pointer-events-none">
+                    {activeBookingsCount}
+                  </Badge>
                 )}
               </CardContent>
             </Card>
