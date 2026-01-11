@@ -144,6 +144,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     heroTitle: "Get Best Price Now",
     heroSubtitle: "✈️ Round-Trip Transfers – 30% OFF! Book your Arrival & Return Airport Transfer Together on Reservations forms and Save 30% instantly 🎁 Use Promo Code on Return: Meet40Return. Best Airport Transfer Company in All Major Airport in TURKİYE - DUBAI - CYPRUS",
+    pointToPoint: "Transfer",
+    perHour: "Per Hour",
     bookYourTransfer: "Book Your Transfer",
     requestPrice: "Request Price",
     getPriceViaWhatsApp: "Get Price via WhatsApp",
@@ -1628,6 +1630,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     heroTitle: "Jetzt besten Preis erhalten",
     heroSubtitle: "✈️ Hin- und Rücktransfers – 30% RABATT! Buchen Sie Ihre Ankunft & Rückreise Flughafentransfer zusammen im Reservierungsformular und sparen Sie sofort 30% 🎁 Promo-Code für Rückreise: Meet40Return. Bestes Flughafentransfer-Unternehmen an allen großen Flughäfen in TÜRKİYE - DUBAI - ZYPERN",
+    pointToPoint: "Transfer",
+    perHour: "Pro Stunde",
     bookYourTransfer: "Transfer buchen",
     requestPrice: "Preis anfordern",
     getPriceViaWhatsApp: "Preis über WhatsApp anfordern",
@@ -3146,6 +3150,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     heroTitle: "Obtenez le Meilleur Prix Maintenant",
     heroSubtitle: "✈️ Transferts Aller-Retour – 30% DE RÉDUCTION! Réservez votre Transfert Aéroport Aller & Retour ensemble sur les formulaires de réservation et économisez 30% instantanément 🎁 Code Promo pour le Retour: Meet40Return. Meilleure Société de Transfert Aéroport dans tous les Grands Aéroports de TURKİYE - DUBAI - CHYPRE",
+    pointToPoint: "Transfert",
+    perHour: "À l'heure",
     bookYourTransfer: "Réserver votre transfert",
     requestPrice: "Demander le prix",
     getPriceViaWhatsApp: "Obtenir le prix via WhatsApp",
@@ -4274,6 +4280,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     heroTitle: "Получите лучшую цену сейчас",
     heroSubtitle: "✈️ Трансферы Туда-Обратно – СКИДКА 30%! Забронируйте трансфер из/в аэропорт вместе в форме бронирования и сэкономьте 30% мгновенно 🎁 Промокод для обратного трансфера: Meet40Return. Лучшая компания по трансферу во всех крупных аэропортах ТУРЦİИ - ДУБАЙ - КИПР",
+    pointToPoint: "Трансфер",
+    perHour: "Почасовая",
     bookYourTransfer: "Забронировать трансфер",
     requestPrice: "Узнать цену",
     getPriceViaWhatsApp: "Узнать цену через WhatsApp",
@@ -5345,6 +5353,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     heroTitle: "Ottieni il Miglior Prezzo Ora",
     heroSubtitle: "✈️ Trasferimenti Andata e Ritorno – 30% DI SCONTO! Prenota il tuo Trasferimento Aeroportuale Andata & Ritorno insieme nei moduli di prenotazione e risparmia subito il 30% 🎁 Codice Promo per il Ritorno: Meet40Return. Migliore Compagnia di Trasferimento in tutti i Principali Aeroporti di TURCHİA - DUBAI - CIPRO",
+    pointToPoint: "Trasferimento",
+    perHour: "All'ora",
     bookYourTransfer: "Prenota il tuo trasferimento",
     requestPrice: "Richiedi prezzo",
     getPriceViaWhatsApp: "Ottieni prezzo via WhatsApp",
@@ -6469,6 +6479,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     heroTitle: "Obtén el Mejor Precio Ahora",
     heroSubtitle: "✈️ Traslados de Ida y Vuelta – ¡30% DE DESCUENTO! Reserva tu Traslado Aeropuerto de Llegada y Regreso juntos en los formularios de reserva y ahorra 30% al instante 🎁 Código Promocional para Regreso: Meet40Return. Mejor Compañía de Traslados en Todos los Principales Aeropuertos de TURQUİA - DUBAI - CHIPRE",
+    pointToPoint: "Traslado",
+    perHour: "Por hora",
     bookYourTransfer: "Reserva tu traslado",
     requestPrice: "Pedir precio",
     getPriceViaWhatsApp: "Obtener precio por WhatsApp",
@@ -7593,6 +7605,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     heroTitle: "احصل على أفضل سعر الآن",
     heroSubtitle: "✈️ نقل ذهاب وإياب – خصم 30%! احجز نقل المطار للوصول والعودة معًا في نماذج الحجز ووفر 30% فورًا 🎁 رمز العرض للعودة: Meet40Return. أفضل شركة نقل في جميع المطارات الرئيسية في تُركِيَا - دبي - قبرص",
+    pointToPoint: "نقل",
+    perHour: "بالساعة",
     bookYourTransfer: "احجز نقلك",
     requestPrice: "احصل على السعر",
     getPriceViaWhatsApp: "احصل على السعر عبر واتساب",
@@ -8664,6 +8678,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     heroTitle: "En İyi Fiyatı Şimdi Alın",
     heroSubtitle: "✈️ Gidiş-Dönüş Transferler – %30 İNDİRİM! Varış ve Dönüş Havalimanı Transferinizi birlikte rezervasyon formlarında ayırtın ve anında %30 tasarruf edin 🎁 Dönüş için Promosyon Kodu: Meet40Return. TÜRKİYE - DUBAI - KIBRIS'ın Tüm Büyük Havalimanlarında En İyi Havalimanı Transfer Şirketi",
+    pointToPoint: "Transfer",
+    perHour: "Saatlik",
     bookYourTransfer: "Transferinizi Ayırtın",
     requestPrice: "Fiyat Teklifi Al",
     getPriceViaWhatsApp: "WhatsApp ile Fiyat Al",
@@ -9881,6 +9897,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     heroTitle: "Отримайте найкращу ціну зараз",
     heroSubtitle: "✈️ Трансфери туди-назад – ЗНИЖКА 30%! Забронюйте трансфер прибуття та повернення разом і заощадьте 30% миттєво 🎁 Промокод на повернення: Meet40Return. Найкраща компанія з трансферу аеропортів у ТУРЕЧЧИНІ - ДУБАЇ - КІПРІ",
+    pointToPoint: "Трансфер",
+    perHour: "Погодинно",
     bookYourTransfer: "Забронювати трансфер",
     requestPrice: "Запит ціни",
     getPriceViaWhatsApp: "Отримати ціну через WhatsApp",
@@ -10959,6 +10977,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     heroTitle: "今すぐ最高の価格を取得",
     heroSubtitle: "✈️ 往復送迎 – 30%オフ！到着と出発の空港送迎を一緒に予約すると30%割引 🎁 復路プロモコード: Meet40Return。トルコ・ドバイ・キプロスの主要空港で最高の空港送迎サービス",
+    pointToPoint: "送迎",
+    perHour: "時間制",
     bookYourTransfer: "送迎を予約",
     requestPrice: "料金を確認",
     getPriceViaWhatsApp: "WhatsAppで料金を取得",
