@@ -94,7 +94,7 @@ const loadGoogleMapsScript = (): Promise<void> => {
   });
 };
 
-interface GooglePlacesAutocompleteProps {
+export interface GooglePlacesAutocompleteProps {
   /** Called ONLY when a place is selected from suggestions */
   onPlaceSelected?: (value: string, details?: PlaceDetails) => void;
   /** Shorthand alias for onPlaceSelected with simplified signature */
@@ -107,6 +107,8 @@ interface GooglePlacesAutocompleteProps {
   maxLength?: number;
   /** Initial value to display in the input */
   initialValue?: string;
+  /** Controlled value - updates input when changed externally */
+  value?: string;
 }
 
 export const GooglePlacesAutocomplete = ({
@@ -118,6 +120,7 @@ export const GooglePlacesAutocomplete = ({
   disabled = false,
   maxLength = 200,
   initialValue,
+  value,
 }: GooglePlacesAutocompleteProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
@@ -135,6 +138,13 @@ export const GooglePlacesAutocomplete = ({
       inputRef.current.value = initialValue;
     }
   }, [initialValue]);
+
+  // Update input value when controlled value prop changes
+  useEffect(() => {
+    if (value !== undefined && inputRef.current) {
+      inputRef.current.value = value;
+    }
+  }, [value]);
 
   useEffect(() => {
     let isCancelled = false;
