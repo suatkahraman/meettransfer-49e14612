@@ -2,13 +2,16 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Hero } from "@/components/Hero";
 import { BookingForm } from "@/components/BookingForm";
 import { Destinations } from "@/components/Destinations";
-import { Features } from "@/components/Features";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 import TrustedPartners from "@/components/website/TrustedPartners";
+import WhyChooseUs from "@/components/website/WhyChooseUs";
+import GoogleReviewsCarousel from "@/components/website/GoogleReviewsCarousel";
+import VideoPromo from "@/components/website/VideoPromo";
+import HourlyRentalSection from "@/components/website/HourlyRentalSection";
 
 
 const Index = () => {
@@ -34,8 +37,11 @@ const Index = () => {
       />
       <Hero />
       <BookingForm />
+      <WhyChooseUs />
       <Destinations />
-      <Features />
+      <HourlyRentalSection />
+      <VideoPromo />
+      <GoogleReviewsCarousel />
       <TrustedPartners />
       <PWAPromoBanner />
       <Footer />
