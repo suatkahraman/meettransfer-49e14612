@@ -3119,6 +3119,20 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogIsWorthItTitle: "Чи варто приватний трансфер у Туреччині?",
     blogIsWorthItDesc: "Аналізуємо реальні витрати та переваги приватних трансферів.",
     
+    // Blog Hourly Rental Promo
+    blogHourlyNewService: "Нова Послуга",
+    blogHourlyPromoTitle: "Погодинний та Добовий Сервіс Шофера",
+    blogHourlyPromoDesc: "Потрібен професійний водій для екскурсій містом, ділових зустрічей чи особливих подій? Замовте наш люкс-сервіс шофера погодинно.",
+    blogHourlyUnlimitedStops: "Необмежені Зупинки",
+    blogHourlyFlexibleHours: "Гнучкий Графік",
+    blogHourlyPremiumFleet: "Преміум Автопарк",
+    blogHourlyStartingPrice: "Від 30€/год",
+    blogHourlyBookNow: "Забронювати Погодинно",
+    blogHourlyFlexibleBooking: "Гнучке Бронювання",
+    blogHourlyCityTours: "Тури",
+    blogHourlyBusinessMeetings: "Бізнес",
+    blogHourlyEvents: "Заходи",
+    
     // Blog CTA Component
     blogCtaDiscountBadge: "30% ЗНИЖКА на зворотні трансфери",
     blogCtaTitle: "Забронюйте ваш преміум-трансфер",
@@ -3493,6 +3507,20 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogFaq4Answer: "はい！アンタルヤ、ボドルム、ドバイ、キプロスなど、すべての主要な目的地をカバーしています。",
     blogIsWorthItTitle: "トルコでプライベート送迎は価値がある？",
     blogIsWorthItDesc: "空港プライベート送迎の実際のコストとメリットを分析。",
+    
+    // Blog Hourly Rental Promo
+    blogHourlyNewService: "新サービス",
+    blogHourlyPromoTitle: "時間制・日単位のシャトルサービス",
+    blogHourlyPromoDesc: "市内観光、ビジネスミーティング、特別なイベントにプロのドライバーが必要ですか？時間単位で高級シャトルサービスを予約してください。",
+    blogHourlyUnlimitedStops: "無制限の停車",
+    blogHourlyFlexibleHours: "フレキシブルな時間",
+    blogHourlyPremiumFleet: "プレミアム車両",
+    blogHourlyStartingPrice: "30€/時間から",
+    blogHourlyBookNow: "時間制サービスを予約",
+    blogHourlyFlexibleBooking: "柔軟な予約",
+    blogHourlyCityTours: "ツアー",
+    blogHourlyBusinessMeetings: "ビジネス",
+    blogHourlyEvents: "イベント",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "復路送迎30%オフ",

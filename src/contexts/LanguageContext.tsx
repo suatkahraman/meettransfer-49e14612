@@ -1301,6 +1301,20 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq6Q: "Can you customize the Bursa tour itinerary?",
     blogBursaFaq6A: "Yes! All our tours are fully customizable based on your interests - history, nature, food, thermal baths, or a mix of everything.",
     
+    // Blog Hourly Rental Promo
+    blogHourlyNewService: "New Service",
+    blogHourlyPromoTitle: "Hourly & Daily Chauffeur Service",
+    blogHourlyPromoDesc: "Need a professional driver for city tours, business meetings, or special events? Book our luxury chauffeur service by the hour.",
+    blogHourlyUnlimitedStops: "Unlimited Stops",
+    blogHourlyFlexibleHours: "Flexible Hours",
+    blogHourlyPremiumFleet: "Premium Fleet",
+    blogHourlyStartingPrice: "From €30/hour",
+    blogHourlyBookNow: "Book Hourly Service",
+    blogHourlyFlexibleBooking: "Flexible Booking",
+    blogHourlyCityTours: "City Tours",
+    blogHourlyBusinessMeetings: "Business",
+    blogHourlyEvents: "Events",
+    
     // Blog CTA Component
     blogCtaDiscountBadge: "30% OFF Return Transfers",
     blogCtaTitle: "Book Your Premium Transfer",
@@ -2740,6 +2754,20 @@ const translations: Record<Language, Record<string, string>> = {
     blogCategory: "Kategorie",
     blogAuthor: "Autor",
     blogMeetTransferTeam: "Meet Transfer Team",
+    
+    // Blog Hourly Rental Promo
+    blogHourlyNewService: "Neuer Service",
+    blogHourlyPromoTitle: "Stündlicher & Täglicher Chauffeurservice",
+    blogHourlyPromoDesc: "Benötigen Sie einen professionellen Fahrer für Stadttouren, Geschäftstreffen oder besondere Veranstaltungen? Buchen Sie unseren Luxus-Chauffeurservice stundenweise.",
+    blogHourlyUnlimitedStops: "Unbegrenzte Stopps",
+    blogHourlyFlexibleHours: "Flexible Zeiten",
+    blogHourlyPremiumFleet: "Premium-Flotte",
+    blogHourlyStartingPrice: "Ab 30€/Stunde",
+    blogHourlyBookNow: "Stündlichen Service buchen",
+    blogHourlyFlexibleBooking: "Flexible Buchung",
+    blogHourlyCityTours: "Stadttouren",
+    blogHourlyBusinessMeetings: "Business",
+    blogHourlyEvents: "Events",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "30% RABATT auf Rücktransfers",
@@ -4290,6 +4318,20 @@ const translations: Record<Language, Record<string, string>> = {
     blogAuthor: "Auteur",
     blogMeetTransferTeam: "Équipe Meet Transfer",
     
+    // Blog Hourly Rental Promo
+    blogHourlyNewService: "Nouveau Service",
+    blogHourlyPromoTitle: "Service de Chauffeur à l'Heure et à la Journée",
+    blogHourlyPromoDesc: "Besoin d'un chauffeur professionnel pour des visites de ville, des réunions d'affaires ou des événements spéciaux? Réservez notre service de chauffeur de luxe à l'heure.",
+    blogHourlyUnlimitedStops: "Arrêts Illimités",
+    blogHourlyFlexibleHours: "Horaires Flexibles",
+    blogHourlyPremiumFleet: "Flotte Premium",
+    blogHourlyStartingPrice: "À partir de 30€/heure",
+    blogHourlyBookNow: "Réserver Service Horaire",
+    blogHourlyFlexibleBooking: "Réservation Flexible",
+    blogHourlyCityTours: "Visites",
+    blogHourlyBusinessMeetings: "Affaires",
+    blogHourlyEvents: "Événements",
+    
     // Blog CTA Component
     blogCtaDiscountBadge: "30% DE RÉDUCTION sur les transferts retour",
     blogCtaTitle: "Réservez votre transfert premium",
@@ -5406,6 +5448,20 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Blog Common Additional
     blogMeetTransferTeam: "Команда Meet Transfer",
+    
+    // Blog Hourly Rental Promo
+    blogHourlyNewService: "Новая Услуга",
+    blogHourlyPromoTitle: "Почасовой и Суточный Сервис Шофёра",
+    blogHourlyPromoDesc: "Нужен профессиональный водитель для экскурсий по городу, деловых встреч или особых мероприятий? Закажите наш люкс-сервис шофёра почасово.",
+    blogHourlyUnlimitedStops: "Неограниченные Остановки",
+    blogHourlyFlexibleHours: "Гибкий График",
+    blogHourlyPremiumFleet: "Премиум Автопарк",
+    blogHourlyStartingPrice: "От 30€/час",
+    blogHourlyBookNow: "Забронировать Почасово",
+    blogHourlyFlexibleBooking: "Гибкое Бронирование",
+    blogHourlyCityTours: "Туры",
+    blogHourlyBusinessMeetings: "Бизнес",
+    blogHourlyEvents: "Мероприятия",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "30% СКИДКА на обратные трансферы",
@@ -6577,6 +6633,20 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common Additional
     blogMeetTransferTeam: "Team Meet Transfer",
     
+    // Blog Hourly Rental Promo
+    blogHourlyNewService: "Nuovo Servizio",
+    blogHourlyPromoTitle: "Servizio Autista Orario e Giornaliero",
+    blogHourlyPromoDesc: "Hai bisogno di un autista professionale per tour della città, meeting di lavoro o eventi speciali? Prenota il nostro servizio autista di lusso a ore.",
+    blogHourlyUnlimitedStops: "Fermate Illimitate",
+    blogHourlyFlexibleHours: "Orari Flessibili",
+    blogHourlyPremiumFleet: "Flotta Premium",
+    blogHourlyStartingPrice: "Da 30€/ora",
+    blogHourlyBookNow: "Prenota Servizio Orario",
+    blogHourlyFlexibleBooking: "Prenotazione Flessibile",
+    blogHourlyCityTours: "Tour",
+    blogHourlyBusinessMeetings: "Business",
+    blogHourlyEvents: "Eventi",
+    
     // Blog CTA Component
     blogCtaDiscountBadge: "30% DI SCONTO sui trasferimenti di ritorno",
     blogCtaTitle: "Prenota il tuo trasferimento premium",
@@ -7747,6 +7817,20 @@ const translations: Record<Language, Record<string, string>> = {
     // Blog Common Additional
     blogMeetTransferTeam: "Equipo Meet Transfer",
     
+    // Blog Hourly Rental Promo
+    blogHourlyNewService: "Nuevo Servicio",
+    blogHourlyPromoTitle: "Servicio de Chófer por Horas y Días",
+    blogHourlyPromoDesc: "¿Necesitas un conductor profesional para tours por la ciudad, reuniones de negocios o eventos especiales? Reserva nuestro servicio de chófer de lujo por horas.",
+    blogHourlyUnlimitedStops: "Paradas Ilimitadas",
+    blogHourlyFlexibleHours: "Horarios Flexibles",
+    blogHourlyPremiumFleet: "Flota Premium",
+    blogHourlyStartingPrice: "Desde 30€/hora",
+    blogHourlyBookNow: "Reservar Servicio por Hora",
+    blogHourlyFlexibleBooking: "Reserva Flexible",
+    blogHourlyCityTours: "Tours",
+    blogHourlyBusinessMeetings: "Negocios",
+    blogHourlyEvents: "Eventos",
+    
     // Blog CTA Component
     blogCtaDiscountBadge: "30% DE DESCUENTO en traslados de vuelta",
     blogCtaTitle: "Reserva tu traslado premium",
@@ -8863,6 +8947,20 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Blog Common Additional
     blogMeetTransferTeam: "فريق Meet Transfer",
+    
+    // Blog Hourly Rental Promo
+    blogHourlyNewService: "خدمة جديدة",
+    blogHourlyPromoTitle: "خدمة السائق بالساعة واليوم",
+    blogHourlyPromoDesc: "هل تحتاج إلى سائق محترف لجولات المدينة أو اجتماعات العمل أو المناسبات الخاصة؟ احجز خدمة السائق الفاخرة لدينا بالساعة.",
+    blogHourlyUnlimitedStops: "توقفات غير محدودة",
+    blogHourlyFlexibleHours: "ساعات مرنة",
+    blogHourlyPremiumFleet: "أسطول فاخر",
+    blogHourlyStartingPrice: "من 30€/ساعة",
+    blogHourlyBookNow: "احجز خدمة الساعة",
+    blogHourlyFlexibleBooking: "حجز مرن",
+    blogHourlyCityTours: "جولات",
+    blogHourlyBusinessMeetings: "أعمال",
+    blogHourlyEvents: "مناسبات",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "خصم 30٪ على رحلات العودة",
@@ -10126,6 +10224,20 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq5A: "Cumalıkızık, 700 yıllık orijinal ahşap evleri koruyan UNESCO Dünya Mirası Osmanlı köyüdür.",
     blogBursaFaq6Q: "Kışın Bursa'yı ziyaret edebilir miyim?",
     blogBursaFaq6A: "Evet! Kış Uludağ'da kayak için harikadır. Cumalıkızık ve tarihi mekanlar yıl boyunca ziyaret edilebilir.",
+    
+    // Blog Hourly Rental Promo
+    blogHourlyNewService: "Yeni Hizmet",
+    blogHourlyPromoTitle: "Saatlik ve Günlük Şoförlü Araç Hizmeti",
+    blogHourlyPromoDesc: "Şehir turları, iş toplantıları veya özel etkinlikler için profesyonel bir şoföre mi ihtiyacınız var? Lüks şoför hizmetimizi saatlik olarak rezerve edin.",
+    blogHourlyUnlimitedStops: "Sınırsız Durak",
+    blogHourlyFlexibleHours: "Esnek Saatler",
+    blogHourlyPremiumFleet: "Premium Filo",
+    blogHourlyStartingPrice: "30€/saatten başlayan",
+    blogHourlyBookNow: "Saatlik Hizmet Rezerve Et",
+    blogHourlyFlexibleBooking: "Esnek Rezervasyon",
+    blogHourlyCityTours: "Turlar",
+    blogHourlyBusinessMeetings: "İş",
+    blogHourlyEvents: "Etkinlikler",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "Dönüş transferlerinde %30 İNDİRİM",
