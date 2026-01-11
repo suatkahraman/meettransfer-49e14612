@@ -181,6 +181,11 @@ const translations: Record<Language, Record<string, string>> = {
     emailPriceNotification: "Your price quote will also be sent to you via email.",
     emailInfoDescription: "Your reservation details will be sent to your email. You can complete your reservation later using the link provided.",
     freeCancellation24h: "Free cancellation 24 hours before",
+    swapLocations: "Swap locations",
+    getPrice: "Get Price",
+    aiAssistant: "AI Assistant",
+    aiAssistantHint: "Ask me anything about your transfer",
+    new: "New",
     
     // Booking Process
     howBookingWorks: "How Our Booking Process Works",
@@ -1702,6 +1707,11 @@ const translations: Record<Language, Record<string, string>> = {
     emailPriceNotification: "Ihr Preisangebot wird Ihnen auch per E-Mail zugesandt.",
     emailInfoDescription: "Ihre Reservierungsdetails werden an Ihre E-Mail gesendet. Sie können Ihre Reservierung später über den bereitgestellten Link abschließen.",
     freeCancellation24h: "Kostenlose Stornierung 24 Stunden vorher",
+    swapLocations: "Orte tauschen",
+    getPrice: "Preis erhalten",
+    aiAssistant: "KI-Assistent",
+    aiAssistantHint: "Fragen Sie mich alles über Ihren Transfer",
+    new: "Neu",
     
     // Booking Process
     howBookingWorks: "So funktioniert unser Buchungsprozess",
@@ -3257,6 +3267,11 @@ const translations: Record<Language, Record<string, string>> = {
     emailPriceNotification: "Votre devis vous sera également envoyé par email.",
     emailInfoDescription: "Les détails de votre réservation seront envoyés à votre email. Vous pouvez compléter votre réservation plus tard en utilisant le lien fourni.",
     freeCancellation24h: "Annulation gratuite 24 heures avant",
+    swapLocations: "Échanger les lieux",
+    getPrice: "Obtenir le prix",
+    aiAssistant: "Assistant IA",
+    aiAssistantHint: "Posez-moi vos questions sur votre transfert",
+    new: "Nouveau",
     
     // Booking Process
     howBookingWorks: "Comment fonctionne notre processus de réservation",
@@ -4422,6 +4437,11 @@ const translations: Record<Language, Record<string, string>> = {
     emailPriceNotification: "Ваше ценовое предложение также будет отправлено на вашу электронную почту.",
     emailInfoDescription: "Детали вашего бронирования будут отправлены на вашу почту. Вы можете завершить бронирование позже по предоставленной ссылке.",
     freeCancellation24h: "Бесплатная отмена за 24 часа до",
+    swapLocations: "Поменять местами",
+    getPrice: "Узнать цену",
+    aiAssistant: "ИИ-ассистент",
+    aiAssistantHint: "Задайте любой вопрос о вашем трансфере",
+    new: "Новый",
     
     // Booking Process
     howBookingWorks: "Как работает наш процесс бронирования",
@@ -5530,6 +5550,11 @@ const translations: Record<Language, Record<string, string>> = {
     emailPriceNotification: "Il tuo preventivo ti sarà inviato anche via email.",
     emailInfoDescription: "I dettagli della tua prenotazione saranno inviati alla tua email. Puoi completare la prenotazione in un secondo momento utilizzando il link fornito.",
     freeCancellation24h: "Cancellazione gratuita 24 ore prima",
+    swapLocations: "Scambia luoghi",
+    getPrice: "Ottieni prezzo",
+    aiAssistant: "Assistente IA",
+    aiAssistantHint: "Chiedimi qualsiasi cosa sul tuo trasferimento",
+    new: "Nuovo",
     
     // Booking Process
     howBookingWorks: "Come funziona il nostro processo di prenotazione",
@@ -6691,6 +6716,11 @@ const translations: Record<Language, Record<string, string>> = {
     emailPriceNotification: "Su cotización también le será enviada por correo electrónico.",
     emailInfoDescription: "Los detalles de su reserva se enviarán a su correo electrónico. Puede completar su reserva más tarde utilizando el enlace proporcionado.",
     freeCancellation24h: "Cancelación gratuita 24 horas antes",
+    swapLocations: "Intercambiar ubicaciones",
+    getPrice: "Obtener precio",
+    aiAssistant: "Asistente IA",
+    aiAssistantHint: "Pregúntame cualquier cosa sobre tu traslado",
+    new: "Nuevo",
     
     // Booking Process
     howBookingWorks: "Cómo funciona nuestro proceso de reserva",
@@ -7852,6 +7882,11 @@ const translations: Record<Language, Record<string, string>> = {
     emailPriceNotification: "سيتم إرسال عرض السعر الخاص بك أيضًا عبر البريد الإلكتروني.",
     emailInfoDescription: "سيتم إرسال تفاصيل حجزك إلى بريدك الإلكتروني. يمكنك إكمال حجزك لاحقًا باستخدام الرابط المقدم.",
     freeCancellation24h: "إلغاء مجاني قبل 24 ساعة",
+    swapLocations: "تبديل المواقع",
+    getPrice: "احصل على السعر",
+    aiAssistant: "المساعد الذكي",
+    aiAssistantHint: "اسألني أي شيء عن نقلك",
+    new: "جديد",
     
     // Booking Process
     howBookingWorks: "كيف تعمل عملية الحجز",
@@ -8960,6 +8995,11 @@ const translations: Record<Language, Record<string, string>> = {
     emailPriceNotification: "Fiyat teklifiniz size e-posta ile de gönderilecektir.",
     emailInfoDescription: "Rezervasyon detaylarınız e-postanıza gönderilecektir. İlerleyen zamanlarda verilen link ile rezervasyonunuzu tamamlayabilirsiniz.",
     freeCancellation24h: "24 saat önce ücretsiz iptal",
+    swapLocations: "Konumları değiştir",
+    getPrice: "Fiyat Al",
+    aiAssistant: "AI Asistan",
+    aiAssistantHint: "Transferiniz hakkında bana soru sorun",
+    new: "Yeni",
     
     // Booking Process
     howBookingWorks: "Rezervasyon Sürecimiz Nasıl İşliyor",
@@ -10214,6 +10254,11 @@ const translations: Record<Language, Record<string, string>> = {
     emailPriceNotification: "Ваша цінова пропозиція також буде надіслана на вашу електронну пошту.",
     emailInfoDescription: "Деталі вашого бронювання будуть надіслані на вашу пошту. Ви можете завершити бронювання пізніше за наданим посиланням.",
     freeCancellation24h: "Безкоштовне скасування за 24 години до",
+    swapLocations: "Поміняти місця",
+    getPrice: "Отримати ціну",
+    aiAssistant: "ШІ-асистент",
+    aiAssistantHint: "Запитайте мене будь-що про ваш трансфер",
+    new: "Новий",
     
     // Booking Process
     howBookingWorks: "Як працює наш процес бронювання",
@@ -11329,6 +11374,11 @@ const translations: Record<Language, Record<string, string>> = {
     emailPriceNotification: "お見積もりはメールでもお送りします。",
     emailInfoDescription: "予約詳細がメールで送信されます。提供されたリンクを使用して、後で予約を完了できます。",
     freeCancellation24h: "24時間前まで無料キャンセル",
+    swapLocations: "場所を入れ替える",
+    getPrice: "料金を取得",
+    aiAssistant: "AIアシスタント",
+    aiAssistantHint: "送迎について何でもお聞きください",
+    new: "新着",
     
     // Booking Process
     howBookingWorks: "予約の流れ",
