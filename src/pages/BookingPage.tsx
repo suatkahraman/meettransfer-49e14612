@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { 
   MapPin, Navigation, Calendar, Clock, Users, Briefcase, Baby, 
   ArrowRight, Loader2, CheckCircle, ArrowLeftRight, Tag, Mail, 
-  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield
+  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired } from "@/lib/vehicleTypes";
@@ -30,6 +30,16 @@ interface VehiclePrice {
   currency: string;
 }
 
+interface HourlyPrice {
+  id: string;
+  city: string;
+  vehicle_type: string;
+  duration_type: string;
+  price: number;
+  hourly_rate: number | null;
+  price_currency: string;
+}
+
 const getSessionId = () => {
   let sessionId = localStorage.getItem('quick_booking_session_id');
   if (!sessionId) {
@@ -39,17 +49,33 @@ const getSessionId = () => {
   return sessionId;
 };
 
+const DURATION_OPTIONS = [
+  { value: "4h", label: "4 Hours" },
+  { value: "6h", label: "6 Hours" },
+  { value: "8h", label: "8 Hours" },
+  { value: "10h", label: "10 Hours" },
+  { value: "12h", label: "12 Hours" },
+];
+
 const BookingPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { t, language, getLocalizedPath } = useLanguage();
   const { user } = useAuth();
 
+  // Determine booking type
+  const bookingType = searchParams.get("type") || "transfer";
+  const isHourlyBooking = bookingType === "hourly";
+
   // Get URL params from Hero
   const urlPickup = searchParams.get("pickup") || "";
   const urlDropoff = searchParams.get("dropoff") || "";
   const urlDate = searchParams.get("date") || "";
   const urlTime = searchParams.get("time") || "";
+  
+  // Hourly-specific params
+  const urlCity = searchParams.get("city") || "";
+  const urlDuration = searchParams.get("duration") || "4h";
 
   // Form state
   const [vehicleType, setVehicleType] = useState("mercedes-vito");
@@ -65,9 +91,13 @@ const BookingPage = () => {
   const [returnTime, setReturnTime] = useState("");
   const [promoCode, setPromoCode] = useState("");
   const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
+  
+  // Hourly rental state
+  const [selectedDuration, setSelectedDuration] = useState(urlDuration);
 
   // Price state
   const [vehiclePrices, setVehiclePrices] = useState<VehiclePrice[]>([]);
+  const [hourlyPrices, setHourlyPrices] = useState<HourlyPrice[]>([]);
   const [isPricesLoading, setIsPricesLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -89,10 +119,16 @@ const BookingPage = () => {
 
   // Redirect if no URL params
   useEffect(() => {
-    if (!urlPickup || !urlDropoff || !urlDate || !urlTime) {
-      navigate(getLocalizedPath("/"));
+    if (isHourlyBooking) {
+      if (!urlCity || !urlDate || !urlTime) {
+        navigate(getLocalizedPath("/"));
+      }
+    } else {
+      if (!urlPickup || !urlDropoff || !urlDate || !urlTime) {
+        navigate(getLocalizedPath("/"));
+      }
     }
-  }, [urlPickup, urlDropoff, urlDate, urlTime, navigate, getLocalizedPath]);
+  }, [urlPickup, urlDropoff, urlDate, urlTime, urlCity, isHourlyBooking, navigate, getLocalizedPath]);
 
   // Pre-fill user data if logged in
   useEffect(() => {
@@ -118,10 +154,10 @@ const BookingPage = () => {
     }
   }, [user]);
 
-  // Fetch vehicle prices
+  // Fetch vehicle prices for transfer bookings
   useEffect(() => {
     const fetchPrices = async () => {
-      if (!urlPickup || !urlDropoff) return;
+      if (isHourlyBooking || !urlPickup || !urlDropoff) return;
       
       setIsPricesLoading(true);
       try {
@@ -144,12 +180,71 @@ const BookingPage = () => {
     };
 
     fetchPrices();
-  }, [urlPickup, urlDropoff, preferredCurrency]);
+  }, [urlPickup, urlDropoff, preferredCurrency, isHourlyBooking]);
 
-  // Get price for a specific vehicle
+  // Fetch hourly rental prices
+  useEffect(() => {
+    const fetchHourlyPrices = async () => {
+      if (!isHourlyBooking || !urlCity) return;
+      
+      setIsPricesLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("hourly_rental_prices")
+          .select("*")
+          .eq("city", urlCity)
+          .eq("is_active", true);
+
+        if (error) throw error;
+        setHourlyPrices(data || []);
+      } catch (error) {
+        console.error("Error fetching hourly prices:", error);
+      } finally {
+        setIsPricesLoading(false);
+      }
+    };
+
+    fetchHourlyPrices();
+  }, [isHourlyBooking, urlCity]);
+
+  // Get price for a specific vehicle (transfer)
   const getPriceForVehicle = (vType: string) => {
     const priceData = vehiclePrices.find(p => p.vehicleType === vType);
     return priceData?.price || null;
+  };
+
+  // Get hourly price for selected vehicle and duration
+  const getHourlyPrice = (vType: string, duration: string) => {
+    // Map vehicle types
+    const vehicleMap: Record<string, string> = {
+      "mercedes-vito": "vito",
+      "vito-vip": "vito_vip",
+      "minibus": "sprinter",
+      "maybach": "maybach",
+    };
+    
+    const mappedType = vehicleMap[vType] || vType;
+    
+    // First try to find exact duration price
+    const exactPrice = hourlyPrices.find(
+      p => p.vehicle_type === mappedType && p.duration_type === duration
+    );
+    
+    if (exactPrice) {
+      return exactPrice.price;
+    }
+    
+    // If custom duration, calculate from hourly rate
+    const customRate = hourlyPrices.find(
+      p => p.vehicle_type === mappedType && p.duration_type === "custom"
+    );
+    
+    if (customRate?.hourly_rate) {
+      const hours = parseInt(duration.replace("h", ""));
+      return customRate.hourly_rate * hours;
+    }
+    
+    return null;
   };
 
   // Handle promo code
@@ -181,53 +276,63 @@ const BookingPage = () => {
     
     try {
       const sessionId = getSessionId();
+      
+      const bookingData = isHourlyBooking 
+        ? {
+            pickup: urlCity, // Use city as pickup for hourly
+            dropoff: `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}`,
+            pickup_date: urlDate,
+            pickup_time: urlTime,
+            vehicle_type: vehicleType,
+            passengers,
+            luggage_count: luggageCount,
+            baby_seat_count: babySeatCount,
+            customer_session_id: sessionId,
+            price: getHourlyPrice(vehicleType, selectedDuration),
+            price_currency: preferredCurrency,
+            customer_notes: `[${selectedDuration} Hourly Rental] ${customerNotes.trim()}`.trim(),
+            customer_phone: customerPhone.trim() || null,
+            customer_email: customerEmail.trim() || null,
+            language: language.toLowerCase(),
+          }
+        : {
+            pickup: urlPickup,
+            dropoff: urlDropoff,
+            pickup_date: urlDate,
+            pickup_time: urlTime,
+            vehicle_type: vehicleType,
+            passengers,
+            luggage_count: luggageCount,
+            baby_seat_count: babySeatCount,
+            customer_session_id: sessionId,
+            price_currency: preferredCurrency,
+            customer_notes: customerNotes.trim() || null,
+            customer_phone: customerPhone.trim() || null,
+            customer_email: customerEmail.trim() || null,
+            language: language.toLowerCase(),
+            has_return_trip: hasReturnTrip && returnDate && returnTime ? true : false,
+            return_date: hasReturnTrip && returnDate ? returnDate : null,
+            return_time: hasReturnTrip && returnTime ? returnTime : null,
+            promo_code: hasReturnTrip && isPromoCodeValid && promoCode ? promoCode : null,
+          };
 
       const { data, error } = await supabase
         .from("quick_booking_requests")
-        .insert({
-          pickup: urlPickup,
-          dropoff: urlDropoff,
-          pickup_date: urlDate,
-          pickup_time: urlTime,
-          vehicle_type: vehicleType,
-          passengers,
-          luggage_count: luggageCount,
-          baby_seat_count: babySeatCount,
-          customer_session_id: sessionId,
-          price_currency: preferredCurrency,
-          customer_notes: customerNotes.trim() || null,
-          customer_phone: customerPhone.trim() || null,
-          customer_email: customerEmail.trim() || null,
-          language: language.toLowerCase(),
-          has_return_trip: hasReturnTrip && returnDate && returnTime ? true : false,
-          return_date: hasReturnTrip && returnDate ? returnDate : null,
-          return_time: hasReturnTrip && returnTime ? returnTime : null,
-          promo_code: hasReturnTrip && isPromoCodeValid && promoCode ? promoCode : null,
-        })
+        .insert(bookingData)
         .select()
         .single();
 
       if (error) throw error;
 
-      // Try auto-pricing
-      let autoPriceResult: { matched?: boolean } | null = null;
-      try {
-        const { data: autoPriceData } = await supabase.functions.invoke("auto-price-quick-booking", {
-          body: { quick_booking_id: data.id },
-        });
-        autoPriceResult = autoPriceData;
-      } catch (autoPriceError) {
-        console.error("Auto-pricing failed:", autoPriceError);
-      }
-
-      // Notify admin if auto-pricing didn't work
-      if (!autoPriceResult?.matched) {
+      // For hourly, we already have the price
+      if (isHourlyBooking) {
+        // Notify admin
         try {
           await supabase.functions.invoke("notify-admin-quick-booking-new", {
             body: {
               bookingId: data.id,
-              pickup: urlPickup,
-              dropoff: urlDropoff,
+              pickup: urlCity,
+              dropoff: `${selectedDuration} Hourly Rental`,
               pickupDate: urlDate,
               pickupTime: urlTime,
               vehicleType,
@@ -241,10 +346,44 @@ const BookingPage = () => {
         } catch (notifyError) {
           console.error("Failed to notify admin:", notifyError);
         }
+      } else {
+        // Try auto-pricing for transfers
+        let autoPriceResult: { matched?: boolean } | null = null;
+        try {
+          const { data: autoPriceData } = await supabase.functions.invoke("auto-price-quick-booking", {
+            body: { quick_booking_id: data.id },
+          });
+          autoPriceResult = autoPriceData;
+        } catch (autoPriceError) {
+          console.error("Auto-pricing failed:", autoPriceError);
+        }
+
+        // Notify admin if auto-pricing didn't work
+        if (!autoPriceResult?.matched) {
+          try {
+            await supabase.functions.invoke("notify-admin-quick-booking-new", {
+              body: {
+                bookingId: data.id,
+                pickup: urlPickup,
+                dropoff: urlDropoff,
+                pickupDate: urlDate,
+                pickupTime: urlTime,
+                vehicleType,
+                passengers,
+                priceCurrency: preferredCurrency,
+                customerEmail: customerEmail.trim() || null,
+                customerPhone: customerPhone.trim() || null,
+                customerNotes: customerNotes.trim() || null,
+              },
+            });
+          } catch (notifyError) {
+            console.error("Failed to notify admin:", notifyError);
+          }
+        }
       }
 
       let url = `/quick-booking-confirm?token=${data.confirmation_token}&new=true`;
-      if (hasReturnTrip && returnDate && returnTime) {
+      if (!isHourlyBooking && hasReturnTrip && returnDate && returnTime) {
         url += `&hasReturn=true&returnDate=${returnDate}&returnTime=${returnTime}`;
         if (isPromoCodeValid && promoCode) {
           url += `&promoCode=${encodeURIComponent(promoCode)}`;
@@ -252,11 +391,7 @@ const BookingPage = () => {
       }
       navigate(url);
 
-      if (autoPriceResult?.matched) {
-        toast.success(t("priceCalculated") || "Price has been calculated!");
-      } else {
-        toast.success(t("priceRequestSent") || "Your request has been sent!");
-      }
+      toast.success(t("priceRequestSent") || "Your request has been sent!");
     } catch (error: unknown) {
       console.error("Error submitting:", error);
       toast.error((error as Error).message || "Failed to submit request");
@@ -281,33 +416,52 @@ const BookingPage = () => {
     setSubmitting(true);
     
     try {
-      // Create reservation directly
+      const reservationData = isHourlyBooking
+        ? {
+            pickup: urlCity,
+            dropoff: `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}`,
+            pickup_date: urlDate,
+            pickup_time: urlTime,
+            vehicle_type: vehicleType,
+            customer_name: customerName.trim(),
+            customer_phone: customerPhone.trim(),
+            customer_notes: `[${selectedDuration} Hourly Rental] ${customerNotes.trim()}`.trim(),
+            customer_id: user!.id,
+            payment_type: paymentType,
+            price: getHourlyPrice(vehicleType, selectedDuration),
+            price_currency: preferredCurrency,
+            luggage_count: luggageCount,
+            baby_seat_count: babySeatCount,
+            status: "pending",
+          }
+        : {
+            pickup: urlPickup,
+            dropoff: urlDropoff,
+            pickup_date: urlDate,
+            pickup_time: urlTime,
+            vehicle_type: vehicleType,
+            customer_name: customerName.trim(),
+            customer_phone: customerPhone.trim(),
+            customer_notes: customerNotes.trim() || null,
+            customer_id: user!.id,
+            payment_type: paymentType,
+            price: selectedPrice || null,
+            price_currency: preferredCurrency,
+            luggage_count: luggageCount,
+            baby_seat_count: babySeatCount,
+            status: "pending",
+          };
+
       const { data: reservation, error } = await supabase
         .from("reservations")
-        .insert({
-          pickup: urlPickup,
-          dropoff: urlDropoff,
-          pickup_date: urlDate,
-          pickup_time: urlTime,
-          vehicle_type: vehicleType,
-          customer_name: customerName.trim(),
-          customer_phone: customerPhone.trim(),
-          customer_notes: customerNotes.trim() || null,
-          customer_id: user!.id,
-          payment_type: paymentType,
-          price: selectedPrice || null,
-          price_currency: preferredCurrency,
-          luggage_count: luggageCount,
-          baby_seat_count: babySeatCount,
-          status: "pending",
-        })
+        .insert(reservationData)
         .select()
         .single();
 
       if (error) throw error;
 
-      // If return trip, create return reservation
-      if (hasReturnTrip && returnDate && returnTime) {
+      // If return trip (only for transfers), create return reservation
+      if (!isHourlyBooking && hasReturnTrip && returnDate && returnTime) {
         const returnPrice = isPromoCodeValid && selectedPrice 
           ? Math.round(selectedPrice * 0.7) // 30% discount
           : selectedPrice;
@@ -341,8 +495,8 @@ const BookingPage = () => {
         await supabase.functions.invoke("notify-admin-new-reservation", {
           body: {
             reservationId: reservation.id,
-            pickup: urlPickup,
-            dropoff: urlDropoff,
+            pickup: isHourlyBooking ? urlCity : urlPickup,
+            dropoff: isHourlyBooking ? `${selectedDuration} Hourly` : urlDropoff,
             pickupDate: urlDate,
             pickupTime: urlTime,
             vehicleType,
@@ -376,7 +530,9 @@ const BookingPage = () => {
 
   // Parse date for display
   const displayDate = urlDate ? format(parse(urlDate, "yyyy-MM-dd", new Date()), "dd MMM yyyy") : "";
-  const selectedPrice = getPriceForVehicle(vehicleType);
+  const selectedPrice = isHourlyBooking 
+    ? getHourlyPrice(vehicleType, selectedDuration) 
+    : getPriceForVehicle(vehicleType);
 
   // Time options
   const timeOptions = [];
@@ -388,28 +544,80 @@ const BookingPage = () => {
     }
   }
 
+  // Get vehicles with hourly prices
+  const getHourlyVehicleOptions = () => {
+    const vehicleMap: Record<string, string> = {
+      "vito": "mercedes-vito",
+      "vito_vip": "vito-vip",
+      "sprinter": "minibus",
+      "maybach": "maybach",
+    };
+    
+    // Get unique vehicles that have prices for this city
+    const uniqueVehicles = [...new Set(hourlyPrices.map(p => p.vehicle_type))];
+    
+    return uniqueVehicles.map(vType => ({
+      value: vehicleMap[vType] || vType,
+      dbType: vType,
+    })).filter(v => VEHICLE_TYPE_MAP[v.value]);
+  };
+
   return (
     <WebsiteLayout>
       <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background py-8 md:py-12">
         <div className="container max-w-4xl px-4">
           {/* Header with Trip Info */}
           <div className="bg-primary text-white rounded-2xl p-6 mb-8 shadow-xl">
-            <h1 className="text-2xl md:text-3xl font-bold mb-4">{t("completeBooking") || "Complete Your Booking"}</h1>
+            <div className="flex items-center gap-2 mb-4">
+              {isHourlyBooking ? (
+                <Timer className="h-6 w-6 text-accent" />
+              ) : (
+                <Car className="h-6 w-6 text-accent" />
+              )}
+              <h1 className="text-2xl md:text-3xl font-bold">
+                {isHourlyBooking 
+                  ? (t("hourlyRentalBooking") || "Hourly Rental Booking")
+                  : (t("completeBooking") || "Complete Your Booking")
+                }
+              </h1>
+            </div>
+            
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 mt-1 text-accent shrink-0" />
-                <div>
-                  <p className="text-white/70 text-sm">{t("pickupPoint")}</p>
-                  <p className="font-medium">{urlPickup}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Navigation className="h-5 w-5 mt-1 text-accent shrink-0" />
-                <div>
-                  <p className="text-white/70 text-sm">{t("dropoffLocation")}</p>
-                  <p className="font-medium">{urlDropoff}</p>
-                </div>
-              </div>
+              {isHourlyBooking ? (
+                <>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 mt-1 text-accent shrink-0" />
+                    <div>
+                      <p className="text-white/70 text-sm">{t("city") || "City"}</p>
+                      <p className="font-medium">{urlCity}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Timer className="h-5 w-5 mt-1 text-accent shrink-0" />
+                    <div>
+                      <p className="text-white/70 text-sm">{t("duration") || "Duration"}</p>
+                      <p className="font-medium">{selectedDuration}</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 mt-1 text-accent shrink-0" />
+                    <div>
+                      <p className="text-white/70 text-sm">{t("pickupPoint")}</p>
+                      <p className="font-medium">{urlPickup}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Navigation className="h-5 w-5 mt-1 text-accent shrink-0" />
+                    <div>
+                      <p className="text-white/70 text-sm">{t("dropoffLocation")}</p>
+                      <p className="font-medium">{urlDropoff}</p>
+                    </div>
+                  </div>
+                </>
+              )}
               <div className="flex items-start gap-3">
                 <Calendar className="h-5 w-5 mt-1 text-accent shrink-0" />
                 <div>
@@ -430,6 +638,40 @@ const BookingPage = () => {
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Main Form */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Duration Selection - Only for hourly */}
+              {isHourlyBooking && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Timer className="h-5 w-5 text-primary" />
+                      {t("selectDuration") || "Select Duration"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-3">
+                      {DURATION_OPTIONS.map((duration) => {
+                        const isSelected = selectedDuration === duration.value;
+                        return (
+                          <button
+                            key={duration.value}
+                            type="button"
+                            onClick={() => setSelectedDuration(duration.value)}
+                            className={cn(
+                              "px-6 py-3 rounded-xl font-semibold transition-all border-2",
+                              isSelected
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border hover:border-primary/50 bg-background"
+                            )}
+                          >
+                            {duration.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Vehicle Selection */}
               <Card>
                 <CardHeader>
@@ -440,17 +682,22 @@ const BookingPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid sm:grid-cols-2 gap-4">
-                    {availableVehicles.map((v) => {
-                      const price = getPriceForVehicle(v.value);
-                      const isSelected = vehicleType === v.value;
-                      const isDisabled = minibusRequired && v.value !== 'minibus';
+                    {(isHourlyBooking ? getHourlyVehicleOptions() : availableVehicles.map(v => ({ value: v.value, dbType: v.value }))).map((vehicleOption) => {
+                      const v = VEHICLE_TYPE_MAP[vehicleOption.value];
+                      if (!v) return null;
+                      
+                      const price = isHourlyBooking 
+                        ? getHourlyPrice(vehicleOption.value, selectedDuration)
+                        : getPriceForVehicle(vehicleOption.value);
+                      const isSelected = vehicleType === vehicleOption.value;
+                      const isDisabled = !isHourlyBooking && minibusRequired && vehicleOption.value !== 'minibus';
                       
                       return (
                         <button
-                          key={v.value}
+                          key={vehicleOption.value}
                           type="button"
                           disabled={isDisabled}
-                          onClick={() => setVehicleType(v.value)}
+                          onClick={() => setVehicleType(vehicleOption.value)}
                           className={cn(
                             "relative overflow-hidden rounded-xl p-4 transition-all duration-300 text-left border-2",
                             "hover:shadow-lg",
@@ -493,6 +740,7 @@ const BookingPage = () => {
                           ) : price ? (
                             <p className="text-lg font-bold text-primary">
                               {price} {preferredCurrency}
+                              {isHourlyBooking && <span className="text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
                             </p>
                           ) : (
                             <p className="text-sm text-muted-foreground">
@@ -585,79 +833,81 @@ const BookingPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Return Trip */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ArrowLeftRight className="h-5 w-5 text-primary" />
-                    {t("returnTrip") || "Return Trip"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Checkbox
-                      id="returnTrip"
-                      checked={hasReturnTrip}
-                      onCheckedChange={(checked) => setHasReturnTrip(checked === true)}
-                    />
-                    <Label htmlFor="returnTrip" className="cursor-pointer font-medium">
-                      {t("addReturnTrip") || "Add return trip"}
-                    </Label>
-                  </div>
+              {/* Return Trip - Only for transfers */}
+              {!isHourlyBooking && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ArrowLeftRight className="h-5 w-5 text-primary" />
+                      {t("returnTrip") || "Return Trip"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        id="returnTrip"
+                        checked={hasReturnTrip}
+                        onCheckedChange={(checked) => setHasReturnTrip(checked === true)}
+                      />
+                      <Label htmlFor="returnTrip" className="cursor-pointer font-medium">
+                        {t("addReturnTrip") || "Add return trip"}
+                      </Label>
+                    </div>
 
-                  <div className="flex items-center gap-2 text-sm text-accent bg-accent/10 px-4 py-3 rounded-lg">
-                    <Tag className="h-4 w-4 shrink-0" />
-                    <span>{t("returnTripDiscount") || "Book round-trip & get 30% OFF on return! Use code: Meet40Return"}</span>
-                  </div>
+                    <div className="flex items-center gap-2 text-sm text-accent bg-accent/10 px-4 py-3 rounded-lg">
+                      <Tag className="h-4 w-4 shrink-0" />
+                      <span>{t("returnTripDiscount") || "Book round-trip & get 30% OFF on return! Use code: Meet40Return"}</span>
+                    </div>
 
-                  {hasReturnTrip && (
-                    <div className="grid sm:grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2">
-                      <div>
-                        <Label className="text-sm text-muted-foreground mb-2 block">{t("returnDate")}</Label>
-                        <Input
-                          type="date"
-                          value={returnDate}
-                          onChange={(e) => setReturnDate(e.target.value)}
-                          min={urlDate}
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm text-muted-foreground mb-2 block">{t("returnTime")}</Label>
-                        <Select value={returnTime} onValueChange={setReturnTime}>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("selectTime")} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px]">
-                            {timeOptions.map((opt) => (
-                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="sm:col-span-2">
-                        <Label className="text-sm text-muted-foreground mb-2 block">{t("promoCode") || "Promo Code"}</Label>
-                        <div className="relative">
+                    {hasReturnTrip && (
+                      <div className="grid sm:grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2">
+                        <div>
+                          <Label className="text-sm text-muted-foreground mb-2 block">{t("returnDate")}</Label>
                           <Input
-                            placeholder="Meet40Return"
-                            value={promoCode}
-                            onChange={(e) => handlePromoCodeChange(e.target.value)}
-                            className={cn(
-                              isPromoCodeValid === true && "border-green-500 ring-1 ring-green-500",
-                              isPromoCodeValid === false && "border-red-500 ring-1 ring-red-500"
-                            )}
+                            type="date"
+                            value={returnDate}
+                            onChange={(e) => setReturnDate(e.target.value)}
+                            min={urlDate}
                           />
+                        </div>
+                        <div>
+                          <Label className="text-sm text-muted-foreground mb-2 block">{t("returnTime")}</Label>
+                          <Select value={returnTime} onValueChange={setReturnTime}>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t("selectTime")} />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-[300px]">
+                              {timeOptions.map((opt) => (
+                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="sm:col-span-2">
+                          <Label className="text-sm text-muted-foreground mb-2 block">{t("promoCode") || "Promo Code"}</Label>
+                          <div className="relative">
+                            <Input
+                              placeholder="Meet40Return"
+                              value={promoCode}
+                              onChange={(e) => handlePromoCodeChange(e.target.value)}
+                              className={cn(
+                                isPromoCodeValid === true && "border-green-500 ring-1 ring-green-500",
+                                isPromoCodeValid === false && "border-red-500 ring-1 ring-red-500"
+                              )}
+                            />
+                            {isPromoCodeValid === true && (
+                              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                            )}
+                          </div>
                           {isPromoCodeValid === true && (
-                            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                            <p className="text-green-600 text-sm mt-1">✓ {t("promoCodeAccepted") || "30% discount will be applied!"}</p>
                           )}
                         </div>
-                        {isPromoCodeValid === true && (
-                          <p className="text-green-600 text-sm mt-1">✓ {t("promoCodeAccepted") || "30% discount will be applied!"}</p>
-                        )}
                       </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Contact Information */}
               <Card>
@@ -722,7 +972,10 @@ const BookingPage = () => {
                     <Textarea
                       value={customerNotes}
                       onChange={(e) => setCustomerNotes(e.target.value)}
-                      placeholder={t("specialRequestsPlaceholder") || "Flight number, special requirements..."}
+                      placeholder={isHourlyBooking 
+                        ? (t("hourlyNotesPlaceholder") || "Pickup location address, places to visit...")
+                        : (t("specialRequestsPlaceholder") || "Flight number, special requirements...")
+                      }
                       className="resize-none min-h-[80px]"
                       maxLength={500}
                     />
@@ -804,6 +1057,14 @@ const BookingPage = () => {
                       <span className="text-muted-foreground">{t("vehicle") || "Vehicle"}</span>
                       <span className="font-medium">{VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}</span>
                     </div>
+                    
+                    {isHourlyBooking && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">{t("duration") || "Duration"}</span>
+                        <span className="font-medium">{selectedDuration}</span>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-muted-foreground">{t("passengers")}</span>
                       <span className="font-medium">{passengers}</span>
@@ -816,7 +1077,9 @@ const BookingPage = () => {
                         </div>
                       ) : selectedPrice ? (
                         <div className="text-center">
-                          <p className="text-sm text-muted-foreground mb-1">{t("totalPrice") || "Total"}</p>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            {isHourlyBooking ? (t("totalForDuration") || "Total for") + ` ${selectedDuration}` : (t("totalPrice") || "Total")}
+                          </p>
                           <p className="text-3xl font-bold text-primary">
                             {selectedPrice} {preferredCurrency}
                           </p>
