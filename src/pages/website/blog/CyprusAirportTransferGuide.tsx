@@ -87,6 +87,8 @@ const CyprusAirportTransferGuide = () => {
             dateModified: '2025-01-10',
             author: 'Meet Transfer',
             readingTime: '17',
+            wordCount: 2500,
+            keywords: ['Cyprus transfer', 'Larnaca airport', 'Paphos airport', 'Ayia Napa', 'Limassol'],
           },
           {
             type: 'FAQPage',

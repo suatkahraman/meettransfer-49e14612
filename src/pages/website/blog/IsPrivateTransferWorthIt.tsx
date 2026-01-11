@@ -69,6 +69,8 @@ const IsPrivateTransferWorthIt = () => {
             dateModified: '2025-01-10',
             author: 'Meet Transfer',
             readingTime: '16',
+            wordCount: 2400,
+            keywords: ['private transfer worth it', 'Turkey airport transfer', 'VIP transfer value', 'transfer comparison'],
           },
           {
             type: 'BreadcrumbList',

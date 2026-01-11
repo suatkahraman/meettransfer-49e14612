@@ -43,9 +43,32 @@ interface ArticleSchema {
   dateModified?: string;
   author?: string;
   readingTime?: string;
+  wordCount?: number;
+  keywords?: string[];
 }
 
-type SchemaType = LocalBusinessSchema | TransportationServiceSchema | FAQSchema | BreadcrumbSchema | ProductSchema | MerchantProductSchema | ArticleSchema;
+interface WebPageSchema {
+  type: 'WebPage';
+  name: string;
+  description: string;
+  url?: string;
+  breadcrumb?: { name: string; url: string }[];
+}
+
+interface ServiceSchema {
+  type: 'Service';
+  name: string;
+  description: string;
+  provider?: string;
+  areaServed?: string[];
+  serviceType?: string;
+  offers?: {
+    price: string;
+    priceCurrency: string;
+  };
+}
+
+type SchemaType = LocalBusinessSchema | TransportationServiceSchema | FAQSchema | BreadcrumbSchema | ProductSchema | MerchantProductSchema | ArticleSchema | WebPageSchema | ServiceSchema;
 
 interface SchemaOrgProps {
   schemas: SchemaType[];
@@ -271,7 +294,10 @@ const generateArticleSchema = (article: ArticleSchema) => ({
     '@type': 'Organization',
     name: article.author || 'Meet Transfer',
     url: baseUrl,
-    logo: companyInfo.logo,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${baseUrl}/pwa-512x512.png`,
+    },
   },
   publisher: {
     '@type': 'Organization',
@@ -279,7 +305,9 @@ const generateArticleSchema = (article: ArticleSchema) => ({
     url: baseUrl,
     logo: {
       '@type': 'ImageObject',
-      url: companyInfo.logo,
+      url: `${baseUrl}/pwa-512x512.png`,
+      width: 512,
+      height: 512,
     },
   },
   mainEntityOfPage: {
@@ -288,6 +316,63 @@ const generateArticleSchema = (article: ArticleSchema) => ({
   },
   ...(article.readingTime && {
     timeRequired: `PT${parseInt(article.readingTime)}M`,
+  }),
+  ...(article.wordCount && {
+    wordCount: article.wordCount,
+  }),
+  ...(article.keywords && article.keywords.length > 0 && {
+    keywords: article.keywords.join(', '),
+  }),
+  articleSection: 'Travel & Transportation',
+  inLanguage: 'en',
+});
+
+const generateWebPageSchema = (webPage: WebPageSchema) => ({
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: webPage.name,
+  description: webPage.description,
+  url: webPage.url || baseUrl,
+  isPartOf: {
+    '@id': `${baseUrl}/#website`,
+  },
+  about: {
+    '@id': `${baseUrl}/#organization`,
+  },
+  ...(webPage.breadcrumb && {
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: webPage.breadcrumb.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.name,
+        item: `${baseUrl}${item.url}`,
+      })),
+    },
+  }),
+});
+
+const generateServiceSchema = (service: ServiceSchema) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: service.name,
+  description: service.description,
+  provider: {
+    '@type': 'Organization',
+    name: service.provider || 'Meet Transfer',
+    '@id': `${baseUrl}/#organization`,
+  },
+  ...(service.serviceType && { serviceType: service.serviceType }),
+  ...(service.areaServed && {
+    areaServed: service.areaServed.map(area => ({ '@type': 'City', name: area })),
+  }),
+  ...(service.offers && {
+    offers: {
+      '@type': 'Offer',
+      price: service.offers.price,
+      priceCurrency: service.offers.priceCurrency,
+      availability: 'https://schema.org/InStock',
+    },
   }),
 });
 
@@ -322,6 +407,12 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
           break;
         case 'Article':
           schemaData = generateArticleSchema(schema as ArticleSchema);
+          break;
+        case 'WebPage':
+          schemaData = generateWebPageSchema(schema as WebPageSchema);
+          break;
+        case 'Service':
+          schemaData = generateServiceSchema(schema as ServiceSchema);
           break;
         default:
           return;

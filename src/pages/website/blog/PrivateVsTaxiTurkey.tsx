@@ -51,6 +51,8 @@ const PrivateVsTaxiTurkey = () => {
             dateModified: '2025-01-10',
             author: 'Meet Transfer',
             readingTime: '13',
+            wordCount: 2000,
+            keywords: ['private transfer vs taxi', 'Turkey airport transfer', 'Istanbul taxi', 'VIP transfer Turkey'],
           },
           {
             type: 'BreadcrumbList',

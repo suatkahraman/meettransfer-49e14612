@@ -64,6 +64,8 @@ const BursaDayTourGuide = () => {
             dateModified: '2025-01-10',
             author: 'Meet Transfer',
             readingTime: '18',
+            wordCount: 2600,
+            keywords: ['Istanbul Bursa day trip', 'Bursa tour', 'Cumalıkızık', 'Uludağ', 'Ottoman capital'],
           },
           {
             type: 'BreadcrumbList',

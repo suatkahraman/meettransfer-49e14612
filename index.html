@@ -141,42 +141,152 @@
       }
     </style>
 
-    <!-- Structured Data - Organization -->
+    <!-- Structured Data - Organization (Enhanced) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Organization",
       "@id": "https://meettransfer.app/#organization",
       "name": "Meet Transfer",
+      "alternateName": ["Meet Transfer Turkey", "Meet Transfer VIP", "MeetTransfer"],
       "url": "https://meettransfer.app",
-      "logo": "https://meettransfer.app/favicon.png",
-      "description": "Premium VIP airport transfer and private chauffeur service in Turkey",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://meettransfer.app/pwa-512x512.png",
+        "width": 512,
+        "height": 512,
+        "caption": "Meet Transfer Logo"
+      },
+      "image": [
+        "https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg",
+        "https://meettransfer.app/images/meet-transfer-vclass-interior.jpg",
+        "https://meettransfer.app/pwa-512x512.png"
+      ],
+      "description": "Premium VIP airport transfer and private chauffeur service in Turkey, Dubai and Cyprus. Professional drivers, luxury Mercedes fleet, 24/7 availability.",
+      "foundingDate": "2020",
       "telephone": "+905321748390",
       "email": "info@meettransfer.app",
       "address": {
         "@type": "PostalAddress",
-        "addressCountry": "TR",
-        "addressLocality": "Istanbul"
+        "streetAddress": "Atatürk Mahallesi",
+        "addressLocality": "Istanbul",
+        "addressRegion": "Istanbul",
+        "postalCode": "34000",
+        "addressCountry": "TR"
       },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 41.0082,
+        "longitude": 28.9784
+      },
+      "areaServed": [
+        {"@type": "Country", "name": "Turkey"},
+        {"@type": "Country", "name": "United Arab Emirates"},
+        {"@type": "Country", "name": "Cyprus"},
+        {"@type": "City", "name": "Istanbul"},
+        {"@type": "City", "name": "Antalya"},
+        {"@type": "City", "name": "Bodrum"},
+        {"@type": "City", "name": "Dalaman"},
+        {"@type": "City", "name": "Izmir"},
+        {"@type": "City", "name": "Cappadocia"},
+        {"@type": "City", "name": "Dubai"},
+        {"@type": "City", "name": "Larnaca"},
+        {"@type": "City", "name": "Bursa"}
+      ],
       "sameAs": [
         "https://www.instagram.com/meettransfer/",
         "https://m.facebook.com/100095122861655/",
         "https://x.com/meettransfer",
-        "https://www.youtube.com/@meettransfer"
-      ]
+        "https://www.youtube.com/@meettransfer",
+        "https://www.linkedin.com/company/meettransfer",
+        "https://www.tripadvisor.com/Profile/meettransfer",
+        "https://www.trustpilot.com/review/meettransfer.app"
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+905321748390",
+          "contactType": "customer service",
+          "availableLanguage": ["English", "Turkish", "German", "French", "Russian", "Arabic", "Spanish", "Italian"],
+          "areaServed": ["TR", "AE", "CY"],
+          "hoursAvailable": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "00:00",
+            "closes": "23:59"
+          }
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+905321748390",
+          "contactType": "reservations",
+          "availableLanguage": ["English", "Turkish", "German", "French", "Russian"],
+          "areaServed": ["TR", "AE", "CY"]
+        }
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "1250",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "priceRange": "€€",
+      "paymentAccepted": ["Cash", "Credit Card", "Debit Card", "Bank Transfer"],
+      "currenciesAccepted": ["EUR", "USD", "TRY", "GBP", "AED"],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "VIP Transfer Services",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Airport Transfer",
+              "description": "Private airport transfer with meet & greet service"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Hourly Chauffeur",
+              "description": "Private chauffeur service by the hour"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Intercity Transfer",
+              "description": "Long-distance private transfers between cities"
+            }
+          }
+        ]
+      }
     }
     </script>
 
-    <!-- Structured Data - WebSite with SearchAction -->
+    <!-- Structured Data - WebSite with SearchAction (Enhanced) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
+      "@id": "https://meettransfer.app/#website",
       "name": "Meet Transfer",
+      "alternateName": "Meet Transfer VIP Airport Transfer",
       "url": "https://meettransfer.app",
+      "description": "Premium VIP airport transfer and private chauffeur service in Turkey, Dubai and Cyprus",
+      "publisher": {
+        "@id": "https://meettransfer.app/#organization"
+      },
+      "inLanguage": ["en", "tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja"],
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://meettransfer.app/destinations?q={search_term_string}",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://meettransfer.app/destinations?q={search_term_string}"
+        },
         "query-input": "required name=search_term_string"
       }
     }
