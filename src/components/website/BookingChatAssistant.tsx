@@ -535,7 +535,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
           
           // Redirect after 2 seconds
           setTimeout(() => {
-            navigate(`/quick-booking-customer-info?token=${data.confirmationToken}`);
+            navigate(`/quick-booking-info?token=${data.confirmationToken}`);
           }, 2000);
         }, 1000);
       }
