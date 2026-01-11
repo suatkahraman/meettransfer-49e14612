@@ -13,7 +13,7 @@ import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import CityMarquee from "@/components/website/CityMarquee";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
+import { VEHICLE_TYPES, isMinibusRequired } from "@/lib/vehicleTypes";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -174,6 +174,34 @@ export const Hero = () => {
     // Reset prices when city changes
     setAllHourlyPrices([]);
   }, [hourlyCity, availableDurations]);
+
+  // Auto-select appropriate vehicle when passenger count changes (Transfer form)
+  useEffect(() => {
+    const passengerCount = parseInt(passengers);
+    const currentVehicle = VEHICLE_TYPES.find(v => v.value === vehicleType);
+    
+    // If current vehicle can't fit passengers, switch to a suitable one
+    if (currentVehicle && currentVehicle.passengers < passengerCount) {
+      const suitableVehicle = VEHICLE_TYPES.find(v => v.passengers >= passengerCount);
+      if (suitableVehicle) {
+        setVehicleType(suitableVehicle.value);
+      }
+    }
+  }, [passengers]);
+
+  // Auto-select appropriate vehicle when passenger count changes (Hourly form)
+  useEffect(() => {
+    const passengerCount = parseInt(hourlyPassengers);
+    const currentVehicle = VEHICLE_TYPES.find(v => v.value === hourlyVehicleType);
+    
+    // If current vehicle can't fit passengers, switch to a suitable one
+    if (currentVehicle && currentVehicle.passengers < passengerCount) {
+      const suitableVehicle = VEHICLE_TYPES.find(v => v.passengers >= passengerCount && v.value !== 'minibus');
+      if (suitableVehicle) {
+        setHourlyVehicleType(suitableVehicle.value);
+      }
+    }
+  }, [hourlyPassengers]);
 
   // Fetch all vehicle prices when city and duration are selected
   useEffect(() => {
@@ -535,45 +563,64 @@ export const Hero = () => {
                   {/* Vehicle Type Selection */}
                   <div>
                     <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("vehicleType") || "Vehicle Type"}</label>
+                    {isMinibusRequired(parseInt(passengers), 0) && (
+                      <p className="text-xs text-amber-600 mb-2">
+                        {t("minibusRequiredForPassengers") || "Sprinter minibus is required for 7+ passengers"}
+                      </p>
+                    )}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                       {VEHICLE_TYPES.map((vehicle) => {
                         const vehiclePrice = allVehiclePrices.find(v => v.vehicleType === vehicle.value);
                         const isSelected = vehicleType === vehicle.value;
+                        const passengerCount = parseInt(passengers);
+                        const isDisabled = vehicle.passengers < passengerCount;
+                        const isOnlyOption = isMinibusRequired(passengerCount, 0) && vehicle.value === 'minibus';
+                        
                         return (
                           <button
                             key={vehicle.value}
                             type="button"
-                            onClick={() => setVehicleType(vehicle.value)}
+                            onClick={() => !isDisabled && setVehicleType(vehicle.value)}
+                            disabled={isDisabled}
                             className={cn(
                               "relative p-3 rounded-xl border-2 transition-all text-left",
-                              isSelected
-                                ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                                : "border-border hover:border-primary/50 bg-muted/30"
+                              isDisabled
+                                ? "border-border bg-muted/20 opacity-50 cursor-not-allowed"
+                                : isSelected
+                                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                  : "border-border hover:border-primary/50 bg-muted/30",
+                              isOnlyOption && "ring-2 ring-amber-400/50"
                             )}
                           >
                             <div className="flex items-center gap-2 mb-1">
                               {vehicle.value === 'maybach-minibus' ? (
-                                <Sparkles className="h-4 w-4 text-amber-500" />
+                                <Sparkles className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-amber-500")} />
                               ) : vehicle.value === 'vip-mercedes' ? (
-                                <Sparkles className="h-4 w-4 text-purple-500" />
+                                <Sparkles className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-purple-500")} />
                               ) : (
-                                <Car className="h-4 w-4 text-primary" />
+                                <Car className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-primary")} />
                               )}
-                              <span className="font-medium text-sm truncate">{vehicle.label.split(' ')[1] || vehicle.label}</span>
+                              <span className={cn("font-medium text-sm truncate", isDisabled && "text-muted-foreground")}>
+                                {vehicle.label.split(' ')[1] || vehicle.label}
+                              </span>
                             </div>
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {vehicle.passengers} {t("passengers") || "pax"}
+                            <div className={cn("text-xs mb-1", isDisabled ? "text-red-400" : "text-muted-foreground")}>
+                              {isDisabled ? (
+                                <>{t("maxPassengers") || "Max"} {vehicle.passengers}</>
+                              ) : (
+                                <>{vehicle.passengers} {t("passengers") || "pax"}</>
+                              )}
                             </div>
                             {loadingTransferPrice ? (
                               <div className="h-5">
                                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                               </div>
-                            ) : vehiclePrice ? (
+                            ) : vehiclePrice && !isDisabled ? (
                               <div className="text-lg font-bold text-primary">
                                 {transferPriceCurrency === "EUR" ? "€" : transferPriceCurrency === "USD" ? "$" : transferPriceCurrency === "GBP" ? "£" : "₺"}
                                 {vehiclePrice.price}
                               </div>
-                            ) : pickup && dropoff ? (
+                            ) : pickup && dropoff && !isDisabled ? (
                               <div className="text-xs text-muted-foreground">-</div>
                             ) : null}
                           </button>
@@ -742,47 +789,64 @@ export const Hero = () => {
                   {(hourlyCity && hourlyDuration) && (
                     <div>
                       <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("vehicleType") || "Vehicle Type"}</label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {VEHICLE_TYPES.filter(v => v.value !== 'sprinter-minibus').map((vehicle) => {
+                      {parseInt(hourlyPassengers) > 6 && (
+                        <p className="text-xs text-amber-600 mb-2">
+                          {t("hourlyMaxPassengers") || "Hourly rental is available for up to 6 passengers"}
+                        </p>
+                      )}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {VEHICLE_TYPES.filter(v => v.value !== 'minibus').map((vehicle) => {
                           const vehiclePrice = allHourlyPrices.find(v => v.vehicleType === vehicle.value);
                           const isSelected = hourlyVehicleType === vehicle.value;
+                          const passengerCount = parseInt(hourlyPassengers);
+                          const isDisabled = vehicle.passengers < passengerCount;
+                          
                           return (
                             <button
                               key={vehicle.value}
                               type="button"
-                              onClick={() => setHourlyVehicleType(vehicle.value)}
+                              onClick={() => !isDisabled && setHourlyVehicleType(vehicle.value)}
+                              disabled={isDisabled}
                               className={cn(
                                 "relative p-3 rounded-xl border-2 transition-all text-left",
-                                isSelected
-                                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                                  : "border-border hover:border-primary/50 bg-muted/30"
+                                isDisabled
+                                  ? "border-border bg-muted/20 opacity-50 cursor-not-allowed"
+                                  : isSelected
+                                    ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                    : "border-border hover:border-primary/50 bg-muted/30"
                               )}
                             >
                               <div className="flex items-center gap-2 mb-1">
                                 {vehicle.value === 'maybach-minibus' ? (
-                                  <Sparkles className="h-4 w-4 text-amber-500" />
+                                  <Sparkles className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-amber-500")} />
                                 ) : vehicle.value === 'vip-mercedes' ? (
-                                  <Sparkles className="h-4 w-4 text-purple-500" />
+                                  <Sparkles className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-purple-500")} />
                                 ) : (
-                                  <Car className="h-4 w-4 text-primary" />
+                                  <Car className={cn("h-4 w-4", isDisabled ? "text-muted-foreground" : "text-primary")} />
                                 )}
-                                <span className="font-medium text-sm truncate">{vehicle.label.split(' ')[1] || vehicle.label}</span>
+                                <span className={cn("font-medium text-sm truncate", isDisabled && "text-muted-foreground")}>
+                                  {vehicle.label.split(' ')[1] || vehicle.label}
+                                </span>
                               </div>
-                              <div className="text-xs text-muted-foreground mb-1">
-                                {vehicle.passengers} {t("passengers") || "pax"}
+                              <div className={cn("text-xs mb-1", isDisabled ? "text-red-400" : "text-muted-foreground")}>
+                                {isDisabled ? (
+                                  <>{t("maxPassengers") || "Max"} {vehicle.passengers}</>
+                                ) : (
+                                  <>{vehicle.passengers} {t("passengers") || "pax"}</>
+                                )}
                               </div>
                               {loadingPrice ? (
                                 <div className="h-5">
                                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                                 </div>
-                              ) : vehiclePrice ? (
+                              ) : vehiclePrice && !isDisabled ? (
                                 <div className="text-lg font-bold text-primary">
                                   {vehiclePrice.currency === "EUR" ? "€" : vehiclePrice.currency === "USD" ? "$" : vehiclePrice.currency === "GBP" ? "£" : "₺"}
                                   {vehiclePrice.price}
                                 </div>
-                              ) : (
+                              ) : !isDisabled ? (
                                 <div className="text-xs text-muted-foreground">-</div>
-                              )}
+                              ) : null}
                             </button>
                           );
                         })}
