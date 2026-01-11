@@ -801,68 +801,68 @@ const BookingPage = () => {
     };
   }, [isPricesLoading, language]);
 
-  // Professional Loading Animation Component
+  // Professional Loading Animation Component - Mobile Optimized
   if (isPricesLoading) {
     return (
       <WebsiteLayout>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5">
-          <div className="text-center px-4 max-w-md">
-            {/* Animated Car Icon */}
-            <div className="relative mb-8">
-              <div className="w-32 h-32 mx-auto relative">
-                {/* Outer ring animation */}
-                <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-[ping_2s_ease-in-out_infinite]" />
-                <div className="absolute inset-2 rounded-full border-4 border-primary/30 animate-[ping_2s_ease-in-out_infinite_0.5s]" />
-                <div className="absolute inset-4 rounded-full border-4 border-primary/40 animate-[ping_2s_ease-in-out_infinite_1s]" />
+        <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 safe-area-inset">
+          <div className="text-center w-full max-w-sm sm:max-w-md">
+            {/* Animated Car Icon - Responsive sizing */}
+            <div className="relative mb-6 sm:mb-8">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto relative">
+                {/* Outer ring animation - optimized for mobile */}
+                <div className="absolute inset-0 rounded-full border-2 sm:border-4 border-primary/20 animate-[ping_2s_ease-in-out_infinite]" />
+                <div className="absolute inset-1.5 sm:inset-2 rounded-full border-2 sm:border-4 border-primary/30 animate-[ping_2s_ease-in-out_infinite_0.5s]" />
+                <div className="absolute inset-3 sm:inset-4 rounded-full border-2 sm:border-4 border-primary/40 animate-[ping_2s_ease-in-out_infinite_1s]" />
                 
-                {/* Center icon */}
+                {/* Center icon - responsive */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-xl animate-pulse">
-                    <Car className="h-10 w-10 text-primary-foreground animate-bounce" />
+                  <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-xl animate-pulse">
+                    <Car className="h-7 w-7 sm:h-10 sm:w-10 text-primary-foreground animate-bounce" />
                   </div>
                 </div>
               </div>
               
-              {/* Sparkle decorations */}
-              <div className="absolute top-0 left-1/4 animate-[pulse_1.5s_ease-in-out_infinite]">
-                <Sparkles className="h-6 w-6 text-accent" />
+              {/* Sparkle decorations - optimized positions */}
+              <div className="absolute top-0 left-[20%] sm:left-1/4 animate-[pulse_1.5s_ease-in-out_infinite]">
+                <Sparkles className="h-4 w-4 sm:h-6 sm:w-6 text-accent" />
               </div>
-              <div className="absolute top-1/4 right-1/4 animate-[pulse_1.5s_ease-in-out_infinite_0.3s]">
-                <Sparkles className="h-4 w-4 text-primary" />
+              <div className="absolute top-[20%] right-[20%] sm:top-1/4 sm:right-1/4 animate-[pulse_1.5s_ease-in-out_infinite_0.3s]">
+                <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
               </div>
-              <div className="absolute bottom-1/4 left-1/3 animate-[pulse_1.5s_ease-in-out_infinite_0.6s]">
-                <Sparkles className="h-5 w-5 text-amber-500" />
+              <div className="absolute bottom-[20%] left-[30%] sm:bottom-1/4 sm:left-1/3 animate-[pulse_1.5s_ease-in-out_infinite_0.6s]">
+                <Sparkles className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-amber-500" />
               </div>
             </div>
             
-            {/* Text content */}
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4 animate-fade-in">
+            {/* Text content - responsive typography */}
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2 sm:mb-4 animate-fade-in px-2">
               {language === 'TR' 
-                ? "En İyi Fiyatlarımız Sizin İçin Hazırlanıyor"
-                : "Best Prices Being Prepared for You"
+                ? "En İyi Fiyatlarımız Hazırlanıyor"
+                : "Best Prices Being Prepared"
               }
             </h2>
-            <p className="text-muted-foreground mb-6 animate-fade-in">
+            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 animate-fade-in px-2">
               {language === 'TR'
-                ? "Lütfen bekleyin, sizin için en uygun fiyatları buluyoruz..."
-                : "Please wait, we are finding the best rates for you..."
+                ? "Sizin için en uygun fiyatları buluyoruz..."
+                : "Finding the best rates for you..."
               }
             </p>
             
-            {/* Progress Bar with Countdown */}
-            <div className="mb-6 px-4">
+            {/* Progress Bar with Countdown - touch optimized */}
+            <div className="mb-4 sm:mb-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">
+                <span className="text-xs sm:text-sm text-muted-foreground">
                   {language === 'TR' ? 'Fiyatlar yükleniyor...' : 'Loading prices...'}
                 </span>
-                <span className="text-sm font-semibold text-primary flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
+                <span className="text-xs sm:text-sm font-semibold text-primary flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   {countdown}s
                 </span>
               </div>
-              <div className="h-3 bg-muted rounded-full overflow-hidden shadow-inner">
+              <div className="h-2.5 sm:h-3 bg-muted rounded-full overflow-hidden shadow-inner">
                 <div 
-                  className="h-full bg-gradient-to-r from-primary via-primary/80 to-accent rounded-full transition-all duration-100 ease-linear relative"
+                  className="h-full bg-gradient-to-r from-primary via-primary/80 to-accent rounded-full transition-all duration-100 ease-linear relative will-change-[width]"
                   style={{ width: `${progressWidth}%` }}
                 >
                   {/* Shimmer effect */}
@@ -871,45 +871,45 @@ const BookingPage = () => {
               </div>
             </div>
             
-            {/* Random Tips */}
-            <div className="mb-6 px-4">
+            {/* Random Tips - mobile optimized */}
+            <div className="mb-4 sm:mb-6">
               <div 
-                className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-xl p-4 border border-primary/20 shadow-sm"
+                className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-primary/20 shadow-sm min-h-[60px] sm:min-h-[72px] flex items-center justify-center"
                 key={tipIndex}
                 style={{ animation: 'tipFadeIn 0.5s ease-out' }}
               >
-                <p className="text-sm font-medium text-foreground">
+                <p className="text-xs sm:text-sm font-medium text-foreground leading-relaxed">
                   {(language === 'TR' ? loadingTips.TR : loadingTips.EN)[tipIndex]}
                 </p>
               </div>
             </div>
             
-            {/* Progress dots */}
-            <div className="flex items-center justify-center gap-2 mb-6">
-              <div className="w-3 h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite]" />
-              <div className="w-3 h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite_0.2s]" />
-              <div className="w-3 h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite_0.4s]" />
+            {/* Progress dots - smaller on mobile */}
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite]" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite_0.2s]" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite_0.4s]" />
             </div>
             
-            {/* Trip summary card */}
-            <div className="bg-card rounded-xl p-4 shadow-lg border border-border/50 animate-fade-in">
-              <div className="text-sm text-muted-foreground space-y-2">
+            {/* Trip summary card - compact for mobile */}
+            <div className="bg-card rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border border-border/50 animate-fade-in">
+              <div className="text-xs sm:text-sm text-muted-foreground space-y-1.5 sm:space-y-2">
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <span className="truncate">{urlPickup}</span>
+                  <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" />
+                  <span className="truncate text-left">{urlPickup}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ArrowRight className="h-4 w-4 text-accent" />
-                  <span className="truncate">{urlDropoff}</span>
+                  <Navigation className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent shrink-0" />
+                  <span className="truncate text-left">{urlDropoff}</span>
                 </div>
-                <div className="flex items-center gap-4 pt-2 border-t border-border/50">
+                <div className="flex items-center justify-center gap-3 sm:gap-4 pt-2 border-t border-border/50">
                   <span className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {displayDate}
+                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-xs sm:text-sm">{displayDate}</span>
                   </span>
                   <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {urlTime}
+                    <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-xs sm:text-sm">{urlTime}</span>
                   </span>
                 </div>
               </div>
@@ -933,6 +933,9 @@ const BookingPage = () => {
               transform: translateY(0) scale(1);
             }
           }
+          .safe-area-inset {
+            padding-bottom: env(safe-area-inset-bottom, 0);
+          }
         `}</style>
       </WebsiteLayout>
     );
@@ -940,17 +943,17 @@ const BookingPage = () => {
 
   return (
     <WebsiteLayout>
-      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background py-8 md:py-12">
-        <div className="container max-w-4xl px-4">
-          {/* Header with Trip Info */}
-          <div className="bg-primary text-white rounded-2xl p-6 mb-8 shadow-xl">
-            <div className="flex items-center gap-2 mb-4">
+      <div className="min-h-[100dvh] bg-gradient-to-b from-muted/30 to-background py-4 sm:py-8 md:py-12">
+        <div className="container max-w-4xl px-3 sm:px-4">
+          {/* Header with Trip Info - Mobile optimized */}
+          <div className="bg-primary text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-8 shadow-xl">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               {isHourlyBooking ? (
-                <Timer className="h-6 w-6 text-accent" />
+                <Timer className="h-5 w-5 sm:h-6 sm:w-6 text-accent shrink-0" />
               ) : (
-                <Car className="h-6 w-6 text-accent" />
+                <Car className="h-5 w-5 sm:h-6 sm:w-6 text-accent shrink-0" />
               )}
-              <h1 className="text-2xl md:text-3xl font-bold">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold leading-tight">
                 {isHourlyBooking 
                   ? (t("hourlyRentalBooking") || "Hourly Rental Booking")
                   : (t("completeBooking") || "Complete Your Booking")
@@ -958,73 +961,73 @@ const BookingPage = () => {
               </h1>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4">
               {isHourlyBooking ? (
                 <>
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 mt-1 text-accent shrink-0" />
-                    <div>
-                      <p className="text-white/70 text-sm">{t("city") || "City"}</p>
-                      <p className="font-medium">{urlCity}</p>
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-white/70 text-xs sm:text-sm">{t("city") || "City"}</p>
+                      <p className="font-medium text-sm sm:text-base truncate">{urlCity}</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <Timer className="h-5 w-5 mt-1 text-accent shrink-0" />
-                    <div>
-                      <p className="text-white/70 text-sm">{t("duration") || "Duration"}</p>
-                      <p className="font-medium">{selectedDuration}</p>
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <Timer className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-white/70 text-xs sm:text-sm">{t("duration") || "Duration"}</p>
+                      <p className="font-medium text-sm sm:text-base">{selectedDuration}</p>
                     </div>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 mt-1 text-accent shrink-0" />
-                    <div>
-                      <p className="text-white/70 text-sm">{t("pickupPoint")}</p>
-                      <p className="font-medium">{urlPickup}</p>
+                  <div className="flex items-start gap-2 sm:gap-3 col-span-2 sm:col-span-1">
+                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white/70 text-xs sm:text-sm">{t("pickupPoint")}</p>
+                      <p className="font-medium text-sm sm:text-base line-clamp-2">{urlPickup}</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <Navigation className="h-5 w-5 mt-1 text-accent shrink-0" />
-                    <div>
-                      <p className="text-white/70 text-sm">{t("dropoffLocation")}</p>
-                      <p className="font-medium">{urlDropoff}</p>
+                  <div className="flex items-start gap-2 sm:gap-3 col-span-2 sm:col-span-1">
+                    <Navigation className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white/70 text-xs sm:text-sm">{t("dropoffLocation")}</p>
+                      <p className="font-medium text-sm sm:text-base line-clamp-2">{urlDropoff}</p>
                     </div>
                   </div>
                 </>
               )}
-              <div className="flex items-start gap-3">
-                <Calendar className="h-5 w-5 mt-1 text-accent shrink-0" />
-                <div>
-                  <p className="text-white/70 text-sm">{t("pickupDate")}</p>
-                  <p className="font-medium">{displayDate}</p>
+              <div className="flex items-start gap-2 sm:gap-3">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-white/70 text-xs sm:text-sm">{t("pickupDate")}</p>
+                  <p className="font-medium text-sm sm:text-base">{displayDate}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 mt-1 text-accent shrink-0" />
-                <div>
-                  <p className="text-white/70 text-sm">{t("pickupTime")}</p>
-                  <p className="font-medium">{urlTime}</p>
+              <div className="flex items-start gap-2 sm:gap-3">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-white/70 text-xs sm:text-sm">{t("pickupTime")}</p>
+                  <p className="font-medium text-sm sm:text-base">{urlTime}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Main Form */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Duration Selection - Only for hourly */}
               {isHourlyBooking && (
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Timer className="h-5 w-5 text-primary" />
+                  <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <Timer className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       {t("selectDuration") || "Select Duration"}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-3">
+                  <CardContent className="p-4 sm:p-6 pt-0">
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
                       {DURATION_OPTIONS.map((duration) => {
                         const isSelected = selectedDuration === duration.value;
                         return (
@@ -1033,7 +1036,7 @@ const BookingPage = () => {
                             type="button"
                             onClick={() => setSelectedDuration(duration.value)}
                             className={cn(
-                              "px-6 py-3 rounded-xl font-semibold transition-all border-2",
+                              "px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all border-2 text-sm sm:text-base",
                               isSelected
                                 ? "border-primary bg-primary text-primary-foreground"
                                 : "border-border hover:border-primary/50 bg-background"
@@ -1050,24 +1053,24 @@ const BookingPage = () => {
 
               {/* Vehicle Selection */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Car className="h-5 w-5 text-primary" />
+                <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Car className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     {t("selectVehicle") || "Select Vehicle"}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4 sm:p-6 pt-0">
                   {/* Warning for 7+ passengers */}
                   {passengers >= 7 && !isHourlyBooking && (
-                    <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                      <p className="text-sm text-amber-600 dark:text-amber-400 font-medium flex items-center gap-2">
-                        <Users className="h-4 w-4" />
+                    <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                      <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-400 font-medium flex items-center gap-2">
+                        <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                         {t("minibusRequiredForPassengers") || "Sprinter minibus is required for 7+ passengers"}
                       </p>
                     </div>
                   )}
                   
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {(isHourlyBooking ? getHourlyVehicleOptions() : availableVehicles.map(v => ({ value: v.value, dbType: v.value }))).map((vehicleOption) => {
                       const v = VEHICLE_TYPE_MAP[vehicleOption.value];
                       if (!v) return null;
@@ -1103,10 +1106,10 @@ const BookingPage = () => {
                             }
                           }}
                           className={cn(
-                            "relative overflow-hidden rounded-xl transition-all duration-300 border-2 cursor-pointer",
-                            "hover:shadow-lg",
+                            "relative overflow-hidden rounded-lg sm:rounded-xl transition-all duration-300 border-2 cursor-pointer",
+                            "hover:shadow-lg active:scale-[0.99]",
                             isSelected
-                              ? "border-primary bg-primary/10 shadow-lg ring-2 ring-primary/50 scale-[1.02]"
+                              ? "border-primary bg-primary/10 shadow-lg ring-2 ring-primary/50 sm:scale-[1.02]"
                               : "border-border hover:border-primary/50 hover:bg-muted/50",
                             isDisabled && "opacity-50 cursor-not-allowed",
                             justSelectedVehicle === vehicleOption.value && "animate-[vehicleShake_0.4s_ease-in-out]"
@@ -1127,20 +1130,20 @@ const BookingPage = () => {
                             }
                           `}</style>
                           {isSelected && (
-                            <div className="absolute top-3 right-3 z-10 bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg animate-[pulse_1.5s_ease-in-out_infinite]">
-                              <CheckCircle className="h-5 w-5" />
+                            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 bg-primary text-primary-foreground rounded-full p-1 sm:p-1.5 shadow-lg animate-[pulse_1.5s_ease-in-out_infinite]">
+                              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
                             </div>
                           )}
                           
                           {/* Selected Banner */}
                           {isSelected && (
-                            <div className="absolute top-0 left-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-br-lg z-10">
+                            <div className="absolute top-0 left-0 bg-primary text-primary-foreground text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-br-lg z-10">
                               {language === 'TR' ? 'SEÇİLDİ' : 'SELECTED'}
                             </div>
                           )}
                           
                           {isDisabled && (
-                            <div className="absolute top-3 left-3 z-10 bg-red-500/90 text-white text-xs px-2 py-1 rounded">
+                            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 bg-red-500/90 text-white text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded">
                               Max {vehicleCapacity}
                             </div>
                           )}
@@ -1174,46 +1177,46 @@ const BookingPage = () => {
                               </CarouselContent>
                               {v.images.length > 1 && (
                                 <>
-                                  <CarouselPrevious className="left-1 h-7 w-7 bg-white/80 hover:bg-white" />
-                                  <CarouselNext className="right-1 h-7 w-7 bg-white/80 hover:bg-white" />
+                                  <CarouselPrevious className="left-1 h-6 w-6 sm:h-7 sm:w-7 bg-white/80 hover:bg-white" />
+                                  <CarouselNext className="right-1 h-6 w-6 sm:h-7 sm:w-7 bg-white/80 hover:bg-white" />
                                 </>
                               )}
                             </Carousel>
                             {/* Image counter */}
                             {v.images.length > 1 && (
-                              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded">
+                              <div className="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 bg-black/60 text-white text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 rounded">
                                 {Math.min(v.images.length, 6)}
                               </div>
                             )}
                           </div>
                           
                           {/* Content area */}
-                          <div className="w-full p-4 text-left">
-                            <h3 className="font-semibold text-foreground mb-2">{v.label}</h3>
+                          <div className="w-full p-3 sm:p-4 text-left">
+                            <h3 className="font-semibold text-foreground mb-1.5 sm:mb-2 text-sm sm:text-base">{v.label}</h3>
                             
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                            <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
                               <span className={cn(
                                 "flex items-center gap-1",
                                 isDisabled && "text-red-500"
                               )}>
-                                <Users className="h-4 w-4" />
+                                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 {v.passengers}
                               </span>
                               <span className="flex items-center gap-1">
-                                <Briefcase className="h-4 w-4" />
+                                <Briefcase className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 {v.luggage}
                               </span>
                             </div>
                             
                             {isPricesLoading ? (
-                              <div className="h-6 w-20 bg-muted animate-pulse rounded" />
+                              <div className="h-5 sm:h-6 w-16 sm:w-20 bg-muted animate-pulse rounded" />
                             ) : price ? (
-                              <p className="text-lg font-bold text-primary">
+                              <p className="text-base sm:text-lg font-bold text-primary">
                                 {price} {preferredCurrency}
-                                {isHourlyBooking && <span className="text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
+                                {isHourlyBooking && <span className="text-xs sm:text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
                               </p>
                             ) : (
-                              <p className="text-sm text-muted-foreground">
+                              <p className="text-xs sm:text-sm text-muted-foreground">
                                 {t("priceOnRequest") || "Price on request"}
                               </p>
                             )}
@@ -1228,17 +1231,17 @@ const BookingPage = () => {
               {/* Selected Vehicle & Price Card */}
               {selectedPrice && (
                 <Card className="border-2 border-primary/50 bg-gradient-to-br from-primary/5 to-accent/5 shadow-lg">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <CheckCircle className="h-5 w-5 text-primary" />
+                  <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       {language === 'TR' ? 'Seçtiğiniz Araç ve Fiyatı' : 'Selected Vehicle & Price'}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4">
+                  <CardContent className="p-4 sm:p-6 pt-0">
+                    <div className="flex items-center gap-3 sm:gap-4">
                       {/* Vehicle Image */}
                       {VEHICLE_TYPE_MAP[vehicleType]?.images?.[0] && (
-                        <div className="w-24 h-16 rounded-lg overflow-hidden shrink-0">
+                        <div className="w-16 h-12 sm:w-24 sm:h-16 rounded-lg overflow-hidden shrink-0">
                           <img
                             src={VEHICLE_TYPE_MAP[vehicleType].images[0].src}
                             alt={VEHICLE_TYPE_MAP[vehicleType].label}
@@ -1248,28 +1251,28 @@ const BookingPage = () => {
                       )}
                       
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-foreground">
+                        <h4 className="font-semibold text-foreground text-sm sm:text-base">
                           {VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}
                         </h4>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                        <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
                           <span className="flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5" />
+                            <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                             {VEHICLE_TYPE_MAP[vehicleType]?.passengers}
                           </span>
                           <span className="flex items-center gap-1">
-                            <Briefcase className="h-3.5 w-3.5" />
+                            <Briefcase className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                             {VEHICLE_TYPE_MAP[vehicleType]?.luggage}
                           </span>
                         </div>
                       </div>
                       
-                      <div className="text-right">
+                      <div className="text-right shrink-0">
                         {discountApplied && originalPrice && (
-                          <p className="text-sm line-through text-muted-foreground">
+                          <p className="text-xs sm:text-sm line-through text-muted-foreground">
                             {originalPrice} {preferredCurrency}
                           </p>
                         )}
-                        <p className="text-2xl font-bold text-primary">
+                        <p className="text-lg sm:text-2xl font-bold text-primary">
                           {selectedPrice} {preferredCurrency}
                         </p>
                       </div>
@@ -1534,19 +1537,19 @@ const BookingPage = () => {
 
               {/* Contact Information */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    {user ? <User className="h-5 w-5 text-primary" /> : <Phone className="h-5 w-5 text-primary" />}
+                <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    {user ? <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" /> : <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />}
                     {user ? (t("passengerInfo") || "Passenger Information") : (t("contactInfo") || "Contact Information")}
                   </CardTitle>
                   {user && (
-                    <CardDescription className="flex items-center gap-2 text-green-600">
-                      <Shield className="h-4 w-4" />
-                      {t("loggedInAs") || "Logged in as"} {user.email}
+                    <CardDescription className="flex items-center gap-2 text-green-600 text-xs sm:text-sm">
+                      <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <span className="truncate">{t("loggedInAs") || "Logged in as"} {user.email}</span>
                     </CardDescription>
                   )}
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="p-4 sm:p-6 pt-0 space-y-3 sm:space-y-4">
                   {/* Name field for logged-in users */}
                   {user && (
                     <div>
@@ -1658,12 +1661,12 @@ const BookingPage = () => {
               )}
             </div>
 
-            {/* Sidebar - Price Summary */}
-            <div className="lg:col-span-1">
+            {/* Sidebar - Price Summary - Hidden on mobile, visible on desktop */}
+            <div className="lg:col-span-1 hidden lg:block">
               <div className="sticky top-24">
                 <Card className="shadow-xl border-primary/20">
-                  <CardHeader className="bg-primary text-white rounded-t-xl">
-                    <CardTitle>{t("priceSummary") || "Price Summary"}</CardTitle>
+                  <CardHeader className="bg-primary text-white rounded-t-xl p-4 sm:p-6">
+                    <CardTitle className="text-base sm:text-lg">{t("priceSummary") || "Price Summary"}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     {/* Vehicle Image Carousel */}
@@ -1683,8 +1686,8 @@ const BookingPage = () => {
                               </CarouselItem>
                             ))}
                           </CarouselContent>
-                          <CarouselPrevious className="left-2 h-8 w-8 bg-white/80 hover:bg-white" />
-                          <CarouselNext className="right-2 h-8 w-8 bg-white/80 hover:bg-white" />
+                          <CarouselPrevious className="left-2 h-7 w-7 sm:h-8 sm:w-8 bg-white/80 hover:bg-white" />
+                          <CarouselNext className="right-2 h-7 w-7 sm:h-8 sm:w-8 bg-white/80 hover:bg-white" />
                         </Carousel>
                         {/* Image counter */}
                         <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
@@ -1693,10 +1696,10 @@ const BookingPage = () => {
                       </div>
                     )}
                     
-                    <div className="p-6 space-y-4">
+                    <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
                       <div className="flex justify-between items-start">
-                        <span className="text-muted-foreground text-sm">{t("vehicle") || "Vehicle"}</span>
-                        <span className="font-semibold text-right">{VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}</span>
+                        <span className="text-muted-foreground text-xs sm:text-sm">{t("vehicle") || "Vehicle"}</span>
+                        <span className="font-semibold text-right text-sm sm:text-base">{VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}</span>
                       </div>
                       
                       {/* Vehicle features */}
@@ -1789,6 +1792,43 @@ const BookingPage = () => {
           </div>
         </div>
       </div>
+      
+      {/* Mobile Sticky Footer */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-3 sm:p-4 shadow-lg z-50 safe-area-inset-bottom">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            {selectedPrice ? (
+              <>
+                <p className="text-xs text-muted-foreground">{t("totalPrice") || "Total"}</p>
+                <p className="text-lg sm:text-xl font-bold text-primary">
+                  {selectedPrice} {preferredCurrency}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("priceOnRequest") || "Price on request"}</p>
+            )}
+          </div>
+          <Button
+            onClick={handleSubmit}
+            size="lg"
+            variant="accent"
+            className="h-12 px-6 text-base font-semibold shrink-0"
+            disabled={submitting}
+          >
+            {submitting ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                {user ? (t("confirm") || "Confirm") : (t("continue") || "Continue")}
+                <ArrowRight className="ml-1.5 h-4 w-4" />
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+      
+      {/* Spacer for mobile sticky footer */}
+      <div className="lg:hidden h-20" />
     </WebsiteLayout>
   );
 };
