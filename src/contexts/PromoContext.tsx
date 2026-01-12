@@ -5,6 +5,7 @@ interface PromoCodeData {
   code: string;
   discountPercentage: number;
   isActive: boolean;
+  validUntil: string | null;
 }
 
 interface PromoContextType {
@@ -18,6 +19,7 @@ const DEFAULT_PROMO: PromoCodeData = {
   code: "MEET30RETURN",
   discountPercentage: 30,
   isActive: true,
+  validUntil: null,
 };
 
 const PromoContext = createContext<PromoContextType>({
@@ -40,11 +42,14 @@ export const PromoProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchActivePromo = async () => {
     try {
+      const now = new Date().toISOString();
+      
       const { data, error } = await supabase
         .from("promo_codes")
-        .select("code, discount_percentage, is_active")
+        .select("code, discount_percentage, is_active, valid_until")
         .eq("is_active", true)
         .eq("applies_to", "return_transfer")
+        .or(`valid_until.is.null,valid_until.gte.${now}`)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -59,6 +64,7 @@ export const PromoProvider = ({ children }: { children: ReactNode }) => {
           code: data.code,
           discountPercentage: data.discount_percentage,
           isActive: data.is_active,
+          validUntil: data.valid_until,
         });
       }
     } catch (err) {

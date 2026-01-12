@@ -1498,9 +1498,19 @@ const BookingPage = () => {
                       </Label>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-accent bg-accent/10 px-4 py-3 rounded-lg">
-                      <Tag className="h-4 w-4 shrink-0" />
-                      <span>{getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language).returnTripDiscount}</span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-sm text-accent bg-accent/10 px-4 py-3 rounded-lg">
+                        <Tag className="h-4 w-4 shrink-0" />
+                        <span>{getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language).returnTripDiscount}</span>
+                      </div>
+                      {activePromo.validUntil && (
+                        <p className="text-xs text-muted-foreground px-4 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {language === 'TR' 
+                            ? `Son kullanım: ${new Date(activePromo.validUntil).toLocaleDateString('tr-TR')}` 
+                            : `Valid until: ${new Date(activePromo.validUntil).toLocaleDateString('en-US')}`}
+                        </p>
+                      )}
                     </div>
 
                     {hasReturnTrip && (

@@ -8,6 +8,7 @@ interface PromoCode {
   description: string | null;
   applies_to: string;
   is_active: boolean;
+  valid_until: string | null;
 }
 
 export const useActivePromoCode = (appliesTo: string = "return_transfer") => {
@@ -47,6 +48,7 @@ export const useActivePromoCode = (appliesTo: string = "return_transfer") => {
           description: null,
           applies_to: "return_transfer",
           is_active: true,
+          valid_until: null,
         });
       } finally {
         setLoading(false);

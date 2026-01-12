@@ -1607,7 +1607,7 @@ const ReservationForm = () => {
                         type="text"
                         value={promoCode}
                         onChange={(e) => handlePromoCodeChange(e.target.value)}
-                        placeholder="Meet30Return"
+                        placeholder={activePromo?.code || "Meet30Return"}
                         className={cn(
                           "pr-10 h-10 sm:h-11 text-sm",
                           isPromoCodeValid === true && "border-green-500 bg-green-50 dark:bg-green-950/20",
@@ -1632,6 +1632,14 @@ const ReservationForm = () => {
                         {t('language') === 'TR' 
                           ? 'Kod olmadan da %10 dönüş indirimi otomatik uygulanır' 
                           : '10% return discount is applied automatically without a code'}
+                      </p>
+                    )}
+                    {activePromo?.validUntil && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {t('language') === 'TR' 
+                          ? `Kod son kullanım: ${new Date(activePromo.validUntil).toLocaleDateString('tr-TR')}` 
+                          : `Code valid until: ${new Date(activePromo.validUntil).toLocaleDateString('en-US')}`}
                       </p>
                     )}
                   </div>
