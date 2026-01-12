@@ -80,12 +80,8 @@ const CappadociaAirportTransferGuide = () => {
     <WebsiteLayout>
       <ReadingProgressBar />
       <SEOHead
-        title={language === 'TR' 
-          ? "Kapadokya Havalimanı Transfer Rehberi 2025 | Fiyatlar & Balon Turları" 
-          : "Cappadocia Airport Transfer Guide 2025 | Prices & Balloon Tours"}
-        description={language === 'TR'
-          ? "Kayseri ve Nevşehir havalimanlarından Göreme, Ürgüp ve diğer Kapadokya bölgelerine VIP transfer. Balon turu transferleri, güncel fiyatlar ve otel listesi."
-          : "VIP transfer from Kayseri and Nevsehir airports to Göreme, Ürgüp and other Cappadocia regions. Balloon tour transfers, current prices and hotel list."}
+        title={t("blogCappadociaSeoTitle")}
+        description={t("blogCappadociaSeoDesc")}
         keywords="Cappadocia airport transfer 2025, Kayseri airport to Göreme, Nevsehir airport transfer, Cappadocia balloon tour transfer, Göreme hotel transfer, Ürgüp transfer, Cappadocia VIP transfer price, Kapadokya havalimanı transfer, balon turu transfer"
         canonicalPath="/blog/cappadocia-airport-transfer-guide"
         ogImage="https://meettransfer.app/og/cappadocia-transfer-og.jpg"
@@ -99,12 +95,8 @@ const CappadociaAirportTransferGuide = () => {
           { type: 'LocalBusiness' },
           {
             type: 'Article',
-            headline: language === 'TR' 
-              ? "Kapadokya Havalimanı Transfer Rehberi 2025" 
-              : "Cappadocia Airport Transfer Guide 2025",
-            description: language === 'TR'
-              ? "Kayseri ve Nevşehir havalimanlarından Kapadokya transferi hakkında kapsamlı rehber"
-              : "Comprehensive guide about transfers from Kayseri and Nevsehir airports to Cappadocia",
+            headline: t("blogCappadociaH1"),
+            description: t("blogCappadociaSeoDesc"),
             image: 'https://meettransfer.app/og/cappadocia-transfer-og.jpg',
             datePublished: '2025-01-10',
             dateModified: '2025-01-10',
@@ -164,9 +156,7 @@ const CappadociaAirportTransferGuide = () => {
 
         {/* Share Buttons */}
         <ShareButtons 
-          title={language === 'TR' 
-            ? "Kapadokya Havalimanı Transfer Rehberi 2025" 
-            : "Cappadocia Airport Transfer Guide 2025"} 
+          title={t("blogCappadociaH1")} 
           className="mb-8" 
         />
 
@@ -174,9 +164,7 @@ const CappadociaAirportTransferGuide = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
             src={cappadociaTransferHero} 
-            alt={language === 'TR' 
-              ? "Kapadokya Havalimanı Transfer 2025 - Göreme, Ürgüp, Uçhisar Otellere VIP Transfer" 
-              : "Cappadocia Airport Transfer 2025 - VIP Transfer to Göreme, Ürgüp, Uchisar Hotels"}
+            alt={t("blogCappadociaHeroAlt")}
             className="w-full h-full object-cover"
             loading="eager"
           />
