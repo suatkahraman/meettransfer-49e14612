@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { 
   AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, 
   ExternalLink, AlertTriangle, Info, Globe, Languages, Link2, FileText, Tag,
-  Bot, Gauge, Clock, Zap, FileCode, Map, Share2, Twitter, Facebook, Linkedin, Image
+  Bot, Gauge, Clock, Zap, FileCode, Map, Share2, Twitter, Facebook, Image
 } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, type Language } from '@/hooks/useLanguageFromUrl';
 import { useSitemapRobotsValidation } from '@/hooks/useSitemapRobotsValidation';
@@ -1606,7 +1606,7 @@ const SEODebugPage = () => {
         </Card>
 
         {/* Social Preview Card */}
-        <Card className="border-pink-500/30 bg-pink-500/5">
+        <Card className="border-primary/30 bg-primary/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <Share2 className="h-4 w-4" />
@@ -1615,7 +1615,7 @@ const SEODebugPage = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-xs text-muted-foreground">
-              Open Graph ve Twitter Card meta etiketlerini kontrol edin, Facebook/Twitter/LinkedIn paylaşım önizlemelerini görün
+              Open Graph ve Twitter Card meta etiketlerini kontrol edin, paylaşım önizlemelerini görün
             </p>
             <Button
               onClick={() => {
@@ -1625,7 +1625,6 @@ const SEODebugPage = () => {
               disabled={isScanningSocial}
               size="sm"
               variant="default"
-              className="bg-pink-600 hover:bg-pink-700"
             >
               <Image className="h-4 w-4 mr-1" />
               Sosyal Önizleme Tara
@@ -1646,14 +1645,14 @@ const SEODebugPage = () => {
                   </Badge>
                 )}
                 {socialResult.issues.length === 0 && (
-                  <Badge className="text-xs bg-green-600">Sorun Yok ✓</Badge>
+                  <Badge variant="default" className="text-xs">Sorun Yok ✓</Badge>
                 )}
               </div>
             )}
           </CardContent>
         </Card>
 
-
+        <div className="flex items-center gap-1 border-b border-border overflow-x-auto">
           <button
             onClick={() => setActiveTab('current')}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
@@ -2785,7 +2784,7 @@ const SEODebugPage = () => {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base">
-                      <Facebook className="h-4 w-4 text-blue-600" />
+                      <Facebook className="h-4 w-4 text-primary" />
                       Facebook Önizleme
                     </CardTitle>
                   </CardHeader>
@@ -2807,7 +2806,7 @@ const SEODebugPage = () => {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base">
-                      <Twitter className="h-4 w-4 text-sky-500" />
+                      <Twitter className="h-4 w-4 text-primary" />
                       Twitter Önizleme
                     </CardTitle>
                   </CardHeader>
