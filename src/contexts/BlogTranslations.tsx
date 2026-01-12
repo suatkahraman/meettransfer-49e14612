@@ -4709,6 +4709,13 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogGalleryAlt2: "Преміум Mercedes Vito VIP екстер'єр для люксових трансферів",
     blogGalleryAlt3: "Mercedes Sprinter з просторим багажним відділенням",
     blogGalleryAlt4: "Задоволені пасажири насолоджуються комфортним трансфером",
+    
+    // Istanbul Price Guide Alt Texts - Ukrainian
+    blogIstanbulPriceHeroAlt: "Приватний трансфер з аеропорту Стамбула 2025 - Mercedes Vito VIP сервіс до Таксіма, Султанахмета та центру міста",
+    blogPriceGalleryAlt1: "Інтер'єр Mercedes Vito VIP для трансферів з аеропорту Стамбула",
+    blogPriceGalleryAlt2: "VIP шкіряний інтер'єр для люксових трансферів по Стамбулу",
+    blogPriceGalleryAlt3: "Мікроавтобус Mercedes Sprinter VIP для групових трансферів",
+    blogPriceGalleryAlt4: "Служба зустрічі в аеропорту з професійним водієм в аеропорту Стамбула",
     blogFethiyeHeroAlt: "Трансфер з аеропорту до Фетхіє 2025 - Даламан до Фетхіє, Олюденіз VIP трансфер",
     blogMarmarisHeroAlt: "Трансфер з аеропорту до Мармарісу 2025 - Даламан до Мармарісу VIP трансфер",
     blogAntalyaHeroAlt: "Трансфер з аеропорту Анталії 2025 - Приватний VIP трансфер до Белека, Сіде, Кемера",
@@ -5347,6 +5354,13 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogGalleryAlt2: "ラグジュアリー送迎用プレミアムメルセデスVito VIPエクステリア",
     blogGalleryAlt3: "広々とした荷物スペースを備えたメルセデススプリンター",
     blogGalleryAlt4: "快適な送迎サービスを楽しむ満足した乗客",
+    
+    // Istanbul Price Guide Alt Texts - Japanese
+    blogIstanbulPriceHeroAlt: "イスタンブール空港プライベート送迎2025 - タクシム、スルタンアフメット、市内中心部へのメルセデスVito VIPサービス",
+    blogPriceGalleryAlt1: "イスタンブール空港送迎用メルセデスVito VIPインテリア",
+    blogPriceGalleryAlt2: "イスタンブール高級送迎用VIPレザーインテリア",
+    blogPriceGalleryAlt3: "グループ送迎用メルセデススプリンターVIPミニバス",
+    blogPriceGalleryAlt4: "イスタンブール空港でプロのドライバーによる空港出迎えサービス",
     blogFethiyeHeroAlt: "フェティエ空港送迎2025 - ダラマンからフェティエ、オルデニズVIP送迎",
     blogMarmarisHeroAlt: "マルマリス空港送迎2025 - ダラマンからマルマリスVIP送迎",
     blogAntalyaHeroAlt: "アンタルヤ空港送迎2025 - ベレク、シデ、ケメルへのプライベートVIP送迎",

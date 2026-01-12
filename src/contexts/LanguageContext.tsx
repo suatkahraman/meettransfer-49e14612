@@ -1211,6 +1211,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryAlt3: "Mercedes Sprinter with spacious luggage compartment",
     blogGalleryAlt4: "Happy passengers enjoying comfortable transfer service",
     
+    // Istanbul Price Guide Alt Texts
+    blogIstanbulPriceHeroAlt: "Istanbul Airport Private Transfer 2025 - Mercedes Vito VIP Service to Taksim, Sultanahmet and City Center",
+    blogPriceGalleryAlt1: "Mercedes Vito VIP interior for Istanbul Airport transfers",
+    blogPriceGalleryAlt2: "VIP leather interior for luxury Istanbul transfers",
+    blogPriceGalleryAlt3: "Mercedes Sprinter VIP minibus for group transfers",
+    blogPriceGalleryAlt4: "Airport pickup service with professional driver at Istanbul Airport",
+    
     // Hero Image Alt Texts
     blogFethiyeHeroAlt: "Fethiye Airport Transfer 2025 - Dalaman to Fethiye, Ölüdeniz, Göcek VIP Transfer",
     blogMarmarisHeroAlt: "Marmaris Airport Transfer 2025 - Dalaman to Marmaris, İçmeler, Datça VIP Transfer",
@@ -3027,6 +3034,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryAlt3: "Mercedes Sprinter mit geräumigem Gepäckraum",
     blogGalleryAlt4: "Zufriedene Passagiere genießen komfortablen Transferservice",
     
+    // Istanbul Price Guide Alt Texts - German
+    blogIstanbulPriceHeroAlt: "Istanbul Flughafen Privattransfer 2025 - Mercedes Vito VIP Service nach Taksim, Sultanahmet und Stadtzentrum",
+    blogPriceGalleryAlt1: "Mercedes Vito VIP Innenraum für Istanbul Flughafentransfers",
+    blogPriceGalleryAlt2: "VIP Lederinnenraum für luxuriöse Istanbul Transfers",
+    blogPriceGalleryAlt3: "Mercedes Sprinter VIP Minibus für Gruppentransfers",
+    blogPriceGalleryAlt4: "Flughafen-Abholservice mit professionellem Fahrer am Istanbul Flughafen",
+    
     // Hero Image Alt Texts - German
     blogFethiyeHeroAlt: "Fethiye Flughafentransfer 2025 - Dalaman nach Fethiye, Ölüdeniz, Göcek VIP Transfer",
     blogMarmarisHeroAlt: "Marmaris Flughafentransfer 2025 - Dalaman nach Marmaris, İçmeler, Datça VIP Transfer",
@@ -4652,6 +4666,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryAlt3: "Mercedes Sprinter avec compartiment bagages spacieux",
     blogGalleryAlt4: "Passagers satisfaits profitant du service de transfert confortable",
     
+    // Istanbul Price Guide Alt Texts - French
+    blogIstanbulPriceHeroAlt: "Transfert Privé Aéroport Istanbul 2025 - Service Mercedes Vito VIP vers Taksim, Sultanahmet et Centre-Ville",
+    blogPriceGalleryAlt1: "Intérieur Mercedes Vito VIP pour transferts Aéroport Istanbul",
+    blogPriceGalleryAlt2: "Intérieur cuir VIP pour transferts luxe Istanbul",
+    blogPriceGalleryAlt3: "Minibus Mercedes Sprinter VIP pour transferts groupe",
+    blogPriceGalleryAlt4: "Service de prise en charge aéroport avec chauffeur professionnel à l'Aéroport Istanbul",
+    
     // Hero Image Alt Texts - French
     blogFethiyeHeroAlt: "Transfert Aéroport Fethiye 2025 - Dalaman vers Fethiye, Ölüdeniz, Göcek Transfert VIP",
     blogMarmarisHeroAlt: "Transfert Aéroport Marmaris 2025 - Dalaman vers Marmaris, İçmeler, Datça Transfert VIP",
@@ -5909,6 +5930,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryAlt2: "Премиум Mercedes Vito VIP экстерьер для люксовых трансферов",
     blogGalleryAlt3: "Mercedes Sprinter с просторным багажным отделением",
     blogGalleryAlt4: "Довольные пассажиры наслаждаются комфортным трансфером",
+    
+    // Istanbul Price Guide Alt Texts - Russian
+    blogIstanbulPriceHeroAlt: "Частный трансфер из аэропорта Стамбула 2025 - Mercedes Vito VIP сервис до Таксима, Султанахмета и центра города",
+    blogPriceGalleryAlt1: "Интерьер Mercedes Vito VIP для трансферов из аэропорта Стамбула",
+    blogPriceGalleryAlt2: "VIP кожаный интерьер для люксовых трансферов по Стамбулу",
+    blogPriceGalleryAlt3: "Микроавтобус Mercedes Sprinter VIP для групповых трансферов",
+    blogPriceGalleryAlt4: "Служба встречи в аэропорту с профессиональным водителем в аэропорту Стамбула",
     
     // Hero Image Alt Texts - Russian
     blogFethiyeHeroAlt: "Трансфер из аэропорта в Фетхие 2025 - Даламан в Фетхие, Олюдениз, Гёджек VIP трансфер",
@@ -7229,6 +7257,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryAlt3: "Mercedes Sprinter con ampio vano bagagli",
     blogGalleryAlt4: "Passeggeri soddisfatti che godono del servizio di trasferimento confortevole",
     
+    // Istanbul Price Guide Alt Texts - Italian
+    blogIstanbulPriceHeroAlt: "Trasferimento Privato Aeroporto Istanbul 2025 - Servizio Mercedes Vito VIP per Taksim, Sultanahmet e Centro Città",
+    blogPriceGalleryAlt1: "Interni Mercedes Vito VIP per trasferimenti Aeroporto Istanbul",
+    blogPriceGalleryAlt2: "Interni in pelle VIP per trasferimenti lusso Istanbul",
+    blogPriceGalleryAlt3: "Minibus Mercedes Sprinter VIP per trasferimenti gruppo",
+    blogPriceGalleryAlt4: "Servizio di prelievo aeroportuale con autista professionista all'Aeroporto Istanbul",
+    
     // Hero Image Alt Texts - Italian
     blogFethiyeHeroAlt: "Trasferimento Aeroporto Fethiye 2025 - Dalaman a Fethiye, Ölüdeniz, Göcek Trasferimento VIP",
     blogMarmarisHeroAlt: "Trasferimento Aeroporto Marmaris 2025 - Dalaman a Marmaris, İçmeler, Datça Trasferimento VIP",
@@ -8548,6 +8583,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryAlt3: "Mercedes Sprinter con amplio maletero",
     blogGalleryAlt4: "Pasajeros satisfechos disfrutando del servicio de traslado cómodo",
     
+    // Istanbul Price Guide Alt Texts - Spanish
+    blogIstanbulPriceHeroAlt: "Traslado Privado Aeropuerto Estambul 2025 - Servicio Mercedes Vito VIP a Taksim, Sultanahmet y Centro Ciudad",
+    blogPriceGalleryAlt1: "Interior Mercedes Vito VIP para traslados Aeropuerto Estambul",
+    blogPriceGalleryAlt2: "Interior de cuero VIP para traslados de lujo Estambul",
+    blogPriceGalleryAlt3: "Minibús Mercedes Sprinter VIP para traslados grupales",
+    blogPriceGalleryAlt4: "Servicio de recogida aeropuerto con conductor profesional en Aeropuerto Estambul",
+    
     // Hero Image Alt Texts - Spanish
     blogFethiyeHeroAlt: "Traslado Aeropuerto Fethiye 2025 - Dalaman a Fethiye, Ölüdeniz, Göcek Traslado VIP",
     blogMarmarisHeroAlt: "Traslado Aeropuerto Marmaris 2025 - Dalaman a Marmaris, İçmeler, Datça Traslado VIP",
@@ -9814,6 +9856,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryAlt3: "مرسيدس سبرينتر مع مساحة أمتعة واسعة",
     blogGalleryAlt4: "ركاب سعداء يستمتعون بخدمة النقل المريحة",
     
+    // Istanbul Price Guide Alt Texts - Arabic
+    blogIstanbulPriceHeroAlt: "نقل خاص من مطار إسطنبول 2025 - خدمة مرسيدس فيتو VIP إلى تقسيم، السلطان أحمد ووسط المدينة",
+    blogPriceGalleryAlt1: "داخلية مرسيدس فيتو VIP لنقل مطار إسطنبول",
+    blogPriceGalleryAlt2: "داخلية جلد VIP للنقل الفاخر في إسطنبول",
+    blogPriceGalleryAlt3: "حافلة صغيرة مرسيدس سبرينتر VIP لنقل المجموعات",
+    blogPriceGalleryAlt4: "خدمة الاستقبال في المطار مع سائق محترف في مطار إسطنبول",
+    
     // Hero Image Alt Texts - Arabic
     blogFethiyeHeroAlt: "نقل مطار فتحية 2025 - دالامان إلى فتحية، أولودنيز، غوجيك نقل VIP",
     blogMarmarisHeroAlt: "نقل مطار مرماريس 2025 - دالامان إلى مرماريس، إتشملر، داتشا نقل VIP",
@@ -11076,6 +11125,13 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryAlt2: "Lüks transferler için premium Mercedes Vito VIP dış görünüm",
     blogGalleryAlt3: "Geniş bagaj bölmeli Mercedes Sprinter",
     blogGalleryAlt4: "Konforlu transfer hizmetinin tadını çıkaran mutlu yolcular",
+    
+    // Istanbul Price Guide Alt Texts - Turkish
+    blogIstanbulPriceHeroAlt: "İstanbul Havalimanı Özel Transfer 2025 - Taksim, Sultanahmet ve Şehir Merkezine Mercedes Vito VIP Hizmeti",
+    blogPriceGalleryAlt1: "İstanbul Havalimanı transferleri için Mercedes Vito VIP iç mekan",
+    blogPriceGalleryAlt2: "Lüks İstanbul transferleri için VIP deri iç mekan",
+    blogPriceGalleryAlt3: "Grup transferleri için Mercedes Sprinter VIP minibüs",
+    blogPriceGalleryAlt4: "İstanbul Havalimanında profesyonel sürücü ile havalimanı karşılama hizmeti",
     
     // Hero Image Alt Texts - Turkish
     blogFethiyeHeroAlt: "Fethiye Havalimanı Transferi 2025 - Dalaman'dan Fethiye, Ölüdeniz, Göcek VIP Transfer",
