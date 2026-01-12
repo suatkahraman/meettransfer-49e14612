@@ -14,7 +14,8 @@ const platforms = [
       </svg>
     ),
     rating: "4.9",
-    reviews: "2,500+",
+    reviews: "488+",
+    url: "https://www.google.com/maps/place/Meet+Transfer/@41.0082,28.9784,15z/data=!4m8!3m7!1s0x14caba06e0f9eb91:0xc5250d5b2d326995!8m2!3d41.0082!4d28.9784!9m1!1b1!16s%2Fg%2F11bxff8vx9",
     color: "hover:bg-blue-50 dark:hover:bg-blue-950",
   },
   {
@@ -29,8 +30,9 @@ const platforms = [
         <path fill="#000" d="M12 6c-2.5 0-4.5 1-5.5 2h11c-1-1-3-2-5.5-2z"/>
       </svg>
     ),
-    rating: "5.0",
-    reviews: "850+",
+    rating: "4.7",
+    reviews: "492+",
+    url: "https://www.tripadvisor.com/Attraction_Review-g293974-d9884368-Reviews-Meet_Transfer-Istanbul.html",
     color: "hover:bg-green-50 dark:hover:bg-green-950",
   },
   {
@@ -42,6 +44,7 @@ const platforms = [
     ),
     rating: "4.8",
     reviews: "1,200+",
+    url: null,
     color: "hover:bg-gray-100 dark:hover:bg-gray-800",
   },
   {
@@ -56,6 +59,7 @@ const platforms = [
     ),
     rating: "4.7",
     reviews: "3,400+",
+    url: null,
     color: "hover:bg-green-50 dark:hover:bg-green-950",
   },
   {
@@ -69,11 +73,25 @@ const platforms = [
     ),
     rating: "4.9",
     reviews: "980+",
+    url: "https://www.trustpilot.com/review/meettransfer.app",
     color: "hover:bg-emerald-50 dark:hover:bg-emerald-950",
   },
 ];
 
 const ReviewPlatformLogos = () => {
+  const renderPlatformContent = (platform: typeof platforms[0]) => (
+    <>
+      {platform.logo}
+      <div className="flex flex-col">
+        <div className="flex items-center gap-1">
+          <span className="font-bold text-sm text-foreground">{platform.rating}</span>
+          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+        </div>
+        <span className="text-[10px] text-muted-foreground">{platform.reviews}</span>
+      </div>
+    </>
+  );
+
   return (
     <section className="py-8 bg-gradient-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4">
@@ -85,16 +103,21 @@ const ReviewPlatformLogos = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card ${platform.color} transition-colors cursor-default`}
             >
-              {platform.logo}
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1">
-                  <span className="font-bold text-sm text-foreground">{platform.rating}</span>
-                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              {platform.url ? (
+                <a
+                  href={platform.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card ${platform.color} transition-colors cursor-pointer`}
+                >
+                  {renderPlatformContent(platform)}
+                </a>
+              ) : (
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card ${platform.color} transition-colors cursor-default`}>
+                  {renderPlatformContent(platform)}
                 </div>
-                <span className="text-[10px] text-muted-foreground">{platform.reviews}</span>
-              </div>
+              )}
             </motion.div>
           ))}
         </div>
