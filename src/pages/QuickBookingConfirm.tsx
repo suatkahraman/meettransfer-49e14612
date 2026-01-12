@@ -848,73 +848,165 @@ export default function QuickBookingConfirm() {
   if (!booking) return null;
 
 
-  // Waiting for price state
+  // Waiting for price state - Enhanced UX
   if (waitingForPrice) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
-        <Card className="max-w-lg w-full">
-          <CardContent className="pt-6">
-            <div className="text-center mb-6">
-              <div className="h-16 w-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-4 animate-pulse">
-                <Clock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50/50 via-background to-orange-50/30 dark:from-amber-950/20 dark:via-background dark:to-orange-950/20 p-4">
+        <Card className="max-w-lg w-full overflow-hidden shadow-2xl border-amber-200/50 dark:border-amber-800/30">
+          {/* Animated Header Banner */}
+          <div className="relative bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite] p-6 text-white">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBjeD0iMjAiIGN5PSIyMCIgcj0iMyIvPjwvZz48L3N2Zz4=')] opacity-30" />
+            <div className="relative text-center">
+              {/* Animated Icon Container */}
+              <div className="relative w-20 h-20 mx-auto mb-4">
+                {/* Outer pulsing ring */}
+                <div className="absolute inset-0 rounded-full bg-white/20 animate-ping" style={{ animationDuration: '2s' }} />
+                {/* Middle rotating ring */}
+                <div 
+                  className="absolute inset-1 rounded-full border-4 border-white/30 border-t-white animate-spin"
+                  style={{ animationDuration: '2s' }}
+                />
+                {/* Inner icon */}
+                <div className="absolute inset-3 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+                  <Clock className="h-8 w-8 text-amber-600" />
+                </div>
               </div>
-              <h1 className="text-2xl font-bold mb-2">{t("qbWaitingForPrice")}</h1>
-              <p className="text-muted-foreground">
-                {t("qbWaitingForPriceDesc")}
+              <h1 className="text-2xl font-bold mb-2 drop-shadow-md">
+                {t("qbWaitingForPrice") || "Fiyat Hesaplanıyor"}
+              </h1>
+              <p className="text-white/90 text-sm max-w-xs mx-auto">
+                {t("qbWaitingForPriceDesc") || "Rotanız için en iyi fiyatı hesaplıyoruz..."}
               </p>
             </div>
+          </div>
 
-            <div className="bg-muted/50 rounded-lg p-4 mb-6 space-y-3">
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t("qbPickup")}</p>
-                  <p className="font-medium">{booking.pickup}</p>
+          <CardContent className="pt-6 pb-6">
+            {/* Progress Steps */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white">
+                  <CheckCircle2 className="h-5 w-5" />
                 </div>
+                <span className="text-xs text-muted-foreground hidden sm:inline">{t("qbRequestReceived") || "İstek Alındı"}</span>
+              </div>
+              <div className="h-0.5 w-8 bg-gradient-to-r from-green-500 to-amber-500" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white animate-pulse">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
+                <span className="text-xs text-muted-foreground hidden sm:inline">{t("qbCalculatingPrice") || "Fiyat Hesaplanıyor"}</span>
+              </div>
+              <div className="h-0.5 w-8 bg-muted" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+                  <CheckCircle className="h-5 w-5" />
+                </div>
+                <span className="text-xs text-muted-foreground hidden sm:inline">{t("qbReadyToBook") || "Rezervasyona Hazır"}</span>
+              </div>
+            </div>
+
+            {/* Booking Details Card */}
+            <div className="bg-gradient-to-br from-muted/80 to-muted/40 rounded-xl p-4 mb-6 space-y-3 border border-border/50">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="h-5 w-5 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t("qbPickup")}</p>
+                  <p className="font-semibold text-sm truncate">{booking.pickup}</p>
+                </div>
+              </div>
+              
+              {/* Route Arrow */}
+              <div className="flex justify-center">
+                <div className="w-0.5 h-4 bg-gradient-to-b from-primary/50 to-accent/50 rounded-full" />
               </div>
 
               <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-accent mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t("qbDropoff")}</p>
-                  <p className="font-medium">{booking.dropoff}</p>
+                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="h-5 w-5 text-accent" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t("qbDropoff")}</p>
+                  <p className="font-semibold text-sm truncate">{booking.dropoff}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t("qbDate")}</p>
-                    <p className="font-medium">
-                      {format(parseISO(booking.pickup_date), "dd/MM/yyyy")}
-                    </p>
-                  </div>
-                </div>
+              <div className="h-px bg-border/50 my-2" />
 
-                <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t("qbTime")}</p>
-                    <p className="font-medium">{booking.pickup_time}</p>
-                  </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center p-2 rounded-lg bg-background/50">
+                  <Calendar className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                  <p className="text-[10px] text-muted-foreground">{t("qbDate")}</p>
+                  <p className="font-bold text-xs">
+                    {format(parseISO(booking.pickup_date), "dd MMM")}
+                  </p>
+                </div>
+                <div className="text-center p-2 rounded-lg bg-background/50">
+                  <Clock className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                  <p className="text-[10px] text-muted-foreground">{t("qbTime")}</p>
+                  <p className="font-bold text-xs">{booking.pickup_time}</p>
+                </div>
+                <div className="text-center p-2 rounded-lg bg-background/50">
+                  <Users className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                  <p className="text-[10px] text-muted-foreground">{t("qbPassengers")}</p>
+                  <p className="font-bold text-xs">{booking.passengers}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <RefreshCw className="h-5 w-5 text-amber-600 dark:text-amber-400 animate-spin" />
-                <p className="font-medium text-amber-700 dark:text-amber-300">
-                  {t("qbWaitingForPriceQuote")}
-                </p>
+            {/* Status Message */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border border-amber-200 dark:border-amber-800/50 rounded-xl p-4">
+              {/* Animated background effect */}
+              <div 
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/30 to-transparent dark:via-amber-500/10 -translate-x-full animate-[slideRight_2s_ease-in-out_infinite]"
+              />
+              
+              <div className="relative flex items-center gap-4">
+                <div className="flex-shrink-0">
+                  <div className="relative">
+                    <RefreshCw className="h-6 w-6 text-amber-600 dark:text-amber-400 animate-spin" style={{ animationDuration: '2s' }} />
+                    <div className="absolute inset-0 animate-ping opacity-30">
+                      <RefreshCw className="h-6 w-6 text-amber-600" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-amber-800 dark:text-amber-300 text-sm">
+                    {t("qbWaitingForPriceQuote") || "En İyi Fiyat Hazırlanıyor"}
+                  </p>
+                  <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">
+                    {t("qbPageAutoUpdate") || "Sayfa otomatik güncellenecek"}
+                  </p>
+                </div>
               </div>
-              <p className="text-sm text-amber-600 dark:text-amber-400">
-                {t("qbPageAutoUpdate")}
-              </p>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="flex items-center justify-center gap-4 mt-6 pt-4 border-t border-border/50">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <span className="text-xs">{t("qbFreeCancellation") || "Ücretsiz İptal"}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <span className="text-xs">{t("qbBestPrice") || "En İyi Fiyat"}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
+        
+        {/* Custom animations */}
+        <style>{`
+          @keyframes shimmer {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+          }
+          @keyframes slideRight {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+        `}</style>
       </div>
     );
   }
