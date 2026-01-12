@@ -313,7 +313,7 @@ export function usePWAInstall() {
           }
         }
 
-        const { error } = await supabase.from('app_installations').insert({
+        const { error } = await supabase.from('app_installations').upsert({
           visitor_id: visitorId,
           user_id: user?.id || null,
           device: /mobile|tablet/i.test(userAgent) ? 'mobile' : 'desktop',
@@ -322,6 +322,9 @@ export function usePWAInstall() {
           country_code: geo?.countryCode || null,
           country_name: geo?.countryName || null,
           city: geo?.city || null,
+        }, { 
+          onConflict: 'visitor_id',
+          ignoreDuplicates: true 
         });
 
         if (error) {
