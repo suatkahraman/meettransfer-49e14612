@@ -236,14 +236,20 @@ const AgencyLoginScreen = () => {
           await supabase.auth.signOut();
           
           // Device not trusted or suspicious activity - require 2FA
-          setPendingRole(userRole);
-          setViewMode('2fa');
           const langCode = language === 'TR' ? 'tr' : 'en';
-          await initiate2FA(authData.user.id, validation.email, userRole, langCode);
-          toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
+          const result = await initiate2FA(authData.user.id, validation.email, userRole, langCode);
           
-          // Clear the flag after initiating 2FA
-          localStorage.removeItem(require2FAKey);
+          if (result.success) {
+            // Only switch to 2FA view if email was sent successfully
+            setPendingRole(userRole);
+            setViewMode('2fa');
+            toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
+            // Clear the flag after initiating 2FA
+            localStorage.removeItem(require2FAKey);
+          } else {
+            // Email sending failed - show error and stay on login screen
+            toast.error(result.error || (language === 'TR' ? 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.' : 'Failed to send verification code. Please try again.'));
+          }
         } else {
           // Device trusted and no suspicious activity - proceed with login
           await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
