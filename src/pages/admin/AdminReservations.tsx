@@ -576,7 +576,8 @@ const AdminReservations = () => {
       .eq('id', deleteDialog.reservationId);
 
     if (error) {
-      toast.error('Rezervasyon silinemedi');
+      console.error('Delete reservation error:', error);
+      toast.error(`Rezervasyon silinemedi: ${error.message || error.code || 'Bilinmeyen hata'}`);
     } else {
       await logAction({
         action: 'DELETE',

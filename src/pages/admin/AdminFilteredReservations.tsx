@@ -263,13 +263,16 @@ const AdminFilteredReservations = () => {
         .delete()
         .eq('id', reservationToDelete.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete reservation error:', error);
+        throw new Error(error.message || error.code || 'Silme hatası');
+      }
 
       setReservations(prev => prev.filter(r => r.id !== reservationToDelete.id));
       toast.success('Rezervasyon silindi');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting reservation:', error);
-      toast.error('Silme sırasında hata oluştu');
+      toast.error(`Silme sırasında hata: ${error.message || 'Bilinmeyen hata'}`);
     } finally {
       setProcessingId(null);
       setDeleteDialogOpen(false);
