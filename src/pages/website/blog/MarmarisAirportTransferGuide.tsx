@@ -139,7 +139,7 @@ const MarmarisAirportTransferGuide = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-8">
           <img 
             src={marmarisTransferHero} 
-            alt="Marmaris Airport Transfer 2025 - Dalaman to Marmaris, İçmeler, Datça VIP Transfer"
+            alt={t("blogMarmarisHeroAlt")}
             className="w-full h-full object-cover"
             loading="eager"
           />
@@ -250,22 +250,22 @@ const MarmarisAirportTransferGuide = () => {
               images={[
                 { 
                   src: vitoFamilyInterior, 
-                  alt: "Mercedes Vito Family Interior Marmaris Transfer",
+                  alt: t("blogGalleryAlt1"),
                   caption: t("blogGalleryCaption1")
                 },
                 { 
                   src: vitoExteriorBlack, 
-                  alt: "Mercedes Vito VIP Exterior",
+                  alt: t("blogGalleryAlt2"),
                   caption: t("blogGalleryCaption2")
                 },
                 { 
                   src: sprinterLuggage, 
-                  alt: "Mercedes Sprinter with luggage space",
+                  alt: t("blogGalleryAlt3"),
                   caption: t("blogGalleryCaption3")
                 },
                 { 
                   src: vitoVipPassengersDay, 
-                  alt: "Happy passengers enjoying transfer",
+                  alt: t("blogGalleryAlt4"),
                   caption: t("blogGalleryCaption4")
                 },
               ]}

@@ -154,7 +154,7 @@ const IstanbulAirportToCityGuide = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
             src={istanbulAirportCityHero} 
-            alt="Istanbul Airport to City Center 2025 - Best Transportation Options Including Private Transfer, Metro M11, and Havaist Bus"
+            alt={t("blogIstanbulHeroAlt")}
             className="w-full h-full object-cover"
             loading="eager"
           />

@@ -142,7 +142,7 @@ const AntalyaAirportTransferGuide = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-8">
           <img 
             src={antalyaTransferHero} 
-            alt="Antalya Airport Transfer 2025 - Private VIP Transfer to Belek, Side, Kemer, Lara Beach and All-Inclusive Hotels"
+            alt={t("blogAntalyaHeroAlt")}
             className="w-full h-full object-cover"
             loading="eager"
           />
@@ -301,22 +301,22 @@ const AntalyaAirportTransferGuide = () => {
               images={[
                 { 
                   src: vitoFamilyInterior, 
-                  alt: "Mercedes Vito Family Interior Antalya Transfer",
+                  alt: t("blogGalleryAlt1"),
                   caption: t("blogGalleryCaption1")
                 },
                 { 
                   src: vitoExteriorBlack, 
-                  alt: "Mercedes Vito VIP Exterior",
+                  alt: t("blogGalleryAlt2"),
                   caption: t("blogGalleryCaption2")
                 },
                 { 
                   src: sprinterLuggage, 
-                  alt: "Mercedes Sprinter with luggage space",
+                  alt: t("blogGalleryAlt3"),
                   caption: t("blogGalleryCaption3")
                 },
                 { 
                   src: vitoVipPassengersDay, 
-                  alt: "Happy passengers enjoying transfer",
+                  alt: t("blogGalleryAlt4"),
                   caption: t("blogGalleryCaption4")
                 },
               ]}

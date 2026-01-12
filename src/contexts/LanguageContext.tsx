@@ -1205,6 +1205,23 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryCaption3: "Ample luggage space for families",
     blogGalleryCaption4: "Comfortable journey to your resort",
     
+    // Gallery Alt Texts
+    blogGalleryAlt1: "Mercedes Vito family interior with comfortable seating for airport transfers",
+    blogGalleryAlt2: "Premium Mercedes Vito VIP exterior for luxury transfers",
+    blogGalleryAlt3: "Mercedes Sprinter with spacious luggage compartment",
+    blogGalleryAlt4: "Happy passengers enjoying comfortable transfer service",
+    
+    // Hero Image Alt Texts
+    blogFethiyeHeroAlt: "Fethiye Airport Transfer 2025 - Dalaman to Fethiye, Ölüdeniz, Göcek VIP Transfer",
+    blogMarmarisHeroAlt: "Marmaris Airport Transfer 2025 - Dalaman to Marmaris, İçmeler, Datça VIP Transfer",
+    blogAntalyaHeroAlt: "Antalya Airport Transfer 2025 - Private VIP Transfer to Belek, Side, Kemer, Lara Beach",
+    blogDubaiHeroAlt: "Dubai Airport Transfer 2025 - VIP Private Transfer to Downtown, Palm Jumeirah, Marina",
+    blogAydinHeroAlt: "Aydin Airport Transfer 2025 - Izmir to Kusadasi, Ephesus, Didim VIP Transfer",
+    blogMuglaHeroAlt: "Mugla Airport Transfer 2025 - Dalaman to Bodrum, Marmaris, Fethiye VIP Transfer",
+    blogOludenizHeroAlt: "Ölüdeniz Airport Transfer 2025 - Dalaman to Ölüdeniz, Blue Lagoon VIP Transfer",
+    blogCyprusHeroAlt: "Cyprus Airport Transfer 2025 - VIP Private Transfer from Larnaca and Paphos Airports",
+    blogIstanbulHeroAlt: "Istanbul Airport to City Center 2025 - Private Transfer, Metro M11, Havaist Bus Options",
+    
     // Cyprus Airport Transfer Guide - Detailed
     blogCyprusSeoTitle: "Cyprus Airport Transfer Guide 2025 | Larnaca to Ayia Napa, Paphos to Limassol",
     blogCyprusSeoDesc: "Complete Cyprus airport transfer guide. Private VIP transfers from Larnaca & Paphos airports from €35. Fixed prices to Ayia Napa, Limassol, Protaras, Kyrenia.",
@@ -3004,6 +3021,23 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryCaption3: "Ausreichend Gepäckraum für Familien",
     blogGalleryCaption4: "Komfortable Fahrt zu Ihrem Resort",
     
+    // Gallery Alt Texts - German
+    blogGalleryAlt1: "Mercedes Vito Familieninterieur mit bequemen Sitzen für Flughafentransfers",
+    blogGalleryAlt2: "Premium Mercedes Vito VIP Außenansicht für Luxustransfers",
+    blogGalleryAlt3: "Mercedes Sprinter mit geräumigem Gepäckraum",
+    blogGalleryAlt4: "Zufriedene Passagiere genießen komfortablen Transferservice",
+    
+    // Hero Image Alt Texts - German
+    blogFethiyeHeroAlt: "Fethiye Flughafentransfer 2025 - Dalaman nach Fethiye, Ölüdeniz, Göcek VIP Transfer",
+    blogMarmarisHeroAlt: "Marmaris Flughafentransfer 2025 - Dalaman nach Marmaris, İçmeler, Datça VIP Transfer",
+    blogAntalyaHeroAlt: "Antalya Flughafentransfer 2025 - Privater VIP Transfer nach Belek, Side, Kemer, Lara Beach",
+    blogDubaiHeroAlt: "Dubai Flughafentransfer 2025 - VIP Privattransfer nach Downtown, Palm Jumeirah, Marina",
+    blogAydinHeroAlt: "Aydin Flughafentransfer 2025 - Izmir nach Kusadasi, Ephesus, Didim VIP Transfer",
+    blogMuglaHeroAlt: "Mugla Flughafentransfer 2025 - Dalaman nach Bodrum, Marmaris, Fethiye VIP Transfer",
+    blogOludenizHeroAlt: "Ölüdeniz Flughafentransfer 2025 - Dalaman nach Ölüdeniz, Blaue Lagune VIP Transfer",
+    blogCyprusHeroAlt: "Zypern Flughafentransfer 2025 - VIP Privattransfer von Larnaca und Paphos Flughäfen",
+    blogIstanbulHeroAlt: "Istanbul Flughafen ins Stadtzentrum 2025 - Privattransfer, Metro M11, Havaist Bus Optionen",
+    
     // ============================================
     // Blog Detailed Content - Cyprus
     // ============================================
@@ -4611,6 +4645,23 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryCaption2: "Mercedes Vito premium pour les transferts resort",
     blogGalleryCaption3: "Grand espace bagages pour les familles",
     blogGalleryCaption4: "Voyage confortable vers votre resort",
+    
+    // Gallery Alt Texts - French
+    blogGalleryAlt1: "Intérieur Mercedes Vito familial avec sièges confortables pour transferts aéroport",
+    blogGalleryAlt2: "Extérieur Mercedes Vito VIP premium pour transferts luxe",
+    blogGalleryAlt3: "Mercedes Sprinter avec compartiment bagages spacieux",
+    blogGalleryAlt4: "Passagers satisfaits profitant du service de transfert confortable",
+    
+    // Hero Image Alt Texts - French
+    blogFethiyeHeroAlt: "Transfert Aéroport Fethiye 2025 - Dalaman vers Fethiye, Ölüdeniz, Göcek Transfert VIP",
+    blogMarmarisHeroAlt: "Transfert Aéroport Marmaris 2025 - Dalaman vers Marmaris, İçmeler, Datça Transfert VIP",
+    blogAntalyaHeroAlt: "Transfert Aéroport Antalya 2025 - Transfert VIP Privé vers Belek, Side, Kemer, Lara Beach",
+    blogDubaiHeroAlt: "Transfert Aéroport Dubai 2025 - Transfert VIP Privé vers Downtown, Palm Jumeirah, Marina",
+    blogAydinHeroAlt: "Transfert Aéroport Aydin 2025 - Izmir vers Kusadasi, Ephèse, Didim Transfert VIP",
+    blogMuglaHeroAlt: "Transfert Aéroport Mugla 2025 - Dalaman vers Bodrum, Marmaris, Fethiye Transfert VIP",
+    blogOludenizHeroAlt: "Transfert Aéroport Ölüdeniz 2025 - Dalaman vers Ölüdeniz, Lagon Bleu Transfert VIP",
+    blogCyprusHeroAlt: "Transfert Aéroport Chypre 2025 - Transfert VIP Privé depuis Larnaca et Paphos",
+    blogIstanbulHeroAlt: "Aéroport Istanbul vers Centre-Ville 2025 - Transfert Privé, Métro M11, Bus Havaist",
 
     // Cappadocia Blog Translations - French
     blogCappadociaFaq1Q: "Quel aéroport est le plus proche de la Cappadoce ?",
@@ -5852,6 +5903,23 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryCaption2: "Премиум Mercedes Vito для курортных трансферов",
     blogGalleryCaption3: "Вместительный багажник для семей",
     blogGalleryCaption4: "Комфортная поездка на ваш курорт",
+    
+    // Gallery Alt Texts - Russian
+    blogGalleryAlt1: "Семейный интерьер Mercedes Vito с удобными сиденьями для трансфера из аэропорта",
+    blogGalleryAlt2: "Премиум Mercedes Vito VIP экстерьер для люксовых трансферов",
+    blogGalleryAlt3: "Mercedes Sprinter с просторным багажным отделением",
+    blogGalleryAlt4: "Довольные пассажиры наслаждаются комфортным трансфером",
+    
+    // Hero Image Alt Texts - Russian
+    blogFethiyeHeroAlt: "Трансфер из аэропорта в Фетхие 2025 - Даламан в Фетхие, Олюдениз, Гёджек VIP трансфер",
+    blogMarmarisHeroAlt: "Трансфер из аэропорта в Мармарис 2025 - Даламан в Мармарис, Ичмелер, Датча VIP трансфер",
+    blogAntalyaHeroAlt: "Трансфер из аэропорта Анталии 2025 - Частный VIP трансфер в Белек, Сиде, Кемер, Лара Бич",
+    blogDubaiHeroAlt: "Трансфер из аэропорта Дубая 2025 - VIP частный трансфер в Даунтаун, Палм Джумейра, Марина",
+    blogAydinHeroAlt: "Трансфер из аэропорта Айдын 2025 - Измир в Кушадасы, Эфес, Дидим VIP трансфер",
+    blogMuglaHeroAlt: "Трансфер из аэропорта Мугла 2025 - Даламан в Бодрум, Мармарис, Фетхие VIP трансфер",
+    blogOludenizHeroAlt: "Трансфер из аэропорта в Олюдениз 2025 - Даламан в Олюдениз, Голубая Лагуна VIP трансфер",
+    blogCyprusHeroAlt: "Трансфер из аэропорта Кипра 2025 - VIP частный трансфер из Ларнаки и Пафоса",
+    blogIstanbulHeroAlt: "Аэропорт Стамбула в центр города 2025 - Частный трансфер, Метро M11, Автобус Havaist",
 
     // Antalya Blog - Hardcoded Content Translations (RU)
     blogAntalyaAirportP1: "Аэропорт Анталии (AYT) — третий по загруженности аэропорт Турции, обслуживающий более 35 миллионов пассажиров в год. Расположенный на живописной Турецкой Ривьере, он служит воротами к одним из самых красивых пляжей и древних руин Средиземноморья. Аэропорт имеет два международных терминала и один внутренний.",
@@ -7154,6 +7222,23 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryCaption2: "Mercedes Vito premium per trasferimenti resort",
     blogGalleryCaption3: "Ampio spazio bagagli per famiglie",
     blogGalleryCaption4: "Viaggio confortevole verso il vostro resort",
+    
+    // Gallery Alt Texts - Italian
+    blogGalleryAlt1: "Interni Mercedes Vito familiare con sedili comodi per trasferimenti aeroportuali",
+    blogGalleryAlt2: "Esterno Mercedes Vito VIP premium per trasferimenti di lusso",
+    blogGalleryAlt3: "Mercedes Sprinter con ampio vano bagagli",
+    blogGalleryAlt4: "Passeggeri soddisfatti che godono del servizio di trasferimento confortevole",
+    
+    // Hero Image Alt Texts - Italian
+    blogFethiyeHeroAlt: "Trasferimento Aeroporto Fethiye 2025 - Dalaman a Fethiye, Ölüdeniz, Göcek Trasferimento VIP",
+    blogMarmarisHeroAlt: "Trasferimento Aeroporto Marmaris 2025 - Dalaman a Marmaris, İçmeler, Datça Trasferimento VIP",
+    blogAntalyaHeroAlt: "Trasferimento Aeroporto Antalya 2025 - Trasferimento VIP Privato a Belek, Side, Kemer, Lara Beach",
+    blogDubaiHeroAlt: "Trasferimento Aeroporto Dubai 2025 - Trasferimento VIP Privato a Downtown, Palm Jumeirah, Marina",
+    blogAydinHeroAlt: "Trasferimento Aeroporto Aydin 2025 - Izmir a Kusadasi, Efeso, Didim Trasferimento VIP",
+    blogMuglaHeroAlt: "Trasferimento Aeroporto Mugla 2025 - Dalaman a Bodrum, Marmaris, Fethiye Trasferimento VIP",
+    blogOludenizHeroAlt: "Trasferimento Aeroporto Ölüdeniz 2025 - Dalaman a Ölüdeniz, Laguna Blu Trasferimento VIP",
+    blogCyprusHeroAlt: "Trasferimento Aeroporto Cipro 2025 - Trasferimento VIP Privato da Larnaca e Paphos",
+    blogIstanbulHeroAlt: "Aeroporto Istanbul al Centro Città 2025 - Trasferimento Privato, Metro M11, Bus Havaist",
 
     // Antalya Blog - Hardcoded Content Translations (IT)
     blogAntalyaAirportP1: "L'aeroporto di Antalya (AYT) è il terzo aeroporto più trafficato della Turchia, con oltre 35 milioni di passeggeri all'anno. Situato sulla splendida Riviera Turca, è il gateway per alcune delle più belle spiagge del Mediterraneo e antiche rovine. L'aeroporto dispone di due terminal internazionali e un terminal domestico.",
@@ -8456,6 +8541,23 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryCaption2: "Mercedes Vito premium para traslados a resort",
     blogGalleryCaption3: "Amplio espacio de equipaje para familias",
     blogGalleryCaption4: "Viaje cómodo a su resort",
+    
+    // Gallery Alt Texts - Spanish
+    blogGalleryAlt1: "Interior Mercedes Vito familiar con asientos cómodos para traslados aeropuerto",
+    blogGalleryAlt2: "Exterior Mercedes Vito VIP premium para traslados de lujo",
+    blogGalleryAlt3: "Mercedes Sprinter con amplio maletero",
+    blogGalleryAlt4: "Pasajeros satisfechos disfrutando del servicio de traslado cómodo",
+    
+    // Hero Image Alt Texts - Spanish
+    blogFethiyeHeroAlt: "Traslado Aeropuerto Fethiye 2025 - Dalaman a Fethiye, Ölüdeniz, Göcek Traslado VIP",
+    blogMarmarisHeroAlt: "Traslado Aeropuerto Marmaris 2025 - Dalaman a Marmaris, İçmeler, Datça Traslado VIP",
+    blogAntalyaHeroAlt: "Traslado Aeropuerto Antalya 2025 - Traslado VIP Privado a Belek, Side, Kemer, Lara Beach",
+    blogDubaiHeroAlt: "Traslado Aeropuerto Dubai 2025 - Traslado VIP Privado a Downtown, Palm Jumeirah, Marina",
+    blogAydinHeroAlt: "Traslado Aeropuerto Aydin 2025 - Izmir a Kusadasi, Éfeso, Didim Traslado VIP",
+    blogMuglaHeroAlt: "Traslado Aeropuerto Mugla 2025 - Dalaman a Bodrum, Marmaris, Fethiye Traslado VIP",
+    blogOludenizHeroAlt: "Traslado Aeropuerto Ölüdeniz 2025 - Dalaman a Ölüdeniz, Laguna Azul Traslado VIP",
+    blogCyprusHeroAlt: "Traslado Aeropuerto Chipre 2025 - Traslado VIP Privado desde Larnaca y Paphos",
+    blogIstanbulHeroAlt: "Aeropuerto Estambul al Centro Ciudad 2025 - Traslado Privado, Metro M11, Bus Havaist",
 
     // Antalya Blog - Hardcoded Content Translations (ES)
     blogAntalyaAirportP1: "El aeropuerto de Antalya (AYT) es el tercer aeropuerto más concurrido de Turquía, con más de 35 millones de pasajeros al año. Situado en la impresionante Riviera Turca, es la puerta de entrada a algunas de las playas más hermosas del Mediterráneo y ruinas antiguas. El aeropuerto cuenta con dos terminales internacionales y una terminal doméstica.",
@@ -9705,6 +9807,23 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryCaption2: "مرسيدس فيتو فاخر لنقل المنتجعات",
     blogGalleryCaption3: "مساحة أمتعة واسعة للعائلات",
     blogGalleryCaption4: "رحلة مريحة إلى منتجعك",
+    
+    // Gallery Alt Texts - Arabic
+    blogGalleryAlt1: "داخلية مرسيدس فيتو عائلية مع مقاعد مريحة لنقل المطار",
+    blogGalleryAlt2: "مظهر خارجي لمرسيدس فيتو VIP فاخر للنقل الراقي",
+    blogGalleryAlt3: "مرسيدس سبرينتر مع مساحة أمتعة واسعة",
+    blogGalleryAlt4: "ركاب سعداء يستمتعون بخدمة النقل المريحة",
+    
+    // Hero Image Alt Texts - Arabic
+    blogFethiyeHeroAlt: "نقل مطار فتحية 2025 - دالامان إلى فتحية، أولودنيز، غوجيك نقل VIP",
+    blogMarmarisHeroAlt: "نقل مطار مرماريس 2025 - دالامان إلى مرماريس، إتشملر، داتشا نقل VIP",
+    blogAntalyaHeroAlt: "نقل مطار أنطاليا 2025 - نقل VIP خاص إلى بيليك، سيدة، كيمر، شاطئ لارا",
+    blogDubaiHeroAlt: "نقل مطار دبي 2025 - نقل VIP خاص إلى داون تاون، نخلة جميرا، مارينا",
+    blogAydinHeroAlt: "نقل مطار أيدن 2025 - إزمير إلى كوساداسي، أفسس، ديديم نقل VIP",
+    blogMuglaHeroAlt: "نقل مطار موغلا 2025 - دالامان إلى بودروم، مرماريس، فتحية نقل VIP",
+    blogOludenizHeroAlt: "نقل مطار أولودنيز 2025 - دالامان إلى أولودنيز، البحيرة الزرقاء نقل VIP",
+    blogCyprusHeroAlt: "نقل مطار قبرص 2025 - نقل VIP خاص من لارنكا وبافوس",
+    blogIstanbulHeroAlt: "مطار إسطنبول إلى وسط المدينة 2025 - نقل خاص، مترو M11، حافلة هافايست",
 
     // Cappadocia Airport Transfer Guide - Arabic
     blogCappadociaSeoTitle: "دليل النقل من مطار كابادوكيا 2025 | الأسعار ورحلات البالون",
@@ -10951,6 +11070,23 @@ const translations: Record<Language, Record<string, string>> = {
     blogGalleryCaption2: "Resort transferleri için premium Mercedes Vito",
     blogGalleryCaption3: "Aileler için bol bagaj alanı",
     blogGalleryCaption4: "Tatilinize konforlu yolculuk",
+    
+    // Gallery Alt Texts - Turkish
+    blogGalleryAlt1: "Havalimanı transferleri için konforlu koltuklu Mercedes Vito aile içi",
+    blogGalleryAlt2: "Lüks transferler için premium Mercedes Vito VIP dış görünüm",
+    blogGalleryAlt3: "Geniş bagaj bölmeli Mercedes Sprinter",
+    blogGalleryAlt4: "Konforlu transfer hizmetinin tadını çıkaran mutlu yolcular",
+    
+    // Hero Image Alt Texts - Turkish
+    blogFethiyeHeroAlt: "Fethiye Havalimanı Transferi 2025 - Dalaman'dan Fethiye, Ölüdeniz, Göcek VIP Transfer",
+    blogMarmarisHeroAlt: "Marmaris Havalimanı Transferi 2025 - Dalaman'dan Marmaris, İçmeler, Datça VIP Transfer",
+    blogAntalyaHeroAlt: "Antalya Havalimanı Transferi 2025 - Belek, Side, Kemer, Lara Beach'e Özel VIP Transfer",
+    blogDubaiHeroAlt: "Dubai Havalimanı Transferi 2025 - Downtown, Palm Jumeirah, Marina'ya VIP Özel Transfer",
+    blogAydinHeroAlt: "Aydın Havalimanı Transferi 2025 - İzmir'den Kuşadası, Efes, Didim VIP Transfer",
+    blogMuglaHeroAlt: "Muğla Havalimanı Transferi 2025 - Dalaman'dan Bodrum, Marmaris, Fethiye VIP Transfer",
+    blogOludenizHeroAlt: "Ölüdeniz Havalimanı Transferi 2025 - Dalaman'dan Ölüdeniz, Mavi Lagün VIP Transfer",
+    blogCyprusHeroAlt: "Kıbrıs Havalimanı Transferi 2025 - Larnaka ve Baf Havalimanlarından VIP Özel Transfer",
+    blogIstanbulHeroAlt: "İstanbul Havalimanından Şehir Merkezine 2025 - Özel Transfer, Metro M11, Havaist Otobüs Seçenekleri",
 
     // Cyprus Airport Transfer Guide - Detailed (TR)
     blogCyprusSeoTitle: "Kıbrıs Havalimanı Transfer Rehberi 2025 | Larnaka'dan Ayia Napa'ya, Baf'tan Limasol'a",
