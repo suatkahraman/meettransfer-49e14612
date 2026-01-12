@@ -539,7 +539,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
           
           // Redirect after 1.5 seconds to confirmation page
           setTimeout(() => {
-            navigate(`/quick-booking?token=${data.confirmationToken}&new=true`);
+            navigate(`/quick-booking-confirm?token=${data.confirmationToken}&new=true`);
           }, 1500);
         }, 500);
       }
@@ -951,7 +951,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                                 size="lg"
                                 onClick={() => {
                                   if (bookingCreated?.token) {
-                                    navigate(`/quick-booking?token=${bookingCreated.token}&new=true`);
+                                    navigate(`/quick-booking-confirm?token=${bookingCreated.token}&new=true`);
                                   }
                                 }}
                                 disabled={!bookingCreated}
