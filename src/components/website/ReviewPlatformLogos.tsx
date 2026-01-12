@@ -109,7 +109,7 @@ const ReviewPlatformLogos = () => {
         ),
         rating: rating.toFixed(1),
         reviews: `${totalReviews.toLocaleString()}+`,
-        url: "https://search.google.com/local/reviews?placeid=ChIJxWLW5C_byxQRxSUmLFnp2dU",
+        url: "https://g.page/r/Ccr28aszxPk0EAE/review",
         color: "hover:bg-blue-50 dark:hover:bg-blue-950",
       },
       ...staticPlatforms.map((p) => {
