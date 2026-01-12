@@ -34,31 +34,31 @@ const CyprusAirportTransferGuide = () => {
   ];
 
   const larnacaTransferPrices = [
-    { destination: "Larnaca City / Hotels", duration: "10-15 min", price: "€35-45" },
-    { destination: "Ayia Napa", duration: "40-50 min", price: "€50-65" },
-    { destination: "Protaras", duration: "50-60 min", price: "€55-70" },
-    { destination: "Limassol", duration: "45-55 min", price: "€60-75" },
-    { destination: "Nicosia", duration: "35-45 min", price: "€50-65" },
-    { destination: "Paphos", duration: "90-110 min", price: "€90-110" },
-    { destination: "Kyrenia (North Cyprus)", duration: "60-75 min", price: "€75-90" },
+    { destination: t("destLarnacaCity"), duration: "10-15 min", price: "€35-45" },
+    { destination: t("destAyiaNapa"), duration: "40-50 min", price: "€50-65" },
+    { destination: t("destProtaras"), duration: "50-60 min", price: "€55-70" },
+    { destination: t("destLimassol"), duration: "45-55 min", price: "€60-75" },
+    { destination: t("destNicosia"), duration: "35-45 min", price: "€50-65" },
+    { destination: t("destPaphos"), duration: "90-110 min", price: "€90-110" },
+    { destination: t("destKyrenia"), duration: "60-75 min", price: "€75-90" },
   ];
 
   const paphosTransferPrices = [
-    { destination: "Paphos City / Hotels", duration: "15-20 min", price: "€25-35" },
-    { destination: "Coral Bay", duration: "25-30 min", price: "€30-40" },
-    { destination: "Polis Chrysochous", duration: "45-55 min", price: "€50-65" },
-    { destination: "Limassol", duration: "55-65 min", price: "€65-80" },
-    { destination: "Larnaca", duration: "90-110 min", price: "€90-110" },
-    { destination: "Ayia Napa", duration: "120-140 min", price: "€120-140" },
+    { destination: t("destPaphosCity"), duration: "15-20 min", price: "€25-35" },
+    { destination: t("destCoralBay"), duration: "25-30 min", price: "€30-40" },
+    { destination: t("destPolis"), duration: "45-55 min", price: "€50-65" },
+    { destination: t("destLimassol"), duration: "55-65 min", price: "€65-80" },
+    { destination: t("destLarnacaCity"), duration: "90-110 min", price: "€90-110" },
+    { destination: t("destAyiaNapa"), duration: "120-140 min", price: "€120-140" },
   ];
 
   const popularDestinations = [
-    { name: "Ayia Napa", description: t("blogCyprusAyiaNapaDesc") },
-    { name: "Protaras", description: t("blogCyprusProtarasDesc") },
-    { name: "Limassol", description: t("blogCyprusLimassolDesc") },
-    { name: "Paphos", description: t("blogCyprusPaphosDesc") },
-    { name: "Kyrenia", description: t("blogCyprusKyreniaDesc") },
-    { name: "Troodos Mountains", description: t("blogCyprusTroodosDesc") },
+    { name: t("destAyiaNapa"), description: t("blogCyprusAyiaNapaDesc") },
+    { name: t("destProtaras"), description: t("blogCyprusProtarasDesc") },
+    { name: t("destLimassol"), description: t("blogCyprusLimassolDesc") },
+    { name: t("destPaphos"), description: t("blogCyprusPaphosDesc") },
+    { name: t("destKyrenia"), description: t("blogCyprusKyreniaDesc") },
+    { name: t("destTroodosMount"), description: t("blogCyprusTroodosDesc") },
   ];
 
   return (

@@ -48,14 +48,14 @@ const MarmarisAirportTransferGuide = () => {
   ];
 
   const destinations = [
-    { area: "Marmaris Center", distance: "95 km", time: "90-100 min", price: "€85" },
-    { area: "İçmeler", distance: "100 km", time: "95-110 min", price: "€85" },
-    { area: "Armutalan", distance: "92 km", time: "85-95 min", price: "€85" },
-    { area: "Turunç", distance: "110 km", time: "110-120 min", price: "€95" },
-    { area: "Bozburun", distance: "140 km", time: "140-160 min", price: "€120" },
-    { area: "Datça", distance: "170 km", time: "170-200 min", price: "€150" },
-    { area: "Akyaka", distance: "65 km", time: "60-70 min", price: "€70" },
-    { area: "Köyceğiz", distance: "40 km", time: "40-50 min", price: "€60" },
+    { area: t("destMarmarisCenter"), distance: "95 km", time: "90-100 min", price: "€85" },
+    { area: t("destIcmeler"), distance: "100 km", time: "95-110 min", price: "€85" },
+    { area: t("destArmutalan"), distance: "92 km", time: "85-95 min", price: "€85" },
+    { area: t("destTurunc"), distance: "110 km", time: "110-120 min", price: "€95" },
+    { area: t("destBozburun"), distance: "140 km", time: "140-160 min", price: "€120" },
+    { area: t("destDatca"), distance: "170 km", time: "170-200 min", price: "€150" },
+    { area: t("destAkyaka"), distance: "65 km", time: "60-70 min", price: "€70" },
+    { area: t("destKoycegiz"), distance: "40 km", time: "40-50 min", price: "€60" },
   ];
 
   return (
