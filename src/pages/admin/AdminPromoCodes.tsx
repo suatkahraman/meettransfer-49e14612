@@ -9,9 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Edit, Trash2, Tag, Percent, Calendar, RefreshCw, BarChart3, TrendingUp, Users } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, Tag, Percent, Calendar, RefreshCw, BarChart3, TrendingUp, Users, ExternalLink, X } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 interface PromoCode {
   id: string;
@@ -46,6 +48,18 @@ interface PromoCodeFormData {
   max_usage: string;
 }
 
+interface PromoUsageItem {
+  id: string;
+  type: 'quick_booking' | 'reservation';
+  customer_name: string | null;
+  customer_phone: string | null;
+  pickup: string;
+  dropoff: string;
+  pickup_date: string;
+  created_at: string;
+  status: string;
+}
+
 const initialFormData: PromoCodeFormData = {
   code: "",
   discount_percentage: 30,
@@ -68,6 +82,11 @@ const AdminPromoCodes = () => {
   const [saving, setSaving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [usageDialogOpen, setUsageDialogOpen] = useState(false);
+  const [usageDialogCode, setUsageDialogCode] = useState<string | null>(null);
+  const [usageDialogType, setUsageDialogType] = useState<'all' | 'quick_booking' | 'reservation'>('all');
+  const [usageItems, setUsageItems] = useState<PromoUsageItem[]>([]);
+  const [usageLoading, setUsageLoading] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -173,6 +192,87 @@ const AdminPromoCodes = () => {
 
   const getStatsForCode = (code: string): PromoCodeStats | undefined => {
     return promoStats.find(s => s.code === code);
+  };
+
+  const openUsageDialog = async (code: string | null, type: 'all' | 'quick_booking' | 'reservation') => {
+    setUsageDialogCode(code);
+    setUsageDialogType(type);
+    setUsageDialogOpen(true);
+    setUsageLoading(true);
+    setUsageItems([]);
+
+    try {
+      const items: PromoUsageItem[] = [];
+
+      // Fetch from quick_booking_requests
+      if (type === 'all' || type === 'quick_booking') {
+        let qbQuery = supabase
+          .from("quick_booking_requests")
+          .select("id, customer_name, customer_phone, pickup, dropoff, pickup_date, created_at, status, promo_code")
+          .not("promo_code", "is", null)
+          .order("created_at", { ascending: false });
+
+        if (code) {
+          qbQuery = qbQuery.eq("promo_code", code);
+        }
+
+        const { data: qbData, error: qbError } = await qbQuery;
+        if (qbError) throw qbError;
+
+        qbData?.forEach(item => {
+          items.push({
+            id: item.id,
+            type: 'quick_booking',
+            customer_name: item.customer_name,
+            customer_phone: item.customer_phone,
+            pickup: item.pickup,
+            dropoff: item.dropoff,
+            pickup_date: item.pickup_date,
+            created_at: item.created_at || '',
+            status: item.status,
+          });
+        });
+      }
+
+      // Fetch from reservations
+      if (type === 'all' || type === 'reservation') {
+        let resQuery = supabase
+          .from("reservations")
+          .select("id, customer_name, customer_phone, pickup, dropoff, pickup_date, created_at, status, promo_code")
+          .not("promo_code", "is", null)
+          .order("created_at", { ascending: false });
+
+        if (code) {
+          resQuery = resQuery.eq("promo_code", code);
+        }
+
+        const { data: resData, error: resError } = await resQuery;
+        if (resError) throw resError;
+
+        resData?.forEach(item => {
+          items.push({
+            id: item.id,
+            type: 'reservation',
+            customer_name: item.customer_name,
+            customer_phone: item.customer_phone,
+            pickup: item.pickup,
+            dropoff: item.dropoff,
+            pickup_date: item.pickup_date,
+            created_at: item.created_at || '',
+            status: item.status,
+          });
+        });
+      }
+
+      // Sort by created_at descending
+      items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setUsageItems(items);
+    } catch (error) {
+      console.error("Error fetching usage items:", error);
+      toast.error("Kullanım verileri yüklenirken hata oluştu");
+    } finally {
+      setUsageLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -466,7 +566,10 @@ const AdminPromoCodes = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => openUsageDialog(null, 'quick_booking')}
+          >
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
@@ -477,10 +580,13 @@ const AdminPromoCodes = () => {
               <div className="text-2xl font-bold text-blue-600">
                 {promoStats.reduce((acc, s) => acc + s.quick_booking_usage, 0)}
               </div>
-              <p className="text-xs text-muted-foreground">kullanım</p>
+              <p className="text-xs text-muted-foreground">kullanım - tıkla görüntüle</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => openUsageDialog(null, 'reservation')}
+          >
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className="h-4 w-4" />
@@ -491,7 +597,7 @@ const AdminPromoCodes = () => {
               <div className="text-2xl font-bold text-primary">
                 {promoStats.reduce((acc, s) => acc + s.reservation_usage, 0)}
               </div>
-              <p className="text-xs text-muted-foreground">kullanım</p>
+              <p className="text-xs text-muted-foreground">kullanım - tıkla görüntüle</p>
             </CardContent>
           </Card>
         </div>
@@ -537,15 +643,30 @@ const AdminPromoCodes = () => {
                       <TableCell>
                         {(() => {
                           const stats = getStatsForCode(promo.code);
-                          if (stats) {
+                          if (stats && stats.total_usage > 0) {
                             return (
-                              <div className="space-y-1">
-                                <div className="text-sm font-bold text-primary">
+                              <div 
+                                className="space-y-1 cursor-pointer hover:bg-muted/50 rounded p-1 -m-1 transition-colors"
+                                onClick={() => openUsageDialog(promo.code, 'all')}
+                              >
+                                <div className="text-sm font-bold text-primary flex items-center gap-1">
                                   {stats.total_usage} toplam
+                                  <ExternalLink className="h-3 w-3" />
                                 </div>
                                 <div className="text-xs text-muted-foreground">
-                                  <span className="text-blue-600">{stats.quick_booking_usage}</span> QB • 
-                                  <span className="text-green-600 ml-1">{stats.reservation_usage}</span> Rez
+                                  <span 
+                                    className="text-blue-600 hover:underline cursor-pointer"
+                                    onClick={(e) => { e.stopPropagation(); openUsageDialog(promo.code, 'quick_booking'); }}
+                                  >
+                                    {stats.quick_booking_usage} QB
+                                  </span>
+                                  {" • "}
+                                  <span 
+                                    className="text-green-600 hover:underline cursor-pointer"
+                                    onClick={(e) => { e.stopPropagation(); openUsageDialog(promo.code, 'reservation'); }}
+                                  >
+                                    {stats.reservation_usage} Rez
+                                  </span>
                                 </div>
                               </div>
                             );
@@ -611,6 +732,101 @@ const AdminPromoCodes = () => {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Usage Dialog */}
+        <Dialog open={usageDialogOpen} onOpenChange={setUsageDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Tag className="h-5 w-5 text-primary" />
+                {usageDialogCode ? (
+                  <>Promo Kodu Kullananlar: <span className="font-mono">{usageDialogCode}</span></>
+                ) : (
+                  <>Tüm {usageDialogType === 'quick_booking' ? 'Quick Booking' : 'Rezervasyon'} Kullanımları</>
+                )}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {usageLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : usageItems.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                Henüz kullanım yok
+              </div>
+            ) : (
+              <ScrollArea className="h-[60vh]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tip</TableHead>
+                      <TableHead>Müşteri</TableHead>
+                      <TableHead>Güzergah</TableHead>
+                      <TableHead>Tarih</TableHead>
+                      <TableHead>Durum</TableHead>
+                      <TableHead className="text-right">İşlem</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {usageItems.map((item) => (
+                      <TableRow key={`${item.type}-${item.id}`}>
+                        <TableCell>
+                          <Badge variant={item.type === 'quick_booking' ? 'secondary' : 'default'}>
+                            {item.type === 'quick_booking' ? 'QB' : 'Rez'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">{item.customer_name || '-'}</div>
+                          <div className="text-xs text-muted-foreground">{item.customer_phone || '-'}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm max-w-[200px] truncate" title={item.pickup}>
+                            {item.pickup}
+                          </div>
+                          <div className="text-xs text-muted-foreground max-w-[200px] truncate" title={item.dropoff}>
+                            → {item.dropoff}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">{format(new Date(item.pickup_date), "dd.MM.yyyy")}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {format(new Date(item.created_at), "dd.MM.yyyy HH:mm")}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={
+                            item.status === 'confirmed' || item.status === 'completed' ? 'default' :
+                            item.status === 'pending' || item.status === 'priced' ? 'secondary' :
+                            item.status === 'cancelled' ? 'destructive' : 'outline'
+                          }>
+                            {item.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              if (item.type === 'quick_booking') {
+                                navigate(`/admin/quick-bookings`);
+                              } else {
+                                navigate(`/admin/reservations/${item.id}/edit`);
+                              }
+                              setUsageDialogOpen(false);
+                            }}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
