@@ -98,7 +98,7 @@ const CyprusTransfer = () => {
         description={t("seoCyprusDesc")}
         keywords={t("seoCyprusKeywords")}
         canonicalPath="/cyprus-transfer"
-        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
+        ogImage="https://meettransfer.app/og/cyprus-airport-og.jpg"
       />
       <SchemaOrg
         schemas={[

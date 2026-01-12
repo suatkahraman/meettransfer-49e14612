@@ -81,7 +81,7 @@ const CappadociaAirportTransfer = () => {
         description="Book Cappadocia Airport private transfer from $35. Kayseri (ASR) & Nevşehir (NAV) to Göreme, Ürgüp, Uçhisar. Meet & greet, cave hotel delivery. Book now!"
         keywords="Cappadocia Airport transfer, Kayseri Airport transfer, Nevşehir Airport transfer, Cappadocia private transfer, Kayseri to Göreme transfer, airport to Cappadocia, Cappadocia shuttle, Göreme airport transfer"
         canonicalPath="/cappadocia-airport-transfer"
-        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
+        ogImage="https://meettransfer.app/og/cappadocia-airport-og.jpg"
       />
       <SchemaOrg
         schemas={[

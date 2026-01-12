@@ -122,7 +122,7 @@ const DubaiTransfer = () => {
         description={t("seoDubaiDesc")}
         keywords={t("seoDubaiKeywords")}
         canonicalPath="/dubai-transfer"
-        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
+        ogImage="https://meettransfer.app/og/dubai-airport-og.jpg"
       />
       <SchemaOrg
         schemas={[
