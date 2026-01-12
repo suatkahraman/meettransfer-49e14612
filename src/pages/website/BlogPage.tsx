@@ -123,6 +123,36 @@ const BlogPage = () => {
       date: "2025-01-10",
       image: privateWorthHero,
     },
+    {
+      id: "fethiye-airport-transfer-guide",
+      titleKey: "blogFethiyeTitle",
+      descriptionKey: "blogFethiyeDesc",
+      category: "Fethiye",
+      categoryKey: "fethiye",
+      readTime: 14,
+      date: "2025-01-12",
+      image: fethiyeHero,
+    },
+    {
+      id: "marmaris-airport-transfer-guide",
+      titleKey: "blogMarmarisTitle",
+      descriptionKey: "blogMarmarisDesc",
+      category: "Marmaris",
+      categoryKey: "marmaris",
+      readTime: 14,
+      date: "2025-01-12",
+      image: marmarisHero,
+    },
+    {
+      id: "oludeniz-airport-transfer-guide",
+      titleKey: "blogOludenizTitle",
+      descriptionKey: "blogOludenizDesc",
+      category: "Ölüdeniz",
+      categoryKey: "oludeniz",
+      readTime: 13,
+      date: "2025-01-12",
+      image: oludenizHero,
+    },
   ], []);
 
   // Get unique categories
