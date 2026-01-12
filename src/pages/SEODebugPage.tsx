@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, ExternalLink, AlertTriangle, Info, Globe, Languages } from 'lucide-react';
+import { AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, ExternalLink, AlertTriangle, Info, Globe, Languages, Link2 } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, type Language } from '@/hooks/useLanguageFromUrl';
 
 interface AggregateRating {
@@ -155,6 +155,38 @@ interface LanguageComparisonSummary {
   inconsistentRatings: boolean;
 }
 
+// Hreflang validation interfaces
+interface HreflangTag {
+  hreflang: string;
+  href: string;
+}
+
+interface HreflangValidationResult {
+  language: Language;
+  url: string;
+  hreflangTags: HreflangTag[];
+  issues: HreflangIssue[];
+  hasXDefault: boolean;
+  hasSelfReference: boolean;
+  scannedAt: Date;
+  error?: string;
+}
+
+interface HreflangIssue {
+  level: 'error' | 'warning' | 'info';
+  message: string;
+  affectedLanguages?: string[];
+}
+
+interface HreflangSummary {
+  totalLanguages: number;
+  scannedLanguages: number;
+  languagesWithIssues: number;
+  missingBidirectional: number;
+  missingXDefault: number;
+  missingSelfReference: number;
+}
+
 const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   EN: "",
   TR: "/tr",
@@ -175,13 +207,19 @@ const SEODebugPage = () => {
   const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [customUrl, setCustomUrl] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages'>('current');
+  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang'>('current');
   
   // Language scanning state
   const [languageScanResults, setLanguageScanResults] = useState<LanguageScanResult[]>([]);
   const [isScanningLanguages, setIsScanningLanguages] = useState(false);
   const [languageScanProgress, setLanguageScanProgress] = useState(0);
   const [languageScanPath, setLanguageScanPath] = useState('/');
+
+  // Hreflang validation state
+  const [hreflangResults, setHreflangResults] = useState<HreflangValidationResult[]>([]);
+  const [isScanningHreflang, setIsScanningHreflang] = useState(false);
+  const [hreflangScanProgress, setHreflangScanProgress] = useState(0);
+  const [hreflangScanPath, setHreflangScanPath] = useState('/');
 
   // Scan current page
   useEffect(() => {
@@ -413,6 +451,172 @@ const SEODebugPage = () => {
       languagesWithErrors: withErrors.length,
       languagesWithRatings: withRatings.length,
       inconsistentRatings: uniqueRatings.length > 1,
+    };
+  };
+
+  // Parse hreflang tags from HTML
+  const parseHreflangTags = (html: string): HreflangTag[] => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const links = doc.querySelectorAll('link[rel="alternate"][hreflang]');
+    const tags: HreflangTag[] = [];
+    
+    links.forEach(link => {
+      const hreflang = link.getAttribute('hreflang');
+      const href = link.getAttribute('href');
+      if (hreflang && href) {
+        tags.push({ hreflang, href });
+      }
+    });
+    
+    return tags;
+  };
+
+  // Scan all languages for hreflang validation
+  const scanHreflangTags = async (basePath: string = '/') => {
+    setIsScanningHreflang(true);
+    setHreflangScanProgress(0);
+    setHreflangResults([]);
+    setActiveTab('hreflang');
+
+    const baseUrl = window.location.origin;
+    const results: HreflangValidationResult[] = [];
+
+    // First, collect all hreflang data from all language versions
+    for (let i = 0; i < SUPPORTED_LANGUAGES.length; i++) {
+      const lang = SUPPORTED_LANGUAGES[i];
+      const prefix = LANGUAGE_TO_PREFIX[lang];
+      const path = prefix + (basePath === '/' ? '' : basePath);
+      const url = baseUrl + (path || '/');
+
+      try {
+        const response = await fetch(url, {
+          headers: { 'Accept': 'text/html' },
+        });
+
+        if (!response.ok) {
+          results.push({
+            language: lang,
+            url,
+            hreflangTags: [],
+            issues: [],
+            hasXDefault: false,
+            hasSelfReference: false,
+            scannedAt: new Date(),
+            error: `HTTP ${response.status}`,
+          });
+        } else {
+          const html = await response.text();
+          const hreflangTags = parseHreflangTags(html);
+          
+          results.push({
+            language: lang,
+            url,
+            hreflangTags,
+            issues: [],
+            hasXDefault: hreflangTags.some(t => t.hreflang === 'x-default'),
+            hasSelfReference: hreflangTags.some(t => t.href === url),
+            scannedAt: new Date(),
+          });
+        }
+      } catch (error) {
+        results.push({
+          language: lang,
+          url,
+          hreflangTags: [],
+          issues: [],
+          hasXDefault: false,
+          hasSelfReference: false,
+          scannedAt: new Date(),
+          error: error instanceof Error ? error.message : 'Bilinmeyen hata',
+        });
+      }
+
+      setHreflangScanProgress(((i + 1) / SUPPORTED_LANGUAGES.length) * 100);
+      setHreflangResults([...results]);
+    }
+
+    // Now validate bidirectional links and other issues
+    const validatedResults = results.map(result => {
+      if (result.error) return result;
+      
+      const issues: HreflangIssue[] = [];
+      
+      // Check for x-default
+      if (!result.hasXDefault) {
+        issues.push({
+          level: 'warning',
+          message: 'x-default hreflang etiketi eksik',
+        });
+      }
+      
+      // Check for self-reference
+      if (!result.hasSelfReference) {
+        issues.push({
+          level: 'error',
+          message: 'Kendine referans (self-referencing) hreflang etiketi eksik',
+        });
+      }
+
+      // Check if all supported languages are covered
+      const languagesInTags = result.hreflangTags.map(t => t.hreflang.toUpperCase().split('-')[0]);
+      const missingLanguages = SUPPORTED_LANGUAGES.filter(lang => {
+        const langCode = lang.toLowerCase();
+        return !languagesInTags.some(t => t.toLowerCase() === langCode);
+      });
+      
+      if (missingLanguages.length > 0) {
+        issues.push({
+          level: 'warning',
+          message: `Eksik dil etiketleri: ${missingLanguages.join(', ')}`,
+          affectedLanguages: missingLanguages,
+        });
+      }
+
+      // Check bidirectional linking
+      result.hreflangTags.forEach(tag => {
+        if (tag.hreflang === 'x-default') return;
+        
+        // Find the target page in our results
+        const targetResult = results.find(r => r.url === tag.href);
+        if (targetResult && !targetResult.error) {
+          // Check if target page links back to this page
+          const hasBacklink = targetResult.hreflangTags.some(t => t.href === result.url);
+          if (!hasBacklink) {
+            issues.push({
+              level: 'error',
+              message: `${tag.hreflang} sayfası (${tag.href}) bu sayfaya geri bağlantı vermiyor`,
+            });
+          }
+        }
+      });
+
+      return { ...result, issues };
+    });
+
+    setHreflangResults(validatedResults);
+    setIsScanningHreflang(false);
+  };
+
+  // Calculate hreflang summary
+  const getHreflangSummary = (): HreflangSummary => {
+    const successfulScans = hreflangResults.filter(r => !r.error);
+    const withIssues = hreflangResults.filter(r => 
+      r.issues.some(i => i.level === 'error' || i.level === 'warning')
+    );
+    const missingXDefault = hreflangResults.filter(r => !r.error && !r.hasXDefault);
+    const missingSelfRef = hreflangResults.filter(r => !r.error && !r.hasSelfReference);
+    const bidirectionalErrors = hreflangResults.filter(r => 
+      r.issues.some(i => i.message.includes('geri bağlantı'))
+    );
+    
+    return {
+      totalLanguages: SUPPORTED_LANGUAGES.length,
+      scannedLanguages: successfulScans.length,
+      languagesWithIssues: withIssues.length,
+      missingBidirectional: bidirectionalErrors.length,
+      missingXDefault: missingXDefault.length,
+      missingSelfReference: missingSelfRef.length,
     };
   };
 
@@ -718,6 +922,49 @@ const SEODebugPage = () => {
           </CardContent>
         </Card>
 
+        {/* Hreflang Scan Card */}
+        <Card className="border-blue-500/30 bg-blue-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              Hreflang Kontrolü
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Tüm dil versiyonlarının hreflang etiketlerini doğrulayın (çift yönlü bağlantı, x-default, vb.)
+            </p>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Sayfa yolu (örn: / veya /reviews)"
+                value={hreflangScanPath}
+                onChange={(e) => setHreflangScanPath(e.target.value)}
+                className="text-sm"
+              />
+              <Button
+                onClick={() => scanHreflangTags(hreflangScanPath)}
+                disabled={isScanningHreflang}
+                size="sm"
+                variant="default"
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Link2 className="h-4 w-4 mr-1" />
+                Hreflang Tara
+                {isScanningHreflang && <RefreshCw className="h-3 w-3 ml-1 animate-spin" />}
+              </Button>
+            </div>
+
+            {isScanningHreflang && (
+              <div className="space-y-1">
+                <Progress value={hreflangScanProgress} className="h-2" />
+                <p className="text-xs text-muted-foreground text-center">
+                  {Math.round(hreflangScanProgress)}% tamamlandı
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <div className="flex gap-2 border-b overflow-x-auto">
           <button
             onClick={() => setActiveTab('current')}
@@ -749,6 +996,17 @@ const SEODebugPage = () => {
           >
             <Globe className="h-3 w-3" />
             Dil Karşılaştırması ({languageScanResults.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('hreflang')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 ${
+              activeTab === 'hreflang'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Link2 className="h-3 w-3" />
+            Hreflang ({hreflangResults.length})
           </button>
         </div>
 
@@ -790,7 +1048,7 @@ const SEODebugPage = () => {
               ))
             )}
           </div>
-        ) : (
+        ) : activeTab === 'languages' ? (
           // Languages tab
           <div className="space-y-4">
             {languageScanResults.length === 0 ? (
@@ -975,7 +1233,233 @@ const SEODebugPage = () => {
               </>
             )}
           </div>
-        )}
+        ) : activeTab === 'hreflang' ? (
+          // Hreflang tab
+          <div className="space-y-4">
+            {hreflangResults.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Henüz hreflang taraması yapılmadı. Yukarıdaki "Hreflang Tara" butonunu kullanın.
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Hreflang Summary Card */}
+                {(() => {
+                  const summary = getHreflangSummary();
+                  const hasIssues = summary.languagesWithIssues > 0 || summary.missingBidirectional > 0;
+                  return (
+                    <Card className={hasIssues ? 'border-destructive' : 'border-green-500'}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                          {hasIssues ? (
+                            <>
+                              <AlertCircle className="h-5 w-5 text-destructive" />
+                              <span className="text-destructive">Hreflang Kontrolü - Sorunlar Var</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="h-5 w-5 text-green-500" />
+                              <span className="text-green-500">Hreflang Kontrolü - Tamamlandı</span>
+                            </>
+                          )}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-4">
+                          <div className="text-center p-2 bg-muted rounded-lg">
+                            <div className="text-xl font-bold">{summary.totalLanguages}</div>
+                            <div className="text-xs text-muted-foreground">Toplam Dil</div>
+                          </div>
+                          <div className="text-center p-2 bg-green-50 dark:bg-green-950 rounded-lg">
+                            <div className="text-xl font-bold text-green-600">{summary.scannedLanguages}</div>
+                            <div className="text-xs text-muted-foreground">Başarılı</div>
+                          </div>
+                          <div className="text-center p-2 bg-red-50 dark:bg-red-950 rounded-lg">
+                            <div className="text-xl font-bold text-destructive">{summary.languagesWithIssues}</div>
+                            <div className="text-xs text-muted-foreground">Sorunlu</div>
+                          </div>
+                          <div className={`text-center p-2 rounded-lg ${summary.missingBidirectional > 0 ? 'bg-red-50 dark:bg-red-950' : 'bg-green-50 dark:bg-green-950'}`}>
+                            <div className={`text-xl font-bold ${summary.missingBidirectional > 0 ? 'text-destructive' : 'text-green-600'}`}>
+                              {summary.missingBidirectional}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Çift Yön Eksik</div>
+                          </div>
+                          <div className={`text-center p-2 rounded-lg ${summary.missingXDefault > 0 ? 'bg-yellow-50 dark:bg-yellow-950' : 'bg-green-50 dark:bg-green-950'}`}>
+                            <div className={`text-xl font-bold ${summary.missingXDefault > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
+                              {summary.missingXDefault}
+                            </div>
+                            <div className="text-xs text-muted-foreground">x-default Eksik</div>
+                          </div>
+                          <div className={`text-center p-2 rounded-lg ${summary.missingSelfReference > 0 ? 'bg-red-50 dark:bg-red-950' : 'bg-green-50 dark:bg-green-950'}`}>
+                            <div className={`text-xl font-bold ${summary.missingSelfReference > 0 ? 'text-destructive' : 'text-green-600'}`}>
+                              {summary.missingSelfReference}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Self-Ref Eksik</div>
+                          </div>
+                        </div>
+
+                        {summary.missingBidirectional > 0 && (
+                          <div className="p-2 bg-red-50 dark:bg-red-950 rounded-lg text-sm text-destructive flex items-start gap-2 mb-2">
+                            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                            <span>Çift yönlü bağlantı hatası: A sayfası B'ye bağlanıyorsa, B de A'ya bağlanmalı!</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+
+                {/* Hreflang by language table */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Link2 className="h-4 w-4" />
+                      Dil Bazlı Hreflang Sonuçları
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-2 px-3">Dil</th>
+                            <th className="text-center py-2 px-3">Etiket</th>
+                            <th className="text-center py-2 px-3">x-default</th>
+                            <th className="text-center py-2 px-3">Self-Ref</th>
+                            <th className="text-center py-2 px-3">Durum</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {hreflangResults.map((result, idx) => {
+                            const errorCount = result.issues.filter(i => i.level === 'error').length;
+                            const warningCount = result.issues.filter(i => i.level === 'warning').length;
+                            
+                            return (
+                              <tr key={idx} className="border-b hover:bg-muted/50">
+                                <td className="py-2 px-3">
+                                  <Badge variant="outline" className="text-xs">{result.language}</Badge>
+                                </td>
+                                <td className="py-2 px-3 text-center">
+                                  {result.error ? (
+                                    <Badge variant="destructive" className="text-xs">Hata</Badge>
+                                  ) : (
+                                    <Badge variant="secondary" className="text-xs">{result.hreflangTags.length}</Badge>
+                                  )}
+                                </td>
+                                <td className="py-2 px-3 text-center">
+                                  {result.hasXDefault ? (
+                                    <CheckCircle className="h-4 w-4 text-green-500 mx-auto" />
+                                  ) : (
+                                    <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto" />
+                                  )}
+                                </td>
+                                <td className="py-2 px-3 text-center">
+                                  {result.hasSelfReference ? (
+                                    <CheckCircle className="h-4 w-4 text-green-500 mx-auto" />
+                                  ) : (
+                                    <AlertCircle className="h-4 w-4 text-destructive mx-auto" />
+                                  )}
+                                </td>
+                                <td className="py-2 px-3 text-center">
+                                  {result.error ? (
+                                    <Badge variant="destructive" className="text-xs">{result.error}</Badge>
+                                  ) : errorCount > 0 ? (
+                                    <Badge variant="destructive" className="text-xs">{errorCount} hata</Badge>
+                                  ) : warningCount > 0 ? (
+                                    <Badge className="bg-yellow-500 text-xs">{warningCount} uyarı</Badge>
+                                  ) : (
+                                    <Badge className="bg-green-500 text-xs">OK</Badge>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Detailed hreflang issues */}
+                <details className="group">
+                  <summary className="cursor-pointer p-3 bg-muted rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-muted/80">
+                    <Code className="h-4 w-4" />
+                    Detaylı Hreflang Sonuçları
+                  </summary>
+                  <div className="mt-4 space-y-6">
+                    {hreflangResults.map((result, idx) => (
+                      <div key={idx} className="space-y-3 border-l-4 border-blue-500 pl-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Badge variant="default">{result.language}</Badge>
+                          <a
+                            href={result.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline font-medium"
+                          >
+                            {result.url}
+                          </a>
+                        </div>
+                        
+                        {result.error ? (
+                          <Card className="border-destructive">
+                            <CardContent className="py-4 text-destructive text-sm">
+                              Sayfa yüklenemedi: {result.error}
+                            </CardContent>
+                          </Card>
+                        ) : (
+                          <>
+                            {/* Issues list */}
+                            {result.issues.length > 0 && (
+                              <div className="space-y-2">
+                                {result.issues.map((issue, issueIdx) => (
+                                  <div
+                                    key={issueIdx}
+                                    className={`p-2 rounded-lg text-xs flex items-start gap-2 ${
+                                      issue.level === 'error' ? 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300' :
+                                      issue.level === 'warning' ? 'bg-yellow-50 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-300' :
+                                      'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+                                    }`}
+                                  >
+                                    {issue.level === 'error' ? <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" /> :
+                                     issue.level === 'warning' ? <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" /> :
+                                     <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />}
+                                    <span>{issue.message}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Hreflang tags list */}
+                            <Card>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-xs">Hreflang Etiketleri ({result.hreflangTags.length})</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-1 max-h-40 overflow-y-auto">
+                                  {result.hreflangTags.map((tag, tagIdx) => (
+                                    <div key={tagIdx} className="flex items-center gap-2 text-xs">
+                                      <Badge variant="outline" className="text-[10px]">{tag.hreflang}</Badge>
+                                      <span className="text-muted-foreground truncate">{tag.href}</span>
+                                    </div>
+                                  ))}
+                                  {result.hreflangTags.length === 0 && (
+                                    <p className="text-muted-foreground text-xs">Hreflang etiketi bulunamadı</p>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              </>
+            )}
+          </div>
+        ) : null}
 
         <Card className="mt-6">
           <CardHeader className="pb-2">
