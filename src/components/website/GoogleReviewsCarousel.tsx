@@ -1,11 +1,13 @@
-import { Star, Quote, Loader2 } from "lucide-react";
+import { Star, Quote, Loader2, Languages, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Review {
   name: string;
@@ -13,6 +15,8 @@ interface Review {
   text: string;
   date: string;
   avatar?: string;
+  originalText?: string;
+  isTranslated?: boolean;
 }
 
 // Fallback reviews in case API fails
@@ -54,6 +58,8 @@ const GoogleReviewsCarousel = () => {
   const { rating: overallRating, totalReviews, isLoading: statsLoading } = useGoogleReviewStats();
   const [reviews, setReviews] = useState<Review[]>(fallbackReviews);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
+  const [translatingIndex, setTranslatingIndex] = useState<number | null>(null);
   
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: "start", slidesToScroll: 1 },
@@ -76,7 +82,7 @@ const GoogleReviewsCarousel = () => {
         }
         
         if (data?.reviews && data.reviews.length > 0) {
-          setReviews(data.reviews);
+          setReviews(data.reviews.map((r: Review) => ({ ...r, isTranslated: false })));
         }
       } catch (error) {
         console.error('Failed to fetch Google reviews:', error);
@@ -105,6 +111,120 @@ const GoogleReviewsCarousel = () => {
   const scrollTo = useCallback(
     (index: number) => emblaApi && emblaApi.scrollTo(index),
     [emblaApi]
+  );
+
+  // Translate a single review
+  const translateReview = async (index: number) => {
+    const review = reviews[index];
+    if (review.isTranslated && review.originalText) {
+      // Toggle back to original
+      setReviews(prev => prev.map((r, i) => 
+        i === index ? { ...r, text: r.originalText!, isTranslated: false } : r
+      ));
+      return;
+    }
+
+    setTranslatingIndex(index);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-review', {
+        body: { 
+          text: review.text,
+          targetLanguage: language
+        }
+      });
+
+      if (error) {
+        console.error('Translation error:', error);
+        return;
+      }
+
+      if (data?.translatedText) {
+        setReviews(prev => prev.map((r, i) => 
+          i === index ? { 
+            ...r, 
+            originalText: r.text,
+            text: data.translatedText, 
+            isTranslated: true 
+          } : r
+        ));
+      }
+    } catch (error) {
+      console.error('Failed to translate review:', error);
+    } finally {
+      setTranslatingIndex(null);
+    }
+  };
+
+  // Reviews to display - carousel shows first 5, expanded shows all
+  const displayedReviews = showAll ? reviews : reviews.slice(0, 5);
+  const hasMoreReviews = reviews.length > 5;
+
+  const ReviewCard = ({ review, index }: { review: Review; index: number }) => (
+    <Card className="h-full bg-card hover:shadow-lg transition-shadow">
+      <CardContent className="p-6 space-y-4">
+        <div className="flex items-start justify-between">
+          <Quote className="h-8 w-8 text-primary/20" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => translateReview(index)}
+            disabled={translatingIndex === index}
+            className="h-8 px-2 text-xs text-muted-foreground hover:text-primary"
+          >
+            {translatingIndex === index ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <>
+                <Languages className="h-3 w-3 mr-1" />
+                {review.isTranslated ? t("showOriginal") || "Original" : t("translate") || "Translate"}
+              </>
+            )}
+          </Button>
+        </div>
+        <p className="text-muted-foreground leading-relaxed min-h-[100px] line-clamp-4">
+          "{review.text}"
+        </p>
+        {review.isTranslated && (
+          <p className="text-xs text-primary/60 italic">
+            {t("translatedFromGoogle") || "Translated"}
+          </p>
+        )}
+        <div className="flex items-center gap-3 pt-4 border-t">
+          {review.avatar ? (
+            <img 
+              src={review.avatar} 
+              alt={review.name}
+              className="w-10 h-10 rounded-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+          ) : null}
+          <div className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center ${review.avatar ? 'hidden' : ''}`}>
+            <span className="font-bold text-primary">
+              {review.name.charAt(0)}
+            </span>
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-sm">{review.name}</p>
+            <div className="flex items-center gap-2">
+              <div className="flex">
+                {[...Array(review.rating)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="h-3 w-3 fill-yellow-400 text-yellow-400"
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {review.date}
+              </span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 
   return (
@@ -151,76 +271,86 @@ const GoogleReviewsCarousel = () => {
           </div>
         </div>
 
-        {/* Carousel */}
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex -ml-4">
-            {reviews.map((review, index) => (
-              <div
-                key={index}
-                className="flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-4"
-              >
-                <Card className="h-full bg-card hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6 space-y-4">
-                    <Quote className="h-8 w-8 text-primary/20" />
-                    <p className="text-muted-foreground leading-relaxed min-h-[100px] line-clamp-4">
-                      "{review.text}"
-                    </p>
-                    <div className="flex items-center gap-3 pt-4 border-t">
-                      {review.avatar ? (
-                        <img 
-                          src={review.avatar} 
-                          alt={review.name}
-                          className="w-10 h-10 rounded-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                      ) : null}
-                      <div className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center ${review.avatar ? 'hidden' : ''}`}>
-                        <span className="font-bold text-primary">
-                          {review.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-sm">{review.name}</p>
-                        <div className="flex items-center gap-2">
-                          <div className="flex">
-                            {[...Array(review.rating)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className="h-3 w-3 fill-yellow-400 text-yellow-400"
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            {review.date}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+        {/* Carousel View (when not expanded) */}
+        {!showAll && (
+          <>
+            <div className="overflow-hidden" ref={emblaRef}>
+              <div className="flex -ml-4">
+                {displayedReviews.map((review, index) => (
+                  <div
+                    key={index}
+                    className="flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-4"
+                  >
+                    <ReviewCard review={review} index={index} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Dots */}
-        <div className="flex justify-center gap-2 mt-6">
-          {reviews.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => scrollTo(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === selectedIndex
-                  ? "bg-primary w-6"
-                  : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-              }`}
-              aria-label={`Go to review ${index + 1}`}
-            />
-          ))}
-        </div>
+            {/* Dots */}
+            <div className="flex justify-center gap-2 mt-6">
+              {displayedReviews.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollTo(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === selectedIndex
+                      ? "bg-primary w-6"
+                      : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                  }`}
+                  aria-label={`Go to review ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Grid View (when expanded) */}
+        <AnimatePresence>
+          {showAll && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+              {reviews.map((review, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <ReviewCard review={review} index={index} />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Show More/Less Button */}
+        {hasMoreReviews && (
+          <div className="text-center mt-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowAll(!showAll)}
+              className="gap-2"
+            >
+              {showAll ? (
+                <>
+                  <ChevronUp className="h-4 w-4" />
+                  {t("showLess") || "Show Less"}
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-4 w-4" />
+                  {t("showAllReviews") || `Show All ${reviews.length} Reviews`}
+                </>
+              )}
+            </Button>
+          </div>
+        )}
 
         {/* CTA to Leave a Review */}
         <div className="text-center mt-8">
