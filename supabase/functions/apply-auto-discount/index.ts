@@ -23,72 +23,96 @@ const DISCOUNT_TRANSLATIONS: Record<string, {
   subject: string;
   title: string;
   message: string;
+  messageHourly: string;
   originalPrice: string;
   discount: string;
   newPrice: string;
   confirmNow: string;
   validFor: string;
   samePrice: string;
+  hourlyInfo: string;
+  duration: string;
+  city: string;
   needHelp: string;
 }> = {
   en: {
     subject: "Special Discount Applied! Your New Price",
     title: "Great News! Special Discount Applied",
     message: "We've applied a special discount to your transfer quote. Here's your updated offer:",
+    messageHourly: "We've applied a special discount to your hourly chauffeur service quote. Here's your updated offer:",
     originalPrice: "Original Price",
     discount: "Discount",
     newPrice: "Your New Price",
     confirmNow: "Confirm & Book Now",
     validFor: "This offer is valid for 24 hours",
     samePrice: "Airport transfers are the same price in both directions",
+    hourlyInfo: "Hourly chauffeur service with unlimited stops",
+    duration: "Duration",
+    city: "City",
     needHelp: "Need Help? Contact Us 24/7",
   },
   tr: {
     subject: "Özel İndirim Uygulandı! Yeni Fiyatınız",
     title: "Harika Haber! Özel İndirim Uygulandı",
     message: "Transfer teklifinize özel bir indirim uyguladık. İşte güncellenmiş teklifiniz:",
+    messageHourly: "Saatlik şoförlü araç kiralama teklifinize özel bir indirim uyguladık. İşte güncellenmiş teklifiniz:",
     originalPrice: "Eski Fiyat",
     discount: "İndirim",
     newPrice: "Yeni Fiyatınız",
     confirmNow: "Şimdi Onayla ve Rezerve Et",
     validFor: "Bu teklif 24 saat geçerlidir",
     samePrice: "Havalimanı transferleri her iki yönde de aynı fiyattır",
+    hourlyInfo: "Sınırsız durak ile saatlik şoförlü araç hizmeti",
+    duration: "Süre",
+    city: "Şehir",
     needHelp: "Yardıma mı ihtiyacınız var? 7/24 bize ulaşın",
   },
   de: {
     subject: "Sonderrabatt angewendet! Ihr neuer Preis",
     title: "Tolle Neuigkeiten! Sonderrabatt angewendet",
     message: "Wir haben einen Sonderrabatt auf Ihr Transferangebot angewendet. Hier ist Ihr aktualisiertes Angebot:",
+    messageHourly: "Wir haben einen Sonderrabatt auf Ihr Stunden-Chauffeurservice-Angebot angewendet. Hier ist Ihr aktualisiertes Angebot:",
     originalPrice: "Ursprünglicher Preis",
     discount: "Rabatt",
     newPrice: "Ihr neuer Preis",
     confirmNow: "Jetzt bestätigen & buchen",
     validFor: "Dieses Angebot gilt für 24 Stunden",
     samePrice: "Flughafentransfers kosten in beide Richtungen gleich viel",
+    hourlyInfo: "Stündlicher Chauffeurservice mit unbegrenzten Stopps",
+    duration: "Dauer",
+    city: "Stadt",
     needHelp: "Brauchen Sie Hilfe? Kontaktieren Sie uns 24/7",
   },
   ru: {
     subject: "Применена специальная скидка! Ваша новая цена",
     title: "Отличные новости! Применена специальная скидка",
     message: "Мы применили специальную скидку к вашему предложению на трансфер. Вот ваше обновленное предложение:",
+    messageHourly: "Мы применили специальную скидку к вашему предложению на почасовой сервис водителя. Вот ваше обновленное предложение:",
     originalPrice: "Исходная цена",
     discount: "Скидка",
     newPrice: "Ваша новая цена",
     confirmNow: "Подтвердить и забронировать",
     validFor: "Это предложение действительно 24 часа",
     samePrice: "Трансферы из аэропорта стоят одинаково в обоих направлениях",
+    hourlyInfo: "Почасовой сервис водителя с неограниченными остановками",
+    duration: "Продолжительность",
+    city: "Город",
     needHelp: "Нужна помощь? Свяжитесь с нами 24/7",
   },
   ar: {
     subject: "تم تطبيق خصم خاص! سعرك الجديد",
     title: "أخبار رائعة! تم تطبيق خصم خاص",
     message: "لقد طبقنا خصمًا خاصًا على عرض النقل الخاص بك. إليك عرضك المحدث:",
+    messageHourly: "لقد طبقنا خصمًا خاصًا على عرض خدمة السائق بالساعة. إليك عرضك المحدث:",
     originalPrice: "السعر الأصلي",
     discount: "الخصم",
     newPrice: "سعرك الجديد",
     confirmNow: "تأكيد والحجز الآن",
     validFor: "هذا العرض صالح لمدة 24 ساعة",
     samePrice: "تكلفة النقل من المطار متساوية في كلا الاتجاهين",
+    hourlyInfo: "خدمة سائق بالساعة مع توقفات غير محدودة",
+    duration: "المدة",
+    city: "المدينة",
     needHelp: "هل تحتاج مساعدة؟ اتصل بنا 24/7",
   },
 };
@@ -110,6 +134,7 @@ function generateDiscountEmail(
   const t = getTranslation(lang);
   const currencySymbol = getCurrencySymbol(currency);
   const vehicleLabel = getVehicleLabel(booking.vehicle_type);
+  const isHourly = booking.service_type === 'hourly';
   
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -121,35 +146,54 @@ function generateDiscountEmail(
     });
   };
 
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${t.title}</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 20px 0;">
-    <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-          
-          <!-- Header -->
-          <tr>
-            <td style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); padding: 30px; text-align: center;">
-              <img src="https://meettransfer.app/images/meet-transfer-logo.png" alt="Meet Transfer" style="height: 50px; margin-bottom: 15px;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">🎉 ${t.title}</h1>
-            </td>
-          </tr>
-          
-          <!-- Content -->
-          <tr>
-            <td style="padding: 30px;">
-              <p style="color: #64748b; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
-                ${t.message}
-              </p>
-              
+  const getDurationLabel = (hours: number, language: string) => {
+    if (language === 'tr') {
+      return `${hours} saat`;
+    } else if (language === 'de') {
+      return `${hours} Stunden`;
+    } else if (language === 'ru') {
+      return `${hours} часов`;
+    } else if (language === 'ar') {
+      return `${hours} ساعات`;
+    }
+    return `${hours} hours`;
+  };
+
+  // Generate different details section based on service type
+  const detailsSection = isHourly ? `
+              <!-- Hourly Rental Details -->
+              <div style="background-color: #f1f5f9; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-size: 12px; font-weight: 600;">
+                  ⏰ ${t.hourlyInfo}
+                </div>
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                      <span style="color: #64748b; font-size: 14px;">🏙️ ${t.city}</span><br>
+                      <span style="color: #1e293b; font-weight: 500;">${booking.city || booking.pickup}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                      <span style="color: #64748b; font-size: 14px;">⏱️ ${t.duration}</span><br>
+                      <span style="color: #1e293b; font-weight: 500;">${getDurationLabel(booking.duration_hours || 4, lang)}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                      <span style="color: #64748b; font-size: 14px;">📅 Date & Time</span><br>
+                      <span style="color: #1e293b; font-weight: 500;">${formatDate(booking.pickup_date)} - ${booking.pickup_time}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0;">
+                      <span style="color: #64748b; font-size: 14px;">🚗 Vehicle</span><br>
+                      <span style="color: #1e293b; font-weight: 500;">${vehicleLabel}</span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+  ` : `
               <!-- Transfer Details -->
               <div style="background-color: #f1f5f9; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
                 <table width="100%" cellpadding="0" cellspacing="0">
@@ -179,6 +223,40 @@ function generateDiscountEmail(
                   </tr>
                 </table>
               </div>
+  `;
+
+  const footerNote = isHourly ? t.hourlyInfo : t.samePrice;
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${t.title}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, ${isHourly ? '#8b5cf6 0%, #7c3aed' : '#1e3a5f 0%, #0f172a'} 100%); padding: 30px; text-align: center;">
+              <img src="https://meettransfer.app/images/meet-transfer-logo.png" alt="Meet Transfer" style="height: 50px; margin-bottom: 15px;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">🎉 ${t.title}</h1>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding: 30px;">
+              <p style="color: #64748b; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                ${isHourly ? t.messageHourly : t.message}
+              </p>
+              
+              ${detailsSection}
               
               <!-- Price Comparison -->
               <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 20px;">
@@ -204,7 +282,7 @@ function generateDiscountEmail(
               
               <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 20px 0 0 0;">
                 ${t.validFor}<br>
-                ${t.samePrice}
+                ${footerNote}
               </p>
             </td>
           </tr>
