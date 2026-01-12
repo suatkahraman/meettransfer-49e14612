@@ -5,7 +5,7 @@ import PriceTable from "@/components/website/PriceTable";
 import FAQSection from "@/components/website/FAQSection";
 import FeatureList from "@/components/website/FeatureList";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
-import { MapPin, ArrowRight, Plane, Palmtree, Sun } from "lucide-react";
+import { MapPin, ArrowRight, Plane, Palmtree, Sun, Clock, Route } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -38,6 +38,17 @@ const prices = [
   { from: "Paphos Airport", to: "Limassol", price: "Request Price" },
   { from: "Ercan Airport", to: "Kyrenia", price: "Request Price" },
   { from: "Ercan Airport", to: "Famagusta", price: "Request Price" },
+];
+
+const popularRoutes = [
+  { key: "LarnacaAyiaNapa", duration: "40-50 min", airport: "LCA" },
+  { key: "LarnacaProtaras", duration: "50-60 min", airport: "LCA" },
+  { key: "LarnacaLimassol", duration: "45-55 min", airport: "LCA" },
+  { key: "LarnacaNicosia", duration: "35-45 min", airport: "LCA" },
+  { key: "PaphosCoralBay", duration: "25-30 min", airport: "PFO" },
+  { key: "PaphosLimassol", duration: "55-65 min", airport: "PFO" },
+  { key: "ErcanKyrenia", duration: "30-40 min", airport: "ECN" },
+  { key: "ErcanFamagusta", duration: "45-55 min", airport: "ECN" },
 ];
 
 const faqItems = [
@@ -163,6 +174,39 @@ const CyprusTransfer = () => {
         </section>
 
         <FeatureList />
+
+        {/* Popular Routes Section */}
+        <section className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-6">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Route className="h-6 w-6 text-primary" />
+            {t("cyprusPopularRoutes")}
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {popularRoutes.map((route) => (
+              <div
+                key={route.key}
+                className="bg-card p-4 rounded-xl shadow-sm border border-border/50 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-bold bg-primary/10 text-primary px-2 py-0.5 rounded">{route.airport}</span>
+                </div>
+                <h3 className="font-semibold text-sm mb-1">{t(`cyprusRoute${route.key}`)}</h3>
+                <p className="text-xs text-muted-foreground mb-3">{t(`cyprusRoute${route.key}Desc`)}</p>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    {route.duration}
+                  </span>
+                  <Link to="/">
+                    <Button size="sm" variant="outline" className="text-xs h-7">
+                      {t("cyprusRequestPrice")}
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Popular Destinations */}
         <section>
