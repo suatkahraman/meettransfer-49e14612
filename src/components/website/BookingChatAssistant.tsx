@@ -76,13 +76,21 @@ function isSpeechRecognitionSupported(): boolean {
   return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 }
 
-// Voice recording hook using Web Speech API (no API key required)
+// Voice recording hook using Web Speech API with iOS Safari support
 function useVoiceRecorder(onTranscription: (text: string) => void, language: string) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showBrowserWarning, setShowBrowserWarning] = useState(false);
+  const [permissionGranted, setPermissionGranted] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const isSupported = isSpeechRecognitionSupported();
+  const transcriptRef = useRef<string>('');
+
+  // Detect iOS Safari
+  const isIOS = useCallback(() => {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }, []);
 
   // Map language codes to BCP-47 format for Web Speech API
   const getLanguageCode = useCallback((lang: string): string => {
@@ -105,7 +113,23 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     setShowBrowserWarning(false);
   }, []);
 
-  const startRecording = useCallback(() => {
+  // Request microphone permission explicitly for iOS
+  const requestMicrophonePermission = useCallback(async (): Promise<boolean> => {
+    try {
+      // Request audio permission
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Stop the stream immediately, we just needed permission
+      stream.getTracks().forEach(track => track.stop());
+      setPermissionGranted(true);
+      return true;
+    } catch (error) {
+      console.error('Microphone permission denied:', error);
+      setShowBrowserWarning(true);
+      return false;
+    }
+  }, []);
+
+  const startRecording = useCallback(async () => {
     // Check for browser support
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
@@ -115,51 +139,119 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       return;
     }
 
+    // For iOS, request microphone permission first
+    if (isIOS() && !permissionGranted) {
+      const granted = await requestMicrophonePermission();
+      if (!granted) {
+        return;
+      }
+    }
+
     try {
+      // Stop any existing recognition
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {
+          // Ignore abort errors
+        }
+      }
+
       const recognition = new SpeechRecognition();
       recognitionRef.current = recognition;
 
       recognition.lang = getLanguageCode(language);
-      recognition.interimResults = false;
+      // For iOS, use interim results for better UX
+      recognition.interimResults = isIOS();
+      // Don't use continuous on iOS - it can cause issues
       recognition.continuous = false;
       recognition.maxAlternatives = 1;
 
+      // Reset transcript
+      transcriptRef.current = '';
+
       recognition.onstart = () => {
+        console.log('Speech recognition started');
         setIsRecording(true);
         setIsProcessing(false);
       };
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        setIsProcessing(true);
-        const transcript = event.results[0][0].transcript;
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            finalTranscript += result[0].transcript;
+          } else {
+            interimTranscript += result[0].transcript;
+          }
+        }
+
+        // Use final transcript if available, otherwise interim
+        const transcript = finalTranscript || interimTranscript;
+        
         if (transcript) {
-          onTranscription(transcript);
+          transcriptRef.current = transcript;
+          console.log('Transcript:', transcript, 'isFinal:', !!finalTranscript);
+          
+          // For non-iOS or final results, trigger transcription immediately
+          if (finalTranscript) {
+            setIsProcessing(true);
+            onTranscription(finalTranscript);
+            setIsProcessing(false);
+          }
+        }
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Speech recognition error:', event.error, event.message);
+        
+        // Handle specific iOS errors
+        if (event.error === 'not-allowed') {
+          setShowBrowserWarning(true);
+          setPermissionGranted(false);
+        }
+        
+        // Don't set isRecording to false for "no-speech" on iOS
+        if (event.error !== 'no-speech') {
+          setIsRecording(false);
         }
         setIsProcessing(false);
       };
 
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Speech recognition error:', event.error);
-        setIsRecording(false);
-        setIsProcessing(false);
-      };
-
       recognition.onend = () => {
+        console.log('Speech recognition ended');
+        
+        // On iOS, if we have an interim transcript but no final, use it
+        if (isIOS() && transcriptRef.current && !isProcessing) {
+          setIsProcessing(true);
+          onTranscription(transcriptRef.current);
+          setIsProcessing(false);
+        }
+        
         setIsRecording(false);
       };
 
       recognition.start();
+      console.log('Speech recognition start() called');
     } catch (error) {
       console.error('Error starting speech recognition:', error);
       setIsRecording(false);
     }
-  }, [language, getLanguageCode, onTranscription]);
+  }, [language, getLanguageCode, onTranscription, isIOS, permissionGranted, requestMicrophonePermission, isProcessing]);
 
   const stopRecording = useCallback(() => {
-    if (recognitionRef.current && isRecording) {
-      recognitionRef.current.stop();
-      setIsRecording(false);
+    console.log('Stopping recording, isRecording:', isRecording);
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        console.error('Error stopping recognition:', e);
+      }
     }
+    setIsRecording(false);
   }, [isRecording]);
 
   return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning };
