@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase, Sparkles, ThumbsUp, Timer } from "lucide-react";
+import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase, Sparkles, ThumbsUp, Timer, Hourglass, Building2 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -39,8 +39,12 @@ interface BookingRequest {
   promo_code?: string;
   luggage_count?: number;
   baby_seat_count?: number;
-  all_vehicle_prices?: Record<string, number> | null; // Admin's manual prices for all vehicles
-  created_at?: string; // For elapsed time calculation
+  all_vehicle_prices?: Record<string, number> | null;
+  created_at?: string;
+  // Hourly rental fields
+  service_type?: string;
+  duration_hours?: number;
+  city?: string;
 }
 
 interface VehiclePriceInfo {
@@ -932,34 +936,59 @@ export default function QuickBookingConfirm() {
 
             {/* Booking Details Card */}
             <div className="bg-gradient-to-br from-muted/80 to-muted/40 rounded-xl p-4 mb-6 space-y-3 border border-border/50">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="h-5 w-5 text-primary" />
+              {/* Service Type Badge for Hourly Rental */}
+              {booking.service_type === 'hourly' && (
+                <div className="flex justify-center mb-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-semibold">
+                    <Hourglass className="h-3.5 w-3.5" />
+                    {t("qbHourlyRental") || "Saatlik Kiralama"}
+                  </span>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t("qbPickup")}</p>
-                  <p className="font-semibold text-sm truncate">{booking.pickup}</p>
-                </div>
-              </div>
+              )}
               
-              {/* Route Arrow */}
-              <div className="flex justify-center">
-                <div className="w-0.5 h-4 bg-gradient-to-b from-primary/50 to-accent/50 rounded-full" />
-              </div>
+              {/* For Hourly Rental - Show City */}
+              {booking.service_type === 'hourly' && booking.city ? (
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                    <Building2 className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t("qbCity") || "Şehir"}</p>
+                    <p className="font-semibold text-sm truncate">{booking.city}</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t("qbPickup")}</p>
+                      <p className="font-semibold text-sm truncate">{booking.pickup}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Route Arrow */}
+                  <div className="flex justify-center">
+                    <div className="w-0.5 h-4 bg-gradient-to-b from-primary/50 to-accent/50 rounded-full" />
+                  </div>
 
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="h-5 w-5 text-accent" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t("qbDropoff")}</p>
-                  <p className="font-semibold text-sm truncate">{booking.dropoff}</p>
-                </div>
-              </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="h-5 w-5 text-accent" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t("qbDropoff")}</p>
+                      <p className="font-semibold text-sm truncate">{booking.dropoff}</p>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="h-px bg-border/50 my-2" />
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className={`grid ${booking.service_type === 'hourly' ? 'grid-cols-4' : 'grid-cols-3'} gap-3`}>
                 <div className="text-center p-2 rounded-lg bg-background/50">
                   <Calendar className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
                   <p className="text-[10px] text-muted-foreground">{t("qbDate")}</p>
@@ -972,6 +1001,14 @@ export default function QuickBookingConfirm() {
                   <p className="text-[10px] text-muted-foreground">{t("qbTime")}</p>
                   <p className="font-bold text-xs">{booking.pickup_time}</p>
                 </div>
+                {/* Duration for Hourly Rental */}
+                {booking.service_type === 'hourly' && booking.duration_hours && (
+                  <div className="text-center p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30">
+                    <Hourglass className="h-4 w-4 text-purple-500 mx-auto mb-1" />
+                    <p className="text-[10px] text-muted-foreground">{t("qbDuration") || "Süre"}</p>
+                    <p className="font-bold text-xs text-purple-600 dark:text-purple-400">{booking.duration_hours} {t("qbHours") || "Saat"}</p>
+                  </div>
+                )}
                 <div className="text-center p-2 rounded-lg bg-background/50">
                   <Users className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
                   <p className="text-[10px] text-muted-foreground">{t("qbPassengers")}</p>
@@ -1102,23 +1139,46 @@ export default function QuickBookingConfirm() {
 
           {/* Transfer Details - Mobile Optimized */}
           <div className="bg-muted/50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 space-y-2 sm:space-y-3">
-            <div className="flex items-start gap-2 sm:gap-3">
-              <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">{t("qbPickup")}</p>
-                <p className="font-medium text-sm sm:text-base truncate">{booking.pickup}</p>
+            {/* Service Type Badge for Hourly Rental */}
+            {booking.service_type === 'hourly' && (
+              <div className="flex justify-center mb-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-semibold">
+                  <Hourglass className="h-3.5 w-3.5" />
+                  {t("qbHourlyRental") || "Saatlik Kiralama"}
+                </span>
               </div>
-            </div>
-
-            <div className="flex items-start gap-2 sm:gap-3">
-              <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-accent mt-0.5 flex-shrink-0" />
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">{t("qbDropoff")}</p>
-                <p className="font-medium text-sm sm:text-base truncate">{booking.dropoff}</p>
+            )}
+            
+            {/* For Hourly Rental - Show City */}
+            {booking.service_type === 'hourly' && booking.city ? (
+              <div className="flex items-start gap-2 sm:gap-3">
+                <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t("qbCity") || "Şehir"}</p>
+                  <p className="font-medium text-sm sm:text-base truncate">{booking.city}</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground">{t("qbPickup")}</p>
+                    <p className="font-medium text-sm sm:text-base truncate">{booking.pickup}</p>
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-accent mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground">{t("qbDropoff")}</p>
+                    <p className="font-medium text-sm sm:text-base truncate">{booking.dropoff}</p>
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className={`grid ${booking.service_type === 'hourly' && booking.duration_hours ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2'} gap-2 sm:gap-4`}>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
                 <div className="min-w-0">
@@ -1136,13 +1196,24 @@ export default function QuickBookingConfirm() {
                   <p className="font-medium text-xs sm:text-base">{booking.pickup_time}</p>
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
-              <div>
-                <p className="text-[10px] sm:text-sm text-muted-foreground">{t("qbPassengers")}</p>
-                <p className="font-medium text-xs sm:text-base">{booking.passengers}</p>
+              
+              {/* Duration for Hourly Rental */}
+              {booking.service_type === 'hourly' && booking.duration_hours && (
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Hourglass className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500 flex-shrink-0" />
+                  <div>
+                    <p className="text-[10px] sm:text-sm text-muted-foreground">{t("qbDuration") || "Süre"}</p>
+                    <p className="font-medium text-xs sm:text-base text-purple-600 dark:text-purple-400">{booking.duration_hours} {t("qbHours") || "Saat"}</p>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
+                <div>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground">{t("qbPassengers")}</p>
+                  <p className="font-medium text-xs sm:text-base">{booking.passengers}</p>
+                </div>
               </div>
             </div>
           </div>

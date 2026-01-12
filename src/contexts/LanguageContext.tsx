@@ -888,6 +888,10 @@ const translations: Record<Language, Record<string, string>> = {
     qbEstimatedWaitTime: "Estimated Wait Time",
     qbTakingLonger: "Taking a bit longer, please wait...",
     qbEstimatedWaitDesc: "You usually receive a response within 1-3 minutes",
+    qbHourlyRental: "Hourly Rental",
+    qbCity: "City",
+    qbDuration: "Duration",
+    qbHours: "Hours",
     
     // Footer
     footerDescription: "Premium VIP transfer services from all major international airports across Turkey, Dubai, and Cyprus. Experience luxury travel with our professional chauffeurs and premium fleet.",
@@ -2436,6 +2440,10 @@ const translations: Record<Language, Record<string, string>> = {
     qbEstimatedWaitTime: "Geschätzte Wartezeit",
     qbTakingLonger: "Es dauert etwas länger, bitte warten...",
     qbEstimatedWaitDesc: "Sie erhalten in der Regel innerhalb von 1-3 Minuten eine Antwort",
+    qbHourlyRental: "Stündliche Miete",
+    qbCity: "Stadt",
+    qbDuration: "Dauer",
+    qbHours: "Stunden",
     
     // Footer
     footerDescription: "Premium VIP Transferdienste von allen großen internationalen Flughäfen in der Türkei, Dubai und Zypern. Erleben Sie Luxusreisen mit unseren professionellen Chauffeuren und Premium-Flotte.",
@@ -4065,6 +4073,10 @@ const translations: Record<Language, Record<string, string>> = {
     qbEstimatedWaitTime: "Temps d'attente estimé",
     qbTakingLonger: "Cela prend un peu plus de temps, veuillez patienter...",
     qbEstimatedWaitDesc: "Vous recevez généralement une réponse dans 1-3 minutes",
+    qbHourlyRental: "Location horaire",
+    qbCity: "Ville",
+    qbDuration: "Durée",
+    qbHours: "Heures",
     
     // Footer
     footerDescription: "Services de transfert VIP premium depuis tous les grands aéroports internationaux en Turquie, Dubaï et Chypre. Vivez le voyage de luxe avec nos chauffeurs professionnels et notre flotte premium.",
@@ -5432,6 +5444,10 @@ const translations: Record<Language, Record<string, string>> = {
     qbEstimatedWaitTime: "Расчётное время ожидания",
     qbTakingLonger: "Это занимает немного больше времени, пожалуйста, подождите...",
     qbEstimatedWaitDesc: "Обычно вы получаете ответ в течение 1-3 минут",
+    qbHourlyRental: "Почасовая аренда",
+    qbCity: "Город",
+    qbDuration: "Продолжительность",
+    qbHours: "Часов",
     
     // Footer
     footerDescription: "Премиальные VIP трансферы из всех крупных международных аэропортов Турции, Дубая и Кипра. Испытайте роскошные путешествия с нашими профессиональными водителями и премиальным автопарком.",
@@ -6671,6 +6687,10 @@ const translations: Record<Language, Record<string, string>> = {
     qbEstimatedWaitTime: "Tempo di attesa stimato",
     qbTakingLonger: "Ci vuole un po' di più, per favore attendi...",
     qbEstimatedWaitDesc: "Di solito ricevi una risposta entro 1-3 minuti",
+    qbHourlyRental: "Noleggio orario",
+    qbCity: "Città",
+    qbDuration: "Durata",
+    qbHours: "Ore",
     
     // Footer
     footerDescription: "Servizi di trasferimento VIP premium da tutti i principali aeroporti internazionali in Turchia, Dubai e Cipro. Vivi viaggi di lusso con i nostri autisti professionisti e la nostra flotta premium.",
@@ -7963,6 +7983,10 @@ const translations: Record<Language, Record<string, string>> = {
     qbEstimatedWaitTime: "Tiempo de espera estimado",
     qbTakingLonger: "Está tardando un poco más, por favor espere...",
     qbEstimatedWaitDesc: "Normalmente recibe una respuesta en 1-3 minutos",
+    qbHourlyRental: "Alquiler por horas",
+    qbCity: "Ciudad",
+    qbDuration: "Duración",
+    qbHours: "Horas",
     
     // Footer
     footerDescription: "Servicios de transfer VIP premium desde los principales aeropuertos internacionales de Turquía, Dubái y Chipre. Experimente viajes de lujo con nuestros chóferes profesionales y flota premium.",
@@ -9255,6 +9279,10 @@ const translations: Record<Language, Record<string, string>> = {
     qbEstimatedWaitTime: "وقت الانتظار المقدر",
     qbTakingLonger: "يستغرق وقتاً أطول قليلاً، يرجى الانتظار...",
     qbEstimatedWaitDesc: "عادة ما تتلقى رداً خلال 1-3 دقائق",
+    qbHourlyRental: "تأجير بالساعة",
+    qbCity: "المدينة",
+    qbDuration: "المدة",
+    qbHours: "ساعات",
     
     // Footer
     footerDescription: "خدمات النقل VIP الفاخرة من جميع المطارات الدولية الرئيسية في تركيا ودبي وقبرص. استمتع بالسفر الفاخر مع سائقينا المحترفين وأسطولنا المتميز.",
@@ -10497,6 +10525,10 @@ const translations: Record<Language, Record<string, string>> = {
     qbEstimatedWaitTime: "Tahmini Bekleme Süresi",
     qbTakingLonger: "Biraz daha uzun sürüyor, lütfen bekleyin...",
     qbEstimatedWaitDesc: "Genellikle 1-3 dakika içinde yanıt alırsınız",
+    qbHourlyRental: "Saatlik Kiralama",
+    qbCity: "Şehir",
+    qbDuration: "Süre",
+    qbHours: "Saat",
     
     // Footer
     footerDescription: "Türkiye, Dubai ve Kıbrıs'taki tüm büyük uluslararası havalimanlarından premium VIP transfer hizmetleri. Profesyonel şoförlerimiz ve premium filomuzla lüks seyahatin keyfini çıkarın.",
@@ -11862,6 +11894,10 @@ const translations: Record<Language, Record<string, string>> = {
     qbEstimatedWaitTime: "Орієнтовний час очікування",
     qbTakingLonger: "Це займає трохи більше часу, будь ласка, зачекайте...",
     qbEstimatedWaitDesc: "Зазвичай ви отримуєте відповідь протягом 1-3 хвилин",
+    qbHourlyRental: "Погодинна оренда",
+    qbCity: "Місто",
+    qbDuration: "Тривалість",
+    qbHours: "Годин",
     
     // Footer
     footerDescription: "Преміальні VIP трансфери з усіх великих міжнародних аеропортів Туреччини, Дубая та Кіпру. Відчуйте розкішні подорожі з нашими професійними водіями та преміальним автопарком.",
