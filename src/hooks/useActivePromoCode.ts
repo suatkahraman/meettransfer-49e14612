@@ -61,31 +61,40 @@ export const useActivePromoCode = (appliesTo: string = "return_transfer") => {
   return { promoCode, loading, error };
 };
 
-export const validatePromoCode = async (code: string): Promise<{ valid: boolean; discount: number; appliesTo: string } | null> => {
+export const validatePromoCode = async (code: string): Promise<{ valid: boolean; discount: number; appliesTo: string; validUntil: string | null } | null> => {
   try {
-    const now = new Date().toISOString();
-    
     const { data, error } = await supabase
       .from("promo_codes")
-      .select("*")
+      .select("discount_percentage, applies_to, is_active, valid_from, valid_until, max_usage, usage_count")
       .eq("code", code.toUpperCase().trim())
       .eq("is_active", true)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    if (error) {
+      console.error("Error validating promo code:", error);
       return null;
     }
+
+    if (!data) {
+      console.log("Promo code not found:", code);
+      return null;
+    }
+
+    const now = new Date();
 
     // Check validity dates
-    if (data.valid_from && new Date(data.valid_from) > new Date()) {
+    if (data.valid_from && new Date(data.valid_from) > now) {
+      console.log("Promo code not yet valid:", data.valid_from);
       return null;
     }
-    if (data.valid_until && new Date(data.valid_until) < new Date()) {
+    if (data.valid_until && new Date(data.valid_until) < now) {
+      console.log("Promo code expired:", data.valid_until);
       return null;
     }
 
     // Check max usage
     if (data.max_usage && data.usage_count >= data.max_usage) {
+      console.log("Promo code max usage reached:", data.usage_count, "/", data.max_usage);
       return null;
     }
 
@@ -93,13 +102,10 @@ export const validatePromoCode = async (code: string): Promise<{ valid: boolean;
       valid: true,
       discount: data.discount_percentage,
       appliesTo: data.applies_to,
+      validUntil: data.valid_until,
     };
   } catch (err) {
     console.error("Error validating promo code:", err);
-    // Fallback validation
-    if (code.toUpperCase().trim() === "MEET30RETURN") {
-      return { valid: true, discount: 30, appliesTo: "return_transfer" };
-    }
     return null;
   }
 };
