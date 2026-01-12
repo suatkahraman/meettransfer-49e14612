@@ -80,13 +80,13 @@ const getGreeting = (t: (key: string) => string): string => {
 };
 
 const CustomerHome = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const { t, language, setLanguage } = useLanguage();
   const { promoCode: activePromo } = usePromo();
   const navigate = useNavigate();
   
   // State - organized by purpose
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showPricePreparation, setShowPricePreparation] = useState(false);
@@ -170,9 +170,13 @@ const CustomerHome = () => {
 
   // Fetch data function - extracted for refresh capability
   const fetchData = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
     
     setIsRefreshing(true);
+    setIsLoading(true);
     try {
       // Fetch active bookings with next transfer info
       const { data: activeReservations, count } = await supabase
@@ -252,6 +256,7 @@ const CustomerHome = () => {
       console.error('Error fetching data:', error);
     } finally {
       setIsRefreshing(false);
+      setIsLoading(false);
     }
   }, [user?.id, formData.passengerPhone]);
 
@@ -266,9 +271,14 @@ const CustomerHome = () => {
     threshold: 80,
   });
 
+  // Wait for auth to complete before fetching data
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!authLoading && user?.id) {
+      fetchData();
+    } else if (!authLoading && !user) {
+      setIsLoading(false);
+    }
+  }, [authLoading, user?.id, fetchData]);
 
   const handleSaveProfile = async () => {
     if (!user?.id) return;
@@ -660,6 +670,27 @@ const CustomerHome = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // Show loading screen while auth or data is loading
+  if (authLoading || (isLoading && !recentReservations.length && !completedReservations.length)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <img 
+              src={meetTransferLogo} 
+              alt="Meet Transfer" 
+              className="h-16 w-16 rounded-full object-cover border-2 border-primary/20"
+            />
+            <Loader2 className="h-6 w-6 animate-spin text-primary absolute -bottom-1 -right-1" />
+          </div>
+          <p className="text-muted-foreground text-sm">
+            {language === 'TR' ? 'Yükleniyor...' : 'Loading...'}
+          </p>
+        </div>
       </div>
     );
   }

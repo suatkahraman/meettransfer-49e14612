@@ -156,7 +156,7 @@ const isActiveReservation = (status: string) => activeStatuses.includes(status);
 
 
 const CustomerBookings = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -242,11 +242,14 @@ const CustomerBookings = () => {
     disabled: loading
   });
 
+  // Wait for auth to complete before fetching reservations
   useEffect(() => {
-    if (user) {
+    if (!authLoading && user?.id) {
       fetchReservations();
+    } else if (!authLoading && !user) {
+      setLoading(false);
     }
-  }, [fetchReservations]);
+  }, [authLoading, user?.id, fetchReservations]);
 
   // Real-time subscription for customer's reservations
   useEffect(() => {
@@ -325,6 +328,27 @@ const CustomerBookings = () => {
   const sortedPastReservations = [...pastReservations].sort((a, b) => 
     new Date(b.pickup_date).getTime() - new Date(a.pickup_date).getTime()
   );
+
+  // Show loading screen while auth or data is loading
+  if (authLoading || (loading && reservations.length === 0)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <img 
+              src={meetTransferLogo} 
+              alt="Meet Transfer" 
+              className="h-16 w-16 rounded-full object-cover border-2 border-primary/20"
+            />
+            <Loader2 className="h-6 w-6 animate-spin text-primary absolute -bottom-1 -right-1" />
+          </div>
+          <p className="text-muted-foreground text-sm">
+            {language === 'TR' ? 'Yükleniyor...' : 'Loading...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
