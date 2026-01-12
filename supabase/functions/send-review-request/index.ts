@@ -210,6 +210,19 @@ const handler = async (req: Request): Promise<Response> => {
                 <p style="color: #888888; font-size: 14px; text-align: center; margin: 30px 0 0;">
                   Your feedback helps us maintain the highest standards of service and rewards our best drivers. It only takes 30 seconds! 🙏
                 </p>
+                
+                <!-- Google Review Section -->
+                <div style="text-align: center; margin: 35px 0 20px; padding: 25px; background: linear-gradient(135deg, #4285F4 0%, #34A853 50%, #FBBC05 75%, #EA4335 100%); border-radius: 12px;">
+                  <p style="color: #ffffff; font-size: 16px; font-weight: 600; margin: 0 0 15px;">
+                    🌟 Love our service? Share it with the world!
+                  </p>
+                  <p style="color: #ffffff; font-size: 14px; margin: 0 0 20px; opacity: 0.9;">
+                    Your Google review helps other travelers discover Meet Transfer
+                  </p>
+                  <a href="https://g.page/r/Ccr28aszxPk0EAE/review" style="display: inline-block; background-color: #ffffff; color: #333333; text-decoration: none; padding: 14px 35px; border-radius: 25px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
+                    <span style="margin-right: 8px;">⭐</span> Leave a Google Review
+                  </a>
+                </div>
               </div>
               
               <!-- Why Rate Section -->
