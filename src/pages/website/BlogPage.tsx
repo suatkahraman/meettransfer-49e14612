@@ -25,6 +25,8 @@ import privateWorthHero from "@/assets/blog/private-transfer-worth-hero.jpg";
 import fethiyeHero from "@/assets/blog/fethiye-transfer-hero.jpg";
 import marmarisHero from "@/assets/blog/marmaris-transfer-hero.jpg";
 import oludenizHero from "@/assets/blog/oludeniz-transfer-hero.jpg";
+import aydinHero from "@/assets/blog/aydin-transfer-hero.jpg";
+import muglaHero from "@/assets/blog/mugla-transfer-hero.jpg";
 
 const BlogPage = () => {
   const { t, getLocalizedPath, language } = useLanguage();
@@ -152,6 +154,26 @@ const BlogPage = () => {
       readTime: 13,
       date: "2025-01-12",
       image: oludenizHero,
+    },
+    {
+      id: "aydin-airport-transfer-guide",
+      titleKey: "blogAydinTitle",
+      descriptionKey: "blogAydinDesc",
+      category: "Aydın",
+      categoryKey: "aydin",
+      readTime: 14,
+      date: "2025-01-12",
+      image: aydinHero,
+    },
+    {
+      id: "mugla-airport-transfer-guide",
+      titleKey: "blogMuglaTitle",
+      descriptionKey: "blogMuglaDesc",
+      category: "Muğla",
+      categoryKey: "mugla",
+      readTime: 14,
+      date: "2025-01-12",
+      image: muglaHero,
     },
   ], []);
 

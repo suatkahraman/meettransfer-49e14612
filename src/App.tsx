@@ -137,6 +137,8 @@ const CappadociaAirportTransferGuide = lazy(() => import("./pages/website/blog/C
 const FethiyeAirportTransferGuide = lazy(() => import("./pages/website/blog/FethiyeAirportTransferGuide"));
 const MarmarisAirportTransferGuide = lazy(() => import("./pages/website/blog/MarmarisAirportTransferGuide"));
 const OludenizAirportTransferGuide = lazy(() => import("./pages/website/blog/OludenizAirportTransferGuide"));
+const AydinAirportTransferGuide = lazy(() => import("./pages/website/blog/AydinAirportTransferGuide"));
+const MuglaAirportTransferGuide = lazy(() => import("./pages/website/blog/MuglaAirportTransferGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
@@ -237,6 +239,8 @@ const App = () => (
               {localizedRoutes("/blog/fethiye-airport-transfer-guide", <FethiyeAirportTransferGuide />)}
               {localizedRoutes("/blog/marmaris-airport-transfer-guide", <MarmarisAirportTransferGuide />)}
               {localizedRoutes("/blog/oludeniz-airport-transfer-guide", <OludenizAirportTransferGuide />)}
+              {localizedRoutes("/blog/aydin-airport-transfer-guide", <AydinAirportTransferGuide />)}
+              {localizedRoutes("/blog/mugla-airport-transfer-guide", <MuglaAirportTransferGuide />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}
