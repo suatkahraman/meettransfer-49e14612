@@ -338,7 +338,7 @@ return (
           <div className="flex gap-3 sm:gap-5">
             {/* Vehicle Image - Compact on mobile */}
             <div 
-              className="w-24 h-20 sm:w-36 sm:h-28 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 relative cursor-pointer shadow-md sm:shadow-lg ring-1 ring-border/50"
+              className="w-32 h-24 sm:w-36 sm:h-28 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 relative cursor-pointer shadow-md sm:shadow-lg ring-1 ring-border/50"
               onClick={(e) => {
                 e.stopPropagation();
                 if (vehicleImages.length > 0) {
