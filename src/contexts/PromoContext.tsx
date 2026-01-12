@@ -70,6 +70,28 @@ export const PromoProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     fetchActivePromo();
+
+    // Subscribe to realtime changes on promo_codes table
+    const channel = supabase
+      .channel('promo-codes-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'promo_codes'
+        },
+        (payload) => {
+          console.log('Promo code changed:', payload);
+          // Refetch when any change occurs
+          fetchActivePromo();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
