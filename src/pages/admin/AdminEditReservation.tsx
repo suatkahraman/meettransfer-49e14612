@@ -1281,27 +1281,31 @@ const AdminEditReservation = () => {
       ? `${formData.dropoff_place_name}\n${formData.dropoff}`
       : formData.dropoff || '—';
 
-    const text = `---------------------------------
-${l.reservationCode}: ${reservationCode || id?.slice(0, 8) || '—'}
-${l.status}: ${statusLabel}
-${l.dateTime}: ${formData.pickup_date} – ${formData.pickup_time}
+    const text = `🚖 *TRANSFER DETAYLARI*
+━━━━━━━━━━━━━━━━━
 
-${l.passengers}:
+🎫 *${l.reservationCode}:* ${reservationCode || id?.slice(0, 8) || '—'}
+📊 *${l.status}:* ${statusLabel}
+📅 *${l.dateTime}:* ${formData.pickup_date} – ${formData.pickup_time}
+
+👥 *${l.passengers}:*
 ${passengerList}
 
-${l.pickup}:
+📞 *${l.customerPhone}:* ${formData.customer_phone || '—'}
+
+🟢 *${l.pickup}:*
 ${pickupFormatted}
 
-${l.dropoff}:
+🔴 *${l.dropoff}:*
 ${dropoffFormatted}
 
-${formData.flight_number ? `${l.flight}: ${formData.flight_number}\n` : ''}${l.vehicle}: ${vehicleLabel}
-${l.price}: ${formData.price ? `${symbol}${formData.price}` : '—'}
-${formData.passenger_cash_amount ? `${l.passengerCash}: ${getCurrencySymbol(formData.passenger_cash_currency)}${formData.passenger_cash_amount}\n` : ''}${l.paymentType}: ${paymentLabel}
+${formData.flight_number ? `✈️ *${l.flight}:* ${formData.flight_number}\n` : ''}🚗 *${l.vehicle}:* ${vehicleLabel}
+💰 *${l.price}:* ${formData.price ? `${symbol}${formData.price}` : '—'}
+${formData.passenger_cash_amount ? `💵 *${l.passengerCash}:* ${getCurrencySymbol(formData.passenger_cash_currency)}${formData.passenger_cash_amount}\n` : ''}💳 *${l.paymentType}:* ${paymentLabel}
+${driverInfo ? `\n👨‍✈️ *${l.driver}:* ${driverInfo.name} (${driverInfo.plate_number || '—'})` : ''}
+${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
 
-${l.customerPhone}: ${formData.customer_phone || '—'}
-${driverInfo ? `${l.driver}: ${driverInfo.name} (${driverInfo.plate_number || '—'})\n` : ''}${l.notes}: ${formData.admin_notes || '—'}
----------------------------------`;
+━━━━━━━━━━━━━━━━━`;
 
     try {
       await navigator.clipboard.writeText(text);

@@ -457,8 +457,9 @@ const AgencyCreateReservation = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {t('currencyCannotBeChangedAfterApproval') || 'Onaylandıktan sonra para birimi değiştirilemez'}
+                    <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                      <span>⚠️</span>
+                      <span>{t('currencyCannotBeChangedAfterApproval') || 'Onaylandıktan sonra para birimi değiştirilemez'}</span>
                     </p>
                   </div>
                 </div>

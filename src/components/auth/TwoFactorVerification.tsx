@@ -279,17 +279,48 @@ const TwoFactorVerification = ({
           </div>
         </motion.div>
 
-        {/* Timer and resend */}
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+        {/* Timer and resend with circular progress */}
+        <div className="flex flex-col items-center gap-3">
           {!canResend ? (
             <motion.div 
-              className="flex items-center gap-2"
+              className="flex flex-col items-center gap-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <Clock className="h-4 w-4" />
-              <span>
-                {countdown} {t.seconds} {t.resendIn}
+              {/* Circular Progress Timer */}
+              <div className="relative w-16 h-16">
+                <svg className="w-16 h-16 transform -rotate-90">
+                  {/* Background circle */}
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                    className="text-muted/30"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                    strokeLinecap="round"
+                    className="text-accent transition-all duration-1000 ease-linear"
+                    strokeDasharray={`${2 * Math.PI * 28}`}
+                    strokeDashoffset={`${2 * Math.PI * 28 * (1 - countdown / 60)}`}
+                  />
+                </svg>
+                {/* Countdown number */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg font-bold text-foreground">{countdown}</span>
+                </div>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {t.resendIn}
               </span>
             </motion.div>
           ) : (
