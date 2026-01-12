@@ -7,11 +7,12 @@ import { Progress } from '@/components/ui/progress';
 import { 
   AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, 
   ExternalLink, AlertTriangle, Info, Globe, Languages, Link2, FileText, Tag,
-  Bot, Gauge, Clock, Zap, FileCode, Map
+  Bot, Gauge, Clock, Zap, FileCode, Map, Share2, Twitter, Facebook, Linkedin, Image
 } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, type Language } from '@/hooks/useLanguageFromUrl';
 import { useSitemapRobotsValidation } from '@/hooks/useSitemapRobotsValidation';
 import { useCoreWebVitals } from '@/hooks/useCoreWebVitals';
+import { useSocialPreview } from '@/hooks/useSocialPreview';
 
 interface AggregateRating {
   ratingValue: string | number;
@@ -285,13 +286,16 @@ const SEODebugPage = () => {
   const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [customUrl, setCustomUrl] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical' | 'metatags' | 'sitemap' | 'vitals'>('current');
+  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical' | 'metatags' | 'sitemap' | 'vitals' | 'social'>('current');
   
   // Robots/Sitemap validation
   const { robotsResult, sitemapResults, isScanning: isScanningRobots, scanProgress: robotsScanProgress, scanRobotsAndSitemap } = useSitemapRobotsValidation();
   
   // Core Web Vitals
   const { result: vitalsResult, liveMetrics, isScanning: isScanningVitals, scanWebVitals } = useCoreWebVitals();
+  
+  // Social preview
+  const { result: socialResult, isScanning: isScanningSocial, imageLoading: socialImageLoading, scanPage: scanSocialPreview } = useSocialPreview();
   
   // Language scanning state
   const [languageScanResults, setLanguageScanResults] = useState<LanguageScanResult[]>([]);
@@ -1601,7 +1605,55 @@ const SEODebugPage = () => {
           </CardContent>
         </Card>
 
-        <div className="flex items-center gap-1 border-b border-border overflow-x-auto">
+        {/* Social Preview Card */}
+        <Card className="border-pink-500/30 bg-pink-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Share2 className="h-4 w-4" />
+              Sosyal Medya Önizleme
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Open Graph ve Twitter Card meta etiketlerini kontrol edin, Facebook/Twitter/LinkedIn paylaşım önizlemelerini görün
+            </p>
+            <Button
+              onClick={() => {
+                scanSocialPreview();
+                setActiveTab('social');
+              }}
+              disabled={isScanningSocial}
+              size="sm"
+              variant="default"
+              className="bg-pink-600 hover:bg-pink-700"
+            >
+              <Image className="h-4 w-4 mr-1" />
+              Sosyal Önizleme Tara
+              {isScanningSocial && <RefreshCw className="h-3 w-3 ml-1 animate-spin" />}
+            </Button>
+
+            {/* Quick preview of issues */}
+            {socialResult && (
+              <div className="flex flex-wrap gap-1">
+                {socialResult.issues.filter(i => i.level === 'error').length > 0 && (
+                  <Badge variant="destructive" className="text-xs">
+                    {socialResult.issues.filter(i => i.level === 'error').length} Hata
+                  </Badge>
+                )}
+                {socialResult.issues.filter(i => i.level === 'warning').length > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    {socialResult.issues.filter(i => i.level === 'warning').length} Uyarı
+                  </Badge>
+                )}
+                {socialResult.issues.length === 0 && (
+                  <Badge className="text-xs bg-green-600">Sorun Yok ✓</Badge>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+
           <button
             onClick={() => setActiveTab('current')}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
@@ -1687,6 +1739,17 @@ const SEODebugPage = () => {
           >
             <Gauge className="h-3 w-3" />
             Web Vitals {vitalsResult ? '✓' : ''}
+          </button>
+          <button
+            onClick={() => setActiveTab('social')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 ${
+              activeTab === 'social'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Share2 className="h-3 w-3" />
+            Sosyal {socialResult ? '✓' : ''}
           </button>
         </div>
 
@@ -2709,6 +2772,62 @@ const SEODebugPage = () => {
               </Card>
             )}
           </div>
+        ) : activeTab === 'social' ? (
+          <div className="space-y-4">
+            {!socialResult ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Henüz sosyal önizleme taraması yapılmadı. Yukarıdaki "Sosyal Önizleme Tara" butonunu kullanın.
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Facebook className="h-4 w-4 text-blue-600" />
+                      Facebook Önizleme
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="aspect-[1.91/1] bg-muted flex items-center justify-center">
+                        {socialResult.meta.ogImage ? (
+                          <img src={socialResult.meta.ogImage.startsWith('/') ? window.location.origin + socialResult.meta.ogImage : socialResult.meta.ogImage} alt="OG" className="w-full h-full object-cover" />
+                        ) : <Image className="h-12 w-12 opacity-30" />}
+                      </div>
+                      <div className="p-3">
+                        <p className="text-xs text-muted-foreground">{socialResult.meta.ogSiteName || new URL(socialResult.url).hostname}</p>
+                        <h3 className="font-semibold line-clamp-2">{socialResult.meta.ogTitle || socialResult.meta.title || 'Başlık Yok'}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{socialResult.meta.ogDescription || 'Açıklama yok'}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Twitter className="h-4 w-4 text-sky-500" />
+                      Twitter Önizleme
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border rounded-2xl overflow-hidden">
+                      <div className="aspect-[2/1] bg-muted flex items-center justify-center">
+                        {(socialResult.meta.twitterImage || socialResult.meta.ogImage) ? (
+                          <img src={(socialResult.meta.twitterImage || socialResult.meta.ogImage || '').startsWith('/') ? window.location.origin + (socialResult.meta.twitterImage || socialResult.meta.ogImage) : (socialResult.meta.twitterImage || socialResult.meta.ogImage)} alt="Twitter" className="w-full h-full object-cover" />
+                        ) : <Image className="h-12 w-12 opacity-30" />}
+                      </div>
+                      <div className="p-3">
+                        <h3 className="font-semibold line-clamp-2">{socialResult.meta.twitterTitle || socialResult.meta.ogTitle || 'Başlık Yok'}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{socialResult.meta.twitterDescription || socialResult.meta.ogDescription || 'Açıklama yok'}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
         ) : null}
 
         <Card className="mt-6">
@@ -2725,6 +2844,6 @@ const SEODebugPage = () => {
       </div>
     </div>
   );
-}; // SEODebugPage component
+};
 
 export default SEODebugPage;
