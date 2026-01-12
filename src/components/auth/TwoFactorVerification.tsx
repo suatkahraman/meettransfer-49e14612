@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Loader2, Mail, RefreshCw, ArrowLeft, ShieldCheck, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Loader2, Mail, RefreshCw, ArrowLeft, ShieldCheck, Clock, AlertTriangle, CheckCircle, Smartphone } from 'lucide-react';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,13 +12,14 @@ interface TwoFactorVerificationProps {
   role: string;
   isLoading: boolean;
   error: string | null;
-  onVerify: (code: string) => void;
+  onVerify: (code: string, rememberDevice: boolean) => void;
   onResend: () => void;
   onCancel: () => void;
   maxAttempts?: number;
   remainingAttempts?: number;
   otpLength?: number;
   expiryMinutes?: number;
+  trustedDeviceDays?: number;
 }
 
 const TwoFactorVerification = ({
@@ -32,12 +34,14 @@ const TwoFactorVerification = ({
   remainingAttempts = 5,
   otpLength = 6,
   expiryMinutes = 5,
+  trustedDeviceDays = 30,
 }: TwoFactorVerificationProps) => {
   const [otpCode, setOtpCode] = useState('');
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [rememberDevice, setRememberDevice] = useState(false);
   const { language } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   const hasAutoSubmitted = useRef(false);
@@ -63,6 +67,12 @@ const TwoFactorVerification = ({
     tooManyAttempts: isTurkish 
       ? 'Çok fazla hatalı deneme. Yeni kod isteyin.' 
       : 'Too many failed attempts. Request a new code.',
+    rememberDevice: isTurkish 
+      ? 'Bu cihazı hatırla' 
+      : 'Remember this device',
+    rememberDeviceHint: isTurkish 
+      ? `${trustedDeviceDays} gün boyunca bu cihazdan 2FA sorulmaz` 
+      : `Skip 2FA on this device for ${trustedDeviceDays} days`,
   };
 
   // Countdown timer for resend
@@ -79,12 +89,12 @@ const TwoFactorVerification = ({
   useEffect(() => {
     if (otpCode.length === otpLength && !hasAutoSubmitted.current && !isLoading) {
       hasAutoSubmitted.current = true;
-      onVerify(otpCode);
+      onVerify(otpCode, rememberDevice);
     }
     if (otpCode.length < otpLength) {
       hasAutoSubmitted.current = false;
     }
-  }, [otpCode, onVerify, isLoading, otpLength]);
+  }, [otpCode, onVerify, isLoading, otpLength, rememberDevice]);
 
   // Focus input on mount and after error
   useEffect(() => {
@@ -119,9 +129,9 @@ const TwoFactorVerification = ({
 
   const handleVerify = useCallback(() => {
     if (otpCode.length === otpLength && !isLoading) {
-      onVerify(otpCode);
+      onVerify(otpCode, rememberDevice);
     }
-  }, [otpCode, isLoading, onVerify, otpLength]);
+  }, [otpCode, isLoading, onVerify, otpLength, rememberDevice]);
 
   // Generate OTP slots dynamically based on otpLength
   const otpSlots = Array.from({ length: otpLength }, (_, i) => i);
@@ -240,6 +250,34 @@ const TwoFactorVerification = ({
             {t.tooManyAttempts}
           </motion.div>
         )}
+
+        {/* Remember device checkbox */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg border border-border/50"
+        >
+          <Checkbox
+            id="remember-device"
+            checked={rememberDevice}
+            onCheckedChange={(checked) => setRememberDevice(checked === true)}
+            disabled={isLoading || isLocked}
+            className="mt-0.5"
+          />
+          <div className="flex-1 space-y-1">
+            <label 
+              htmlFor="remember-device" 
+              className="text-sm font-medium cursor-pointer flex items-center gap-2"
+            >
+              <Smartphone className="h-4 w-4 text-muted-foreground" />
+              {t.rememberDevice}
+            </label>
+            <p className="text-xs text-muted-foreground">
+              {t.rememberDeviceHint}
+            </p>
+          </div>
+        </motion.div>
 
         {/* Timer and resend */}
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
