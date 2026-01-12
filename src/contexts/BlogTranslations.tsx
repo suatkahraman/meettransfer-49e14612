@@ -34,6 +34,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     cityGocek: "Göcek",
     cityKalkan: "Kalkan",
     cityKas: "Kaş",
+    cityMugla: "Muğla",
+    cityAydin: "Aydın",
     
     // Antalya Destinations (for tables)
     destKaleici: "Kaleici (Old Town)",
@@ -792,6 +794,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     cityGocek: "Göcek",
     cityKalkan: "Kalkan",
     cityKas: "Kaş",
+    cityMugla: "Muğla",
+    cityAydin: "Aydın",
     
     // Antalya Destinations (for tables)
     destKaleici: "Kaleici (Altstadt)",
@@ -1579,6 +1583,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     cityGocek: "Göcek",
     cityKalkan: "Kalkan",
     cityKas: "Kaş",
+    cityMugla: "Muğla",
+    cityAydin: "Aydın",
     
     // Antalya Destinations
     destKaleici: "Kaleici (Vieille ville)",
@@ -2338,6 +2344,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     cityGocek: "Гёджек",
     cityKalkan: "Калкан",
     cityKas: "Каш",
+    cityMugla: "Мугла",
+    cityAydin: "Айдын",
     
     // Antalya Destinations
     destKaleici: "Калеичи (Старый город)",
@@ -3001,6 +3009,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     cityGocek: "Göcek",
     cityKalkan: "Kalkan",
     cityKas: "Kaş",
+    cityMugla: "Muğla",
+    cityAydin: "Aydın",
     
     // Antalya Destinations
     destKaleici: "Kaleici (Centro storico)",
@@ -3620,6 +3630,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     cityGocek: "Göcek",
     cityKalkan: "Kalkan",
     cityKas: "Kaş",
+    cityMugla: "Muğla",
+    cityAydin: "Aydın",
     
     // Antalya Destinations
     destKaleici: "Kaleici (Casco antiguo)",
@@ -4239,6 +4251,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     cityGocek: "غوجك",
     cityKalkan: "كالكان",
     cityKas: "كاش",
+    cityMugla: "موغلا",
+    cityAydin: "آيدين",
     
     // Antalya Destinations (for tables)
     destKaleici: "كاليتشي (المدينة القديمة)",
@@ -4899,6 +4913,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     cityGocek: "Göcek",
     cityKalkan: "Kalkan",
     cityKas: "Kaş",
+    cityMugla: "Muğla",
+    cityAydin: "Aydın",
     
     // Antalya Destinations
     destKaleici: "Kaleiçi (Tarihi Merkez)",
@@ -5759,6 +5775,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     cityGocek: "Гечек",
     cityKalkan: "Калкан",
     cityKas: "Каш",
+    cityMugla: "Мугла",
+    cityAydin: "Айдин",
     
     // Antalya Destinations (for tables)
     destKaleici: "Калейчі (Старе місто)",
@@ -6466,6 +6484,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     cityGocek: "ギョジェク",
     cityKalkan: "カルカン",
     cityKas: "カシュ",
+    cityMugla: "ムーラ",
+    cityAydin: "アイドゥン",
     
     // Antalya Destinations (for tables)
     destKaleici: "カレイチ（旧市街）",

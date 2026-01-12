@@ -120,7 +120,7 @@ const CyprusAirportTransferGuide = () => {
 
         {/* Article Header */}
         <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">Cyprus</Badge>
+          <Badge variant="secondary" className="mb-4">{t("cityCyprus")}</Badge>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
             {t("blogCyprusH1")}
           </h1>

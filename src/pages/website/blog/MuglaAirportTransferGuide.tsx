@@ -114,7 +114,7 @@ const MuglaAirportTransferGuide = () => {
         </Link>
 
         <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">Muğla</Badge>
+          <Badge variant="secondary" className="mb-4">{t("cityMugla")}</Badge>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
             {t("blogMuglaH1")}
           </h1>
@@ -243,7 +243,7 @@ const MuglaAirportTransferGuide = () => {
             </Card>
           </div>
 
-          <h3>{t("galleryTitle") || "Our Fleet Gallery"}</h3>
+          <h3>{t("galleryTitle")}</h3>
           <div className="not-prose my-8">
             <BlogImageGallery 
               images={[
