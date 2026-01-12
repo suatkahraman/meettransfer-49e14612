@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useCustomerNotification } from '@/hooks/useCustomerNotification';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -104,6 +105,7 @@ const AdminEditReservation = () => {
   const returnToParam = searchParams.get('returnTo');
   const returnTo = returnToParam ? decodeURIComponent(returnToParam) : '/admin/reservations';
   const { logAction } = useAuditLog();
+  const { notifyStatusChange } = useCustomerNotification();
   const { thresholdsMap } = usePriceThresholds();
   const { emailCustomerPriceSet, emailDriverAssigned, emailDriverReservationUpdated, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed, emailAgencyApproved, emailAgencyRejected, emailAgencyPriceSet } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
@@ -1199,6 +1201,26 @@ const AdminEditReservation = () => {
       }
     } catch (e) {
       console.error('Failed to send driver update email:', e);
+    }
+
+    // Send push notification to customer if status changed
+    try {
+      const prevStatus = (originalData?.status as string | undefined) || '';
+      const newStatus = formData.status;
+      
+      if (customerId && prevStatus !== newStatus) {
+        console.log('Sending customer push notification for status change:', prevStatus, '->', newStatus);
+        const reservationCode = (originalData as any)?.reservation_code || '';
+        await notifyStatusChange({
+          customerId,
+          reservationCode,
+          oldStatus: prevStatus,
+          newStatus,
+          language: 'EN', // Could be fetched from customer preferences
+        });
+      }
+    } catch (e) {
+      console.error('Failed to send customer status notification:', e);
     }
 
     toast.success('Reservation updated');
