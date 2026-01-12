@@ -77,16 +77,6 @@ interface SchemaOrgProps {
 
 const baseUrl = 'https://meettransfer.app';
 
-// Shared aggregateRating - unified across all pages (updated: 2026-01-12)
-const sharedAggregateRating = {
-  '@type': 'AggregateRating',
-  '@id': `${baseUrl}/#aggregateRating`,
-  ratingValue: '4.8',
-  reviewCount: '2847',
-  bestRating: '5',
-  worstRating: '1',
-};
-
 const companyInfo = {
   name: 'Meet Transfer',
   legalName: 'Meet Transfer Ltd.',
@@ -133,7 +123,15 @@ const companyInfo = {
   // aggregateRating is conditionally added only on homepage
 };
 
-const generateLocalBusinessSchema = (includeRating: boolean = false) => {
+type AggregateRatingData = {
+  ratingValue: string;
+  reviewCount: string;
+};
+
+const generateLocalBusinessSchema = (
+  includeRating: boolean = false,
+  aggregateRating?: AggregateRatingData
+) => {
   const baseSchema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -174,10 +172,17 @@ const generateLocalBusinessSchema = (includeRating: boolean = false) => {
   };
 
   // Only include aggregateRating on homepage to avoid "multiple aggregate ratings" warning
-  if (includeRating) {
+  if (includeRating && aggregateRating) {
     return {
       ...baseSchema,
-      aggregateRating: sharedAggregateRating,
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        '@id': `${baseUrl}/#aggregateRating`,
+        ratingValue: aggregateRating.ratingValue,
+        reviewCount: aggregateRating.reviewCount,
+        bestRating: '5',
+        worstRating: '1',
+      },
     };
   }
 
@@ -395,54 +400,90 @@ const generateServiceSchema = (service: ServiceSchema) => ({
 
 const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
   useEffect(() => {
-    // Remove existing schema scripts
-    const existingScripts = document.querySelectorAll('script[data-schema-org]');
-    existingScripts.forEach(script => script.remove());
+    let cancelled = false;
 
-    // Generate and inject schemas
-    schemas.forEach((schema, index) => {
-      let schemaData;
+    const run = async () => {
+      // Remove existing schema scripts
+      const existingScripts = document.querySelectorAll('script[data-schema-org]');
+      existingScripts.forEach(script => script.remove());
 
-      switch (schema.type) {
-        case 'LocalBusiness':
-          schemaData = generateLocalBusinessSchema((schema as LocalBusinessSchema).includeRating);
-          break;
-        case 'TransportationService':
-          schemaData = generateTransportationServiceSchema((schema as TransportationServiceSchema).areaServed);
-          break;
-        case 'FAQPage':
-          schemaData = generateFAQSchema((schema as FAQSchema).questions);
-          break;
-        case 'BreadcrumbList':
-          schemaData = generateBreadcrumbSchema((schema as BreadcrumbSchema).items);
-          break;
-        case 'Product':
-          schemaData = generateProductSchema(schema as ProductSchema);
-          break;
-        case 'MerchantProduct':
-          schemaData = generateMerchantProductSchema();
-          break;
-        case 'Article':
-          schemaData = generateArticleSchema(schema as ArticleSchema);
-          break;
-        case 'WebPage':
-          schemaData = generateWebPageSchema(schema as WebPageSchema);
-          break;
-        case 'Service':
-          schemaData = generateServiceSchema(schema as ServiceSchema);
-          break;
-        default:
-          return;
+      // Fetch rating once (only if needed)
+      let aggregateRating: AggregateRatingData | undefined;
+      const needsRating = schemas.some(
+        (s) => s.type === 'LocalBusiness' && (s as LocalBusinessSchema).includeRating
+      );
+
+      if (needsRating) {
+        try {
+          const { supabase } = await import('@/integrations/supabase/client');
+          const { useLanguage } = await import('@/contexts/LanguageContext');
+          // useLanguage is a hook; we can't call it here.
+          // Instead, request EN to keep rating consistent across locales.
+          const { data } = await supabase.functions.invoke('get-google-reviews', {
+            body: { language: 'en' },
+          });
+
+          const ratingValue = String(data?.rating ?? '4.8');
+          const reviewCount = String(data?.totalReviews ?? '2847');
+          aggregateRating = { ratingValue, reviewCount };
+        } catch {
+          aggregateRating = { ratingValue: '4.8', reviewCount: '2847' };
+        }
       }
 
-      const script = document.createElement('script');
-      script.type = 'application/ld+json';
-      script.setAttribute('data-schema-org', `schema-${index}`);
-      script.textContent = JSON.stringify(schemaData);
-      document.head.appendChild(script);
-    });
+      if (cancelled) return;
+
+      // Generate and inject schemas
+      schemas.forEach((schema, index) => {
+        let schemaData;
+
+        switch (schema.type) {
+          case 'LocalBusiness':
+            schemaData = generateLocalBusinessSchema(
+              (schema as LocalBusinessSchema).includeRating,
+              aggregateRating
+            );
+            break;
+          case 'TransportationService':
+            schemaData = generateTransportationServiceSchema((schema as TransportationServiceSchema).areaServed);
+            break;
+          case 'FAQPage':
+            schemaData = generateFAQSchema((schema as FAQSchema).questions);
+            break;
+          case 'BreadcrumbList':
+            schemaData = generateBreadcrumbSchema((schema as BreadcrumbSchema).items);
+            break;
+          case 'Product':
+            schemaData = generateProductSchema(schema as ProductSchema);
+            break;
+          case 'MerchantProduct':
+            schemaData = generateMerchantProductSchema();
+            break;
+          case 'Article':
+            schemaData = generateArticleSchema(schema as ArticleSchema);
+            break;
+          case 'WebPage':
+            schemaData = generateWebPageSchema(schema as WebPageSchema);
+            break;
+          case 'Service':
+            schemaData = generateServiceSchema(schema as ServiceSchema);
+            break;
+          default:
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.setAttribute('data-schema-org', `schema-${index}`);
+        script.textContent = JSON.stringify(schemaData);
+        document.head.appendChild(script);
+      });
+    };
+
+    run();
 
     return () => {
+      cancelled = true;
       const scripts = document.querySelectorAll('script[data-schema-org]');
       scripts.forEach(script => script.remove());
     };
