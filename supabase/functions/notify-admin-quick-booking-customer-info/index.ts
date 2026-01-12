@@ -71,9 +71,9 @@ serve(async (req) => {
       await supabase.from("notifications").insert({
         user_id: userId,
         reservation_id: reservationId,
-        title: "✅ Quick Booking Complete",
-        message: `${customerName} completed reservation ${reservationCode} - ${pickup} → ${dropoff}`,
-        type: "quick_booking_complete",
+        title: "🎉 Müşteri Hesap Oluşturdu",
+        message: `${customerName} hesap oluşturup rezervasyonu onayladı (${reservationCode}) - ${pickup} → ${dropoff}`,
+        type: "customer_account_created",
       });
       console.log("Created notification for admin:", userId);
     }
@@ -97,8 +97,8 @@ serve(async (req) => {
                   auth: sub.auth,
                 },
               },
-              title: "✅ Quick Booking Complete",
-              body: `${customerName} - ${reservationCode} ready for driver assignment`,
+              title: "🎉 Müşteri Hesap Oluşturdu",
+              body: `${customerName} hesap oluşturup ${reservationCode} rezervasyonunu onayladı - Şoför atamak için hazır`,
               url: "/admin/reservations",
             },
           });
@@ -131,7 +131,7 @@ serve(async (req) => {
     };
 
     try {
-      const whatsAppMessage = `✅ *Rezervasyon Tamamlandı*\n\n📋 Kod: ${reservationCode}\n👤 ${customerName}\n📞 ${customerPhone}\n📧 ${customerEmail}\n\n📍 ${pickup} → ${dropoff}\n📅 ${pickupDate} saat ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n💰 ${currencySymbols[priceCurrency] || priceCurrency}${price}\n💳 ${paymentLabels[paymentMethod] || paymentMethod}\n\n🚀 Şoför atamak için:\nhttps://meettransfer.app/admin/reservations`;
+      const whatsAppMessage = `🎉 *Müşteri Hesap Oluşturdu*\n\n📋 Kod: ${reservationCode}\n👤 ${customerName}\n📞 ${customerPhone}\n📧 ${customerEmail}\n\n📍 ${pickup} → ${dropoff}\n📅 ${pickupDate} saat ${pickupTime}\n🚗 ${vehicleLabels[vehicleType] || vehicleType}\n💰 ${currencySymbols[priceCurrency] || priceCurrency}${price}\n💳 ${paymentLabels[paymentMethod] || paymentMethod}\n\n✅ Müşteri hesabını oluşturup rezervasyonu onayladı.\n🚀 Şoför atamak için:\nhttps://meettransfer.app/admin/reservations`;
 
       await supabase.functions.invoke("send-whatsapp-admin", {
         body: {
@@ -199,7 +199,7 @@ serve(async (req) => {
             body: JSON.stringify({
               from,
               to: adminEmails,
-              subject: `✅ Quick Booking Complete - ${reservationCode} - ${customerName}`,
+              subject: `🎉 Müşteri Hesap Oluşturdu - ${reservationCode} - ${customerName}`,
               html: `
                 <!DOCTYPE html>
                 <html>
@@ -211,8 +211,8 @@ serve(async (req) => {
                 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
                   <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                      <h1 style="color: #22c55e; margin: 0; font-size: 28px;">✅ Quick Booking Complete</h1>
-                      <p style="color: #666; margin-top: 10px;">Customer has completed all information - ready for driver assignment</p>
+                      <h1 style="color: #22c55e; margin: 0; font-size: 28px;">🎉 Müşteri Hesap Oluşturdu</h1>
+                      <p style="color: #666; margin-top: 10px;">Müşteri hesabını oluşturup rezervasyonu onayladı - Şoför ataması için hazır</p>
                     </div>
 
                     <div style="background: #22c55e; border-radius: 12px; padding: 16px; text-align: center; color: white; margin-bottom: 24px;">
