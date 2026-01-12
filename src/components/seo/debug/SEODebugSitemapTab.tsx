@@ -1,7 +1,12 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { AlertCircle, CheckCircle, AlertTriangle, Play, RotateCcw, Clock, Loader2, XCircle, Globe } from 'lucide-react';
 import { type RobotsResult, type SitemapResult } from '@/hooks/useSitemapRobotsValidation';
+import { useSitemapUrlValidation } from '@/hooks/useSitemapUrlValidation';
 
 interface SEODebugSitemapTabProps {
   robotsResult: RobotsResult | null;
@@ -9,6 +14,43 @@ interface SEODebugSitemapTabProps {
 }
 
 export const SEODebugSitemapTab = ({ robotsResult, sitemapResults }: SEODebugSitemapTabProps) => {
+  const [showValidation, setShowValidation] = useState(false);
+  const { results, summary, isValidating, progress, startedAt, completedAt, validateUrls, reset } = useSitemapUrlValidation();
+
+  const handleValidateUrls = async () => {
+    // Collect all URLs from all sitemaps
+    const allUrls = sitemapResults.flatMap(sitemap => 
+      sitemap.urls.map(u => u.loc)
+    );
+    
+    if (allUrls.length === 0) {
+      return;
+    }
+
+    setShowValidation(true);
+    await validateUrls(allUrls, 3); // Validate 3 URLs at a time
+  };
+
+  const handleReset = () => {
+    reset();
+    setShowValidation(false);
+  };
+
+  const getStatusColor = (ok: boolean, status: number | null) => {
+    if (ok) return 'text-green-600 bg-green-50 dark:bg-green-950';
+    if (status && status >= 300 && status < 400) return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950';
+    if (status && status >= 400 && status < 500) return 'text-orange-600 bg-orange-50 dark:bg-orange-950';
+    return 'text-red-600 bg-red-50 dark:bg-red-950';
+  };
+
+  const getStatusIcon = (ok: boolean, status: number | null) => {
+    if (ok) return <CheckCircle className="h-3.5 w-3.5" />;
+    if (status && status >= 300 && status < 400) return <AlertTriangle className="h-3.5 w-3.5" />;
+    return <XCircle className="h-3.5 w-3.5" />;
+  };
+
+  const totalSitemapUrls = sitemapResults.reduce((acc, s) => acc + s.urlCount, 0);
+
   if (!robotsResult && sitemapResults.length === 0) {
     return (
       <Card>
@@ -21,6 +63,7 @@ export const SEODebugSitemapTab = ({ robotsResult, sitemapResults }: SEODebugSit
 
   return (
     <div className="space-y-4">
+      {/* Robots.txt Card */}
       {robotsResult && (
         <Card className={robotsResult.issues.some(i => i.level === 'error') ? 'border-destructive' : robotsResult.accessible ? 'border-green-500' : 'border-yellow-500'}>
           <CardHeader className="pb-2">
@@ -44,6 +87,8 @@ export const SEODebugSitemapTab = ({ robotsResult, sitemapResults }: SEODebugSit
           </CardContent>
         </Card>
       )}
+
+      {/* Sitemap Cards */}
       {sitemapResults.map((sitemap, idx) => (
         <Card key={idx} className={sitemap.accessible ? 'border-green-500' : 'border-destructive'}>
           <CardHeader className="pb-2">
@@ -63,6 +108,169 @@ export const SEODebugSitemapTab = ({ robotsResult, sitemapResults }: SEODebugSit
           </CardContent>
         </Card>
       ))}
+
+      {/* URL Validation Section */}
+      {sitemapResults.length > 0 && sitemapResults.some(s => s.urlCount > 0) && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Globe className="h-5 w-5" />
+                URL Validation
+              </CardTitle>
+              <div className="flex gap-2">
+                {showValidation && (
+                  <Button variant="outline" size="sm" onClick={handleReset} disabled={isValidating}>
+                    <RotateCcw className="h-4 w-4 mr-1" />
+                    Sıfırla
+                  </Button>
+                )}
+                <Button 
+                  size="sm" 
+                  onClick={handleValidateUrls} 
+                  disabled={isValidating}
+                >
+                  {isValidating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Doğrulanıyor...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4 mr-1" />
+                      {totalSitemapUrls} URL Doğrula
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {!showValidation ? (
+              <div className="text-center py-4 text-muted-foreground text-sm">
+                <p>Sitemap'teki tüm URL'lerin 200 OK döndüğünü doğrulamak için butona tıklayın.</p>
+                <p className="text-xs mt-1">Bu işlem {totalSitemapUrls} URL için birkaç dakika sürebilir.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Progress */}
+                {(isValidating || results.length > 0) && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">İlerleme</span>
+                      <span className="font-medium">{progress}%</span>
+                    </div>
+                    <Progress value={progress} className="h-2" />
+                    
+                    {/* Summary Stats */}
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs mt-3">
+                      <div className="p-2 bg-green-50 dark:bg-green-950 rounded">
+                        <div className="font-bold text-green-600">{summary.ok}</div>
+                        <div className="text-green-600/70">OK (200)</div>
+                      </div>
+                      <div className="p-2 bg-red-50 dark:bg-red-950 rounded">
+                        <div className="font-bold text-red-600">{summary.errors}</div>
+                        <div className="text-red-600/70">Hata</div>
+                      </div>
+                      <div className="p-2 bg-muted rounded">
+                        <div className="font-bold">{summary.total}</div>
+                        <div className="text-muted-foreground">Toplam</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Time info */}
+                {startedAt && (
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Başlangıç: {startedAt.toLocaleTimeString('tr-TR')}
+                    </span>
+                    {completedAt && (
+                      <span>
+                        Süre: {Math.round((completedAt.getTime() - startedAt.getTime()) / 1000)}s
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Results List */}
+                {results.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">Sonuçlar</h4>
+                    <ScrollArea className="h-[300px] border rounded-md">
+                      <div className="p-2 space-y-1">
+                        {results.map((result, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`flex items-center justify-between p-2 rounded text-xs ${getStatusColor(result.ok, result.status)}`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              {getStatusIcon(result.ok, result.status)}
+                              <span className="truncate" title={result.url}>
+                                {result.url.replace(window.location.origin, '')}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 ml-2 shrink-0">
+                              {result.responseTime && (
+                                <span className="text-muted-foreground">{result.responseTime}ms</span>
+                              )}
+                              <Badge 
+                                variant={result.ok ? "secondary" : "destructive"} 
+                                className="text-xs font-mono"
+                              >
+                                {result.status ?? 'ERR'}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                )}
+
+                {/* Error URLs Summary */}
+                {completedAt && summary.errors > 0 && (
+                  <div className="p-3 bg-destructive/10 rounded-md">
+                    <h4 className="text-sm font-medium text-destructive mb-2 flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
+                      Hatalı URL'ler ({summary.errors})
+                    </h4>
+                    <div className="space-y-1 text-xs">
+                      {results.filter(r => !r.ok).slice(0, 10).map((result, idx) => (
+                        <div key={idx} className="flex items-center justify-between">
+                          <span className="truncate text-destructive" title={result.url}>
+                            {result.url.replace(window.location.origin, '')}
+                          </span>
+                          <span className="text-destructive font-mono ml-2">
+                            {result.status ?? result.error ?? 'ERR'}
+                          </span>
+                        </div>
+                      ))}
+                      {summary.errors > 10 && (
+                        <div className="text-muted-foreground mt-1">
+                          ...ve {summary.errors - 10} daha
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Success Message */}
+                {completedAt && summary.errors === 0 && summary.total > 0 && (
+                  <div className="p-3 bg-green-50 dark:bg-green-950 rounded-md flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-sm text-green-600 font-medium">
+                      Tüm {summary.total} URL başarıyla doğrulandı! ✓
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
