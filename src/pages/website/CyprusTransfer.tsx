@@ -5,7 +5,7 @@ import PriceTable from "@/components/website/PriceTable";
 import FAQSection from "@/components/website/FAQSection";
 import FeatureList from "@/components/website/FeatureList";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
-import { MapPin, ArrowRight, Plane, Palmtree, Sun, Clock, Route } from "lucide-react";
+import { MapPin, ArrowRight, Plane, Palmtree, Sun, Clock, Route, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -192,14 +192,20 @@ const CyprusTransfer = () => {
                 </div>
                 <h3 className="font-semibold text-sm mb-1">{t(`cyprusRoute${route.key}`)}</h3>
                 <p className="text-xs text-muted-foreground mb-3">{t(`cyprusRoute${route.key}Desc`)}</p>
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    {route.duration}
-                  </span>
-                  <Link to="/">
-                    <Button size="sm" variant="outline" className="text-xs h-7">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
+                  <Clock className="h-3 w-3" />
+                  {route.duration}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link to="/" className="flex-1">
+                    <Button size="sm" variant="outline" className="text-xs h-7 w-full">
                       {t("cyprusRequestPrice")}
+                    </Button>
+                  </Link>
+                  <Link to={`/?ai=true&route=${encodeURIComponent(t(`cyprusRoute${route.key}`))}`}>
+                    <Button size="sm" variant="secondary" className="text-xs h-7 gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      {t("cyprusAskAI")}
                     </Button>
                   </Link>
                 </div>
