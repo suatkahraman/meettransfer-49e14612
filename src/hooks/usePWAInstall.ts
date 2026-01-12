@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -24,6 +24,40 @@ interface BrowserInfo {
   instructions?: string;
 }
 
+// Cache keys for optimization
+const GEO_CACHE_KEY = 'mt_geo_cache';
+const GEO_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const EXCLUDED_ROLES: Array<'admin' | 'driver' | 'agency'> = ['admin', 'driver', 'agency'];
+
+interface GeoCache {
+  data: { countryCode: string; countryName: string; city: string };
+  timestamp: number;
+}
+
+function getCachedGeo(): GeoCache['data'] | null {
+  try {
+    const cached = localStorage.getItem(GEO_CACHE_KEY);
+    if (!cached) return null;
+    const parsed: GeoCache = JSON.parse(cached);
+    if (Date.now() - parsed.timestamp > GEO_CACHE_TTL) {
+      localStorage.removeItem(GEO_CACHE_KEY);
+      return null;
+    }
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedGeo(data: GeoCache['data']): void {
+  try {
+    const cache: GeoCache = { data, timestamp: Date.now() };
+    localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -32,6 +66,7 @@ export function usePWAInstall() {
   const [isAndroid, setIsAndroid] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
   const [browserInfo, setBrowserInfo] = useState<BrowserInfo | null>(null);
+  const isExcludedUserRef = useRef<boolean | null>(null);
 
   useEffect(() => {
     const INSTALL_TRACK_KEY = 'app_install_tracked_v2';
@@ -221,35 +256,61 @@ export function usePWAInstall() {
       if (localStorage.getItem(INSTALL_TRACK_KEY) === '1') return;
 
       try {
+        // Check if user has excluded role (admin, driver, agency)
+        if (isExcludedUserRef.current === null) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: roleData } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', user.id)
+              .in('role', EXCLUDED_ROLES)
+              .limit(1);
+            
+            isExcludedUserRef.current = (roleData && roleData.length > 0);
+          } else {
+            isExcludedUserRef.current = false;
+          }
+        }
+
+        // Don't track excluded users
+        if (isExcludedUserRef.current) {
+          console.log('[PWA] Skipping install tracking for excluded user role');
+          return;
+        }
+
         const visitorId = localStorage.getItem('visitor_id') || crypto.randomUUID();
         localStorage.setItem('visitor_id', visitorId);
 
         // Get current user if logged in
         const { data: { user } } = await supabase.auth.getUser();
 
-        // Fetch country info with fallback
-        let countryCode: string | null = null;
-        let countryName: string | null = null;
-        let city: string | null = null;
-        
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000);
-          
-          const geoRes = await fetch('https://ipapi.co/json/', { 
-            signal: controller.signal 
-          });
-          
-          clearTimeout(timeoutId);
-          
-          if (geoRes.ok) {
-            const geoData = await geoRes.json();
-            countryCode = geoData.country_code || null;
-            countryName = geoData.country_name || null;
-            city = geoData.city || null;
+        // Use cached geo or fetch new with timeout
+        let geo = getCachedGeo();
+        if (!geo) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
+            const geoRes = await fetch('https://ipapi.co/json/', { 
+              signal: controller.signal 
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (geoRes.ok) {
+              const geoData = await geoRes.json();
+              geo = {
+                countryCode: geoData.country_code || '',
+                countryName: geoData.country_name || '',
+                city: geoData.city || ''
+              };
+              setCachedGeo(geo);
+            }
+          } catch (geoError) {
+            console.log('[PWA] Could not fetch geo info:', geoError);
+            geo = { countryCode: '', countryName: '', city: '' };
           }
-        } catch (geoError) {
-          console.log('[PWA] Could not fetch geo info:', geoError);
         }
 
         const { error } = await supabase.from('app_installations').insert({
@@ -258,9 +319,9 @@ export function usePWAInstall() {
           device: /mobile|tablet/i.test(userAgent) ? 'mobile' : 'desktop',
           browser: browser.name,
           platform: isIOSDevice ? 'iOS' : isAndroidDevice ? 'Android' : 'Desktop',
-          country_code: countryCode,
-          country_name: countryName,
-          city: city,
+          country_code: geo?.countryCode || null,
+          country_name: geo?.countryName || null,
+          city: geo?.city || null,
         });
 
         if (error) {

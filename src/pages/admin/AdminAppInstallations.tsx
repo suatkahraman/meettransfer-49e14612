@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Download, Smartphone, Monitor, Apple, Chrome, Globe } from 'lucide-react';
+import { ArrowLeft, Download, Smartphone, Monitor, Apple, Chrome, Globe, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -26,50 +26,47 @@ const AdminAppInstallations = () => {
   const navigate = useNavigate();
   const [installations, setInstallations] = useState<AppInstallation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    total: 0,
-    mobile: 0,
-    desktop: 0,
-    ios: 0,
-    android: 0,
-  });
+  const [refreshing, setRefreshing] = useState(false);
+  const [excludedUserIds, setExcludedUserIds] = useState<string[]>([]);
 
+  // Fetch excluded user IDs once on mount
   useEffect(() => {
-    const fetchInstallations = async () => {
-      // First get admin user IDs to exclude them
-      const { data: adminRoles } = await supabase
+    const fetchExcludedUsers = async () => {
+      const { data: excludedRoles } = await supabase
         .from('user_roles')
         .select('user_id')
-        .eq('role', 'admin');
+        .in('role', ['admin', 'driver', 'agency']);
       
-      const adminUserIds = adminRoles?.map(r => r.user_id) || [];
-
-      const { data, error } = await supabase
-        .from('app_installations')
-        .select('*')
-        .order('installed_at', { ascending: false });
-
-      if (!error && data) {
-        // Filter out admin installations
-        const filteredData = data.filter(i => !i.user_id || !adminUserIds.includes(i.user_id));
-        
-        setInstallations(filteredData);
-        
-        // Calculate stats from filtered data
-        const total = filteredData.length;
-        const mobile = filteredData.filter(i => i.device === 'mobile').length;
-        const desktop = filteredData.filter(i => i.device === 'desktop').length;
-        const ios = filteredData.filter(i => i.platform === 'iOS').length;
-        const android = filteredData.filter(i => i.platform === 'Android').length;
-        
-        setStats({ total, mobile, desktop, ios, android });
-      }
-      setLoading(false);
+      setExcludedUserIds(excludedRoles?.map(r => r.user_id) || []);
     };
+    
+    fetchExcludedUsers();
+  }, []);
 
-    fetchInstallations();
+  const fetchInstallations = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('app_installations')
+      .select('*')
+      .order('installed_at', { ascending: false })
+      .limit(500); // Limit for performance
 
-    // Subscribe to realtime updates
+    if (!error && data) {
+      // Filter out excluded user installations (already fetched excluded IDs)
+      const filteredData = data.filter(i => !i.user_id || !excludedUserIds.includes(i.user_id));
+      setInstallations(filteredData);
+    }
+    setLoading(false);
+    setRefreshing(false);
+  }, [excludedUserIds]);
+
+  useEffect(() => {
+    if (excludedUserIds.length >= 0) {
+      fetchInstallations();
+    }
+  }, [excludedUserIds, fetchInstallations]);
+
+  // Realtime subscription
+  useEffect(() => {
     const channel = supabase
       .channel('app-installations-list')
       .on(
@@ -82,7 +79,34 @@ const AdminAppInstallations = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchInstallations]);
+
+  // Calculate stats using useMemo for performance
+  const stats = useMemo(() => ({
+    total: installations.length,
+    mobile: installations.filter(i => i.device === 'mobile').length,
+    desktop: installations.filter(i => i.device === 'desktop').length,
+    ios: installations.filter(i => i.platform === 'iOS').length,
+    android: installations.filter(i => i.platform === 'Android').length,
+  }), [installations]);
+
+  // Calculate country stats with useMemo
+  const sortedCountries = useMemo(() => {
+    const countryStats = installations.reduce((acc, inst) => {
+      const country = inst.country_name || 'Bilinmiyor';
+      acc[country] = (acc[country] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(countryStats)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5);
+  }, [installations]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchInstallations();
+  };
 
   const getPlatformIcon = (platform: string | null) => {
     switch (platform) {
@@ -124,24 +148,24 @@ const AdminAppInstallations = () => {
     return String.fromCodePoint(...codePoints);
   };
 
-  // Calculate country stats
-  const countryStats = installations.reduce((acc, inst) => {
-    const country = inst.country_name || 'Bilinmiyor';
-    acc[country] = (acc[country] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const sortedCountries = Object.entries(countryStats)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 5);
-
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
-          <ArrowLeft className="h-5 w-5" />
+      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="text-primary-foreground hover:bg-primary-foreground/10">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-serif">Uygulama İndirmeleri</h1>
+        </div>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={handleRefresh} 
+          disabled={refreshing}
+          className="text-primary-foreground hover:bg-primary-foreground/10"
+        >
+          <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
         </Button>
-        <h1 className="text-2xl font-serif">Uygulama İndirmeleri</h1>
       </header>
 
       <main className="container mx-auto py-8 px-4">
