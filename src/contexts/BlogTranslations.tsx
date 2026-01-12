@@ -3814,6 +3814,65 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     travelTips: "نصائح السفر",
     dayTripGuide: "دليل الرحلة اليومية",
     updatedFor2025: "محدث لعام 2025",
+    
+    // City Names (for tables and badges)
+    cityIstanbul: "إسطنبول",
+    cityAntalya: "أنطاليا",
+    cityFethiye: "فتحية",
+    cityCappadocia: "كابادوكيا",
+    cityBodrum: "بودروم",
+    cityDalaman: "دالامان",
+    cityDubai: "دبي",
+    cityCyprus: "قبرص",
+    cityMarmaris: "مارماريس",
+    cityOludeniz: "أولودينيز",
+    cityGocek: "غوجك",
+    cityKalkan: "كالكان",
+    cityKas: "كاش",
+    
+    // Antalya Destinations (for tables)
+    destKaleici: "كاليتشي (المدينة القديمة)",
+    destLaraBeach: "شاطئ لارا / كوندو",
+    destBelek: "بيليك",
+    destSide: "سيدي",
+    destAlanya: "ألانيا",
+    destKemer: "كيمر / غوينوك",
+    destKasAntalya: "كاش",
+    destKalkanAntalya: "كالكان",
+    
+    // Istanbul Destinations (for tables)
+    destTaksim: "تقسيم / بيوغلو",
+    destSultanahmet: "سلطان أحمد",
+    destKadikoy: "قاضي كوي",
+    destBesiktas: "بشكتاش",
+    destGalataport: "ميناء جالاتا للرحلات البحرية",
+    destSabihaGokcen: "مطار صبيحة غوكتشن",
+    destBursa: "بورصة (عثمان غازي)",
+    destSapanca: "سابانجا",
+    destKartepe: "منتجع كارتيبي للتزلج",
+    
+    // Fethiye Destinations (for tables)
+    destFethiyeCenter: "مركز فتحية",
+    destOludeniz: "أولودينيز",
+    destHisaronu: "هيساروني",
+    destCalisBeach: "شاطئ تشاليش",
+    destKayakoy: "كاياكوي",
+    destGocek: "غوجك",
+    destKalkan: "كالكان",
+    destKas: "كاش",
+    
+    // Vehicle Names (for tables)
+    vehicleVito: "مرسيدس فيتو (حتى 6 ركاب)",
+    vehicleVitoVIP: "مرسيدس فيتو VIP (حتى 6 ركاب)",
+    vehicleMaybach: "مرسيدس مايباخ (حتى 3 ركاب)",
+    vehicleSprinter: "مرسيدس سبرينتر (حتى 16 راكب)",
+    
+    // Table Headers
+    tableDistance: "المسافة",
+    tableTime: "المدة",
+    tablePrivatePrice: "النقل الخاص",
+    tableBusPrice: "حافلة المطار",
+    tableNotAvailable: "غير متوفر",
     blogIstanbul1Title: "أفضل طريقة للوصول من مطار إسطنبول إلى وسط المدينة (دليل 2025)",
     blogIstanbul1Desc: "دليل شامل للنقل من مطار إسطنبول. قارن بين النقل الخاص والمترو والحافلات.",
     blogIstanbul1H1: "أفضل طريقة للوصول من مطار إسطنبول إلى وسط المدينة",
@@ -5106,6 +5165,65 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogHourlyBusinessMeetings: "Бізнес",
     blogHourlyEvents: "Заходи",
     
+    // City Names (for tables and badges)
+    cityIstanbul: "Стамбул",
+    cityAntalya: "Анталія",
+    cityFethiye: "Фетхіє",
+    cityCappadocia: "Каппадокія",
+    cityBodrum: "Бодрум",
+    cityDalaman: "Даламан",
+    cityDubai: "Дубай",
+    cityCyprus: "Кіпр",
+    cityMarmaris: "Мармаріс",
+    cityOludeniz: "Олюденіз",
+    cityGocek: "Гечек",
+    cityKalkan: "Калкан",
+    cityKas: "Каш",
+    
+    // Antalya Destinations (for tables)
+    destKaleici: "Калейчі (Старе місто)",
+    destLaraBeach: "Пляж Лара / Кунду",
+    destBelek: "Белек",
+    destSide: "Сіде",
+    destAlanya: "Аланія",
+    destKemer: "Кемер / Гейнюк",
+    destKasAntalya: "Каш",
+    destKalkanAntalya: "Калкан",
+    
+    // Istanbul Destinations (for tables)
+    destTaksim: "Таксім / Бейоглу",
+    destSultanahmet: "Султанахмет",
+    destKadikoy: "Кадикьой",
+    destBesiktas: "Бешикташ",
+    destGalataport: "Круїзний термінал Галатапорт",
+    destSabihaGokcen: "Аеропорт Сабіха Гекчен",
+    destBursa: "Бурса (Османгазі)",
+    destSapanca: "Сапанджа",
+    destKartepe: "Гірськолижний курорт Картепе",
+    
+    // Fethiye Destinations (for tables)
+    destFethiyeCenter: "Центр Фетхіє",
+    destOludeniz: "Олюденіз",
+    destHisaronu: "Хісароню",
+    destCalisBeach: "Пляж Чаліш",
+    destKayakoy: "Каякьой",
+    destGocek: "Гечек",
+    destKalkan: "Калкан",
+    destKas: "Каш",
+    
+    // Vehicle Names (for tables)
+    vehicleVito: "Mercedes Vito (до 6 осіб)",
+    vehicleVitoVIP: "Mercedes Vito VIP (до 6 осіб)",
+    vehicleMaybach: "Mercedes Maybach (до 3 осіб)",
+    vehicleSprinter: "Mercedes Sprinter (до 16 осіб)",
+    
+    // Table Headers
+    tableDistance: "Відстань",
+    tableTime: "Тривалість",
+    tablePrivatePrice: "Приватний трансфер",
+    tableBusPrice: "Автобус з аеропорту",
+    tableNotAvailable: "Н/Д",
+
     // Blog CTA Component
     blogCtaDiscountBadge: "30% ЗНИЖКА на зворотні трансфери",
     blogCtaTitle: "Забронюйте ваш преміум-трансфер",
@@ -5683,6 +5801,65 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     travelTips: "旅行のヒント",
     dayTripGuide: "日帰り旅行ガイド",
     updatedFor2025: "2025年版に更新",
+    
+    // City Names (for tables and badges)
+    cityIstanbul: "イスタンブール",
+    cityAntalya: "アンタルヤ",
+    cityFethiye: "フェティエ",
+    cityCappadocia: "カッパドキア",
+    cityBodrum: "ボドルム",
+    cityDalaman: "ダラマン",
+    cityDubai: "ドバイ",
+    cityCyprus: "キプロス",
+    cityMarmaris: "マルマリス",
+    cityOludeniz: "オルデニズ",
+    cityGocek: "ギョジェク",
+    cityKalkan: "カルカン",
+    cityKas: "カシュ",
+    
+    // Antalya Destinations (for tables)
+    destKaleici: "カレイチ（旧市街）",
+    destLaraBeach: "ララビーチ / クンドゥ",
+    destBelek: "ベレク",
+    destSide: "シデ",
+    destAlanya: "アランヤ",
+    destKemer: "ケメル / ギョイニュク",
+    destKasAntalya: "カシュ",
+    destKalkanAntalya: "カルカン",
+    
+    // Istanbul Destinations (for tables)
+    destTaksim: "タクシム / ベイオール",
+    destSultanahmet: "スルタンアフメット",
+    destKadikoy: "カドゥキョイ",
+    destBesiktas: "ベシクタシュ",
+    destGalataport: "ガラタポートクルーズターミナル",
+    destSabihaGokcen: "サビハ・ギョクチェン空港",
+    destBursa: "ブルサ（オスマンガジ）",
+    destSapanca: "サパンジャ",
+    destKartepe: "カルテペスキーリゾート",
+    
+    // Fethiye Destinations (for tables)
+    destFethiyeCenter: "フェティエ中心部",
+    destOludeniz: "オルデニズ",
+    destHisaronu: "ヒサロニュ",
+    destCalisBeach: "チャリシュビーチ",
+    destKayakoy: "カヤキョイ",
+    destGocek: "ギョジェク",
+    destKalkan: "カルカン",
+    destKas: "カシュ",
+    
+    // Vehicle Names (for tables)
+    vehicleVito: "メルセデスVito（最大6名）",
+    vehicleVitoVIP: "メルセデスVito VIP（最大6名）",
+    vehicleMaybach: "メルセデスMaybach（最大3名）",
+    vehicleSprinter: "メルセデスSprinter（最大16名）",
+    
+    // Table Headers
+    tableDistance: "距離",
+    tableTime: "所要時間",
+    tablePrivatePrice: "プライベート送迎",
+    tableBusPrice: "空港バス",
+    tableNotAvailable: "N/A",
     blogIstanbul1Title: "イスタンブール空港から市内中心部への最良の行き方（2025年ガイド）",
     blogIstanbul1Desc: "イスタンブール空港の交通機関完全ガイド。プライベート送迎、地下鉄、バスを比較。",
     blogIstanbul1H1: "イスタンブール空港から市内中心部への最良の行き方",
