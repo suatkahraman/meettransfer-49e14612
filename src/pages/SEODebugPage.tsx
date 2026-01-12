@@ -145,6 +145,22 @@ const SEODebugPage = () => {
     { label: 'About', path: '/about' },
   ];
 
+  const blogQuickPaths = [
+    { label: 'Cappadocia', path: '/blog/cappadocia-airport-transfer-guide' },
+    { label: 'Istanbul City', path: '/blog/istanbul-airport-to-city-guide' },
+    { label: 'Istanbul Price', path: '/blog/istanbul-transfer-price-guide' },
+    { label: 'Antalya', path: '/blog/antalya-airport-transfer-guide' },
+    { label: 'Marmaris', path: '/blog/marmaris-airport-transfer-guide' },
+    { label: 'Fethiye', path: '/blog/fethiye-airport-transfer-guide' },
+    { label: 'Ölüdeniz', path: '/blog/oludeniz-airport-transfer-guide' },
+    { label: 'Cyprus', path: '/blog/cyprus-airport-transfer-guide' },
+    { label: 'Dubai', path: '/blog/dubai-airport-transfer-guide' },
+    { label: 'Mugla', path: '/blog/mugla-airport-transfer-guide' },
+    { label: 'Aydin', path: '/blog/aydin-airport-transfer-guide' },
+    { label: 'Bursa Tour', path: '/blog/istanbul-bursa-day-tour-guide' },
+    { label: 'Taxi Comparison', path: '/blog/private-vs-taxi-turkey' },
+  ];
+
   // Scan all language versions
   const scanAllLanguages = async (basePath: string = '/') => {
     setIsScanningLanguages(true);
@@ -482,7 +498,31 @@ const SEODebugPage = () => {
         <Card className="border-primary/30 bg-primary/5">
           <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><Languages className="h-4 w-4" />Tüm Dilleri Tara</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex gap-2"><Input placeholder="Sayfa yolu (örn: / veya /reviews)" value={languageScanPath} onChange={(e) => setLanguageScanPath(e.target.value)} className="text-sm" /><Button onClick={() => scanAllLanguages(languageScanPath)} disabled={isScanningLanguages} size="sm"><Globe className="h-4 w-4 mr-1" />{SUPPORTED_LANGUAGES.length} Dili Tara{isScanningLanguages && <RefreshCw className="h-3 w-3 ml-1 animate-spin" />}</Button></div>
+            <div className="flex gap-2">
+              <Input placeholder="Sayfa yolu (örn: / veya /reviews)" value={languageScanPath} onChange={(e) => setLanguageScanPath(e.target.value)} className="text-sm" />
+              <Button onClick={() => scanAllLanguages(languageScanPath)} disabled={isScanningLanguages} size="sm">
+                <Globe className="h-4 w-4 mr-1" />{SUPPORTED_LANGUAGES.length} Dili Tara{isScanningLanguages && <RefreshCw className="h-3 w-3 ml-1 animate-spin" />}
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              <span className="text-xs text-muted-foreground mr-2">Blog:</span>
+              {blogQuickPaths.map((item) => (
+                <Button 
+                  key={item.path} 
+                  onClick={() => { 
+                    setLanguageScanPath(item.path);
+                    setHreflangScanPath(item.path);
+                    setCanonicalScanPath(item.path);
+                    setMetaTagScanPath(item.path);
+                  }} 
+                  variant={languageScanPath === item.path ? "default" : "ghost"} 
+                  size="sm" 
+                  className="h-6 text-xs px-2"
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </div>
             {isScanningLanguages && <Progress value={languageScanProgress} className="h-2" />}
           </CardContent>
         </Card>
