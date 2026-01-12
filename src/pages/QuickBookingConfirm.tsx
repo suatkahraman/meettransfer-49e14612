@@ -14,6 +14,7 @@ import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo } from "@/contexts/PromoContext";
+import { validatePromoCode } from "@/hooks/useActivePromoCode";
 import { getCurrencySymbol } from "@/lib/currency";
 import { VEHICLE_TYPE_MAP } from "@/lib/vehicleTypes";
 import { VehicleSelectionCard, VehicleBadgeType } from "@/components/VehicleSelectionCard";
@@ -87,7 +88,7 @@ const getRecommendedVehicle = (passengers: number, luggage: number): string => {
 };
 
 export default function QuickBookingConfirm() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { promoCode: activePromo } = usePromo();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -123,6 +124,8 @@ export default function QuickBookingConfirm() {
   // Promo code state
   const [promoCode, setPromoCode] = useState("");
   const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
+  const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   
   // Payment method state
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "payment_link">("cash");
@@ -463,26 +466,30 @@ export default function QuickBookingConfirm() {
     }
   };
 
-  const handlePromoCodeChange = (value: string) => {
+  const handlePromoCodeChange = async (value: string) => {
     setPromoCode(value);
+    setPromoCodeError(null);
+    
     if (value.trim() === "") {
       setIsPromoCodeValid(null);
-    } else {
-      // Check against VALID_PROMO_CODES and activePromo code
-      const validCodes = [...VALID_PROMO_CODES];
-      if (activePromo?.code) {
-        validCodes.push(activePromo.code);
-      }
+      return;
+    }
+    
+    setIsValidatingPromo(true);
+    try {
+      const result = await validatePromoCode(value, language);
       
-      // Check if promo code is valid and not expired
-      const isExpired = activePromo?.validUntil && new Date(activePromo.validUntil) < new Date();
-      const codeMatches = validCodes.some(code => code.toLowerCase() === value.trim().toLowerCase());
-      
-      if (codeMatches && !isExpired) {
+      if (result.valid) {
         setIsPromoCodeValid(true);
+        setPromoCodeError(null);
       } else {
         setIsPromoCodeValid(false);
+        setPromoCodeError('errorMessage' in result ? result.errorMessage : null);
       }
+    } catch (err) {
+      setIsPromoCodeValid(false);
+    } finally {
+      setIsValidatingPromo(false);
     }
   };
 
@@ -1463,10 +1470,13 @@ export default function QuickBookingConfirm() {
                         isPromoCodeValid === false ? "border-red-500 focus:ring-red-500" : ""
                       }`}
                     />
-                    {isPromoCodeValid === true && (
+                    {isValidatingPromo && (
+                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground animate-spin" />
+                    )}
+                    {!isValidatingPromo && isPromoCodeValid === true && (
                       <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                     )}
-                    {isPromoCodeValid === false && (
+                    {!isValidatingPromo && isPromoCodeValid === false && (
                       <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
                     )}
                   </div>
@@ -1476,10 +1486,16 @@ export default function QuickBookingConfirm() {
                       {t("qbDiscountApplied")}
                     </p>
                   )}
+                  {isPromoCodeValid === false && promoCodeError && (
+                    <p className="text-xs sm:text-sm text-red-500 flex items-center gap-1">
+                      <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      {promoCodeError}
+                    </p>
+                  )}
                   {activePromo?.validUntil && (
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      {t("language") === 'TR' 
+                      {language === 'TR' 
                         ? `Kod son kullanım: ${new Date(activePromo.validUntil).toLocaleDateString('tr-TR')}` 
                         : `Code valid until: ${new Date(activePromo.validUntil).toLocaleDateString('en-US')}`}
                     </p>

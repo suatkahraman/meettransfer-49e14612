@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePromo } from '@/contexts/PromoContext';
+import { validatePromoCode } from '@/hooks/useActivePromoCode';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,7 +90,7 @@ const ReservationForm = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
-  const { t, getLocalizedPath } = useLanguage();
+  const { t, getLocalizedPath, language } = useLanguage();
   const { emailAdminNewReservation } = useEmailNotifications();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -295,6 +296,8 @@ const ReservationForm = () => {
   const [hasReturnTrip, setHasReturnTrip] = useState(urlHasReturn);
   const [promoCode, setPromoCode] = useState(urlPromoCode);
   const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(urlPromoCode ? true : null);
+  const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   const [returnTripData, setReturnTripData] = useState({
     date: urlReturnDate,
     time: urlReturnTime,
@@ -472,13 +475,31 @@ const ReservationForm = () => {
     return baseCodes;
   }, [activePromo]);
 
-  const handlePromoCodeChange = (value: string) => {
+  const handlePromoCodeChange = async (value: string) => {
     setPromoCode(value);
+    setPromoCodeError(null);
+    
     if (value.trim() === '') {
       setIsPromoCodeValid(null);
-    } else {
-      const validCodes = getValidPromoCodes();
-      setIsPromoCodeValid(validCodes.includes(value.trim().toLowerCase()));
+      return;
+    }
+    
+    setIsValidatingPromo(true);
+    try {
+      const result = await validatePromoCode(value, language);
+      
+      if (result.valid) {
+        setIsPromoCodeValid(true);
+        setPromoCodeError(null);
+      } else {
+        setIsPromoCodeValid(false);
+        setPromoCodeError('errorMessage' in result ? result.errorMessage : null);
+      }
+    } catch (err) {
+      setIsPromoCodeValid(false);
+      setPromoCodeError(t("errorValidatingPromoCode") || "Error validating promo code");
+    } finally {
+      setIsValidatingPromo(false);
     }
   };
 
@@ -1614,22 +1635,31 @@ const ReservationForm = () => {
                           isPromoCodeValid === false && "border-destructive"
                         )}
                       />
-                      {isPromoCodeValid === true && (
+                      {isValidatingPromo && (
+                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground animate-spin" />
+                      )}
+                      {!isValidatingPromo && isPromoCodeValid === true && (
                         <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                       )}
-                      {isPromoCodeValid === false && (
+                      {!isValidatingPromo && isPromoCodeValid === false && (
                         <X className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
                       )}
                     </div>
                     {isPromoCodeValid === true && (
                       <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 flex items-center gap-1 bg-green-50 dark:bg-green-950/30 px-2 py-1 rounded">
                         <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                        {t('language') === 'TR' ? 'Dönüşte %30 indirim kazandınız!' : '30% off on return transfer!'}
+                        {language === 'TR' ? 'Dönüşte %30 indirim kazandınız!' : '30% off on return transfer!'}
                       </p>
                     )}
-                    {!isPromoCodeValid && (
+                    {isPromoCodeValid === false && promoCodeError && (
+                      <p className="text-xs sm:text-sm text-red-500 flex items-center gap-1 bg-red-50 dark:bg-red-950/30 px-2 py-1 rounded">
+                        <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                        {promoCodeError}
+                      </p>
+                    )}
+                    {!isPromoCodeValid && !promoCodeError && (
                       <p className="text-xs text-muted-foreground">
-                        {t('language') === 'TR' 
+                        {language === 'TR' 
                           ? 'Kod olmadan da %10 dönüş indirimi otomatik uygulanır' 
                           : '10% return discount is applied automatically without a code'}
                       </p>
