@@ -361,6 +361,9 @@ const BlogPage = () => {
                         <Badge variant="outline" className="text-xs">
                           {post.category}
                         </Badge>
+                        <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                          {t('updatedForYear').replace('{year}', new Date(post.date).getFullYear().toString())}
+                        </Badge>
                       </div>
                       <CardTitle className="text-xl line-clamp-2 group-hover:text-primary transition-colors">
                         {t(post.titleKey)}

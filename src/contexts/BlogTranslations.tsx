@@ -20,7 +20,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     readMore: "Read More",
     travelTips: "Travel Tips",
     dayTripGuide: "Day Trip Guide",
-    updatedFor2025: "Updated for 2025",
+    updatedForYear: "Updated for {year}",
     
     // City Names (for tables and badges)
     cityIstanbul: "Istanbul",
@@ -782,7 +782,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     readMore: "Weiterlesen",
     travelTips: "Reisetipps",
     dayTripGuide: "Tagesausflug Guide",
-    updatedFor2025: "Aktualisiert für 2025",
+    updatedForYear: "Aktualisiert für {year}",
     
     // City Names (for tables and badges)
     cityIstanbul: "Istanbul",
@@ -1573,7 +1573,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     readMore: "Lire la suite",
     travelTips: "Conseils de voyage",
     dayTripGuide: "Guide d'excursion",
-    updatedFor2025: "Mis à jour pour 2025",
+    updatedForYear: "Mis à jour pour {year}",
     
     // City Names
     cityIstanbul: "Istanbul",
@@ -2336,7 +2336,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     readMore: "Читать далее",
     travelTips: "Советы путешественникам",
     dayTripGuide: "Гид по однодневным турам",
-    updatedFor2025: "Обновлено на 2025",
+    updatedForYear: "Обновлено на {year}",
     
     // City Names
     cityIstanbul: "Стамбул",
@@ -3003,7 +3003,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     readMore: "Leggi di più",
     travelTips: "Consigli di viaggio",
     dayTripGuide: "Guida escursione",
-    updatedFor2025: "Aggiornato per 2025",
+    updatedForYear: "Aggiornato per {year}",
     
     // City Names
     cityIstanbul: "Istanbul",
@@ -3626,7 +3626,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     readMore: "Leer más",
     travelTips: "Consejos de viaje",
     dayTripGuide: "Guía de excursión",
-    updatedFor2025: "Actualizado para 2025",
+    updatedForYear: "Actualizado para {year}",
     
     // City Names
     cityIstanbul: "Estambul",
@@ -4249,7 +4249,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     readMore: "اقرأ المزيد",
     travelTips: "نصائح السفر",
     dayTripGuide: "دليل الرحلة اليومية",
-    updatedFor2025: "محدث لعام 2025",
+    updatedForYear: "محدث لعام {year}",
     
     // City Names (for tables and badges)
     cityIstanbul: "إسطنبول",
@@ -4913,7 +4913,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     readMore: "Devamını Oku",
     travelTips: "Seyahat İpuçları",
     dayTripGuide: "Günübirlik Tur Rehberi",
-    updatedFor2025: "2025 için Güncellendi",
+    updatedForYear: "{year} için Güncellendi",
     
     // City Names
     cityIstanbul: "İstanbul",
@@ -5695,7 +5695,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     readMore: "Читати далі",
     travelTips: "Поради мандрівникам",
     dayTripGuide: "Гід одноденних турів",
-    updatedFor2025: "Оновлено на 2025",
+    updatedForYear: "Оновлено на {year}",
     blogIstanbul1Title: "Найкращий спосіб дістатися з аеропорту Стамбула до центру (Гід 2025)",
     blogIstanbul1Desc: "Повний гід з транспорту з аеропорту Стамбула. Порівняння трансферів, метро та автобусів.",
     blogIstanbul1H1: "Найкращий спосіб дістатися з аеропорту Стамбула до центру",
@@ -6488,7 +6488,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     readMore: "続きを読む",
     travelTips: "旅行のヒント",
     dayTripGuide: "日帰り旅行ガイド",
-    updatedFor2025: "2025年版に更新",
+    updatedForYear: "{year}年版に更新",
     
     // City Names (for tables and badges)
     cityIstanbul: "イスタンブール",
