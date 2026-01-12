@@ -109,7 +109,7 @@ const HourlyRentalSection = () => {
         </div>
 
         {/* Features Row */}
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
+        <div className="flex flex-wrap justify-center gap-4 mb-6">
           {[
             { icon: MapPin, text: t("hourlyUnlimitedStops") || "Unlimited Stops" },
             { icon: Clock, text: t("hourlyFlexibleSchedule") || "Flexible Schedule" },
@@ -126,6 +126,20 @@ const HourlyRentalSection = () => {
               </div>
             );
           })}
+        </div>
+
+        {/* Important Notes */}
+        <div className="flex flex-col sm:flex-row justify-center gap-3 mb-8">
+          <div className="flex items-center justify-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+              📍 {t("hourlyDailyKmLimit") || "Daily Limit: 100 KM"}
+            </span>
+          </div>
+          <div className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+              🏙️ {t("hourlySameCityOnly") || "Hourly Rental Valid Within Same City Only"}
+            </span>
+          </div>
         </div>
 
         {/* CTA */}

@@ -1331,6 +1331,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogHourlyCityTours: "City Tours",
     blogHourlyBusinessMeetings: "Business",
     blogHourlyEvents: "Events",
+    hourlyDailyKmLimit: "Daily Limit: 100 KM",
+    hourlySameCityOnly: "Hourly Rental Valid Within Same City Only",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "30% OFF Return Transfers",
@@ -2798,6 +2800,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogHourlyCityTours: "Stadttouren",
     blogHourlyBusinessMeetings: "Business",
     blogHourlyEvents: "Events",
+    hourlyDailyKmLimit: "Tageslimit: 100 KM",
+    hourlySameCityOnly: "Stündliche Anmietung nur innerhalb derselben Stadt gültig",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "30% RABATT auf Rücktransfers",
@@ -4453,6 +4457,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogHourlyCityTours: "Visites",
     blogHourlyBusinessMeetings: "Affaires",
     blogHourlyEvents: "Événements",
+    hourlyDailyKmLimit: "Limite journalière: 100 KM",
+    hourlySameCityOnly: "Location horaire valable uniquement dans la même ville",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "30% DE RÉDUCTION sur les transferts retour",
@@ -5673,6 +5679,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogHourlyCityTours: "Туры",
     blogHourlyBusinessMeetings: "Бизнес",
     blogHourlyEvents: "Мероприятия",
+    hourlyDailyKmLimit: "Дневной лимит: 100 КМ",
+    hourlySameCityOnly: "Почасовая аренда действует только в пределах одного города",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "30% СКИДКА на обратные трансферы",
@@ -6870,6 +6878,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogHourlyCityTours: "Tour",
     blogHourlyBusinessMeetings: "Business",
     blogHourlyEvents: "Eventi",
+    hourlyDailyKmLimit: "Limite giornaliero: 100 KM",
+    hourlySameCityOnly: "Noleggio orario valido solo nella stessa città",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "30% DI SCONTO sui trasferimenti di ritorno",
@@ -8067,6 +8077,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogHourlyCityTours: "Tours",
     blogHourlyBusinessMeetings: "Negocios",
     blogHourlyEvents: "Eventos",
+    hourlyDailyKmLimit: "Límite diario: 100 KM",
+    hourlySameCityOnly: "Alquiler por hora válido solo dentro de la misma ciudad",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "30% DE DESCUENTO en traslados de vuelta",
@@ -9211,6 +9223,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogHourlyCityTours: "جولات",
     blogHourlyBusinessMeetings: "أعمال",
     blogHourlyEvents: "مناسبات",
+    hourlyDailyKmLimit: "الحد اليومي: 100 كم",
+    hourlySameCityOnly: "الإيجار بالساعة صالح فقط داخل نفس المدينة",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "خصم 30٪ على رحلات العودة",
@@ -10505,6 +10519,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogHourlyCityTours: "Turlar",
     blogHourlyBusinessMeetings: "İş",
     blogHourlyEvents: "Etkinlikler",
+    hourlyDailyKmLimit: "Günlük Limit: 100 KM",
+    hourlySameCityOnly: "Saatlik Kiralama Sadece Aynı Şehir İçinde Geçerlidir",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "Dönüş transferlerinde %30 İNDİRİM",
@@ -10968,6 +10984,8 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "Для 7+ пасажирів потрібен Sprinter мікроавтобус",
     priceOnRequest: "Ціна за запитом",
     promoCodeAccepted: "Знижка 30% буде застосована!",
+    hourlyDailyKmLimit: "Денний ліміт: 100 КМ",
+    hourlySameCityOnly: "Погодинна оренда діє лише в межах одного міста",
     
     // Customer Bookings
     myReservationsTitle: "Мої бронювання",
@@ -11896,6 +11914,8 @@ const translations: Record<Language, Record<string, string>> = {
     fullDay: "8時間（終日）",
     customHourly: "9時間以上（カスタム）",
     hourlyMaxPassengers: "時間貸しは最大6名様までご利用いただけます",
+    hourlyDailyKmLimit: "1日の制限: 100 KM",
+    hourlySameCityOnly: "時間貸しは同一都市内でのみ有効です",
     
     
     // Booking Process
