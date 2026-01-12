@@ -13,6 +13,7 @@ import confetti from "canvas-confetti";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePromo } from "@/contexts/PromoContext";
 import { getCurrencySymbol } from "@/lib/currency";
 import { VEHICLE_TYPE_MAP } from "@/lib/vehicleTypes";
 import { VehicleSelectionCard, VehicleBadgeType } from "@/components/VehicleSelectionCard";
@@ -87,6 +88,7 @@ const getRecommendedVehicle = (passengers: number, luggage: number): string => {
 
 export default function QuickBookingConfirm() {
   const { t } = useLanguage();
+  const { promoCode: activePromo } = usePromo();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -465,10 +467,22 @@ export default function QuickBookingConfirm() {
     setPromoCode(value);
     if (value.trim() === "") {
       setIsPromoCodeValid(null);
-    } else if (VALID_PROMO_CODES.some(code => code.toLowerCase() === value.trim().toLowerCase())) {
-      setIsPromoCodeValid(true);
     } else {
-      setIsPromoCodeValid(false);
+      // Check against VALID_PROMO_CODES and activePromo code
+      const validCodes = [...VALID_PROMO_CODES];
+      if (activePromo?.code) {
+        validCodes.push(activePromo.code);
+      }
+      
+      // Check if promo code is valid and not expired
+      const isExpired = activePromo?.validUntil && new Date(activePromo.validUntil) < new Date();
+      const codeMatches = validCodes.some(code => code.toLowerCase() === value.trim().toLowerCase());
+      
+      if (codeMatches && !isExpired) {
+        setIsPromoCodeValid(true);
+      } else {
+        setIsPromoCodeValid(false);
+      }
     }
   };
 
@@ -1441,7 +1455,7 @@ export default function QuickBookingConfirm() {
                   <div className="relative">
                     <Input
                       id="promoCode"
-                      placeholder={t("qbEnterPromoCode")}
+                      placeholder={activePromo?.code || t("qbEnterPromoCode")}
                       value={promoCode}
                       onChange={(e) => handlePromoCodeChange(e.target.value)}
                       className={`pr-10 h-9 sm:h-10 text-sm ${
@@ -1460,6 +1474,14 @@ export default function QuickBookingConfirm() {
                     <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
                       <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       {t("qbDiscountApplied")}
+                    </p>
+                  )}
+                  {activePromo?.validUntil && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {t("language") === 'TR' 
+                        ? `Kod son kullanım: ${new Date(activePromo.validUntil).toLocaleDateString('tr-TR')}` 
+                        : `Code valid until: ${new Date(activePromo.validUntil).toLocaleDateString('en-US')}`}
                     </p>
                   )}
                 </div>
