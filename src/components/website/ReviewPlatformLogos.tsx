@@ -15,7 +15,7 @@ const platforms = [
     ),
     rating: "4.9",
     reviews: "488+",
-    url: "https://www.google.com/maps/place/Meet+Transfer/@41.0082,28.9784,15z/data=!4m8!3m7!1s0x14caba06e0f9eb91:0xc5250d5b2d326995!8m2!3d41.0082!4d28.9784!9m1!1b1!16s%2Fg%2F11bxff8vx9",
+    url: "https://search.google.com/local/reviews?placeid=ChIJxWLW5C_byxQRxSUmLFnp2dU",
     color: "hover:bg-blue-50 dark:hover:bg-blue-950",
   },
   {
