@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, ExternalLink } from 'lucide-react';
+import { AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, ExternalLink, AlertTriangle, Info } from 'lucide-react';
 
 interface AggregateRating {
   ratingValue: string | number;
@@ -20,18 +20,123 @@ interface SchemaScript {
   hasAggregateRating: boolean;
   aggregateRating?: AggregateRating;
   raw: string;
+  parsed?: Record<string, unknown>;
+}
+
+interface ValidationIssue {
+  level: 'error' | 'warning' | 'info';
+  schemaIndex: number;
+  schemaType: string;
+  field: string;
+  message: string;
 }
 
 interface ScanResult {
   url: string;
   schemas: SchemaScript[];
   aggregateRatings: AggregateRating[];
+  validationIssues: ValidationIssue[];
   scannedAt: Date;
 }
+
+// Schema.org validation rules
+const validateSchema = (parsed: Record<string, unknown>, index: number): ValidationIssue[] => {
+  const issues: ValidationIssue[] = [];
+  const schemaType = (parsed['@type'] as string) || 'Unknown';
+
+  // Check for @context
+  if (!parsed['@context']) {
+    issues.push({
+      level: 'error',
+      schemaIndex: index,
+      schemaType,
+      field: '@context',
+      message: '@context eksik - "https://schema.org" olmalı'
+    });
+  }
+
+  // LocalBusiness validations
+  if (schemaType === 'LocalBusiness' || schemaType === 'Organization') {
+    if (!parsed['name']) {
+      issues.push({ level: 'error', schemaIndex: index, schemaType, field: 'name', message: 'name alanı zorunlu' });
+    }
+    if (!parsed['url']) {
+      issues.push({ level: 'warning', schemaIndex: index, schemaType, field: 'url', message: 'url alanı önerilir' });
+    }
+    if (!parsed['telephone'] && !parsed['email']) {
+      issues.push({ level: 'warning', schemaIndex: index, schemaType, field: 'contact', message: 'telephone veya email önerilir' });
+    }
+    if (!parsed['address']) {
+      issues.push({ level: 'warning', schemaIndex: index, schemaType, field: 'address', message: 'address alanı önerilir' });
+    }
+  }
+
+  // AggregateRating validations
+  if (parsed['aggregateRating']) {
+    const rating = parsed['aggregateRating'] as Record<string, unknown>;
+    
+    if (!rating['ratingValue']) {
+      issues.push({ level: 'error', schemaIndex: index, schemaType, field: 'aggregateRating.ratingValue', message: 'ratingValue zorunlu' });
+    } else {
+      const val = Number(rating['ratingValue']);
+      if (isNaN(val) || val < 1 || val > 5) {
+        issues.push({ level: 'warning', schemaIndex: index, schemaType, field: 'aggregateRating.ratingValue', message: 'ratingValue 1-5 arasında olmalı' });
+      }
+    }
+    
+    if (!rating['reviewCount'] && !rating['ratingCount']) {
+      issues.push({ level: 'error', schemaIndex: index, schemaType, field: 'aggregateRating.reviewCount', message: 'reviewCount veya ratingCount zorunlu' });
+    }
+    
+    if (!rating['bestRating']) {
+      issues.push({ level: 'info', schemaIndex: index, schemaType, field: 'aggregateRating.bestRating', message: 'bestRating belirtilmemiş (varsayılan: 5)' });
+    }
+  }
+
+  // Service validations
+  if (schemaType === 'Service' || schemaType === 'TransportationService') {
+    if (!parsed['provider']) {
+      issues.push({ level: 'warning', schemaIndex: index, schemaType, field: 'provider', message: 'provider alanı önerilir' });
+    }
+    if (!parsed['areaServed']) {
+      issues.push({ level: 'info', schemaIndex: index, schemaType, field: 'areaServed', message: 'areaServed belirtilmemiş' });
+    }
+  }
+
+  // WebSite validations
+  if (schemaType === 'WebSite') {
+    if (!parsed['url']) {
+      issues.push({ level: 'error', schemaIndex: index, schemaType, field: 'url', message: 'url alanı zorunlu' });
+    }
+  }
+
+  // Article validations
+  if (schemaType === 'Article' || schemaType === 'BlogPosting') {
+    if (!parsed['headline']) {
+      issues.push({ level: 'error', schemaIndex: index, schemaType, field: 'headline', message: 'headline alanı zorunlu' });
+    }
+    if (!parsed['author']) {
+      issues.push({ level: 'warning', schemaIndex: index, schemaType, field: 'author', message: 'author alanı önerilir' });
+    }
+    if (!parsed['datePublished']) {
+      issues.push({ level: 'warning', schemaIndex: index, schemaType, field: 'datePublished', message: 'datePublished alanı önerilir' });
+    }
+  }
+
+  // FAQPage validations
+  if (schemaType === 'FAQPage') {
+    if (!parsed['mainEntity'] || !Array.isArray(parsed['mainEntity']) || (parsed['mainEntity'] as unknown[]).length === 0) {
+      issues.push({ level: 'error', schemaIndex: index, schemaType, field: 'mainEntity', message: 'mainEntity dizisi zorunlu ve en az bir soru içermeli' });
+    }
+  }
+
+  return issues;
+};
 
 const SEODebugPage = () => {
   const [currentPageSchemas, setCurrentPageSchemas] = useState<SchemaScript[]>([]);
   const [currentPageRatings, setCurrentPageRatings] = useState<AggregateRating[]>([]);
+  const [currentPageIssues, setCurrentPageIssues] = useState<ValidationIssue[]>([]);
   const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [customUrl, setCustomUrl] = useState('');
   const [isScanning, setIsScanning] = useState(false);
@@ -43,6 +148,7 @@ const SEODebugPage = () => {
       const result = parsePageSchemas(document);
       setCurrentPageSchemas(result.schemas);
       setCurrentPageRatings(result.ratings);
+      setCurrentPageIssues(result.issues);
     };
 
     scanCurrentPage();
@@ -50,10 +156,11 @@ const SEODebugPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const parsePageSchemas = (doc: Document): { schemas: SchemaScript[]; ratings: AggregateRating[] } => {
+  const parsePageSchemas = (doc: Document): { schemas: SchemaScript[]; ratings: AggregateRating[]; issues: ValidationIssue[] } => {
     const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
     const foundSchemas: SchemaScript[] = [];
     const foundRatings: AggregateRating[] = [];
+    let allIssues: ValidationIssue[] = [];
 
     scripts.forEach((script, index) => {
       try {
@@ -77,12 +184,17 @@ const SEODebugPage = () => {
           foundRatings.push(aggregateRating);
         }
 
+        // Validate schema
+        const schemaIssues = validateSchema(parsed, index + 1);
+        allIssues = [...allIssues, ...schemaIssues];
+
         foundSchemas.push({
           index: index + 1,
           type: schemaType,
           hasAggregateRating,
           aggregateRating,
           raw: JSON.stringify(parsed, null, 2),
+          parsed,
         });
       } catch (e) {
         foundSchemas.push({
@@ -91,13 +203,31 @@ const SEODebugPage = () => {
           hasAggregateRating: false,
           raw: script.textContent || 'Empty',
         });
+        allIssues.push({
+          level: 'error',
+          schemaIndex: index + 1,
+          schemaType: 'Unknown',
+          field: 'JSON',
+          message: 'JSON parse hatası - geçersiz format'
+        });
       }
     });
 
-    return { schemas: foundSchemas, ratings: foundRatings };
+    // Check for multiple aggregate ratings (global issue)
+    if (foundRatings.length > 1) {
+      allIssues.unshift({
+        level: 'error',
+        schemaIndex: 0,
+        schemaType: 'Global',
+        field: 'aggregateRating',
+        message: `Birden fazla aggregateRating tespit edildi (${foundRatings.length} adet) - Google "multiple ratings" hatası verecektir!`
+      });
+    }
+
+    return { schemas: foundSchemas, ratings: foundRatings, issues: allIssues };
   };
 
-  const parseHtmlString = (html: string): { schemas: SchemaScript[]; ratings: AggregateRating[] } => {
+  const parseHtmlString = (html: string): { schemas: SchemaScript[]; ratings: AggregateRating[]; issues: ValidationIssue[] } => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     return parsePageSchemas(doc);
@@ -106,11 +236,8 @@ const SEODebugPage = () => {
   const scanUrl = async (url: string) => {
     setIsScanning(true);
     try {
-      // Fetch the page HTML
       const response = await fetch(url, {
-        headers: {
-          'Accept': 'text/html',
-        },
+        headers: { 'Accept': 'text/html' },
       });
       
       if (!response.ok) {
@@ -124,6 +251,7 @@ const SEODebugPage = () => {
         url,
         schemas: result.schemas,
         aggregateRatings: result.ratings,
+        validationIssues: result.issues,
         scannedAt: new Date(),
       };
 
@@ -144,7 +272,6 @@ const SEODebugPage = () => {
 
   const scanCustomUrl = () => {
     if (!customUrl) return;
-    
     let url = customUrl;
     if (!url.startsWith('http')) {
       url = window.location.origin + (url.startsWith('/') ? url : '/' + url);
@@ -158,6 +285,86 @@ const SEODebugPage = () => {
     { label: 'Istanbul Transfer', path: '/istanbul-transfer' },
     { label: 'About', path: '/about' },
   ];
+
+  const getIssueCounts = (issues: ValidationIssue[]) => {
+    return {
+      errors: issues.filter(i => i.level === 'error').length,
+      warnings: issues.filter(i => i.level === 'warning').length,
+      infos: issues.filter(i => i.level === 'info').length,
+    };
+  };
+
+  const renderValidationCard = (issues: ValidationIssue[]) => {
+    const counts = getIssueCounts(issues);
+    const hasErrors = counts.errors > 0;
+    const hasWarnings = counts.warnings > 0;
+
+    return (
+      <Card className={hasErrors ? 'border-destructive' : hasWarnings ? 'border-yellow-500' : 'border-green-500'}>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            {hasErrors ? (
+              <>
+                <AlertCircle className="h-5 w-5 text-destructive" />
+                <span className="text-destructive">Validasyon Hataları</span>
+              </>
+            ) : hasWarnings ? (
+              <>
+                <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                <span className="text-yellow-600">Uyarılar Var</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span className="text-green-500">Validasyon Başarılı</span>
+              </>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="text-center p-2 bg-red-50 dark:bg-red-950 rounded-lg">
+              <div className="text-xl font-bold text-destructive">{counts.errors}</div>
+              <div className="text-xs text-muted-foreground">Hata</div>
+            </div>
+            <div className="text-center p-2 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+              <div className="text-xl font-bold text-yellow-600">{counts.warnings}</div>
+              <div className="text-xs text-muted-foreground">Uyarı</div>
+            </div>
+            <div className="text-center p-2 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <div className="text-xl font-bold text-blue-600">{counts.infos}</div>
+              <div className="text-xs text-muted-foreground">Bilgi</div>
+            </div>
+          </div>
+
+          {issues.length > 0 && (
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {issues.map((issue, idx) => (
+                <div
+                  key={idx}
+                  className={`p-2 rounded-lg text-xs flex items-start gap-2 ${
+                    issue.level === 'error' ? 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300' :
+                    issue.level === 'warning' ? 'bg-yellow-50 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-300' :
+                    'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+                  }`}
+                >
+                  {issue.level === 'error' ? <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" /> :
+                   issue.level === 'warning' ? <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" /> :
+                   <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />}
+                  <div>
+                    <span className="font-medium">{issue.schemaType}</span>
+                    {issue.schemaIndex > 0 && <span className="opacity-70"> (#{issue.schemaIndex})</span>}
+                    <span className="opacity-70"> → {issue.field}:</span>
+                    <span className="ml-1">{issue.message}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const renderSummaryCard = (ratings: AggregateRating[], title: string) => {
     const hasMultipleRatings = ratings.length > 1;
@@ -214,7 +421,6 @@ const SEODebugPage = () => {
 
   const renderSchemaList = (schemas: SchemaScript[], ratings: AggregateRating[]) => (
     <>
-      {/* Ratings Detail */}
       {ratings.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
@@ -245,7 +451,6 @@ const SEODebugPage = () => {
         </Card>
       )}
 
-      {/* All Schemas */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -283,15 +488,13 @@ const SEODebugPage = () => {
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
       <div className="max-w-5xl mx-auto space-y-4">
-        {/* Header */}
         <div className="text-center space-y-1">
-          <h1 className="text-2xl font-bold text-foreground">SEO Debug - JSON-LD Inspector</h1>
+          <h1 className="text-2xl font-bold text-foreground">SEO Debug - JSON-LD Validator</h1>
           <p className="text-sm text-muted-foreground">
-            Sayfalardaki JSON-LD schema scriptlerini ve aggregateRating değerlerini inceleyin
+            Schema.org validasyonu ile JSON-LD scriptlerini kontrol edin
           </p>
         </div>
 
-        {/* Quick Scan Buttons */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -300,7 +503,6 @@ const SEODebugPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {/* Quick scan buttons */}
             <div className="flex flex-wrap gap-2">
               <Button
                 onClick={scanHomepage}
@@ -325,7 +527,6 @@ const SEODebugPage = () => {
               ))}
             </div>
 
-            {/* Custom URL input */}
             <div className="flex gap-2">
               <Input
                 placeholder="/sayfa-yolu veya tam URL"
@@ -345,7 +546,6 @@ const SEODebugPage = () => {
           </CardContent>
         </Card>
 
-        {/* Tabs */}
         <div className="flex gap-2 border-b">
           <button
             onClick={() => setActiveTab('current')}
@@ -369,9 +569,9 @@ const SEODebugPage = () => {
           </button>
         </div>
 
-        {/* Content */}
         {activeTab === 'current' ? (
           <div className="space-y-4">
+            {renderValidationCard(currentPageIssues)}
             {renderSummaryCard(currentPageRatings, 'Bu Sayfa')}
             {renderSchemaList(currentPageSchemas, currentPageRatings)}
           </div>
@@ -400,6 +600,7 @@ const SEODebugPage = () => {
                       ({result.scannedAt.toLocaleTimeString()})
                     </span>
                   </div>
+                  {renderValidationCard(result.validationIssues)}
                   {renderSummaryCard(result.aggregateRatings, new URL(result.url).pathname)}
                   {renderSchemaList(result.schemas, result.aggregateRatings)}
                 </div>
@@ -408,15 +609,15 @@ const SEODebugPage = () => {
           </div>
         )}
 
-        {/* Instructions */}
         <Card className="mt-6">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Kullanım</CardTitle>
+            <CardTitle className="text-base">Validasyon Kuralları</CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground space-y-1">
-            <p>• <strong>Aggregate Ratings</strong> sayısı 1'den fazlaysa Google "multiple ratings" hatası verir</p>
-            <p>• <strong>Ana Sayfa</strong> butonuyla canlı sitenin ana sayfasını tarayın</p>
-            <p>• Özel URL girerek herhangi bir sayfayı tarayabilirsiniz</p>
+            <p>• <strong className="text-destructive">Hata:</strong> Zorunlu alanlar eksik veya geçersiz format</p>
+            <p>• <strong className="text-yellow-600">Uyarı:</strong> Önerilen alanlar eksik</p>
+            <p>• <strong className="text-blue-600">Bilgi:</strong> Opsiyonel iyileştirmeler</p>
+            <p className="pt-2">• Birden fazla aggregateRating olması Google "multiple ratings" hatasına neden olur</p>
           </CardContent>
         </Card>
       </div>
