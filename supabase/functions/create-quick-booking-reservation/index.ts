@@ -223,7 +223,7 @@ serve(async (req) => {
 
           // Get discount percentage from promo code - all return codes are 30%
           const PROMO_CODE_CONFIG: Record<string, number> = {
-            'MEET40RETURN': 30,
+            'MEET30RETURN': 30,
             'GIDISDONUS': 30,
             'RETURN30': 30,
             'MEET30': 30,

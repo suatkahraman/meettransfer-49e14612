@@ -294,7 +294,7 @@ const BookingPage = () => {
     setPromoCode(value);
     if (value.trim() === "") {
       setIsPromoCodeValid(null);
-    } else if (value.trim().toLowerCase() === "meet40return") {
+    } else if (value.trim().toLowerCase() === "meet30return") {
       setIsPromoCodeValid(true);
     } else {
       setIsPromoCodeValid(false);
@@ -1494,7 +1494,7 @@ const BookingPage = () => {
 
                     <div className="flex items-center gap-2 text-sm text-accent bg-accent/10 px-4 py-3 rounded-lg">
                       <Tag className="h-4 w-4 shrink-0" />
-                      <span>{t("returnTripDiscount") || "Book round-trip & get 30% OFF on return! Use code: Meet40Return"}</span>
+                      <span>{t("returnTripDiscount") || "Book round-trip & get 30% OFF on return! Use code: Meet30Return"}</span>
                     </div>
 
                     {hasReturnTrip && (
@@ -1525,7 +1525,7 @@ const BookingPage = () => {
                           <Label className="text-sm text-muted-foreground mb-2 block">{t("promoCode") || "Promo Code"}</Label>
                           <div className="relative">
                             <Input
-                              placeholder="Meet40Return"
+                              placeholder="Meet30Return"
                               value={promoCode}
                               onChange={(e) => handlePromoCodeChange(e.target.value)}
                               className={cn(

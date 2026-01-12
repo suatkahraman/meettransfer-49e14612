@@ -516,7 +516,7 @@ ${getEmailHeader(`💰 ${t.yourPriceQuote}`, undefined, lang)}
       <tr>
         <td style="padding: 16px; text-align: center;">
           <p style="margin: 0; font-size: 16px;">🎁 <strong>${t.roundTripDiscount}</strong></p>
-          <p style="margin: 8px 0 0; color: #744210; font-size: 14px;">${t.bookReturn} <strong>30% ${t.offReturn}</strong> ${t.useCode}: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">MEET40RETURN</code></p>
+          <p style="margin: 8px 0 0; color: #744210; font-size: 14px;">${t.bookReturn} <strong>30% ${t.offReturn}</strong> ${t.useCode}: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">MEET30RETURN</code></p>
         </td>
       </tr>
     </table>
@@ -550,7 +550,7 @@ ${vehiclePrices
 ${t.completeBooking}: https://meet-transfer.com
 
 🎁 ${t.roundTripDiscount} ${t.bookReturn} 30% ${t.offReturn}!
-${t.useCode}: MEET40RETURN
+${t.useCode}: MEET30RETURN
 
 ${t.needHelp}:
 📧 info@meettransfer.app

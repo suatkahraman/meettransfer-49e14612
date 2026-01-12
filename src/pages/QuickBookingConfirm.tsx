@@ -58,7 +58,7 @@ interface VehiclePriceInfo {
   available: boolean;
 }
 
-const VALID_PROMO_CODE = "Meet40Return";
+const VALID_PROMO_CODE = "Meet30Return";
 
 
 // Get recommended vehicle based on passenger and luggage count

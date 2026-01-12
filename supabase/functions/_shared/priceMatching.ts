@@ -905,7 +905,7 @@ export function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
 // Vehicle matching is now in vehicleConfig.ts - re-exported above
 
 // ==================== DISCOUNT CALCULATION ====================
-export const VALID_PROMO_CODES = ['MEET40RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30', 'MEET10', 'WELCOME10'];
+export const VALID_PROMO_CODES = ['MEET30RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30', 'MEET10', 'WELCOME10'];
 
 export interface PromoCodeInfo {
   code: string;
@@ -915,7 +915,7 @@ export interface PromoCodeInfo {
 }
 
 export const PROMO_CODE_CONFIG: Record<string, PromoCodeInfo> = {
-  'MEET40RETURN': { code: 'MEET40RETURN', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
+  'MEET30RETURN': { code: 'MEET30RETURN', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
   'GIDISDONUS': { code: 'GIDISDONUS', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
   'RETURN30': { code: 'RETURN30', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
   'MEET30': { code: 'MEET30', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
