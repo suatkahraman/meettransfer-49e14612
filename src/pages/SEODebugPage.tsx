@@ -2780,47 +2780,133 @@ const SEODebugPage = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                {/* OG Image Analysis Card */}
+                {socialResult.ogImageAnalysis && (
+                  <Card className={socialResult.ogImageAnalysis.isOptimalSize && socialResult.ogImageAnalysis.isOptimalAspectRatio ? 'border-green-500' : 'border-yellow-500'}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <Image className="h-4 w-4" />
+                        OG Image Analizi
+                        {socialResult.ogImageAnalysis.isOptimalSize && socialResult.ogImageAnalysis.isOptimalAspectRatio && socialResult.ogImageAnalysis.hasCacheBusting ? (
+                          <Badge variant="default" className="text-xs">Optimal ✓</Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">İyileştirilebilir</Badge>
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {socialResult.ogImageAnalysis.error ? (
+                        <p className="text-destructive text-sm">{socialResult.ogImageAnalysis.error}</p>
+                      ) : (
+                        <>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="p-2 rounded bg-muted">
+                              <p className="text-xs text-muted-foreground">Boyut</p>
+                              <p className={`font-semibold ${socialResult.ogImageAnalysis.isOptimalSize ? 'text-green-600' : 'text-yellow-600'}`}>
+                                {socialResult.ogImageAnalysis.width}x{socialResult.ogImageAnalysis.height}px
+                              </p>
+                            </div>
+                            <div className="p-2 rounded bg-muted">
+                              <p className="text-xs text-muted-foreground">En-Boy Oranı</p>
+                              <p className={`font-semibold ${socialResult.ogImageAnalysis.isOptimalAspectRatio ? 'text-green-600' : 'text-yellow-600'}`}>
+                                {socialResult.ogImageAnalysis.aspectRatioLabel}
+                              </p>
+                            </div>
+                            <div className="p-2 rounded bg-muted">
+                              <p className="text-xs text-muted-foreground">Format</p>
+                              <p className="font-semibold">{socialResult.ogImageAnalysis.format}</p>
+                            </div>
+                            <div className="p-2 rounded bg-muted">
+                              <p className="text-xs text-muted-foreground">Dosya Boyutu</p>
+                              <p className={`font-semibold ${socialResult.ogImageAnalysis.isOptimalFileSize ? 'text-green-600' : 'text-yellow-600'}`}>
+                                {socialResult.ogImageAnalysis.fileSizeFormatted || 'Ölçülemedi'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="p-2 rounded bg-muted">
+                            <p className="text-xs text-muted-foreground mb-1">Cache Busting</p>
+                            <p className={`font-semibold ${socialResult.ogImageAnalysis.hasCacheBusting ? 'text-green-600' : 'text-yellow-600'}`}>
+                              {socialResult.ogImageAnalysis.hasCacheBusting ? '✓ Aktif (URL parametresi var)' : '✗ Yok - Güncellemeler gecikmeli yansıyabilir'}
+                            </p>
+                          </div>
+                          {socialResult.ogImageAnalysis.recommendations.length > 0 && (
+                            <div className="space-y-1 pt-2 border-t">
+                              <p className="text-xs font-medium text-muted-foreground">Öneriler:</p>
+                              {socialResult.ogImageAnalysis.recommendations.map((rec, idx) => (
+                                <p key={idx} className="text-sm">{rec}</p>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Preview Cards */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <Facebook className="h-4 w-4 text-primary" />
+                        Facebook Önizleme
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="border rounded-lg overflow-hidden">
+                        <div className="aspect-[1.91/1] bg-muted flex items-center justify-center">
+                          {socialResult.meta.ogImage ? (
+                            <img src={socialResult.meta.ogImage.startsWith('/') ? window.location.origin + socialResult.meta.ogImage : socialResult.meta.ogImage} alt="OG" className="w-full h-full object-cover" />
+                          ) : <Image className="h-12 w-12 opacity-30" />}
+                        </div>
+                        <div className="p-3">
+                          <p className="text-xs text-muted-foreground">{socialResult.meta.ogSiteName || new URL(socialResult.url).hostname}</p>
+                          <h3 className="font-semibold line-clamp-2">{socialResult.meta.ogTitle || socialResult.meta.title || 'Başlık Yok'}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{socialResult.meta.ogDescription || 'Açıklama yok'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <Twitter className="h-4 w-4 text-primary" />
+                        Twitter Önizleme
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="border rounded-2xl overflow-hidden">
+                        <div className="aspect-[2/1] bg-muted flex items-center justify-center">
+                          {(socialResult.meta.twitterImage || socialResult.meta.ogImage) ? (
+                            <img src={(socialResult.meta.twitterImage || socialResult.meta.ogImage || '').startsWith('/') ? window.location.origin + (socialResult.meta.twitterImage || socialResult.meta.ogImage) : (socialResult.meta.twitterImage || socialResult.meta.ogImage)} alt="Twitter" className="w-full h-full object-cover" />
+                          ) : <Image className="h-12 w-12 opacity-30" />}
+                        </div>
+                        <div className="p-3">
+                          <h3 className="font-semibold line-clamp-2">{socialResult.meta.twitterTitle || socialResult.meta.ogTitle || 'Başlık Yok'}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{socialResult.meta.twitterDescription || socialResult.meta.ogDescription || 'Açıklama yok'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* External Test Links */}
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Facebook className="h-4 w-4 text-primary" />
-                      Facebook Önizleme
-                    </CardTitle>
+                    <CardTitle className="text-base">Harici Test Araçları</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="border rounded-lg overflow-hidden">
-                      <div className="aspect-[1.91/1] bg-muted flex items-center justify-center">
-                        {socialResult.meta.ogImage ? (
-                          <img src={socialResult.meta.ogImage.startsWith('/') ? window.location.origin + socialResult.meta.ogImage : socialResult.meta.ogImage} alt="OG" className="w-full h-full object-cover" />
-                        ) : <Image className="h-12 w-12 opacity-30" />}
-                      </div>
-                      <div className="p-3">
-                        <p className="text-xs text-muted-foreground">{socialResult.meta.ogSiteName || new URL(socialResult.url).hostname}</p>
-                        <h3 className="font-semibold line-clamp-2">{socialResult.meta.ogTitle || socialResult.meta.title || 'Başlık Yok'}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{socialResult.meta.ogDescription || 'Açıklama yok'}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Twitter className="h-4 w-4 text-primary" />
-                      Twitter Önizleme
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="border rounded-2xl overflow-hidden">
-                      <div className="aspect-[2/1] bg-muted flex items-center justify-center">
-                        {(socialResult.meta.twitterImage || socialResult.meta.ogImage) ? (
-                          <img src={(socialResult.meta.twitterImage || socialResult.meta.ogImage || '').startsWith('/') ? window.location.origin + (socialResult.meta.twitterImage || socialResult.meta.ogImage) : (socialResult.meta.twitterImage || socialResult.meta.ogImage)} alt="Twitter" className="w-full h-full object-cover" />
-                        ) : <Image className="h-12 w-12 opacity-30" />}
-                      </div>
-                      <div className="p-3">
-                        <h3 className="font-semibold line-clamp-2">{socialResult.meta.twitterTitle || socialResult.meta.ogTitle || 'Başlık Yok'}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{socialResult.meta.twitterDescription || socialResult.meta.ogDescription || 'Açıklama yok'}</p>
-                      </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" onClick={() => window.open(`https://developers.facebook.com/tools/debug/?q=${encodeURIComponent(socialResult.url)}`, '_blank')}>
+                        <Facebook className="h-4 w-4 mr-1" /> Facebook Debugger
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => window.open('https://cards-dev.twitter.com/validator', '_blank')}>
+                        <Twitter className="h-4 w-4 mr-1" /> Twitter Validator
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => window.open(`https://www.linkedin.com/post-inspector/inspect/${encodeURIComponent(socialResult.url)}`, '_blank')}>
+                        <ExternalLink className="h-4 w-4 mr-1" /> LinkedIn Inspector
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
