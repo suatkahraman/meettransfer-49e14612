@@ -51,6 +51,7 @@ const AgencyLoginScreen = () => {
     resendOTP, 
     cancel2FA,
     checkTrustedDevice,
+    registerTrustedDevice,
     maxAttempts,
     remainingAttempts,
     otpSettings
@@ -121,11 +122,21 @@ const AgencyLoginScreen = () => {
   }, [isLoading, user, role, roleLoading, navigate, viewMode]);
 
   // Handle 2FA verification success
-  const handle2FAVerify = async (code: string) => {
+  const handle2FAVerify = async (code: string, rememberDevice: boolean = false) => {
     const result = await verify2FA(code);
     if (result.success && pendingRole) {
       // 2FA complete – allow global redirects again
       localStorage.removeItem('suppress_auth_redirect');
+
+      // If user chose to remember device, register it
+      if (rememberDevice && twoFactorState.userId) {
+        try {
+          await registerTrustedDevice(twoFactorState.userId);
+          console.log('Device registered as trusted');
+        } catch (e) {
+          console.error('Failed to register trusted device:', e);
+        }
+      }
 
       // Log successful login attempt
       const userEmail = result.email || twoFactorState.email || '';
@@ -380,6 +391,7 @@ const AgencyLoginScreen = () => {
             remainingAttempts={remainingAttempts}
             otpLength={otpSettings.otpLength}
             expiryMinutes={otpSettings.expiryMinutes}
+            trustedDeviceDays={otpSettings.trustedDeviceDays}
           />
         </div>
       </div>

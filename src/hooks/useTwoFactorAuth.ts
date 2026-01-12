@@ -144,6 +144,7 @@ export const useTwoFactorAuth = () => {
     otpLength: 6,
     expiryMinutes: 5,
     failedLoginThreshold: 2,
+    trustedDeviceDays: 30,
   });
   
   // Memoize device fingerprint to prevent regeneration
@@ -178,6 +179,7 @@ export const useTwoFactorAuth = () => {
             otpLength: parseInt(settingsMap['otp_length'] || '6', 10),
             expiryMinutes: parseInt(settingsMap['otp_expiry_minutes'] || '5', 10),
             failedLoginThreshold: parseInt(settingsMap['failed_login_threshold'] || '2', 10),
+            trustedDeviceDays: parseInt(settingsMap['trusted_device_days'] || '30', 10),
           });
         }
       } catch (err) {
