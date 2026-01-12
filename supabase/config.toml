@@ -170,3 +170,6 @@ verify_jwt = false
 
 [functions.translate-review]
 verify_jwt = false
+
+[functions.notify-customer-reservation-status]
+verify_jwt = false
