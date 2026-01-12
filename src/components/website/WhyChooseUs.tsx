@@ -1,5 +1,6 @@
 import { Clock, Shield, CreditCard, Plane, Baby, Wifi, Car, Award, HeadphonesIcon, XCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 
 interface Benefit {
   icon: React.ElementType;
@@ -55,6 +56,7 @@ const benefits: Benefit[] = [
 
 const WhyChooseUs = () => {
   const { t } = useLanguage();
+  const { rating } = useGoogleReviewStats();
 
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-background to-muted/30">
@@ -118,7 +120,7 @@ const WhyChooseUs = () => {
             <div className="text-sm text-muted-foreground">{t("whyDestinations") || "Destinations"}</div>
           </div>
           <div className="text-center p-4">
-            <div className="text-3xl md:text-4xl font-bold text-primary">4.8</div>
+            <div className="text-3xl md:text-4xl font-bold text-primary">{rating.toFixed(1)}</div>
             <div className="text-sm text-muted-foreground">{t("whyAverageRating") || "Average Rating"}</div>
           </div>
         </div>
