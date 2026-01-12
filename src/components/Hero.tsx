@@ -1173,12 +1173,24 @@ export const Hero = () => {
                   )}
 
                   {/* Info Box */}
-                  <div className="space-y-3">
-                    <div className="bg-accent/10 rounded-xl p-4 text-left">
+                  <div className="space-y-2">
+                    <div className="bg-accent/10 rounded-xl p-3 text-left">
                       <p className="text-sm text-accent font-medium flex items-center gap-2">
                         <Timer className="h-4 w-4" />
                         {t("hourlyRentalInfo") || "Driver at your disposal for the selected duration. Visit multiple locations!"}
                       </p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                        <span className="text-xs font-medium text-amber-800 dark:text-amber-200">
+                          📍 {t("hourlyDailyKmLimit") || "Daily Limit: 100 KM"}
+                        </span>
+                      </div>
+                      <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <span className="text-xs font-medium text-blue-800 dark:text-blue-200">
+                          🏙️ {t("hourlySameCityOnly") || "Hourly Rental Valid Within Same City Only"}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
