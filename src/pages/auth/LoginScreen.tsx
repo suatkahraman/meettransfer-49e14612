@@ -219,7 +219,9 @@ const LoginScreen = () => {
 
   // Role-based redirect after login (only if not pending 2FA)
   useEffect(() => {
-    if (user && !roleLoading && role && viewMode !== '2fa') {
+    // During an active login attempt we must not auto-redirect, otherwise we can race
+    // the 2FA flow and never show the OTP entry screen.
+    if (!isLoading && user && !roleLoading && role && viewMode !== '2fa') {
       switch (role) {
         case 'admin':
           navigate('/admin', { replace: true });
@@ -234,29 +236,50 @@ const LoginScreen = () => {
           navigate('/customer', { replace: true });
       }
     }
-  }, [user, role, roleLoading, navigate, viewMode]);
+  }, [isLoading, user, role, roleLoading, navigate, viewMode]);
 
   // Handle 2FA verification success
   const handle2FAVerify = async (code: string) => {
     const result = await verify2FA(code);
-    if (result.success && user && pendingRole) {
+    if (result.success && pendingRole) {
       // Log successful login after 2FA
-      await logLoginAttempt(user.email || '', true, undefined, undefined, pendingRole);
+      const userEmail = result.email || twoFactorState.email || '';
+      await logLoginAttempt(userEmail, true, undefined, undefined, pendingRole);
+      
+      toast.success(language === 'TR' ? 'Doğrulama başarılı! Giriş yapılıyor...' : 'Verification successful! Signing in...');
+      
+      // Try auto-login with the magic link token
+      if (result.autoLogin && result.tokenHash) {
+        try {
+          const { error: verifyError } = await supabase.auth.verifyOtp({
+            token_hash: result.tokenHash,
+            type: 'magiclink',
+          });
+
+          if (verifyError) {
+            console.error('Auto-login failed:', verifyError);
+          }
+        } catch (e) {
+          console.error('Auto-login error:', e);
+        }
+      }
       
       // Redirect based on role
-      switch (pendingRole) {
-        case 'admin':
-          navigate('/admin', { replace: true });
-          break;
-        case 'driver':
-          navigate('/driver', { replace: true });
-          break;
-        case 'agency':
-          navigate('/agency', { replace: true });
-          break;
-        default:
-          navigate('/customer', { replace: true });
-      }
+      setTimeout(() => {
+        switch (pendingRole) {
+          case 'admin':
+            navigate('/admin', { replace: true });
+            break;
+          case 'driver':
+            navigate('/driver', { replace: true });
+            break;
+          case 'agency':
+            navigate('/agency', { replace: true });
+            break;
+          default:
+            navigate('/customer', { replace: true });
+        }
+      }, 500);
     }
   };
 
@@ -269,7 +292,7 @@ const LoginScreen = () => {
   };
 
   // If already logged in, show loading
-  if (authLoading || (user && roleLoading)) {
+  if (authLoading || (user && roleLoading && viewMode !== '2fa')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
         <Loader2 className="h-8 w-8 animate-spin text-accent" />
@@ -351,26 +374,29 @@ const LoginScreen = () => {
         
         // Require 2FA if: device not trusted OR there were failed login attempts
         if (!isTrusted || require2FADueToFailedAttempts) {
-          // Sign out temporarily - user needs to verify via 2FA
-          await supabase.auth.signOut();
-          
-          // Device not trusted or suspicious activity - require 2FA
+          // IMPORTANT: Switch UI to 2FA immediately to avoid redirect race conditions
           setPendingRole(userRole);
           setViewMode('2fa');
-          
+
+          // Sign out temporarily - user needs to verify via 2FA
+          await supabase.auth.signOut();
+
+          // Device not trusted or suspicious activity - require 2FA
           const langCode = language === 'TR' ? 'tr' : 'en';
           console.log('Initiating 2FA for:', validation.email);
-          
+
           const result = await initiate2FA(authData.user.id, validation.email, userRole, langCode);
-          
+
           if (result.success) {
             toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
           } else {
             console.error('2FA initiation failed:', result.error);
             toast.error(result.error || 'Doğrulama kodu gönderilemedi');
-            // Stay on 2FA page to allow retry
+            // Revert back to login if failed
+            setPendingRole(null);
+            setViewMode('login');
           }
-          
+
           // Clear the flag after initiating 2FA
           localStorage.removeItem(require2FAKey);
         } else {
