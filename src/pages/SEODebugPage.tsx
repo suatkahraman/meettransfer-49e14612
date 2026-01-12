@@ -4,7 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, ExternalLink, AlertTriangle, Info, Globe, Languages, Link2, FileText, Tag } from 'lucide-react';
+import { 
+  AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, 
+  ExternalLink, AlertTriangle, Info, Globe, Languages, Link2, FileText, Tag 
+} from 'lucide-react';
 import { SUPPORTED_LANGUAGES, type Language } from '@/hooks/useLanguageFromUrl';
 
 interface AggregateRating {
@@ -279,7 +282,7 @@ const SEODebugPage = () => {
   const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [customUrl, setCustomUrl] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical' | 'metatags'>('current');
+  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical'>('current');
   
   // Language scanning state
   const [languageScanResults, setLanguageScanResults] = useState<LanguageScanResult[]>([]);
@@ -2266,69 +2269,6 @@ const SEODebugPage = () => {
               </>
             )}
           </div>
-        ) : activeTab === 'metatags' ? (
-          <div className="space-y-4">
-            {metaTagResults.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  Henüz meta tag taraması yapılmadı. Yukarıdaki "Meta Tara" butonunu kullanın.
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-                {(() => {
-                  const summary = getMetaTagSummary();
-                  const hasIssues = summary.languagesWithIssues > 0 || summary.missingTitle > 0 || summary.missingDescription > 0;
-                  return (
-                    <Card className={hasIssues ? 'border-destructive' : 'border-green-500'}>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="flex items-center gap-2 text-lg">
-                          {hasIssues ? (<><AlertCircle className="h-5 w-5 text-destructive" /><span className="text-destructive">Meta Tag Kontrolü - Sorunlar Var</span></>) : (<><CheckCircle className="h-5 w-5 text-green-500" /><span className="text-green-500">Meta Tag Kontrolü - Tamamlandı</span></>)}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-                          <div className="text-center p-2 bg-muted rounded-lg"><div className="text-xl font-bold">{summary.totalLanguages}</div><div className="text-xs text-muted-foreground">Toplam Dil</div></div>
-                          <div className="text-center p-2 bg-green-50 dark:bg-green-950 rounded-lg"><div className="text-xl font-bold text-green-600">{summary.scannedLanguages}</div><div className="text-xs text-muted-foreground">Başarılı</div></div>
-                          <div className={`text-center p-2 rounded-lg ${summary.missingTitle > 0 ? 'bg-red-50 dark:bg-red-950' : 'bg-green-50 dark:bg-green-950'}`}><div className={`text-xl font-bold ${summary.missingTitle > 0 ? 'text-destructive' : 'text-green-600'}`}>{summary.missingTitle}</div><div className="text-xs text-muted-foreground">Eksik Title</div></div>
-                          <div className={`text-center p-2 rounded-lg ${summary.missingDescription > 0 ? 'bg-red-50 dark:bg-red-950' : 'bg-green-50 dark:bg-green-950'}`}><div className={`text-xl font-bold ${summary.missingDescription > 0 ? 'text-destructive' : 'text-green-600'}`}>{summary.missingDescription}</div><div className="text-xs text-muted-foreground">Eksik Desc</div></div>
-                          <div className={`text-center p-2 rounded-lg ${summary.missingOgTags > 0 ? 'bg-yellow-50 dark:bg-yellow-950' : 'bg-green-50 dark:bg-green-950'}`}><div className={`text-xl font-bold ${summary.missingOgTags > 0 ? 'text-yellow-600' : 'text-green-600'}`}>{summary.missingOgTags}</div><div className="text-xs text-muted-foreground">Eksik OG</div></div>
-                        </div>
-                        {summary.missingTitle > 0 && (<div className="p-2 bg-red-50 dark:bg-red-950 rounded-lg text-sm text-destructive flex items-start gap-2"><AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" /><span>Title etiketi eksik!</span></div>)}
-                      </CardContent>
-                    </Card>
-                  );
-                })()}
-                <Card>
-                  <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><Tag className="h-4 w-4" />Dil Bazlı Meta Tag Sonuçları</CardTitle></CardHeader>
-                  <CardContent>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead><tr className="border-b"><th className="text-left py-2 px-3">Dil</th><th className="text-left py-2 px-3">Title</th><th className="text-center py-2 px-3">Title Uzunluğu</th><th className="text-center py-2 px-3">Desc Uzunluğu</th><th className="text-center py-2 px-3">OG</th><th className="text-center py-2 px-3">Durum</th></tr></thead>
-                        <tbody>
-                          {metaTagResults.map((result, idx) => {
-                            const errorCount = result.issues.filter(i => i.level === 'error').length;
-                            const warningCount = result.issues.filter(i => i.level === 'warning').length;
-                            const hasOgTags = result.metaTags.ogTitle && result.metaTags.ogDescription;
-                            return (
-                              <tr key={idx} className="border-b hover:bg-muted/50">
-                                <td className="py-2 px-3"><Badge variant="outline" className="text-xs">{result.language}</Badge></td>
-                                <td className="py-2 px-3">{result.error ? <Badge variant="destructive" className="text-xs">Hata</Badge> : result.metaTags.title ? <span className="text-xs text-muted-foreground truncate block max-w-[200px]" title={result.metaTags.title}>{result.metaTags.title}</span> : <Badge variant="destructive" className="text-xs">Eksik</Badge>}</td>
-                                <td className="py-2 px-3 text-center"><span className={`text-xs font-medium ${result.metaTags.titleLength > 60 ? 'text-yellow-600' : result.metaTags.titleLength < 30 ? 'text-yellow-600' : 'text-green-600'}`}>{result.metaTags.titleLength || '—'}</span></td>
-                                <td className="py-2 px-3 text-center">{result.metaTags.description ? <span className={`text-xs font-medium ${result.metaTags.descriptionLength > 160 ? 'text-yellow-600' : 'text-green-600'}`}>{result.metaTags.descriptionLength}</span> : <Badge variant="destructive" className="text-xs">Eksik</Badge>}</td>
-                                <td className="py-2 px-3 text-center">{hasOgTags ? <CheckCircle className="h-4 w-4 text-green-500 mx-auto" /> : <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto" />}</td>
-                                <td className="py-2 px-3 text-center">{result.error ? <Badge variant="destructive" className="text-xs">{result.error}</Badge> : errorCount > 0 ? <Badge variant="destructive" className="text-xs">{errorCount} hata</Badge> : warningCount > 0 ? <Badge className="bg-yellow-500 text-xs">{warningCount} uyarı</Badge> : <Badge className="bg-green-500 text-xs">OK</Badge>}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            )}
-          </div>
         ) : null}
 
         <Card className="mt-6">
@@ -2345,6 +2285,6 @@ const SEODebugPage = () => {
       </div>
     </div>
   );
-};
+}; // SEODebugPage component
 
 export default SEODebugPage;
