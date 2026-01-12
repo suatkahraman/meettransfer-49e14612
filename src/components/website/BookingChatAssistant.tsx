@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -485,6 +485,7 @@ function getConversationKey(visitorId: string): string {
 export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssistantProps) {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -494,6 +495,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const hasLoadedRef = useRef(false);
+  const hasHandledAIParamRef = useRef(false);
 
   // Voice recording
   const handleTranscription = useCallback((text: string) => {
@@ -508,6 +510,40 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
   // Text-to-Speech
   const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate } = useTextToSpeech(language);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+
+  // Handle AI parameter from URL - auto-open chat and pre-fill route message
+  useEffect(() => {
+    if (hasHandledAIParamRef.current) return;
+    
+    const aiParam = searchParams.get('ai');
+    const routeParam = searchParams.get('route');
+    
+    if (aiParam === 'true') {
+      hasHandledAIParamRef.current = true;
+      
+      // Open the chat
+      setIsOpen(true);
+      
+      // Clear the URL parameters
+      searchParams.delete('ai');
+      searchParams.delete('route');
+      setSearchParams(searchParams, { replace: true });
+      
+      // If there's a route parameter, pre-fill the input with a question about it
+      if (routeParam) {
+        const routeQuestion = language === 'TR' 
+          ? `${routeParam} rotası için fiyat ve detay almak istiyorum.`
+          : `I'd like to get price and details for the ${routeParam} route.`;
+        
+        // Set the input with the route question after a short delay
+        setTimeout(() => {
+          setInput(routeQuestion);
+          // Focus the input
+          inputRef.current?.focus();
+        }, 500);
+      }
+    }
+  }, [searchParams, setSearchParams, language]);
 
   // Load saved conversation on mount
   useEffect(() => {
