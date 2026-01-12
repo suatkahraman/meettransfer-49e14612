@@ -251,22 +251,22 @@ const MarmarisAirportTransferGuide = () => {
                 { 
                   src: vitoFamilyInterior, 
                   alt: "Mercedes Vito Family Interior Marmaris Transfer",
-                  caption: "Spacious family-friendly interior"
+                  caption: t("blogGalleryCaption1")
                 },
                 { 
                   src: vitoExteriorBlack, 
                   alt: "Mercedes Vito VIP Exterior",
-                  caption: "Premium Mercedes Vito for resort transfers"
+                  caption: t("blogGalleryCaption2")
                 },
                 { 
                   src: sprinterLuggage, 
                   alt: "Mercedes Sprinter with luggage space",
-                  caption: "Ample luggage space for families"
+                  caption: t("blogGalleryCaption3")
                 },
                 { 
                   src: vitoVipPassengersDay, 
                   alt: "Happy passengers enjoying transfer",
-                  caption: "Comfortable journey to your resort"
+                  caption: t("blogGalleryCaption4")
                 },
               ]}
               columns={2}
