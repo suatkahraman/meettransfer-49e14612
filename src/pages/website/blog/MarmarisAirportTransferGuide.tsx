@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, CheckCircle2, MapPin } from "lucide-react";
+import { CompactRouteMap } from "@/components/ui/compact-route-map";
 import marmarisTransferHero from "@/assets/blog/marmaris-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
@@ -290,6 +291,11 @@ const MarmarisAirportTransferGuide = () => {
           <p className="text-muted-foreground text-sm mb-4">
             {t("blogMarmarisMapDesc")}
           </p>
+          <CompactRouteMap 
+            pickup="Dalaman Airport, Turkey" 
+            dropoff="Marmaris, Turkey" 
+            className="h-[200px]"
+          />
         </div>
 
         <BlogCTA destination="Marmaris" />
