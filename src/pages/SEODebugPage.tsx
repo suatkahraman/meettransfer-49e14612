@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, ExternalLink, AlertTriangle, Info, Globe, Languages, Link2 } from 'lucide-react';
+import { AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, ExternalLink, AlertTriangle, Info, Globe, Languages, Link2, FileText } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, type Language } from '@/hooks/useLanguageFromUrl';
 
 interface AggregateRating {
@@ -187,6 +187,33 @@ interface HreflangSummary {
   missingSelfReference: number;
 }
 
+// Canonical validation interfaces
+interface CanonicalValidationResult {
+  language: Language;
+  url: string;
+  canonicalUrl: string | null;
+  issues: CanonicalIssue[];
+  isSelfReferencing: boolean;
+  isAbsoluteUrl: boolean;
+  scannedAt: Date;
+  error?: string;
+}
+
+interface CanonicalIssue {
+  level: 'error' | 'warning' | 'info';
+  message: string;
+}
+
+interface CanonicalSummary {
+  totalLanguages: number;
+  scannedLanguages: number;
+  languagesWithIssues: number;
+  missingCanonical: number;
+  nonSelfReferencing: number;
+  relativeUrls: number;
+  inconsistentPatterns: boolean;
+}
+
 const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   EN: "",
   TR: "/tr",
@@ -207,7 +234,7 @@ const SEODebugPage = () => {
   const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [customUrl, setCustomUrl] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang'>('current');
+  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical'>('current');
   
   // Language scanning state
   const [languageScanResults, setLanguageScanResults] = useState<LanguageScanResult[]>([]);
@@ -220,6 +247,12 @@ const SEODebugPage = () => {
   const [isScanningHreflang, setIsScanningHreflang] = useState(false);
   const [hreflangScanProgress, setHreflangScanProgress] = useState(0);
   const [hreflangScanPath, setHreflangScanPath] = useState('/');
+
+  // Canonical validation state
+  const [canonicalResults, setCanonicalResults] = useState<CanonicalValidationResult[]>([]);
+  const [isScanningCanonical, setIsScanningCanonical] = useState(false);
+  const [canonicalScanProgress, setCanonicalScanProgress] = useState(0);
+  const [canonicalScanPath, setCanonicalScanPath] = useState('/');
 
   // Scan current page
   useEffect(() => {
@@ -620,6 +653,170 @@ const SEODebugPage = () => {
     };
   };
 
+  // Parse canonical URL from HTML
+  const parseCanonicalUrl = (html: string): string | null => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const canonicalLink = doc.querySelector('link[rel="canonical"]');
+    return canonicalLink?.getAttribute('href') || null;
+  };
+
+  // Scan all languages for canonical validation
+  const scanCanonicalUrls = async (basePath: string = '/') => {
+    setIsScanningCanonical(true);
+    setCanonicalScanProgress(0);
+    setCanonicalResults([]);
+    setActiveTab('canonical');
+
+    const baseUrl = window.location.origin;
+    const results: CanonicalValidationResult[] = [];
+
+    for (let i = 0; i < SUPPORTED_LANGUAGES.length; i++) {
+      const lang = SUPPORTED_LANGUAGES[i];
+      const prefix = LANGUAGE_TO_PREFIX[lang];
+      const path = prefix + (basePath === '/' ? '' : basePath);
+      const url = baseUrl + (path || '/');
+
+      try {
+        const response = await fetch(url, {
+          headers: { 'Accept': 'text/html' },
+        });
+
+        if (!response.ok) {
+          results.push({
+            language: lang,
+            url,
+            canonicalUrl: null,
+            issues: [],
+            isSelfReferencing: false,
+            isAbsoluteUrl: false,
+            scannedAt: new Date(),
+            error: `HTTP ${response.status}`,
+          });
+        } else {
+          const html = await response.text();
+          const canonicalUrl = parseCanonicalUrl(html);
+          
+          const issues: CanonicalIssue[] = [];
+          let isSelfReferencing = false;
+          let isAbsoluteUrl = false;
+
+          if (!canonicalUrl) {
+            issues.push({
+              level: 'error',
+              message: 'Canonical tag eksik - her sayfada canonical URL olmalı',
+            });
+          } else {
+            // Check if absolute URL
+            isAbsoluteUrl = canonicalUrl.startsWith('http://') || canonicalUrl.startsWith('https://');
+            if (!isAbsoluteUrl) {
+              issues.push({
+                level: 'error',
+                message: 'Canonical URL mutlak (absolute) olmalı, göreli (relative) değil',
+              });
+            }
+
+            // Check if self-referencing
+            isSelfReferencing = canonicalUrl === url;
+            if (!isSelfReferencing) {
+              // Check if it's pointing to another language version (might be intentional)
+              const canonicalPointsToAnotherLang = SUPPORTED_LANGUAGES.some(l => {
+                const langPrefix = LANGUAGE_TO_PREFIX[l];
+                const expectedUrl = baseUrl + langPrefix + (basePath === '/' ? '' : basePath);
+                return canonicalUrl === expectedUrl && l !== lang;
+              });
+
+              if (canonicalPointsToAnotherLang) {
+                issues.push({
+                  level: 'warning',
+                  message: `Canonical başka bir dil versiyonuna işaret ediyor: ${canonicalUrl}`,
+                });
+              } else if (canonicalUrl.includes(baseUrl)) {
+                issues.push({
+                  level: 'info',
+                  message: `Canonical kendi URL'si değil: ${canonicalUrl}`,
+                });
+              } else {
+                issues.push({
+                  level: 'error',
+                  message: `Canonical harici bir URL'ye işaret ediyor: ${canonicalUrl}`,
+                });
+              }
+            }
+
+            // Check for trailing slash consistency
+            const urlHasTrailingSlash = url.endsWith('/');
+            const canonicalHasTrailingSlash = canonicalUrl.endsWith('/');
+            if (isSelfReferencing === false && urlHasTrailingSlash !== canonicalHasTrailingSlash) {
+              // Only warn if they're otherwise the same
+              const normalizedUrl = url.replace(/\/$/, '');
+              const normalizedCanonical = canonicalUrl.replace(/\/$/, '');
+              if (normalizedUrl === normalizedCanonical) {
+                issues.push({
+                  level: 'warning',
+                  message: 'Trailing slash tutarsızlığı: URL ve canonical farklı bitiyor',
+                });
+              }
+            }
+          }
+
+          results.push({
+            language: lang,
+            url,
+            canonicalUrl,
+            issues,
+            isSelfReferencing,
+            isAbsoluteUrl,
+            scannedAt: new Date(),
+          });
+        }
+      } catch (error) {
+        results.push({
+          language: lang,
+          url,
+          canonicalUrl: null,
+          issues: [],
+          isSelfReferencing: false,
+          isAbsoluteUrl: false,
+          scannedAt: new Date(),
+          error: error instanceof Error ? error.message : 'Bilinmeyen hata',
+        });
+      }
+
+      setCanonicalScanProgress(((i + 1) / SUPPORTED_LANGUAGES.length) * 100);
+      setCanonicalResults([...results]);
+    }
+
+    setIsScanningCanonical(false);
+  };
+
+  // Calculate canonical summary
+  const getCanonicalSummary = (): CanonicalSummary => {
+    const successfulScans = canonicalResults.filter(r => !r.error);
+    const withIssues = canonicalResults.filter(r => 
+      r.issues.some(i => i.level === 'error' || i.level === 'warning')
+    );
+    const missingCanonical = canonicalResults.filter(r => !r.error && !r.canonicalUrl);
+    const nonSelfRef = canonicalResults.filter(r => !r.error && r.canonicalUrl && !r.isSelfReferencing);
+    const relativeUrls = canonicalResults.filter(r => !r.error && r.canonicalUrl && !r.isAbsoluteUrl);
+
+    // Check for consistent pattern (all self-referencing or all pointing to same base)
+    const canonicalPatterns = successfulScans
+      .filter(r => r.canonicalUrl)
+      .map(r => r.isSelfReferencing ? 'self' : 'other');
+    const uniquePatterns = [...new Set(canonicalPatterns)];
+    
+    return {
+      totalLanguages: SUPPORTED_LANGUAGES.length,
+      scannedLanguages: successfulScans.length,
+      languagesWithIssues: withIssues.length,
+      missingCanonical: missingCanonical.length,
+      nonSelfReferencing: nonSelfRef.length,
+      relativeUrls: relativeUrls.length,
+      inconsistentPatterns: uniquePatterns.length > 1,
+    };
+  };
+
   const getIssueCounts = (issues: ValidationIssue[]) => {
     return {
       errors: issues.filter(i => i.level === 'error').length,
@@ -922,7 +1119,48 @@ const SEODebugPage = () => {
           </CardContent>
         </Card>
 
-        {/* Hreflang Scan Card */}
+        {/* Canonical Scan Card */}
+        <Card className="border-green-500/30 bg-green-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Canonical URL Kontrolü
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Tüm dil versiyonlarının canonical URL etiketlerini doğrulayın
+            </p>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Sayfa yolu (örn: / veya /reviews)"
+                value={canonicalScanPath}
+                onChange={(e) => setCanonicalScanPath(e.target.value)}
+                className="text-sm"
+              />
+              <Button
+                onClick={() => scanCanonicalUrls(canonicalScanPath)}
+                disabled={isScanningCanonical}
+                size="sm"
+                variant="default"
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <FileText className="h-4 w-4 mr-1" />
+                Canonical Tara
+                {isScanningCanonical && <RefreshCw className="h-3 w-3 ml-1 animate-spin" />}
+              </Button>
+            </div>
+
+            {isScanningCanonical && (
+              <div className="space-y-1">
+                <Progress value={canonicalScanProgress} className="h-2" />
+                <p className="text-xs text-muted-foreground text-center">
+                  {Math.round(canonicalScanProgress)}% tamamlandı
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
         <Card className="border-blue-500/30 bg-blue-500/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -1007,6 +1245,17 @@ const SEODebugPage = () => {
           >
             <Link2 className="h-3 w-3" />
             Hreflang ({hreflangResults.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('canonical')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 ${
+              activeTab === 'canonical'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <FileText className="h-3 w-3" />
+            Canonical ({canonicalResults.length})
           </button>
         </div>
 
@@ -1450,6 +1699,250 @@ const SEODebugPage = () => {
                                 </div>
                               </CardContent>
                             </Card>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              </>
+            )}
+          </div>
+        ) : activeTab === 'canonical' ? (
+          // Canonical tab
+          <div className="space-y-4">
+            {canonicalResults.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Henüz canonical taraması yapılmadı. Yukarıdaki "Canonical Tara" butonunu kullanın.
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Canonical Summary Card */}
+                {(() => {
+                  const summary = getCanonicalSummary();
+                  const hasIssues = summary.languagesWithIssues > 0 || summary.missingCanonical > 0;
+                  return (
+                    <Card className={hasIssues ? 'border-destructive' : 'border-green-500'}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                          {hasIssues ? (
+                            <>
+                              <AlertCircle className="h-5 w-5 text-destructive" />
+                              <span className="text-destructive">Canonical Kontrolü - Sorunlar Var</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="h-5 w-5 text-green-500" />
+                              <span className="text-green-500">Canonical Kontrolü - Tamamlandı</span>
+                            </>
+                          )}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-4">
+                          <div className="text-center p-2 bg-muted rounded-lg">
+                            <div className="text-xl font-bold">{summary.totalLanguages}</div>
+                            <div className="text-xs text-muted-foreground">Toplam Dil</div>
+                          </div>
+                          <div className="text-center p-2 bg-green-50 dark:bg-green-950 rounded-lg">
+                            <div className="text-xl font-bold text-green-600">{summary.scannedLanguages}</div>
+                            <div className="text-xs text-muted-foreground">Başarılı</div>
+                          </div>
+                          <div className={`text-center p-2 rounded-lg ${summary.missingCanonical > 0 ? 'bg-red-50 dark:bg-red-950' : 'bg-green-50 dark:bg-green-950'}`}>
+                            <div className={`text-xl font-bold ${summary.missingCanonical > 0 ? 'text-destructive' : 'text-green-600'}`}>
+                              {summary.missingCanonical}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Eksik</div>
+                          </div>
+                          <div className={`text-center p-2 rounded-lg ${summary.nonSelfReferencing > 0 ? 'bg-yellow-50 dark:bg-yellow-950' : 'bg-green-50 dark:bg-green-950'}`}>
+                            <div className={`text-xl font-bold ${summary.nonSelfReferencing > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
+                              {summary.nonSelfReferencing}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Farklı URL</div>
+                          </div>
+                          <div className={`text-center p-2 rounded-lg ${summary.relativeUrls > 0 ? 'bg-red-50 dark:bg-red-950' : 'bg-green-50 dark:bg-green-950'}`}>
+                            <div className={`text-xl font-bold ${summary.relativeUrls > 0 ? 'text-destructive' : 'text-green-600'}`}>
+                              {summary.relativeUrls}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Göreli URL</div>
+                          </div>
+                          <div className={`text-center p-2 rounded-lg ${summary.inconsistentPatterns ? 'bg-yellow-50 dark:bg-yellow-950' : 'bg-green-50 dark:bg-green-950'}`}>
+                            <div className={`text-xl font-bold ${summary.inconsistentPatterns ? 'text-yellow-600' : 'text-green-600'}`}>
+                              {summary.inconsistentPatterns ? '✗' : '✓'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Tutarlı</div>
+                          </div>
+                        </div>
+
+                        {summary.missingCanonical > 0 && (
+                          <div className="p-2 bg-red-50 dark:bg-red-950 rounded-lg text-sm text-destructive flex items-start gap-2 mb-2">
+                            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                            <span>Canonical etiketi eksik olan sayfalar var - SEO için her sayfada canonical olmalı!</span>
+                          </div>
+                        )}
+
+                        {summary.relativeUrls > 0 && (
+                          <div className="p-2 bg-red-50 dark:bg-red-950 rounded-lg text-sm text-destructive flex items-start gap-2 mb-2">
+                            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                            <span>Göreli URL kullanan canonical etiketleri var - mutlak URL kullanılmalı!</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+
+                {/* Canonical by language table */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Dil Bazlı Canonical Sonuçları
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-2 px-3">Dil</th>
+                            <th className="text-left py-2 px-3">Canonical URL</th>
+                            <th className="text-center py-2 px-3">Self-Ref</th>
+                            <th className="text-center py-2 px-3">Absolute</th>
+                            <th className="text-center py-2 px-3">Durum</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {canonicalResults.map((result, idx) => {
+                            const errorCount = result.issues.filter(i => i.level === 'error').length;
+                            const warningCount = result.issues.filter(i => i.level === 'warning').length;
+                            
+                            return (
+                              <tr key={idx} className="border-b hover:bg-muted/50">
+                                <td className="py-2 px-3">
+                                  <Badge variant="outline" className="text-xs">{result.language}</Badge>
+                                </td>
+                                <td className="py-2 px-3">
+                                  {result.error ? (
+                                    <Badge variant="destructive" className="text-xs">Hata</Badge>
+                                  ) : result.canonicalUrl ? (
+                                    <span className="text-xs text-muted-foreground truncate block max-w-[300px]" title={result.canonicalUrl}>
+                                      {result.canonicalUrl}
+                                    </span>
+                                  ) : (
+                                    <Badge variant="destructive" className="text-xs">Eksik</Badge>
+                                  )}
+                                </td>
+                                <td className="py-2 px-3 text-center">
+                                  {result.canonicalUrl ? (
+                                    result.isSelfReferencing ? (
+                                      <CheckCircle className="h-4 w-4 text-green-500 mx-auto" />
+                                    ) : (
+                                      <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto" />
+                                    )
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground">—</span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-3 text-center">
+                                  {result.canonicalUrl ? (
+                                    result.isAbsoluteUrl ? (
+                                      <CheckCircle className="h-4 w-4 text-green-500 mx-auto" />
+                                    ) : (
+                                      <AlertCircle className="h-4 w-4 text-destructive mx-auto" />
+                                    )
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground">—</span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-3 text-center">
+                                  {result.error ? (
+                                    <Badge variant="destructive" className="text-xs">{result.error}</Badge>
+                                  ) : errorCount > 0 ? (
+                                    <Badge variant="destructive" className="text-xs">{errorCount} hata</Badge>
+                                  ) : warningCount > 0 ? (
+                                    <Badge className="bg-yellow-500 text-xs">{warningCount} uyarı</Badge>
+                                  ) : (
+                                    <Badge className="bg-green-500 text-xs">OK</Badge>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Detailed canonical issues */}
+                <details className="group">
+                  <summary className="cursor-pointer p-3 bg-muted rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-muted/80">
+                    <Code className="h-4 w-4" />
+                    Detaylı Canonical Sonuçları
+                  </summary>
+                  <div className="mt-4 space-y-6">
+                    {canonicalResults.map((result, idx) => (
+                      <div key={idx} className="space-y-3 border-l-4 border-green-500 pl-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Badge variant="default">{result.language}</Badge>
+                          <a
+                            href={result.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline font-medium"
+                          >
+                            {result.url}
+                          </a>
+                        </div>
+                        
+                        {result.error ? (
+                          <Card className="border-destructive">
+                            <CardContent className="py-4 text-destructive text-sm">
+                              Sayfa yüklenemedi: {result.error}
+                            </CardContent>
+                          </Card>
+                        ) : (
+                          <>
+                            {/* Canonical URL display */}
+                            <div className="p-3 bg-muted rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1">Canonical URL:</div>
+                              {result.canonicalUrl ? (
+                                <code className="text-xs break-all">{result.canonicalUrl}</code>
+                              ) : (
+                                <span className="text-destructive text-xs">Canonical tag bulunamadı!</span>
+                              )}
+                            </div>
+
+                            {/* Issues list */}
+                            {result.issues.length > 0 && (
+                              <div className="space-y-2">
+                                {result.issues.map((issue, issueIdx) => (
+                                  <div
+                                    key={issueIdx}
+                                    className={`p-2 rounded-lg text-xs flex items-start gap-2 ${
+                                      issue.level === 'error' ? 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300' :
+                                      issue.level === 'warning' ? 'bg-yellow-50 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-300' :
+                                      'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+                                    }`}
+                                  >
+                                    {issue.level === 'error' ? <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" /> :
+                                     issue.level === 'warning' ? <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" /> :
+                                     <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />}
+                                    <span>{issue.message}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {result.issues.length === 0 && result.canonicalUrl && (
+                              <div className="p-2 bg-green-50 dark:bg-green-950 rounded-lg text-xs text-green-700 dark:text-green-300 flex items-center gap-2">
+                                <CheckCircle className="h-3 w-3" />
+                                <span>Canonical URL doğru yapılandırılmış</span>
+                              </div>
+                            )}
                           </>
                         )}
                       </div>
