@@ -1,18 +1,64 @@
 # Meet Transfer Robots.txt
 # https://meettransfer.app
+# Last updated: 2026-01-12
 
-# Allow all crawlers
+# ===========================================
+# Default rules for all crawlers
+# ===========================================
 User-agent: *
 Allow: /
 
-# Disallow admin and auth routes (not for public indexing)
-Disallow: /admin/
+# Protected routes - not for public indexing
 Disallow: /admin
-Disallow: /driver/
+Disallow: /admin/
 Disallow: /driver
-Disallow: /customer/
+Disallow: /driver/
 Disallow: /customer
+Disallow: /customer/
+Disallow: /agency
 Disallow: /agency/
+Disallow: /auth
+Disallow: /login
+Disallow: /signup
+Disallow: /install
+Disallow: /book/
+Disallow: /confirm-booking
+Disallow: /quick-booking-confirm
+Disallow: /quick-booking-customer-info
+Disallow: /customer-portal
+Disallow: /api/
+Disallow: /*?token=
+Disallow: /*?session=
+
+# ===========================================
+# Social Media Bots - Full access for OG images
+# ===========================================
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+# ===========================================
+# Major Search Engines
+# ===========================================
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
 Disallow: /agency
 Disallow: /auth
 Disallow: /login
@@ -23,22 +69,31 @@ Disallow: /confirm-booking
 Disallow: /quick-booking-confirm
 Disallow: /quick-booking-customer-info
 Disallow: /customer-portal
+Disallow: /api/
+Disallow: /*?token=
+Disallow: /*?session=
 
-# Allow important bots full access
-User-agent: Googlebot
+User-agent: Googlebot-Image
 Allow: /
 
 User-agent: Bingbot
 Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
-User-agent: LinkedInBot
-Allow: /
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
+Disallow: /agency
+Disallow: /auth
+Disallow: /login
+Disallow: /signup
+Disallow: /install
+Disallow: /book/
+Disallow: /confirm-booking
+Disallow: /quick-booking-confirm
+Disallow: /quick-booking-customer-info
+Disallow: /customer-portal
+Disallow: /api/
+Disallow: /*?token=
+Disallow: /*?session=
 
 User-agent: Slurp
 Allow: /
@@ -51,16 +106,43 @@ Allow: /
 
 User-agent: YandexBot
 Allow: /
+Crawl-delay: 2
 
-# Sitemap location
-Sitemap: https://meettransfer.app/sitemap.xml
-
-# Crawl-delay for less important bots
+# ===========================================
+# SEO Tools - Rate limited
+# ===========================================
 User-agent: AhrefsBot
 Crawl-delay: 10
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
+Disallow: /agency
 
 User-agent: SemrushBot
 Crawl-delay: 10
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
+Disallow: /agency
 
 User-agent: MJ12bot
 Crawl-delay: 10
+
+User-agent: DotBot
+Crawl-delay: 10
+
+User-agent: BLEXBot
+Crawl-delay: 10
+
+# ===========================================
+# Block bad/aggressive bots
+# ===========================================
+User-agent: AhrefsBot
+User-agent: MJ12bot
+User-agent: SemrushBot
+User-agent: DotBot
+
+# ===========================================
+# Sitemap
+# ===========================================
+Sitemap: https://meettransfer.app/sitemap.xml
