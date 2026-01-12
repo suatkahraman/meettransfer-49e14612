@@ -221,9 +221,9 @@ serve(async (req) => {
             ? requestData.price + (requestData.returnPrice || requestData.price)
             : requestData.price;
 
-          // Get discount percentage from promo code
+          // Get discount percentage from promo code - all return codes are 30%
           const PROMO_CODE_CONFIG: Record<string, number> = {
-            'MEET40RETURN': 40,
+            'MEET40RETURN': 30,
             'GIDISDONUS': 30,
             'RETURN30': 30,
             'MEET30': 30,
