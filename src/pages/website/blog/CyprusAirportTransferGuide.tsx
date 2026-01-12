@@ -69,12 +69,12 @@ const CyprusAirportTransferGuide = () => {
       <SEOHead
         title={t("blogCyprusSeoTitle")}
         description={t("blogCyprusSeoDesc")}
-        keywords="Cyprus airport transfer 2025, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Protaras transfer, Kyrenia transfer, Northern Cyprus transfer, Ercan airport, Famagusta transfer, Troodos transfer, Cyprus VIP transfer, Cyprus transfer price"
+        keywords="Cyprus airport transfer 2026, budget airport transfer Cyprus, luxury airport transfer Cyprus, VIP airport transfer Cyprus, Larnaca airport transfer, Larnaca Airport to Ayia Napa private transfer, Larnaca Airport to Protaras transfer, Paphos airport transfer, Paphos Airport to Coral Bay transfer, Paphos Airport to Limassol transfer, Ercan airport transfer, Ercan transfer price, Larnaca transfer price 2026, Paphos transfer price 2026, airport pickup drop off Cyprus, group airport transfer Cyprus, family airport transfer Cyprus, Cyprus airport transfer online booking, Cyprus taxi transfer price, airport transfer reviews Cyprus, Ayia Napa transfer, Limassol airport transfer, Protaras transfer, Kyrenia transfer, Famagusta transfer, Northern Cyprus transfer, TRNC airport transfer service, Troodos transfer, Cyprus private driver, Cyprus VIP chauffeur"
         canonicalPath="/blog/cyprus-airport-transfer-guide"
         ogImage="https://meettransfer.app/og/cyprus-transfer-og.jpg"
         ogType="article"
         articlePublishedTime="2024-12-26"
-        articleModifiedTime="2025-01-10"
+        articleModifiedTime="2026-01-10"
         articleSection="Travel Guide"
       />
       <SchemaOrg
@@ -86,11 +86,11 @@ const CyprusAirportTransferGuide = () => {
             description: t("blogCyprusSeoDesc"),
             image: 'https://meettransfer.app/og/cyprus-transfer-og.jpg',
             datePublished: '2024-12-26',
-            dateModified: '2025-01-10',
+            dateModified: '2026-01-10',
             author: 'Meet Transfer',
             readingTime: '17',
             wordCount: 2500,
-            keywords: ['Cyprus transfer', 'Larnaca airport', 'Paphos airport', 'Ayia Napa', 'Limassol'],
+            keywords: ['Cyprus transfer', 'Larnaca airport', 'Paphos airport', 'Ercan airport', 'Ayia Napa', 'Protaras', 'Limassol', 'Kyrenia', 'Coral Bay', 'budget transfer Cyprus', 'VIP transfer Cyprus', 'family transfer', 'group transfer', 'airport pickup Cyprus'],
           },
           {
             type: 'FAQPage',
