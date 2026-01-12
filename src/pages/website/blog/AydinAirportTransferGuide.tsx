@@ -47,14 +47,14 @@ const AydinAirportTransferGuide = () => {
   ];
 
   const destinations = [
-    { area: "Kuşadası", distance: "70 km", time: "60-70 min", price: "€75" },
-    { area: "Ephesus", distance: "55 km", time: "50-60 min", price: "€65" },
-    { area: "Didim", distance: "100 km", time: "90-100 min", price: "€95" },
-    { area: "Söke", distance: "65 km", time: "55-65 min", price: "€70" },
-    { area: "Aydın Center", distance: "80 km", time: "70-80 min", price: "€80" },
-    { area: "Pamukkale", distance: "180 km", time: "150-180 min", price: "€160" },
-    { area: "Selçuk", distance: "50 km", time: "45-55 min", price: "€60" },
-    { area: "Altınkum", distance: "105 km", time: "95-105 min", price: "€100" },
+    { area: t("destKusadasi"), distance: "70 km", time: "60-70 min", price: "€75" },
+    { area: t("destEphesus"), distance: "55 km", time: "50-60 min", price: "€65" },
+    { area: t("destDidim"), distance: "100 km", time: "90-100 min", price: "€95" },
+    { area: t("destSoke"), distance: "65 km", time: "55-65 min", price: "€70" },
+    { area: t("destAydinCenter"), distance: "80 km", time: "70-80 min", price: "€80" },
+    { area: t("destPamukkale"), distance: "180 km", time: "150-180 min", price: "€160" },
+    { area: t("destSelcuk"), distance: "50 km", time: "45-55 min", price: "€60" },
+    { area: t("destAltinkum"), distance: "105 km", time: "95-105 min", price: "€100" },
   ];
 
   return (

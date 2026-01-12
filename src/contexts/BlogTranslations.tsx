@@ -107,6 +107,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destBusinessBay: "Business Bay",
     destAbuDhabi: "Abu Dhabi",
     
+    // Muğla Destinations (for tables)
+    destBodrum: "Bodrum",
+    destMuglaCenter: "Muğla Center",
+    destOrtaca: "Ortaca",
+    
+    // Aydın Destinations (for tables)
+    destKusadasi: "Kuşadası",
+    destEphesus: "Ephesus",
+    destDidim: "Didim",
+    destSoke: "Söke",
+    destAydinCenter: "Aydın Center",
+    destPamukkale: "Pamukkale",
+    destSelcuk: "Selçuk",
+    destAltinkum: "Altınkum",
+    
     // Vehicle Names (for tables)
     vehicleVito: "Mercedes Vito (up to 6 pax)",
     vehicleVitoVIP: "Mercedes Vito VIP (up to 6 pax)",
@@ -849,6 +864,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destJumeirahBeach: "Jumeirah Beach Hotels",
     destBusinessBay: "Business Bay",
     destAbuDhabi: "Abu Dhabi",
+    
+    // Muğla Destinations (for tables)
+    destBodrum: "Bodrum",
+    destMuglaCenter: "Muğla Zentrum",
+    destOrtaca: "Ortaca",
+    
+    // Aydın Destinations (for tables)
+    destKusadasi: "Kuşadası",
+    destEphesus: "Ephesus",
+    destDidim: "Didim",
+    destSoke: "Söke",
+    destAydinCenter: "Aydın Zentrum",
+    destPamukkale: "Pamukkale",
+    destSelcuk: "Selçuk",
+    destAltinkum: "Altınkum",
     
     // Vehicle Names (for tables)
     vehicleVito: "Mercedes Vito (bis 6 Pers.)",
@@ -1612,6 +1642,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destBusinessBay: "Business Bay",
     destAbuDhabi: "Abou Dhabi",
     
+    // Muğla Destinations (for tables)
+    destBodrum: "Bodrum",
+    destMuglaCenter: "Centre de Muğla",
+    destOrtaca: "Ortaca",
+    
+    // Aydın Destinations (for tables)
+    destKusadasi: "Kuşadası",
+    destEphesus: "Éphèse",
+    destDidim: "Didim",
+    destSoke: "Söke",
+    destAydinCenter: "Centre d'Aydın",
+    destPamukkale: "Pamukkale",
+    destSelcuk: "Selçuk",
+    destAltinkum: "Altınkum",
+    
     // Vehicle Names
     vehicleVito: "Mercedes Vito (jusqu'à 6 pers.)",
     vehicleVitoVIP: "Mercedes Vito VIP (jusqu'à 6 pers.)",
@@ -2356,6 +2401,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destBusinessBay: "Бизнес Бэй",
     destAbuDhabi: "Абу-Даби",
     
+    // Muğla Destinations (for tables)
+    destBodrum: "Бодрум",
+    destMuglaCenter: "Центр Муглы",
+    destOrtaca: "Ортаджа",
+    
+    // Aydın Destinations (for tables)
+    destKusadasi: "Кушадасы",
+    destEphesus: "Эфес",
+    destDidim: "Дидим",
+    destSoke: "Сёке",
+    destAydinCenter: "Центр Айдына",
+    destPamukkale: "Памуккале",
+    destSelcuk: "Сельчук",
+    destAltinkum: "Алтынкум",
+    
     // Vehicle Names
     vehicleVito: "Mercedes Vito (до 6 чел.)",
     vehicleVitoVIP: "Mercedes Vito VIP (до 6 чел.)",
@@ -2963,6 +3023,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destKalkan: "Kalkan",
     destKas: "Kaş",
     
+    // Muğla Destinations (for tables)
+    destBodrum: "Bodrum",
+    destMuglaCenter: "Centro di Muğla",
+    destOrtaca: "Ortaca",
+    
+    // Aydın Destinations (for tables)
+    destKusadasi: "Kuşadası",
+    destEphesus: "Efeso",
+    destDidim: "Didim",
+    destSoke: "Söke",
+    destAydinCenter: "Centro di Aydın",
+    destPamukkale: "Pamukkale",
+    destSelcuk: "Selçuk",
+    destAltinkum: "Altınkum",
+    
     // Vehicle Names
     vehicleVito: "Mercedes Vito (fino a 6 pers.)",
     vehicleVitoVIP: "Mercedes Vito VIP (fino a 6 pers.)",
@@ -3566,6 +3641,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destGocek: "Göcek",
     destKalkan: "Kalkan",
     destKas: "Kaş",
+    
+    // Muğla Destinations (for tables)
+    destBodrum: "Bodrum",
+    destMuglaCenter: "Centro de Muğla",
+    destOrtaca: "Ortaca",
+    
+    // Aydın Destinations (for tables)
+    destKusadasi: "Kuşadası",
+    destEphesus: "Éfeso",
+    destDidim: "Didim",
+    destSoke: "Söke",
+    destAydinCenter: "Centro de Aydın",
+    destPamukkale: "Pamukkale",
+    destSelcuk: "Selçuk",
+    destAltinkum: "Altınkum",
     
     // Vehicle Names
     vehicleVito: "Mercedes Vito (hasta 6 pers.)",
@@ -4212,6 +4302,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destBusinessBay: "الخليج التجاري",
     destAbuDhabi: "أبوظبي",
     
+    // Muğla Destinations (for tables)
+    destBodrum: "بودروم",
+    destMuglaCenter: "مركز موغلا",
+    destOrtaca: "أورتاجا",
+    
+    // Aydın Destinations (for tables)
+    destKusadasi: "كوشاداسي",
+    destEphesus: "أفسس",
+    destDidim: "ديديم",
+    destSoke: "سوكه",
+    destAydinCenter: "مركز أيدين",
+    destPamukkale: "باموكالي",
+    destSelcuk: "سلجوق",
+    destAltinkum: "التينكوم",
+    
     // Vehicle Names (for tables)
     vehicleVito: "مرسيدس فيتو (حتى 6 ركاب)",
     vehicleVitoVIP: "مرسيدس فيتو VIP (حتى 6 ركاب)",
@@ -4856,6 +4961,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destJumeirahBeach: "Jumeirah Beach Otelleri",
     destBusinessBay: "Business Bay",
     destAbuDhabi: "Abu Dabi",
+    
+    // Muğla Destinations (for tables)
+    destBodrum: "Bodrum",
+    destMuglaCenter: "Muğla Merkez",
+    destOrtaca: "Ortaca",
+    
+    // Aydın Destinations (for tables)
+    destKusadasi: "Kuşadası",
+    destEphesus: "Efes",
+    destDidim: "Didim",
+    destSoke: "Söke",
+    destAydinCenter: "Aydın Merkez",
+    destPamukkale: "Pamukkale",
+    destSelcuk: "Selçuk",
+    destAltinkum: "Altınkum",
     
     // Vehicle Names
     vehicleVito: "Mercedes Vito (6 kişiye kadar)",
@@ -5702,6 +5822,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destBusinessBay: "Бізнес Бей",
     destAbuDhabi: "Абу-Дабі",
     
+    // Muğla Destinations (for tables)
+    destBodrum: "Бодрум",
+    destMuglaCenter: "Центр Мугли",
+    destOrtaca: "Ортаджа",
+    
+    // Aydın Destinations (for tables)
+    destKusadasi: "Кушадаси",
+    destEphesus: "Ефес",
+    destDidim: "Дідім",
+    destSoke: "Сьоке",
+    destAydinCenter: "Центр Айдина",
+    destPamukkale: "Памуккале",
+    destSelcuk: "Сельчук",
+    destAltinkum: "Алтинкум",
+    
     // Vehicle Names (for tables)
     vehicleVito: "Mercedes Vito (до 6 осіб)",
     vehicleVitoVIP: "Mercedes Vito VIP (до 6 осіб)",
@@ -6393,6 +6528,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destJumeirahBeach: "ジュメイラビーチホテル",
     destBusinessBay: "ビジネスベイ",
     destAbuDhabi: "アブダビ",
+    
+    // Muğla Destinations (for tables)
+    destBodrum: "ボドルム",
+    destMuglaCenter: "ムーラ中心部",
+    destOrtaca: "オルタジャ",
+    
+    // Aydın Destinations (for tables)
+    destKusadasi: "クシャダス",
+    destEphesus: "エフェソス",
+    destDidim: "ディディム",
+    destSoke: "ソケ",
+    destAydinCenter: "アイドゥン中心部",
+    destPamukkale: "パムッカレ",
+    destSelcuk: "セルチュク",
+    destAltinkum: "アルトゥンクム",
     
     // Vehicle Names (for tables)
     vehicleVito: "メルセデスVito（最大6名）",

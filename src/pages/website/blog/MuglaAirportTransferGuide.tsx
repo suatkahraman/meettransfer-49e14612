@@ -47,14 +47,14 @@ const MuglaAirportTransferGuide = () => {
   ];
 
   const destinations = [
-    { area: "Bodrum", distance: "95 km", time: "90-100 min", price: "€95" },
-    { area: "Marmaris", distance: "95 km", time: "90-100 min", price: "€95" },
-    { area: "Fethiye", distance: "50 km", time: "50-60 min", price: "€65" },
-    { area: "Ölüdeniz", distance: "60 km", time: "60-70 min", price: "€70" },
-    { area: "Muğla Center", distance: "25 km", time: "25-35 min", price: "€45" },
-    { area: "Datça", distance: "150 km", time: "140-160 min", price: "€140" },
-    { area: "Köyceğiz", distance: "35 km", time: "35-45 min", price: "€55" },
-    { area: "Ortaca", distance: "20 km", time: "20-30 min", price: "€40" },
+    { area: t("destBodrum"), distance: "95 km", time: "90-100 min", price: "€95" },
+    { area: t("cityMarmaris"), distance: "95 km", time: "90-100 min", price: "€95" },
+    { area: t("cityFethiye"), distance: "50 km", time: "50-60 min", price: "€65" },
+    { area: t("cityOludeniz"), distance: "60 km", time: "60-70 min", price: "€70" },
+    { area: t("destMuglaCenter"), distance: "25 km", time: "25-35 min", price: "€45" },
+    { area: t("destDatca"), distance: "150 km", time: "140-160 min", price: "€140" },
+    { area: t("destKoycegiz"), distance: "35 km", time: "35-45 min", price: "€55" },
+    { area: t("destOrtaca"), distance: "20 km", time: "20-30 min", price: "€40" },
   ];
 
   return (
