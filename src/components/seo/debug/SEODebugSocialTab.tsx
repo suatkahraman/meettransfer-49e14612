@@ -9,10 +9,23 @@ import { type SocialPreviewResult, type SocialPreviewIssue } from '@/hooks/useSo
 import { getIssueLevelVariant } from './utils';
 
 interface SEODebugSocialTabProps {
-  result: SocialPreviewResult;
+  socialResult: SocialPreviewResult | null;
+  imageLoading?: boolean;
 }
 
-export const SEODebugSocialTab = ({ result }: SEODebugSocialTabProps) => {
+export const SEODebugSocialTab = ({ socialResult, imageLoading }: SEODebugSocialTabProps) => {
+  if (!socialResult) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center">
+          <Share2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">Sosyal medya önizlemesi taramak için yukarıdaki "Sosyal Medya" butonuna tıklayın</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const result = socialResult;
   const errorCount = result.issues.filter(i => i.level === 'error').length;
   const warningCount = result.issues.filter(i => i.level === 'warning').length;
 
