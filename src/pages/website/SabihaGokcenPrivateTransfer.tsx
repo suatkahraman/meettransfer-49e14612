@@ -34,6 +34,7 @@ const SabihaGokcenPrivateTransfer = () => {
         description="Book Sabiha Gökçen Airport (SAW) private transfer from €45. Direct service to Taksim, Kadıköy & all Istanbul. Meet & greet, fixed prices. Book now!"
         keywords="Sabiha Gökçen transfer, SAW airport transfer, SAW to Taksim, Sabiha Gökçen private transfer, SAW airport shuttle"
         canonicalPath="/sabiha-gokcen-private-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg schemas={[
         { type: 'TransportationService', areaServed: ['Sabiha Gökçen Airport', 'SAW', 'Kadıköy', 'Üsküdar', 'Taksim'] },

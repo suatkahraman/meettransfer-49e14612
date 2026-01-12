@@ -81,6 +81,7 @@ const IzmirAirportTransfer = () => {
         description="Book Izmir Airport (ADB) private transfer from $35. Direct service to Çeşme, Alaçatı, Kuşadası, Ephesus & city center. Meet & greet, fixed prices. Book now!"
         keywords="Izmir Airport transfer, ADB airport transfer, Izmir Airport taxi, Izmir to Çeşme transfer, Izmir Airport shuttle, Izmir to Kuşadası, Izmir to Ephesus, Izmir Airport to Alaçatı"
         canonicalPath="/izmir-airport-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

@@ -81,6 +81,7 @@ const BodrumAirportTransfer = () => {
         description="Book Bodrum Airport (BJV) private transfer from €50. Direct service to Bodrum, Yalıkavak, Türkbükü, Gümbet & all areas. Meet & greet included. Book now!"
         keywords="Bodrum Airport transfer, BJV airport transfer, Bodrum to Yalıkavak transfer, Bodrum Airport shuttle, Bodrum hotel transfer, Bodrum Airport to Türkbükü, Bodrum marina transfer"
         canonicalPath="/bodrum-airport-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

@@ -31,6 +31,7 @@ const IstCityCenterVipTransfer = () => {
         description="Book IST Airport VIP transfer to Istanbul city center from €55. Premium Mercedes, professional chauffeur, executive service. Corporate accounts available."
         keywords="IST VIP transfer, Istanbul Airport VIP, luxury airport transfer Istanbul, executive transfer IST, business transfer Istanbul Airport"
         canonicalPath="/ist-city-center-vip-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
       />
       <SchemaOrg schemas={[
         { type: 'TransportationService', areaServed: ['IST Airport', 'Istanbul', 'Taksim', 'Levent', 'Maslak'] },
