@@ -1780,6 +1780,17 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogPriceFaq5A: "Nos prix sont en Euros (€). Vous pouvez payer en EUR, USD, GBP ou TRY.",
     blogPriceFaq6Q: "Les sièges enfants sont-ils inclus ?",
     blogPriceFaq6A: "Oui, les sièges enfants sont disponibles gratuitement. Demandez-les lors de la réservation.",
+    
+    // Antalya, Bursa, Cyprus, Dubai SEO - French
+    blogAntalyaSeoTitle: "Transfert Aéroport Antalya vers Hôtels: Guide Complet 2025",
+    blogAntalyaSeoDesc: "Tout sur les transferts aéroport Antalya. Prix vers Lara, Belek, Side, Kemer, Alanya. Conseils de réservation et durées de trajet.",
+    blogBursaSeoTitle: "Istanbul vers Bursa Tour Journée 2025 | Que Voir et Comment y Aller",
+    blogBursaSeoDesc: "Guide complet pour visiter Bursa depuis Istanbul. Meilleures attractions, options de transport, itinéraires et conseils pour une journée parfaite.",
+    blogCyprusSeoTitle: "Guide Transfert Aéroport Chypre 2025 | Larnaca, Paphos vers Ayia Napa",
+    blogCyprusSeoDesc: "Guide complet des transferts aéroport Chypre. VIP privé depuis Larnaca & Paphos dès 35€. Prix fixes vers Ayia Napa, Limassol, Protaras.",
+    blogDubaiSeoTitle: "Guide Transfert Aéroport Dubaï 2025 | DXB vers Downtown, Palm Jumeirah",
+    blogDubaiSeoDesc: "Guide complet des transferts aéroport Dubaï. VIP privé depuis DXB vers Downtown, Palm Jumeirah, Marina dès 45$. Accueil 24/7.",
+    
     blogPriceGalleryCaption1: "Mercedes Vito VIP - Transfert Aéroport de Luxe",
     blogPriceGalleryCaption2: "Intérieur cuir premium avec plafond étoilé",
     blogPriceGalleryCaption3: "Sprinter VIP - Parfait pour les groupes",
@@ -2498,6 +2509,17 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogPriceFaq5A: "Цены в евро (€). Можно платить в EUR, USD, GBP или TRY.",
     blogPriceFaq6Q: "Детские кресла включены?",
     blogPriceFaq6A: "Да, детские кресла бесплатны. Запросите при бронировании.",
+    
+    // Antalya, Bursa, Cyprus, Dubai SEO - Russian
+    blogAntalyaSeoTitle: "Трансфер из аэропорта Анталии в отели: Полный гид 2025",
+    blogAntalyaSeoDesc: "Всё о трансферах из аэропорта Анталии. Цены в Лару, Белек, Сиде, Кемер, Аланью. Советы по бронированию и время в пути.",
+    blogBursaSeoTitle: "Стамбул — Бурса однодневная экскурсия 2025 | Что посмотреть и как добраться",
+    blogBursaSeoDesc: "Полный гид по посещению Бурсы из Стамбула. Лучшие достопримечательности, транспорт, маршруты и советы для идеальной поездки.",
+    blogCyprusSeoTitle: "Гид по трансферу из аэропорта Кипра 2025 | Ларнака, Пафос — Айя-Напа",
+    blogCyprusSeoDesc: "Полный гид по трансферам с Кипра. Частные VIP-трансферы из Ларнаки и Пафоса от €35. Фиксированные цены в Айя-Напу, Лимассол, Протарас.",
+    blogDubaiSeoTitle: "Гид по трансферу из аэропорта Дубая 2025 | DXB — Downtown, Palm Jumeirah",
+    blogDubaiSeoDesc: "Полный гид по трансферам из аэропорта Дубая. Частный VIP из DXB в Downtown, Palm Jumeirah, Marina от $45. Встреча 24/7.",
+    
     blogPriceGalleryCaption1: "Mercedes Vito VIP — Люксовый трансфер",
     blogPriceGalleryCaption2: "Премиум кожаный салон со звездным потолком",
     blogPriceGalleryCaption3: "Sprinter VIP — Для групп",
@@ -3081,6 +3103,17 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogPriceFaq5A: "I prezzi sono in Euro (€). Puoi pagare in EUR, USD, GBP o TRY.",
     blogPriceFaq6Q: "I seggiolini sono inclusi nel prezzo?",
     blogPriceFaq6A: "Sì, i seggiolini (neonato, bambino o rialzo) sono disponibili gratuitamente. Richiedili alla prenotazione.",
+    
+    // Antalya, Bursa, Cyprus, Dubai SEO - Italian
+    blogAntalyaSeoTitle: "Transfer Aeroporto Antalya agli Hotel: Guida Completa 2025",
+    blogAntalyaSeoDesc: "Tutto sui transfer dall'aeroporto di Antalya. Prezzi per Lara, Belek, Side, Kemer, Alanya. Consigli di prenotazione e tempi di viaggio.",
+    blogBursaSeoTitle: "Istanbul a Bursa Gita Giornaliera 2025 | Cosa Vedere e Come Arrivare",
+    blogBursaSeoDesc: "Guida completa per visitare Bursa da Istanbul. Migliori attrazioni, opzioni di trasporto, itinerari e consigli per una gita perfetta.",
+    blogCyprusSeoTitle: "Guida Transfer Aeroporto Cipro 2025 | Larnaca, Paphos verso Ayia Napa",
+    blogCyprusSeoDesc: "Guida completa ai transfer aeroporto Cipro. VIP privato da Larnaca e Paphos da €35. Prezzi fissi per Ayia Napa, Limassol, Protaras.",
+    blogDubaiSeoTitle: "Guida Transfer Aeroporto Dubai 2025 | DXB verso Downtown, Palm Jumeirah",
+    blogDubaiSeoDesc: "Guida completa ai transfer aeroporto Dubai. VIP privato da DXB a Downtown, Palm Jumeirah, Marina da $45. Accoglienza 24/7.",
+    
     blogPriceGalleryCaption1: "Mercedes Vito VIP - Trasferimento aeroporto di lusso",
     blogPriceGalleryCaption2: "Interni in pelle premium con tetto stellato",
     blogPriceGalleryCaption3: "Sprinter VIP - Perfetto per gruppi",
@@ -3661,6 +3694,17 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogPriceFaq5A: "Los precios están en Euros (€). Puedes pagar en EUR, USD, GBP o TRY.",
     blogPriceFaq6Q: "¿Las sillas de bebé están incluidas en el precio?",
     blogPriceFaq6A: "Sí, las sillas de bebé (portabebés, infantil o elevador) están disponibles gratis. Solicítalas al reservar.",
+    
+    // Antalya, Bursa, Cyprus, Dubai SEO - Spanish
+    blogAntalyaSeoTitle: "Traslado Aeropuerto Antalya a Hoteles: Guía Completa 2025",
+    blogAntalyaSeoDesc: "Todo sobre los traslados del aeropuerto de Antalya. Precios a Lara, Belek, Side, Kemer, Alanya. Consejos de reserva y tiempos de viaje.",
+    blogBursaSeoTitle: "Estambul a Bursa Tour de un Día 2025 | Qué Ver y Cómo Llegar",
+    blogBursaSeoDesc: "Guía completa para visitar Bursa desde Estambul. Mejores atracciones, opciones de transporte, itinerarios y consejos para un día perfecto.",
+    blogCyprusSeoTitle: "Guía Traslado Aeropuerto Chipre 2025 | Larnaca, Paphos a Ayia Napa",
+    blogCyprusSeoDesc: "Guía completa de traslados aeropuerto Chipre. VIP privado desde Larnaca y Paphos desde €35. Precios fijos a Ayia Napa, Limassol, Protaras.",
+    blogDubaiSeoTitle: "Guía Traslado Aeropuerto Dubái 2025 | DXB a Downtown, Palm Jumeirah",
+    blogDubaiSeoDesc: "Guía completa de traslados aeropuerto Dubái. VIP privado desde DXB a Downtown, Palm Jumeirah, Marina desde $45. Bienvenida 24/7.",
+    
     blogPriceGalleryCaption1: "Mercedes Vito VIP - Traslado aeroportuario de lujo",
     blogPriceGalleryCaption2: "Interior de cuero premium con techo estrellado",
     blogPriceGalleryCaption3: "Sprinter VIP - Perfecto para grupos",
@@ -4282,6 +4326,17 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogPriceFaq5A: "أسعارنا مدرجة باليورو (€) لسهولة المقارنة. يمكنك الدفع باليورو أو الدولار أو الجنيه أو الليرة التركية.",
     blogPriceFaq6Q: "هل مقاعد الأطفال مشمولة في السعر؟",
     blogPriceFaq6A: "نعم، مقاعد الأطفال (حاملة أو مقعد صغار أو مقعد رفع) متوفرة مجاناً. اطلبها عند الحجز.",
+    
+    // Antalya, Bursa, Cyprus, Dubai SEO - Arabic
+    blogAntalyaSeoTitle: "نقل مطار أنطاليا إلى الفنادق: دليل شامل 2025",
+    blogAntalyaSeoDesc: "كل شيء عن نقل مطار أنطاليا. أسعار إلى لارا، بيليك، سيدي، كيمر، ألانيا. نصائح الحجز وأوقات الرحلة.",
+    blogBursaSeoTitle: "جولة يوم واحد من إسطنبول إلى بورصة 2025 | ماذا تشاهد وكيف تصل",
+    blogBursaSeoDesc: "دليل شامل لزيارة بورصة من إسطنبول. أفضل المعالم، خيارات النقل، المسارات والنصائح ليوم مثالي.",
+    blogCyprusSeoTitle: "دليل نقل مطار قبرص 2025 | لارنكا، بافوس إلى أيا نابا",
+    blogCyprusSeoDesc: "دليل شامل لنقل مطار قبرص. VIP خاص من لارنكا وبافوس من 35€. أسعار ثابتة إلى أيا نابا، ليماسول، بروتاراس.",
+    blogDubaiSeoTitle: "دليل نقل مطار دبي 2025 | DXB إلى داون تاون، نخلة جميرا",
+    blogDubaiSeoDesc: "دليل شامل لنقل مطار دبي. VIP خاص من DXB إلى داون تاون، نخلة جميرا، مارينا من 45$. استقبال 24/7.",
+    
     blogPriceGalleryCaption1: "مرسيدس فيتو VIP - نقل فاخر من المطار",
     blogPriceGalleryCaption2: "داخلية جلد فاخرة مع سقف نجمي",
     blogPriceGalleryCaption3: "سبرينتر VIP - مثالي للمجموعات",
@@ -5659,6 +5714,16 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogPriceTip3: "Вкажіть точну адресу готелю з районом",
     blogPriceTip4: "Запитуйте дитячі крісла за 24 години до трансферу",
     
+    // Antalya, Bursa, Cyprus, Dubai SEO - Ukrainian
+    blogAntalyaSeoTitle: "Трансфер з аеропорту Анталії до готелів: Повний гід 2025",
+    blogAntalyaSeoDesc: "Все про трансфери з аеропорту Анталії. Ціни до Лари, Белек, Сіде, Кемер, Аланьї. Поради бронювання та час у дорозі.",
+    blogBursaSeoTitle: "Стамбул — Бурса одноденна екскурсія 2025 | Що подивитися і як дістатися",
+    blogBursaSeoDesc: "Повний гід з відвідування Бурси зі Стамбула. Найкращі пам'ятки, транспорт, маршрути та поради для ідеальної поїздки.",
+    blogCyprusSeoTitle: "Гід з трансферу з аеропорту Кіпру 2025 | Ларнака, Пафос — Айя-Напа",
+    blogCyprusSeoDesc: "Повний гід з трансферів з Кіпру. Приватні VIP-трансфери з Ларнаки та Пафоса від €35. Фіксовані ціни до Айя-Напи, Лімассолу, Протарасу.",
+    blogDubaiSeoTitle: "Гід з трансферу з аеропорту Дубая 2025 | DXB — Downtown, Palm Jumeirah",
+    blogDubaiSeoDesc: "Повний гід з трансферів з аеропорту Дубая. Приватний VIP з DXB до Downtown, Palm Jumeirah, Marina від $45. Зустріч 24/7.",
+    
     // Fethiye Airport Transfer Guide - Ukrainian
     blogFethiyeTitle: "Трансфер з аеропорту Даламан до Фетхіє 2025 | Ціни та поради",
     blogFethiyeDesc: "Повний гід з трансферів з аеропорту Даламан до Фетхіє, Олюденіз, Гочек. Порівняння цін, приватних трансферів та шатлів.",
@@ -6479,6 +6544,16 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogTaxiFaq5A: "プライベート送迎では、ドライバーがフライトを監視し調整します - 追加料金なし。通常交通機関では到着時に利用可能なものを使います。",
     blogTaxiFaq6Q: "子供連れの家族にはどちらが良いですか？",
     blogTaxiFaq6A: "家族にはプライベート送迎を強くお勧めします。チャイルドシートのリクエストが可能で、ベビーカー用のスペースがあり、ドアtoドアサービスでストレスが軽減されます。",
+    
+    // Antalya, Bursa, Cyprus, Dubai SEO - Japanese
+    blogAntalyaSeoTitle: "アンタルヤ空港からホテルへの送迎：完全ガイド2025",
+    blogAntalyaSeoDesc: "アンタルヤ空港送迎のすべて。ララ、ベレク、シデ、ケメル、アランヤへの料金。予約のヒントと移動時間。",
+    blogBursaSeoTitle: "イスタンブールからブルサ日帰りツアー2025｜見どころと行き方",
+    blogBursaSeoDesc: "イスタンブールからブルサ訪問の完全ガイド。ベストな観光スポット、交通手段、ルート、完璧な日帰り旅行のヒント。",
+    blogCyprusSeoTitle: "キプロス空港送迎ガイド2025｜ラルナカ、パフォスからアヤナパへ",
+    blogCyprusSeoDesc: "キプロス空港送迎の完全ガイド。ラルナカとパフォスからのプライベートVIP€35から。アヤナパ、リマソール、プロタラスへの固定料金。",
+    blogDubaiSeoTitle: "ドバイ空港送迎ガイド2025｜DXBからダウンタウン、パームジュメイラへ",
+    blogDubaiSeoDesc: "ドバイ空港送迎の完全ガイド。DXBからダウンタウン、パームジュメイラ、マリーナへのプライベートVIP$45から。24時間お出迎え。",
     
     // Antalya Airport Guide Details - Japanese
     blogAntalyaAirportP1: "アンタルヤ空港（AYT）はトルコで2番目に混雑する空港で、トルコのリビエラへの主要な玄関口です。",
