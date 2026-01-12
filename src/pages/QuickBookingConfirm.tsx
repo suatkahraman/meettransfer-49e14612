@@ -369,7 +369,75 @@ export default function QuickBookingConfirm() {
         return;
       }
       
-      // Fallback to fetching from region_prices
+      // For hourly rentals, fetch prices from hourly_rental_prices table
+      if (booking.service_type === 'hourly' && booking.city && booking.duration_hours) {
+        console.log("Fetching hourly rental prices for:", booking.city, booking.duration_hours, "hours");
+        
+        // Map duration_hours to duration_type
+        const getDurationType = (hours: number): string => {
+          if (hours <= 4) return '4h';
+          if (hours <= 6) return '6h';
+          if (hours <= 8) return '8h';
+          if (hours <= 10) return '10h';
+          return 'daily';
+        };
+        
+        const durationType = getDurationType(booking.duration_hours);
+        
+        // Vehicle type mapping for hourly prices table
+        const HOURLY_VEHICLE_MAP: Record<string, string> = {
+          'vito': 'mercedes-vito',
+          'vito_vip': 'vip-mercedes',
+          'sprinter': 'minibus',
+          'maybach': 'maybach-minibus',
+        };
+        
+        const VEHICLE_CONFIG: Record<string, { label: string; passengers: number; luggage: number }> = {
+          'mercedes-vito': { label: 'Mercedes Vito', passengers: 6, luggage: 6 },
+          'vip-mercedes': { label: 'VIP Mercedes', passengers: 5, luggage: 5 },
+          'maybach-minibus': { label: 'Maybach Minibus', passengers: 4, luggage: 4 },
+          'minibus': { label: 'Mercedes Sprinter', passengers: 16, luggage: 16 },
+        };
+        
+        const { data: hourlyPrices, error: hourlyError } = await supabase
+          .from("hourly_rental_prices")
+          .select("*")
+          .eq("city", booking.city)
+          .eq("duration_type", durationType)
+          .eq("is_active", true);
+        
+        if (hourlyError) {
+          console.error("Error fetching hourly prices:", hourlyError);
+        }
+        
+        if (hourlyPrices && hourlyPrices.length > 0) {
+          const prices: VehiclePriceInfo[] = Object.entries(VEHICLE_CONFIG).map(([vehicleType, config]) => {
+            // Find matching price from database
+            const dbVehicleType = Object.entries(HOURLY_VEHICLE_MAP).find(([_, v]) => v === vehicleType)?.[0] || vehicleType;
+            const priceData = hourlyPrices.find(p => p.vehicle_type === dbVehicleType);
+            
+            return {
+              vehicleType,
+              vehicleLabel: config.label,
+              price: priceData?.price || null,
+              currency: priceData?.price_currency || booking.price_currency,
+              passengers: config.passengers,
+              luggage: config.luggage,
+              available: !!priceData?.price,
+            };
+          });
+          
+          console.log("Hourly rental prices loaded:", prices);
+          setAllVehiclePrices(prices);
+          setLoadingPrices(false);
+          return;
+        }
+        
+        // If no prices found, show booking price for current vehicle only
+        console.log("No hourly prices found in database, using booking price");
+      }
+      
+      // Fallback to fetching from region_prices for transfers
       const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
         body: {
           pickup: booking.pickup,
@@ -658,17 +726,29 @@ export default function QuickBookingConfirm() {
               status: "price_sent",
             });
             
-            // Update allVehiclePrices to reflect the discount on selected vehicle
+            // Update allVehiclePrices to reflect the discount
             if (allVehiclePrices.length > 0) {
-              const discountAmount = (oldPrice || 0) - newPrice;
+              // For hourly rentals, apply 3% discount to all vehicles proportionally
+              // For transfers, apply same absolute discount amount
+              const isHourlyRental = booking.service_type === 'hourly';
+              const discountPercentage = 0.03; // 3%
+              const absoluteDiscount = (oldPrice || 0) - newPrice;
+              
               setAllVehiclePrices(prevPrices => 
                 prevPrices.map(v => {
                   if (v.vehicleType === (selectedVehicle || booking.vehicle_type)) {
                     return { ...v, price: newPrice };
                   }
-                  // Apply proportional discount to other vehicles
+                  // Apply discount to other vehicles
                   if (v.price) {
-                    return { ...v, price: Math.max(v.price - discountAmount, 0) };
+                    if (isHourlyRental) {
+                      // Proportional 3% discount for hourly rentals
+                      const vehicleDiscount = Math.round(v.price * discountPercentage);
+                      return { ...v, price: Math.max(v.price - vehicleDiscount, 1) };
+                    } else {
+                      // Same absolute discount for transfers
+                      return { ...v, price: Math.max(v.price - absoluteDiscount, 1) };
+                    }
                   }
                   return v;
                 })
