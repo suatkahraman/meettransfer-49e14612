@@ -36,11 +36,11 @@ const LANGUAGE_CODES: Record<Language, string> = {
 
 // Default OG images for different page types (1200x630 recommended for social media)
 const DEFAULT_OG_IMAGES = {
-  home: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
-  transfer: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+  home: 'https://meettransfer.app/og/home-og.jpg',
+  transfer: 'https://meettransfer.app/og/home-og.jpg',
   fleet: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
   blog: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
-  default: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+  default: 'https://meettransfer.app/og/home-og.jpg',
 };
 
 const SEOHead = ({

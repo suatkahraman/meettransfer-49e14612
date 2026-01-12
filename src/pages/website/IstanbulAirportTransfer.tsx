@@ -84,7 +84,7 @@ const IstanbulAirportTransfer = () => {
         description="Book Istanbul Airport (IST) private transfer from €50. Professional meet & greet, flight tracking, luxury Mercedes vehicles. 24/7 service. Fixed prices, no hidden fees. Book now!"
         keywords="Istanbul Airport transfer, IST airport transfer, Istanbul Airport private transfer, IST to city center, Istanbul Airport VIP transfer, Istanbul Airport shuttle, Istanbul new airport transfer"
         canonicalPath="/istanbul-airport-transfer"
-        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
+        ogImage="https://meettransfer.app/og/istanbul-airport-og.jpg"
       />
       <SchemaOrg
         schemas={[

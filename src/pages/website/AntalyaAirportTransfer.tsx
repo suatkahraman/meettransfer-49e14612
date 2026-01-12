@@ -81,7 +81,7 @@ const AntalyaAirportTransfer = () => {
         description="Book Antalya Airport (AYT) private transfer from $25. Direct service to Lara, Belek, Side, Alanya & all hotels. 24/7 meet & greet. Fixed prices. Book now!"
         keywords="Antalya Airport transfer, AYT airport transfer, Antalya to Belek transfer, Antalya Airport shuttle, Antalya hotel transfer, Antalya Airport to Lara, Antalya Airport to Side, Antalya Airport to Alanya"
         canonicalPath="/antalya-airport-transfer"
-        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
+        ogImage="https://meettransfer.app/og/antalya-airport-og.jpg"
       />
       <SchemaOrg
         schemas={[
