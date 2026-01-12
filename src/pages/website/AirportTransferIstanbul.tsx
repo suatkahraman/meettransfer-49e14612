@@ -158,8 +158,8 @@ const AirportTransferIstanbul = () => {
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-card rounded-xl p-4 text-center shadow-sm">
             <Star className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">4.9/5</div>
-            <div className="text-sm text-muted-foreground">847+ Değerlendirme</div>
+            <div className="text-2xl font-bold">4.8/5</div>
+            <div className="text-sm text-muted-foreground">2,847+ Değerlendirme</div>
           </div>
           <div className="bg-card rounded-xl p-4 text-center shadow-sm">
             <Users className="h-8 w-8 text-primary mx-auto mb-2" />
@@ -359,7 +359,7 @@ const AirportTransferIstanbul = () => {
         <section className="prose max-w-none">
           <h2 className="text-2xl font-bold mb-4 text-foreground">Neden Meet Transfer?</h2>
           <p className="text-muted-foreground leading-relaxed mb-4">
-            2018'den bu yana İstanbul'da binlerce misafire güvenli ve konforlu transfer hizmeti sunuyoruz. <strong>Google'da 4.9/5</strong> ortalama puanımız ve <strong>847+ olumlu değerlendirmemiz</strong> hizmet kalitemizin kanıtıdır.
+            2018'den bu yana İstanbul'da binlerce misafire güvenli ve konforlu transfer hizmeti sunuyoruz. <strong>Google'da 4.8/5</strong> ortalama puanımız ve <strong>2,847+ olumlu değerlendirmemiz</strong> hizmet kalitemizin kanıtıdır.
           </p>
           <div className="grid md:grid-cols-3 gap-6 my-8">
             <div className="text-center">

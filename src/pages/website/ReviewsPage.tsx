@@ -125,7 +125,7 @@ const ReviewsPage = () => {
     <WebsiteLayout>
       <SEOHead
         title="Customer Reviews - Meet Transfer Airport Transfer Service"
-        description="Read reviews from 2,500+ satisfied customers. 4.9/5 rating for Meet Transfer's VIP airport transfer service in Turkey. Trusted by travelers worldwide."
+        description="Read reviews from 2,800+ satisfied customers. 4.8/5 rating for Meet Transfer's VIP airport transfer service in Turkey. Trusted by travelers worldwide."
         keywords="Meet Transfer reviews, airport transfer reviews Turkey, VIP transfer testimonials, customer reviews Turkey transfer, trusted transfer service"
         canonicalPath="/reviews"
         ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
@@ -286,9 +286,9 @@ const ReviewsPage = () => {
               />
             ))}
           </div>
-          <div className="text-4xl font-bold mb-1">4.9</div>
+          <div className="text-4xl font-bold mb-1">4.8</div>
           <div className="text-muted-foreground">
-            Based on 2,500+ verified reviews across all platforms
+            Based on 2,800+ verified reviews across all platforms
           </div>
         </section>
 

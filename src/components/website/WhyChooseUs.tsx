@@ -118,7 +118,7 @@ const WhyChooseUs = () => {
             <div className="text-sm text-muted-foreground">{t("whyDestinations") || "Destinations"}</div>
           </div>
           <div className="text-center p-4">
-            <div className="text-3xl md:text-4xl font-bold text-primary">4.9</div>
+            <div className="text-3xl md:text-4xl font-bold text-primary">4.8</div>
             <div className="text-sm text-muted-foreground">{t("whyAverageRating") || "Average Rating"}</div>
           </div>
         </div>

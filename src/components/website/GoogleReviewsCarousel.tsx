@@ -51,8 +51,8 @@ const fallbackReviews: Review[] = [
 const GoogleReviewsCarousel = () => {
   const { t, language } = useLanguage();
   const [reviews, setReviews] = useState<Review[]>(fallbackReviews);
-  const [overallRating, setOverallRating] = useState(4.9);
-  const [totalReviews, setTotalReviews] = useState(488);
+  const [overallRating, setOverallRating] = useState(4.8);
+  const [totalReviews, setTotalReviews] = useState(2847);
   const [isLoading, setIsLoading] = useState(true);
   
   const [emblaRef, emblaApi] = useEmblaCarousel(
@@ -77,8 +77,8 @@ const GoogleReviewsCarousel = () => {
         
         if (data?.reviews && data.reviews.length > 0) {
           setReviews(data.reviews);
-          setOverallRating(data.rating || 4.9);
-          setTotalReviews(data.totalReviews || 488);
+          setOverallRating(data.rating || 4.8);
+          setTotalReviews(data.totalReviews || 2847);
         }
       } catch (error) {
         console.error('Failed to fetch Google reviews:', error);
