@@ -170,20 +170,11 @@ const DubaiAirportTransferGuide = () => {
           <h2 id="dubai-airports">{t("blogDubaiSection2Title")}</h2>
           <p>{t("blogDubaiSection2Intro")}</p>
 
-          <h3>Dubai International Airport (DXB)</h3>
-          <p>
-            Located just 4.6 km from the city center, DXB is the primary airport serving Dubai. It features 
-            three terminals: Terminal 1 handles most international airlines, Terminal 2 serves budget carriers, 
-            and Terminal 3 is exclusively for Emirates airline passengers. The airport is well-connected to 
-            the Dubai Metro via the Red Line.
-          </p>
+          <h3>{t("blogDubaiSection2Title")} - DXB</h3>
+          <p>{t("blogDubaiDXBDetails")}</p>
 
           <h3>Al Maktoum International Airport (DWC)</h3>
-          <p>
-            Situated 37 km southwest of Dubai, Al Maktoum Airport serves as a secondary hub, primarily for 
-            cargo and some passenger flights. It's part of the massive Dubai World Central development and 
-            is expected to become the world's largest airport upon full completion.
-          </p>
+          <p>{t("blogDubaiDWCDetails")}</p>
 
           <h2 id="dubai-prices">{t("blogDubaiSection3Title")}</h2>
           <p>{t("blogDubaiSection3Intro")}</p>
@@ -209,26 +200,16 @@ const DubaiAirportTransferGuide = () => {
             </Table>
           </div>
 
-          <h3>Understanding Dubai Transfer Pricing</h3>
-          <p>
-            Dubai's transfer prices are influenced by distance, traffic conditions, and the type of service 
-            you choose. Sheikh Zayed Road, the main arterial highway, can experience significant traffic 
-            during rush hours (7-9 AM and 5-8 PM). Our fixed pricing ensures you know exactly what you'll 
-            pay, regardless of traffic conditions.
-          </p>
+          <h3>{t("blogDubaiPricingTitle")}</h3>
+          <p>{t("blogDubaiPricingP1")}</p>
 
           <h2 id="dubai-private">{t("blogDubaiSection4Title")}</h2>
           <p>
             <Link to={getLocalizedPath("/dubai-transfer")} className="text-primary hover:underline">{t("blogDubaiPrivateTransfer")}</Link> {t("blogDubaiSection4P1")}
           </p>
 
-          <h3>The Dubai Luxury Experience</h3>
-          <p>
-            Dubai is synonymous with luxury, and your airport transfer should match that standard. Our 
-            premium fleet includes the latest Mercedes models, ensuring you arrive at your destination in 
-            style. Whether you're heading to the iconic Burj Al Arab or a business meeting at DIFC, our 
-            professional chauffeurs know the city inside out.
-          </p>
+          <h3>{t("blogDubaiLuxuryTitle")}</h3>
+          <p>{t("blogDubaiLuxuryP1")}</p>
 
           <h3>{t("blogDubaiSection4SubTitle")}</h3>
           <ul>
@@ -273,24 +254,19 @@ const DubaiAirportTransferGuide = () => {
           <h2 id="dubai-booking">{t("blogDubaiSection5Title")}</h2>
           <p>{t("blogDubaiSection5Intro")}</p>
 
-          <h3>Booking in Advance vs. On Arrival</h3>
-          <p>
-            While transport options are available at Dubai Airport, booking in advance offers significant 
-            advantages. Pre-booked transfers mean your driver is already waiting when you exit arrivals, 
-            eliminating queue time and uncertainty. During peak seasons and major events like the Dubai 
-            Shopping Festival, pre-booking becomes essential.
-          </p>
+          <h3>{t("blogDubaiBookingTitle")}</h3>
+          <p>{t("blogDubaiBookingP1")}</p>
 
           <h2 id="dubai-tips">{t("blogDubaiSection6Title")}</h2>
           <p>{t("blogDubaiSection6Intro")}</p>
 
-          <h3>Essential Dubai Arrival Tips</h3>
+          <h3>{t("blogDubaiTipsTitle")}</h3>
           <ul>
-            <li><strong>Stay connected:</strong> Free WiFi is available throughout the airport</li>
-            <li><strong>Currency exchange:</strong> ATMs offer better rates than exchange counters</li>
-            <li><strong>Dress code:</strong> While Dubai is liberal, modest clothing is respectful</li>
-            <li><strong>RTA cards:</strong> Get a Nol card if using public transport during your stay</li>
-            <li><strong>Summer heat:</strong> From May to September, temperatures exceed 40°C - air-conditioned transfer is essential</li>
+            <li><strong>{t("blogDubaiTip1")}</strong> {t("blogDubaiTip1Desc")}</li>
+            <li><strong>{t("blogDubaiTip2")}</strong> {t("blogDubaiTip2Desc")}</li>
+            <li><strong>{t("blogDubaiTip3")}</strong> {t("blogDubaiTip3Desc")}</li>
+            <li><strong>{t("blogDubaiTip4")}</strong> {t("blogDubaiTip4Desc")}</li>
+            <li><strong>{t("blogDubaiTip5")}</strong> {t("blogDubaiTip5Desc")}</li>
           </ul>
 
           <h2 id="dubai-attractions">{t("blogDubaiSection7Title")}</h2>
@@ -310,25 +286,15 @@ const DubaiAirportTransferGuide = () => {
             ))}
           </div>
 
-          <h3>Beyond the Famous Landmarks</h3>
-          <p>
-            While the Burj Khalifa and Palm Jumeirah grab headlines, Dubai offers much more. Explore the 
-            historic Al Fahidi neighborhood for a glimpse of old Dubai, take an abra ride across Dubai Creek, 
-            or venture to the desert for an authentic Bedouin experience. Our transfer services can take you 
-            anywhere in the emirate.
-          </p>
+          <h3>{t("blogDubaiBeyondTitle")}</h3>
+          <p>{t("blogDubaiBeyondP1")}</p>
 
           <h2 id="dubai-faq">{t("blogDubaiSection8Title")}</h2>
           <p>{t("blogDubaiSection8Intro")}</p>
 
           <h2>{t("blogDubaiConclusion")}</h2>
           <p>{t("blogDubaiConclusionP1")}</p>
-          <p>
-            Dubai is a city that impresses from the moment you arrive. With world-class infrastructure, 
-            stunning architecture, and endless entertainment options, your visit promises to be unforgettable. 
-            Starting your journey with a professional private transfer sets the tone for the exceptional 
-            experience that awaits you in this dynamic city.
-          </p>
+          <p>{t("blogDubaiFinalP1")}</p>
         </div>
 
         {/* CTA Section */}
