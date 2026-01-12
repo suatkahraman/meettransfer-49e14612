@@ -36,6 +36,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Handle successful sign in - redirect based on role
         if (event === 'SIGNED_IN' && currentSession?.user) {
+          // Some flows (like our 2FA pre-check) intentionally sign in and immediately sign out.
+          // In that window we must prevent global redirects, otherwise the app navigates away
+          // and the OTP entry screen never renders.
+          const suppressRedirect = localStorage.getItem('suppress_auth_redirect') === 'true';
+          if (suppressRedirect) return;
+
           // Defer role check to avoid Supabase deadlock
           setTimeout(async () => {
             if (!isMounted) return;
