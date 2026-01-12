@@ -147,9 +147,9 @@ const SEODebugPage = () => {
 
   const blogQuickPaths = [
     { label: 'Cappadocia', path: '/blog/cappadocia-airport-transfer-guide' },
-    { label: 'Istanbul City', path: '/blog/istanbul-airport-to-city-guide' },
-    { label: 'Istanbul Price', path: '/blog/istanbul-transfer-price-guide' },
-    { label: 'Antalya', path: '/blog/antalya-airport-transfer-guide' },
+    { label: 'Istanbul City', path: '/blog/istanbul-airport-to-city-best-way' },
+    { label: 'Istanbul Price', path: '/blog/istanbul-airport-transfer-price-guide' },
+    { label: 'Antalya', path: '/blog/antalya-airport-transfer-to-hotels' },
     { label: 'Marmaris', path: '/blog/marmaris-airport-transfer-guide' },
     { label: 'Fethiye', path: '/blog/fethiye-airport-transfer-guide' },
     { label: 'Ölüdeniz', path: '/blog/oludeniz-airport-transfer-guide' },
@@ -158,7 +158,7 @@ const SEODebugPage = () => {
     { label: 'Mugla', path: '/blog/mugla-airport-transfer-guide' },
     { label: 'Aydin', path: '/blog/aydin-airport-transfer-guide' },
     { label: 'Bursa Tour', path: '/blog/istanbul-bursa-day-tour-guide' },
-    { label: 'Taxi Comparison', path: '/blog/private-vs-taxi-turkey' },
+    { label: 'Taxi Comparison', path: '/blog/private-vs-taxi-transfer-turkey' },
   ];
 
   // Scan all language versions
