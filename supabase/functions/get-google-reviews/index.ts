@@ -6,8 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Meet Transfer's Google Place ID - Get this from Google Business Profile
-const PLACE_ID = "ChIJxWLW5C_byxQRxSUmLFnp2dU";
+// Business search query - used to dynamically find Place ID
+const BUSINESS_NAME = "Meet Transfer";
+const BUSINESS_LOCATION = "Istanbul, Turkey";
 
 // Cache duration in hours
 const CACHE_DURATION_HOURS = 24;
@@ -31,6 +32,43 @@ interface PlaceDetailsResponse {
   error_message?: string;
 }
 
+interface FindPlaceResponse {
+  candidates?: Array<{
+    place_id: string;
+    name?: string;
+  }>;
+  status: string;
+  error_message?: string;
+}
+
+// Find Place ID dynamically using business name
+async function findPlaceId(apiKey: string): Promise<string | null> {
+  const query = encodeURIComponent(`${BUSINESS_NAME} ${BUSINESS_LOCATION}`);
+  const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${query}&inputtype=textquery&fields=place_id,name&key=${apiKey}`;
+  
+  console.log(`Searching for Place ID with query: ${BUSINESS_NAME} ${BUSINESS_LOCATION}`);
+  
+  try {
+    const response = await fetch(url);
+    const data: FindPlaceResponse = await response.json();
+    
+    console.log('Find Place API response status:', data.status);
+    
+    if (data.status === 'OK' && data.candidates && data.candidates.length > 0) {
+      const placeId = data.candidates[0].place_id;
+      const placeName = data.candidates[0].name;
+      console.log(`Found Place ID: ${placeId} for business: ${placeName}`);
+      return placeId;
+    }
+    
+    console.error('Find Place API error:', data.error_message || data.status);
+    return null;
+  } catch (error) {
+    console.error('Error finding place ID:', error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -45,18 +83,27 @@ serve(async (req) => {
     // Get language from request body or default to 'en'
     let language = 'en';
     let forceRefresh = false;
+    let clearCache = false;
     try {
       const body = await req.json();
       language = body.language?.toLowerCase() || 'en';
       forceRefresh = body.forceRefresh || false;
+      clearCache = body.clearCache || false;
     } catch {
       // No body, use defaults
     }
 
-    console.log(`Fetching reviews for language: ${language}, forceRefresh: ${forceRefresh}`);
+    console.log(`Fetching reviews for language: ${language}, forceRefresh: ${forceRefresh}, clearCache: ${clearCache}`);
 
-    // Check cache first (unless force refresh)
-    if (!forceRefresh) {
+    // Clear all cache if requested
+    if (clearCache) {
+      console.log('Clearing all cached reviews...');
+      await supabase.from('google_reviews_cache').delete().neq('language', '');
+      console.log('Cache cleared successfully');
+    }
+
+    // Check cache first (unless force refresh or cache cleared)
+    if (!forceRefresh && !clearCache) {
       const { data: cachedData, error: cacheError } = await supabase
         .from('google_reviews_cache')
         .select('*')
@@ -101,10 +148,48 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Fetching fresh reviews from Google Places API for place: ${PLACE_ID}`);
+    // Find Place ID dynamically
+    const placeId = await findPlaceId(apiKey);
+    
+    if (!placeId) {
+      console.error('Could not find Place ID for business');
+      
+      // Try to return stale cache if available
+      const { data: staleCache } = await supabase
+        .from('google_reviews_cache')
+        .select('*')
+        .eq('language', language)
+        .single();
+      
+      if (staleCache) {
+        console.log('Returning stale cache due to Place ID not found');
+        return new Response(
+          JSON.stringify({
+            reviews: staleCache.reviews,
+            rating: staleCache.rating,
+            totalReviews: staleCache.total_reviews,
+            cached: true,
+            stale: true,
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Could not find business Place ID', 
+          reviews: [], 
+          rating: 0, 
+          totalReviews: 0 
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Fetching fresh reviews from Google Places API for place: ${placeId}`);
 
     // Fetch place details including reviews
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,rating,user_ratings_total&key=${apiKey}&language=${language}&reviews_sort=newest`;
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews,rating,user_ratings_total&key=${apiKey}&language=${language}&reviews_sort=newest`;
     
     const response = await fetch(url);
     const data: PlaceDetailsResponse = await response.json();
@@ -158,7 +243,7 @@ serve(async (req) => {
     const rating = data.result?.rating || 0;
     const totalReviews = data.result?.user_ratings_total || 0;
 
-    console.log(`Fetched ${reviews.length} reviews, caching...`);
+    console.log(`Fetched ${reviews.length} reviews, rating: ${rating}, totalReviews: ${totalReviews}, caching...`);
 
     // Update cache (upsert based on language)
     const expiresAt = new Date();
