@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Edit, Trash2, Tag, Percent, Calendar, RefreshCw } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, Tag, Percent, Calendar, RefreshCw, BarChart3, TrendingUp, Users } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -26,6 +26,13 @@ interface PromoCode {
   max_usage: number | null;
   created_at: string;
   updated_at: string;
+}
+
+interface PromoCodeStats {
+  code: string;
+  quick_booking_usage: number;
+  reservation_usage: number;
+  total_usage: number;
 }
 
 interface PromoCodeFormData {
@@ -53,6 +60,7 @@ const initialFormData: PromoCodeFormData = {
 const AdminPromoCodes = () => {
   const navigate = useNavigate();
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
+  const [promoStats, setPromoStats] = useState<PromoCodeStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -90,6 +98,7 @@ const AdminPromoCodes = () => {
   useEffect(() => {
     if (authChecked && isAdmin) {
       fetchPromoCodes();
+      fetchPromoStats();
     }
   }, [authChecked, isAdmin]);
 
@@ -109,6 +118,61 @@ const AdminPromoCodes = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchPromoStats = async () => {
+    try {
+      // Fetch usage from quick_booking_requests
+      const { data: qbData, error: qbError } = await supabase
+        .from("quick_booking_requests")
+        .select("promo_code")
+        .not("promo_code", "is", null);
+
+      // Fetch usage from reservations
+      const { data: resData, error: resError } = await supabase
+        .from("reservations")
+        .select("promo_code")
+        .not("promo_code", "is", null);
+
+      if (qbError || resError) {
+        console.error("Error fetching stats:", qbError || resError);
+        return;
+      }
+
+      // Count usage per promo code
+      const statsMap = new Map<string, { qb: number; res: number }>();
+      
+      qbData?.forEach(item => {
+        if (item.promo_code) {
+          const existing = statsMap.get(item.promo_code) || { qb: 0, res: 0 };
+          existing.qb++;
+          statsMap.set(item.promo_code, existing);
+        }
+      });
+
+      resData?.forEach(item => {
+        if (item.promo_code) {
+          const existing = statsMap.get(item.promo_code) || { qb: 0, res: 0 };
+          existing.res++;
+          statsMap.set(item.promo_code, existing);
+        }
+      });
+
+      const stats: PromoCodeStats[] = Array.from(statsMap.entries()).map(([code, counts]) => ({
+        code,
+        quick_booking_usage: counts.qb,
+        reservation_usage: counts.res,
+        total_usage: counts.qb + counts.res,
+      }));
+
+      setPromoStats(stats);
+    } catch (error) {
+      console.error("Error fetching promo stats:", error);
+    }
+  };
+
+  const getStatsForCode = (code: string): PromoCodeStats | undefined => {
+    return promoStats.find(s => s.code === code);
   };
 
   const handleSubmit = async () => {
@@ -377,10 +441,11 @@ const AdminPromoCodes = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Tag className="h-4 w-4" />
                 Toplam Promo Kod
               </CardTitle>
             </CardHeader>
@@ -390,7 +455,8 @@ const AdminPromoCodes = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
                 Aktif Kodlar
               </CardTitle>
             </CardHeader>
@@ -402,14 +468,30 @@ const AdminPromoCodes = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Toplam Kullanım
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Quick Booking
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {promoStats.reduce((acc, s) => acc + s.quick_booking_usage, 0)}
+              </div>
+              <p className="text-xs text-muted-foreground">kullanım</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Rezervasyon
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">
-                {promoCodes.reduce((acc, p) => acc + p.usage_count, 0)}
+                {promoStats.reduce((acc, s) => acc + s.reservation_usage, 0)}
               </div>
+              <p className="text-xs text-muted-foreground">kullanım</p>
             </CardContent>
           </Card>
         </div>
@@ -453,8 +535,30 @@ const AdminPromoCodes = () => {
                       </TableCell>
                       <TableCell>{getAppliesLabel(promo.applies_to)}</TableCell>
                       <TableCell>
-                        {promo.usage_count}
-                        {promo.max_usage && <span className="text-muted-foreground">/{promo.max_usage}</span>}
+                        {(() => {
+                          const stats = getStatsForCode(promo.code);
+                          if (stats) {
+                            return (
+                              <div className="space-y-1">
+                                <div className="text-sm font-bold text-primary">
+                                  {stats.total_usage} toplam
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  <span className="text-blue-600">{stats.quick_booking_usage}</span> QB • 
+                                  <span className="text-green-600 ml-1">{stats.reservation_usage}</span> Rez
+                                </div>
+                              </div>
+                            );
+                          }
+                          return (
+                            <span className="text-muted-foreground">0</span>
+                          );
+                        })()}
+                        {promo.max_usage && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            max: {promo.max_usage}
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Switch
