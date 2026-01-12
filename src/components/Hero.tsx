@@ -544,9 +544,16 @@ export const Hero = () => {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
               {t("heroTitle")}
             </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-xl mx-auto font-sans">
-              {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language).heroSubtitle}
-            </p>
+            <div className="space-y-2">
+              <p className="text-lg md:text-xl text-white/90 max-w-xl mx-auto font-sans">
+                {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language, activePromo.validUntil).heroSubtitle}
+              </p>
+              {activePromo.validUntil && (
+                <p className="text-sm md:text-base text-accent font-medium animate-pulse">
+                  {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language, activePromo.validUntil).validUntilText}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* AI Chat Assistant */}
