@@ -504,6 +504,8 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
 
       if (error) throw error;
 
+      console.log("Booking assistant response:", data);
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -519,7 +521,10 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
       }
 
       // If booking was created, show success and navigate to confirm page
+      console.log("Checking booking:", { quickBookingId: data.quickBookingId, confirmationToken: data.confirmationToken });
+      
       if (data.quickBookingId && data.confirmationToken) {
+        console.log("Booking created! Navigating to confirmation page...");
         setBookingCreated({ id: data.quickBookingId, token: data.confirmationToken });
         
         // Show price summary message
@@ -527,21 +532,21 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
           ? `${data.bookingData.currency === "TRY" ? "₺" : data.bookingData.currency === "USD" ? "$" : "€"}${data.bookingData.estimatedPrice}` 
           : "";
         
+        // Immediately add success message and then navigate
+        const successMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          role: "assistant",
+          content: language === "TR" 
+            ? `✅ Rezervasyonunuz oluşturuldu! ${priceInfo ? `Fiyat: ${priceInfo}` : ""}\n\nBilgilerinizi tamamlamak için onay sayfasına yönlendiriliyorsunuz...`
+            : `✅ Your reservation is ready! ${priceInfo ? `Price: ${priceInfo}` : ""}\n\nRedirecting you to the confirmation page...`
+        };
+        setMessages(prev => [...prev, successMessage]);
+        
+        // Close chat and redirect after short delay
         setTimeout(() => {
-          const successMessage: Message = {
-            id: (Date.now() + 2).toString(),
-            role: "assistant",
-            content: language === "TR" 
-              ? `✅ Rezervasyonunuz oluşturuldu! ${priceInfo ? `Fiyat: ${priceInfo}` : ""}\n\nBilgilerinizi tamamlamak için onay sayfasına yönlendiriliyorsunuz...`
-              : `✅ Your reservation is ready! ${priceInfo ? `Price: ${priceInfo}` : ""}\n\nRedirecting you to the confirmation page...`
-          };
-          setMessages(prev => [...prev, successMessage]);
-          
-          // Redirect after 1.5 seconds to confirmation page
-          setTimeout(() => {
-            navigate(`/quick-booking-confirm?token=${data.confirmationToken}&new=true`);
-          }, 1500);
-        }, 500);
+          setIsOpen(false);
+          navigate(`/quick-booking-confirm?token=${data.confirmationToken}&new=true`);
+        }, 1200);
       }
 
     } catch (error) {
