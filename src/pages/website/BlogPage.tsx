@@ -22,6 +22,9 @@ import istanbulTransferHero from "@/assets/blog/istanbul-transfer-hero.jpg";
 import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
 import antalyaHero from "@/assets/blog/antalya-transfer-hero.jpg";
 import privateWorthHero from "@/assets/blog/private-transfer-worth-hero.jpg";
+import fethiyeHero from "@/assets/blog/fethiye-transfer-hero.jpg";
+import marmarisHero from "@/assets/blog/marmaris-transfer-hero.jpg";
+import oludenizHero from "@/assets/blog/oludeniz-transfer-hero.jpg";
 
 const BlogPage = () => {
   const { t, getLocalizedPath, language } = useLanguage();
