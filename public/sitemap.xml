@@ -1485,56 +1485,86 @@
 
   <!-- Blog Articles (main language only - SEO handles hreflang via page) -->
   <url>
-    <loc>https://meettransfer.app/blog/istanbul-transfer-prices</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://meettransfer.app/blog/istanbul-airport-to-city-best-way</loc>
+    <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://meettransfer.app/blog/antalya-airport-transfer-guide</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://meettransfer.app/blog/istanbul-airport-transfer-price-guide</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meettransfer.app/blog/antalya-airport-transfer-to-hotels</loc>
+    <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://meettransfer.app/blog/cappadocia-airport-transfer-guide</loc>
-    <lastmod>2026-01-11</lastmod>
+    <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://meettransfer.app/blog/bursa-day-tour-from-istanbul</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://meettransfer.app/blog/fethiye-airport-transfer-guide</loc>
+    <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://meettransfer.app/blog/istanbul-airport-to-city</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://meettransfer.app/blog/marmaris-airport-transfer-guide</loc>
+    <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://meettransfer.app/blog/is-private-transfer-worth-it</loc>
-    <lastmod>2026-01-11</lastmod>
+    <loc>https://meettransfer.app/blog/oludeniz-airport-transfer-guide</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meettransfer.app/blog/aydin-airport-transfer-guide</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meettransfer.app/blog/mugla-airport-transfer-guide</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meettransfer.app/blog/istanbul-bursa-day-tour-guide</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meettransfer.app/blog/private-vs-taxi-transfer-turkey</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meettransfer.app/blog/is-private-transfer-worth-it-turkey</loc>
+    <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://meettransfer.app/blog/cyprus-airport-transfer-guide</loc>
-    <lastmod>2026-01-11</lastmod>
+    <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://meettransfer.app/blog/dubai-airport-transfer-guide</loc>
-    <lastmod>2026-01-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://meettransfer.app/blog/private-vs-taxi</loc>
-    <lastmod>2026-01-11</lastmod>
+    <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
