@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,6 +73,7 @@ const BookingPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { t, language, getLocalizedPath } = useLanguage();
+  const { promoCode: activePromo } = usePromo();
   const { user } = useAuth();
 
   // Determine booking type
@@ -1498,7 +1500,7 @@ const BookingPage = () => {
 
                     <div className="flex items-center gap-2 text-sm text-accent bg-accent/10 px-4 py-3 rounded-lg">
                       <Tag className="h-4 w-4 shrink-0" />
-                      <span>{t("returnTripDiscount") || "Book round-trip & get 30% OFF on return! Use code: Meet30Return"}</span>
+                      <span>{getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language).returnTripDiscount}</span>
                     </div>
 
                     {hasReturnTrip && (
@@ -1529,7 +1531,7 @@ const BookingPage = () => {
                           <Label className="text-sm text-muted-foreground mb-2 block">{t("promoCode") || "Promo Code"}</Label>
                           <div className="relative">
                             <Input
-                              placeholder="Meet30Return"
+                              placeholder={activePromo.code}
                               value={promoCode}
                               onChange={(e) => handlePromoCodeChange(e.target.value)}
                               className={cn(

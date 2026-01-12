@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { PromoProvider } from "./contexts/PromoContext";
 import { AgencyLanguageProvider } from "./contexts/AgencyLanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute, AgencyRoute } from "./components/ProtectedRoute";
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
@@ -189,6 +190,7 @@ const App = () => (
         <LanguageQueryRedirect />
         <OAuthCallbackHandler>
           <LanguageProvider>
+            <PromoProvider>
             <UpdateNotification />
             <AuthProvider>
               <Routes>
@@ -328,6 +330,7 @@ const App = () => (
               </Routes>
               <FloatingWhatsApp />
             </AuthProvider>
+            </PromoProvider>
           </LanguageProvider>
         </OAuthCallbackHandler>
       </BrowserRouter>

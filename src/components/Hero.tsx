@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { GooglePlacesAutocomplete, PlaceDetails, GooglePlacesAutocompleteProps } from "@/components/ui/google-places-autocomplete";
 import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
@@ -48,7 +49,8 @@ const hourlyDurationOptions = [
 ];
 
 export const Hero = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { promoCode: activePromo } = usePromo();
   const navigate = useNavigate();
   
   // Tab state
@@ -543,7 +545,7 @@ export const Hero = () => {
               {t("heroTitle")}
             </h1>
             <p className="text-lg md:text-xl text-white/90 max-w-xl mx-auto font-sans">
-              {t("heroSubtitle")}
+              {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language).heroSubtitle}
             </p>
           </div>
 
