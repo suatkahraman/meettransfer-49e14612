@@ -1,11 +1,54 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft, Settings, Users, Shield, ShieldAlert, ChevronRight, Euro } from 'lucide-react';
+import { ArrowLeft, Settings, Users, Shield, ShieldAlert, ChevronRight, Euro, Star, RefreshCw, CheckCircle } from 'lucide-react';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const AdminSettings = () => {
   const navigate = useNavigate();
+  const [isRefreshingReviews, setIsRefreshingReviews] = useState(false);
+  const [lastRefreshResult, setLastRefreshResult] = useState<{rating: number; count: number} | null>(null);
+
+  const handleForceRefreshReviews = async () => {
+    setIsRefreshingReviews(true);
+    setLastRefreshResult(null);
+    
+    try {
+      // First, clear the cache
+      const { error: deleteError } = await supabase
+        .from('google_reviews_cache')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+      
+      if (deleteError) {
+        console.error('Cache clear error:', deleteError);
+      }
+
+      // Then fetch fresh reviews
+      const { data, error } = await supabase.functions.invoke('get-google-reviews', {
+        body: { language: 'en', forceRefresh: true }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.rating && data?.totalReviews) {
+        setLastRefreshResult({ rating: data.rating, count: data.totalReviews });
+        toast.success(`Google Reviews güncellendi: ${data.rating} ★ (${data.totalReviews} yorum)`);
+      } else {
+        toast.warning('Değerler alındı ancak veri eksik olabilir');
+      }
+    } catch (error) {
+      console.error('Force refresh error:', error);
+      toast.error('Google Reviews güncellenemedi: ' + (error instanceof Error ? error.message : 'Bilinmeyen hata'));
+    } finally {
+      setIsRefreshingReviews(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -20,6 +63,51 @@ const AdminSettings = () => {
         <div className="space-y-4">
           {/* Notification Settings */}
           <NotificationSettingsPanel language="TR" />
+
+          {/* Google Reviews Force Refresh */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-yellow-500" />
+                Google Reviews
+              </CardTitle>
+              <CardDescription>
+                Google yorumları cache'ini temizle ve güncel değerleri çek
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Button 
+                  onClick={handleForceRefreshReviews}
+                  disabled={isRefreshingReviews}
+                  variant="outline"
+                >
+                  {isRefreshingReviews ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Güncelleniyor...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Force Refresh
+                    </>
+                  )}
+                </Button>
+                
+                {lastRefreshResult && (
+                  <div className="flex items-center gap-2 text-sm text-green-600">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>{lastRefreshResult.rating} ★ ({lastRefreshResult.count} yorum)</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-muted-foreground text-sm">
+                Bu işlem Google Places API'den güncel yorum ve puan bilgilerini çeker.
+                Cache otomatik olarak 24 saat sonra yenilenir.
+              </p>
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader>
