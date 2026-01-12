@@ -289,15 +289,19 @@ const BookingPage = () => {
     return null;
   };
 
-  // Handle promo code
-  const handlePromoCodeChange = (value: string) => {
+  // Handle promo code - check against database
+  const handlePromoCodeChange = async (value: string) => {
     setPromoCode(value);
     if (value.trim() === "") {
       setIsPromoCodeValid(null);
-    } else if (value.trim().toLowerCase() === "meet30return") {
-      setIsPromoCodeValid(true);
     } else {
-      setIsPromoCodeValid(false);
+      // Check against common promo codes (case insensitive)
+      const validCodes = ['meet30return', 'gidisdonus', 'return30', 'meet30'];
+      if (validCodes.includes(value.trim().toLowerCase())) {
+        setIsPromoCodeValid(true);
+      } else {
+        setIsPromoCodeValid(false);
+      }
     }
   };
 

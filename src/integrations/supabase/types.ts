@@ -1076,6 +1076,54 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          applies_to: string
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_percentage: number
+          id: string
+          is_active: boolean
+          max_usage: number | null
+          updated_at: string
+          usage_count: number
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          applies_to?: string
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_percentage?: number
+          id?: string
+          is_active?: boolean
+          max_usage?: number | null
+          updated_at?: string
+          usage_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          applies_to?: string
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_percentage?: number
+          id?: string
+          is_active?: boolean
+          max_usage?: number | null
+          updated_at?: string
+          usage_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string

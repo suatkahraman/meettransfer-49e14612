@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { endOfDay, endOfMonth, format, startOfDay, startOfMonth } from 'date-fns';
-import { AlertCircle, Banknote, BarChart3, Building2, Calculator, Calendar, CalendarDays, Car, CheckCircle, ClipboardList, Clock, DollarSign, FileText, Inbox, LogOut, MapPin, MessageCircle, Plane, Receipt, Settings, Users } from 'lucide-react';
+import { AlertCircle, Banknote, BarChart3, Building2, Calculator, Calendar, CalendarDays, Car, CheckCircle, ClipboardList, Clock, DollarSign, FileText, Inbox, LogOut, MapPin, MessageCircle, Plane, Receipt, Settings, Tag, Users } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import NotificationBell from '@/components/NotificationBell';
@@ -277,6 +277,7 @@ const AdminDashboard = () => {
     { icon: DollarSign, label: 'Aylık Muhasebe', path: '/admin/monthly-accounting' },
     { icon: Calculator, label: 'Aylık Kâr', path: '/admin/monthly-profit' },
     { icon: MapPin, label: 'Bölge Fiyatları', path: '/admin/region-prices' },
+    { icon: Tag, label: 'Promo Kodları', path: '/admin/promo-codes' },
     { icon: Clock, label: 'Saatlik Kiralama', path: '/admin/hourly-rental-prices' },
     { icon: BarChart3, label: 'Ziyaretçi Analizi', path: '/admin/analytics' },
     { icon: Settings, label: 'Ayarlar', path: '/admin/settings' },
