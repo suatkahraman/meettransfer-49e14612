@@ -12,6 +12,7 @@ import { SEOHead, SchemaOrg } from "@/components/seo";
 import mercedesVipImage from "@/assets/mercedes-vip-transfer.webp";
 import mercedesVitoFamilyImage from "@/assets/mercedes-vito-family.webp";
 import { Footer } from "@/components/Footer";
+import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 
 const destinations = [
   { name: "Taksim", price: "Fiyat Talep Et", time: "45 dk" },
@@ -84,6 +85,8 @@ const vehicles = [
 ];
 
 const AirportTransferIstanbul = () => {
+  const { rating, totalReviews } = useGoogleReviewStats();
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -158,8 +161,8 @@ const AirportTransferIstanbul = () => {
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-card rounded-xl p-4 text-center shadow-sm">
             <Star className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">4.8/5</div>
-            <div className="text-sm text-muted-foreground">2,847+ Değerlendirme</div>
+            <div className="text-2xl font-bold">{rating.toFixed(1)}/5</div>
+            <div className="text-sm text-muted-foreground">{totalReviews.toLocaleString()}+ Değerlendirme</div>
           </div>
           <div className="bg-card rounded-xl p-4 text-center shadow-sm">
             <Users className="h-8 w-8 text-primary mx-auto mb-2" />

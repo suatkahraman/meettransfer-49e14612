@@ -5,6 +5,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 
 interface Review {
   name: string;
@@ -50,9 +51,8 @@ const fallbackReviews: Review[] = [
 
 const GoogleReviewsCarousel = () => {
   const { t, language } = useLanguage();
+  const { rating: overallRating, totalReviews, isLoading: statsLoading } = useGoogleReviewStats();
   const [reviews, setReviews] = useState<Review[]>(fallbackReviews);
-  const [overallRating, setOverallRating] = useState(4.8);
-  const [totalReviews, setTotalReviews] = useState(2847);
   const [isLoading, setIsLoading] = useState(true);
   
   const [emblaRef, emblaApi] = useEmblaCarousel(
@@ -77,8 +77,6 @@ const GoogleReviewsCarousel = () => {
         
         if (data?.reviews && data.reviews.length > 0) {
           setReviews(data.reviews);
-          setOverallRating(data.rating || 4.8);
-          setTotalReviews(data.totalReviews || 2847);
         }
       } catch (error) {
         console.error('Failed to fetch Google reviews:', error);
@@ -134,7 +132,7 @@ const GoogleReviewsCarousel = () => {
               />
             </svg>
             <span className="font-semibold text-sm">Google Reviews</span>
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {(isLoading || statsLoading) && <Loader2 className="h-4 w-4 animate-spin" />}
           </div>
           <h2 className="text-3xl md:text-4xl font-bold">
             {t("customerReviewsTitle") || "What Our Customers Say"}
