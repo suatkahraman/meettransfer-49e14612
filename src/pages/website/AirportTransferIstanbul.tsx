@@ -87,6 +87,7 @@ const AirportTransferIstanbul = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
+    "@id": "https://meettransfer.app/airporttransfer/istanbul#product",
     "name": "İstanbul Havalimanı Transfer Hizmeti",
     "description": "İstanbul Havalimanından şehir merkezine VIP transfer. Sabit fiyat, lüks Mercedes araçlar.",
     "brand": {
@@ -99,12 +100,8 @@ const AirportTransferIstanbul = () => {
       "highPrice": "120",
       "priceCurrency": "EUR",
       "offerCount": "8"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.9",
-      "reviewCount": "847"
     }
+    // aggregateRating removed - using organization-level rating only to avoid Google warning
   };
 
   return (

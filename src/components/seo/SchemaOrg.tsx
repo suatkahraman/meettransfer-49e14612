@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 interface LocalBusinessSchema {
   type: 'LocalBusiness';
+  includeRating?: boolean; // Only true on homepage to avoid duplicate ratings
 }
 
 interface TransportationServiceSchema {
@@ -76,6 +77,16 @@ interface SchemaOrgProps {
 
 const baseUrl = 'https://meettransfer.app';
 
+// Shared aggregateRating - only defined once to avoid duplicate rating warnings
+const sharedAggregateRating = {
+  '@type': 'AggregateRating',
+  '@id': `${baseUrl}/#aggregateRating`,
+  ratingValue: '4.9',
+  reviewCount: '1250',
+  bestRating: '5',
+  worstRating: '1',
+};
+
 const companyInfo = {
   name: 'Meet Transfer',
   legalName: 'Meet Transfer Ltd.',
@@ -119,53 +130,59 @@ const companyInfo = {
     { '@type': 'City', name: 'Cyprus' },
     { '@type': 'City', name: 'Bursa' },
   ],
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    reviewCount: '1250',
-    bestRating: '5',
-    worstRating: '1',
-  },
+  // aggregateRating is conditionally added only on homepage
 };
 
-const generateLocalBusinessSchema = () => ({
-  '@context': 'https://schema.org',
-  '@type': 'LocalBusiness',
-  '@id': `${baseUrl}/#organization`,
-  ...companyInfo,
-  hasOfferCatalog: {
-    '@type': 'OfferCatalog',
-    name: 'Airport Transfer Services',
-    itemListElement: [
-      {
-        '@type': 'Offer',
-        itemOffered: {
-          '@type': 'Service',
-          name: 'VIP Airport Transfer',
-          description: 'Luxury airport transfer with meet & greet service',
+const generateLocalBusinessSchema = (includeRating: boolean = false) => {
+  const baseSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': `${baseUrl}/#organization`,
+    ...companyInfo,
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Airport Transfer Services',
+      itemListElement: [
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'VIP Airport Transfer',
+            description: 'Luxury airport transfer with meet & greet service',
+          },
+          hasMerchantReturnPolicy: {
+            '@type': 'MerchantReturnPolicy',
+            applicableCountry: 'TR',
+            returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+          },
         },
-        hasMerchantReturnPolicy: {
-          '@type': 'MerchantReturnPolicy',
-          applicableCountry: 'TR',
-          returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'Hourly Chauffeur Service',
+            description: 'Private chauffeur service by the hour',
+          },
+          hasMerchantReturnPolicy: {
+            '@type': 'MerchantReturnPolicy',
+            applicableCountry: 'TR',
+            returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+          },
         },
-      },
-      {
-        '@type': 'Offer',
-        itemOffered: {
-          '@type': 'Service',
-          name: 'Hourly Chauffeur Service',
-          description: 'Private chauffeur service by the hour',
-        },
-        hasMerchantReturnPolicy: {
-          '@type': 'MerchantReturnPolicy',
-          applicableCountry: 'TR',
-          returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
-        },
-      },
-    ],
-  },
-});
+      ],
+    },
+  };
+
+  // Only include aggregateRating on homepage to avoid "multiple aggregate ratings" warning
+  if (includeRating) {
+    return {
+      ...baseSchema,
+      aggregateRating: sharedAggregateRating,
+    };
+  }
+
+  return baseSchema;
+};
 
 const generateTransportationServiceSchema = (areaServed?: string[]) => ({
   '@context': 'https://schema.org',
@@ -388,7 +405,7 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
 
       switch (schema.type) {
         case 'LocalBusiness':
-          schemaData = generateLocalBusinessSchema();
+          schemaData = generateLocalBusinessSchema((schema as LocalBusinessSchema).includeRating);
           break;
         case 'TransportationService':
           schemaData = generateTransportationServiceSchema((schema as TransportationServiceSchema).areaServed);

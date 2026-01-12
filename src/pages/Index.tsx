@@ -36,7 +36,7 @@ const Index = () => {
       />
       <SchemaOrg
         schemas={[
-          { type: 'LocalBusiness' },
+          { type: 'LocalBusiness', includeRating: true },
           { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus'] },
           { type: 'MerchantProduct' },
         ]}
