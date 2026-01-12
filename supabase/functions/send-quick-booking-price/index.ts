@@ -121,6 +121,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Calculate discount if promo code exists
     const hasReturnTrip = return_price !== undefined && return_date && return_time;
+    
+    // Get discount percentage from promo code
+    const PROMO_CODE_CONFIG: Record<string, number> = {
+      'MEET40RETURN': 40,
+      'GIDISDONUS': 30,
+      'RETURN30': 30,
+      'MEET30': 30,
+      'MEET10': 10,
+      'WELCOME10': 10,
+    };
+    const discountPercent = promo_code ? (PROMO_CODE_CONFIG[promo_code.toUpperCase()] || 30) : 30;
+    
     // Use original_return_price if provided, otherwise calculate from discounted price
     const originalReturnPrice = hasReturnTrip && promo_code && original_return_price !== undefined
       ? original_return_price
@@ -150,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
 - Date: ${formattedReturnDate}
 - Time: ${return_time}
 ${promo_code && originalReturnPrice ? `- Original Price: ${currencySymbol}${originalReturnPrice}` : ''}
-${promo_code && discountAmount ? `- Discount (30%): -${currencySymbol}${discountAmount}` : ''}
+${promo_code && discountAmount ? `- Discount (${discountPercent}%): -${currencySymbol}${discountAmount}` : ''}
 - Price: ${currencySymbol}${return_price}
 ${promo_code ? `- Promo Code: ${promo_code} ✓` : ''}
 
@@ -171,7 +183,7 @@ ${promo_code && discountAmount ? `You save: ${currencySymbol}${discountAmount}` 
             <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff;border-radius:6px;margin:10px 0;border:1px dashed #2e7d32;">
               <tr><td style="padding:12px;">
                 <p style="margin:0 0 5px;color:#666;font-size:13px;text-decoration:line-through;">Original: ${currencySymbol}${originalReturnPrice}</p>
-                <p style="margin:0 0 5px;color:#2e7d32;font-size:14px;font-weight:bold;">🎉 Discount (30%): -${currencySymbol}${discountAmount}</p>
+                <p style="margin:0 0 5px;color:#2e7d32;font-size:14px;font-weight:bold;">🎉 Discount (${discountPercent}%): -${currencySymbol}${discountAmount}</p>
                 <p style="margin:0;color:#1a365d;font-size:16px;font-weight:bold;">Final Price: ${currencySymbol}${return_price}</p>
                 <p style="margin:8px 0 0;color:#2e7d32;font-size:12px;background-color:#e8f5e9;padding:4px 8px;border-radius:4px;display:inline-block;">✓ Promo Code: ${promo_code}</p>
               </td></tr>

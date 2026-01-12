@@ -221,9 +221,20 @@ serve(async (req) => {
             ? requestData.price + (requestData.returnPrice || requestData.price)
             : requestData.price;
 
+          // Get discount percentage from promo code
+          const PROMO_CODE_CONFIG: Record<string, number> = {
+            'MEET40RETURN': 40,
+            'GIDISDONUS': 30,
+            'RETURN30': 30,
+            'MEET30': 30,
+            'MEET10': 10,
+            'WELCOME10': 10,
+          };
+          const discountPercent = requestData.promoCode ? (PROMO_CODE_CONFIG[requestData.promoCode.toUpperCase()] || 30) : 30;
+          
           // Calculate discount amount for return trip
           const originalReturnPrice = requestData.promoCode && requestData.returnPrice 
-            ? Math.round(requestData.returnPrice / 0.7) // Original price before 30% discount
+            ? Math.round(requestData.returnPrice / (1 - discountPercent / 100)) // Original price before discount
             : null;
           const discountAmount = originalReturnPrice 
             ? originalReturnPrice - requestData.returnPrice!
@@ -238,7 +249,7 @@ Return Transfer:
 - Date: ${formattedReturnDate}
 - Time: ${requestData.returnTime}
 ${requestData.promoCode && originalReturnPrice ? `- Original Price: ${currencySymbol}${originalReturnPrice}` : ''}
-${requestData.promoCode && discountAmount ? `- Discount (30%): -${currencySymbol}${discountAmount}` : ''}
+${requestData.promoCode && discountAmount ? `- Discount (${discountPercent}%): -${currencySymbol}${discountAmount}` : ''}
 - Price: ${currencySymbol}${requestData.returnPrice || requestData.price}
 ${requestData.promoCode ? `- Promo Code: ${requestData.promoCode}` : ''}
 ` : '';
@@ -256,7 +267,7 @@ ${requestData.promoCode ? `- Promo Code: ${requestData.promoCode}` : ''}
             <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff;border-radius:6px;margin:10px 0;border:1px dashed #2e7d32;">
               <tr><td style="padding:12px;">
                 <p style="margin:0 0 5px;color:#666;font-size:13px;text-decoration:line-through;">Original: ${currencySymbol}${originalReturnPrice}</p>
-                <p style="margin:0 0 5px;color:#2e7d32;font-size:14px;font-weight:bold;">🎉 Discount (30%): -${currencySymbol}${discountAmount}</p>
+                <p style="margin:0 0 5px;color:#2e7d32;font-size:14px;font-weight:bold;">🎉 Discount (${discountPercent}%): -${currencySymbol}${discountAmount}</p>
                 <p style="margin:0;color:#1a365d;font-size:16px;font-weight:bold;">Final Price: ${currencySymbol}${requestData.returnPrice}</p>
                 <p style="margin:8px 0 0;color:#2e7d32;font-size:12px;background-color:#e8f5e9;padding:4px 8px;border-radius:4px;display:inline-block;">✓ Promo Code: ${requestData.promoCode}</p>
               </td></tr>
