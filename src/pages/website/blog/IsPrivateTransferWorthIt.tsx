@@ -51,7 +51,7 @@ const IsPrivateTransferWorthIt = () => {
         description={t('blogWorthItDesc')}
         keywords="private transfer Turkey worth it 2025, Turkey airport transfer cost, VIP transfer value, should I book private transfer, Turkey private transfer, airport taxi vs private, Turkey transfer comparison, Istanbul private transfer price, Antalya private transfer worth it"
         canonicalPath="/blog/is-private-transfer-worth-it-turkey"
-        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
+        ogImage="https://meettransfer.app/og/private-transfer-worth-og.jpg"
         ogType="article"
         articlePublishedTime="2024-11-20"
         articleModifiedTime="2025-01-10"
@@ -64,7 +64,7 @@ const IsPrivateTransferWorthIt = () => {
             type: 'Article',
             headline: t('blogWorthItH1'),
             description: t('blogWorthItDesc'),
-            image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
+            image: 'https://meettransfer.app/og/private-transfer-worth-og.jpg',
             datePublished: '2024-11-20',
             dateModified: '2025-01-10',
             author: 'Meet Transfer',

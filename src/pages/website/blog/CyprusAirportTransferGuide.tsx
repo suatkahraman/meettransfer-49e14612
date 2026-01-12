@@ -69,7 +69,7 @@ const CyprusAirportTransferGuide = () => {
         description={t("blogCyprusSeoDesc")}
         keywords="Cyprus airport transfer 2025, Larnaca airport transfer, Paphos airport transfer, Ayia Napa transfer, Limassol airport transfer, Cyprus private transfer, Protaras transfer, Kyrenia transfer, Northern Cyprus transfer, Ercan airport, Famagusta transfer, Troodos transfer, Cyprus VIP transfer, Cyprus transfer price"
         canonicalPath="/blog/cyprus-airport-transfer-guide"
-        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
+        ogImage="https://meettransfer.app/og/cyprus-transfer-og.jpg"
         ogType="article"
         articlePublishedTime="2024-12-26"
         articleModifiedTime="2025-01-10"
@@ -82,7 +82,7 @@ const CyprusAirportTransferGuide = () => {
             type: 'Article',
             headline: t("blogCyprusH1"),
             description: t("blogCyprusSeoDesc"),
-            image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+            image: 'https://meettransfer.app/og/cyprus-transfer-og.jpg',
             datePublished: '2024-12-26',
             dateModified: '2025-01-10',
             author: 'Meet Transfer',

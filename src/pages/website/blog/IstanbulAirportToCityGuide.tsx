@@ -77,7 +77,7 @@ const IstanbulAirportToCityGuide = () => {
         description={t('blogIstanbul1Desc')}
         keywords="Istanbul Airport to city 2025, Istanbul Airport transfer, IST to Taksim, Istanbul Airport metro, Istanbul Airport to Sultanahmet, private transfer Istanbul, Istanbul Airport bus, Havaist bus, M11 metro Istanbul, Istanbul new airport transport, IST airport to hotel"
         canonicalPath="/blog/istanbul-airport-to-city-best-way"
-        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
+        ogImage="https://meettransfer.app/og/istanbul-airport-city-og.jpg"
         ogType="article"
         articlePublishedTime="2024-12-15"
         articleModifiedTime="2025-01-10"
@@ -90,7 +90,7 @@ const IstanbulAirportToCityGuide = () => {
             type: 'Article',
             headline: t('blogIstanbul1H1'),
             description: t('blogIstanbul1Desc'),
-            image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
+            image: 'https://meettransfer.app/og/istanbul-airport-city-og.jpg',
             datePublished: '2024-12-15',
             dateModified: '2025-01-10',
             author: 'Meet Transfer',

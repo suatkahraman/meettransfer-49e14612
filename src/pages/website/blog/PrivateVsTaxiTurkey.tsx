@@ -33,7 +33,7 @@ const PrivateVsTaxiTurkey = () => {
         description={t('blogPrivateTaxiDesc')}
         keywords="private transfer vs taxi Turkey 2025, Turkey airport transfer, private car Turkey, Turkish transport tips, airport transfer comparison, is private transfer worth it, Istanbul taxi vs private, Antalya taxi comparison, Turkey airport taxi safety"
         canonicalPath="/blog/private-vs-taxi-transfer-turkey"
-        ogImage="https://meettransfer.app/images/meet-transfer-vclass-interior.jpg"
+        ogImage="https://meettransfer.app/og/private-transfer-worth-og.jpg"
         ogType="article"
         articlePublishedTime="2024-12-05"
         articleModifiedTime="2025-01-10"
@@ -46,7 +46,7 @@ const PrivateVsTaxiTurkey = () => {
             type: 'Article',
             headline: t('blogPrivateTaxiH1'),
             description: t('blogPrivateTaxiDesc'),
-            image: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
+            image: 'https://meettransfer.app/og/private-transfer-worth-og.jpg',
             datePublished: '2024-12-05',
             dateModified: '2025-01-10',
             author: 'Meet Transfer',
