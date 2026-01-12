@@ -6,9 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { 
   AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, 
-  ExternalLink, AlertTriangle, Info, Globe, Languages, Link2, FileText, Tag 
+  ExternalLink, AlertTriangle, Info, Globe, Languages, Link2, FileText, Tag,
+  Bot, Gauge, Clock, Zap, FileCode, Map
 } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, type Language } from '@/hooks/useLanguageFromUrl';
+import { useSitemapRobotsValidation } from '@/hooks/useSitemapRobotsValidation';
+import { useCoreWebVitals } from '@/hooks/useCoreWebVitals';
 
 interface AggregateRating {
   ratingValue: string | number;
@@ -282,7 +285,13 @@ const SEODebugPage = () => {
   const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [customUrl, setCustomUrl] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical' | 'metatags'>('current');
+  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical' | 'metatags' | 'sitemap' | 'vitals'>('current');
+  
+  // Robots/Sitemap validation
+  const { robotsResult, sitemapResults, isScanning: isScanningRobots, scanProgress: robotsScanProgress, scanRobotsAndSitemap } = useSitemapRobotsValidation();
+  
+  // Core Web Vitals
+  const { result: vitalsResult, liveMetrics, isScanning: isScanningVitals, scanWebVitals } = useCoreWebVitals();
   
   // Language scanning state
   const [languageScanResults, setLanguageScanResults] = useState<LanguageScanResult[]>([]);
@@ -1510,6 +1519,88 @@ const SEODebugPage = () => {
           </CardContent>
         </Card>
 
+        {/* Robots/Sitemap Scan Card */}
+        <Card className="border-orange-500/30 bg-orange-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              Robots.txt & Sitemap Kontrolü
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              robots.txt ve sitemap.xml dosyalarını kontrol edin, dil kapsama ve hreflang tanımlarını doğrulayın
+            </p>
+            <Button
+              onClick={() => {
+                scanRobotsAndSitemap();
+                setActiveTab('sitemap');
+              }}
+              disabled={isScanningRobots}
+              size="sm"
+              variant="default"
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              <Map className="h-4 w-4 mr-1" />
+              Robots & Sitemap Tara
+              {isScanningRobots && <RefreshCw className="h-3 w-3 ml-1 animate-spin" />}
+            </Button>
+
+            {isScanningRobots && (
+              <div className="space-y-1">
+                <Progress value={robotsScanProgress} className="h-2" />
+                <p className="text-xs text-muted-foreground text-center">
+                  {Math.round(robotsScanProgress)}% tamamlandı
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Core Web Vitals Card */}
+        <Card className="border-cyan-500/30 bg-cyan-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Gauge className="h-4 w-4" />
+              Core Web Vitals
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Sayfa hızı ve kullanıcı deneyimi metriklerini ölçün (LCP, FID, CLS, INP, FCP, TTFB)
+            </p>
+            <Button
+              onClick={() => {
+                scanWebVitals();
+                setActiveTab('vitals');
+              }}
+              disabled={isScanningVitals}
+              size="sm"
+              variant="default"
+              className="bg-cyan-600 hover:bg-cyan-700"
+            >
+              <Zap className="h-4 w-4 mr-1" />
+              Vitals Ölç
+              {isScanningVitals && <RefreshCw className="h-3 w-3 ml-1 animate-spin" />}
+            </Button>
+
+            {/* Live metrics preview */}
+            {Object.keys(liveMetrics).length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {Object.values(liveMetrics).map(metric => metric && (
+                  <Badge 
+                    key={metric.name}
+                    variant={metric.rating === 'good' ? 'default' : metric.rating === 'needs-improvement' ? 'secondary' : 'destructive'}
+                    className="text-xs"
+                  >
+                    {metric.name}: {metric.name === 'CLS' ? metric.value.toFixed(3) : `${metric.value}ms`}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <div className="flex items-center gap-1 border-b border-border overflow-x-auto">
           <button
             onClick={() => setActiveTab('current')}
@@ -1574,6 +1665,28 @@ const SEODebugPage = () => {
           >
             <Tag className="h-3 w-3" />
             Meta Tags ({metaTagResults.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('sitemap')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 ${
+              activeTab === 'sitemap'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Map className="h-3 w-3" />
+            Sitemap {robotsResult ? '✓' : ''}
+          </button>
+          <button
+            onClick={() => setActiveTab('vitals')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 ${
+              activeTab === 'vitals'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Gauge className="h-3 w-3" />
+            Web Vitals {vitalsResult ? '✓' : ''}
           </button>
         </div>
 
@@ -2502,6 +2615,98 @@ const SEODebugPage = () => {
                   </div>
                 </details>
               </>
+            )}
+          </div>
+        ) : activeTab === 'sitemap' ? (
+          <div className="space-y-4">
+            {!robotsResult && sitemapResults.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Henüz robots.txt/sitemap taraması yapılmadı. Yukarıdaki "Robots & Sitemap Tara" butonunu kullanın.
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {robotsResult && (
+                  <Card className={robotsResult.issues.some(i => i.level === 'error') ? 'border-destructive' : robotsResult.accessible ? 'border-green-500' : 'border-yellow-500'}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        {robotsResult.accessible ? <CheckCircle className="h-5 w-5 text-green-500" /> : <AlertTriangle className="h-5 w-5 text-yellow-500" />}
+                        <span>robots.txt - {robotsResult.accessible ? 'Erişilebilir' : 'Bulunamadı'}</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                        <div className="p-2 bg-muted rounded"><div className="font-bold">{robotsResult.sitemapUrls.length}</div><div className="text-muted-foreground">Sitemap</div></div>
+                        <div className="p-2 bg-muted rounded"><div className="font-bold">{robotsResult.disallowRules.length}</div><div className="text-muted-foreground">Disallow</div></div>
+                        <div className="p-2 bg-muted rounded"><div className="font-bold">{robotsResult.allowRules.length}</div><div className="text-muted-foreground">Allow</div></div>
+                        <div className="p-2 bg-muted rounded"><div className="font-bold">{robotsResult.crawlDelay ?? '—'}</div><div className="text-muted-foreground">Delay</div></div>
+                      </div>
+                      {robotsResult.issues.map((issue, i) => (
+                        <div key={i} className={`p-2 rounded text-xs flex gap-2 ${issue.level === 'error' ? 'bg-destructive/10 text-destructive' : 'bg-yellow-50 dark:bg-yellow-950 text-yellow-700'}`}>
+                          <AlertCircle className="h-3 w-3 mt-0.5" /><span>{issue.message}</span>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+                {sitemapResults.map((sitemap, idx) => (
+                  <Card key={idx} className={sitemap.accessible ? 'border-green-500' : 'border-destructive'}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-sm">
+                        {sitemap.accessible ? <CheckCircle className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-destructive" />}
+                        <span className="truncate">{sitemap.url}</span>
+                        <Badge variant="secondary" className="text-xs">{sitemap.urlCount} URL</Badge>
+                        {sitemap.hasHreflang && <Badge className="text-xs">Hreflang ✓</Badge>}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {sitemap.issues.map((issue, i) => (
+                        <div key={i} className={`p-2 rounded text-xs mb-2 ${issue.level === 'error' ? 'bg-destructive/10 text-destructive' : 'bg-yellow-50 dark:bg-yellow-950 text-yellow-700'}`}>
+                          {issue.message}
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </>
+            )}
+          </div>
+        ) : activeTab === 'vitals' ? (
+          <div className="space-y-4">
+            {!vitalsResult ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Henüz Web Vitals ölçümü yapılmadı. Yukarıdaki "Vitals Ölç" butonunu kullanın.
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className={vitalsResult.overallScore === 'good' ? 'border-green-500' : vitalsResult.overallScore === 'needs-improvement' ? 'border-yellow-500' : 'border-destructive'}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2">
+                    <Gauge className="h-5 w-5" />
+                    Core Web Vitals - {vitalsResult.overallScore === 'good' ? 'İyi' : vitalsResult.overallScore === 'needs-improvement' ? 'Orta' : 'Zayıf'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {vitalsResult.metrics.map(metric => (
+                      <div key={metric.name} className={`p-3 rounded-lg ${metric.rating === 'good' ? 'bg-green-50 dark:bg-green-950' : metric.rating === 'needs-improvement' ? 'bg-yellow-50 dark:bg-yellow-950' : 'bg-red-50 dark:bg-red-950'}`}>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-bold">{metric.name}</span>
+                          <Badge variant={metric.rating === 'good' ? 'default' : metric.rating === 'needs-improvement' ? 'secondary' : 'destructive'} className="text-xs">
+                            {metric.rating === 'good' ? 'İyi' : metric.rating === 'needs-improvement' ? 'Orta' : 'Zayıf'}
+                          </Badge>
+                        </div>
+                        <div className={`text-xl font-bold ${metric.rating === 'good' ? 'text-green-600' : metric.rating === 'needs-improvement' ? 'text-yellow-600' : 'text-destructive'}`}>
+                          {metric.name === 'CLS' ? metric.value.toFixed(3) : `${metric.value}ms`}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{metric.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </div>
         ) : null}
