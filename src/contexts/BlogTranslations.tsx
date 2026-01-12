@@ -119,6 +119,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     tablePrivatePrice: "Private Transfer",
     tableBusPrice: "Airport Bus",
     tableNotAvailable: "N/A",
+    blogAntalyaTableDistance: "Distance",
+    blogAntalyaTableTime: "Journey Time",
     
     // Blog 1: Istanbul Airport to City
     blogIstanbul1Title: "Best Way to Get from Istanbul Airport to City Center (2025 Guide)",
@@ -845,6 +847,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     tablePrivatePrice: "Privattransfer",
     tableBusPrice: "Flughafenbus",
     tableNotAvailable: "N/V",
+    blogAntalyaTableDistance: "Entfernung",
+    blogAntalyaTableTime: "Fahrzeit",
     
     // Blog Posts
     blogIstanbul1Title: "Bester Weg vom Flughafen Istanbul ins Stadtzentrum (Guide 2025)",
@@ -1589,6 +1593,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     tableTime: "Durée",
     tablePrivatePrice: "Transfert Privé",
     tableBusPrice: "Bus Aéroport",
+    blogAntalyaTableDistance: "Distance",
+    blogAntalyaTableTime: "Durée du Trajet",
     tableNotAvailable: "N/D",
     
     // Blog Posts
@@ -2306,6 +2312,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     tablePrivatePrice: "Частный трансфер",
     tableBusPrice: "Автобус",
     tableNotAvailable: "Н/Д",
+    blogAntalyaTableDistance: "Расстояние",
+    blogAntalyaTableTime: "Время в пути",
     blogIstanbul1Title: "Лучший способ добраться из аэропорта Стамбула в центр (Гид 2025)",
     blogIstanbul1Desc: "Полный гид по транспорту из аэропорта Стамбула. Сравнение трансферов, метро и автобусов.",
     blogIstanbul1H1: "Лучший способ добраться из аэропорта Стамбула в центр",
@@ -2885,6 +2893,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     tablePrivatePrice: "Trasferimento Privato",
     tableBusPrice: "Bus Aeroporto",
     tableNotAvailable: "N/D",
+    blogAntalyaTableDistance: "Distanza",
+    blogAntalyaTableTime: "Tempo di Viaggio",
     blogIstanbul1Title: "Il modo migliore per arrivare dall'aeroporto di Istanbul al centro (Guida 2025)",
     blogIstanbul1Desc: "Guida completa ai trasporti dall'aeroporto di Istanbul. Confronta trasferimenti privati, metro e bus.",
     blogIstanbul1H1: "Il modo migliore per arrivare dall'aeroporto di Istanbul al centro",
@@ -3461,6 +3471,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     tablePrivatePrice: "Traslado Privado",
     tableBusPrice: "Bus Aeropuerto",
     tableNotAvailable: "N/D",
+    blogAntalyaTableDistance: "Distancia",
+    blogAntalyaTableTime: "Tiempo de Viaje",
     blogIstanbul1Title: "La mejor manera de ir del aeropuerto de Estambul al centro (Guía 2025)",
     blogIstanbul1Desc: "Guía completa del transporte desde el aeropuerto de Estambul. Compara traslados privados, metro y autobuses.",
     blogIstanbul1H1: "La mejor manera de ir del aeropuerto de Estambul al centro",
@@ -4078,6 +4090,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     tablePrivatePrice: "النقل الخاص",
     tableBusPrice: "حافلة المطار",
     tableNotAvailable: "غير متوفر",
+    blogAntalyaTableDistance: "المسافة",
+    blogAntalyaTableTime: "مدة الرحلة",
     blogIstanbul1Title: "أفضل طريقة للوصول من مطار إسطنبول إلى وسط المدينة (دليل 2025)",
     blogIstanbul1Desc: "دليل شامل للنقل من مطار إسطنبول. قارن بين النقل الخاص والمترو والحافلات.",
     blogIstanbul1H1: "أفضل طريقة للوصول من مطار إسطنبول إلى وسط المدينة",
@@ -4695,6 +4709,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     tablePrivatePrice: "Özel Transfer",
     tableBusPrice: "Havalimanı Otobüsü",
     tableNotAvailable: "Yok",
+    blogAntalyaTableDistance: "Mesafe",
+    blogAntalyaTableTime: "Yolculuk Süresi",
     blogIstanbul1Title: "İstanbul Havalimanından Şehir Merkezine En İyi Ulaşım Yolu (2025 Rehberi)",
     blogIstanbul1Desc: "İstanbul Havalimanı ulaşım rehberi. Özel transfer, metro ve otobüsleri karşılaştırın.",
     blogIstanbul1H1: "İstanbul Havalimanından Şehir Merkezine En İyi Ulaşım Yolu",
@@ -5510,6 +5526,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     tablePrivatePrice: "Приватний трансфер",
     tableBusPrice: "Автобус з аеропорту",
     tableNotAvailable: "Н/Д",
+    blogAntalyaTableDistance: "Відстань",
+    blogAntalyaTableTime: "Час у дорозі",
 
     // Blog CTA Component
     blogCtaDiscountBadge: "30% ЗНИЖКА на зворотні трансфери",
@@ -6188,6 +6206,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     tablePrivatePrice: "プライベート送迎",
     tableBusPrice: "空港バス",
     tableNotAvailable: "N/A",
+    blogAntalyaTableDistance: "距離",
+    blogAntalyaTableTime: "移動時間",
     blogIstanbul1Title: "イスタンブール空港から市内中心部への最良の行き方（2025年ガイド）",
     blogIstanbul1Desc: "イスタンブール空港の交通機関完全ガイド。プライベート送迎、地下鉄、バスを比較。",
     blogIstanbul1H1: "イスタンブール空港から市内中心部への最良の行き方",
