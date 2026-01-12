@@ -48,14 +48,14 @@ const OludenizAirportTransferGuide = () => {
   ];
 
   const destinations = [
-    { area: "Ölüdeniz Beach", distance: "60 km", time: "60-70 min", price: "€70" },
-    { area: "Hisarönü", distance: "55 km", time: "55-65 min", price: "€70" },
-    { area: "Ovacık", distance: "58 km", time: "55-65 min", price: "€70" },
-    { area: "Fethiye Center", distance: "50 km", time: "50-60 min", price: "€65" },
-    { area: "Çalış Beach", distance: "52 km", time: "50-60 min", price: "€65" },
-    { area: "Kayaköy", distance: "58 km", time: "55-65 min", price: "€70" },
-    { area: "Babadağ (Paragliding)", distance: "65 km", time: "70-80 min", price: "€75" },
-    { area: "Butterfly Valley", distance: "70 km", time: "75-85 min", price: "€80" },
+    { area: t("destOludenizBeach"), distance: "60 km", time: "60-70 min", price: "€70" },
+    { area: t("destHisaronuOlu"), distance: "55 km", time: "55-65 min", price: "€70" },
+    { area: t("destOvacik"), distance: "58 km", time: "55-65 min", price: "€70" },
+    { area: t("destFethiyeCenterOlu"), distance: "50 km", time: "50-60 min", price: "€65" },
+    { area: t("destCalisBeachOlu"), distance: "52 km", time: "50-60 min", price: "€65" },
+    { area: t("destKayakoyOlu"), distance: "58 km", time: "55-65 min", price: "€70" },
+    { area: t("destBabadag"), distance: "65 km", time: "70-80 min", price: "€75" },
+    { area: t("destButterflyValley"), distance: "70 km", time: "75-85 min", price: "€80" },
   ];
 
   return (

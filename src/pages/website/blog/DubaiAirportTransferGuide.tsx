@@ -36,19 +36,19 @@ const DubaiAirportTransferGuide = () => {
   ];
 
   const transferPrices = [
-    { destination: "Downtown Dubai / Burj Khalifa", duration: "15-25 min", price: "$45-60" },
-    { destination: "Palm Jumeirah", duration: "25-35 min", price: "$55-70" },
-    { destination: "Dubai Marina / JBR", duration: "30-40 min", price: "$55-70" },
-    { destination: "Jumeirah Beach Hotels", duration: "20-30 min", price: "$50-65" },
-    { destination: "Business Bay", duration: "15-25 min", price: "$45-60" },
-    { destination: "Abu Dhabi", duration: "75-90 min", price: "$120-150" },
+    { destination: t("destDowntownDubai"), duration: "15-25 min", price: "$45-60" },
+    { destination: t("destPalmJumeirah"), duration: "25-35 min", price: "$55-70" },
+    { destination: t("destDubaiMarina"), duration: "30-40 min", price: "$55-70" },
+    { destination: t("destJumeirahBeach"), duration: "20-30 min", price: "$50-65" },
+    { destination: t("destBusinessBay"), duration: "15-25 min", price: "$45-60" },
+    { destination: t("destAbuDhabi"), duration: "75-90 min", price: "$120-150" },
   ];
 
   const popularAttractions = [
-    { name: "Burj Khalifa", description: t("blogDubaiBurjKhalifa") },
-    { name: "Palm Jumeirah", description: t("blogDubaiPalm") },
+    { name: t("destDowntownDubai").split(" /")[0], description: t("blogDubaiBurjKhalifa") },
+    { name: t("destPalmJumeirah"), description: t("blogDubaiPalm") },
     { name: "Dubai Mall", description: t("blogDubaiMall") },
-    { name: "Dubai Marina", description: t("blogDubaiMarina") },
+    { name: t("destDubaiMarina").split(" /")[0], description: t("blogDubaiMarina") },
     { name: "Burj Al Arab", description: t("blogDubaiBurjArab") },
     { name: "Dubai Frame", description: t("blogDubaiFrame") },
   ];

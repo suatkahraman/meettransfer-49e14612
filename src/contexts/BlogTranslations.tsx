@@ -66,6 +66,47 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destKalkan: "Kalkan",
     destKas: "Kaş",
     
+    // Marmaris Destinations (for tables)
+    destMarmarisCenter: "Marmaris Center",
+    destIcmeler: "İçmeler",
+    destArmutalan: "Armutalan",
+    destTurunc: "Turunç",
+    destBozburun: "Bozburun",
+    destDatca: "Datça",
+    destAkyaka: "Akyaka",
+    destKoycegiz: "Köyceğiz",
+    
+    // Ölüdeniz Destinations (for tables)
+    destOludenizBeach: "Ölüdeniz Beach",
+    destHisaronuOlu: "Hisarönü",
+    destOvacik: "Ovacık",
+    destFethiyeCenterOlu: "Fethiye Center",
+    destCalisBeachOlu: "Çalış Beach",
+    destKayakoyOlu: "Kayaköy",
+    destBabadag: "Babadağ (Paragliding)",
+    destButterflyValley: "Butterfly Valley",
+    
+    // Cyprus Destinations (for tables)
+    destLarnacaCity: "Larnaca City / Hotels",
+    destAyiaNapa: "Ayia Napa",
+    destProtaras: "Protaras",
+    destLimassol: "Limassol",
+    destNicosia: "Nicosia",
+    destPaphos: "Paphos",
+    destKyrenia: "Kyrenia (North Cyprus)",
+    destPaphosCity: "Paphos City / Hotels",
+    destCoralBay: "Coral Bay",
+    destPolis: "Polis Chrysochous",
+    destTroodosMount: "Troodos Mountains",
+    
+    // Dubai Destinations (for tables)
+    destDowntownDubai: "Downtown Dubai / Burj Khalifa",
+    destPalmJumeirah: "Palm Jumeirah",
+    destDubaiMarina: "Dubai Marina / JBR",
+    destJumeirahBeach: "Jumeirah Beach Hotels",
+    destBusinessBay: "Business Bay",
+    destAbuDhabi: "Abu Dhabi",
+    
     // Vehicle Names (for tables)
     vehicleVito: "Mercedes Vito (up to 6 pax)",
     vehicleVitoVIP: "Mercedes Vito VIP (up to 6 pax)",
@@ -750,6 +791,47 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destGocek: "Göcek",
     destKalkan: "Kalkan",
     destKas: "Kaş",
+    
+    // Marmaris Destinations (for tables)
+    destMarmarisCenter: "Marmaris Zentrum",
+    destIcmeler: "İçmeler",
+    destArmutalan: "Armutalan",
+    destTurunc: "Turunç",
+    destBozburun: "Bozburun",
+    destDatca: "Datça",
+    destAkyaka: "Akyaka",
+    destKoycegiz: "Köyceğiz",
+    
+    // Ölüdeniz Destinations (for tables)
+    destOludenizBeach: "Ölüdeniz Strand",
+    destHisaronuOlu: "Hisarönü",
+    destOvacik: "Ovacık",
+    destFethiyeCenterOlu: "Fethiye Zentrum",
+    destCalisBeachOlu: "Çalış Beach",
+    destKayakoyOlu: "Kayaköy",
+    destBabadag: "Babadağ (Paragliding)",
+    destButterflyValley: "Schmetterlingstal",
+    
+    // Cyprus Destinations (for tables)
+    destLarnacaCity: "Larnaca Stadt / Hotels",
+    destAyiaNapa: "Ayia Napa",
+    destProtaras: "Protaras",
+    destLimassol: "Limassol",
+    destNicosia: "Nikosia",
+    destPaphos: "Paphos",
+    destKyrenia: "Kyrenia (Nordzypern)",
+    destPaphosCity: "Paphos Stadt / Hotels",
+    destCoralBay: "Coral Bay",
+    destPolis: "Polis Chrysochous",
+    destTroodosMount: "Troodos-Gebirge",
+    
+    // Dubai Destinations (for tables)
+    destDowntownDubai: "Downtown Dubai / Burj Khalifa",
+    destPalmJumeirah: "Palm Jumeirah",
+    destDubaiMarina: "Dubai Marina / JBR",
+    destJumeirahBeach: "Jumeirah Beach Hotels",
+    destBusinessBay: "Business Bay",
+    destAbuDhabi: "Abu Dhabi",
     
     // Vehicle Names (for tables)
     vehicleVito: "Mercedes Vito (bis 6 Pers.)",
@@ -1455,6 +1537,47 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destKalkan: "Kalkan",
     destKas: "Kaş",
     
+    // Marmaris Destinations (for tables)
+    destMarmarisCenter: "Centre de Marmaris",
+    destIcmeler: "İçmeler",
+    destArmutalan: "Armutalan",
+    destTurunc: "Turunç",
+    destBozburun: "Bozburun",
+    destDatca: "Datça",
+    destAkyaka: "Akyaka",
+    destKoycegiz: "Köyceğiz",
+    
+    // Ölüdeniz Destinations (for tables)
+    destOludenizBeach: "Plage d'Ölüdeniz",
+    destHisaronuOlu: "Hisarönü",
+    destOvacik: "Ovacık",
+    destFethiyeCenterOlu: "Centre de Fethiye",
+    destCalisBeachOlu: "Plage de Çalış",
+    destKayakoyOlu: "Kayaköy",
+    destBabadag: "Babadağ (Parapente)",
+    destButterflyValley: "Vallée des Papillons",
+    
+    // Cyprus Destinations (for tables)
+    destLarnacaCity: "Ville de Larnaca / Hôtels",
+    destAyiaNapa: "Ayia Napa",
+    destProtaras: "Protaras",
+    destLimassol: "Limassol",
+    destNicosia: "Nicosie",
+    destPaphos: "Paphos",
+    destKyrenia: "Kyrenia (Chypre du Nord)",
+    destPaphosCity: "Ville de Paphos / Hôtels",
+    destCoralBay: "Coral Bay",
+    destPolis: "Polis Chrysochous",
+    destTroodosMount: "Montagnes Troodos",
+    
+    // Dubai Destinations (for tables)
+    destDowntownDubai: "Downtown Dubai / Burj Khalifa",
+    destPalmJumeirah: "Palm Jumeirah",
+    destDubaiMarina: "Dubai Marina / JBR",
+    destJumeirahBeach: "Hôtels Jumeirah Beach",
+    destBusinessBay: "Business Bay",
+    destAbuDhabi: "Abou Dhabi",
+    
     // Vehicle Names
     vehicleVito: "Mercedes Vito (jusqu'à 6 pers.)",
     vehicleVitoVIP: "Mercedes Vito VIP (jusqu'à 6 pers.)",
@@ -2129,6 +2252,47 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destGocek: "Гёджек",
     destKalkan: "Калкан",
     destKas: "Каш",
+    
+    // Marmaris Destinations (for tables)
+    destMarmarisCenter: "Центр Мармариса",
+    destIcmeler: "Ичмелер",
+    destArmutalan: "Армуталан",
+    destTurunc: "Турунч",
+    destBozburun: "Бозбурун",
+    destDatca: "Датча",
+    destAkyaka: "Акьяка",
+    destKoycegiz: "Кёйджегиз",
+    
+    // Ölüdeniz Destinations (for tables)
+    destOludenizBeach: "Пляж Олюдениз",
+    destHisaronuOlu: "Хисарёню",
+    destOvacik: "Оваджик",
+    destFethiyeCenterOlu: "Центр Фетхие",
+    destCalisBeachOlu: "Пляж Чалыш",
+    destKayakoyOlu: "Каякёй",
+    destBabadag: "Бабадаг (Параглайдинг)",
+    destButterflyValley: "Долина Бабочек",
+    
+    // Cyprus Destinations (for tables)
+    destLarnacaCity: "Ларнака / Отели",
+    destAyiaNapa: "Айя-Напа",
+    destProtaras: "Протарас",
+    destLimassol: "Лимассол",
+    destNicosia: "Никосия",
+    destPaphos: "Пафос",
+    destKyrenia: "Кирения (Северный Кипр)",
+    destPaphosCity: "Пафос / Отели",
+    destCoralBay: "Корал Бэй",
+    destPolis: "Полис Хрисохус",
+    destTroodosMount: "Горы Троодос",
+    
+    // Dubai Destinations (for tables)
+    destDowntownDubai: "Даунтаун Дубай / Бурдж-Халифа",
+    destPalmJumeirah: "Палм Джумейра",
+    destDubaiMarina: "Дубай Марина / JBR",
+    destJumeirahBeach: "Отели Джумейра Бич",
+    destBusinessBay: "Бизнес Бэй",
+    destAbuDhabi: "Абу-Даби",
     
     // Vehicle Names
     vehicleVito: "Mercedes Vito (до 6 чел.)",
@@ -3861,6 +4025,47 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destKalkan: "كالكان",
     destKas: "كاش",
     
+    // Marmaris Destinations (for tables)
+    destMarmarisCenter: "مركز مرمريس",
+    destIcmeler: "إيتشملر",
+    destArmutalan: "أرموتالان",
+    destTurunc: "تورونتش",
+    destBozburun: "بوزبورون",
+    destDatca: "داتشا",
+    destAkyaka: "أكياكا",
+    destKoycegiz: "كويجيغيز",
+    
+    // Ölüdeniz Destinations (for tables)
+    destOludenizBeach: "شاطئ أولودينيز",
+    destHisaronuOlu: "هيساروني",
+    destOvacik: "أوفاجيك",
+    destFethiyeCenterOlu: "مركز فتحية",
+    destCalisBeachOlu: "شاطئ تشاليش",
+    destKayakoyOlu: "كاياكوي",
+    destBabadag: "بابا داغ (الطيران الشراعي)",
+    destButterflyValley: "وادي الفراشات",
+    
+    // Cyprus Destinations (for tables)
+    destLarnacaCity: "مدينة لارنكا / الفنادق",
+    destAyiaNapa: "أيا نابا",
+    destProtaras: "بروتاراس",
+    destLimassol: "ليماسول",
+    destNicosia: "نيقوسيا",
+    destPaphos: "بافوس",
+    destKyrenia: "كيرينيا (شمال قبرص)",
+    destPaphosCity: "مدينة بافوس / الفنادق",
+    destCoralBay: "خليج المرجان",
+    destPolis: "بوليس كريسوخوس",
+    destTroodosMount: "جبال ترودوس",
+    
+    // Dubai Destinations (for tables)
+    destDowntownDubai: "وسط دبي / برج خليفة",
+    destPalmJumeirah: "نخلة جميرا",
+    destDubaiMarina: "دبي مارينا / JBR",
+    destJumeirahBeach: "فنادق شاطئ جميرا",
+    destBusinessBay: "الخليج التجاري",
+    destAbuDhabi: "أبوظبي",
+    
     // Vehicle Names (for tables)
     vehicleVito: "مرسيدس فيتو (حتى 6 ركاب)",
     vehicleVitoVIP: "مرسيدس فيتو VIP (حتى 6 ركاب)",
@@ -4436,6 +4641,47 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destGocek: "Göcek",
     destKalkan: "Kalkan",
     destKas: "Kaş",
+    
+    // Marmaris Destinations (for tables)
+    destMarmarisCenter: "Marmaris Merkez",
+    destIcmeler: "İçmeler",
+    destArmutalan: "Armutalan",
+    destTurunc: "Turunç",
+    destBozburun: "Bozburun",
+    destDatca: "Datça",
+    destAkyaka: "Akyaka",
+    destKoycegiz: "Köyceğiz",
+    
+    // Ölüdeniz Destinations (for tables)
+    destOludenizBeach: "Ölüdeniz Plajı",
+    destHisaronuOlu: "Hisarönü",
+    destOvacik: "Ovacık",
+    destFethiyeCenterOlu: "Fethiye Merkez",
+    destCalisBeachOlu: "Çalış Plajı",
+    destKayakoyOlu: "Kayaköy",
+    destBabadag: "Babadağ (Yamaç Paraşütü)",
+    destButterflyValley: "Kelebekler Vadisi",
+    
+    // Cyprus Destinations (for tables)
+    destLarnacaCity: "Larnaka Şehir / Oteller",
+    destAyiaNapa: "Ayia Napa",
+    destProtaras: "Protaras",
+    destLimassol: "Limasol",
+    destNicosia: "Lefkoşa",
+    destPaphos: "Baf",
+    destKyrenia: "Girne (Kuzey Kıbrıs)",
+    destPaphosCity: "Baf Şehir / Oteller",
+    destCoralBay: "Coral Bay",
+    destPolis: "Polis Chrysochous",
+    destTroodosMount: "Troodos Dağları",
+    
+    // Dubai Destinations (for tables)
+    destDowntownDubai: "Downtown Dubai / Burj Khalifa",
+    destPalmJumeirah: "Palm Jumeirah",
+    destDubaiMarina: "Dubai Marina / JBR",
+    destJumeirahBeach: "Jumeirah Beach Otelleri",
+    destBusinessBay: "Business Bay",
+    destAbuDhabi: "Abu Dabi",
     
     // Vehicle Names
     vehicleVito: "Mercedes Vito (6 kişiye kadar)",
@@ -5211,6 +5457,47 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destKalkan: "Калкан",
     destKas: "Каш",
     
+    // Marmaris Destinations (for tables)
+    destMarmarisCenter: "Центр Мармарісу",
+    destIcmeler: "Ічмелер",
+    destArmutalan: "Армуталан",
+    destTurunc: "Турунч",
+    destBozburun: "Бозбурун",
+    destDatca: "Датча",
+    destAkyaka: "Ак'яка",
+    destKoycegiz: "Кейджегіз",
+    
+    // Ölüdeniz Destinations (for tables)
+    destOludenizBeach: "Пляж Олюденіз",
+    destHisaronuOlu: "Хісароню",
+    destOvacik: "Оваджик",
+    destFethiyeCenterOlu: "Центр Фетхіє",
+    destCalisBeachOlu: "Пляж Чаліш",
+    destKayakoyOlu: "Каякьой",
+    destBabadag: "Бабадаг (Параглайдинг)",
+    destButterflyValley: "Долина Метеликів",
+    
+    // Cyprus Destinations (for tables)
+    destLarnacaCity: "Ларнака / Готелі",
+    destAyiaNapa: "Айя-Напа",
+    destProtaras: "Протарас",
+    destLimassol: "Лімасол",
+    destNicosia: "Нікосія",
+    destPaphos: "Пафос",
+    destKyrenia: "Киренія (Північний Кіпр)",
+    destPaphosCity: "Пафос / Готелі",
+    destCoralBay: "Корал Бей",
+    destPolis: "Поліс Хрисохус",
+    destTroodosMount: "Гори Троодос",
+    
+    // Dubai Destinations (for tables)
+    destDowntownDubai: "Даунтаун Дубай / Бурдж-Халіфа",
+    destPalmJumeirah: "Палм Джумейра",
+    destDubaiMarina: "Дубай Марина / JBR",
+    destJumeirahBeach: "Готелі Джумейра Біч",
+    destBusinessBay: "Бізнес Бей",
+    destAbuDhabi: "Абу-Дабі",
+    
     // Vehicle Names (for tables)
     vehicleVito: "Mercedes Vito (до 6 осіб)",
     vehicleVitoVIP: "Mercedes Vito VIP (до 6 осіб)",
@@ -5847,6 +6134,47 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destGocek: "ギョジェク",
     destKalkan: "カルカン",
     destKas: "カシュ",
+    
+    // Marmaris Destinations (for tables)
+    destMarmarisCenter: "マルマリス中心部",
+    destIcmeler: "イチメレル",
+    destArmutalan: "アルムタラン",
+    destTurunc: "トゥルンチ",
+    destBozburun: "ボズブルン",
+    destDatca: "ダッチャ",
+    destAkyaka: "アキャカ",
+    destKoycegiz: "キョイジェイズ",
+    
+    // Ölüdeniz Destinations (for tables)
+    destOludenizBeach: "オルデニズビーチ",
+    destHisaronuOlu: "ヒサロニュ",
+    destOvacik: "オヴァジュク",
+    destFethiyeCenterOlu: "フェティエ中心部",
+    destCalisBeachOlu: "チャリシュビーチ",
+    destKayakoyOlu: "カヤキョイ",
+    destBabadag: "ババダー（パラグライダー）",
+    destButterflyValley: "バタフライバレー",
+    
+    // Cyprus Destinations (for tables)
+    destLarnacaCity: "ラルナカ市内/ホテル",
+    destAyiaNapa: "アヤナパ",
+    destProtaras: "プロタラス",
+    destLimassol: "リマソール",
+    destNicosia: "ニコシア",
+    destPaphos: "パフォス",
+    destKyrenia: "キレニア（北キプロス）",
+    destPaphosCity: "パフォス市内/ホテル",
+    destCoralBay: "コーラルベイ",
+    destPolis: "ポリスクリソコウス",
+    destTroodosMount: "トロードス山脈",
+    
+    // Dubai Destinations (for tables)
+    destDowntownDubai: "ダウンタウンドバイ/ブルジュハリファ",
+    destPalmJumeirah: "パームジュメイラ",
+    destDubaiMarina: "ドバイマリーナ/JBR",
+    destJumeirahBeach: "ジュメイラビーチホテル",
+    destBusinessBay: "ビジネスベイ",
+    destAbuDhabi: "アブダビ",
     
     // Vehicle Names (for tables)
     vehicleVito: "メルセデスVito（最大6名）",
