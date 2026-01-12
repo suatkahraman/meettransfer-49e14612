@@ -114,6 +114,7 @@ function getCityImage(city: string): string {
 export function CityImageCard({ city, className }: CityImageCardProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const imageUrl = getCityImage(city);
   
   const handleLoad = () => {
@@ -126,7 +127,17 @@ export function CityImageCard({ city, className }: CityImageCardProps) {
   };
   
   return (
-    <div className={cn("relative rounded-xl overflow-hidden", className)}>
+    <div 
+      className={cn(
+        "relative rounded-xl overflow-hidden cursor-pointer group",
+        "transform transition-all duration-300 ease-out",
+        "hover:shadow-xl hover:shadow-primary/20",
+        "hover:-translate-y-1",
+        className
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Loading Skeleton */}
       {isLoading && (
         <div className="absolute inset-0 z-10">
@@ -138,13 +149,13 @@ export function CityImageCard({ city, className }: CityImageCardProps) {
       )}
       
       {/* City Image */}
-      <div className="relative h-40 sm:h-48 md:h-56">
+      <div className="relative h-40 sm:h-48 md:h-56 overflow-hidden">
         {hasError ? (
           // Error Fallback
-          <div className="w-full h-full bg-gradient-to-br from-purple-500/20 via-primary/10 to-accent/20 flex items-center justify-center">
-            <div className="text-center">
-              <div className="p-4 rounded-full bg-muted/50 inline-block mb-2">
-                <Building2 className="h-10 w-10 text-muted-foreground" />
+          <div className="w-full h-full bg-gradient-to-br from-purple-500/20 via-primary/10 to-accent/20 flex items-center justify-center transition-all duration-300 group-hover:from-purple-500/30 group-hover:to-accent/30">
+            <div className="text-center transform transition-transform duration-300 group-hover:scale-105">
+              <div className="p-4 rounded-full bg-muted/50 inline-block mb-2 transition-all duration-300 group-hover:bg-primary/20">
+                <Building2 className="h-10 w-10 text-muted-foreground transition-colors duration-300 group-hover:text-primary" />
               </div>
               <p className="text-lg font-bold text-foreground">{city}</p>
               <p className="text-xs text-muted-foreground">Saatlik Kiralama</p>
@@ -155,8 +166,9 @@ export function CityImageCard({ city, className }: CityImageCardProps) {
             src={imageUrl}
             alt={city}
             className={cn(
-              "w-full h-full object-cover transition-opacity duration-300",
-              isLoading ? "opacity-0" : "opacity-100"
+              "w-full h-full object-cover transition-all duration-500 ease-out",
+              isLoading ? "opacity-0 scale-105" : "opacity-100 scale-100",
+              "group-hover:scale-110"
             )}
             loading="lazy"
             onLoad={handleLoad}
@@ -164,34 +176,66 @@ export function CityImageCard({ city, className }: CityImageCardProps) {
           />
         )}
         
-        {/* Gradient Overlay - only show when image loaded successfully */}
+        {/* Gradient Overlay - animates on hover */}
         {!hasError && !isLoading && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className={cn(
+            "absolute inset-0 transition-all duration-300",
+            "bg-gradient-to-t from-black/70 via-black/20 to-transparent",
+            "group-hover:from-black/80 group-hover:via-black/30"
+          )} />
         )}
         
-        {/* City Name Badge - show after loading */}
+        {/* Shimmer effect on hover */}
         {!isLoading && !hasError && (
-          <div className="absolute bottom-3 left-3 right-3">
+          <div className={cn(
+            "absolute inset-0 opacity-0 transition-opacity duration-300",
+            "bg-gradient-to-r from-transparent via-white/10 to-transparent",
+            "group-hover:opacity-100 group-hover:animate-[shimmer_1.5s_ease-in-out]"
+          )} />
+        )}
+        
+        {/* City Name Badge - animates on hover */}
+        {!isLoading && !hasError && (
+          <div className="absolute bottom-3 left-3 right-3 transform transition-all duration-300 group-hover:translate-y-[-4px]">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-full bg-white/20 backdrop-blur-sm">
-                <Building2 className="h-5 w-5 text-white" />
+              <div className={cn(
+                "p-2 rounded-full backdrop-blur-sm transition-all duration-300",
+                "bg-white/20 group-hover:bg-primary/80 group-hover:scale-110"
+              )}>
+                <Building2 className="h-5 w-5 text-white transition-transform duration-300 group-hover:rotate-12" />
               </div>
               <div>
-                <p className="text-white/80 text-xs font-medium">Saatlik Kiralama</p>
+                <p className="text-white/80 text-xs font-medium transition-colors duration-300 group-hover:text-white">
+                  Saatlik Kiralama
+                </p>
                 <p className="text-white text-lg sm:text-xl font-bold">{city}</p>
               </div>
             </div>
           </div>
         )}
         
-        {/* Decorative Pin - show after loading */}
+        {/* Decorative Pin - pulses on hover */}
         {!isLoading && !hasError && (
-          <div className="absolute top-3 right-3">
-            <div className="p-2 rounded-full bg-purple-500/90 shadow-lg">
-              <MapPin className="h-4 w-4 text-white" />
+          <div className="absolute top-3 right-3 transform transition-all duration-300 group-hover:scale-110">
+            <div className={cn(
+              "p-2 rounded-full shadow-lg transition-all duration-300",
+              "bg-purple-500/90 group-hover:bg-primary group-hover:shadow-primary/50"
+            )}>
+              <MapPin className={cn(
+                "h-4 w-4 text-white transition-transform duration-300",
+                "group-hover:animate-bounce"
+              )} />
             </div>
           </div>
         )}
+        
+        {/* Corner accent on hover */}
+        <div className={cn(
+          "absolute top-0 left-0 w-16 h-16 transition-all duration-500",
+          "bg-gradient-to-br from-primary/40 to-transparent",
+          "opacity-0 group-hover:opacity-100",
+          "-translate-x-8 -translate-y-8 group-hover:translate-x-0 group-hover:translate-y-0"
+        )} />
       </div>
     </div>
   );
