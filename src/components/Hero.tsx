@@ -81,6 +81,8 @@ export const Hero = () => {
   const [allHourlyPrices, setAllHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
   const [loadingPrice, setLoadingPrice] = useState(false);
   const [customHours, setCustomHours] = useState("9"); // For custom duration (9+ hours)
+  const [hourlyCurrency, setHourlyCurrency] = useState<string>("EUR"); // Currency selection for hourly rental
+  const [convertingHourlyPrices, setConvertingHourlyPrices] = useState(false);
 
   // Fetch available cities and their durations from hourly_rental_prices
   useEffect(() => {
@@ -227,10 +229,14 @@ export const Hero = () => {
     }
   }, [hourlyPassengers]);
 
+  // Store original prices in base currency for conversion
+  const [originalHourlyPrices, setOriginalHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
+
   // Fetch all vehicle prices when city and duration are selected
   useEffect(() => {
     const fetchAllPrices = async () => {
       if (!hourlyCity || !hourlyDuration) {
+        setOriginalHourlyPrices([]);
         setAllHourlyPrices([]);
         return;
       }
@@ -268,6 +274,7 @@ export const Hero = () => {
             }
           });
           
+          setOriginalHourlyPrices(prices);
           setAllHourlyPrices(prices);
         } else {
           // Try both formats: "4h" and "4_hours"
@@ -327,10 +334,12 @@ export const Hero = () => {
             });
           });
           
+          setOriginalHourlyPrices(prices);
           setAllHourlyPrices(prices);
         }
       } catch (error) {
         console.error("Error fetching hourly prices:", error);
+        setOriginalHourlyPrices([]);
         setAllHourlyPrices([]);
       } finally {
         setLoadingPrice(false);
@@ -339,6 +348,54 @@ export const Hero = () => {
 
     fetchAllPrices();
   }, [hourlyCity, hourlyDuration, customHours]);
+
+  // Convert prices when currency changes
+  useEffect(() => {
+    const convertPrices = async () => {
+      if (originalHourlyPrices.length === 0) return;
+      
+      // Get the base currency from original prices (they should all be same)
+      const baseCurrency = originalHourlyPrices[0]?.currency || "EUR";
+      
+      // If selected currency matches base currency, no conversion needed
+      if (hourlyCurrency === baseCurrency) {
+        setAllHourlyPrices(originalHourlyPrices);
+        return;
+      }
+
+      setConvertingHourlyPrices(true);
+      try {
+        // Call exchange rate API
+        const { data: rateData, error: rateError } = await supabase.functions.invoke('get-exchange-rate', {
+          body: {
+            from_currency: baseCurrency,
+            to_currency: hourlyCurrency,
+          }
+        });
+
+        if (rateError) throw rateError;
+
+        const rate = rateData?.rate || 1;
+        
+        // Convert all prices
+        const convertedPrices = originalHourlyPrices.map(p => ({
+          vehicleType: p.vehicleType,
+          price: Math.round(p.price * rate),
+          currency: hourlyCurrency
+        }));
+        
+        setAllHourlyPrices(convertedPrices);
+      } catch (error) {
+        console.error("Error converting hourly prices:", error);
+        // Keep original prices on error
+        setAllHourlyPrices(originalHourlyPrices);
+      } finally {
+        setConvertingHourlyPrices(false);
+      }
+    };
+
+    convertPrices();
+  }, [hourlyCurrency, originalHourlyPrices]);
 
   const handleRideContinue = () => {
     const missingFields: string[] = [];
@@ -906,6 +963,36 @@ export const Hero = () => {
                         </Select>
                       </div>
                     )}
+                    
+                    {/* Currency Selection */}
+                    {hourlyCity && hourlyDuration && (
+                      <div className="relative">
+                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">
+                          {t("preferredCurrency") || "Currency"}
+                        </label>
+                        <Select value={hourlyCurrency} onValueChange={setHourlyCurrency}>
+                          <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                            <div className="flex items-center">
+                              <span className="mr-2 text-primary font-bold">
+                                {hourlyCurrency === "EUR" ? "€" : hourlyCurrency === "USD" ? "$" : hourlyCurrency === "GBP" ? "£" : hourlyCurrency === "TRY" ? "₺" : hourlyCurrency}
+                              </span>
+                              <SelectValue />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent className="z-50">
+                            <SelectItem value="EUR">€ EUR - Euro</SelectItem>
+                            <SelectItem value="USD">$ USD - US Dollar</SelectItem>
+                            <SelectItem value="GBP">£ GBP - British Pound</SelectItem>
+                            <SelectItem value="TRY">₺ TRY - Turkish Lira</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {convertingHourlyPrices && (
+                          <div className="absolute right-3 top-1/2 translate-y-1">
+                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
                   {/* Dynamic Price Display for Custom Hours */}
@@ -946,10 +1033,12 @@ export const Hero = () => {
                           );
                         })}
                       </div>
-                      {loadingPrice && (
+                      {(loadingPrice || convertingHourlyPrices) && (
                         <div className="flex items-center justify-center mt-2">
                           <Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
-                          <span className="text-sm text-muted-foreground">{t("calculatingPrice") || "Calculating..."}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {convertingHourlyPrices ? (t("convertingCurrency") || "Converting...") : (t("calculatingPrice") || "Calculating...")}
+                          </span>
                         </div>
                       )}
                     </div>
