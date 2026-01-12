@@ -351,7 +351,7 @@ const IstanbulTransferPriceGuide = () => {
           </ul>
 
           {/* Image Gallery */}
-          <h3>{t("galleryTitle") || "Our Fleet Gallery"}</h3>
+          <h3>{t("galleryTitle")}</h3>
           <div className="not-prose my-8">
             <BlogImageGallery 
               images={[

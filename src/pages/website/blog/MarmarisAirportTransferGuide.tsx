@@ -115,7 +115,7 @@ const MarmarisAirportTransferGuide = () => {
         </Link>
 
         <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">Marmaris</Badge>
+          <Badge variant="secondary" className="mb-4">{t("cityMarmaris")}</Badge>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
             {t("blogMarmarisH1")}
           </h1>
@@ -244,7 +244,7 @@ const MarmarisAirportTransferGuide = () => {
             </Card>
           </div>
 
-          <h3>{t("galleryTitle") || "Our Fleet Gallery"}</h3>
+          <h3>{t("galleryTitle")}</h3>
           <div className="not-prose my-8">
             <BlogImageGallery 
               images={[
