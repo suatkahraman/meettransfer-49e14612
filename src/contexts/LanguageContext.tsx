@@ -199,6 +199,7 @@ const translations: Record<Language, Record<string, string>> = {
     sixHours: "6 Hours",
     fullDay: "8 Hours (Full Day)",
     customHourly: "9+ Hours (Custom)",
+    numberOfHours: "Number of Hours",
     hourlyMaxPassengers: "Hourly rental is available for up to 6 passengers",
     
     // Booking Process
@@ -9386,6 +9387,7 @@ const translations: Record<Language, Record<string, string>> = {
     sixHours: "6 Saat",
     fullDay: "8 Saat (Tam Gün)",
     customHourly: "9+ Saat (Özel)",
+    numberOfHours: "Saat Sayısı",
     hourlyMaxPassengers: "Saatlik kiralama maksimum 6 yolcu içindir",
     
     // Booking Process

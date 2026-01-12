@@ -80,6 +80,7 @@ export const Hero = () => {
   const [loadingCities, setLoadingCities] = useState(false);
   const [allHourlyPrices, setAllHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
   const [loadingPrice, setLoadingPrice] = useState(false);
+  const [customHours, setCustomHours] = useState("9"); // For custom duration (9+ hours)
 
   // Fetch available cities and their durations from hourly_rental_prices
   useEffect(() => {
@@ -236,64 +237,98 @@ export const Hero = () => {
 
       setLoadingPrice(true);
       try {
-        // Try both formats: "4h" and "4_hours"
-        const durationKeyShort = `${hourlyDuration}h`;
-        const durationKeyLong = `${hourlyDuration}_hours`;
-        
-        // Fetch all vehicle types for this city and duration
-        const { data: shortData, error: shortError } = await supabase
-          .from("hourly_rental_prices")
-          .select("vehicle_type, price, price_currency")
-          .eq("city", hourlyCity)
-          .eq("duration_type", durationKeyShort)
-          .eq("is_active", true);
-        
-        const { data: longData, error: longError } = await supabase
-          .from("hourly_rental_prices")
-          .select("vehicle_type, price, price_currency")
-          .eq("city", hourlyCity)
-          .eq("duration_type", durationKeyLong)
-          .eq("is_active", true);
-        
-        // Combine results, preferring short format
-        const combinedData = [...(shortData || []), ...(longData || [])];
-        
-        // Map to vehicle types, removing duplicates
-        const vehiclePriceMap = new Map<string, { price: number; currency: string }>();
-        combinedData.forEach(item => {
-          if (!vehiclePriceMap.has(item.vehicle_type)) {
-            vehiclePriceMap.set(item.vehicle_type, {
-              price: item.price,
-              currency: item.price_currency
-            });
-          }
-        });
-        
-        // Convert to array with mapped vehicle types
-        const prices: Array<{ vehicleType: string; price: number; currency: string }> = [];
-        
-        // Map database vehicle types to our VEHICLE_TYPES
-        const vehicleTypeMapping: Record<string, string> = {
-          'vito': 'mercedes-vito',
-          'vito_vip': 'vip-mercedes',
-          'maybach': 'maybach-minibus',
-          'sprinter': 'sprinter-minibus',
-          'mercedes-vito': 'mercedes-vito',
-          'vip-mercedes': 'vip-mercedes',
-          'maybach-minibus': 'maybach-minibus',
-          'sprinter-minibus': 'sprinter-minibus'
-        };
-        
-        vehiclePriceMap.forEach((value, key) => {
-          const mappedType = vehicleTypeMapping[key] || key;
-          prices.push({
-            vehicleType: mappedType,
-            price: value.price,
-            currency: value.currency
+        // For custom duration (9+), fetch hourly_rate and calculate
+        if (hourlyDuration === "custom") {
+          const { data: customData, error: customError } = await supabase
+            .from("hourly_rental_prices")
+            .select("vehicle_type, hourly_rate, price_currency")
+            .eq("city", hourlyCity)
+            .eq("duration_type", "custom")
+            .eq("is_active", true);
+          
+          if (customError) throw customError;
+          
+          const hours = parseInt(customHours) || 9;
+          const vehicleTypeMapping: Record<string, string> = {
+            'vito': 'mercedes-vito',
+            'vito_vip': 'vip-mercedes',
+            'maybach': 'maybach-minibus',
+            'sprinter': 'sprinter-minibus',
+          };
+          
+          const prices: Array<{ vehicleType: string; price: number; currency: string }> = [];
+          customData?.forEach(item => {
+            if (item.hourly_rate) {
+              const mappedType = vehicleTypeMapping[item.vehicle_type] || item.vehicle_type;
+              prices.push({
+                vehicleType: mappedType,
+                price: item.hourly_rate * hours,
+                currency: item.price_currency
+              });
+            }
           });
-        });
-        
-        setAllHourlyPrices(prices);
+          
+          setAllHourlyPrices(prices);
+        } else {
+          // Try both formats: "4h" and "4_hours"
+          const durationKeyShort = `${hourlyDuration}h`;
+          const durationKeyLong = `${hourlyDuration}_hours`;
+          
+          // Fetch all vehicle types for this city and duration
+          const { data: shortData, error: shortError } = await supabase
+            .from("hourly_rental_prices")
+            .select("vehicle_type, price, price_currency")
+            .eq("city", hourlyCity)
+            .eq("duration_type", durationKeyShort)
+            .eq("is_active", true);
+          
+          const { data: longData, error: longError } = await supabase
+            .from("hourly_rental_prices")
+            .select("vehicle_type, price, price_currency")
+            .eq("city", hourlyCity)
+            .eq("duration_type", durationKeyLong)
+            .eq("is_active", true);
+          
+          // Combine results, preferring short format
+          const combinedData = [...(shortData || []), ...(longData || [])];
+          
+          // Map to vehicle types, removing duplicates
+          const vehiclePriceMap = new Map<string, { price: number; currency: string }>();
+          combinedData.forEach(item => {
+            if (!vehiclePriceMap.has(item.vehicle_type)) {
+              vehiclePriceMap.set(item.vehicle_type, {
+                price: item.price,
+                currency: item.price_currency
+              });
+            }
+          });
+          
+          // Convert to array with mapped vehicle types
+          const prices: Array<{ vehicleType: string; price: number; currency: string }> = [];
+          
+          // Map database vehicle types to our VEHICLE_TYPES
+          const vehicleTypeMapping: Record<string, string> = {
+            'vito': 'mercedes-vito',
+            'vito_vip': 'vip-mercedes',
+            'maybach': 'maybach-minibus',
+            'sprinter': 'sprinter-minibus',
+            'mercedes-vito': 'mercedes-vito',
+            'vip-mercedes': 'vip-mercedes',
+            'maybach-minibus': 'maybach-minibus',
+            'sprinter-minibus': 'sprinter-minibus'
+          };
+          
+          vehiclePriceMap.forEach((value, key) => {
+            const mappedType = vehicleTypeMapping[key] || key;
+            prices.push({
+              vehicleType: mappedType,
+              price: value.price,
+              currency: value.currency
+            });
+          });
+          
+          setAllHourlyPrices(prices);
+        }
       } catch (error) {
         console.error("Error fetching hourly prices:", error);
         setAllHourlyPrices([]);
@@ -303,7 +338,7 @@ export const Hero = () => {
     };
 
     fetchAllPrices();
-  }, [hourlyCity, hourlyDuration]);
+  }, [hourlyCity, hourlyDuration, customHours]);
 
   const handleRideContinue = () => {
     const missingFields: string[] = [];
@@ -347,7 +382,12 @@ export const Hero = () => {
     params.set("city", hourlyCity);
     params.set("date", format(hourlyDate!, "yyyy-MM-dd"));
     params.set("time", hourlyTime);
-    params.set("duration", hourlyDuration);
+    // For custom duration, pass the actual hours
+    if (hourlyDuration === "custom") {
+      params.set("duration", `${customHours}h`);
+    } else {
+      params.set("duration", `${hourlyDuration}h`);
+    }
     params.set("passengers", hourlyPassengers);
     params.set("vehicleType", hourlyVehicleType);
     params.set("type", "hourly");
@@ -842,6 +882,30 @@ export const Hero = () => {
                         </SelectContent>
                       </Select>
                     </div>
+                    
+                    {/* Custom Hours Input - shown only when "custom" is selected */}
+                    {hourlyDuration === "custom" && (
+                      <div className="relative">
+                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">
+                          {t("numberOfHours") || "Number of Hours"}
+                        </label>
+                        <Select value={customHours} onValueChange={setCustomHours}>
+                          <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                            <div className="flex items-center">
+                              <Timer className="mr-2 h-5 w-5 text-primary" />
+                              <SelectValue />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent className="z-50 max-h-[300px]">
+                            {Array.from({ length: 16 }, (_, i) => i + 9).map((hours) => (
+                              <SelectItem key={hours} value={hours.toString()}>
+                                {hours} {t("hours") || "hours"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
 
                   {/* Date, Time & Passengers - 2 rows on mobile, 3 cols on desktop */}
