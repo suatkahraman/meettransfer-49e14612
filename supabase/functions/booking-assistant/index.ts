@@ -301,26 +301,60 @@ WRONG - DO NOT ask clarifying questions if all info is already in the message!`;
     let quickBookingId = null;
     let confirmationToken = null;
 
-    if (bookingData?.isComplete && bookingData.pickup && bookingData.dropoff && bookingData.date && bookingData.time && bookingData.passengers) {
-      console.log("Creating quick booking request...");
+    const serviceType = bookingData?.serviceType || 'transfer';
+    const isHourlyRental = serviceType === 'hourly';
+
+    // Check completion based on service type
+    const isTransferComplete = !isHourlyRental && 
+      bookingData?.isComplete && 
+      bookingData.pickup && 
+      bookingData.dropoff && 
+      bookingData.date && 
+      bookingData.time && 
+      bookingData.passengers;
+
+    const isHourlyComplete = isHourlyRental && 
+      bookingData?.isComplete && 
+      bookingData.city && 
+      bookingData.durationHours && 
+      bookingData.date && 
+      bookingData.time && 
+      bookingData.passengers;
+
+    if (isTransferComplete || isHourlyComplete) {
+      console.log(`Creating ${serviceType} booking request...`);
       
       const sessionId = visitorId || `ai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
+      // Build insert data based on service type
+      const insertData: Record<string, any> = {
+        pickup_date: bookingData.date,
+        pickup_time: bookingData.time,
+        passengers: bookingData.passengers,
+        vehicle_type: bookingData.vehicleType || 'mercedes-vito',
+        price: bookingData.estimatedPrice || null,
+        price_currency: bookingData.currency || 'EUR',
+        customer_session_id: sessionId,
+        status: 'pending',
+        language: language,
+        service_type: serviceType
+      };
+
+      if (isHourlyRental) {
+        // Hourly rental: use city as both pickup and dropoff
+        insertData.pickup = bookingData.city;
+        insertData.dropoff = bookingData.city;
+        insertData.city = bookingData.city;
+        insertData.duration_hours = bookingData.durationHours;
+      } else {
+        // Transfer: use pickup and dropoff locations
+        insertData.pickup = bookingData.pickup;
+        insertData.dropoff = bookingData.dropoff;
+      }
+
       const { data: quickBooking, error: qbError } = await supabase
         .from('quick_booking_requests')
-        .insert({
-          pickup: bookingData.pickup,
-          dropoff: bookingData.dropoff,
-          pickup_date: bookingData.date,
-          pickup_time: bookingData.time,
-          passengers: bookingData.passengers,
-          vehicle_type: bookingData.vehicleType || 'mercedes-vito',
-          price: bookingData.estimatedPrice || null,
-          price_currency: bookingData.currency || 'EUR',
-          customer_session_id: sessionId,
-          status: 'pending',
-          language: language
-        })
+        .insert(insertData)
         .select('id, confirmation_token')
         .single();
 
@@ -329,7 +363,7 @@ WRONG - DO NOT ask clarifying questions if all info is already in the message!`;
       } else {
         quickBookingId = quickBooking.id;
         confirmationToken = quickBooking.confirmation_token;
-        console.log("Quick booking created:", quickBookingId);
+        console.log("Quick booking created:", quickBookingId, "type:", serviceType);
       }
     }
 
