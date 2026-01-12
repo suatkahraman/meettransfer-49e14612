@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase, Sparkles, ThumbsUp } from "lucide-react";
+import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, ArrowLeftRight, Tag, CheckCircle2, CreditCard, Banknote, Briefcase, Sparkles, ThumbsUp, Timer } from "lucide-react";
 import confetti from "canvas-confetti";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -39,6 +40,7 @@ interface BookingRequest {
   luggage_count?: number;
   baby_seat_count?: number;
   all_vehicle_prices?: Record<string, number> | null; // Admin's manual prices for all vehicles
+  created_at?: string; // For elapsed time calculation
 }
 
 interface VehiclePriceInfo {
@@ -116,6 +118,10 @@ export default function QuickBookingConfirm() {
   
   // Payment method state
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "payment_link">("cash");
+  
+  // Elapsed time state for waiting screen
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const ESTIMATED_WAIT_MINUTES = 3; // 3 minutes estimated wait time
 
   const token = searchParams.get("token");
   const isNewRequest = searchParams.get("new") === "true"; // Flag for showing animation on initial load
@@ -198,6 +204,25 @@ export default function QuickBookingConfirm() {
       fetchAllVehiclePrices();
     }
   }, [booking?.id, booking?.status]);
+
+  // Elapsed time counter for waiting screen
+  useEffect(() => {
+    if (!waitingForPrice || !booking?.created_at) return;
+    
+    // Calculate initial elapsed time
+    const createdAt = new Date(booking.created_at).getTime();
+    const now = Date.now();
+    const initialElapsed = Math.floor((now - createdAt) / 1000);
+    setElapsedSeconds(Math.max(0, initialElapsed));
+    
+    // Update every second
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - createdAt) / 1000);
+      setElapsedSeconds(Math.max(0, elapsed));
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [waitingForPrice, booking?.created_at]);
 
   // Realtime subscription for price updates
   useEffect(() => {
@@ -953,6 +978,44 @@ export default function QuickBookingConfirm() {
                   <p className="font-bold text-xs">{booking.passengers}</p>
                 </div>
               </div>
+            </div>
+
+            {/* Estimated Wait Time Indicator */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 rounded-xl p-4 border border-blue-200/50 dark:border-blue-800/30">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Timer className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                    {t("qbEstimatedWaitTime") || "Tahmini Bekleme Süresi"}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                    {Math.floor(elapsedSeconds / 60)}:{(elapsedSeconds % 60).toString().padStart(2, '0')}
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-1">
+                    / ~{ESTIMATED_WAIT_MINUTES}:00
+                  </span>
+                </div>
+              </div>
+              
+              {/* Progress bar */}
+              <div className="relative">
+              <Progress 
+                  value={Math.min((elapsedSeconds / (ESTIMATED_WAIT_MINUTES * 60)) * 100, 100)} 
+                  className="h-2 bg-blue-100 dark:bg-blue-900/50"
+                  indicatorClassName="bg-blue-500 dark:bg-blue-400"
+                />
+                {elapsedSeconds >= ESTIMATED_WAIT_MINUTES * 60 && (
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-2 text-center animate-pulse">
+                    {t("qbTakingLonger") || "Biraz daha uzun sürüyor, lütfen bekleyin..."}
+                  </p>
+                )}
+              </div>
+              
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                {t("qbEstimatedWaitDesc") || "Genellikle 1-3 dakika içinde yanıt alırsınız"}
+              </p>
             </div>
 
             {/* Status Message */}
