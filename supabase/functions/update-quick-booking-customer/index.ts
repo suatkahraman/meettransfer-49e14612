@@ -138,6 +138,13 @@ serve(async (req) => {
       updateData.price = requestData.newPrice;
     }
 
+    // Get old reservation data for audit log
+    const { data: oldReservation } = await supabase
+      .from("reservations")
+      .select("*")
+      .eq("id", requestData.reservationId)
+      .single();
+
     // Update the main reservation
     const { data: updatedReservation, error: updateError } = await supabase
       .from("reservations")
@@ -152,6 +159,43 @@ serve(async (req) => {
     }
 
     console.log("Main reservation updated:", updatedReservation.reservation_code);
+    console.log("Customer account created/linked - User ID:", userId, "Email:", requestData.customerEmail);
+
+    // Log audit for customer account creation and reservation linking
+    try {
+      const auditAction = requestData.isGoogleAuth ? "customer_google_signup" : "customer_account_created";
+      await supabase
+        .from("audit_logs")
+        .insert({
+          user_id: userId,
+          user_email: requestData.customerEmail,
+          action: auditAction,
+          table_name: "reservations",
+          record_id: requestData.reservationId,
+          old_data: oldReservation ? {
+            customer_id: oldReservation.customer_id,
+            customer_name: oldReservation.customer_name,
+            status: oldReservation.status,
+          } : null,
+          new_data: {
+            customer_id: userId,
+            customer_name: requestData.customerName,
+            customer_email: requestData.customerEmail,
+            customer_phone: requestData.customerPhone,
+            status: "customer_approved",
+            vehicle_type: updateData.vehicle_type || updatedReservation.vehicle_type,
+            price: updateData.price || updatedReservation.price,
+            reservation_code: updatedReservation.reservation_code,
+            is_google_auth: requestData.isGoogleAuth || false,
+          },
+          ip_address: null,
+          user_agent: "quick-booking-customer-info",
+        });
+      console.log(`✅ Audit log created: ${auditAction} - Reservation ${updatedReservation.reservation_code} linked to customer ${requestData.customerEmail} (User ID: ${userId})`);
+    } catch (auditError) {
+      console.error("Failed to create audit log:", auditError);
+      // Don't fail the operation for audit log failure
+    }
 
     // Update return reservation if exists
     if (requestData.returnReservationCode) {
