@@ -885,6 +885,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbReject: "Reject",
     rejectButtonHint: "Request better price",
     qbByConfirming: "By confirming, you'll proceed to complete your booking details.",
+    qbEstimatedWaitTime: "Estimated Wait Time",
+    qbTakingLonger: "Taking a bit longer, please wait...",
+    qbEstimatedWaitDesc: "You usually receive a response within 1-3 minutes",
     
     // Footer
     footerDescription: "Premium VIP transfer services from all major international airports across Turkey, Dubai, and Cyprus. Experience luxury travel with our professional chauffeurs and premium fleet.",
@@ -2430,6 +2433,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbReject: "Ablehnen",
     rejectButtonHint: "Besseren Preis anfordern",
     qbByConfirming: "Mit der Bestätigung fahren Sie fort, Ihre Buchungsdetails zu vervollständigen.",
+    qbEstimatedWaitTime: "Geschätzte Wartezeit",
+    qbTakingLonger: "Es dauert etwas länger, bitte warten...",
+    qbEstimatedWaitDesc: "Sie erhalten in der Regel innerhalb von 1-3 Minuten eine Antwort",
     
     // Footer
     footerDescription: "Premium VIP Transferdienste von allen großen internationalen Flughäfen in der Türkei, Dubai und Zypern. Erleben Sie Luxusreisen mit unseren professionellen Chauffeuren und Premium-Flotte.",
@@ -4056,6 +4062,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbReject: "Refuser",
     rejectButtonHint: "Demander un meilleur prix",
     qbByConfirming: "En confirmant, vous procéderez à compléter les détails de votre réservation.",
+    qbEstimatedWaitTime: "Temps d'attente estimé",
+    qbTakingLonger: "Cela prend un peu plus de temps, veuillez patienter...",
+    qbEstimatedWaitDesc: "Vous recevez généralement une réponse dans 1-3 minutes",
     
     // Footer
     footerDescription: "Services de transfert VIP premium depuis tous les grands aéroports internationaux en Turquie, Dubaï et Chypre. Vivez le voyage de luxe avec nos chauffeurs professionnels et notre flotte premium.",
@@ -5420,6 +5429,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbReject: "Отклонить",
     rejectButtonHint: "Запросить лучшую цену",
     qbByConfirming: "Подтверждая, вы перейдете к заполнению деталей бронирования.",
+    qbEstimatedWaitTime: "Расчётное время ожидания",
+    qbTakingLonger: "Это занимает немного больше времени, пожалуйста, подождите...",
+    qbEstimatedWaitDesc: "Обычно вы получаете ответ в течение 1-3 минут",
     
     // Footer
     footerDescription: "Премиальные VIP трансферы из всех крупных международных аэропортов Турции, Дубая и Кипра. Испытайте роскошные путешествия с нашими профессиональными водителями и премиальным автопарком.",
@@ -6656,6 +6668,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbReject: "Rifiuta",
     rejectButtonHint: "Richiedi un prezzo migliore",
     qbByConfirming: "Confermando, procederai a completare i dettagli della tua prenotazione.",
+    qbEstimatedWaitTime: "Tempo di attesa stimato",
+    qbTakingLonger: "Ci vuole un po' di più, per favore attendi...",
+    qbEstimatedWaitDesc: "Di solito ricevi una risposta entro 1-3 minuti",
     
     // Footer
     footerDescription: "Servizi di trasferimento VIP premium da tutti i principali aeroporti internazionali in Turchia, Dubai e Cipro. Vivi viaggi di lusso con i nostri autisti professionisti e la nostra flotta premium.",
@@ -7945,6 +7960,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbReject: "Rechazar",
     rejectButtonHint: "Solicitar mejor precio",
     qbByConfirming: "Al confirmar, procederá a completar los detalles de su reserva.",
+    qbEstimatedWaitTime: "Tiempo de espera estimado",
+    qbTakingLonger: "Está tardando un poco más, por favor espere...",
+    qbEstimatedWaitDesc: "Normalmente recibe una respuesta en 1-3 minutos",
     
     // Footer
     footerDescription: "Servicios de transfer VIP premium desde los principales aeropuertos internacionales de Turquía, Dubái y Chipre. Experimente viajes de lujo con nuestros chóferes profesionales y flota premium.",
@@ -9234,6 +9252,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbReject: "رفض",
     rejectButtonHint: "طلب سعر أفضل",
     qbByConfirming: "بالتأكيد، ستنتقل لإكمال تفاصيل حجزك.",
+    qbEstimatedWaitTime: "وقت الانتظار المقدر",
+    qbTakingLonger: "يستغرق وقتاً أطول قليلاً، يرجى الانتظار...",
+    qbEstimatedWaitDesc: "عادة ما تتلقى رداً خلال 1-3 دقائق",
     
     // Footer
     footerDescription: "خدمات النقل VIP الفاخرة من جميع المطارات الدولية الرئيسية في تركيا ودبي وقبرص. استمتع بالسفر الفاخر مع سائقينا المحترفين وأسطولنا المتميز.",
@@ -10473,6 +10494,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbReject: "Reddet",
     rejectButtonHint: "Daha iyi fiyat iste",
     qbByConfirming: "Onaylayarak, rezervasyon detaylarınızı tamamlamaya devam edeceksiniz.",
+    qbEstimatedWaitTime: "Tahmini Bekleme Süresi",
+    qbTakingLonger: "Biraz daha uzun sürüyor, lütfen bekleyin...",
+    qbEstimatedWaitDesc: "Genellikle 1-3 dakika içinde yanıt alırsınız",
     
     // Footer
     footerDescription: "Türkiye, Dubai ve Kıbrıs'taki tüm büyük uluslararası havalimanlarından premium VIP transfer hizmetleri. Profesyonel şoförlerimiz ve premium filomuzla lüks seyahatin keyfini çıkarın.",
@@ -11835,6 +11859,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbReject: "Відхилити",
     rejectButtonHint: "Запросити кращу ціну",
     qbByConfirming: "Підтверджуючи, ви перейдете до заповнення деталей бронювання.",
+    qbEstimatedWaitTime: "Орієнтовний час очікування",
+    qbTakingLonger: "Це займає трохи більше часу, будь ласка, зачекайте...",
+    qbEstimatedWaitDesc: "Зазвичай ви отримуєте відповідь протягом 1-3 хвилин",
     
     // Footer
     footerDescription: "Преміальні VIP трансфери з усіх великих міжнародних аеропортів Туреччини, Дубая та Кіпру. Відчуйте розкішні подорожі з нашими професійними водіями та преміальним автопарком.",
