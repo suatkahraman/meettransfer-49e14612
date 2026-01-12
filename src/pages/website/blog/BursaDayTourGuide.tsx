@@ -46,7 +46,7 @@ const BursaDayTourGuide = () => {
         description={t("blogBursaSeoDesc")}
         keywords="Istanbul to Bursa day trip 2025, Bursa day tour, Bursa from Istanbul, Cumalıkızık village, Uludağ cable car, Green Mosque Bursa, Grand Mosque Bursa, İskender kebab Bursa, Bursa thermal baths, Ottoman capital Bursa, Bursa private transfer, Bursa ski resort, Osmangazi Bridge, Istanbul Bursa transfer price"
         canonicalPath="/blog/istanbul-bursa-day-tour-guide"
-        ogImage="https://meettransfer.app/images/bursa-transfer-hero.jpg"
+        ogImage="https://meettransfer.app/og/bursa-day-tour-og.jpg"
         ogType="article"
         articlePublishedTime="2024-12-26"
         articleModifiedTime="2025-01-10"
@@ -59,7 +59,7 @@ const BursaDayTourGuide = () => {
             type: 'Article',
             headline: t("blogBursaH1"),
             description: t("blogBursaSeoDesc"),
-            image: 'https://meettransfer.app/images/bursa-transfer-hero.jpg',
+            image: 'https://meettransfer.app/og/bursa-day-tour-og.jpg',
             datePublished: '2024-12-26',
             dateModified: '2025-01-10',
             author: 'Meet Transfer',

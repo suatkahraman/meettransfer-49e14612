@@ -75,7 +75,7 @@ const IstanbulTransferPriceGuide = () => {
         description={t("blogPriceSeoDesc")}
         keywords="Istanbul Airport transfer price 2025, IST transfer cost, private transfer Istanbul price, Istanbul Airport to Taksim price, airport transfer pricing Turkey, Istanbul Airport transfer fare, VIP transfer Istanbul cost, Mercedes transfer Istanbul, Istanbul Airport to hotel price, Sultanahmet transfer cost"
         canonicalPath="/blog/istanbul-airport-transfer-price-guide"
-        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
+        ogImage="https://meettransfer.app/og/istanbul-transfer-og.jpg"
         ogType="article"
         articlePublishedTime="2024-12-10"
         articleModifiedTime="2025-01-10"
@@ -88,7 +88,7 @@ const IstanbulTransferPriceGuide = () => {
             type: 'Article',
             headline: t("blogPriceH1"),
             description: t("blogPriceSeoDesc"),
-            image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+            image: 'https://meettransfer.app/og/istanbul-transfer-og.jpg',
             datePublished: '2024-12-10',
             dateModified: '2025-01-10',
             author: 'Meet Transfer',

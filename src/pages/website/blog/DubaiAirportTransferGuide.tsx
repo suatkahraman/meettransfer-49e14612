@@ -61,7 +61,7 @@ const DubaiAirportTransferGuide = () => {
         description={t("blogDubaiSeoDesc")}
         keywords="Dubai airport transfer 2025, DXB private transfer, Dubai Airport to Downtown, Palm Jumeirah transfer, Dubai VIP transfer, Dubai luxury transfer, Dubai Marina transfer, Burj Khalifa transfer, JBR transfer, Business Bay transfer, Dubai Airport to hotel, DWC airport transfer, Al Maktoum airport, Abu Dhabi transfer, Dubai chauffeur service"
         canonicalPath="/blog/dubai-airport-transfer-guide"
-        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
+        ogImage="https://meettransfer.app/og/dubai-transfer-og.jpg"
         ogType="article"
         articlePublishedTime="2024-12-26"
         articleModifiedTime="2025-01-10"
@@ -74,7 +74,7 @@ const DubaiAirportTransferGuide = () => {
             type: 'Article',
             headline: t("blogDubaiH1"),
             description: t("blogDubaiSeoDesc"),
-            image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+            image: 'https://meettransfer.app/og/dubai-transfer-og.jpg',
             datePublished: '2024-12-26',
             dateModified: '2025-01-10',
             author: 'Meet Transfer',

@@ -65,7 +65,7 @@ const AntalyaAirportTransferGuide = () => {
         description={t("blogAntalyaSeoDesc")}
         keywords="Antalya airport transfer 2025, AYT airport hotel transfer, Antalya to Belek transfer, Antalya to Side transfer, Lara Beach transfer, private transfer Antalya, Kemer transfer, Alanya airport transfer, Antalya VIP transfer price, Antalya airport taxi cost"
         canonicalPath="/blog/antalya-airport-transfer-to-hotels"
-        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
+        ogImage="https://meettransfer.app/og/antalya-transfer-og.jpg"
         ogType="article"
         articlePublishedTime="2024-11-28"
         articleModifiedTime="2025-01-10"
@@ -78,7 +78,7 @@ const AntalyaAirportTransferGuide = () => {
             type: 'Article',
             headline: t("blogAntalyaH1"),
             description: t("blogAntalyaSeoDesc"),
-            image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+            image: 'https://meettransfer.app/og/antalya-transfer-og.jpg',
             datePublished: '2024-11-28',
             dateModified: '2025-01-10',
             author: 'Meet Transfer',

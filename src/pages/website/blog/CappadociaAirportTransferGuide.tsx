@@ -88,7 +88,7 @@ const CappadociaAirportTransferGuide = () => {
           : "VIP transfer from Kayseri and Nevsehir airports to Göreme, Ürgüp and other Cappadocia regions. Balloon tour transfers, current prices and hotel list."}
         keywords="Cappadocia airport transfer 2025, Kayseri airport to Göreme, Nevsehir airport transfer, Cappadocia balloon tour transfer, Göreme hotel transfer, Ürgüp transfer, Cappadocia VIP transfer price, Kapadokya havalimanı transfer, balon turu transfer"
         canonicalPath="/blog/cappadocia-airport-transfer-guide"
-        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
+        ogImage="https://meettransfer.app/og/cappadocia-transfer-og.jpg"
         ogType="article"
         articlePublishedTime="2025-01-10"
         articleModifiedTime="2025-01-10"
@@ -105,7 +105,7 @@ const CappadociaAirportTransferGuide = () => {
             description: language === 'TR'
               ? "Kayseri ve Nevşehir havalimanlarından Kapadokya transferi hakkında kapsamlı rehber"
               : "Comprehensive guide about transfers from Kayseri and Nevsehir airports to Cappadocia",
-            image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+            image: 'https://meettransfer.app/og/cappadocia-transfer-og.jpg',
             datePublished: '2025-01-10',
             dateModified: '2025-01-10',
             author: 'Meet Transfer',
