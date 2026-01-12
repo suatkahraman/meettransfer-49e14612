@@ -297,7 +297,7 @@ export const useTwoFactorAuth = () => {
     }
   }, []);
 
-  const verify2FA = useCallback(async (otpCode: string): Promise<TwoFactorResult> => {
+  const verify2FA = useCallback(async (otpCode: string): Promise<TwoFactorResult & { autoLogin?: boolean; email?: string }> => {
     if (!twoFactorState.userId) {
       setError('No pending 2FA verification');
       return { success: false, error: 'no_pending', errorCode: 'no_pending' };
@@ -356,6 +356,9 @@ export const useTwoFactorAuth = () => {
       // Register this device as trusted after successful verification
       await registerTrustedDevice(twoFactorState.userId);
 
+      // Store email for auto-login
+      const userEmail = data.email || twoFactorState.email;
+
       // Reset state on success
       setTwoFactorState({
         isPending: false,
@@ -367,7 +370,11 @@ export const useTwoFactorAuth = () => {
         errorCode: null,
       });
 
-      return { success: true };
+      return { 
+        success: true,
+        autoLogin: data.autoLogin,
+        email: userEmail
+      };
     } catch (err: any) {
       console.error('2FA verification error:', err);
       const errorMessage = err.message || 'Doğrulama başarısız';
@@ -380,7 +387,7 @@ export const useTwoFactorAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [twoFactorState.userId, twoFactorState.attempts, registerTrustedDevice]);
+  }, [twoFactorState.userId, twoFactorState.attempts, twoFactorState.email, registerTrustedDevice, otpSettings.maxVerifyAttempts, otpSettings.otpLength]);
 
   const resendOTP = useCallback(async (): Promise<TwoFactorResult> => {
     if (!twoFactorState.userId || !twoFactorState.email || !twoFactorState.role) {

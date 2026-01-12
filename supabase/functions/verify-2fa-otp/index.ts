@@ -134,11 +134,49 @@ const handler = async (req: Request): Promise<Response> => {
     // Clear rate limit on successful verification
     verifyRateLimit.delete(userId);
 
+    // Generate a magic link token for auto-login after 2FA
+    // Use admin API to create a session for the user
+    const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
+    
+    if (userError || !userData?.user) {
+      console.error("Failed to get user for session:", userError);
+      return new Response(
+        JSON.stringify({ success: true, message: "Doğrulama başarılı", autoLogin: false }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Generate a magic link for the user to auto-login
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email: userData.user.email!,
+      options: {
+        redirectTo: `${req.headers.get('origin') || 'https://meettransfer.app'}/auth/callback`,
+      }
+    });
+
+    if (linkError) {
+      console.error("Failed to generate magic link:", linkError);
+      // Still return success, user will need to login manually
+      return new Response(
+        JSON.stringify({ success: true, message: "Doğrulama başarılı", autoLogin: false }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const duration = Date.now() - startTime;
     console.log(`2FA OTP verified successfully for user: ${userId} (duration: ${duration}ms)`);
 
+    // Return the magic link token for client to use
     return new Response(
-      JSON.stringify({ success: true, message: "Doğrulama başarılı" }),
+      JSON.stringify({ 
+        success: true, 
+        message: "Doğrulama başarılı",
+        autoLogin: true,
+        // Extract the token from the magic link
+        magicLinkToken: linkData.properties?.hashed_token,
+        email: userData.user.email
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {

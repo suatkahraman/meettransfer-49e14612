@@ -121,22 +121,31 @@ const AgencyLoginScreen = () => {
   // Handle 2FA verification success
   const handle2FAVerify = async (code: string) => {
     const result = await verify2FA(code);
-    if (result.success && user && pendingRole) {
-      await logLoginAttempt(user.email || '', true, undefined, undefined, pendingRole);
+    if (result.success && pendingRole) {
+      // Log successful login attempt
+      const userEmail = result.email || twoFactorState.email || '';
+      await logLoginAttempt(userEmail, true, undefined, undefined, pendingRole);
       
-      switch (pendingRole) {
-        case 'admin':
-          navigate('/admin', { replace: true });
-          break;
-        case 'driver':
-          navigate('/driver', { replace: true });
-          break;
-        case 'agency':
-          navigate('/agency', { replace: true });
-          break;
-        default:
-          navigate('/customer', { replace: true });
-      }
+      // After successful 2FA, we need to sign the user back in
+      // The user was signed out before 2FA, now we redirect to complete login
+      toast.success(language === 'TR' ? 'Doğrulama başarılı! Yönlendiriliyorsunuz...' : 'Verification successful! Redirecting...');
+      
+      // Small delay to show success message, then redirect
+      setTimeout(() => {
+        switch (pendingRole) {
+          case 'admin':
+            navigate('/admin', { replace: true });
+            break;
+          case 'driver':
+            navigate('/driver', { replace: true });
+            break;
+          case 'agency':
+            navigate('/agency', { replace: true });
+            break;
+          default:
+            navigate('/customer', { replace: true });
+        }
+      }, 500);
     }
   };
 
