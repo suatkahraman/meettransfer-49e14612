@@ -17,6 +17,7 @@ import { getCurrencySymbol } from "@/lib/currency";
 import { VEHICLE_TYPE_MAP } from "@/lib/vehicleTypes";
 import { VehicleSelectionCard, VehicleBadgeType } from "@/components/VehicleSelectionCard";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
+import { CityImageCard } from "@/components/ui/city-image-card";
 
 interface BookingRequest {
   id: string;
@@ -934,6 +935,11 @@ export default function QuickBookingConfirm() {
               </div>
             </div>
 
+            {/* City Image for Hourly Rental */}
+            {booking.service_type === 'hourly' && booking.city && (
+              <CityImageCard city={booking.city} className="mb-4" />
+            )}
+            
             {/* Booking Details Card */}
             <div className="bg-gradient-to-br from-muted/80 to-muted/40 rounded-xl p-4 mb-6 space-y-3 border border-border/50">
               {/* Service Type Badge for Hourly Rental */}
@@ -1130,12 +1136,19 @@ export default function QuickBookingConfirm() {
             </p>
           </div>
 
-          {/* Route Map */}
-          <CompactRouteMap 
-            pickup={booking.pickup} 
-            dropoff={booking.dropoff}
-            className="mb-4 sm:mb-6"
-          />
+          {/* Route Map or City Image */}
+          {booking.service_type === 'hourly' && booking.city ? (
+            <CityImageCard 
+              city={booking.city}
+              className="mb-4 sm:mb-6"
+            />
+          ) : (
+            <CompactRouteMap 
+              pickup={booking.pickup} 
+              dropoff={booking.dropoff}
+              className="mb-4 sm:mb-6"
+            />
+          )}
 
           {/* Transfer Details - Mobile Optimized */}
           <div className="bg-muted/50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 space-y-2 sm:space-y-3">
