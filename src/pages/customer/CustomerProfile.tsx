@@ -8,12 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2, User, Phone, Mail, CheckCircle, AlertCircle, Sparkles, Shield, History, Star, Award } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, User, Phone, Mail, CheckCircle, AlertCircle, Sparkles, Shield, History, Star, Award, Bell, BellOff, BellRing } from 'lucide-react';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 import meetTransferLogo from '@/assets/meet-transfer-logo-small.webp';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 const profileSchema = z.object({
   full_name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
@@ -24,6 +26,7 @@ const CustomerProfile = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const { isSupported, isSubscribed, isLoading: pushLoading, permission, subscribe, unsubscribe } = usePushNotifications();
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -63,6 +66,15 @@ const CustomerProfile = () => {
       namePlaceholder: 'Enter your full name',
       phonePlaceholder: 'Enter your phone number',
       emailPlaceholder: 'Enter new email address',
+      notifications: 'Notifications',
+      notificationsDesc: 'Manage your notification preferences',
+      pushNotifications: 'Push Notifications',
+      pushEnabled: 'Enabled',
+      pushDisabled: 'Disabled',
+      pushNotSupported: 'Not supported on this device',
+      pushDenied: 'Permission denied in browser settings',
+      enablePush: 'Enable',
+      disablePush: 'Disable',
     },
     TR: {
       title: 'Profilim',
@@ -85,6 +97,15 @@ const CustomerProfile = () => {
       namePlaceholder: 'Adınızı ve soyadınızı girin',
       phonePlaceholder: 'Telefon numaranızı girin',
       emailPlaceholder: 'Yeni e-posta adresinizi girin',
+      notifications: 'Bildirimler',
+      notificationsDesc: 'Bildirim tercihlerinizi yönetin',
+      pushNotifications: 'Anlık Bildirimler',
+      pushEnabled: 'Açık',
+      pushDisabled: 'Kapalı',
+      pushNotSupported: 'Bu cihazda desteklenmiyor',
+      pushDenied: 'Tarayıcı ayarlarından izin verilmedi',
+      enablePush: 'Aç',
+      disablePush: 'Kapat',
     },
     DE: {
       title: 'Mein Profil',
@@ -107,6 +128,15 @@ const CustomerProfile = () => {
       namePlaceholder: 'Geben Sie Ihren vollständigen Namen ein',
       phonePlaceholder: 'Geben Sie Ihre Telefonnummer ein',
       emailPlaceholder: 'Geben Sie Ihre neue E-Mail-Adresse ein',
+      notifications: 'Benachrichtigungen',
+      notificationsDesc: 'Verwalten Sie Ihre Benachrichtigungseinstellungen',
+      pushNotifications: 'Push-Benachrichtigungen',
+      pushEnabled: 'Aktiviert',
+      pushDisabled: 'Deaktiviert',
+      pushNotSupported: 'Auf diesem Gerät nicht unterstützt',
+      pushDenied: 'Berechtigung in den Browsereinstellungen verweigert',
+      enablePush: 'Aktivieren',
+      disablePush: 'Deaktivieren',
     },
     FR: {
       title: 'Mon Profil',
@@ -129,6 +159,15 @@ const CustomerProfile = () => {
       namePlaceholder: 'Entrez votre nom complet',
       phonePlaceholder: 'Entrez votre numéro de téléphone',
       emailPlaceholder: 'Entrez votre nouvelle adresse e-mail',
+      notifications: 'Notifications',
+      notificationsDesc: 'Gérez vos préférences de notification',
+      pushNotifications: 'Notifications push',
+      pushEnabled: 'Activé',
+      pushDisabled: 'Désactivé',
+      pushNotSupported: 'Non pris en charge sur cet appareil',
+      pushDenied: 'Autorisation refusée dans les paramètres du navigateur',
+      enablePush: 'Activer',
+      disablePush: 'Désactiver',
     },
     RU: {
       title: 'Мой профиль',
@@ -151,6 +190,15 @@ const CustomerProfile = () => {
       namePlaceholder: 'Введите ваше полное имя',
       phonePlaceholder: 'Введите ваш номер телефона',
       emailPlaceholder: 'Введите новый адрес электронной почты',
+      notifications: 'Уведомления',
+      notificationsDesc: 'Управляйте настройками уведомлений',
+      pushNotifications: 'Push-уведомления',
+      pushEnabled: 'Включено',
+      pushDisabled: 'Отключено',
+      pushNotSupported: 'Не поддерживается на этом устройстве',
+      pushDenied: 'Разрешение отклонено в настройках браузера',
+      enablePush: 'Включить',
+      disablePush: 'Отключить',
     },
     AR: {
       title: 'ملفي الشخصي',
@@ -173,6 +221,15 @@ const CustomerProfile = () => {
       namePlaceholder: 'أدخل اسمك الكامل',
       phonePlaceholder: 'أدخل رقم هاتفك',
       emailPlaceholder: 'أدخل عنوان بريدك الإلكتروني الجديد',
+      notifications: 'الإشعارات',
+      notificationsDesc: 'إدارة تفضيلات الإشعارات',
+      pushNotifications: 'الإشعارات الفورية',
+      pushEnabled: 'مفعل',
+      pushDisabled: 'معطل',
+      pushNotSupported: 'غير مدعوم على هذا الجهاز',
+      pushDenied: 'تم رفض الإذن في إعدادات المتصفح',
+      enablePush: 'تفعيل',
+      disablePush: 'تعطيل',
     },
   };
 
@@ -560,11 +617,91 @@ const CustomerProfile = () => {
           </Card>
         </motion.div>
 
-        {/* Quick Actions Card */}
+        {/* Notifications Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
+          className="mt-6"
+        >
+          <Card className="shadow-md border-border/50 overflow-hidden">
+            <CardHeader className="pb-4 bg-muted/30 border-b border-border/50">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                  <Bell className="h-4 w-4 text-amber-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-base">{txt.notifications}</CardTitle>
+                  <CardDescription className="text-xs">{txt.notificationsDesc}</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                    isSubscribed ? 'bg-green-500/10' : 'bg-muted'
+                  }`}>
+                    {isSubscribed ? (
+                      <BellRing className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <BellOff className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{txt.pushNotifications}</p>
+                    {!isSupported ? (
+                      <p className="text-xs text-muted-foreground">{txt.pushNotSupported}</p>
+                    ) : permission === 'denied' ? (
+                      <p className="text-xs text-destructive">{txt.pushDenied}</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        {isSubscribed ? txt.pushEnabled : txt.pushDisabled}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                {isSupported && permission !== 'denied' && (
+                  <div className="flex items-center gap-2">
+                    {pushLoading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    ) : (
+                      <Switch
+                        checked={isSubscribed}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            subscribe();
+                          } else {
+                            unsubscribe();
+                          }
+                        }}
+                        className="data-[state=checked]:bg-green-500"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Info message for denied permission */}
+              {permission === 'denied' && (
+                <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                    {language === 'TR' 
+                      ? 'Bildirimleri etkinleştirmek için tarayıcı ayarlarından izin vermeniz gerekiyor.'
+                      : 'To enable notifications, please allow them in your browser settings.'}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Quick Actions Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
           className="mt-6"
         >
           <Card className="shadow-md border-border/50">
