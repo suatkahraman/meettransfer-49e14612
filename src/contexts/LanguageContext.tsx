@@ -12981,14 +12981,18 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const { language, fromPrefix } = resolveLanguage(location.pathname);
 
   // Merge base translations with blog translations
+  // Blog translations from BlogTranslations.tsx take precedence, then fall back to main translations
   const mergedTranslations = useMemo(() => {
     const result: Record<Language, Record<string, string>> = {} as Record<Language, Record<string, string>>;
     const languages: Language[] = ["EN", "DE", "FR", "RU", "IT", "ES", "AR", "TR", "UK", "JA"];
     
     for (const lang of languages) {
+      // First add blog translations, then main translations
+      // This ensures main translations (which have complete blog content) are available
+      // and blog translations can override specific keys if needed
       result[lang] = {
-        ...translations[lang],
         ...blogTranslations[lang],
+        ...translations[lang],
       };
     }
     
