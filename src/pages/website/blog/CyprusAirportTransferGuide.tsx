@@ -198,8 +198,8 @@ const CyprusAirportTransferGuide = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("blogPriceTableDestination")}</TableHead>
-                  <TableHead>{t("blogDubaiTableDuration")}</TableHead>
-                  <TableHead>{t("blogDubaiTablePrice")}</TableHead>
+                  <TableHead>{t("blogCyprusTableDuration")}</TableHead>
+                  <TableHead>{t("blogCyprusTablePrice")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -223,8 +223,8 @@ const CyprusAirportTransferGuide = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("blogPriceTableDestination")}</TableHead>
-                  <TableHead>{t("blogDubaiTableDuration")}</TableHead>
-                  <TableHead>{t("blogDubaiTablePrice")}</TableHead>
+                  <TableHead>{t("blogCyprusTableDuration")}</TableHead>
+                  <TableHead>{t("blogCyprusTablePrice")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
