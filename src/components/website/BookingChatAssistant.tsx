@@ -518,26 +518,30 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
         speak(assistantMessage.content);
       }
 
-      // If booking was created, show success and redirect
+      // If booking was created, show success and navigate to confirm page
       if (data.quickBookingId && data.confirmationToken) {
         setBookingCreated({ id: data.quickBookingId, token: data.confirmationToken });
         
-        // Show success message with redirect countdown
+        // Show price summary message
+        const priceInfo = data.bookingData?.estimatedPrice 
+          ? `${data.bookingData.currency === "TRY" ? "₺" : data.bookingData.currency === "USD" ? "$" : "€"}${data.bookingData.estimatedPrice}` 
+          : "";
+        
         setTimeout(() => {
           const successMessage: Message = {
             id: (Date.now() + 2).toString(),
             role: "assistant",
             content: language === "TR" 
-              ? "✅ Rezervasyonunuz oluşturuldu! İletişim bilgilerinizi girmek için yönlendiriliyorsunuz..."
-              : "✅ Your reservation has been created! Redirecting you to enter your contact details..."
+              ? `✅ Rezervasyonunuz oluşturuldu! ${priceInfo ? `Fiyat: ${priceInfo}` : ""}\n\nBilgilerinizi tamamlamak için onay sayfasına yönlendiriliyorsunuz...`
+              : `✅ Your reservation is ready! ${priceInfo ? `Price: ${priceInfo}` : ""}\n\nRedirecting you to the confirmation page...`
           };
           setMessages(prev => [...prev, successMessage]);
           
-          // Redirect after 2 seconds
+          // Redirect after 1.5 seconds to confirmation page
           setTimeout(() => {
-            navigate(`/quick-booking-info?token=${data.confirmationToken}`);
-          }, 2000);
-        }, 1000);
+            navigate(`/quick-booking?token=${data.confirmationToken}&new=true`);
+          }, 1500);
+        }, 500);
       }
 
     } catch (error) {
@@ -907,17 +911,63 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                           )}
                         </div>
                         
-                        {/* Booking Action Button */}
+                        {/* Booking Action Buttons */}
                         {msg.bookingData?.isComplete && (
                           <motion.div
                             initial={{ opacity: 0, y: 10, scale: 0.9 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             transition={{ delay: 0.2 }}
+                            className="space-y-2"
                           >
+                            {/* Price Display */}
+                            {msg.bookingData.estimatedPrice && (
+                              <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl px-4 py-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-2xl">💰</span>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground">
+                                      {language === "TR" ? "Fiyat" : "Price"}
+                                    </p>
+                                    <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                                      {msg.bookingData.currency === "TRY" ? "₺" : 
+                                       msg.bookingData.currency === "USD" ? "$" : "€"}
+                                      {msg.bookingData.estimatedPrice}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Confirm Booking Button */}
+                            {bookingCreated?.token ? (
+                              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                                <CheckCircle2 className="h-5 w-5" />
+                                <span className="text-sm font-medium">
+                                  {language === "TR" ? "Yönlendiriliyor..." : "Redirecting..."}
+                                </span>
+                              </div>
+                            ) : (
+                              <Button
+                                size="lg"
+                                onClick={() => {
+                                  if (bookingCreated?.token) {
+                                    navigate(`/quick-booking?token=${bookingCreated.token}&new=true`);
+                                  }
+                                }}
+                                disabled={!bookingCreated}
+                                className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-green-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold gap-2 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 text-base py-6"
+                              >
+                                <CheckCircle2 className="h-5 w-5" />
+                                {language === "TR" ? "Rezervasyonu Onayla" : "Confirm Booking"}
+                              </Button>
+                            )}
+                            
+                            {/* Apply to Form Button (secondary) */}
                             <Button
                               size="sm"
+                              variant="outline"
                               onClick={() => handleApplyBooking(msg.bookingData!)}
-                              className="bg-gradient-to-r from-accent via-accent to-accent/90 hover:from-accent/90 hover:to-accent text-accent-foreground font-semibold gap-2 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
+                              className="w-full gap-2 rounded-xl"
                             >
                               <ArrowRight className="h-4 w-4" />
                               {t("applyToForm") || "Apply to Form"}
