@@ -358,22 +358,22 @@ const IstanbulTransferPriceGuide = () => {
                 { 
                   src: vitoVip1, 
                   alt: "Mercedes Vito VIP Transfer Istanbul",
-                  caption: "Mercedes Vito VIP - Luxury Airport Transfer"
+                  caption: t("blogPriceGalleryCaption1")
                 },
                 { 
                   src: vitoVip2, 
                   alt: "VIP Interior Istanbul Transfer",
-                  caption: "Premium leather interior with starlight ceiling"
+                  caption: t("blogPriceGalleryCaption2")
                 },
                 { 
                   src: sprinterInteriorBlue, 
                   alt: "Mercedes Sprinter VIP Minibus",
-                  caption: "Sprinter VIP - Perfect for groups"
+                  caption: t("blogPriceGalleryCaption3")
                 },
                 { 
                   src: vitoAirportAnime, 
                   alt: "Airport pickup service Istanbul",
-                  caption: "Professional meet & greet service"
+                  caption: t("blogPriceGalleryCaption4")
                 },
               ]}
               columns={2}
