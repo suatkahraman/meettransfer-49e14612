@@ -202,6 +202,7 @@ const translations: Record<Language, Record<string, string>> = {
     numberOfHours: "Number of Hours",
     pricesPerVehicle: "Prices per vehicle",
     calculatingPrice: "Calculating...",
+    convertingCurrency: "Converting currency...",
     hourlyMaxPassengers: "Hourly rental is available for up to 6 passengers",
     
     // Booking Process
@@ -1762,6 +1763,7 @@ const translations: Record<Language, Record<string, string>> = {
     fullDay: "8 Stunden (Ganztag)",
     customHourly: "9+ Stunden (Individuell)",
     hourlyMaxPassengers: "Stündliche Miete ist für bis zu 6 Passagiere verfügbar",
+    convertingCurrency: "Währung wird umgerechnet...",
     
     // Booking Process
     howBookingWorks: "So funktioniert unser Buchungsprozess",
@@ -3355,6 +3357,7 @@ const translations: Record<Language, Record<string, string>> = {
     fullDay: "8 Heures (Journée complète)",
     customHourly: "9+ Heures (Personnalisé)",
     hourlyMaxPassengers: "La location horaire est disponible pour jusqu'à 6 passagers",
+    convertingCurrency: "Conversion de la devise...",
     
     // Booking Process
     howBookingWorks: "Comment fonctionne notre processus de réservation",
@@ -4713,6 +4716,7 @@ const translations: Record<Language, Record<string, string>> = {
     fullDay: "8 Часов (Весь день)",
     customHourly: "9+ Часов (Индивидуально)",
     hourlyMaxPassengers: "Почасовая аренда доступна для до 6 пассажиров",
+    convertingCurrency: "Конвертация валюты...",
     
     // Booking Process
     howBookingWorks: "Как работает наш процесс бронирования",
@@ -5859,6 +5863,7 @@ const translations: Record<Language, Record<string, string>> = {
     fullDay: "8 Ore (Giornata intera)",
     customHourly: "9+ Ore (Personalizzato)",
     hourlyMaxPassengers: "Il noleggio orario è disponibile per un massimo di 6 passeggeri",
+    convertingCurrency: "Conversione valuta...",
     
     // Booking Process
     howBookingWorks: "Come funziona il nostro processo di prenotazione",
@@ -7058,6 +7063,7 @@ const translations: Record<Language, Record<string, string>> = {
     fullDay: "8 Horas (Día completo)",
     customHourly: "9+ Horas (Personalizado)",
     hourlyMaxPassengers: "El alquiler por hora está disponible para hasta 6 pasajeros",
+    convertingCurrency: "Convirtiendo moneda...",
     
     // Booking Process
     howBookingWorks: "Cómo funciona nuestro proceso de reserva",
@@ -8257,6 +8263,7 @@ const translations: Record<Language, Record<string, string>> = {
     fullDay: "8 ساعات (يوم كامل)",
     customHourly: "9+ ساعات (مخصص)",
     hourlyMaxPassengers: "التأجير بالساعة متاح لما يصل إلى 6 ركاب",
+    convertingCurrency: "تحويل العملة...",
     
     // Booking Process
     howBookingWorks: "كيف تعمل عملية الحجز",
@@ -9407,6 +9414,7 @@ const translations: Record<Language, Record<string, string>> = {
     pricesPerVehicle: "Araç başına fiyatlar",
     calculatingPrice: "Hesaplanıyor...",
     hourlyMaxPassengers: "Saatlik kiralama maksimum 6 yolcu içindir",
+    convertingCurrency: "Para birimi dönüştürülüyor...",
     
     // Booking Process
     howBookingWorks: "Rezervasyon Sürecimiz Nasıl İşliyor",
@@ -10699,6 +10707,7 @@ const translations: Record<Language, Record<string, string>> = {
     fullDay: "8 Годин (Весь день)",
     customHourly: "9+ Годин (Індивідуально)",
     hourlyMaxPassengers: "Погодинна оренда доступна для до 6 пасажирів",
+    convertingCurrency: "Конвертація валюти...",
     
     // Booking Process
     howBookingWorks: "Як працює наш процес бронювання",
@@ -11914,6 +11923,7 @@ const translations: Record<Language, Record<string, string>> = {
     fullDay: "8時間（終日）",
     customHourly: "9時間以上（カスタム）",
     hourlyMaxPassengers: "時間貸しは最大6名様までご利用いただけます",
+    convertingCurrency: "通貨を変換中...",
     hourlyDailyKmLimit: "1日の制限: 100 KM",
     hourlySameCityOnly: "時間貸しは同一都市内でのみ有効です",
     
