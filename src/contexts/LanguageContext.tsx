@@ -830,8 +830,8 @@ const translations: Record<Language, Record<string, string>> = {
     seoDubaiDesc: "Book premium Dubai airport transfer from DXB & DWC. Luxury Mercedes fleet (Vito, V-Class, Maybach), professional drivers, 24/7 meet & greet. Fixed prices to Palm Jumeirah, Downtown Dubai, Marina. Flight tracking included.",
     seoDubaiKeywords: "Dubai airport transfer, DXB airport transfer, DWC airport transfer, Dubai VIP transfer, Palm Jumeirah transfer, Downtown Dubai transfer, Dubai Marina transfer, Al Maktoum airport transfer, Dubai private driver, Dubai luxury transfer",
     seoCyprusTitle: "Cyprus Airport Transfer 2025 | VIP Private Transfer Larnaca, Paphos, Ercan | Meet Transfer",
-    seoCyprusDesc: "Book premium Cyprus airport transfer from Larnaca (LCA), Paphos (PFO) & Ercan (ECN). Luxury Mercedes fleet, professional drivers, 24/7 meet & greet. Fixed prices to Ayia Napa, Limassol, Kyrenia, Nicosia.",
-    seoCyprusKeywords: "Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Ercan airport transfer, Ayia Napa transfer, Limassol transfer, Kyrenia transfer, Northern Cyprus transfer, Cyprus VIP transfer",
+    seoCyprusDesc: "Book premium Cyprus airport transfer from Larnaca (LCA), Paphos (PFO) & Ercan (ECN). Luxury Mercedes fleet, professional drivers, 24/7 meet & greet. Fixed prices to Ayia Napa, Limassol, Protaras, Kyrenia, Coral Bay, Nicosia.",
+    seoCyprusKeywords: "Cyprus airport transfer, budget airport transfer Cyprus, luxury airport transfer Cyprus, VIP airport transfer Cyprus, Larnaca airport transfer, Larnaca Airport to Ayia Napa private transfer, Larnaca Airport to Protaras transfer, Paphos airport transfer, Paphos Airport to Coral Bay transfer, Paphos Airport to Limassol transfer, Ercan airport transfer, Ercan transfer price, airport pickup drop off Cyprus, group airport transfer Cyprus, family airport transfer Cyprus, Cyprus airport transfer online booking, Cyprus taxi transfer price, airport transfer reviews Cyprus, Ayia Napa transfer, Limassol transfer, Protaras transfer, Kyrenia transfer, Famagusta transfer, Northern Cyprus transfer, TRNC airport transfer service",
     dubaiAirportTransfer: "Dubai Airport Transfer",
     dubaiSubtitle: "Mercedes Vito, V-Class, Maybach | 24/7 Meet & Greet Service",
     dubaiH1: "Private Airport Transfer in Dubai",
@@ -1230,8 +1230,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogIstanbulHeroAlt: "Istanbul Airport to City Center 2025 - Private Transfer, Metro M11, Havaist Bus Options",
     
     // Cyprus Airport Transfer Guide - Detailed
-    blogCyprusSeoTitle: "Cyprus Airport Transfer Guide 2025 | Larnaca to Ayia Napa, Paphos to Limassol",
-    blogCyprusSeoDesc: "Complete Cyprus airport transfer guide. Private VIP transfers from Larnaca & Paphos airports from €35. Fixed prices to Ayia Napa, Limassol, Protaras, Kyrenia.",
+    blogCyprusSeoTitle: "Cyprus Airport Transfer Guide 2026 | Larnaca to Ayia Napa, Protaras | Paphos to Coral Bay, Limassol",
+    blogCyprusSeoDesc: "Complete Cyprus airport transfer guide with 2026 prices. Budget, luxury & VIP private transfers from Larnaca, Paphos, Ercan airports. Online booking, fixed prices to Ayia Napa, Protaras, Limassol, Kyrenia, Coral Bay. Group & family transfers available.",
     blogCyprusH1: "Cyprus Airport Transfer Guide 2025: Larnaca & Paphos",
     blogCyprusIntro: "Complete guide to Cyprus airport transportation. Compare private transfers and bus options from Larnaca and Paphos airports.",
     blogCyprusTransfers: "Cyprus Transfers",
@@ -10782,8 +10782,8 @@ const translations: Record<Language, Record<string, string>> = {
     seoDubaiDesc: "DXB ve DWC'den premium Dubai havalimanı transferi rezerve edin. Lüks Mercedes filosu (Vito, V-Class, Maybach), profesyonel şoförler, 7/24 karşılama. Palm Jumeirah, Downtown Dubai, Marina'ya sabit fiyatlar.",
     seoDubaiKeywords: "Dubai havalimanı transferi, DXB havalimanı transferi, DWC havalimanı transferi, Dubai VIP transfer, Palm Jumeirah transfer, Downtown Dubai transfer, Dubai Marina transfer, Dubai özel şoför",
     seoCyprusTitle: "Kıbrıs Havalimanı Transferi 2025 | VIP Özel Transfer Larnaka, Baf, Ercan | Meet Transfer",
-    seoCyprusDesc: "Larnaka (LCA), Baf (PFO) ve Ercan (ECN)'den premium Kıbrıs havalimanı transferi rezerve edin. Lüks Mercedes filosu, profesyonel şoförler, 7/24 karşılama. Ayia Napa, Limasol, Girne'ye sabit fiyatlar.",
-    seoCyprusKeywords: "Kıbrıs havalimanı transferi, Larnaka havalimanı transferi, Baf havalimanı transferi, Ercan havalimanı transferi, Ayia Napa transfer, Limasol transfer, Girne transfer, Kuzey Kıbrıs transfer",
+    seoCyprusDesc: "Larnaka (LCA), Baf (PFO) ve Ercan (ECN)'den premium Kıbrıs havalimanı transferi rezerve edin. Lüks Mercedes filosu, profesyonel şoförler, 7/24 karşılama. Ayia Napa, Protaras, Limasol, Girne, Coral Bay'e sabit fiyatlar.",
+    seoCyprusKeywords: "Kıbrıs havalimanı transferi, ucuz havalimanı transfer Kıbrıs, lüks havalimanı transfer Kıbrıs, VIP havalimanı transfer Kıbrıs, araçlı havalimanı transfer, Larnaka havalimanı transferi, Larnaka Havalimanından Ayia Napa özel transfer, Larnaka Havalimanından Protaras transfer, Baf havalimanı transferi, Baf Havalimanından Coral Bay transfer, Baf Havalimanından Limasol transfer, Ercan havalimanı transferi, Ercan transfer fiyat, Larnaca transfer fiyat, Paphos transfer fiyat, havalimanı transfer online rezervasyon, grup havalimanı transfer Kıbrıs, aile havalimanı transfer Kıbrıs, Kıbrıs taksi transfer fiyat, havalimanı transfer hizmeti yorumları, airport pickup drop off Cyprus, KKTC havalimanı transfer servisi, Ayia Napa transfer, Limasol transfer, Protaras transfer, Girne transfer, Gazimağusa transfer, Kuzey Kıbrıs transfer",
     dubaiAirportTransfer: "Dubai Havalimanı Transferi",
     dubaiSubtitle: "Mercedes Vito, V-Class, Maybach | 7/24 Karşılama Hizmeti",
     dubaiH1: "Dubai'de Özel Havalimanı Transferi",
@@ -11196,8 +11196,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogIstanbulHeroAlt: "İstanbul Havalimanından Şehir Merkezine 2025 - Özel Transfer, Metro M11, Havaist Otobüs Seçenekleri",
 
     // Cyprus Airport Transfer Guide - Detailed (TR)
-    blogCyprusSeoTitle: "Kıbrıs Havalimanı Transfer Rehberi 2025 | Larnaka'dan Ayia Napa'ya, Baf'tan Limasol'a",
-    blogCyprusSeoDesc: "Tam Kıbrıs havalimanı transfer rehberi. Larnaka ve Baf havalimanlarından €35'ten başlayan özel VIP transferler.",
+    blogCyprusSeoTitle: "Kıbrıs Havalimanı Transfer Rehberi 2026 | Larnaka Ayia Napa Protaras | Baf Coral Bay Limasol Fiyatları",
+    blogCyprusSeoDesc: "2026 fiyatlarıyla tam Kıbrıs havalimanı transfer rehberi. Ucuz, lüks ve VIP özel transferler. Larnaka, Baf, Ercan havalimanlarından online rezervasyon. Ayia Napa, Protaras, Limasol, Girne, Coral Bay sabit fiyatları. Grup ve aile transferleri.",
     blogCyprusTransfers: "Kıbrıs Transferleri",
     blogCyprusIslandParadise: "Akdeniz Ada Cenneti",
     blogCyprusSection1Title: "Giriş: Kıbrıs'ı Keşfedin",

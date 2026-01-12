@@ -102,7 +102,7 @@ const CyprusTransfer = () => {
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Cyprus', 'Larnaca', 'Paphos', 'Ayia Napa', 'Limassol', 'Kyrenia', 'Famagusta', 'Northern Cyprus', 'Protaras', 'Nicosia', 'Troodos'] },
+          { type: 'TransportationService', areaServed: ['Cyprus', 'Larnaca', 'Paphos', 'Ercan', 'Ayia Napa', 'Protaras', 'Limassol', 'Kyrenia', 'Famagusta', 'Northern Cyprus', 'TRNC', 'Coral Bay', 'Nicosia', 'Troodos', 'Polis'] },
           {
             type: 'BreadcrumbList',
             items: [
@@ -116,9 +116,9 @@ const CyprusTransfer = () => {
           {
             type: 'Product',
             name: 'Cyprus Airport VIP Transfer Service',
-            description: 'Premium VIP airport transfer from Larnaca, Paphos, and Ercan airports to Ayia Napa, Limassol, Kyrenia, and all Cyprus destinations including Northern Cyprus',
+            description: 'Premium VIP airport transfer from Larnaca, Paphos, and Ercan airports to Ayia Napa, Protaras, Limassol, Kyrenia, Coral Bay and all Cyprus destinations. Budget, luxury and VIP options. Group and family transfers. Online booking with fixed prices.',
             image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
-            offers: { price: '35', priceCurrency: 'USD' },
+            offers: { price: '35', priceCurrency: 'EUR' },
           },
         ]}
       />
