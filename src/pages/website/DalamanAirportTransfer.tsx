@@ -81,6 +81,7 @@ const DalamanAirportTransfer = () => {
         description="Book Dalaman Airport (DLM) private transfer from $35. Direct service to Fethiye, Ölüdeniz, Marmaris, Dalyan, Göcek & Kaş. 24/7 meet & greet. Book now!"
         keywords="Dalaman Airport transfer, DLM airport transfer, Dalaman to Fethiye transfer, Dalaman to Marmaris, Dalaman to Ölüdeniz, Dalaman Airport shuttle, Dalaman to Göcek yacht transfer"
         canonicalPath="/dalaman-airport-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[

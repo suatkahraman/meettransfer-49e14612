@@ -32,6 +32,7 @@ const IstanbulAirportHotelTransfer = () => {
         description="Book Istanbul Airport to hotel private transfer from €50. Direct delivery to Taksim, Sultanahmet & all Istanbul hotels. Meet & greet, fixed prices. Book now!"
         keywords="Istanbul Airport hotel transfer, IST to hotel, Istanbul Airport to Taksim hotel, airport hotel shuttle Istanbul, Istanbul hotel pickup"
         canonicalPath="/istanbul-airport-hotel-transfer"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg schemas={[
         { type: 'TransportationService', areaServed: ['Istanbul Airport', 'Taksim', 'Sultanahmet', 'Beşiktaş'] },

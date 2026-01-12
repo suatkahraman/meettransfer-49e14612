@@ -74,6 +74,7 @@ const EphesusPamukkale = () => {
         description={t("seoEphesusDesc")}
         keywords="Ephesus transfer, Pamukkale transfer, Ephesus tour, Pamukkale tour, Kuşadası cruise excursion, Ephesus private tour, Hierapolis transfer, Turkey ancient sites tour, Selçuk transfer"
         canonicalPath="/ephesus-pamukkale"
+        ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[
