@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
@@ -6,10 +6,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Loader2, TrendingUp, DollarSign, CreditCard, Wallet, CheckCircle, Clock, Calendar, History } from 'lucide-react';
+import { ArrowLeft, Loader2, TrendingUp, DollarSign, CreditCard, Wallet, CheckCircle, Clock, Calendar, History, ChevronRight, RefreshCw } from 'lucide-react';
 import { MonthNavigator } from '@/components/accounting/MonthNavigator';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { calculateCurrencyBalances, CurrencyBalance, getCurrencySymbol } from '@/lib/currency';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface AgencyReservationDetail {
   id: string;
@@ -38,6 +40,14 @@ interface AgencyTransaction {
   balance_after: number;
   created_at: string;
   currency: string;
+}
+
+interface Payment {
+  id: string;
+  amount: number;
+  currency: string;
+  payment_date: string;
+  notes: string | null;
 }
 
 const AgencyReports = () => {
@@ -245,60 +255,124 @@ const AgencyReports = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4">
+      <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate('/agency')} 
+            className="text-primary-foreground hover:bg-primary-foreground/10"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-xl font-serif">{t('agencyReports')}</h1>
+            {agency && <p className="text-sm opacity-80">{agency.agency_name}</p>}
+          </div>
+        </div>
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => navigate('/agency')} 
+          onClick={fetchData}
+          disabled={loading}
           className="text-primary-foreground hover:bg-primary-foreground/10"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <RefreshCw className={cn("h-5 w-5", loading && "animate-spin")} />
         </Button>
-        <div>
-          <h1 className="text-xl font-serif">{t('agencyReports')}</h1>
-          {agency && <p className="text-sm opacity-80">{agency.agency_name}</p>}
-        </div>
       </header>
 
       <main className="container mx-auto py-6 px-4 max-w-4xl space-y-6">
-        {/* Para Birimi Bazlı Güncel Bakiye Kartları */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {/* Overall Balance Cards - Clickable for details */}
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-primary" />
+            {t('currentBalance') || 'Güncel Bakiye'}
+          </h2>
+          
           {combinedBalances.length > 0 ? (
-            combinedBalances.map(cb => {
-              const symbol = getCurrencySymbol(cb.currency);
-              return (
-                <Card 
-                  key={`current-${cb.currency}`} 
-                  className={`cursor-pointer hover:shadow-lg transition-shadow ${cb.netBalance > 0 ? 'border-orange-500/50 border-2' : 'border-green-500/50 border-2'}`}
-                  onClick={() => navigate(`/agency/currency/${cb.currency}`)}
-                >
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${cb.netBalance > 0 ? 'bg-orange-100' : 'bg-green-100'}`}>
-                        <Wallet className={`h-5 w-5 ${cb.netBalance > 0 ? 'text-orange-600' : 'text-green-600'}`} />
-                      </div>
-                      <Badge variant="outline" className="font-mono">{cb.currency}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-1">{t('currentBalance') || 'Güncel Bakiye'}</p>
-                    <p className={`text-2xl font-bold ${cb.netBalance > 0 ? 'text-orange-600' : cb.netBalance < 0 ? 'text-green-600' : 'text-gray-600'}`}>
-                      {symbol}{Math.abs(cb.netBalance).toFixed(2)}
-                    </p>
-                    {cb.netBalance > 0 && (
-                      <p className="text-xs text-orange-600 mt-1">{t('amountOwed') || 'Borç'}</p>
-                    )}
-                    {cb.netBalance < 0 && (
-                      <p className="text-xs text-green-600 mt-1">{t('creditBalance') || 'Alacak'}</p>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {combinedBalances.map(cb => {
+                const symbol = getCurrencySymbol(cb.currency);
+                return (
+                  <motion.div
+                    key={`current-${cb.currency}`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Card 
+                      className={cn(
+                        "cursor-pointer transition-all hover:shadow-lg",
+                        cb.netBalance > 0 
+                          ? "border-orange-500/50 border-2 bg-gradient-to-br from-orange-50 to-white dark:from-orange-950/20 dark:to-background" 
+                          : cb.netBalance < 0
+                          ? "border-green-500/50 border-2 bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-background"
+                          : "border-muted"
+                      )}
+                      onClick={() => navigate(`/agency/currency/${cb.currency}`)}
+                    >
+                      <CardContent className="pt-5 pb-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <div className={cn(
+                              "w-10 h-10 rounded-full flex items-center justify-center",
+                              cb.netBalance > 0 ? "bg-orange-100 dark:bg-orange-900/30" : "bg-green-100 dark:bg-green-900/30"
+                            )}>
+                              <Wallet className={cn(
+                                "h-5 w-5",
+                                cb.netBalance > 0 ? "text-orange-600" : "text-green-600"
+                              )} />
+                            </div>
+                            <Badge variant="outline" className="font-mono text-sm">{cb.currency}</Badge>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <p className={cn(
+                            "text-3xl font-bold",
+                            cb.netBalance > 0 ? "text-orange-600" : cb.netBalance < 0 ? "text-green-600" : "text-gray-600"
+                          )}>
+                            {symbol}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                          <p className={cn(
+                            "text-sm font-medium",
+                            cb.netBalance > 0 ? "text-orange-600" : cb.netBalance < 0 ? "text-green-600" : "text-muted-foreground"
+                          )}>
+                            {cb.netBalance > 0 ? (t('amountOwed') || 'Borç') : cb.netBalance < 0 ? (t('creditBalance') || 'Alacak') : (t('settled') || 'Hesaplaşıldı')}
+                          </p>
+                        </div>
+
+                        {/* Quick breakdown */}
+                        <div className="mt-3 pt-3 border-t border-dashed space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">{t('agencyExpense') || 'Gider'}</span>
+                            <span>{symbol}{cb.totalCompanyAmount.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}</span>
+                          </div>
+                          {cb.totalPassengerCash > 0 && (
+                            <div className="flex justify-between text-xs">
+                              <span className="text-muted-foreground">{t('passengerCash') || 'Nakit'}</span>
+                              <span className="text-green-600">-{symbol}{cb.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}</span>
+                            </div>
+                          )}
+                          {cb.totalPaid > 0 && (
+                            <div className="flex justify-between text-xs">
+                              <span className="text-muted-foreground">{t('paid') || 'Ödenen'}</span>
+                              <span className="text-green-600">-{symbol}{cb.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}</span>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
           ) : (
-            <Card className="col-span-full">
-              <CardContent className="pt-6 text-center">
-                <Wallet className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-                <p className="text-lg font-medium text-gray-500">{t('noBalance') || 'Bakiye Yok'}</p>
-                <p className="text-sm text-muted-foreground">{t('noCompletedReservations') || 'Tamamlanmış rezervasyon yok'}</p>
+            <Card className="border-dashed">
+              <CardContent className="py-8 text-center">
+                <Wallet className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
+                <p className="text-lg font-medium text-muted-foreground">{t('noBalance') || 'Bakiye Yok'}</p>
+                <p className="text-sm text-muted-foreground/70">{t('noCompletedReservations') || 'Tamamlanmış rezervasyon yok'}</p>
               </CardContent>
             </Card>
           )}
@@ -311,202 +385,186 @@ const AgencyReports = () => {
           onNextMonth={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))}
         />
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Carryover Balance Cards - Para birimi bazlı ayrı kartlar */}
-          {carryoverBalances
-            .filter(cb => cb.netBalance !== 0)
-            .sort((a, b) => Math.abs(b.netBalance) - Math.abs(a.netBalance))
-            .map(cb => {
-              const symbol = getCurrencySymbol(cb.currency);
-              return (
-                <Card key={`carryover-${cb.currency}`} className={cb.netBalance > 0 ? 'border-blue-500/50 border-2' : 'border-green-500/50 border-2'}>
-                  <CardContent className="pt-6 text-center">
-                    <History className={`h-8 w-8 mx-auto mb-2 ${cb.netBalance > 0 ? 'text-blue-500' : 'text-green-500'}`} />
-                    <p className={`text-2xl font-bold ${cb.netBalance > 0 ? 'text-blue-600' : 'text-green-600'}`}>
-                      {symbol}{Math.abs(cb.netBalance).toFixed(0)}
+        {/* Monthly Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* Carryover Balance - Compact */}
+          {carryoverBalances.filter(cb => cb.netBalance !== 0).length > 0 && (
+            <Card className="col-span-2 md:col-span-1 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background border-blue-200 dark:border-blue-800">
+              <CardContent className="pt-4 pb-3">
+                <History className="h-6 w-6 text-blue-500 mb-2" />
+                <p className="text-xs text-muted-foreground mb-1">{t('carryoverBalance') || 'Devir'}</p>
+                <div className="space-y-0.5">
+                  {carryoverBalances.filter(cb => cb.netBalance !== 0).slice(0, 2).map(cb => (
+                    <p key={`carry-${cb.currency}`} className="text-lg font-bold text-blue-600">
+                      {getCurrencySymbol(cb.currency)}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 0 })}
+                      <span className="text-xs ml-1 font-normal">{cb.currency}</span>
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {t('carryoverBalance') || 'Devir'} ({cb.currency})
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {cb.netBalance > 0 ? (t('debt') || 'Borç') : (t('credit') || 'Alacak')}
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
-            <CardContent className="pt-6 text-center">
-              <Calendar className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+            <CardContent className="pt-4 pb-3 text-center">
+              <Calendar className="h-6 w-6 mx-auto text-primary mb-2" />
               <p className="text-2xl font-bold">{totalReservations}</p>
-              <p className="text-sm text-muted-foreground">{t('totalReservations')}</p>
+              <p className="text-xs text-muted-foreground">{t('totalReservations') || 'Rezervasyon'}</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <CheckCircle className="h-8 w-8 mx-auto text-green-500 mb-2" />
-              <p className="text-2xl font-bold">{completedReservations}</p>
-              <p className="text-sm text-muted-foreground">{t('completed')}</p>
+          <Card className="bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-background border-green-200 dark:border-green-800">
+            <CardContent className="pt-4 pb-3 text-center">
+              <CheckCircle className="h-6 w-6 mx-auto text-green-500 mb-2" />
+              <p className="text-2xl font-bold text-green-600">{completedReservations}</p>
+              <p className="text-xs text-muted-foreground">{t('completed') || 'Tamamlanan'}</p>
             </CardContent>
           </Card>
 
-          {/* Para birimi bazlı bu ay bakiye kartları */}
+          {/* This month debt summary */}
           {currentMonthBalances.length > 0 ? (
-            currentMonthBalances.map(cb => {
+            currentMonthBalances.slice(0, 1).map(cb => {
               const symbol = getCurrencySymbol(cb.currency);
               return (
-                <Card key={`month-${cb.currency}`} className={cb.netBalance > 0 ? 'border-orange-500 border-2' : ''}>
-                  <CardContent className="pt-6 text-center">
-                    <DollarSign className="h-8 w-8 mx-auto text-orange-500 mb-2" />
-                    <p className={`text-2xl font-bold ${cb.netBalance > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                      {symbol}{Math.abs(cb.netBalance).toFixed(0)}
+                <Card 
+                  key={`month-stat-${cb.currency}`} 
+                  className={cn(
+                    "bg-gradient-to-br",
+                    cb.netBalance > 0 
+                      ? "from-orange-50 to-white dark:from-orange-950/20 dark:to-background border-orange-200 dark:border-orange-800"
+                      : "from-green-50 to-white dark:from-green-950/20 dark:to-background border-green-200 dark:border-green-800"
+                  )}
+                >
+                  <CardContent className="pt-4 pb-3 text-center">
+                    <DollarSign className={cn("h-6 w-6 mx-auto mb-2", cb.netBalance > 0 ? "text-orange-500" : "text-green-500")} />
+                    <p className={cn("text-2xl font-bold", cb.netBalance > 0 ? "text-orange-600" : "text-green-600")}>
+                      {symbol}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 0 })}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {cb.netBalance > 0 ? (t('totalDebt') || 'Borç') : (t('credit') || 'Alacak')} ({cb.currency})
+                    <p className="text-xs text-muted-foreground">
+                      {cb.netBalance > 0 ? (t('thisMonthDebt') || 'Bu Ay Borç') : (t('credit') || 'Alacak')}
                     </p>
-                    {cb.totalPassengerCash > 0 && (
-                      <p className="text-xs text-green-600 mt-1">
-                        -{symbol}{cb.totalPassengerCash.toFixed(0)} {t('passengerCash')}
-                      </p>
-                    )}
                   </CardContent>
                 </Card>
               );
             })
           ) : (
             <Card>
-              <CardContent className="pt-6 text-center">
-                <CheckCircle className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                <p className="text-2xl font-bold text-gray-500">{t('settled') || 'Hesaplaşıldı'}</p>
-                <p className="text-sm text-muted-foreground">{t('noDebt') || 'Bakiye yok'}</p>
+              <CardContent className="pt-4 pb-3 text-center">
+                <CheckCircle className="h-6 w-6 mx-auto text-gray-400 mb-2" />
+                <p className="text-lg font-bold text-gray-500">{t('settled') || '✓'}</p>
+                <p className="text-xs text-muted-foreground">{t('noDebt') || 'Bakiye yok'}</p>
               </CardContent>
             </Card>
           )}
         </div>
 
-        {/* Financial Summary - Para birimi bazlı */}
+        {/* Financial Summary - Simplified */}
         <Card>
-          <CardHeader>
-            <CardTitle>{t('financialSummary')}</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              {t('financialSummary') || 'Finansal Özet'}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Para birimi bazlı devir bakiye */}
-            {carryoverBalances
-              .filter(cb => cb.netBalance !== 0)
-              .map(cb => {
-                const symbol = getCurrencySymbol(cb.currency);
-                return (
-                  <div key={`carryover-detail-${cb.currency}`} className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">{t('carryoverBalance') || 'Devir Bakiye'} ({cb.currency})</span>
-                    <span className={`font-semibold ${cb.netBalance > 0 ? 'text-blue-600' : 'text-green-600'}`}>
-                      {symbol}{cb.netBalance.toFixed(2)}
-                    </span>
-                  </div>
-                );
-              })}
-            
-            {/* Para birimi bazlı bu ay detayları */}
+          <CardContent className="space-y-3">
+            {/* Current month breakdown per currency */}
             {currentMonthBalances.map(cb => {
               const symbol = getCurrencySymbol(cb.currency);
               return (
-                <div key={`month-detail-${cb.currency}`} className="space-y-2 py-2 border-b">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t('agencyExpense')} ({cb.currency})</span>
-                    <span className="font-semibold">{symbol}{cb.totalCompanyAmount.toFixed(2)}</span>
-                  </div>
-                  {cb.totalPassengerCash > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t('passengerCashDeducted')} ({cb.currency})</span>
-                      <span className="font-semibold text-green-600">-{symbol}{cb.totalPassengerCash.toFixed(2)}</span>
-                    </div>
-                  )}
-                  {cb.totalPaid > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t('paid')} ({cb.currency})</span>
-                      <span className="font-semibold text-green-600">-{symbol}{cb.totalPaid.toFixed(2)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="font-medium">{t('netDebt') || 'Net Borç'} ({cb.currency})</span>
-                    <span className={`font-bold ${cb.netBalance > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                      {symbol}{cb.netBalance.toFixed(2)}
+                <div key={`summary-${cb.currency}`} className="p-3 rounded-lg bg-muted/50 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="font-mono">{cb.currency}</Badge>
+                    <span className={cn(
+                      "font-bold text-lg",
+                      cb.netBalance > 0 ? "text-orange-600" : "text-green-600"
+                    )}>
+                      {cb.netBalance > 0 ? '' : '-'}{symbol}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                     </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div>
+                      <p className="text-xs text-muted-foreground">{t('agencyExpense') || 'Gider'}</p>
+                      <p className="font-medium">{symbol}{cb.totalCompanyAmount.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">{t('passengerCash') || 'Nakit'}</p>
+                      <p className="font-medium text-green-600">-{symbol}{cb.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">{t('paid') || 'Ödenen'}</p>
+                      <p className="font-medium text-green-600">-{symbol}{cb.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}</p>
+                    </div>
                   </div>
                 </div>
               );
             })}
             
             {currentMonthBalances.length === 0 && (
-              <div className="flex justify-between py-2 border-b">
-                <span className="text-muted-foreground">{t('thisMonthDebt') || 'Bu Ay Borç'}</span>
-                <span className="font-semibold text-gray-500">0.00</span>
+              <div className="text-center py-4 text-muted-foreground">
+                {t('noActivityThisMonth') || 'Bu ay için aktivite yok'}
               </div>
             )}
-            
-            <div className="flex justify-between py-2">
-              <span className="text-muted-foreground">{t('pendingPayments')}</span>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold">{pendingPayments}</span>
-                <span className="text-muted-foreground">/ {agencyDetails.length}</span>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
         {/* Recent Transactions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              {t('recentBalanceTransactions')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {transactions.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">{t('noTransactionsYet')}</p>
-            ) : (
-              <div className="space-y-3">
-                {transactions.map((tx) => (
+        {transactions.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />
+                {t('recentBalanceTransactions') || 'Son İşlemler'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {transactions.slice(0, 5).map((tx) => (
                   <div 
                     key={tx.id} 
-                    className="flex items-center justify-between py-3 border-b last:border-0"
+                    className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        tx.type === 'top_up' ? 'bg-green-100' : 'bg-red-100'
-                      }`}>
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center",
+                        tx.type === 'top_up' ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"
+                      )}>
                         {tx.type === 'top_up' ? (
-                          <TrendingUp className="h-5 w-5 text-green-600" />
+                          <TrendingUp className="h-4 w-4 text-green-600" />
                         ) : (
-                          <Clock className="h-5 w-5 text-red-600" />
+                          <Clock className="h-4 w-4 text-red-600" />
                         )}
                       </div>
                       <div>
-                        <p className="font-medium">
-                          {tx.type === 'top_up' ? t('balanceTopUp') : t('deduction')}
+                        <p className="font-medium text-sm">
+                          {tx.type === 'top_up' ? t('balanceTopUp') || 'Ödeme' : t('deduction') || 'Kesinti'}
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                          {tx.description || format(new Date(tx.created_at), 'dd MMM yyyy HH:mm', { locale })}
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(tx.created_at), 'dd MMM HH:mm', { locale })}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className={`font-bold ${tx.type === 'top_up' ? 'text-green-600' : 'text-red-600'}`}>
-                        {tx.type === 'top_up' ? '+' : '-'}{tx.currency === 'TRY' ? '₺' : tx.currency === 'EUR' ? '€' : tx.currency === 'USD' ? '$' : tx.currency}{Math.abs(tx.amount).toFixed(2)}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {t('balance')}: {tx.currency === 'TRY' ? '₺' : tx.currency === 'EUR' ? '€' : tx.currency === 'USD' ? '$' : tx.currency}{tx.balance_after.toFixed(2)}
-                      </p>
-                    </div>
+                    <p className={cn(
+                      "font-bold",
+                      tx.type === 'top_up' ? "text-green-600" : "text-red-600"
+                    )}>
+                      {tx.type === 'top_up' ? '+' : '-'}{getCurrencySymbol(tx.currency)}{Math.abs(tx.amount).toLocaleString('tr-TR', { minimumFractionDigits: 0 })}
+                    </p>
                   </div>
                 ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
+              {transactions.length > 5 && (
+                <Button 
+                  variant="ghost" 
+                  className="w-full mt-3"
+                  onClick={() => navigate('/agency/transactions')}
+                >
+                  {t('viewAll') || 'Tümünü Gör'} ({transactions.length})
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );

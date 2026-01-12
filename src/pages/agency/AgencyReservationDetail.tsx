@@ -503,18 +503,19 @@ const AgencyReservationDetail = () => {
     return cancellableStatuses.includes(reservation.status);
   };
 
-  const handleCopyDetails = () => {
-    if (!reservation) return;
+  // Generate WhatsApp-friendly reservation details text
+  const getWhatsAppDetailsText = () => {
+    if (!reservation) return '';
 
     const passengerList = reservation.passenger_names && reservation.passenger_names.length > 0
       ? reservation.passenger_names.map((name, i) => `   ${i + 1}. ${name}`).join('\n')
       : `   1. ${reservation.customer_name}`;
 
     const pickupFormatted = reservation.pickup_place_name && reservation.pickup_place_name !== reservation.pickup
-      ? `${reservation.pickup_place_name}\n📍 ${reservation.pickup}`
+      ? `${reservation.pickup_place_name}\n   📍 ${reservation.pickup}`
       : reservation.pickup;
     const dropoffFormatted = reservation.dropoff_place_name && reservation.dropoff_place_name !== reservation.dropoff
-      ? `${reservation.dropoff_place_name}\n📍 ${reservation.dropoff}`
+      ? `${reservation.dropoff_place_name}\n   📍 ${reservation.dropoff}`
       : reservation.dropoff;
 
     const lines = [
@@ -551,8 +552,20 @@ const AgencyReservationDetail = () => {
       `━━━━━━━━━━━━━━━━━`,
     ].filter(Boolean).join('\n');
 
+    return lines;
+  };
+
+  const handleCopyDetails = () => {
+    const lines = getWhatsAppDetailsText();
+    if (!lines) return;
     navigator.clipboard.writeText(lines);
     toast.success('Reservation details copied');
+  };
+
+  const handleShareWhatsApp = () => {
+    const lines = getWhatsAppDetailsText();
+    if (!lines) return;
+    window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, '_blank');
   };
 
   if (loading) {
@@ -984,43 +997,7 @@ const AgencyReservationDetail = () => {
               </Button>
               <Button 
                 className="w-full bg-[#25D366] hover:bg-[#22c55e] text-white"
-                onClick={() => {
-                  if (!reservation) return;
-                  const passengerList = reservation.passenger_names && reservation.passenger_names.length > 0
-                    ? reservation.passenger_names.map((name, i) => `${i + 1}. ${name}`).join('\n')
-                    : reservation.customer_name;
-                  const pickupFormatted = reservation.pickup_place_name && reservation.pickup_place_name !== reservation.pickup
-                    ? `${reservation.pickup_place_name}\n${reservation.pickup}`
-                    : reservation.pickup;
-                  const dropoffFormatted = reservation.dropoff_place_name && reservation.dropoff_place_name !== reservation.dropoff
-                    ? `${reservation.dropoff_place_name}\n${reservation.dropoff}`
-                    : reservation.dropoff;
-                  const details = [
-                    `Reservation: ${reservation.reservation_code || 'N/A'}`,
-                    `Date: ${format(new Date(reservation.pickup_date), 'dd/MM/yyyy')}`,
-                    `Time: ${reservation.pickup_time}`,
-                    '',
-                    'Passengers:',
-                    passengerList,
-                    '',
-                    `Phone: ${reservation.customer_phone}`,
-                    '',
-                    `Pickup:`,
-                    pickupFormatted,
-                    '',
-                    `Drop-off:`,
-                    dropoffFormatted,
-                    reservation.flight_number ? `Flight: ${reservation.flight_number}` : null,
-                    `Vehicle: ${reservation.vehicle_type.replace('-', ' ')}`,
-                    '',
-                    reservation.passenger_cash_amount ? `Passenger Cash: ${reservation.passenger_cash_currency || 'USD'} ${reservation.passenger_cash_amount}` : null,
-                    '',
-                    reservation.drivers ? `Driver: ${reservation.drivers.name}` : null,
-                    reservation.drivers?.plate_number ? `Plate: ${reservation.drivers.plate_number}` : null,
-                    reservation.drivers?.vehicle_model ? `Vehicle: ${reservation.drivers.vehicle_model}` : null,
-                  ].filter(Boolean).join('\n');
-                  window.open(`https://wa.me/?text=${encodeURIComponent(details)}`, '_blank');
-                }}
+                onClick={handleShareWhatsApp}
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 {t('shareViaWhatsApp')}

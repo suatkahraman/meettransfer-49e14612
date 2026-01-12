@@ -13,7 +13,7 @@ import AgencyLanguageSelector from '@/components/agency/AgencyLanguageSelector';
 import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { toast } from 'sonner';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isToday, isTomorrow, parseISO, compareAsc } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LocationDisplay } from '@/components/ui/location-display';
@@ -381,6 +381,44 @@ const AgencyHome = () => {
   );
   
   const completedJobs = filteredReservations.filter((r) => r.status === 'completed');
+
+  // Group upcoming jobs by date for better organization
+  const groupedUpcomingJobs = useMemo(() => {
+    const groups: { date: string; label: string; jobs: Reservation[] }[] = [];
+    const jobsByDate = new Map<string, Reservation[]>();
+    
+    upcomingJobs.forEach(job => {
+      const dateKey = job.pickup_date;
+      if (!jobsByDate.has(dateKey)) {
+        jobsByDate.set(dateKey, []);
+      }
+      jobsByDate.get(dateKey)!.push(job);
+    });
+    
+    // Sort dates and create groups
+    const sortedDates = Array.from(jobsByDate.keys()).sort();
+    
+    sortedDates.forEach(dateKey => {
+      const date = parseISO(dateKey);
+      let label: string;
+      
+      if (isToday(date)) {
+        label = t('today') || 'Bugün';
+      } else if (isTomorrow(date)) {
+        label = t('tomorrow') || 'Yarın';
+      } else {
+        label = format(date, 'dd MMMM yyyy', { locale });
+      }
+      
+      groups.push({
+        date: dateKey,
+        label,
+        jobs: jobsByDate.get(dateKey)!.sort((a, b) => a.pickup_time.localeCompare(b.pickup_time))
+      });
+    });
+    
+    return groups;
+  }, [upcomingJobs, t, locale]);
 
   const ReservationCard = ({ reservation }: { reservation: Reservation }) => (
     <Card 
@@ -948,18 +986,43 @@ const AgencyHome = () => {
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden border-t"
                       >
-                        <div className="p-3 space-y-3 bg-muted/30">
-                          {upcomingJobs.map((res) => (
-                            <SwipeableReservationCard 
-                              key={res.id} 
-                              reservation={res}
-                              statusColors={statusColors}
-                              statusLabels={statusLabels}
-                              locale={locale}
-                              onView={() => navigate(`/agency/reservation/${res.id}`)}
-                              onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
-                              onCancel={() => handleCancelReservation(res.id)}
-                            />
+                        <div className="p-3 space-y-4 bg-muted/30">
+                          {groupedUpcomingJobs.map((group) => (
+                            <div key={group.date} className="space-y-2">
+                              {/* Date Header */}
+                              <div className="flex items-center gap-2 px-2">
+                                <div className={cn(
+                                  "h-2 w-2 rounded-full",
+                                  isToday(parseISO(group.date)) ? "bg-red-500 animate-pulse" : 
+                                  isTomorrow(parseISO(group.date)) ? "bg-amber-500" : "bg-primary/50"
+                                )} />
+                                <span className={cn(
+                                  "text-sm font-semibold",
+                                  isToday(parseISO(group.date)) ? "text-red-600" : 
+                                  isTomorrow(parseISO(group.date)) ? "text-amber-600" : "text-muted-foreground"
+                                )}>
+                                  {group.label}
+                                </span>
+                                <Badge variant="outline" className="text-xs">
+                                  {group.jobs.length} {t('transfer')}
+                                </Badge>
+                              </div>
+                              {/* Reservations for this date */}
+                              <div className="space-y-2 pl-3 border-l-2 border-primary/20 ml-1">
+                                {group.jobs.map((res) => (
+                                  <SwipeableReservationCard 
+                                    key={res.id} 
+                                    reservation={res}
+                                    statusColors={statusColors}
+                                    statusLabels={statusLabels}
+                                    locale={locale}
+                                    onView={() => navigate(`/agency/reservation/${res.id}`)}
+                                    onEdit={() => navigate(`/agency/edit-reservation/${res.id}`)}
+                                    onCancel={() => handleCancelReservation(res.id)}
+                                  />
+                                ))}
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </motion.div>
