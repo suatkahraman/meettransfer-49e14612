@@ -90,9 +90,9 @@ const OludenizAirportTransferGuide = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Ölüdeniz Airport Transfer Guide', url: '/blog/oludeniz-airport-transfer-guide' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogOludenizH1"), url: '/blog/oludeniz-airport-transfer-guide' },
             ],
           },
           {

@@ -89,9 +89,9 @@ const AntalyaAirportTransferGuide = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Antalya Airport Transfer Guide', url: '/blog/antalya-airport-transfer-to-hotels' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogAntalyaH1"), url: '/blog/antalya-airport-transfer-to-hotels' },
             ],
           },
           {

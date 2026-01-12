@@ -101,9 +101,9 @@ const IstanbulAirportToCityGuide = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Istanbul Airport to City Guide', url: '/blog/istanbul-airport-to-city-best-way' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogIstanbulH1"), url: '/blog/istanbul-airport-to-city-best-way' },
             ],
           },
           {

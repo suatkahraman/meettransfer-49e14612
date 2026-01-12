@@ -99,9 +99,9 @@ const IstanbulTransferPriceGuide = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Istanbul Airport Transfer Price Guide', url: '/blog/istanbul-airport-transfer-price-guide' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogIstanbulPriceH1"), url: '/blog/istanbul-airport-transfer-price-guide' },
             ],
           },
           {

@@ -90,9 +90,9 @@ const MarmarisAirportTransferGuide = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Marmaris Airport Transfer Guide', url: '/blog/marmaris-airport-transfer-guide' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogMarmarisH1"), url: '/blog/marmaris-airport-transfer-guide' },
             ],
           },
           {

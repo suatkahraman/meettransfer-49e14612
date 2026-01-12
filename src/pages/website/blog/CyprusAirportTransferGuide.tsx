@@ -100,9 +100,9 @@ const CyprusAirportTransferGuide = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Cyprus Airport Transfer Guide', url: '/blog/cyprus-airport-transfer-guide' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogCyprusH1"), url: '/blog/cyprus-airport-transfer-guide' },
             ],
           },
         ]}
