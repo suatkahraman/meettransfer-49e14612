@@ -135,6 +135,7 @@ const CyprusAirportTransferGuide = lazy(() => import("./pages/website/blog/Cypru
 const BursaDayTourGuide = lazy(() => import("./pages/website/blog/BursaDayTourGuide"));
 const CappadociaAirportTransferGuide = lazy(() => import("./pages/website/blog/CappadociaAirportTransferGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
+const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
 const queryClient = new QueryClient();
 
@@ -307,6 +308,9 @@ const App = () => (
               
               {/* Security Settings - Protected (all authenticated users) */}
               <Route path="/security-settings" element={<LazyRoute><SecuritySettings /></LazyRoute>} />
+              
+              {/* SEO Debug Page - Public */}
+              <Route path="/seo-debug" element={<LazyRoute><SEODebugPage /></LazyRoute>} />
               
                 <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
               </Routes>
