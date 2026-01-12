@@ -20,6 +20,65 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     dayTripGuide: "Day Trip Guide",
     updatedFor2025: "Updated for 2025",
     
+    // City Names (for tables and badges)
+    cityIstanbul: "Istanbul",
+    cityAntalya: "Antalya",
+    cityFethiye: "Fethiye",
+    cityCappadocia: "Cappadocia",
+    cityBodrum: "Bodrum",
+    cityDalaman: "Dalaman",
+    cityDubai: "Dubai",
+    cityCyprus: "Cyprus",
+    cityMarmaris: "Marmaris",
+    cityOludeniz: "Ölüdeniz",
+    cityGocek: "Göcek",
+    cityKalkan: "Kalkan",
+    cityKas: "Kaş",
+    
+    // Antalya Destinations (for tables)
+    destKaleici: "Kaleici (Old Town)",
+    destLaraBeach: "Lara Beach / Kundu",
+    destBelek: "Belek",
+    destSide: "Side",
+    destAlanya: "Alanya",
+    destKemer: "Kemer / Göynük",
+    destKasAntalya: "Kaş",
+    destKalkanAntalya: "Kalkan",
+    
+    // Istanbul Destinations (for tables)
+    destTaksim: "Taksim / Beyoğlu",
+    destSultanahmet: "Sultanahmet",
+    destKadikoy: "Kadıköy",
+    destBesiktas: "Beşiktaş",
+    destGalataport: "Galataport Cruise Terminal",
+    destSabihaGokcen: "Sabiha Gökçen Airport",
+    destBursa: "Bursa (Osmangazi)",
+    destSapanca: "Sapanca",
+    destKartepe: "Kartepe Ski Resort",
+    
+    // Fethiye Destinations (for tables)
+    destFethiyeCenter: "Fethiye Center",
+    destOludeniz: "Ölüdeniz",
+    destHisaronu: "Hisarönü",
+    destCalisBeach: "Çalış Beach",
+    destKayakoy: "Kayaköy",
+    destGocek: "Göcek",
+    destKalkan: "Kalkan",
+    destKas: "Kaş",
+    
+    // Vehicle Names (for tables)
+    vehicleVito: "Mercedes Vito (up to 6 pax)",
+    vehicleVitoVIP: "Mercedes Vito VIP (up to 6 pax)",
+    vehicleMaybach: "Mercedes Maybach (up to 3 pax)",
+    vehicleSprinter: "Mercedes Sprinter (up to 16 pax)",
+    
+    // Table Headers
+    tableDistance: "Distance",
+    tableTime: "Duration",
+    tablePrivatePrice: "Private Transfer",
+    tableBusPrice: "Airport Bus",
+    tableNotAvailable: "N/A",
+    
     // Blog 1: Istanbul Airport to City
     blogIstanbul1Title: "Best Way to Get from Istanbul Airport to City Center (2025 Guide)",
     blogIstanbul1Desc: "Complete guide to Istanbul Airport transportation. Compare private transfers, metro & buses. Find the safest, fastest way to reach Taksim, Sultanahmet. Updated prices & tips.",
@@ -645,6 +704,65 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     travelTips: "Reisetipps",
     dayTripGuide: "Tagesausflug Guide",
     updatedFor2025: "Aktualisiert für 2025",
+    
+    // City Names (for tables and badges)
+    cityIstanbul: "Istanbul",
+    cityAntalya: "Antalya",
+    cityFethiye: "Fethiye",
+    cityCappadocia: "Kappadokien",
+    cityBodrum: "Bodrum",
+    cityDalaman: "Dalaman",
+    cityDubai: "Dubai",
+    cityCyprus: "Zypern",
+    cityMarmaris: "Marmaris",
+    cityOludeniz: "Ölüdeniz",
+    cityGocek: "Göcek",
+    cityKalkan: "Kalkan",
+    cityKas: "Kaş",
+    
+    // Antalya Destinations (for tables)
+    destKaleici: "Kaleici (Altstadt)",
+    destLaraBeach: "Lara Beach / Kundu",
+    destBelek: "Belek",
+    destSide: "Side",
+    destAlanya: "Alanya",
+    destKemer: "Kemer / Göynük",
+    destKasAntalya: "Kaş",
+    destKalkanAntalya: "Kalkan",
+    
+    // Istanbul Destinations (for tables)
+    destTaksim: "Taksim / Beyoğlu",
+    destSultanahmet: "Sultanahmet",
+    destKadikoy: "Kadıköy",
+    destBesiktas: "Beşiktaş",
+    destGalataport: "Galataport Kreuzfahrtterminal",
+    destSabihaGokcen: "Sabiha Gökçen Flughafen",
+    destBursa: "Bursa (Osmangazi)",
+    destSapanca: "Sapanca",
+    destKartepe: "Kartepe Skigebiet",
+    
+    // Fethiye Destinations (for tables)
+    destFethiyeCenter: "Fethiye Zentrum",
+    destOludeniz: "Ölüdeniz",
+    destHisaronu: "Hisarönü",
+    destCalisBeach: "Çalış Beach",
+    destKayakoy: "Kayaköy",
+    destGocek: "Göcek",
+    destKalkan: "Kalkan",
+    destKas: "Kaş",
+    
+    // Vehicle Names (for tables)
+    vehicleVito: "Mercedes Vito (bis 6 Pers.)",
+    vehicleVitoVIP: "Mercedes Vito VIP (bis 6 Pers.)",
+    vehicleMaybach: "Mercedes Maybach (bis 3 Pers.)",
+    vehicleSprinter: "Mercedes Sprinter (bis 16 Pers.)",
+    
+    // Table Headers
+    tableDistance: "Entfernung",
+    tableTime: "Dauer",
+    tablePrivatePrice: "Privattransfer",
+    tableBusPrice: "Flughafenbus",
+    tableNotAvailable: "N/V",
     
     // Blog Posts
     blogIstanbul1Title: "Bester Weg vom Flughafen Istanbul ins Stadtzentrum (Guide 2025)",
@@ -1291,6 +1409,65 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     dayTripGuide: "Guide d'excursion",
     updatedFor2025: "Mis à jour pour 2025",
     
+    // City Names
+    cityIstanbul: "Istanbul",
+    cityAntalya: "Antalya",
+    cityFethiye: "Fethiye",
+    cityCappadocia: "Cappadoce",
+    cityBodrum: "Bodrum",
+    cityDalaman: "Dalaman",
+    cityDubai: "Dubaï",
+    cityCyprus: "Chypre",
+    cityMarmaris: "Marmaris",
+    cityOludeniz: "Ölüdeniz",
+    cityGocek: "Göcek",
+    cityKalkan: "Kalkan",
+    cityKas: "Kaş",
+    
+    // Antalya Destinations
+    destKaleici: "Kaleici (Vieille ville)",
+    destLaraBeach: "Plage de Lara / Kundu",
+    destBelek: "Belek",
+    destSide: "Side",
+    destAlanya: "Alanya",
+    destKemer: "Kemer / Göynük",
+    destKasAntalya: "Kaş",
+    destKalkanAntalya: "Kalkan",
+    
+    // Istanbul Destinations
+    destTaksim: "Taksim / Beyoğlu",
+    destSultanahmet: "Sultanahmet",
+    destKadikoy: "Kadıköy",
+    destBesiktas: "Beşiktaş",
+    destGalataport: "Terminal Galataport",
+    destSabihaGokcen: "Aéroport Sabiha Gökçen",
+    destBursa: "Bursa (Osmangazi)",
+    destSapanca: "Sapanca",
+    destKartepe: "Station de ski Kartepe",
+    
+    // Fethiye Destinations
+    destFethiyeCenter: "Centre de Fethiye",
+    destOludeniz: "Ölüdeniz",
+    destHisaronu: "Hisarönü",
+    destCalisBeach: "Plage de Çalış",
+    destKayakoy: "Kayaköy",
+    destGocek: "Göcek",
+    destKalkan: "Kalkan",
+    destKas: "Kaş",
+    
+    // Vehicle Names
+    vehicleVito: "Mercedes Vito (jusqu'à 6 pers.)",
+    vehicleVitoVIP: "Mercedes Vito VIP (jusqu'à 6 pers.)",
+    vehicleMaybach: "Mercedes Maybach (jusqu'à 3 pers.)",
+    vehicleSprinter: "Mercedes Sprinter (jusqu'à 16 pers.)",
+    
+    // Table Headers
+    tableDistance: "Distance",
+    tableTime: "Durée",
+    tablePrivatePrice: "Transfert Privé",
+    tableBusPrice: "Bus Aéroport",
+    tableNotAvailable: "N/D",
+    
     // Blog Posts
     blogIstanbul1Title: "Meilleur moyen de se rendre de l'aéroport d'Istanbul au centre-ville (Guide 2025)",
     blogIstanbul1Desc: "Guide complet des transports de l'aéroport d'Istanbul. Comparez transferts privés, métro et bus.",
@@ -1906,6 +2083,65 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     travelTips: "Советы путешественникам",
     dayTripGuide: "Гид по однодневным турам",
     updatedFor2025: "Обновлено на 2025",
+    
+    // City Names
+    cityIstanbul: "Стамбул",
+    cityAntalya: "Анталья",
+    cityFethiye: "Фетхие",
+    cityCappadocia: "Каппадокия",
+    cityBodrum: "Бодрум",
+    cityDalaman: "Даламан",
+    cityDubai: "Дубай",
+    cityCyprus: "Кипр",
+    cityMarmaris: "Мармарис",
+    cityOludeniz: "Олюдениз",
+    cityGocek: "Гёджек",
+    cityKalkan: "Калкан",
+    cityKas: "Каш",
+    
+    // Antalya Destinations
+    destKaleici: "Калеичи (Старый город)",
+    destLaraBeach: "Пляж Лара / Кунду",
+    destBelek: "Белек",
+    destSide: "Сиде",
+    destAlanya: "Аланья",
+    destKemer: "Кемер / Гёйнюк",
+    destKasAntalya: "Каш",
+    destKalkanAntalya: "Калкан",
+    
+    // Istanbul Destinations
+    destTaksim: "Таксим / Бейоглу",
+    destSultanahmet: "Султанахмет",
+    destKadikoy: "Кадыкёй",
+    destBesiktas: "Бешикташ",
+    destGalataport: "Терминал Галатапорт",
+    destSabihaGokcen: "Аэропорт Сабиха Гёкчен",
+    destBursa: "Бурса (Османгази)",
+    destSapanca: "Сапанджа",
+    destKartepe: "Горнолыжный курорт Картепе",
+    
+    // Fethiye Destinations
+    destFethiyeCenter: "Центр Фетхие",
+    destOludeniz: "Олюдениз",
+    destHisaronu: "Хисарёню",
+    destCalisBeach: "Пляж Чалыш",
+    destKayakoy: "Каякёй",
+    destGocek: "Гёджек",
+    destKalkan: "Калкан",
+    destKas: "Каш",
+    
+    // Vehicle Names
+    vehicleVito: "Mercedes Vito (до 6 чел.)",
+    vehicleVitoVIP: "Mercedes Vito VIP (до 6 чел.)",
+    vehicleMaybach: "Mercedes Maybach (до 3 чел.)",
+    vehicleSprinter: "Mercedes Sprinter (до 16 чел.)",
+    
+    // Table Headers
+    tableDistance: "Расстояние",
+    tableTime: "Время",
+    tablePrivatePrice: "Частный трансфер",
+    tableBusPrice: "Автобус",
+    tableNotAvailable: "Н/Д",
     blogIstanbul1Title: "Лучший способ добраться из аэропорта Стамбула в центр (Гид 2025)",
     blogIstanbul1Desc: "Полный гид по транспорту из аэропорта Стамбула. Сравнение трансферов, метро и автобусов.",
     blogIstanbul1H1: "Лучший способ добраться из аэропорта Стамбула в центр",
@@ -2426,6 +2662,65 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     travelTips: "Consigli di viaggio",
     dayTripGuide: "Guida escursione",
     updatedFor2025: "Aggiornato per 2025",
+    
+    // City Names
+    cityIstanbul: "Istanbul",
+    cityAntalya: "Antalya",
+    cityFethiye: "Fethiye",
+    cityCappadocia: "Cappadocia",
+    cityBodrum: "Bodrum",
+    cityDalaman: "Dalaman",
+    cityDubai: "Dubai",
+    cityCyprus: "Cipro",
+    cityMarmaris: "Marmaris",
+    cityOludeniz: "Ölüdeniz",
+    cityGocek: "Göcek",
+    cityKalkan: "Kalkan",
+    cityKas: "Kaş",
+    
+    // Antalya Destinations
+    destKaleici: "Kaleici (Centro storico)",
+    destLaraBeach: "Spiaggia di Lara / Kundu",
+    destBelek: "Belek",
+    destSide: "Side",
+    destAlanya: "Alanya",
+    destKemer: "Kemer / Göynük",
+    destKasAntalya: "Kaş",
+    destKalkanAntalya: "Kalkan",
+    
+    // Istanbul Destinations
+    destTaksim: "Taksim / Beyoğlu",
+    destSultanahmet: "Sultanahmet",
+    destKadikoy: "Kadıköy",
+    destBesiktas: "Beşiktaş",
+    destGalataport: "Terminal Galataport",
+    destSabihaGokcen: "Aeroporto Sabiha Gökçen",
+    destBursa: "Bursa (Osmangazi)",
+    destSapanca: "Sapanca",
+    destKartepe: "Comprensorio sciistico Kartepe",
+    
+    // Fethiye Destinations
+    destFethiyeCenter: "Centro di Fethiye",
+    destOludeniz: "Ölüdeniz",
+    destHisaronu: "Hisarönü",
+    destCalisBeach: "Spiaggia di Çalış",
+    destKayakoy: "Kayaköy",
+    destGocek: "Göcek",
+    destKalkan: "Kalkan",
+    destKas: "Kaş",
+    
+    // Vehicle Names
+    vehicleVito: "Mercedes Vito (fino a 6 pers.)",
+    vehicleVitoVIP: "Mercedes Vito VIP (fino a 6 pers.)",
+    vehicleMaybach: "Mercedes Maybach (fino a 3 pers.)",
+    vehicleSprinter: "Mercedes Sprinter (fino a 16 pers.)",
+    
+    // Table Headers
+    tableDistance: "Distanza",
+    tableTime: "Durata",
+    tablePrivatePrice: "Trasferimento Privato",
+    tableBusPrice: "Bus Aeroporto",
+    tableNotAvailable: "N/D",
     blogIstanbul1Title: "Il modo migliore per arrivare dall'aeroporto di Istanbul al centro (Guida 2025)",
     blogIstanbul1Desc: "Guida completa ai trasporti dall'aeroporto di Istanbul. Confronta trasferimenti privati, metro e bus.",
     blogIstanbul1H1: "Il modo migliore per arrivare dall'aeroporto di Istanbul al centro",
@@ -2943,6 +3238,65 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     travelTips: "Consejos de viaje",
     dayTripGuide: "Guía de excursión",
     updatedFor2025: "Actualizado para 2025",
+    
+    // City Names
+    cityIstanbul: "Estambul",
+    cityAntalya: "Antalya",
+    cityFethiye: "Fethiye",
+    cityCappadocia: "Capadocia",
+    cityBodrum: "Bodrum",
+    cityDalaman: "Dalaman",
+    cityDubai: "Dubái",
+    cityCyprus: "Chipre",
+    cityMarmaris: "Marmaris",
+    cityOludeniz: "Ölüdeniz",
+    cityGocek: "Göcek",
+    cityKalkan: "Kalkan",
+    cityKas: "Kaş",
+    
+    // Antalya Destinations
+    destKaleici: "Kaleici (Casco antiguo)",
+    destLaraBeach: "Playa Lara / Kundu",
+    destBelek: "Belek",
+    destSide: "Side",
+    destAlanya: "Alanya",
+    destKemer: "Kemer / Göynük",
+    destKasAntalya: "Kaş",
+    destKalkanAntalya: "Kalkan",
+    
+    // Istanbul Destinations
+    destTaksim: "Taksim / Beyoğlu",
+    destSultanahmet: "Sultanahmet",
+    destKadikoy: "Kadıköy",
+    destBesiktas: "Beşiktaş",
+    destGalataport: "Terminal Galataport",
+    destSabihaGokcen: "Aeropuerto Sabiha Gökçen",
+    destBursa: "Bursa (Osmangazi)",
+    destSapanca: "Sapanca",
+    destKartepe: "Estación de esquí Kartepe",
+    
+    // Fethiye Destinations
+    destFethiyeCenter: "Centro de Fethiye",
+    destOludeniz: "Ölüdeniz",
+    destHisaronu: "Hisarönü",
+    destCalisBeach: "Playa Çalış",
+    destKayakoy: "Kayaköy",
+    destGocek: "Göcek",
+    destKalkan: "Kalkan",
+    destKas: "Kaş",
+    
+    // Vehicle Names
+    vehicleVito: "Mercedes Vito (hasta 6 pers.)",
+    vehicleVitoVIP: "Mercedes Vito VIP (hasta 6 pers.)",
+    vehicleMaybach: "Mercedes Maybach (hasta 3 pers.)",
+    vehicleSprinter: "Mercedes Sprinter (hasta 16 pers.)",
+    
+    // Table Headers
+    tableDistance: "Distancia",
+    tableTime: "Duración",
+    tablePrivatePrice: "Traslado Privado",
+    tableBusPrice: "Bus Aeropuerto",
+    tableNotAvailable: "N/D",
     blogIstanbul1Title: "La mejor manera de ir del aeropuerto de Estambul al centro (Guía 2025)",
     blogIstanbul1Desc: "Guía completa del transporte desde el aeropuerto de Estambul. Compara traslados privados, metro y autobuses.",
     blogIstanbul1H1: "La mejor manera de ir del aeropuerto de Estambul al centro",
@@ -3977,6 +4331,65 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     travelTips: "Seyahat İpuçları",
     dayTripGuide: "Günübirlik Tur Rehberi",
     updatedFor2025: "2025 için Güncellendi",
+    
+    // City Names
+    cityIstanbul: "İstanbul",
+    cityAntalya: "Antalya",
+    cityFethiye: "Fethiye",
+    cityCappadocia: "Kapadokya",
+    cityBodrum: "Bodrum",
+    cityDalaman: "Dalaman",
+    cityDubai: "Dubai",
+    cityCyprus: "Kıbrıs",
+    cityMarmaris: "Marmaris",
+    cityOludeniz: "Ölüdeniz",
+    cityGocek: "Göcek",
+    cityKalkan: "Kalkan",
+    cityKas: "Kaş",
+    
+    // Antalya Destinations
+    destKaleici: "Kaleiçi (Tarihi Merkez)",
+    destLaraBeach: "Lara Plajı / Kundu",
+    destBelek: "Belek",
+    destSide: "Side",
+    destAlanya: "Alanya",
+    destKemer: "Kemer / Göynük",
+    destKasAntalya: "Kaş",
+    destKalkanAntalya: "Kalkan",
+    
+    // Istanbul Destinations
+    destTaksim: "Taksim / Beyoğlu",
+    destSultanahmet: "Sultanahmet",
+    destKadikoy: "Kadıköy",
+    destBesiktas: "Beşiktaş",
+    destGalataport: "Galataport Kruvaziyer Terminali",
+    destSabihaGokcen: "Sabiha Gökçen Havalimanı",
+    destBursa: "Bursa (Osmangazi)",
+    destSapanca: "Sapanca",
+    destKartepe: "Kartepe Kayak Merkezi",
+    
+    // Fethiye Destinations
+    destFethiyeCenter: "Fethiye Merkez",
+    destOludeniz: "Ölüdeniz",
+    destHisaronu: "Hisarönü",
+    destCalisBeach: "Çalış Plajı",
+    destKayakoy: "Kayaköy",
+    destGocek: "Göcek",
+    destKalkan: "Kalkan",
+    destKas: "Kaş",
+    
+    // Vehicle Names
+    vehicleVito: "Mercedes Vito (6 kişiye kadar)",
+    vehicleVitoVIP: "Mercedes Vito VIP (6 kişiye kadar)",
+    vehicleMaybach: "Mercedes Maybach (3 kişiye kadar)",
+    vehicleSprinter: "Mercedes Sprinter (16 kişiye kadar)",
+    
+    // Table Headers
+    tableDistance: "Mesafe",
+    tableTime: "Süre",
+    tablePrivatePrice: "Özel Transfer",
+    tableBusPrice: "Havalimanı Otobüsü",
+    tableNotAvailable: "Yok",
     blogIstanbul1Title: "İstanbul Havalimanından Şehir Merkezine En İyi Ulaşım Yolu (2025 Rehberi)",
     blogIstanbul1Desc: "İstanbul Havalimanı ulaşım rehberi. Özel transfer, metro ve otobüsleri karşılaştırın.",
     blogIstanbul1H1: "İstanbul Havalimanından Şehir Merkezine En İyi Ulaşım Yolu",

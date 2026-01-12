@@ -48,14 +48,14 @@ const FethiyeAirportTransferGuide = () => {
   ];
 
   const destinations = [
-    { area: "Fethiye Center", distance: "50 km", time: "50-60 min", price: "€65" },
-    { area: "Ölüdeniz", distance: "60 km", time: "60-70 min", price: "€70" },
-    { area: "Hisarönü", distance: "55 km", time: "55-65 min", price: "€70" },
-    { area: "Çalış Beach", distance: "52 km", time: "50-60 min", price: "€65" },
-    { area: "Kayaköy", distance: "58 km", time: "55-65 min", price: "€70" },
-    { area: "Göcek", distance: "25 km", time: "25-30 min", price: "€55" },
-    { area: "Kalkan", distance: "85 km", time: "90-100 min", price: "€90" },
-    { area: "Kaş", distance: "110 km", time: "110-130 min", price: "€110" },
+    { area: t("destFethiyeCenter"), distance: "50 km", time: "50-60 min", price: "€65" },
+    { area: t("destOludeniz"), distance: "60 km", time: "60-70 min", price: "€70" },
+    { area: t("destHisaronu"), distance: "55 km", time: "55-65 min", price: "€70" },
+    { area: t("destCalisBeach"), distance: "52 km", time: "50-60 min", price: "€65" },
+    { area: t("destKayakoy"), distance: "58 km", time: "55-65 min", price: "€70" },
+    { area: t("destGocek"), distance: "25 km", time: "25-30 min", price: "€55" },
+    { area: t("destKalkan"), distance: "85 km", time: "90-100 min", price: "€90" },
+    { area: t("destKas"), distance: "110 km", time: "110-130 min", price: "€110" },
   ];
 
   return (
@@ -115,7 +115,7 @@ const FethiyeAirportTransferGuide = () => {
         </Link>
 
         <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">Fethiye</Badge>
+          <Badge variant="secondary" className="mb-4">{t("cityFethiye")}</Badge>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
             {t("blogFethiyeH1")}
           </h1>
