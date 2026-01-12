@@ -138,7 +138,7 @@ const DubaiAirportTransferGuide = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
             src={dubaiTransferHero} 
-            alt="Dubai Airport Transfer 2025 - VIP Private Transfer to Downtown, Palm Jumeirah, Dubai Marina"
+            alt={t("blogDubaiHeroAlt")}
             className="w-full h-full object-cover"
             loading="eager"
           />

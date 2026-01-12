@@ -146,7 +146,7 @@ const CyprusAirportTransferGuide = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
             src={cyprusTransferHero} 
-            alt="Cyprus Airport Transfer 2025 - VIP Private Transfer from Larnaca and Paphos Airports"
+            alt={t("blogCyprusHeroAlt")}
             className="w-full h-full object-cover"
             loading="eager"
           />
