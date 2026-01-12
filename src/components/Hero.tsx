@@ -907,6 +907,53 @@ export const Hero = () => {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Dynamic Price Display for Custom Hours */}
+                  {hourlyDuration === "custom" && allHourlyPrices.length > 0 && (
+                    <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl p-4 border border-primary/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Timer className="h-5 w-5 text-primary" />
+                        <span className="font-semibold text-foreground">
+                          {customHours} {t("hours") || "hours"} - {t("pricesPerVehicle") || "Prices per vehicle"}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {allHourlyPrices.map((vp) => {
+                          const vehicleLabels: Record<string, string> = {
+                            'mercedes-vito': 'Mercedes Vito',
+                            'vip-mercedes': 'Mercedes Vito VIP',
+                            'maybach-minibus': 'Mercedes Maybach',
+                            'sprinter-minibus': 'Mercedes Sprinter'
+                          };
+                          const currencySymbol = vp.currency === "EUR" ? "€" : vp.currency === "USD" ? "$" : vp.currency === "GBP" ? "£" : "₺";
+                          return (
+                            <div 
+                              key={vp.vehicleType} 
+                              className={cn(
+                                "flex justify-between items-center p-2 rounded-lg transition-all",
+                                hourlyVehicleType === vp.vehicleType 
+                                  ? "bg-primary/20 border border-primary/30" 
+                                  : "bg-background/50"
+                              )}
+                            >
+                              <span className="text-sm text-muted-foreground truncate">
+                                {vehicleLabels[vp.vehicleType] || vp.vehicleType}
+                              </span>
+                              <span className="font-bold text-primary">
+                                {currencySymbol}{vp.price}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {loadingPrice && (
+                        <div className="flex items-center justify-center mt-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
+                          <span className="text-sm text-muted-foreground">{t("calculatingPrice") || "Calculating..."}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Date, Time & Passengers - 2 rows on mobile, 3 cols on desktop */}
                   <div className="space-y-4 md:space-y-0">
