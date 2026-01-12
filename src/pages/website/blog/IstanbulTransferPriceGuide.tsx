@@ -152,7 +152,7 @@ const IstanbulTransferPriceGuide = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-8">
           <img 
             src={istanbulTransferHero} 
-            alt="Istanbul Airport Private Transfer 2025 - Mercedes Vito VIP Service to Taksim, Sultanahmet and City Center"
+            alt={t("blogIstanbulPriceHeroAlt")}
             className="w-full h-full object-cover"
             loading="eager"
           />
@@ -357,22 +357,22 @@ const IstanbulTransferPriceGuide = () => {
               images={[
                 { 
                   src: vitoVip1, 
-                  alt: "Mercedes Vito VIP Transfer Istanbul",
+                  alt: t("blogPriceGalleryAlt1"),
                   caption: t("blogPriceGalleryCaption1")
                 },
                 { 
                   src: vitoVip2, 
-                  alt: "VIP Interior Istanbul Transfer",
+                  alt: t("blogPriceGalleryAlt2"),
                   caption: t("blogPriceGalleryCaption2")
                 },
                 { 
                   src: sprinterInteriorBlue, 
-                  alt: "Mercedes Sprinter VIP Minibus",
+                  alt: t("blogPriceGalleryAlt3"),
                   caption: t("blogPriceGalleryCaption3")
                 },
                 { 
                   src: vitoAirportAnime, 
-                  alt: "Airport pickup service Istanbul",
+                  alt: t("blogPriceGalleryAlt4"),
                   caption: t("blogPriceGalleryCaption4")
                 },
               ]}
