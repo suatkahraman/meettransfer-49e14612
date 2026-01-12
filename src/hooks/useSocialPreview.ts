@@ -33,6 +33,23 @@ export interface SocialPreviewIssue {
   recommendation?: string;
 }
 
+export interface OGImageAnalysis {
+  url: string;
+  width?: number;
+  height?: number;
+  aspectRatio?: number;
+  aspectRatioLabel?: string;
+  fileSize?: number;
+  fileSizeFormatted?: string;
+  format?: string;
+  isOptimalSize: boolean;
+  isOptimalAspectRatio: boolean;
+  isOptimalFileSize: boolean;
+  hasCacheBusting: boolean;
+  recommendations: string[];
+  error?: string;
+}
+
 export interface SocialPreviewResult {
   url: string;
   meta: SocialMetaData;
@@ -45,10 +62,14 @@ export interface SocialPreviewResult {
     isValid: boolean;
     error?: string;
   };
+  ogImageAnalysis?: OGImageAnalysis;
 }
 
 const OG_IMAGE_MIN_WIDTH = 1200;
 const OG_IMAGE_MIN_HEIGHT = 630;
+const OG_IMAGE_OPTIMAL_RATIO = 1.91; // 1200/630 ≈ 1.91
+const OG_IMAGE_MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB - Facebook limit
+const OG_IMAGE_RECOMMENDED_FILE_SIZE = 1 * 1024 * 1024; // 1MB recommended
 const TWITTER_IMAGE_MIN_WIDTH = 800;
 const TWITTER_IMAGE_MIN_HEIGHT = 418;
 
@@ -56,6 +77,144 @@ export const useSocialPreview = () => {
   const [result, setResult] = useState<SocialPreviewResult | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
+
+  const formatFileSize = useCallback((bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  }, []);
+
+  const detectImageFormat = useCallback((url: string): string => {
+    const ext = url.split('?')[0].split('.').pop()?.toLowerCase();
+    const formatMap: Record<string, string> = {
+      'jpg': 'JPEG', 'jpeg': 'JPEG', 'png': 'PNG', 'gif': 'GIF',
+      'webp': 'WebP', 'avif': 'AVIF', 'svg': 'SVG'
+    };
+    return formatMap[ext || ''] || 'Bilinmiyor';
+  }, []);
+
+  const hasCacheBusting = useCallback((url: string): boolean => {
+    // Check for common cache busting patterns
+    const patterns = [
+      /[?&]v=/, /[?&]version=/, /[?&]t=/, /[?&]ts=/, /[?&]hash=/,
+      /[?&]_=/, /\.[a-f0-9]{8,}\.(png|jpg|jpeg|webp|gif)/i
+    ];
+    return patterns.some(p => p.test(url));
+  }, []);
+
+  const analyzeOGImage = useCallback(async (imageUrl: string | null): Promise<OGImageAnalysis | undefined> => {
+    if (!imageUrl) return undefined;
+
+    const recommendations: string[] = [];
+    const fullUrl = imageUrl.startsWith('/') ? window.location.origin + imageUrl : imageUrl;
+    const format = detectImageFormat(imageUrl);
+    const cacheBusting = hasCacheBusting(imageUrl);
+
+    try {
+      // Load image to get dimensions
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new window.Image();
+        image.crossOrigin = 'anonymous';
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error('Görsel yüklenemedi'));
+        image.src = fullUrl;
+        setTimeout(() => reject(new Error('Zaman aşımı')), 10000);
+      });
+
+      const width = img.width;
+      const height = img.height;
+      const aspectRatio = width / height;
+      
+      // Calculate aspect ratio label
+      let aspectRatioLabel = `${aspectRatio.toFixed(2)}:1`;
+      if (Math.abs(aspectRatio - 1.91) < 0.05) aspectRatioLabel = '1.91:1 (OG optimal)';
+      else if (Math.abs(aspectRatio - 2) < 0.05) aspectRatioLabel = '2:1 (Twitter optimal)';
+      else if (Math.abs(aspectRatio - 1.78) < 0.05) aspectRatioLabel = '16:9';
+      else if (Math.abs(aspectRatio - 1) < 0.05) aspectRatioLabel = '1:1 (Kare)';
+
+      // Size validations
+      const isOptimalSize = width >= OG_IMAGE_MIN_WIDTH && height >= OG_IMAGE_MIN_HEIGHT;
+      const isOptimalAspectRatio = Math.abs(aspectRatio - OG_IMAGE_OPTIMAL_RATIO) < 0.1;
+
+      // Try to get file size via fetch (may fail due to CORS)
+      let fileSize: number | undefined;
+      let fileSizeFormatted: string | undefined;
+      let isOptimalFileSize = true;
+
+      try {
+        const response = await fetch(fullUrl, { method: 'HEAD' });
+        const contentLength = response.headers.get('content-length');
+        if (contentLength) {
+          fileSize = parseInt(contentLength, 10);
+          fileSizeFormatted = formatFileSize(fileSize);
+          isOptimalFileSize = fileSize <= OG_IMAGE_RECOMMENDED_FILE_SIZE;
+          
+          if (fileSize > OG_IMAGE_MAX_FILE_SIZE) {
+            recommendations.push(`⛔ Dosya boyutu çok büyük (${fileSizeFormatted}). Facebook limiti 8MB.`);
+          } else if (fileSize > OG_IMAGE_RECOMMENDED_FILE_SIZE) {
+            recommendations.push(`⚠️ Dosya boyutu optimize edilebilir (${fileSizeFormatted}). Önerilen: <1MB`);
+          }
+        }
+      } catch {
+        // CORS may block HEAD request, ignore
+      }
+
+      // Generate recommendations
+      if (!isOptimalSize) {
+        recommendations.push(`📐 Boyut yetersiz (${width}x${height}). Önerilen: 1200x630px`);
+      }
+
+      if (!isOptimalAspectRatio) {
+        recommendations.push(`📏 En-boy oranı optimal değil (${aspectRatioLabel}). Önerilen: 1.91:1`);
+      }
+
+      if (!cacheBusting) {
+        recommendations.push('🔄 Cache busting parametresi yok. ?v=xxx ekleyerek güncellemelerin yansımasını sağlayın.');
+      }
+
+      if (format === 'PNG' && width >= 1200) {
+        recommendations.push('💾 PNG yerine JPEG/WebP kullanarak dosya boyutunu küçültebilirsiniz.');
+      }
+
+      if (format === 'SVG') {
+        recommendations.push('⚠️ SVG formatı sosyal platformlarda desteklenmeyebilir. PNG/JPEG kullanın.');
+      }
+
+      if (format === 'GIF') {
+        recommendations.push('⚠️ GIF formatı OG image için önerilmez. Statik PNG/JPEG kullanın.');
+      }
+
+      if (isOptimalSize && isOptimalAspectRatio && isOptimalFileSize && cacheBusting) {
+        recommendations.push('✅ OG görseli tüm kriterleri karşılıyor!');
+      }
+
+      return {
+        url: imageUrl,
+        width,
+        height,
+        aspectRatio,
+        aspectRatioLabel,
+        fileSize,
+        fileSizeFormatted,
+        format,
+        isOptimalSize,
+        isOptimalAspectRatio,
+        isOptimalFileSize,
+        hasCacheBusting: cacheBusting,
+        recommendations
+      };
+    } catch (error) {
+      return {
+        url: imageUrl,
+        isOptimalSize: false,
+        isOptimalAspectRatio: false,
+        isOptimalFileSize: false,
+        hasCacheBusting: cacheBusting,
+        recommendations: [],
+        error: (error as Error).message
+      };
+    }
+  }, [formatFileSize, detectImageFormat, hasCacheBusting]);
 
   const extractMetaContent = useCallback((doc: Document, selectors: string[]): string | null => {
     for (const selector of selectors) {
@@ -75,7 +234,7 @@ export const useSocialPreview = () => {
     setImageLoading(true);
     
     return new Promise((resolve) => {
-      const img = new Image();
+      const img = new window.Image();
       img.crossOrigin = 'anonymous';
       
       img.onload = () => {
@@ -329,12 +488,16 @@ export const useSocialPreview = () => {
         }
       }
 
+      // Analyze OG image in detail
+      const ogImageAnalysis = await analyzeOGImage(meta.ogImage);
+
       setResult({
         url: finalUrl,
         meta,
         issues,
         scannedAt: new Date(),
-        imagePreview
+        imagePreview,
+        ogImageAnalysis
       });
     } catch (error) {
       console.error('Social preview scan error:', error);
@@ -356,7 +519,7 @@ export const useSocialPreview = () => {
     } finally {
       setIsScanning(false);
     }
-  }, [extractMetaContent, validateMeta, validateImage]);
+  }, [extractMetaContent, validateMeta, validateImage, analyzeOGImage]);
 
   // Auto-scan current page on mount
   useEffect(() => {
