@@ -352,7 +352,7 @@ const ReviewsPage = () => {
               TripAdvisor
             </a>
             <a
-              href="https://www.google.com/maps/place/Meet+Transfer"
+              href="https://search.google.com/local/reviews?placeid=ChIJxWLW5C_byxQRxSUmLFnp2dU"
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors font-medium"
