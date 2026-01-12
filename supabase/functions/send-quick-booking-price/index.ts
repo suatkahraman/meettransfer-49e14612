@@ -25,6 +25,32 @@ interface SendPriceRequest {
   promo_code?: string;
 }
 
+// Helper function to send push notification to a user
+async function sendPushNotification(
+  supabase: any,
+  userId: string,
+  title: string,
+  body: string,
+  url?: string
+): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.functions.invoke("send-push-notification", {
+      body: { user_id: userId, title, body, url },
+    });
+    
+    if (error) {
+      console.error("Push notification error:", error);
+      return false;
+    }
+    
+    console.log("Push notification sent:", data);
+    return true;
+  } catch (err) {
+    console.error("Failed to send push notification:", err);
+    return false;
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -301,8 +327,57 @@ ${getEmailFooter()}`.trim(),
       console.log("No customer email available; skipping email send for quick booking:", quick_booking_id);
     }
 
+    // Send push notification if customer has an account with push subscription
+    let pushSent = false;
+    if (toEmail) {
+      try {
+        // Find user by email in auth.users
+        const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+        
+        if (!userError && userData?.users) {
+          const matchingUser = userData.users.find(
+            (u: any) => u.email?.toLowerCase() === toEmail.toLowerCase()
+          );
+          
+          if (matchingUser) {
+            console.log("Found matching user for push notification:", matchingUser.id);
+            
+            // Check if user has push subscription
+            const { data: subscriptions } = await supabase
+              .from("push_subscriptions")
+              .select("id")
+              .eq("user_id", matchingUser.id)
+              .limit(1);
+            
+            if (subscriptions && subscriptions.length > 0) {
+              const currencySymbol = getCurrencySymbol(currency);
+              const pushTitle = "💰 Fiyat Teklifiniz Hazır!";
+              const pushBody = `Transfer fiyatınız: ${currencySymbol}${price}. Hemen onaylayın!`;
+              const pushUrl = `/quick-booking-confirm?token=${booking.confirmation_token}`;
+              
+              pushSent = await sendPushNotification(
+                supabase,
+                matchingUser.id,
+                pushTitle,
+                pushBody,
+                pushUrl
+              );
+              
+              console.log("Push notification result:", pushSent);
+            } else {
+              console.log("User has no push subscriptions");
+            }
+          } else {
+            console.log("No matching user found for email:", toEmail);
+          }
+        }
+      } catch (pushErr) {
+        console.error("Error sending push notification:", pushErr);
+      }
+    }
+
     return new Response(
-      JSON.stringify({ success: true, confirmUrl, emailSent, toEmail, usedFrom }),
+      JSON.stringify({ success: true, confirmUrl, emailSent, toEmail, usedFrom, pushSent }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
