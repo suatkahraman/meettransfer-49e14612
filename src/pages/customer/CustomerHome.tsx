@@ -280,6 +280,47 @@ const CustomerHome = () => {
     }
   }, [authLoading, user?.id, fetchData]);
 
+  // Real-time subscription for customer's reservations
+  useEffect(() => {
+    if (!user?.id) return;
+
+    console.log('Setting up realtime subscription for customer:', user.id);
+
+    const channel = supabase
+      .channel('customer-home-reservations-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reservations',
+          filter: `customer_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('CustomerHome - Reservation realtime update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            toast.success(language === 'TR' ? 'Yeni rezervasyon oluşturuldu!' : 'New reservation created!');
+            fetchData();
+          } else if (payload.eventType === 'UPDATE') {
+            toast.info(language === 'TR' ? 'Rezervasyon güncellendi' : 'Reservation updated');
+            fetchData();
+          } else if (payload.eventType === 'DELETE') {
+            toast.info(language === 'TR' ? 'Rezervasyon silindi' : 'Reservation deleted');
+            fetchData();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('CustomerHome realtime subscription status:', status);
+      });
+
+    return () => {
+      console.log('Cleaning up CustomerHome realtime subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, language, fetchData]);
+
   const handleSaveProfile = async () => {
     if (!user?.id) return;
     

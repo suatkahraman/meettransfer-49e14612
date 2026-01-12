@@ -253,7 +253,9 @@ const CustomerBookings = () => {
 
   // Real-time subscription for customer's reservations
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
+
+    console.log('Setting up realtime subscription for customer bookings:', user.id);
 
     const channel = supabase
       .channel('customer-reservations-realtime')
@@ -266,20 +268,31 @@ const CustomerBookings = () => {
           filter: `customer_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('Reservation update:', payload);
-          fetchReservations();
-          if (payload.eventType === 'UPDATE') {
+          console.log('CustomerBookings - Reservation realtime update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            playSound();
+            toast.success(language === 'TR' ? 'Yeni rezervasyon oluşturuldu!' : 'New reservation created!');
+            fetchReservations();
+          } else if (payload.eventType === 'UPDATE') {
             playSound();
             toast.info(t('reservationUpdated'));
+            fetchReservations();
+          } else if (payload.eventType === 'DELETE') {
+            toast.info(language === 'TR' ? 'Rezervasyon silindi' : 'Reservation deleted');
+            fetchReservations();
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('CustomerBookings realtime subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up CustomerBookings realtime subscription');
       supabase.removeChannel(channel);
     };
-  }, [user, playSound, t]);
+  }, [user?.id, playSound, t, language, fetchReservations]);
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return null;
