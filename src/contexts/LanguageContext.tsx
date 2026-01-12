@@ -4606,6 +4606,12 @@ const translations: Record<Language, Record<string, string>> = {
     blogCtaFeature4: "Flotte Mercedes",
     galleryTitle: "Galerie de notre flotte",
     
+    // Blog Gallery Captions (FR)
+    blogGalleryCaption1: "Intérieur spacieux adapté aux familles",
+    blogGalleryCaption2: "Mercedes Vito premium pour les transferts resort",
+    blogGalleryCaption3: "Grand espace bagages pour les familles",
+    blogGalleryCaption4: "Voyage confortable vers votre resort",
+
     // Cappadocia Blog Translations - French
     blogCappadociaFaq1Q: "Quel aéroport est le plus proche de la Cappadoce ?",
     blogCappadociaFaq1A: "L'aéroport de Nevşehir-Cappadoce (NAV) n'est qu'à 40 km de Göreme. L'aéroport de Kayseri (ASR) est à 80 km mais offre plus d'options de vols.",
@@ -5841,6 +5847,12 @@ const translations: Record<Language, Record<string, string>> = {
     blogCtaFeature4: "Парк Mercedes",
     galleryTitle: "Галерея нашего автопарка",
     
+    // Blog Gallery Captions (RU)
+    blogGalleryCaption1: "Просторный семейный салон",
+    blogGalleryCaption2: "Премиум Mercedes Vito для курортных трансферов",
+    blogGalleryCaption3: "Вместительный багажник для семей",
+    blogGalleryCaption4: "Комфортная поездка на ваш курорт",
+
     // Antalya Blog - Hardcoded Content Translations (RU)
     blogAntalyaAirportP1: "Аэропорт Анталии (AYT) — третий по загруженности аэропорт Турции, обслуживающий более 35 миллионов пассажиров в год. Расположенный на живописной Турецкой Ривьере, он служит воротами к одним из самых красивых пляжей и древних руин Средиземноморья. Аэропорт имеет два международных терминала и один внутренний.",
     blogAntalyaNavigating: "Навигация в аэропорту Анталии",
@@ -7137,6 +7149,12 @@ const translations: Record<Language, Record<string, string>> = {
     blogCtaFeature4: "Flotta Mercedes",
     galleryTitle: "Galleria della nostra flotta",
     
+    // Blog Gallery Captions (IT)
+    blogGalleryCaption1: "Interni spaziosi adatti alle famiglie",
+    blogGalleryCaption2: "Mercedes Vito premium per trasferimenti resort",
+    blogGalleryCaption3: "Ampio spazio bagagli per famiglie",
+    blogGalleryCaption4: "Viaggio confortevole verso il vostro resort",
+
     // Antalya Blog - Hardcoded Content Translations (IT)
     blogAntalyaAirportP1: "L'aeroporto di Antalya (AYT) è il terzo aeroporto più trafficato della Turchia, con oltre 35 milioni di passeggeri all'anno. Situato sulla splendida Riviera Turca, è il gateway per alcune delle più belle spiagge del Mediterraneo e antiche rovine. L'aeroporto dispone di due terminal internazionali e un terminal domestico.",
     blogAntalyaNavigating: "Orientarsi all'Aeroporto di Antalya",
@@ -8433,6 +8451,12 @@ const translations: Record<Language, Record<string, string>> = {
     blogCtaFeature4: "Flota Mercedes",
     galleryTitle: "Galería de nuestra flota",
     
+    // Blog Gallery Captions (ES)
+    blogGalleryCaption1: "Interior espacioso ideal para familias",
+    blogGalleryCaption2: "Mercedes Vito premium para traslados a resort",
+    blogGalleryCaption3: "Amplio espacio de equipaje para familias",
+    blogGalleryCaption4: "Viaje cómodo a su resort",
+
     // Antalya Blog - Hardcoded Content Translations (ES)
     blogAntalyaAirportP1: "El aeropuerto de Antalya (AYT) es el tercer aeropuerto más concurrido de Turquía, con más de 35 millones de pasajeros al año. Situado en la impresionante Riviera Turca, es la puerta de entrada a algunas de las playas más hermosas del Mediterráneo y ruinas antiguas. El aeropuerto cuenta con dos terminales internacionales y una terminal doméstica.",
     blogAntalyaNavigating: "Navegando por el Aeropuerto de Antalya",
@@ -9676,6 +9700,12 @@ const translations: Record<Language, Record<string, string>> = {
     blogCtaFeature4: "أسطول مرسيدس",
     galleryTitle: "معرض أسطولنا",
     
+    // Blog Gallery Captions (AR)
+    blogGalleryCaption1: "مقصورة داخلية واسعة ومناسبة للعائلات",
+    blogGalleryCaption2: "مرسيدس فيتو فاخر لنقل المنتجعات",
+    blogGalleryCaption3: "مساحة أمتعة واسعة للعائلات",
+    blogGalleryCaption4: "رحلة مريحة إلى منتجعك",
+
     // Cappadocia Airport Transfer Guide - Arabic
     blogCappadociaSeoTitle: "دليل النقل من مطار كابادوكيا 2025 | الأسعار ورحلات البالون",
     blogCappadociaSeoDesc: "نقل VIP من مطاري قيصرية (ASR) ونوشهر-كابادوكيا (NAV) إلى غوريمي وأورغوب وجميع مناطق كابادوكيا. الأسعار الحالية ونقل رحلات البالون ومعلومات الفنادق الشهيرة.",
