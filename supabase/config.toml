@@ -167,3 +167,6 @@ verify_jwt = true
 
 [functions.send-vehicle-prices-email]
 verify_jwt = false
+
+[functions.translate-review]
+verify_jwt = false
