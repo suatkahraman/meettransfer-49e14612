@@ -101,7 +101,9 @@ const AgencyLoginScreen = () => {
 
   // Role-based redirect after login (only if not pending 2FA)
   useEffect(() => {
-    if (user && !roleLoading && role && viewMode !== '2fa') {
+    // During an active login attempt we must not auto-redirect, otherwise we can race
+    // the 2FA flow and never show the OTP entry screen.
+    if (!isLoading && user && !roleLoading && role && viewMode !== '2fa') {
       switch (role) {
         case 'admin':
           navigate('/admin', { replace: true });
@@ -116,7 +118,7 @@ const AgencyLoginScreen = () => {
           navigate('/customer', { replace: true });
       }
     }
-  }, [user, role, roleLoading, navigate, viewMode]);
+  }, [isLoading, user, role, roleLoading, navigate, viewMode]);
 
   // Handle 2FA verification success
   const handle2FAVerify = async (code: string) => {
@@ -129,14 +131,13 @@ const AgencyLoginScreen = () => {
       toast.success(language === 'TR' ? 'Doğrulama başarılı! Giriş yapılıyor...' : 'Verification successful! Signing in...');
       
       // Try auto-login with the magic link token
-      if (result.autoLogin && result.tokenHash && result.email) {
+      if (result.autoLogin && result.tokenHash) {
         try {
           const { error: verifyError } = await supabase.auth.verifyOtp({
-            email: result.email,
-            token: result.tokenHash,
-            type: 'magiclink'
+            token_hash: result.tokenHash,
+            type: 'magiclink',
           });
-          
+
           if (verifyError) {
             console.error('Auto-login failed:', verifyError);
             // Redirect anyway - user will need to login again
@@ -174,7 +175,7 @@ const AgencyLoginScreen = () => {
   };
 
   // If already logged in, show loading
-  if (authLoading || (user && roleLoading)) {
+  if (authLoading || (user && roleLoading && viewMode !== '2fa')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
         <Loader2 className="h-8 w-8 animate-spin text-accent" />
@@ -257,23 +258,27 @@ const AgencyLoginScreen = () => {
         
         // Require 2FA if: device not trusted OR there were failed login attempts
         if (!isTrusted || require2FADueToFailedAttempts) {
+          // IMPORTANT: Switch UI to 2FA immediately to avoid redirect race conditions
+          // (the role-based redirect effect can otherwise navigate away before viewMode updates).
+          setPendingRole(userRole);
+          setViewMode('2fa');
+
           // Sign out temporarily - user needs to verify via 2FA
           await supabase.auth.signOut();
-          
+
           // Device not trusted or suspicious activity - require 2FA
           const langCode = language === 'TR' ? 'tr' : 'en';
           const result = await initiate2FA(authData.user.id, validation.email, userRole, langCode);
-          
+
           if (result.success) {
-            // Only switch to 2FA view if email was sent successfully
-            setPendingRole(userRole);
-            setViewMode('2fa');
             toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
             // Clear the flag after initiating 2FA
             localStorage.removeItem(require2FAKey);
           } else {
-            // Email sending failed - show error and stay on login screen
+            // Email sending failed - revert back to login screen
             toast.error(result.error || (language === 'TR' ? 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.' : 'Failed to send verification code. Please try again.'));
+            setPendingRole(null);
+            setViewMode('login');
           }
         } else {
           // Device trusted and no suspicious activity - proceed with login
