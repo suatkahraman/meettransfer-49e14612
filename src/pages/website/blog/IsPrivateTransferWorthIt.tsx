@@ -18,28 +18,28 @@ const IsPrivateTransferWorthIt = () => {
 
   const faqItems = [
     {
-      question: "Is private transfer really worth the extra cost?",
-      answer: "For most travelers, yes. When you factor in time saved, comfort, safety, and especially when traveling with others, the value proposition is strong. A family of 4 pays roughly the same per person as taking separate regular transportation options."
+      question: t('blogWorthItFaq1Q'),
+      answer: t('blogWorthItFaq1A')
     },
     {
-      question: "When is private transfer NOT worth it?",
-      answer: "Solo budget travelers on short distances during daytime may find regular transportation or public transport more economical. However, for night arrivals, families, or groups, private transfer almost always offers better value."
+      question: t('blogWorthItFaq2Q'),
+      answer: t('blogWorthItFaq2A')
     },
     {
-      question: "How much more expensive is private transfer?",
-      answer: "Private transfers typically cost 2-3x more than a single regular transportation fare. However, this includes meet & greet, fixed pricing, premium vehicle, and professional driver. For 2+ passengers, the per-person cost becomes comparable."
+      question: t('blogWorthItFaq3Q'),
+      answer: t('blogWorthItFaq3A')
     },
     {
-      question: "What makes private transfer better than regular transportation?",
-      answer: "Key advantages include: pre-booked so no waiting, fixed price so no surprises, meet & greet service, professional English-speaking driver, premium vehicle, flight monitoring, and door-to-door service."
+      question: t('blogWorthItFaq4Q'),
+      answer: t('blogWorthItFaq4A')
     },
     {
-      question: "Is it safe to book private transfers online?",
-      answer: "Yes, when booking with reputable companies. Look for: company reviews, clear pricing, professional website, WhatsApp communication, and confirmation of driver details before pickup."
+      question: t('blogWorthItFaq5Q'),
+      answer: t('blogWorthItFaq5A')
     },
     {
-      question: "Can private transfer accommodate large groups?",
-      answer: "Yes! We offer vehicles from sedans (up to 3) to minivans (up to 8) and minibuses (up to 16). Large groups often get the best per-person value with private transfer."
+      question: t('blogWorthItFaq6Q'),
+      answer: t('blogWorthItFaq6A')
     }
   ];
 
@@ -460,7 +460,7 @@ const IsPrivateTransferWorthIt = () => {
 
         {/* FAQ Section */}
         <section className="my-12">
-          <h2 className="font-serif text-2xl font-bold mb-8">Frequently Asked Questions</h2>
+          <h2 className="font-serif text-2xl font-bold mb-8">{t('blogWorthItFaqTitle')}</h2>
           <div className="space-y-6">
             {faqItems.map((item, index) => (
               <div key={index} className="border-b border-border pb-6 last:border-0">
