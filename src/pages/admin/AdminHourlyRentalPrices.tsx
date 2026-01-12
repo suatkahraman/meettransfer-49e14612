@@ -32,7 +32,8 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Pencil, Trash2, Clock, Car, MapPin, Euro, DollarSign, PoundSterling } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Clock, Car, MapPin, Euro, DollarSign, PoundSterling, Percent } from "lucide-react";
+import BulkPriceUpdateDialog from "@/components/admin/BulkPriceUpdateDialog";
 
 interface HourlyRentalPrice {
   id: string;
@@ -90,6 +91,7 @@ const AdminHourlyRentalPrices = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
+  const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
   const [editingPrice, setEditingPrice] = useState<HourlyRentalPrice | null>(null);
   const [filterCity, setFilterCity] = useState<string>("all");
   const [filterVehicle, setFilterVehicle] = useState<string>("all");
@@ -419,6 +421,11 @@ const AdminHourlyRentalPrices = () => {
             </div>
           </div>
           <div className="flex gap-2">
+            {/* Bulk Update Dialog */}
+            <Button variant="outline" className="gap-2" onClick={() => setIsBulkUpdateDialogOpen(true)}>
+              <Percent className="h-4 w-4" />
+              % Güncelle
+            </Button>
             {/* Bulk Add Dialog */}
             <Dialog open={isBulkDialogOpen} onOpenChange={(open) => {
               setIsBulkDialogOpen(open);
@@ -895,6 +902,16 @@ const AdminHourlyRentalPrices = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Bulk Price Update Dialog */}
+        <BulkPriceUpdateDialog
+          open={isBulkUpdateDialogOpen}
+          onOpenChange={setIsBulkUpdateDialogOpen}
+          priceType="hourly"
+          onSuccess={fetchPrices}
+          cities={uniqueCities}
+          vehicleTypes={vehicleTypes}
+        />
       </div>
     </div>
   );

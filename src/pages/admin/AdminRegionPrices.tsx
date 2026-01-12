@@ -27,7 +27,8 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent } from 'lucide-react';
+import BulkPriceUpdateDialog from "@/components/admin/BulkPriceUpdateDialog";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -141,6 +142,8 @@ const AdminRegionPrices = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCity, setFilterCity] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
+  const [isBulkIntercityUpdateDialogOpen, setIsBulkIntercityUpdateDialogOpen] = useState(false);
   const [editingPrice, setEditingPrice] = useState<RegionPrice | null>(null);
   
   // Airport form state - now supports all 4 vehicles at once
@@ -731,13 +734,18 @@ const AdminRegionPrices = () => {
                   <MapPin className="h-5 w-5" />
                   Havalimanı Transfer Fiyatları
                 </CardTitle>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button onClick={openNewDialog}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Yeni Fiyat Ekle
-                    </Button>
-                  </DialogTrigger>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setIsBulkUpdateDialogOpen(true)}>
+                    <Percent className="h-4 w-4 mr-2" />
+                    % Güncelle
+                  </Button>
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button onClick={openNewDialog}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Yeni Fiyat Ekle
+                      </Button>
+                    </DialogTrigger>
                   <DialogContent className="max-w-md">
                     <DialogHeader>
                       <DialogTitle>
@@ -832,6 +840,7 @@ const AdminRegionPrices = () => {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+                </div>
               </CardHeader>
               <CardContent>
                 {/* Filters */}
@@ -936,13 +945,18 @@ const AdminRegionPrices = () => {
                   <ArrowRightLeft className="h-5 w-5" />
                   Şehirler Arası Fiyatlar
                 </CardTitle>
-                <Dialog open={isIntercityDialogOpen} onOpenChange={setIsIntercityDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button onClick={openNewIntercityDialog}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Yeni Fiyat Ekle
-                    </Button>
-                  </DialogTrigger>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setIsBulkIntercityUpdateDialogOpen(true)}>
+                    <Percent className="h-4 w-4 mr-2" />
+                    % Güncelle
+                  </Button>
+                  <Dialog open={isIntercityDialogOpen} onOpenChange={setIsIntercityDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button onClick={openNewIntercityDialog}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Yeni Fiyat Ekle
+                      </Button>
+                    </DialogTrigger>
                   <DialogContent className="max-w-md">
                     <DialogHeader>
                       <DialogTitle>
@@ -1059,6 +1073,7 @@ const AdminRegionPrices = () => {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+                </div>
               </CardHeader>
               <CardContent>
                 {/* Search */}
@@ -1154,6 +1169,24 @@ const AdminRegionPrices = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Bulk Price Update Dialogs */}
+        <BulkPriceUpdateDialog
+          open={isBulkUpdateDialogOpen}
+          onOpenChange={setIsBulkUpdateDialogOpen}
+          priceType="region"
+          onSuccess={fetchPrices}
+          cities={Object.keys(CITIES_DATA)}
+          vehicleTypes={VEHICLE_TYPES}
+        />
+        <BulkPriceUpdateDialog
+          open={isBulkIntercityUpdateDialogOpen}
+          onOpenChange={setIsBulkIntercityUpdateDialogOpen}
+          priceType="intercity"
+          onSuccess={fetchIntercityPrices}
+          cities={Object.keys(CITIES_DATA)}
+          vehicleTypes={VEHICLE_TYPES}
+        />
       </main>
     </div>
   );
