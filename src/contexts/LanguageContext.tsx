@@ -5960,6 +5960,22 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusHeroAlt: "Трансфер из аэропорта Кипра 2025 - VIP частный трансфер из Ларнаки и Пафоса",
     blogIstanbulHeroAlt: "Аэропорт Стамбула в центр города 2025 - Частный трансфер, Метро M11, Автобус Havaist",
 
+    // Antalya Airport Transfer Guide - Detailed SEO (RU)
+    blogAntalyaSeoTitle: "Трансфер из аэропорта Анталии в отели: Полный гид 2025",
+    blogAntalyaSeoDesc: "Всё о трансферах из аэропорта Анталии. Цены до Лара, Белек, Сиде, Кемер, Аланья. Советы по бронированию, время в пути и чего ожидать.",
+
+    // Dubai Airport Transfer Guide - Detailed SEO (RU)
+    blogDubaiSeoTitle: "Гид по трансферу из аэропорта Дубая 2025 | DXB в Даунтаун, Палм Джумейра, Марина",
+    blogDubaiSeoDesc: "Полный гид по трансферам из аэропорта Дубая. VIP-трансферы из DXB в Даунтаун Дубай, Палм Джумейра, Дубай Марина от $45. Встреча 24/7, люксовые авто.",
+
+    // Cyprus Airport Transfer Guide - Detailed SEO (RU)
+    blogCyprusSeoTitle: "Гид по трансферу из аэропорта Кипра 2025 | Ларнака в Айя-Напу, Пафос в Лимассол",
+    blogCyprusSeoDesc: "Полный гид по трансферам из аэропортов Кипра. VIP-трансферы из Ларнаки и Пафоса от €35. Фиксированные цены до Айя-Напа, Лимассол, Протарас, Кирения.",
+
+    // Bursa Day Tour Guide - Detailed SEO (RU)
+    blogBursaSeoTitle: "Однодневный тур Стамбул-Бурса 2025 | Что посмотреть и как добраться",
+    blogBursaSeoDesc: "Полный гид по посещению Бурсы из Стамбула. Лучшие достопримечательности, варианты транспорта, маршруты экскурсий и советы для идеального однодневного тура.",
+
     // Antalya Blog - Hardcoded Content Translations (RU)
     blogAntalyaAirportP1: "Аэропорт Анталии (AYT) — третий по загруженности аэропорт Турции, обслуживающий более 35 миллионов пассажиров в год. Расположенный на живописной Турецкой Ривьере, он служит воротами к одним из самых красивых пляжей и древних руин Средиземноморья. Аэропорт имеет два международных терминала и один внутренний.",
     blogAntalyaNavigating: "Навигация в аэропорту Анталии",
@@ -7287,6 +7303,16 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusHeroAlt: "Trasferimento Aeroporto Cipro 2025 - Trasferimento VIP Privato da Larnaca e Paphos",
     blogIstanbulHeroAlt: "Aeroporto Istanbul al Centro Città 2025 - Trasferimento Privato, Metro M11, Bus Havaist",
 
+    // Antalya Airport Transfer Guide - Detailed SEO (IT)
+    blogAntalyaSeoTitle: "Trasferimento Aeroporto Antalya agli Hotel: Guida Completa 2025",
+    blogAntalyaSeoDesc: "Tutto sui trasferimenti dall'aeroporto di Antalya. Prezzi per Lara, Belek, Side, Kemer, Alanya. Consigli di prenotazione, tempi di viaggio.",
+    blogDubaiSeoTitle: "Guida Trasferimento Aeroporto Dubai 2025 | DXB a Downtown, Palm Jumeirah, Marina",
+    blogDubaiSeoDesc: "Guida completa ai trasferimenti dall'aeroporto di Dubai. Trasferimenti VIP da DXB a Downtown Dubai, Palm Jumeirah, Dubai Marina da $45. Meet & greet 24/7.",
+    blogCyprusSeoTitle: "Guida Trasferimento Aeroporto Cipro 2025 | Larnaca a Ayia Napa, Paphos a Limassol",
+    blogCyprusSeoDesc: "Guida completa ai trasferimenti aeroportuali di Cipro. Trasferimenti VIP da Larnaca e Paphos da €35. Prezzi fissi per Ayia Napa, Limassol, Protaras.",
+    blogBursaSeoTitle: "Guida Tour Giornaliero Istanbul-Bursa 2025 | Cosa Vedere e Come Arrivare",
+    blogBursaSeoDesc: "Guida completa per visitare Bursa da Istanbul. Migliori attrazioni, opzioni di trasporto, itinerari e consigli per la gita perfetta.",
+
     // Antalya Blog - Hardcoded Content Translations (IT)
     blogAntalyaAirportP1: "L'aeroporto di Antalya (AYT) è il terzo aeroporto più trafficato della Turchia, con oltre 35 milioni di passeggeri all'anno. Situato sulla splendida Riviera Turca, è il gateway per alcune delle più belle spiagge del Mediterraneo e antiche rovine. L'aeroporto dispone di due terminal internazionali e un terminal domestico.",
     blogAntalyaNavigating: "Orientarsi all'Aeroporto di Antalya",
@@ -8613,6 +8639,16 @@ const translations: Record<Language, Record<string, string>> = {
     blogOludenizHeroAlt: "Traslado Aeropuerto Ölüdeniz 2025 - Dalaman a Ölüdeniz, Laguna Azul Traslado VIP",
     blogCyprusHeroAlt: "Traslado Aeropuerto Chipre 2025 - Traslado VIP Privado desde Larnaca y Paphos",
     blogIstanbulHeroAlt: "Aeropuerto Estambul al Centro Ciudad 2025 - Traslado Privado, Metro M11, Bus Havaist",
+
+    // Antalya Airport Transfer Guide - Detailed SEO (ES)
+    blogAntalyaSeoTitle: "Traslado Aeropuerto Antalya a Hoteles: Guía Completa 2025",
+    blogAntalyaSeoDesc: "Todo sobre traslados desde el aeropuerto de Antalya. Precios a Lara, Belek, Side, Kemer, Alanya. Consejos de reserva, tiempos de viaje.",
+    blogDubaiSeoTitle: "Guía Traslado Aeropuerto Dubai 2025 | DXB a Downtown, Palm Jumeirah, Marina",
+    blogDubaiSeoDesc: "Guía completa de traslados del aeropuerto de Dubai. Traslados VIP desde DXB a Downtown Dubai, Palm Jumeirah, Dubai Marina desde $45. Meet & greet 24/7.",
+    blogCyprusSeoTitle: "Guía Traslado Aeropuerto Chipre 2025 | Larnaca a Ayia Napa, Paphos a Limassol",
+    blogCyprusSeoDesc: "Guía completa de traslados aeroportuarios de Chipre. Traslados VIP desde Larnaca y Paphos desde €35. Precios fijos a Ayia Napa, Limassol, Protaras.",
+    blogBursaSeoTitle: "Guía Tour de un Día Estambul-Bursa 2025 | Qué Ver y Cómo Llegar",
+    blogBursaSeoDesc: "Guía completa para visitar Bursa desde Estambul. Mejores atracciones, opciones de transporte, itinerarios y consejos para la excursión perfecta.",
 
     // Antalya Blog - Hardcoded Content Translations (ES)
     blogAntalyaAirportP1: "El aeropuerto de Antalya (AYT) es el tercer aeropuerto más concurrido de Turquía, con más de 35 millones de pasajeros al año. Situado en la impresionante Riviera Turca, es la puerta de entrada a algunas de las playas más hermosas del Mediterráneo y ruinas antiguas. El aeropuerto cuenta con dos terminales internacionales y una terminal doméstica.",
