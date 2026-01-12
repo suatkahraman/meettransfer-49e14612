@@ -57,9 +57,9 @@ const PrivateVsTaxiTurkey = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Private Transfer vs Taxi Turkey', url: '/blog/private-vs-taxi-transfer-turkey' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogTaxiH1"), url: '/blog/private-vs-taxi-transfer-turkey' },
             ],
           },
           {

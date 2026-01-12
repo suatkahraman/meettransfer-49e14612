@@ -70,9 +70,9 @@ const BursaDayTourGuide = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Istanbul to Bursa Day Tour Guide', url: '/blog/istanbul-bursa-day-tour-guide' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogBursaH1"), url: '/blog/istanbul-bursa-day-tour-guide' },
             ],
           },
           { type: 'FAQPage', questions: faqItems },

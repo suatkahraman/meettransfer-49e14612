@@ -90,9 +90,9 @@ const FethiyeAirportTransferGuide = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Fethiye Airport Transfer Guide', url: '/blog/fethiye-airport-transfer-guide' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogFethiyeH1"), url: '/blog/fethiye-airport-transfer-guide' },
             ],
           },
           {

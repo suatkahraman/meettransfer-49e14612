@@ -92,9 +92,9 @@ const DubaiAirportTransferGuide = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Dubai Airport Transfer Guide', url: '/blog/dubai-airport-transfer-guide' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogDubaiH1"), url: '/blog/dubai-airport-transfer-guide' },
             ],
           },
         ]}

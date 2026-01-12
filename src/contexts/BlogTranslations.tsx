@@ -6,6 +6,8 @@ import { Language } from "./LanguageContext";
 export const blogTranslations: Record<Language, Record<string, string>> = {
   EN: {
     // Blog Common
+    breadcrumbHome: "Home",
+    breadcrumbBlog: "Blog",
     backToBlog: "Back to Blog",
     minRead: "min read",
     shareArticle: "Share",
@@ -766,6 +768,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
   
   DE: {
     // Blog Common
+    breadcrumbHome: "Startseite",
+    breadcrumbBlog: "Blog",
     backToBlog: "Zurück zum Blog",
     minRead: "Min. Lesezeit",
     shareArticle: "Teilen",
@@ -1555,6 +1559,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
   
   FR: {
     // Blog Common
+    breadcrumbHome: "Accueil",
+    breadcrumbBlog: "Blog",
     backToBlog: "Retour au blog",
     minRead: "min de lecture",
     shareArticle: "Partager",
@@ -2316,6 +2322,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
   
   RU: {
     // Blog Common
+    breadcrumbHome: "Главная",
+    breadcrumbBlog: "Блог",
     backToBlog: "Назад к блогу",
     minRead: "мин чтения",
     shareArticle: "Поделиться",
@@ -2981,6 +2989,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
   
   IT: {
     // Blog Common
+    breadcrumbHome: "Home",
+    breadcrumbBlog: "Blog",
     backToBlog: "Torna al blog",
     minRead: "min di lettura",
     shareArticle: "Condividi",
@@ -3602,6 +3612,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
   
   ES: {
     // Blog Common
+    breadcrumbHome: "Inicio",
+    breadcrumbBlog: "Blog",
     backToBlog: "Volver al blog",
     minRead: "min de lectura",
     shareArticle: "Compartir",
@@ -4223,6 +4235,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
   
   AR: {
     // Blog Common
+    breadcrumbHome: "الرئيسية",
+    breadcrumbBlog: "المدونة",
     backToBlog: "العودة للمدونة",
     minRead: "دقيقة قراءة",
     shareArticle: "مشاركة",
@@ -4885,6 +4899,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
   
   TR: {
     // Blog Common
+    breadcrumbHome: "Ana Sayfa",
+    breadcrumbBlog: "Blog",
     backToBlog: "Bloga Dön",
     minRead: "dk okuma",
     shareArticle: "Paylaş",
@@ -5665,6 +5681,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
   
   UK: {
     // Blog Common
+    breadcrumbHome: "Головна",
+    breadcrumbBlog: "Блог",
     backToBlog: "Назад до блогу",
     minRead: "хв читання",
     shareArticle: "Поділитися",
@@ -6456,6 +6474,8 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
   
   JA: {
     // Blog Common
+    breadcrumbHome: "ホーム",
+    breadcrumbBlog: "ブログ",
     backToBlog: "ブログに戻る",
     minRead: "分で読める",
     shareArticle: "共有",

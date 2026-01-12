@@ -89,9 +89,9 @@ const AydinAirportTransferGuide = () => {
           {
             type: "BreadcrumbList",
             items: [
-              { name: "Home", url: "/" },
-              { name: "Blog", url: "/blog" },
-              { name: "Aydin Airport Transfer Guide", url: "/blog/aydin-airport-transfer-guide" },
+              { name: t("breadcrumbHome"), url: "/" },
+              { name: t("breadcrumbBlog"), url: "/blog" },
+              { name: t("blogAydinH1"), url: "/blog/aydin-airport-transfer-guide" },
             ],
           },
           {

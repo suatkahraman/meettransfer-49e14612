@@ -75,9 +75,9 @@ const IsPrivateTransferWorthIt = () => {
           {
             type: 'BreadcrumbList',
             items: [
-              { name: 'Home', url: '/' },
-              { name: 'Blog', url: '/blog' },
-              { name: 'Is Private Transfer Worth It?', url: '/blog/is-private-transfer-worth-it-turkey' },
+              { name: t("breadcrumbHome"), url: '/' },
+              { name: t("breadcrumbBlog"), url: '/blog' },
+              { name: t("blogWorthH1"), url: '/blog/is-private-transfer-worth-it-turkey' },
             ],
           },
           {

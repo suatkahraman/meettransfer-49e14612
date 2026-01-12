@@ -89,9 +89,9 @@ const MuglaAirportTransferGuide = () => {
           {
             type: "BreadcrumbList",
             items: [
-              { name: "Home", url: "/" },
-              { name: "Blog", url: "/blog" },
-              { name: "Mugla Airport Transfer Guide", url: "/blog/mugla-airport-transfer-guide" },
+              { name: t("breadcrumbHome"), url: "/" },
+              { name: t("breadcrumbBlog"), url: "/blog" },
+              { name: t("blogMuglaH1"), url: "/blog/mugla-airport-transfer-guide" },
             ],
           },
           {
