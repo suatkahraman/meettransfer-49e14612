@@ -511,7 +511,10 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
   const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate } = useTextToSpeech(language);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
 
-  // Handle AI parameter from URL - auto-open chat and pre-fill route message
+  // Ref to store pending auto-send message
+  const pendingAutoSendRef = useRef<string | null>(null);
+
+  // Handle AI parameter from URL - auto-open chat and auto-send route message
   useEffect(() => {
     if (hasHandledAIParamRef.current) return;
     
@@ -529,18 +532,13 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
       searchParams.delete('route');
       setSearchParams(searchParams, { replace: true });
       
-      // If there's a route parameter, pre-fill the input with a question about it
+      // If there's a route parameter, store it for auto-send after chat opens
       if (routeParam) {
         const routeQuestion = language === 'TR' 
           ? `${routeParam} rotası için fiyat ve detay almak istiyorum.`
           : `I'd like to get price and details for the ${routeParam} route.`;
         
-        // Set the input with the route question after a short delay
-        setTimeout(() => {
-          setInput(routeQuestion);
-          // Focus the input
-          inputRef.current?.focus();
-        }, 500);
+        pendingAutoSendRef.current = routeQuestion;
       }
     }
   }, [searchParams, setSearchParams, language]);
@@ -585,6 +583,26 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
       }]);
     }
   }, [isOpen, language, messages.length]);
+
+  // Auto-send pending message after chat opens and welcome message is added
+  useEffect(() => {
+    if (isOpen && pendingAutoSendRef.current && messages.length > 0) {
+      const messageToSend = pendingAutoSendRef.current;
+      pendingAutoSendRef.current = null;
+      
+      // Small delay to ensure UI is ready
+      setTimeout(() => {
+        setInput(messageToSend);
+        // Trigger send after setting input
+        setTimeout(() => {
+          const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
+          if (submitButton) {
+            submitButton.click();
+          }
+        }, 100);
+      }, 500);
+    }
+  }, [isOpen, messages.length]);
 
   useEffect(() => {
     // Scroll to bottom when new messages added
@@ -1268,6 +1286,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                       onClick={sendMessage}
                       disabled={isLoading || !input.trim()}
                       size="icon"
+                      data-chat-submit
                       className={cn(
                         "h-11 w-11 md:h-12 md:w-12 rounded-xl transition-all touch-manipulation",
                         input.trim() 
