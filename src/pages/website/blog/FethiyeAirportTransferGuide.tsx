@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, CheckCircle2, MapPin } from "lucide-react";
+import { CompactRouteMap } from "@/components/ui/compact-route-map";
 import fethiyeTransferHero from "@/assets/blog/fethiye-transfer-hero.jpg";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
@@ -290,6 +291,11 @@ const FethiyeAirportTransferGuide = () => {
           <p className="text-muted-foreground text-sm mb-4">
             {t("blogFethiyeMapDesc")}
           </p>
+          <CompactRouteMap 
+            pickup="Dalaman Airport, Turkey" 
+            dropoff="Fethiye, Turkey" 
+            className="h-[200px]"
+          />
         </div>
 
         <BlogCTA destination="Fethiye" />
