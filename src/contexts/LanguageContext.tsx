@@ -57,6 +57,11 @@ const translations: Record<Language, Record<string, string>> = {
     bestPriceGuarantee: "Best Price Guarantee",
     noHiddenFees: "No Hidden Fees",
     qbNewPriceReceived: "New price received! You can now review and confirm.",
+    qbRequestReceived: "Request Received",
+    qbCalculatingPrice: "Calculating Price",
+    qbReadyToBook: "Ready to Book",
+    qbFreeCancellation: "Free Cancellation",
+    qbBestPrice: "Best Price",
     
     // Navigation
     home: "Home",
@@ -1621,6 +1626,11 @@ const translations: Record<Language, Record<string, string>> = {
     bestPriceGuarantee: "Bestpreisgarantie",
     noHiddenFees: "Keine versteckten Gebühren",
     qbNewPriceReceived: "Neuer Preis erhalten! Sie können jetzt prüfen und bestätigen.",
+    qbRequestReceived: "Anfrage erhalten",
+    qbCalculatingPrice: "Preis wird berechnet",
+    qbReadyToBook: "Buchungsbereit",
+    qbFreeCancellation: "Kostenlose Stornierung",
+    qbBestPrice: "Bester Preis",
     
     // Navigation
     home: "Startseite",
@@ -3241,6 +3251,11 @@ const translations: Record<Language, Record<string, string>> = {
     bestPriceGuarantee: "Garantie du meilleur prix",
     noHiddenFees: "Sans frais cachés",
     qbNewPriceReceived: "Nouveau prix reçu ! Vous pouvez maintenant vérifier et confirmer.",
+    qbRequestReceived: "Demande reçue",
+    qbCalculatingPrice: "Calcul du prix",
+    qbReadyToBook: "Prêt à réserver",
+    qbFreeCancellation: "Annulation gratuite",
+    qbBestPrice: "Meilleur prix",
     
     // Navigation
     // Navigation
@@ -4600,6 +4615,11 @@ const translations: Record<Language, Record<string, string>> = {
     bestPriceGuarantee: "Гарантия лучшей цены",
     noHiddenFees: "Без скрытых платежей",
     qbNewPriceReceived: "Новая цена получена! Теперь вы можете проверить и подтвердить.",
+    qbRequestReceived: "Запрос получен",
+    qbCalculatingPrice: "Расчёт цены",
+    qbReadyToBook: "Готово к бронированию",
+    qbFreeCancellation: "Бесплатная отмена",
+    qbBestPrice: "Лучшая цена",
     
     // Navigation
     // Navigation
@@ -5831,6 +5851,11 @@ const translations: Record<Language, Record<string, string>> = {
     bestPriceGuarantee: "Garanzia del miglior prezzo",
     noHiddenFees: "Nessun costo nascosto",
     qbNewPriceReceived: "Nuovo prezzo ricevuto! Ora puoi verificare e confermare.",
+    qbRequestReceived: "Richiesta ricevuta",
+    qbCalculatingPrice: "Calcolo del prezzo",
+    qbReadyToBook: "Pronto per prenotare",
+    qbFreeCancellation: "Cancellazione gratuita",
+    qbBestPrice: "Miglior prezzo",
     
     // Navigation
     // Navigation
@@ -7115,6 +7140,11 @@ const translations: Record<Language, Record<string, string>> = {
     bestPriceGuarantee: "Garantía del mejor precio",
     noHiddenFees: "Sin cargos ocultos",
     qbNewPriceReceived: "¡Nuevo precio recibido! Ahora puedes revisar y confirmar.",
+    qbRequestReceived: "Solicitud recibida",
+    qbCalculatingPrice: "Calculando precio",
+    qbReadyToBook: "Listo para reservar",
+    qbFreeCancellation: "Cancelación gratuita",
+    qbBestPrice: "Mejor precio",
     
     // Navigation
     // Navigation
@@ -8399,6 +8429,11 @@ const translations: Record<Language, Record<string, string>> = {
     bestPriceGuarantee: "ضمان أفضل سعر",
     noHiddenFees: "بدون رسوم مخفية",
     qbNewPriceReceived: "تم استلام السعر الجديد! يمكنك الآن المراجعة والتأكيد.",
+    qbRequestReceived: "تم استلام الطلب",
+    qbCalculatingPrice: "جاري حساب السعر",
+    qbReadyToBook: "جاهز للحجز",
+    qbFreeCancellation: "إلغاء مجاني",
+    qbBestPrice: "أفضل سعر",
     
     // Navigation
     // Navigation
@@ -9608,6 +9643,11 @@ const translations: Record<Language, Record<string, string>> = {
     bestPriceGuarantee: "En İyi Fiyat Garantisi",
     noHiddenFees: "Gizli Ücret Yok",
     qbNewPriceReceived: "Yeni fiyat alındı! Artık inceleyip onaylayabilirsiniz.",
+    qbRequestReceived: "İstek Alındı",
+    qbCalculatingPrice: "Fiyat Hesaplanıyor",
+    qbReadyToBook: "Rezervasyona Hazır",
+    qbFreeCancellation: "Ücretsiz İptal",
+    qbBestPrice: "En İyi Fiyat",
     
     // Navigation
     // Navigation
@@ -10988,6 +11028,11 @@ const translations: Record<Language, Record<string, string>> = {
     bestPriceGuarantee: "Гарантія найкращої ціни",
     noHiddenFees: "Без прихованих платежів",
     qbNewPriceReceived: "Нову ціну отримано! Тепер ви можете переглянути та підтвердити.",
+    qbRequestReceived: "Запит отримано",
+    qbCalculatingPrice: "Розрахунок ціни",
+    qbReadyToBook: "Готово до бронювання",
+    qbFreeCancellation: "Безкоштовне скасування",
+    qbBestPrice: "Найкраща ціна",
     
     // Navigation
     // Navigation
@@ -12204,6 +12249,11 @@ const translations: Record<Language, Record<string, string>> = {
     bestPriceGuarantee: "最安値保証",
     noHiddenFees: "隠れた料金なし",
     qbNewPriceReceived: "新しい価格を受け取りました！確認してご承認ください。",
+    qbRequestReceived: "リクエスト受付済み",
+    qbCalculatingPrice: "価格計算中",
+    qbReadyToBook: "予約準備完了",
+    qbFreeCancellation: "無料キャンセル",
+    qbBestPrice: "最安値",
     
     // Navigation
     // Navigation
