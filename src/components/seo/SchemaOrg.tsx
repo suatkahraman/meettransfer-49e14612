@@ -413,21 +413,36 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
         (s) => s.type === 'LocalBusiness' && (s as LocalBusinessSchema).includeRating
       );
 
+      const fallback: AggregateRatingData = { ratingValue: '4.8', reviewCount: '2847' };
+
       if (needsRating) {
         try {
           const { supabase } = await import('@/integrations/supabase/client');
-          const { useLanguage } = await import('@/contexts/LanguageContext');
-          // useLanguage is a hook; we can't call it here.
-          // Instead, request EN to keep rating consistent across locales.
-          const { data } = await supabase.functions.invoke('get-google-reviews', {
+
+          // Request EN to keep rating consistent across locales.
+          const { data, error } = await supabase.functions.invoke('get-google-reviews', {
             body: { language: 'en' },
           });
 
-          const ratingValue = String(data?.rating ?? '4.8');
-          const reviewCount = String(data?.totalReviews ?? '2847');
+          const apiError = (data as any)?.error;
+          if (error || apiError) throw new Error(String(error?.message ?? apiError));
+
+          const nextRating = Number((data as any)?.rating);
+          const nextTotal = Number((data as any)?.totalReviews);
+
+          const ratingValue =
+            Number.isFinite(nextRating) && nextRating > 0
+              ? nextRating.toFixed(1)
+              : fallback.ratingValue;
+
+          const reviewCount =
+            Number.isFinite(nextTotal) && nextTotal > 0
+              ? String(Math.round(nextTotal))
+              : fallback.reviewCount;
+
           aggregateRating = { ratingValue, reviewCount };
         } catch {
-          aggregateRating = { ratingValue: '4.8', reviewCount: '2847' };
+          aggregateRating = fallback;
         }
       }
 
