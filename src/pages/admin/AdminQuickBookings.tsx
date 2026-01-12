@@ -62,6 +62,8 @@ import {
   Eye,
   Briefcase,
   Baby,
+  UserCheck,
+  UserX,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PriceHistoryCard from "@/components/admin/PriceHistoryCard";
@@ -104,6 +106,15 @@ interface QuickBookingRequest {
   return_time: string | null;
   return_price: number | null;
   promo_code: string | null;
+}
+
+// Interface for linked reservation customer status
+interface LinkedReservationInfo {
+  reservation_id: string;
+  reservation_code: string;
+  customer_id: string | null;
+  customer_name: string;
+  status: string;
 }
 
 const vehicleLabels: Record<string, string> = {
@@ -159,6 +170,9 @@ export default function AdminQuickBookings() {
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<TabValue>("all");
+  
+  // Linked reservation info (customer account status)
+  const [linkedReservations, setLinkedReservations] = useState<Record<string, LinkedReservationInfo>>({});
 
   useEffect(() => {
     fetchRequests();
@@ -170,6 +184,16 @@ export default function AdminQuickBookings() {
         { event: "*", schema: "public", table: "quick_booking_requests" },
         () => {
           fetchRequests();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "reservations" },
+        (payload) => {
+          // When a reservation is updated (e.g., customer_id is set), refresh linked reservations
+          if (payload.new && (payload.new as any).customer_id !== (payload.old as any)?.customer_id) {
+            fetchRequests();
+          }
         }
       )
       .subscribe();
@@ -192,11 +216,56 @@ export default function AdminQuickBookings() {
 
       if (error) throw error;
       setRequests((data as QuickBookingRequest[]) || []);
+      
+      // For confirmed requests, fetch linked reservation customer status
+      const confirmedRequests = (data as QuickBookingRequest[])?.filter(r => r.status === "confirmed") || [];
+      if (confirmedRequests.length > 0) {
+        fetchLinkedReservations(confirmedRequests);
+      }
     } catch (error) {
       console.error("Error fetching requests:", error);
       toast.error("Failed to fetch booking requests");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch linked reservations to check customer account status
+  const fetchLinkedReservations = async (confirmedRequests: QuickBookingRequest[]) => {
+    try {
+      // Build conditions for each confirmed request
+      const orConditions = confirmedRequests.map(r => 
+        `and(pickup.eq.${encodeURIComponent(r.pickup)},dropoff.eq.${encodeURIComponent(r.dropoff)},pickup_date.eq.${r.pickup_date},pickup_time.eq.${r.pickup_time})`
+      ).join(',');
+      
+      // Query reservations that match the confirmed quick bookings
+      const linkedMap: Record<string, LinkedReservationInfo> = {};
+      
+      for (const req of confirmedRequests) {
+        const { data: reservations } = await supabase
+          .from("reservations")
+          .select("id, reservation_code, customer_id, customer_name, status")
+          .eq("pickup", req.pickup)
+          .eq("dropoff", req.dropoff)
+          .eq("pickup_date", req.pickup_date)
+          .eq("pickup_time", req.pickup_time)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        
+        if (reservations && reservations.length > 0) {
+          linkedMap[req.id] = {
+            reservation_id: reservations[0].id,
+            reservation_code: reservations[0].reservation_code || '',
+            customer_id: reservations[0].customer_id,
+            customer_name: reservations[0].customer_name,
+            status: reservations[0].status,
+          };
+        }
+      }
+      
+      setLinkedReservations(linkedMap);
+    } catch (error) {
+      console.error("Error fetching linked reservations:", error);
     }
   };
 
@@ -666,7 +735,7 @@ export default function AdminQuickBookings() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-col">
+                            <div className="flex flex-col gap-1">
                               {request.customer_name && (
                                 <span className="font-medium text-sm">{request.customer_name}</span>
                               )}
@@ -677,6 +746,30 @@ export default function AdminQuickBookings() {
                                 <Badge variant="outline" className="w-fit mt-1 text-xs bg-purple-50 text-purple-700 border-purple-200">
                                   <Building2 className="h-3 w-3 mr-1" />
                                   {request.agency.agency_name}
+                                </Badge>
+                              )}
+                              {/* Customer Account Status for Confirmed Bookings */}
+                              {request.status === "confirmed" && linkedReservations[request.id] && (
+                                <Badge 
+                                  variant="outline" 
+                                  className={cn(
+                                    "w-fit mt-1 text-xs",
+                                    linkedReservations[request.id].customer_id 
+                                      ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400" 
+                                      : "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400"
+                                  )}
+                                >
+                                  {linkedReservations[request.id].customer_id ? (
+                                    <>
+                                      <UserCheck className="h-3 w-3 mr-1" />
+                                      Hesap Oluşturdu
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserX className="h-3 w-3 mr-1" />
+                                      Hesap Bekleniyor
+                                    </>
+                                  )}
                                 </Badge>
                               )}
                             </div>
@@ -803,14 +896,38 @@ export default function AdminQuickBookings() {
                         )}
                       </div>
 
-                      {(request.customer_name || request.agency) && (
-                        <div className="flex items-center gap-2 text-xs">
+                      {(request.customer_name || request.agency || (request.status === "confirmed" && linkedReservations[request.id])) && (
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
                           {request.customer_name && (
                             <span className="text-muted-foreground">{request.customer_name}</span>
                           )}
                           {request.agency && (
                             <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
                               {request.agency.agency_name}
+                            </Badge>
+                          )}
+                          {/* Customer Account Status for Confirmed Bookings - Mobile */}
+                          {request.status === "confirmed" && linkedReservations[request.id] && (
+                            <Badge 
+                              variant="outline" 
+                              className={cn(
+                                "text-xs",
+                                linkedReservations[request.id].customer_id 
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400" 
+                                  : "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400"
+                              )}
+                            >
+                              {linkedReservations[request.id].customer_id ? (
+                                <>
+                                  <UserCheck className="h-3 w-3 mr-1" />
+                                  Hesap Oluşturdu
+                                </>
+                              ) : (
+                                <>
+                                  <UserX className="h-3 w-3 mr-1" />
+                                  Hesap Bekleniyor
+                                </>
+                              )}
                             </Badge>
                           )}
                         </div>
@@ -1042,6 +1159,53 @@ export default function AdminQuickBookings() {
                         <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                           {selectedRequest.agency.agency_name}
                         </Badge>
+                      </div>
+                    )}
+                    
+                    {/* Customer Account Status */}
+                    {selectedRequest.status === "confirmed" && linkedReservations[selectedRequest.id] && (
+                      <div className={cn(
+                        "mt-3 p-3 rounded-lg border",
+                        linkedReservations[selectedRequest.id].customer_id 
+                          ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800" 
+                          : "bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800"
+                      )}>
+                        <div className="flex items-center gap-2">
+                          {linkedReservations[selectedRequest.id].customer_id ? (
+                            <>
+                              <UserCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                              <div>
+                                <p className="font-medium text-emerald-700 dark:text-emerald-300">Müşteri Hesabı Oluşturuldu</p>
+                                <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                                  Müşteri bilgilerini doldurdu ve sisteme kayıt oldu
+                                </p>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <UserX className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                              <div>
+                                <p className="font-medium text-orange-700 dark:text-orange-300">Hesap Bekleniyor</p>
+                                <p className="text-xs text-orange-600 dark:text-orange-400">
+                                  Müşteri henüz bilgilerini doldurmadı
+                                </p>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        {linkedReservations[selectedRequest.id].reservation_code && (
+                          <div className="mt-2 pt-2 border-t border-current/10">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 text-xs w-full justify-start"
+                              onClick={() => navigate(`/admin/reservations/${linkedReservations[selectedRequest.id].reservation_id}`)}
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Rezervasyonu Görüntüle ({linkedReservations[selectedRequest.id].reservation_code})
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </CardContent>
