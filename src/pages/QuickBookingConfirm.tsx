@@ -58,7 +58,8 @@ interface VehiclePriceInfo {
   available: boolean;
 }
 
-const VALID_PROMO_CODE = "Meet30Return";
+// Valid promo codes list
+const VALID_PROMO_CODES = ['Meet30Return', 'MEET30RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30'];
 
 
 // Get recommended vehicle based on passenger and luggage count
@@ -146,7 +147,7 @@ export default function QuickBookingConfirm() {
     }
     if (urlPromoCode) {
       setPromoCode(urlPromoCode);
-      if (urlPromoCode.toLowerCase() === VALID_PROMO_CODE.toLowerCase()) {
+      if (VALID_PROMO_CODES.some(code => code.toLowerCase() === urlPromoCode.toLowerCase())) {
         setIsPromoCodeValid(true);
       }
     }
@@ -164,7 +165,7 @@ export default function QuickBookingConfirm() {
       }
       if (booking.promo_code) {
         setPromoCode(booking.promo_code);
-        if (booking.promo_code.toLowerCase() === VALID_PROMO_CODE.toLowerCase()) {
+        if (VALID_PROMO_CODES.some(code => code.toLowerCase() === booking.promo_code?.toLowerCase())) {
           setIsPromoCodeValid(true);
         }
       }
@@ -464,7 +465,7 @@ export default function QuickBookingConfirm() {
     setPromoCode(value);
     if (value.trim() === "") {
       setIsPromoCodeValid(null);
-    } else if (value.trim().toLowerCase() === VALID_PROMO_CODE.toLowerCase()) {
+    } else if (VALID_PROMO_CODES.some(code => code.toLowerCase() === value.trim().toLowerCase())) {
       setIsPromoCodeValid(true);
     } else {
       setIsPromoCodeValid(false);
