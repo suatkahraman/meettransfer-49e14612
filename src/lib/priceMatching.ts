@@ -795,7 +795,7 @@ export async function testPriceMatch(
 }
 
 // ==================== DISCOUNT FUNCTIONS ====================
-const VALID_PROMO_CODES = ['MEET40RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30'];
+const VALID_PROMO_CODES = ['MEET30RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30'];
 
 export function applyPromoDiscount(
   price: number,

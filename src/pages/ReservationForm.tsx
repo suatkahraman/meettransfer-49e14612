@@ -459,7 +459,7 @@ const ReservationForm = () => {
     setPassengerNames(updated);
   };
 
-  const VALID_PROMO_CODE = 'Meet40Return';
+  const VALID_PROMO_CODE = 'Meet30Return';
 
   const handlePromoCodeChange = (value: string) => {
     setPromoCode(value);
@@ -1597,7 +1597,7 @@ const ReservationForm = () => {
                         type="text"
                         value={promoCode}
                         onChange={(e) => handlePromoCodeChange(e.target.value)}
-                        placeholder="Meet40Return"
+                        placeholder="Meet30Return"
                         className={cn(
                           "pr-10 h-10 sm:h-11 text-sm",
                           isPromoCodeValid === true && "border-green-500 bg-green-50 dark:bg-green-950/20",

@@ -161,7 +161,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Get Best Price Now",
-    heroSubtitle: "✈️ 30% OFF Round-Trip Transfers! 🎁 Code: Meet40Return | Turkey • Dubai • Cyprus",
+    heroSubtitle: "✈️ 30% OFF Round-Trip Transfers! 🎁 Code: Meet30Return | Turkey • Dubai • Cyprus",
     pointToPoint: "Transfer",
     perHour: "Per Hour",
     bookYourTransfer: "Book Your Transfer",
@@ -174,7 +174,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryFleet: "Luxury Fleet",
     serviceLocations: "We Serve",
     addReturnTrip: "Add Return Trip",
-    returnTripDiscount: "Book return trip and get 30% OFF with code: Meet40Return",
+    returnTripDiscount: "Book return trip and get 30% OFF with code: Meet30Return",
     preferredCurrency: "Preferred Currency",
     currencyHint: "Select your preferred currency for the price quote",
     specialRequests: "Special Requests / Notes",
@@ -1818,7 +1818,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Jetzt besten Preis erhalten",
-    heroSubtitle: "✈️ 30% RABATT auf Hin- und Rücktransfers! 🎁 Code: Meet40Return | Türkei • Dubai • Zypern",
+    heroSubtitle: "✈️ 30% RABATT auf Hin- und Rücktransfers! 🎁 Code: Meet30Return | Türkei • Dubai • Zypern",
     pointToPoint: "Transfer",
     perHour: "Pro Stunde",
     bookYourTransfer: "Transfer buchen",
@@ -1831,7 +1831,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryFleet: "Luxusflotte",
     serviceLocations: "Wir bedienen",
     addReturnTrip: "Rückfahrt hinzufügen",
-    returnTripDiscount: "Buchen Sie die Rückfahrt und erhalten Sie 30% Rabatt mit Code: Meet40Return",
+    returnTripDiscount: "Buchen Sie die Rückfahrt und erhalten Sie 30% Rabatt mit Code: Meet30Return",
     preferredCurrency: "Bevorzugte Währung",
     currencyHint: "Wählen Sie Ihre bevorzugte Währung für das Preisangebot",
     specialRequests: "Sonderwünsche / Notizen",
@@ -3532,7 +3532,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Obtenez le Meilleur Prix Maintenant",
-    heroSubtitle: "✈️ 30% DE RÉDUCTION sur les transferts aller-retour! 🎁 Code: Meet40Return | Turquie • Dubai • Chypre",
+    heroSubtitle: "✈️ 30% DE RÉDUCTION sur les transferts aller-retour! 🎁 Code: Meet30Return | Turquie • Dubai • Chypre",
     pointToPoint: "Transfert",
     perHour: "À l'heure",
     bookYourTransfer: "Réserver votre transfert",
@@ -3545,7 +3545,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryFleet: "Flotte de luxe",
     serviceLocations: "Nous desservons",
     addReturnTrip: "Ajouter un trajet retour",
-    returnTripDiscount: "Réservez le trajet retour et obtenez 30% de réduction avec le code: Meet40Return",
+    returnTripDiscount: "Réservez le trajet retour et obtenez 30% de réduction avec le code: Meet30Return",
     preferredCurrency: "Devise préférée",
     currencyHint: "Sélectionnez votre devise préférée pour le devis",
     specialRequests: "Demandes spéciales / Notes",
@@ -4957,7 +4957,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Получите лучшую цену сейчас",
-    heroSubtitle: "✈️ СКИДКА 30% на трансферы туда-обратно! 🎁 Код: Meet40Return | Турция • Дубай • Кипр",
+    heroSubtitle: "✈️ СКИДКА 30% на трансферы туда-обратно! 🎁 Код: Meet30Return | Турция • Дубай • Кипр",
     pointToPoint: "Трансфер",
     perHour: "Почасовая",
     bookYourTransfer: "Забронировать трансфер",
@@ -4970,7 +4970,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryFleet: "Люкс автопарк",
     serviceLocations: "Мы обслуживаем",
     addReturnTrip: "Добавить обратный трансфер",
-    returnTripDiscount: "Забронируйте обратный трансфер и получите скидку 30% с кодом: Meet40Return",
+    returnTripDiscount: "Забронируйте обратный трансфер и получите скидку 30% с кодом: Meet30Return",
     preferredCurrency: "Предпочитаемая валюта",
     currencyHint: "Выберите предпочитаемую валюту для ценового предложения",
     specialRequests: "Особые пожелания / Заметки",
@@ -6137,7 +6137,7 @@ const translations: Record<Language, Record<string, string>> = {
     blogCappadociaFaq3Q: "Предлагаете ли вы трансфер на воздушные шары?",
     blogCappadociaFaq3A: "Да, мы предлагаем ранние утренние трансферы на полеты на воздушных шарах с выездом в 4-4:30 утра.",
     blogCappadociaFaq4Q: "Могу ли я забронировать трансфер туда-обратно?",
-    blogCappadociaFaq4A: "Да, мы предлагаем 30% скидку на трансферы туда-обратно с кодом Meet40Return.",
+    blogCappadociaFaq4A: "Да, мы предлагаем 30% скидку на трансферы туда-обратно с кодом Meet30Return.",
     blogCappadociaFaq5Q: "Есть ли трансферы до пещерных отелей?",
     blogCappadociaFaq5A: "Да, мы обслуживаем все пещерные отели в Гёреме, Ургюпе, Учисаре и окрестностях.",
     blogCappadociaFaq6Q: "Доступен ли ночной трансфер?",
@@ -6268,7 +6268,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Ottieni il Miglior Prezzo Ora",
-    heroSubtitle: "✈️ 30% DI SCONTO sui trasferimenti andata e ritorno! 🎁 Codice: Meet40Return | Turchia • Dubai • Cipro",
+    heroSubtitle: "✈️ 30% DI SCONTO sui trasferimenti andata e ritorno! 🎁 Codice: Meet30Return | Turchia • Dubai • Cipro",
     pointToPoint: "Trasferimento",
     perHour: "All'ora",
     bookYourTransfer: "Prenota il tuo trasferimento",
@@ -6281,7 +6281,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryFleet: "Flotta di lusso",
     serviceLocations: "Serviamo",
     addReturnTrip: "Aggiungi viaggio di ritorno",
-    returnTripDiscount: "Prenota il viaggio di ritorno e ottieni il 30% di sconto con il codice: Meet40Return",
+    returnTripDiscount: "Prenota il viaggio di ritorno e ottieni il 30% di sconto con il codice: Meet30Return",
     preferredCurrency: "Valuta preferita",
     currencyHint: "Seleziona la tua valuta preferita per il preventivo",
     specialRequests: "Richieste speciali / Note",
@@ -7282,7 +7282,7 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusGuideFaq2Q: "C'è transfer per il nord di Cipro?",
     blogCyprusGuideFaq2A: "Sì, offriamo transfer per Kyrenia, Famagusta e altre città del nord.",
     blogCyprusGuideFaq3Q: "Posso prenotare transfer andata e ritorno?",
-    blogCyprusGuideFaq3A: "Sì, con 30% di sconto sul viaggio di ritorno con il codice Meet40Return.",
+    blogCyprusGuideFaq3A: "Sì, con 30% di sconto sul viaggio di ritorno con il codice Meet30Return.",
     blogCyprusGuideFaq4Q: "C'è servizio notturno disponibile?",
     blogCyprusGuideFaq4A: "Sì, operiamo 24/7 senza costi aggiuntivi per voli notturni.",
     
@@ -7495,7 +7495,7 @@ const translations: Record<Language, Record<string, string>> = {
     blogCappadociaFaq3Q: "Offrite transfer per voli in mongolfiera?",
     blogCappadociaFaq3A: "Sì, offriamo transfer mattutini per voli in mongolfiera con prelievo alle 4-4:30 AM.",
     blogCappadociaFaq4Q: "Posso prenotare transfer andata e ritorno?",
-    blogCappadociaFaq4A: "Sì, offriamo 30% di sconto sui transfer andata e ritorno con il codice Meet40Return.",
+    blogCappadociaFaq4A: "Sì, offriamo 30% di sconto sui transfer andata e ritorno con il codice Meet30Return.",
     blogCappadociaFaq5Q: "Ci sono transfer per hotel grotta?",
     blogCappadociaFaq5A: "Sì, serviamo tutti gli hotel grotta a Göreme, Ürgüp, Uçhisar e dintorni.",
     blogCappadociaFaq6Q: "È disponibile transfer notturno?",
@@ -7626,7 +7626,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Obtén el Mejor Precio Ahora",
-    heroSubtitle: "✈️ ¡30% DE DESCUENTO en traslados ida y vuelta! 🎁 Código: Meet40Return | Turquía • Dubai • Chipre",
+    heroSubtitle: "✈️ ¡30% DE DESCUENTO en traslados ida y vuelta! 🎁 Código: Meet30Return | Turquía • Dubai • Chipre",
     pointToPoint: "Traslado",
     perHour: "Por hora",
     bookYourTransfer: "Reserva tu traslado",
@@ -7639,7 +7639,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryFleet: "Flota de lujo",
     serviceLocations: "Servimos en",
     addReturnTrip: "Añadir viaje de regreso",
-    returnTripDiscount: "Reserva el viaje de regreso y obtén 30% de descuento con el código: Meet40Return",
+    returnTripDiscount: "Reserva el viaje de regreso y obtén 30% de descuento con el código: Meet30Return",
     preferredCurrency: "Moneda preferida",
     currencyHint: "Selecciona tu moneda preferida para la cotización",
     specialRequests: "Solicitudes especiales / Notas",
@@ -8640,7 +8640,7 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusGuideFaq2Q: "¿Hay transfer al norte de Chipre?",
     blogCyprusGuideFaq2A: "Sí, ofrecemos transfer a Kyrenia, Famagusta y otras ciudades del norte.",
     blogCyprusGuideFaq3Q: "¿Puedo reservar transfer de ida y vuelta?",
-    blogCyprusGuideFaq3A: "Sí, con 30% de descuento en el viaje de regreso con el código Meet40Return.",
+    blogCyprusGuideFaq3A: "Sí, con 30% de descuento en el viaje de regreso con el código Meet30Return.",
     blogCyprusGuideFaq4Q: "¿Hay servicio nocturno disponible?",
     blogCyprusGuideFaq4A: "Sí, operamos 24/7 sin cargos adicionales por vuelos nocturnos.",
     
@@ -8853,7 +8853,7 @@ const translations: Record<Language, Record<string, string>> = {
     blogCappadociaFaq3Q: "¿Ofrecen transfer para vuelos en globo?",
     blogCappadociaFaq3A: "Sí, ofrecemos transfers temprano por la mañana para vuelos en globo con recogida a las 4-4:30 AM.",
     blogCappadociaFaq4Q: "¿Puedo reservar transfer de ida y vuelta?",
-    blogCappadociaFaq4A: "Sí, ofrecemos 30% de descuento en transfers de ida y vuelta con el código Meet40Return.",
+    blogCappadociaFaq4A: "Sí, ofrecemos 30% de descuento en transfers de ida y vuelta con el código Meet30Return.",
     blogCappadociaFaq5Q: "¿Hay transfers a hoteles cueva?",
     blogCappadociaFaq5A: "Sí, servimos a todos los hoteles cueva en Göreme, Ürgüp, Uçhisar y alrededores.",
     blogCappadociaFaq6Q: "¿Hay transfer nocturno disponible?",
@@ -8984,7 +8984,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "احصل على أفضل سعر الآن",
-    heroSubtitle: "✈️ خصم 30% على النقل ذهاب وإياب! 🎁 الرمز: Meet40Return | تركيا • دبي • قبرص",
+    heroSubtitle: "✈️ خصم 30% على النقل ذهاب وإياب! 🎁 الرمز: Meet30Return | تركيا • دبي • قبرص",
     pointToPoint: "نقل",
     perHour: "بالساعة",
     bookYourTransfer: "احجز نقلك",
@@ -8997,7 +8997,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryFleet: "أسطول فاخر",
     serviceLocations: "نحن نخدم",
     addReturnTrip: "إضافة رحلة العودة",
-    returnTripDiscount: "احجز رحلة العودة واحصل على خصم 30% مع الكود: Meet40Return",
+    returnTripDiscount: "احجز رحلة العودة واحصل على خصم 30% مع الكود: Meet30Return",
     preferredCurrency: "العملة المفضلة",
     currencyHint: "اختر العملة المفضلة للحصول على عرض السعر",
     specialRequests: "طلبات خاصة / ملاحظات",
@@ -10257,7 +10257,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "En İyi Fiyatı Şimdi Alın",
-    heroSubtitle: "✈️ Gidiş-Dönüş Transferlerde %30 İNDİRİM! 🎁 Kod: Meet40Return | Türkiye • Dubai • Kıbrıs",
+    heroSubtitle: "✈️ Gidiş-Dönüş Transferlerde %30 İNDİRİM! 🎁 Kod: Meet30Return | Türkiye • Dubai • Kıbrıs",
     pointToPoint: "Transfer",
     perHour: "Saatlik",
     bookYourTransfer: "Transferinizi Ayırtın",
@@ -10270,7 +10270,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryFleet: "Lüks Filo",
     serviceLocations: "Hizmet Verdiğimiz Bölgeler",
     addReturnTrip: "Dönüş Yolculuğu Ekle",
-    returnTripDiscount: "Dönüş yolculuğu rezervasyonu yapın ve Meet40Return koduyla %30 indirim kazanın",
+    returnTripDiscount: "Dönüş yolculuğu rezervasyonu yapın ve Meet30Return koduyla %30 indirim kazanın",
     preferredCurrency: "Tercih Edilen Para Birimi",
     currencyHint: "Fiyat teklifi için tercih ettiğiniz para birimini seçin",
     specialRequests: "Özel İstekler / Notlar",
@@ -11728,7 +11728,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Отримайте найкращу ціну зараз",
-    heroSubtitle: "✈️ ЗНИЖКА 30% на трансфери туди-назад! 🎁 Код: Meet40Return | Туреччина • Дубай • Кіпр",
+    heroSubtitle: "✈️ ЗНИЖКА 30% на трансфери туди-назад! 🎁 Код: Meet30Return | Туреччина • Дубай • Кіпр",
     pointToPoint: "Трансфер",
     perHour: "Погодинно",
     bookYourTransfer: "Забронювати трансфер",
@@ -11741,7 +11741,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryFleet: "Преміальний автопарк",
     serviceLocations: "Ми обслуговуємо",
     addReturnTrip: "Додати зворотню поїздку",
-    returnTripDiscount: "Забронюйте зворотню поїздку та отримайте знижку 30% з кодом: Meet40Return",
+    returnTripDiscount: "Забронюйте зворотню поїздку та отримайте знижку 30% з кодом: Meet30Return",
     preferredCurrency: "Бажана валюта",
     currencyHint: "Оберіть бажану валюту для цінової пропозиції",
     specialRequests: "Особливі побажання / Примітки",
@@ -12977,7 +12977,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "今すぐ最高の価格を取得",
-    heroSubtitle: "✈️ 往復送迎30%オフ！🎁 コード: Meet40Return | トルコ • ドバイ • キプロス",
+    heroSubtitle: "✈️ 往復送迎30%オフ！🎁 コード: Meet30Return | トルコ • ドバイ • キプロス",
     pointToPoint: "送迎",
     perHour: "時間制",
     bookYourTransfer: "送迎を予約",
@@ -12990,7 +12990,7 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryFleet: "高級車両",
     serviceLocations: "サービスエリア",
     addReturnTrip: "復路を追加",
-    returnTripDiscount: "復路予約で30%オフ コード: Meet40Return",
+    returnTripDiscount: "復路予約で30%オフ コード: Meet30Return",
     preferredCurrency: "ご希望の通貨",
     currencyHint: "お見積もりの通貨を選択してください",
     specialRequests: "特別なご要望・備考",

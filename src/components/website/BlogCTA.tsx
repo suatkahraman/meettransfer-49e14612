@@ -45,7 +45,7 @@ const BlogCTA = ({ destination = "", className = "" }: BlogCTAProps) => {
               {t("blogCtaReturnDiscountDesc")}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              {t("blogCtaPromoCode")}: <span className="font-mono font-bold text-primary">Meet40Return</span>
+              {t("blogCtaPromoCode")}: <span className="font-mono font-bold text-primary">Meet30Return</span>
             </p>
           </div>
 
