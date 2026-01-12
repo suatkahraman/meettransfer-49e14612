@@ -914,6 +914,7 @@ export interface PromoCodeInfo {
   appliesToTotal: boolean;
 }
 
+// Default promo code configuration - can be overridden by database
 export const PROMO_CODE_CONFIG: Record<string, PromoCodeInfo> = {
   'MEET30RETURN': { code: 'MEET30RETURN', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
   'GIDISDONUS': { code: 'GIDISDONUS', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
@@ -922,6 +923,33 @@ export const PROMO_CODE_CONFIG: Record<string, PromoCodeInfo> = {
   'MEET10': { code: 'MEET10', discountPercent: 10, appliesToReturn: false, appliesToTotal: true },
   'WELCOME10': { code: 'WELCOME10', discountPercent: 10, appliesToReturn: false, appliesToTotal: true },
 };
+
+// Fetch promo code config from database
+export async function getPromoCodeFromDB(supabase: any, code: string): Promise<PromoCodeInfo | null> {
+  try {
+    const { data, error } = await supabase
+      .from('promo_codes')
+      .select('code, discount_percentage, applies_to, is_active')
+      .eq('code', code.toUpperCase())
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (error || !data) {
+      // Fallback to hardcoded config
+      return PROMO_CODE_CONFIG[code.toUpperCase()] || null;
+    }
+
+    return {
+      code: data.code,
+      discountPercent: data.discount_percentage,
+      appliesToReturn: data.applies_to === 'return_transfer' || data.applies_to === 'all',
+      appliesToTotal: data.applies_to === 'all' || data.applies_to === 'one_way',
+    };
+  } catch (err) {
+    console.error('Error fetching promo code from DB:', err);
+    return PROMO_CODE_CONFIG[code.toUpperCase()] || null;
+  }
+}
 
 export function calculateDiscount(
   basePrice: number,
