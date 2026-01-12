@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePromo } from '@/contexts/PromoContext';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -459,16 +460,25 @@ const ReservationForm = () => {
     setPassengerNames(updated);
   };
 
-  const VALID_PROMO_CODE = 'Meet30Return';
+  // Get active promo code from context
+  const { promoCode: activePromo } = usePromo();
+  
+  // Build valid promo codes list from active promo + fallback codes
+  const getValidPromoCodes = useCallback(() => {
+    const baseCodes = ['meet30return', 'gidisdonus', 'return30', 'meet30'];
+    if (activePromo?.code) {
+      baseCodes.push(activePromo.code.toLowerCase());
+    }
+    return baseCodes;
+  }, [activePromo]);
 
   const handlePromoCodeChange = (value: string) => {
     setPromoCode(value);
     if (value.trim() === '') {
       setIsPromoCodeValid(null);
-    } else if (value.trim().toLowerCase() === VALID_PROMO_CODE.toLowerCase()) {
-      setIsPromoCodeValid(true);
     } else {
-      setIsPromoCodeValid(false);
+      const validCodes = getValidPromoCodes();
+      setIsPromoCodeValid(validCodes.includes(value.trim().toLowerCase()));
     }
   };
 
