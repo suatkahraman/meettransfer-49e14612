@@ -27,9 +27,11 @@ import vitoCappadociaBalloon from "@/assets/vito-cappadocia-balloon.jpg";
 import vitoVipCouple from "@/assets/vito-vip-couple-starlight.jpg";
 import vitoPassengerCouple from "@/assets/vito-passenger-couple.jpg";
 import vitoAirportWelcome from "@/assets/vito-airport-welcome.jpg";
+import { useBlogDate } from "@/hooks/useBlogDate";
 
 const CappadociaAirportTransferGuide = () => {
   const { getLocalizedPath, t, language } = useLanguage();
+  const { formatBlogDate } = useBlogDate();
 
   const faqItems = [
     { question: t("blogCappadociaFaq1Q"), answer: t("blogCappadociaFaq1A") },
@@ -145,7 +147,7 @@ const CappadociaAirportTransferGuide = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {t("lastUpdated")}: January 10, 2025
+              {t("lastUpdated")}: {formatBlogDate("2025-01-10")}
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />

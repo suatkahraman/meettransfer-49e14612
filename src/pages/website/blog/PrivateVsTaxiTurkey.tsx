@@ -12,9 +12,11 @@ import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import BlogCTA from "@/components/website/BlogCTA";
+import { useBlogDate } from "@/hooks/useBlogDate";
 
 const PrivateVsTaxiTurkey = () => {
   const { t, getLocalizedPath } = useLanguage();
+  const { formatBlogDate } = useBlogDate();
 
   const faqItems = [
     { question: t("blogTaxiFaq1Q"), answer: t("blogTaxiFaq1A") },
@@ -94,7 +96,7 @@ const PrivateVsTaxiTurkey = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {t("lastUpdated")}: January 10, 2025
+              {t("lastUpdated")}: {formatBlogDate("2025-01-10")}
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
