@@ -65,12 +65,23 @@ serve(async (req) => {
         .single();
 
       if (!cacheError && cachedData) {
+        // Always prefer a canonical rating/count from EN cache if present,
+        // so all locales show the same numbers.
+        const { data: canonical } = await supabase
+          .from('google_reviews_cache')
+          .select('rating,total_reviews')
+          .eq('language', 'en')
+          .single();
+
+        const canonicalRating = canonical?.rating ?? cachedData.rating;
+        const canonicalTotal = canonical?.total_reviews ?? cachedData.total_reviews;
+
         console.log('Returning cached reviews');
         return new Response(
           JSON.stringify({
             reviews: cachedData.reviews,
-            rating: cachedData.rating,
-            totalReviews: cachedData.total_reviews,
+            rating: canonicalRating,
+            totalReviews: canonicalTotal,
             cached: true,
             cachedAt: cachedData.fetched_at,
           }),
@@ -153,22 +164,36 @@ serve(async (req) => {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + CACHE_DURATION_HOURS);
 
+    const nowIso = new Date().toISOString();
+
     const { error: upsertError } = await supabase
       .from('google_reviews_cache')
-      .upsert({
-        language,
-        reviews,
-        rating,
-        total_reviews: totalReviews,
-        fetched_at: new Date().toISOString(),
-        expires_at: expiresAt.toISOString(),
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'language',
-      });
+      .upsert(
+        {
+          language,
+          reviews,
+          rating,
+          total_reviews: totalReviews,
+          fetched_at: nowIso,
+          expires_at: expiresAt.toISOString(),
+          updated_at: nowIso,
+        },
+        {
+          onConflict: 'language',
+        }
+      );
+
+    // Keep rating/count synchronized across all cached languages to prevent
+    // different pages/locales showing different numbers.
+    const { error: syncError } = await supabase
+      .from('google_reviews_cache')
+      .update({ rating, total_reviews: totalReviews, updated_at: nowIso })
+      .neq('language', language);
 
     if (upsertError) {
       console.error('Error caching reviews:', upsertError);
+    } else if (syncError) {
+      console.error('Error syncing rating across languages:', syncError);
     } else {
       console.log('Reviews cached successfully');
     }
