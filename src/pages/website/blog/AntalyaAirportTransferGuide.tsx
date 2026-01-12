@@ -47,14 +47,14 @@ const AntalyaAirportTransferGuide = () => {
   ];
 
   const destinations = [
-    { area: "Kaleici (Old Town)", distance: "13 km", time: "20-25 min", price: "€50" },
-    { area: "Lara Beach / Kundu", distance: "18 km", time: "20-30 min", price: "€50" },
-    { area: "Belek", distance: "35 km", time: "35-45 min", price: "€65" },
-    { area: "Side", distance: "65 km", time: "60-75 min", price: "€72" },
-    { area: "Alanya", distance: "130 km", time: "120-150 min", price: "€84" },
-    { area: "Kemer / Göynük", distance: "60 km", time: "50-65 min", price: "€65" },
-    { area: "Kaş", distance: "190 km", time: "180-210 min", price: "€170" },
-    { area: "Kalkan", distance: "220 km", time: "210-240 min", price: "€170" },
+    { area: t("destKaleici"), distance: "13 km", time: "20-25 min", price: "€50" },
+    { area: t("destLaraBeach"), distance: "18 km", time: "20-30 min", price: "€50" },
+    { area: t("destBelek"), distance: "35 km", time: "35-45 min", price: "€65" },
+    { area: t("destSide"), distance: "65 km", time: "60-75 min", price: "€72" },
+    { area: t("destAlanya"), distance: "130 km", time: "120-150 min", price: "€84" },
+    { area: t("destKemer"), distance: "60 km", time: "50-65 min", price: "€65" },
+    { area: t("destKasAntalya"), distance: "190 km", time: "180-210 min", price: "€170" },
+    { area: t("destKalkanAntalya"), distance: "220 km", time: "210-240 min", price: "€170" },
   ];
 
   return (
@@ -116,7 +116,7 @@ const AntalyaAirportTransferGuide = () => {
 
         {/* Article Header */}
         <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">Antalya</Badge>
+          <Badge variant="secondary" className="mb-4">{t("cityAntalya")}</Badge>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
             {t("blogAntalyaH1")}
           </h1>

@@ -128,7 +128,7 @@ const IstanbulAirportToCityGuide = () => {
 
         {/* Article Header */}
         <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">Istanbul</Badge>
+          <Badge variant="secondary" className="mb-4">{t("cityIstanbul")}</Badge>
           <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
             {t('blogIstanbul1H1')}
           </h1>

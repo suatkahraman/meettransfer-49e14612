@@ -49,22 +49,22 @@ const IstanbulTransferPriceGuide = () => {
   ];
 
   const priceData = [
-    { destination: "Taksim / Beyoğlu", private: "€50-55", bus: "150 TL ($5)" },
-    { destination: "Sultanahmet", private: "€50-55", bus: "150 TL ($5)" },
-    { destination: "Kadıköy", private: "€65-70", bus: "180 TL ($6)" },
-    { destination: "Beşiktaş", private: "€50-55", bus: "150 TL ($5)" },
-    { destination: "Galataport Cruise Terminal", private: "€50-55", bus: "N/A" },
-    { destination: "Sabiha Gökçen Airport", private: "€110-130", bus: "N/A" },
-    { destination: "Bursa (Osmangazi)", private: "€185-195", bus: "N/A" },
-    { destination: "Sapanca", private: "€245-255", bus: "N/A" },
-    { destination: "Kartepe Kayak Merkezi", private: "€255-275", bus: "N/A" },
+    { destination: t("destTaksim"), private: "€50-55", bus: "150 TL ($5)" },
+    { destination: t("destSultanahmet"), private: "€50-55", bus: "150 TL ($5)" },
+    { destination: t("destKadikoy"), private: "€65-70", bus: "180 TL ($6)" },
+    { destination: t("destBesiktas"), private: "€50-55", bus: "150 TL ($5)" },
+    { destination: t("destGalataport"), private: "€50-55", bus: t("tableNotAvailable") },
+    { destination: t("destSabihaGokcen"), private: "€110-130", bus: t("tableNotAvailable") },
+    { destination: t("destBursa"), private: "€185-195", bus: t("tableNotAvailable") },
+    { destination: t("destSapanca"), private: "€245-255", bus: t("tableNotAvailable") },
+    { destination: t("destKartepe"), private: "€255-275", bus: t("tableNotAvailable") },
   ];
 
   const vehiclePrices = [
-    { vehicle: "Mercedes Vito (up to 6 pax)", toTaksim: "€50", toKadikoy: "€65", toBursa: "€185" },
-    { vehicle: "Mercedes Vito VIP (up to 6 pax)", toTaksim: "€55", toKadikoy: "€70", toBursa: "€195" },
-    { vehicle: "Mercedes Maybach (up to 3 pax)", toTaksim: "€65", toKadikoy: "€80", toBursa: "€210" },
-    { vehicle: "Mercedes Sprinter (up to 16 pax)", toTaksim: "€85", toKadikoy: "€105", toBursa: "€220" },
+    { vehicle: t("vehicleVito"), toTaksim: "€50", toKadikoy: "€65", toBursa: "€185" },
+    { vehicle: t("vehicleVitoVIP"), toTaksim: "€55", toKadikoy: "€70", toBursa: "€195" },
+    { vehicle: t("vehicleMaybach"), toTaksim: "€65", toKadikoy: "€80", toBursa: "€210" },
+    { vehicle: t("vehicleSprinter"), toTaksim: "€85", toKadikoy: "€105", toBursa: "€220" },
   ];
 
   return (
