@@ -967,6 +967,16 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogIsWorthItTitle: "Lohnt sich ein Privattransfer in der Türkei?",
     blogIsWorthItDesc: "Wir analysieren die echten Kosten und Vorteile von Privattransfers.",
     
+    // Antalya, Bursa, Cyprus, Dubai SEO - German
+    blogAntalyaSeoTitle: "Flughafen Antalya Transfer zu Hotels: Kompletter Guide 2025",
+    blogAntalyaSeoDesc: "Alles über Antalya Flughafentransfers. Preise nach Lara, Belek, Side, Kemer, Alanya. Buchungstipps und Fahrzeiten.",
+    blogBursaSeoTitle: "Istanbul nach Bursa Tagestour 2025 | Sehenswürdigkeiten & Anreise",
+    blogBursaSeoDesc: "Kompletter Guide für Ihren Bursa-Besuch von Istanbul. Top-Attraktionen, beste Reisezeit, Transferoptionen nach Uludağ und osmanische Geschichte.",
+    blogCyprusSeoTitle: "Zypern Flughafen Transfer Guide 2025 | Larnaca, Paphos nach Ayia Napa",
+    blogCyprusSeoDesc: "Kompletter Guide zu Zypern Flughafentransfers. Privater VIP ab Larnaca & Paphos ab €35. Festpreise nach Ayia Napa, Limassol, Protaras.",
+    blogDubaiSeoTitle: "Dubai Flughafen Transfer Guide 2025 | DXB nach Downtown, Palm Jumeirah",
+    blogDubaiSeoDesc: "Kompletter Guide zu Dubai Flughafentransfers. Privater VIP ab DXB nach Downtown, Palm Jumeirah, Marina ab $45. 24/7 Meet & Greet.",
+    
     // Blog CTA Component
     blogCtaDiscountBadge: "30% RABATT auf Rücktransfers",
     blogCtaTitle: "Buchen Sie Ihren Premium-Transfer",
