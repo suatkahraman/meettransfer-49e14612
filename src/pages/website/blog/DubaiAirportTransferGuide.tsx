@@ -162,20 +162,10 @@ const DubaiAirportTransferGuide = () => {
           <p>{t("blogDubaiSection1P1")}</p>
           <p>{t("blogDubaiSection1P2")}</p>
           
-          <p>
-            Dubai is one of the world's most visited cities, welcoming over 16 million international tourists 
-            annually. Known for its ultramodern architecture, luxury shopping, and vibrant nightlife, Dubai 
-            offers an experience unlike any other. Planning your airport transfer is the first step to ensuring 
-            a smooth and memorable visit.
-          </p>
+          <p>{t("blogDubaiMostVisited")}</p>
 
-          <h3>What to Expect When Arriving in Dubai</h3>
-          <p>
-            Dubai International Airport (DXB) is consistently ranked among the world's busiest airports. 
-            Upon arrival, you'll navigate through impressive terminals designed with efficiency in mind. 
-            Immigration processing is typically quick, especially for citizens of many countries who qualify 
-            for visa-on-arrival. After collecting your luggage, you'll have several options for reaching your destination.
-          </p>
+          <h3>{t("blogDubaiWhatToExpect")}</h3>
+          <p>{t("blogDubaiWhatToExpectP1")}</p>
 
           <h2 id="dubai-airports">{t("blogDubaiSection2Title")}</h2>
           <p>{t("blogDubaiSection2Intro")}</p>
