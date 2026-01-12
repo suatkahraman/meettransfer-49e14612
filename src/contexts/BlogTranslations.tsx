@@ -392,6 +392,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogTaxiFaq5A: "With private transfer, your driver monitors your flight and adjusts accordingly - no extra charge. With regular transport, you simply take whatever is available when you arrive, but there's no pre-arranged pickup.",
     blogTaxiFaq6Q: "Which option is better for families with children?",
     blogTaxiFaq6A: "Private transfer is strongly recommended for families. You can request child seats, have space for strollers, and the door-to-door service eliminates stress of navigating with kids and luggage.",
+    blogTaxiHeroAlt: "Private Transfer vs Regular Transportation in Turkey 2025 - Luxury Mercedes VIP Transfer Service",
     
     // Fethiye Airport Transfer Guide
     blogFethiyeTitle: "Dalaman to Fethiye Airport Transfer Guide 2025 | Prices & Tips",
@@ -1012,6 +1013,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogTaxiFaq5A: "Bei Privattransfer überwacht Ihr Fahrer Ihren Flug und passt entsprechend an - ohne Aufpreis. Bei regulärem Transport nehmen Sie einfach, was bei Ankunft verfügbar ist.",
     blogTaxiFaq6Q: "Welche Option ist besser für Familien mit Kindern?",
     blogTaxiFaq6A: "Privattransfer wird für Familien dringend empfohlen. Sie können Kindersitze anfordern, haben Platz für Kinderwagen, und der Tür-zu-Tür-Service eliminiert Stress.",
+    blogTaxiHeroAlt: "Privattransfer vs Regulärer Transport in der Türkei 2025 - Luxus Mercedes VIP Transfer Service",
     
     // Fethiye Airport Transfer Guide - German
     blogFethiyeTitle: "Flughafen Dalaman Fethiye Transfer 2025 | Preise & Tipps",
@@ -1651,6 +1653,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogTaxiFaq5A: "Avec le transfert privé, votre chauffeur surveille votre vol et s'adapte - sans frais supplémentaires.",
     blogTaxiFaq6Q: "Quelle option est meilleure pour les familles avec enfants ?",
     blogTaxiFaq6A: "Le transfert privé est fortement recommandé. Sièges enfants, espace pour poussettes, service porte-à-porte.",
+    blogTaxiHeroAlt: "Transfert Privé vs Transport Régulier en Turquie 2025 - Service de Transfert VIP Mercedes Luxe",
     
     // Fethiye Airport Transfer Guide - French
     blogFethiyeTitle: "Guide Transfert Aéroport Dalaman vers Fethiye 2025 | Prix et Conseils",
@@ -2264,6 +2267,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogTaxiFaq5A: "При частном трансфере водитель отслеживает рейс и подстраивается — без доплаты.",
     blogTaxiFaq6Q: "Какой вариант лучше для семей с детьми?",
     blogTaxiFaq6A: "Частный трансфер настоятельно рекомендуется. Детские кресла, место для колясок, сервис от двери до двери.",
+    blogTaxiHeroAlt: "Частный Трансфер vs Обычный Транспорт в Турции 2025 - Люкс Mercedes VIP Трансфер Сервис",
     
     // Fethiye Airport Transfer Guide - Russian
     blogFethiyeTitle: "Трансфер из аэропорта Даламан в Фетхие 2025 | Цены и советы",
@@ -2780,6 +2784,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogTaxiRegularCon1: "Prezzi variabili",
     blogTaxiRegularCon2: "Barriere linguistiche",
     blogTaxiRegularCon3: "Code",
+    blogTaxiHeroAlt: "Trasferimento Privato vs Trasporto Regolare in Turchia 2025 - Servizio Transfer VIP Mercedes Lusso",
     
     // Fethiye Airport Transfer Guide - Italian
     blogFethiyeTitle: "Guida Trasferimento Aeroporto Dalaman-Fethiye 2025 | Prezzi e Consigli",
@@ -3296,6 +3301,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogTaxiRegularCon1: "Precios variables",
     blogTaxiRegularCon2: "Barreras de idioma",
     blogTaxiRegularCon3: "Colas",
+    blogTaxiHeroAlt: "Traslado Privado vs Transporte Regular en Turquía 2025 - Servicio Transfer VIP Mercedes Lujo",
     
     // Fethiye Airport Transfer Guide - Spanish
     blogFethiyeTitle: "Guía Traslado Aeropuerto Dalaman a Fethiye 2025 | Precios y Consejos",
@@ -3812,6 +3818,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogTaxiRegularCon1: "أسعار متغيرة",
     blogTaxiRegularCon2: "حواجز لغوية",
     blogTaxiRegularCon3: "طوابير",
+    blogTaxiHeroAlt: "النقل الخاص مقابل النقل العادي في تركيا 2025 - خدمة نقل VIP مرسيدس فاخرة",
     
     // Fethiye Airport Transfer Guide - Arabic
     blogFethiyeTitle: "دليل نقل مطار دالامان إلى فتحية 2025 | الأسعار والنصائح",
@@ -4339,6 +4346,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogTaxiSectionQuickSummary: "Hızlı Özet: Bir Bakışta",
     blogTaxiSectionSafety: "Güvenlik Karşılaştırması",
     blogTaxiSafetyVerdictText: "Özel transferler önemli ölçüde daha iyi güvenlik sunar.",
+    blogTaxiHeroAlt: "Türkiye'de Özel Transfer ve Normal Ulaşım 2025 - Lüks Mercedes VIP Transfer Hizmeti",
     
     // Fethiye Airport Transfer Guide - Turkish
     blogFethiyeTitle: "Dalaman Havalimanı Fethiye Transfer Rehberi 2025 | Fiyatlar ve İpuçları",
@@ -5127,6 +5135,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogTaxiRegularCon1: "Змінні ціни",
     blogTaxiRegularCon2: "Мовні бар'єри",
     blogTaxiRegularCon3: "Черги",
+    blogTaxiHeroAlt: "Приватний Трансфер проти Звичайного Транспорту в Туреччині 2025 - Люкс Mercedes VIP Трансфер Сервіс",
     
     // Cappadocia Airport Guide - Ukrainian
     blogCappadociaSeoTitle: "Гід з трансферу з аеропорту Каппадокії 2025 | Ціни та повітряні кулі",
@@ -5596,6 +5605,9 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogBursaEvening: "夕方：イスタンブールへ帰着",
     blogBursaConclusionP1: "歴史と文化に満ちたブルサ日帰り旅行をお楽しみください。",
     blogBursaConclusionCta: "今すぐブルサツアーを予約 →",
+    blogBursaCumalikizikAlt: "ブルサのジュマルクズック UNESCO 村",
+    blogBursaUludagAlt: "冬のウルダグ ケーブルカー",
+    blogTaxiHeroAlt: "トルコでのプライベート送迎 vs 通常交通機関 2025 - 高級メルセデス VIP 送迎サービス",
     
     // Cappadocia Airport Guide Details - Japanese
     blogCappadociaSeoTitle: "カッパドキア空港送迎ガイド2025｜料金と気球ツアー",

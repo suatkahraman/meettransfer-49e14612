@@ -235,9 +235,9 @@ const BursaDayTourGuide = () => {
 
           {/* Cumalıkızık Image */}
           <div className="relative rounded-2xl overflow-hidden mb-8">
-            <img 
+          <img 
               src={cumalikizikImage} 
-              alt="Cumalıkızık UNESCO Village in Bursa" 
+              alt={t("blogBursaCumalikizikAlt")}
               className="w-full h-[300px] md:h-[400px] object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
@@ -322,9 +322,9 @@ const BursaDayTourGuide = () => {
 
           {/* Uludağ Image */}
           <div className="relative rounded-2xl overflow-hidden">
-            <img 
+          <img 
               src={uludagImage} 
-              alt="Uludağ Cable Car in Winter" 
+              alt={t("blogBursaUludagAlt")}
               className="w-full h-[300px] md:h-[400px] object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">

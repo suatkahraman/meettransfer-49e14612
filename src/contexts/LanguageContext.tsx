@@ -1387,6 +1387,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq5A: "Spring (April-May) and autumn (September-October) offer pleasant weather. Winter is perfect for skiing. Summer can be hot.",
     blogBursaFaq6Q: "Can you customize the Bursa tour itinerary?",
     blogBursaFaq6A: "Yes! All our tours are fully customizable based on your interests - history, nature, food, thermal baths, or a mix of everything.",
+    blogBursaCumalikizikAlt: "Cumalıkızık UNESCO Village in Bursa",
+    blogBursaUludagAlt: "Uludağ Cable Car in Winter",
     
     // Blog Hourly Rental Promo
     blogHourlyNewService: "New Service",
@@ -3208,6 +3210,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq5A: "İskender Kebab ist ein Muss! Diese in Bursa erfundene Spezialität besteht aus Döner-Fleisch auf Brot mit Tomatensauce und Butter. Probieren Sie auch Kestane Şekeri (kandierte Maronen).",
     blogBursaFaq6Q: "Was ist Cumalıkızık und warum ist es besonders?",
     blogBursaFaq6A: "Cumalıkızık ist ein 700 Jahre altes osmanisches Dorf und UNESCO-Welterbe. Es bietet traditionelle Architektur, Kopfsteinpflasterstraßen und authentische türkische Frühstückserlebnisse.",
+    blogBursaCumalikizikAlt: "Cumalıkızık UNESCO-Dorf in Bursa",
+    blogBursaUludagAlt: "Uludağ-Seilbahn im Winter",
     
     // ============================================
     // Blog Detailed Content - Cappadocia
@@ -11309,6 +11313,8 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq5A: "Cumalıkızık, 700 yıllık orijinal ahşap evleri koruyan UNESCO Dünya Mirası Osmanlı köyüdür.",
     blogBursaFaq6Q: "Kışın Bursa'yı ziyaret edebilir miyim?",
     blogBursaFaq6A: "Evet! Kış Uludağ'da kayak için harikadır. Cumalıkızık ve tarihi mekanlar yıl boyunca ziyaret edilebilir.",
+    blogBursaCumalikizikAlt: "Bursa'da Cumalıkızık UNESCO Köyü",
+    blogBursaUludagAlt: "Kışın Uludağ Teleferik",
     
     // Cappadocia Blog - Detailed Content Translations (TR)
     blogCappadociaSeoTitle: "Kapadokya Havalimanı Transfer Rehberi 2025 | Fiyatlar ve Balon Turları",

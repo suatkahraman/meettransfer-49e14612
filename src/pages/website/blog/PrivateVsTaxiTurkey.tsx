@@ -94,7 +94,7 @@ const PrivateVsTaxiTurkey = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              December 5, 2024
+              {t("lastUpdated")}: January 10, 2025
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
@@ -110,7 +110,7 @@ const PrivateVsTaxiTurkey = () => {
         <div className="aspect-video overflow-hidden rounded-xl mb-12">
           <img 
             src={vitoVipStarlightPurple} 
-            alt="Private Transfer vs Regular Transportation in Turkey 2025 - Luxury Mercedes VIP Transfer Service"
+            alt={t("blogTaxiHeroAlt")}
             className="w-full h-full object-cover"
             loading="eager"
           />
