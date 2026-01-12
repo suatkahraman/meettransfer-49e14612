@@ -1531,6 +1531,42 @@ export type Database = {
           },
         ]
       }
+      translation_cache: {
+        Row: {
+          created_at: string
+          expires_at: string
+          hit_count: number
+          id: string
+          source_language: string | null
+          source_text: string
+          source_text_hash: string
+          target_language: string
+          translated_text: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          hit_count?: number
+          id?: string
+          source_language?: string | null
+          source_text: string
+          source_text_hash: string
+          target_language: string
+          translated_text: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          hit_count?: number
+          id?: string
+          source_language?: string | null
+          source_text?: string
+          source_text_hash?: string
+          target_language?: string
+          translated_text?: string
+        }
+        Relationships: []
+      }
       trusted_devices: {
         Row: {
           created_at: string
