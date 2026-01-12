@@ -349,24 +349,24 @@ return (
               {vehicleImages.length > 0 ? (
                 <>
                   <Carousel 
-                    className="w-full h-full"
+                    className="w-full h-full absolute inset-0"
                     plugins={[Fade(), Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: false })]}
                     opts={{ loop: true }}
                   >
-                    <CarouselContent className="h-full">
+                    <CarouselContent className="h-full ml-0">
                       {vehicleImages.slice(0, 4).map((img, idx) => (
-                        <CarouselItem key={idx} className="h-full">
+                        <CarouselItem key={idx} className="h-full pl-0 basis-full">
                           <img
                             src={img.src}
                             alt={img.alt}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover object-center"
                           />
                         </CarouselItem>
                       ))}
                     </CarouselContent>
                   </Carousel>
                   {/* Zoom overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-1.5 sm:pb-3">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-1.5 sm:pb-3 z-10">
                     <span className="flex items-center gap-1 text-white text-[10px] sm:text-xs font-semibold bg-black/30 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full backdrop-blur-sm">
                       <ZoomIn className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
                       <span className="hidden sm:inline">{isTurkish ? "Galeri" : "Gallery"}</span>
