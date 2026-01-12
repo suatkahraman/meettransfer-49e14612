@@ -12,32 +12,43 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus } from 'lucide-react';
+import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus, Users, MapPin, Calendar, Banknote, ClipboardCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { motion, AnimatePresence } from 'framer-motion';
+import { z } from 'zod';
 
 // Airports list removed - pickup is now free text
 // Use centralized vehicle types
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 import { getCurrencySymbol, CURRENCY_OPTIONS as currencies } from '@/lib/currency';
+
 const paymentTypes = [
-  { value: 'cash', label: 'Şoföre Nakit' },
-  { value: 'payment_link', label: 'Online Ödeme Linki' },
-  { value: 'agency_pay', label: 'Acente Ödemesi' },
+  { value: 'cash', label: 'Şoföre Nakit', icon: '💵' },
+  { value: 'payment_link', label: 'Online Ödeme Linki', icon: '💳' },
+  { value: 'agency_pay', label: 'Acente Ödemesi', icon: '🏢' },
 ];
 
 // Statuses for manual admin reservations
 const statuses = [
-  { value: 'confirmed', label: 'Onaylandı' },
-  { value: 'sent_to_driver', label: 'Şoföre Gönderildi' },
-  { value: 'active', label: 'Aktif' },
-  { value: 'completed', label: 'Tamamlandı' },
+  { value: 'confirmed', label: 'Onaylandı', color: 'bg-green-500' },
+  { value: 'sent_to_driver', label: 'Şoföre Gönderildi', color: 'bg-blue-500' },
+  { value: 'active', label: 'Aktif', color: 'bg-purple-500' },
+  { value: 'completed', label: 'Tamamlandı', color: 'bg-gray-500' },
 ];
 
-// Currency options now imported from @/lib/currency as CURRENCY_OPTIONS
+// Validation schema
+const reservationSchema = z.object({
+  customer_name: z.string().trim().min(2, 'İsim en az 2 karakter olmalı').max(100, 'İsim 100 karakteri geçemez'),
+  customer_phone: z.string().trim().min(10, 'Geçerli bir telefon numarası girin').max(20, 'Telefon numarası çok uzun'),
+  pickup: z.string().trim().min(3, 'Alış noktası gerekli'),
+  dropoff: z.string().trim().min(3, 'Bırakış noktası gerekli'),
+  pickup_date: z.string().min(1, 'Tarih seçin'),
+  pickup_time: z.string().min(1, 'Saat seçin'),
+});
 
 interface Driver {
   id: string;
@@ -61,6 +72,10 @@ interface Agency {
   agency_name: string;
 }
 
+interface FormErrors {
+  [key: string]: string;
+}
+
 const AdminCreateReservation = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -74,6 +89,8 @@ const AdminCreateReservation = () => {
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [templateDialog, setTemplateDialog] = useState(false);
   const [templateName, setTemplateName] = useState('');
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   
   // Pre-fill from URL params (for duplicate functionality)
   const [formData, setFormData] = useState({
@@ -205,18 +222,76 @@ const AdminCreateReservation = () => {
     }
   };
 
+  // Validate form field
+  const validateField = (field: string, value: string) => {
+    const testData = { ...formData, [field]: value };
+    try {
+      if (field === 'customer_name') {
+        reservationSchema.shape.customer_name.parse(value);
+      } else if (field === 'customer_phone') {
+        reservationSchema.shape.customer_phone.parse(value);
+      } else if (field === 'pickup') {
+        reservationSchema.shape.pickup.parse(value);
+      } else if (field === 'dropoff') {
+        reservationSchema.shape.dropoff.parse(value);
+      } else if (field === 'pickup_date') {
+        reservationSchema.shape.pickup_date.parse(value);
+      } else if (field === 'pickup_time') {
+        reservationSchema.shape.pickup_time.parse(value);
+      }
+      setFormErrors(prev => ({ ...prev, [field]: '' }));
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setFormErrors(prev => ({ ...prev, [field]: err.errors[0]?.message || 'Geçersiz değer' }));
+      }
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    validateField(field, (formData as any)[field] || '');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate all fields
+    const validationData = {
+      customer_name: passengerNames[0] || '',
+      customer_phone: formData.customer_phone,
+      pickup: formData.pickup,
+      dropoff: formData.dropoff,
+      pickup_date: formData.pickup_date,
+      pickup_time: formData.pickup_time,
+    };
+
+    const result = reservationSchema.safeParse(validationData);
+    if (!result.success) {
+      const errors: FormErrors = {};
+      result.error.errors.forEach(err => {
+        if (err.path[0]) {
+          errors[err.path[0] as string] = err.message;
+        }
+      });
+      setFormErrors(errors);
+      // Mark all as touched to show errors
+      setTouched({
+        customer_name: true,
+        customer_phone: true,
+        pickup: true,
+        dropoff: true,
+        pickup_date: true,
+        pickup_time: true,
+      });
+      toast.error('Lütfen tüm zorunlu alanları doğru şekilde doldurun');
+      return;
+    }
+
     // Validate passenger names - at least primary passenger required
     const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
     if (validPassengerNames.length === 0) {
-      toast.error('At least one passenger name is required');
-      return;
-    }
-    
-    if (!formData.customer_phone || !formData.pickup || !formData.dropoff || !formData.pickup_date || !formData.pickup_time) {
-      toast.error('Please fill in all required fields');
+      setFormErrors(prev => ({ ...prev, customer_name: 'En az bir yolcu ismi gerekli' }));
+      toast.error('En az bir yolcu ismi gerekli');
       return;
     }
 
@@ -227,6 +302,7 @@ const AdminCreateReservation = () => {
     }
 
     setSaving(true);
+    setFormErrors({});
 
     try {
       // Use first passenger as customer_name for backwards compatibility
@@ -410,42 +486,76 @@ const AdminCreateReservation = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
               {/* Customer Information */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Müşteri Bilgileri</h3>
+              <motion.div 
+                className="space-y-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <div className="flex items-center gap-2 border-b pb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Müşteri Bilgileri</h3>
+                </div>
                 
                 {/* Passenger Names */}
                 <div className="space-y-3">
-                  <Label>Yolcu İsimleri * <span className="text-muted-foreground text-sm">({passengerNames.length}/{MAX_PASSENGERS})</span></Label>
-                  {passengerNames.map((name, index) => (
-                    <div key={index} className="flex gap-2 items-center">
-                      <div className="flex-1">
-                        <div className="relative">
-                          <Input
-                            value={name}
-                            onChange={(e) => updatePassenger(index, e.target.value)}
-                            placeholder={index === 0 ? "Ana Yolcu Adı *" : `Yolcu ${index + 1}`}
-                            className="pr-20"
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                            {index === 0 ? 'Ana' : `#${index + 1}`}
-                          </span>
+                  <div className="flex items-center justify-between">
+                    <Label className="flex items-center gap-2">
+                      Yolcu İsimleri <span className="text-destructive">*</span>
+                    </Label>
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                      {passengerNames.filter(n => n.trim()).length}/{MAX_PASSENGERS}
+                    </span>
+                  </div>
+                  
+                  <AnimatePresence>
+                    {passengerNames.map((name, index) => (
+                      <motion.div 
+                        key={index} 
+                        className="flex gap-2 items-center"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <div className="flex-1">
+                          <div className="relative">
+                            <Input
+                              value={name}
+                              onChange={(e) => updatePassenger(index, e.target.value)}
+                              placeholder={index === 0 ? "Ana Yolcu Adı *" : `Yolcu ${index + 1}`}
+                              className={`pr-20 ${index === 0 && touched.customer_name && formErrors.customer_name ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                              onBlur={() => index === 0 && handleBlur('customer_name')}
+                            />
+                            <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs ${index === 0 ? 'bg-primary/10 text-primary px-2 py-0.5 rounded' : 'text-muted-foreground'}`}>
+                              {index === 0 ? '👤 Ana' : `#${index + 1}`}
+                            </span>
+                          </div>
+                          {index === 0 && touched.customer_name && formErrors.customer_name && (
+                            <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                              <AlertCircle className="h-3 w-3" />
+                              {formErrors.customer_name}
+                            </p>
+                          )}
                         </div>
-                      </div>
-                      {index > 0 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => removePassenger(index)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
+                        {index > 0 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => removePassenger(index)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                   
                   {passengerNames.length < MAX_PASSENGERS && (
                     <Button
@@ -463,19 +573,38 @@ const AdminCreateReservation = () => {
 
                 {/* Phone */}
                 <div className="space-y-2">
-                  <Label>Müşteri Telefonu *</Label>
+                  <Label className="flex items-center gap-1">
+                    Müşteri Telefonu <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     value={formData.customer_phone}
                     onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
+                    onBlur={() => handleBlur('customer_phone')}
                     placeholder="+90 5XX XXX XXXX"
-                    required
+                    className={touched.customer_phone && formErrors.customer_phone ? 'border-destructive focus-visible:ring-destructive' : ''}
                   />
+                  {touched.customer_phone && formErrors.customer_phone && (
+                    <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {formErrors.customer_phone}
+                    </p>
+                  )}
                 </div>
-              </div>
+              </motion.div>
 
               {/* Transfer Details */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Transfer Detayları</h3>
+              <motion.div 
+                className="space-y-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <div className="flex items-center gap-2 border-b pb-2">
+                  <div className="p-2 rounded-lg bg-green-500/10">
+                    <MapPin className="h-5 w-5 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Transfer Detayları</h3>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Alış Noktası *</Label>
@@ -626,11 +755,21 @@ const AdminCreateReservation = () => {
                     </Select>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Payment & Pricing */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Ödeme ve Fiyat</h3>
+              <motion.div 
+                className="space-y-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="flex items-center gap-2 border-b pb-2">
+                  <div className="p-2 rounded-lg bg-amber-500/10">
+                    <Banknote className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Ödeme ve Fiyat</h3>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label>Ödeme Tipi</Label>
@@ -703,11 +842,21 @@ const AdminCreateReservation = () => {
                     <p className="text-xs text-muted-foreground">Bu tutar sadece bilgi amaçlıdır, hesaplamalara dahil edilmez.</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Status & Assignment */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Durum ve Atama</h3>
+              <motion.div 
+                className="space-y-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <div className="flex items-center gap-2 border-b pb-2">
+                  <div className="p-2 rounded-lg bg-blue-500/10">
+                    <ClipboardCheck className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Durum ve Atama</h3>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Durum</Label>
@@ -753,23 +902,50 @@ const AdminCreateReservation = () => {
                     </Select>
                   </div>
                 )}
-              </div>
+              </motion.div>
 
               {/* Admin Notes */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Admin Notları (Dahili)</h3>
+              <motion.div 
+                className="space-y-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <div className="flex items-center gap-2 border-b pb-2">
+                  <div className="p-2 rounded-lg bg-purple-500/10">
+                    <FileText className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Admin Notları (Dahili)</h3>
+                </div>
                 <Textarea
                   value={formData.admin_notes}
                   onChange={(e) => setFormData({...formData, admin_notes: e.target.value})}
                   placeholder="Dahili notlar - müşteri veya şoför tarafından görülemez"
                   rows={3}
+                  className="resize-none"
                 />
-              </div>
+              </motion.div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={saving}>
-                <Save className="h-4 w-4 mr-2" />
-                {saving ? 'Oluşturuluyor...' : 'Rezervasyon Oluştur'}
-              </Button>
+              {/* Submit Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <Button type="submit" className="w-full h-12 text-base font-semibold" size="lg" disabled={saving}>
+                  {saving ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      Oluşturuluyor...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-5 w-5 mr-2" />
+                      Rezervasyon Oluştur
+                    </>
+                  )}
+                </Button>
+              </motion.div>
             </form>
           </CardContent>
         </Card>
