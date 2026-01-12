@@ -3,7 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import {
   analyzeTransfer,
-  calculateDiscount,
+  calculateDiscountWithConfig,
+  getActiveReturnPromoCode,
   logAnalysis,
   checkPriceSanity,
   logPriceSanityCheck,
@@ -386,11 +387,24 @@ const handler = async (req: Request): Promise<Response> => {
     const basePriceCurrency = bestPrice.price_currency || 'EUR';
     const customerRequestedCurrency = booking.price_currency || basePriceCurrency;
 
-    // Calculate price with discount
-    const discountInfo = calculateDiscount(
+    // Fetch active promo code from database for return trips
+    let promoConfig = null;
+    let appliedPromoCode = booking.promo_code;
+    
+    if (booking.has_return_trip) {
+      // Get active return promo code from database
+      promoConfig = await getActiveReturnPromoCode(supabase);
+      if (promoConfig) {
+        appliedPromoCode = promoConfig.code;
+        console.log(`🎟️ Using active promo code from DB: ${promoConfig.code} (${promoConfig.discountPercent}%)`);
+      }
+    }
+
+    // Calculate price with discount using DB config
+    const discountInfo = calculateDiscountWithConfig(
       bestPrice.price,
       booking.has_return_trip || false,
-      booking.promo_code
+      promoConfig
     );
 
     let finalPrice = discountInfo.price;
@@ -414,7 +428,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(`💱 Currency converted: ${discountInfo.price} ${basePriceCurrency} → ${finalPrice} ${finalCurrency} (rate: ${exchangeRate})`);
     }
 
-    // Update booking with price
+    // Update booking with price and promo code
     const { error: updateError } = await supabase
       .from("quick_booking_requests")
       .update({
@@ -422,6 +436,7 @@ const handler = async (req: Request): Promise<Response> => {
         price_currency: finalCurrency,
         status: "price_sent",
         return_price: finalReturnPrice,
+        promo_code: appliedPromoCode, // Save the applied promo code
       })
       .eq("id", quick_booking_id);
 
