@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,8 @@ import {
   Monitor,
   Smartphone,
   Tablet,
-  RefreshCw
+  RefreshCw,
+  Eye
 } from "lucide-react";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -41,6 +42,17 @@ interface ActiveVisitor {
   last_activity: string;
 }
 
+interface PresenceState {
+  visitor_id: string;
+  page_path: string;
+  country_code: string;
+  country_name: string;
+  city: string;
+  browser: string;
+  device: string;
+  last_activity: string;
+}
+
 const AdminAnalytics = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -51,55 +63,48 @@ const AdminAnalytics = () => {
   const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       const now = new Date();
       const todayStart = startOfDay(now).toISOString();
       const todayEnd = endOfDay(now).toISOString();
-      const activeThreshold = new Date(now.getTime() - 5 * 60 * 1000).toISOString(); // 5 minutes
 
-      // Fetch today's stats
-      const { data: todayData } = await supabase
-        .from('page_visits')
-        .select('visitor_id')
-        .gte('created_at', todayStart)
-        .lte('created_at', todayEnd);
+      // Parallel fetch for better performance
+      const [todayResult, countryResult, weekResult] = await Promise.all([
+        // Today's unique visitors count
+        supabase
+          .from('page_visits')
+          .select('visitor_id', { count: 'exact', head: false })
+          .gte('created_at', todayStart)
+          .lte('created_at', todayEnd),
+        
+        // Country stats
+        supabase
+          .from('page_visits')
+          .select('country_name, country_code')
+          .gte('created_at', todayStart)
+          .lte('created_at', todayEnd)
+          .not('country_name', 'is', null),
+        
+        // Last 7 days - single query with date grouping
+        supabase
+          .from('page_visits')
+          .select('visitor_id, created_at')
+          .gte('created_at', subDays(now, 6).toISOString())
+          .lte('created_at', todayEnd)
+      ]);
 
-      if (todayData) {
-        const uniqueVisitors = new Set(todayData.map(v => v.visitor_id));
+      // Process today's stats
+      if (todayResult.data) {
+        const uniqueVisitors = new Set(todayResult.data.map(v => v.visitor_id));
         setTodayVisitors(uniqueVisitors.size);
-        setTodayPageViews(todayData.length);
+        setTodayPageViews(todayResult.data.length);
       }
 
-      // Fetch active visitors (last 5 minutes)
-      const { data: activeData } = await supabase
-        .from('page_visits')
-        .select('visitor_id, page_path, country_name, country_code, device, browser, last_activity')
-        .gte('last_activity', activeThreshold)
-        .order('last_activity', { ascending: false });
-
-      if (activeData) {
-        // Get unique visitors by visitor_id (most recent activity)
-        const uniqueActive = activeData.reduce((acc: ActiveVisitor[], curr) => {
-          if (!acc.find(v => v.visitor_id === curr.visitor_id)) {
-            acc.push(curr);
-          }
-          return acc;
-        }, []);
-        setActiveVisitors(uniqueActive);
-      }
-
-      // Fetch country stats for today
-      const { data: countryData } = await supabase
-        .from('page_visits')
-        .select('country_name, country_code')
-        .gte('created_at', todayStart)
-        .lte('created_at', todayEnd)
-        .not('country_name', 'is', null);
-
-      if (countryData) {
+      // Process country stats
+      if (countryResult.data) {
         const countryMap = new Map<string, { name: string; code: string; count: number }>();
-        countryData.forEach(visit => {
+        countryResult.data.forEach(visit => {
           const key = visit.country_code || visit.country_name || 'Unknown';
           const existing = countryMap.get(key);
           if (existing) {
@@ -112,93 +117,135 @@ const AdminAnalytics = () => {
             });
           }
         });
-        const sorted = Array.from(countryMap.values())
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 10);
-        setCountryStats(sorted.map(s => ({
-          country_name: s.name,
-          country_code: s.code,
-          count: s.count
-        })));
+        setCountryStats(
+          Array.from(countryMap.values())
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10)
+            .map(s => ({
+              country_name: s.name,
+              country_code: s.code,
+              count: s.count
+            }))
+        );
       }
 
-      // Fetch last 7 days stats
-      const last7Days: DailyStats[] = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = subDays(now, i);
-        const dayStart = startOfDay(date).toISOString();
-        const dayEnd = endOfDay(date).toISOString();
+      // Process weekly stats
+      if (weekResult.data) {
+        const dailyMap = new Map<string, Set<string>>();
+        
+        for (let i = 6; i >= 0; i--) {
+          const date = subDays(now, i);
+          const dateKey = format(date, 'yyyy-MM-dd');
+          dailyMap.set(dateKey, new Set());
+        }
 
-        const { data: dayData } = await supabase
-          .from('page_visits')
-          .select('visitor_id')
-          .gte('created_at', dayStart)
-          .lte('created_at', dayEnd);
+        weekResult.data.forEach(visit => {
+          const dateKey = format(new Date(visit.created_at), 'yyyy-MM-dd');
+          dailyMap.get(dateKey)?.add(visit.visitor_id);
+        });
 
-        if (dayData) {
-          const uniqueVisitors = new Set(dayData.map(v => v.visitor_id));
-          last7Days.push({
+        const stats: DailyStats[] = [];
+        for (let i = 6; i >= 0; i--) {
+          const date = subDays(now, i);
+          const dateKey = format(date, 'yyyy-MM-dd');
+          const visitors = dailyMap.get(dateKey);
+          stats.push({
             date: format(date, 'dd MMM', { locale: tr }),
-            visitors: uniqueVisitors.size,
-            pageViews: dayData.length
-          });
-        } else {
-          last7Days.push({
-            date: format(date, 'dd MMM', { locale: tr }),
-            visitors: 0,
-            pageViews: 0
+            visitors: visitors?.size || 0,
+            pageViews: 0 // Not needed for display
           });
         }
+        setDailyStats(stats);
       }
-      setDailyStats(last7Days);
-
     } catch (error) {
       console.error('Error fetching analytics:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, []);
+
+  // Subscribe to realtime presence for active visitors
+  useEffect(() => {
+    const channel = supabase.channel('mt_visitors');
+    
+    const handlePresenceSync = () => {
+      const state = channel.presenceState<PresenceState>();
+      const visitors: ActiveVisitor[] = [];
+      
+      Object.values(state).forEach((presences) => {
+        if (presences && presences.length > 0) {
+          const latest = presences[presences.length - 1];
+          visitors.push({
+            visitor_id: latest.visitor_id,
+            page_path: latest.page_path,
+            country_name: latest.country_name || '',
+            country_code: latest.country_code || '',
+            device: latest.device || 'Desktop',
+            browser: latest.browser || 'Unknown',
+            last_activity: latest.last_activity || new Date().toISOString()
+          });
+        }
+      });
+      
+      setActiveVisitors(visitors);
+    };
+
+    channel
+      .on('presence', { event: 'sync' }, handlePresenceSync)
+      .on('presence', { event: 'join' }, handlePresenceSync)
+      .on('presence', { event: 'leave' }, handlePresenceSync)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   useEffect(() => {
     fetchAnalytics();
     
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchAnalytics, 30000);
+    // Refresh every 60 seconds (reduced from 30s)
+    const interval = setInterval(fetchAnalytics, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchAnalytics]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     setRefreshing(true);
     fetchAnalytics();
-  };
+  }, [fetchAnalytics]);
 
-  const getDeviceIcon = (device: string) => {
+  const getDeviceIcon = useCallback((device: string) => {
     switch (device) {
       case 'Mobile': return <Smartphone className="h-4 w-4" />;
       case 'Tablet': return <Tablet className="h-4 w-4" />;
       default: return <Monitor className="h-4 w-4" />;
     }
-  };
+  }, []);
 
-  const getFlagEmoji = (countryCode: string) => {
+  const getFlagEmoji = useCallback((countryCode: string) => {
     if (!countryCode || countryCode.length !== 2) return '🌍';
     const codePoints = countryCode
       .toUpperCase()
       .split('')
       .map(char => 127397 + char.charCodeAt(0));
     return String.fromCodePoint(...codePoints);
-  };
+  }, []);
+
+  const maxVisitors = useMemo(() => 
+    Math.max(...dailyStats.map(d => d.visitors), 1),
+    [dailyStats]
+  );
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-4 md:p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <Skeleton className="h-10 w-48" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
           </div>
         </div>
       </div>
@@ -231,7 +278,7 @@ const AdminAnalytics = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -242,7 +289,22 @@ const AdminAnalytics = () => {
             <CardContent>
               <div className="text-3xl font-bold">{todayVisitors}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {todayPageViews} sayfa görüntüleme
+                Tekil ziyaretçi
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Sayfa Görüntüleme
+              </CardTitle>
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{todayPageViews}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Toplam görüntüleme
               </p>
             </CardContent>
           </Card>
@@ -257,7 +319,7 @@ const AdminAnalytics = () => {
             <CardContent>
               <div className="text-3xl font-bold text-green-600">{activeVisitors.length}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Son 5 dakikada aktif
+                Canlı ziyaretçi
               </p>
             </CardContent>
           </Card>
@@ -272,7 +334,7 @@ const AdminAnalytics = () => {
             <CardContent>
               <div className="text-3xl font-bold">{countryStats.length}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Farklı ülkeden ziyaretçi
+                Farklı ülke
               </p>
             </CardContent>
           </Card>
@@ -295,7 +357,7 @@ const AdminAnalytics = () => {
                 Şu an aktif ziyaretçi yok
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-80 overflow-y-auto">
                 {activeVisitors.map((visitor, index) => (
                   <div 
                     key={`${visitor.visitor_id}-${index}`}
@@ -306,7 +368,7 @@ const AdminAnalytics = () => {
                         {getFlagEmoji(visitor.country_code)}
                       </span>
                       <div>
-                        <p className="font-medium text-sm">{visitor.page_path}</p>
+                        <p className="font-medium text-sm truncate max-w-[200px]">{visitor.page_path}</p>
                         <p className="text-xs text-muted-foreground">
                           {visitor.country_name || 'Bilinmeyen Konum'}
                         </p>
@@ -315,7 +377,7 @@ const AdminAnalytics = () => {
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1 text-muted-foreground">
                         {getDeviceIcon(visitor.device)}
-                        <span className="text-xs">{visitor.browser}</span>
+                        <span className="text-xs hidden sm:inline">{visitor.browser}</span>
                       </div>
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                     </div>
@@ -380,9 +442,9 @@ const AdminAnalytics = () => {
                     <div className="flex-1 mx-4">
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-primary rounded-full transition-all"
+                          className="h-full bg-primary rounded-full transition-all duration-500"
                           style={{ 
-                            width: `${Math.min((day.visitors / Math.max(...dailyStats.map(d => d.visitors), 1)) * 100, 100)}%` 
+                            width: `${Math.min((day.visitors / maxVisitors) * 100, 100)}%` 
                           }}
                         />
                       </div>

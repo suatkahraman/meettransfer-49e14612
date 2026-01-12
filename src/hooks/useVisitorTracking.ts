@@ -1,9 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 const VISITOR_ID_KEY = 'mt_visitor_id';
-const ACTIVITY_INTERVAL = 30000; // 30 seconds
+const GEO_CACHE_KEY = 'mt_geo_cache';
+const GEO_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const ACTIVITY_INTERVAL = 60000; // 60 seconds (reduced from 30s)
+const DEBOUNCE_DELAY = 2000; // 2 seconds debounce for page changes
+
+interface GeoCache {
+  data: { countryCode: string; countryName: string; city: string };
+  timestamp: number;
+}
 
 function generateVisitorId(): string {
   return 'v_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -18,19 +26,45 @@ function getVisitorId(): string {
   return visitorId;
 }
 
+function getCachedGeo(): GeoCache['data'] | null {
+  try {
+    const cached = localStorage.getItem(GEO_CACHE_KEY);
+    if (!cached) return null;
+    
+    const parsed: GeoCache = JSON.parse(cached);
+    if (Date.now() - parsed.timestamp > GEO_CACHE_TTL) {
+      localStorage.removeItem(GEO_CACHE_KEY);
+      return null;
+    }
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedGeo(data: GeoCache['data']): void {
+  try {
+    const cache: GeoCache = { data, timestamp: Date.now() };
+    localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 function getBrowserInfo(): string {
   const ua = navigator.userAgent;
-  if (ua.includes('Chrome')) return 'Chrome';
+  if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome';
   if (ua.includes('Firefox')) return 'Firefox';
-  if (ua.includes('Safari')) return 'Safari';
-  if (ua.includes('Edge')) return 'Edge';
+  if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+  if (ua.includes('Edg')) return 'Edge';
+  if (ua.includes('Opera') || ua.includes('OPR')) return 'Opera';
   return 'Other';
 }
 
 function getDeviceInfo(): string {
   const ua = navigator.userAgent;
-  if (/Mobi|Android/i.test(ua)) return 'Mobile';
-  if (/Tablet|iPad/i.test(ua)) return 'Tablet';
+  if (/iPad|Tablet/i.test(ua)) return 'Tablet';
+  if (/Mobi|Android|iPhone/i.test(ua)) return 'Mobile';
   return 'Desktop';
 }
 
@@ -45,7 +79,7 @@ const EXCLUDED_ROUTES = [
   '/signup',
 ];
 
-// Domains that should be excluded from tracking (development/preview environments)
+// Domains that should be excluded from tracking
 const EXCLUDED_DOMAINS = [
   'lovableproject.com',
   'localhost',
@@ -55,19 +89,20 @@ const EXCLUDED_DOMAINS = [
 // Roles that should be excluded from tracking
 const EXCLUDED_ROLES: Array<'admin' | 'driver' | 'agency'> = ['admin', 'driver', 'agency'];
 
-// Check if current domain is a development/preview environment
 function isExcludedDomain(): boolean {
   const hostname = window.location.hostname;
   return EXCLUDED_DOMAINS.some(domain => hostname.includes(domain));
 }
 
-
 export function useVisitorTracking() {
   const location = useLocation();
   const visitIdRef = useRef<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const presenceRef = useRef<any | null>(null);
-  const [isExcludedUser, setIsExcludedUser] = useState<boolean>(true); // Default to excluded until proven otherwise
+  const lastPathRef = useRef<string>('');
+  const lastHeartbeatRef = useRef<number>(0);
+  const [isExcludedUser, setIsExcludedUser] = useState<boolean>(true);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const ctxRef = useRef<{
     visitorId: string;
@@ -78,19 +113,22 @@ export function useVisitorTracking() {
     geo: { countryCode: string; countryName: string; city: string };
   } | null>(null);
 
-  // Helper function to stop tracking
-  const stopTracking = () => {
+  const stopTracking = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
+    }
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
     }
     if (presenceRef.current) {
       supabase.removeChannel(presenceRef.current);
       presenceRef.current = null;
     }
     visitIdRef.current = null;
-    ctxRef.current = null; // Clear context to prevent stale data
-  };
+    ctxRef.current = null;
+  }, []);
 
   // Check excluded user status on mount and auth changes
   useEffect(() => {
@@ -98,40 +136,33 @@ export function useVisitorTracking() {
     
     const checkExcluded = async () => {
       try {
-        // First check if user is authenticated
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!isMounted) return;
         
-        // If no user, they're not excluded (anonymous visitor)
         if (!user) {
           setIsExcludedUser(false);
           setIsAuthChecked(true);
           return;
         }
         
-        // Check if authenticated user has excluded role
         const { data: roleData, error } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .in('role', EXCLUDED_ROLES);
+          .in('role', EXCLUDED_ROLES)
+          .limit(1);
         
         if (!isMounted) return;
         
         if (error) {
           console.error('[VisitorTracking] Role check error:', error);
-          // If error checking role, exclude by default for safety
           setIsExcludedUser(true);
           stopTracking();
         } else {
           const hasExcludedRole = roleData && roleData.length > 0;
           setIsExcludedUser(hasExcludedRole);
-          
-          // If user has excluded role, immediately stop tracking
-          if (hasExcludedRole) {
-            stopTracking();
-          }
+          if (hasExcludedRole) stopTracking();
         }
       } catch (err) {
         console.error('[VisitorTracking] checkExcluded error:', err);
@@ -141,52 +172,28 @@ export function useVisitorTracking() {
         }
       }
       
-      if (isMounted) {
-        setIsAuthChecked(true);
-      }
+      if (isMounted) setIsAuthChecked(true);
     };
     
     checkExcluded();
     
-    // Re-check on auth state change
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      // Immediately stop tracking on any auth change
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       stopTracking();
-      
-      // Reset state
       setIsAuthChecked(false);
-      setIsExcludedUser(true); // Default to excluded until check completes
-      
-      // Re-check after a small delay to ensure auth state is stable
-      setTimeout(() => {
-        if (isMounted) {
-          checkExcluded();
-        }
-      }, 100);
+      setIsExcludedUser(true);
+      setTimeout(() => { if (isMounted) checkExcluded(); }, 100);
     });
     
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
-  useEffect(() => {
-    // Wait for auth check to complete
-    if (!isAuthChecked) return;
-    
-    // Don't track admin, driver, agency users
-    if (isExcludedUser) {
-      stopTracking();
-      return;
-    }
+  }, [stopTracking]);
 
-    // Don't track development/preview environments (Lovable, localhost)
-    if (isExcludedDomain()) {
-      return;
-    }
+  useEffect(() => {
+    if (!isAuthChecked || isExcludedUser || isExcludedDomain()) return;
     
     const isExcluded = EXCLUDED_ROUTES.some((route) => location.pathname.startsWith(route));
-
     if (isExcluded) {
       stopTracking();
       return;
@@ -200,20 +207,30 @@ export function useVisitorTracking() {
       const visitorId = getVisitorId();
       const sessionStart = new Date().toISOString();
 
-      // Geo lookup (best effort)
-      let countryCode = '';
-      let countryName = '';
-      let city = '';
-      try {
-        const geoResponse = await fetch('https://ipapi.co/json/');
-        if (geoResponse.ok) {
-          const geoData = await geoResponse.json();
-          countryCode = geoData.country_code || '';
-          countryName = geoData.country_name || '';
-          city = geoData.city || '';
+      // Use cached geo or fetch new
+      let geo = getCachedGeo();
+      if (!geo) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          
+          const geoResponse = await fetch('https://ipapi.co/json/', {
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          
+          if (geoResponse.ok) {
+            const geoData = await geoResponse.json();
+            geo = {
+              countryCode: geoData.country_code || '',
+              countryName: geoData.country_name || '',
+              city: geoData.city || ''
+            };
+            setCachedGeo(geo);
+          }
+        } catch {
+          geo = { countryCode: '', countryName: '', city: '' };
         }
-      } catch {
-        // ignore
       }
 
       ctxRef.current = {
@@ -222,7 +239,7 @@ export function useVisitorTracking() {
         browser: getBrowserInfo(),
         device: getDeviceInfo(),
         referrer: document.referrer || null,
-        geo: { countryCode, countryName, city },
+        geo: geo || { countryCode: '', countryName: '', city: '' },
       };
 
       return ctxRef.current;
@@ -251,20 +268,31 @@ export function useVisitorTracking() {
             last_activity: new Date().toISOString(),
           });
         } catch {
-          // ignore presence errors
+          // Ignore presence errors
         }
       });
     };
 
-    const heartbeat = async () => {
+    const heartbeat = async (force = false) => {
+      const now = Date.now();
+      const pathChanged = location.pathname !== lastPathRef.current;
+      
+      // Skip if not enough time has passed and path hasn't changed (unless forced)
+      if (!force && !pathChanged && now - lastHeartbeatRef.current < ACTIVITY_INTERVAL * 0.9) {
+        return;
+      }
+
       const ctx = await ensureContext();
       if (!ctx || cancelled) return;
+
+      lastPathRef.current = location.pathname;
+      lastHeartbeatRef.current = now;
 
       await ensurePresenceChannel(ctx);
 
       const lastActivity = new Date().toISOString();
 
-      // 1) Live presence (for anlık ziyaretçi)
+      // 1) Live presence update
       try {
         await presenceRef.current?.track({
           visitor_id: ctx.visitorId,
@@ -277,10 +305,10 @@ export function useVisitorTracking() {
           last_activity: lastActivity,
         });
       } catch {
-        // ignore
+        // Ignore
       }
 
-      // 2) DB write (for historical analytics) via backend function
+      // 2) DB write via edge function
       try {
         const { data, error } = await supabase.functions.invoke('track-visit', {
           body: {
@@ -298,42 +326,44 @@ export function useVisitorTracking() {
           },
         });
 
-        if (error) {
-          console.error('[VisitorTracking] track-visit error:', error);
-          return;
+        if (!error) {
+          const newVisitId = (data as any)?.visit_id || (data as any)?.id;
+          if (newVisitId) visitIdRef.current = newVisitId;
         }
-
-        const newVisitId = (data as any)?.visit_id || (data as any)?.id;
-        if (newVisitId) visitIdRef.current = newVisitId;
       } catch (err) {
         console.error('[VisitorTracking] unexpected error:', err);
       }
     };
 
-    void heartbeat();
+    // Debounced heartbeat for page changes
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    
+    debounceRef.current = setTimeout(() => {
+      void heartbeat(true);
+    }, DEBOUNCE_DELAY);
 
-    intervalRef.current = setInterval(() => {
-      void heartbeat();
-    }, ACTIVITY_INTERVAL);
+    // Set up interval for regular heartbeats
+    if (!intervalRef.current) {
+      intervalRef.current = setInterval(() => {
+        void heartbeat();
+      }, ACTIVITY_INTERVAL);
+    }
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+      cancelled = true;
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+        debounceRef.current = null;
       }
     };
-  }, [location.pathname, isExcludedUser, isAuthChecked]);
+  }, [location.pathname, isExcludedUser, isAuthChecked, stopTracking]);
 
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      if (presenceRef.current) {
-        supabase.removeChannel(presenceRef.current);
-        presenceRef.current = null;
-      }
+      stopTracking();
     };
-  }, []);
+  }, [stopTracking]);
 }
