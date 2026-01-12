@@ -915,7 +915,7 @@ export interface PromoCodeInfo {
 }
 
 export const PROMO_CODE_CONFIG: Record<string, PromoCodeInfo> = {
-  'MEET40RETURN': { code: 'MEET40RETURN', discountPercent: 40, appliesToReturn: true, appliesToTotal: false },
+  'MEET40RETURN': { code: 'MEET40RETURN', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
   'GIDISDONUS': { code: 'GIDISDONUS', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
   'RETURN30': { code: 'RETURN30', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
   'MEET30': { code: 'MEET30', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
