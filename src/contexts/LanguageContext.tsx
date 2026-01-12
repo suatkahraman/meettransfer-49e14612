@@ -862,6 +862,7 @@ const translations: Record<Language, Record<string, string>> = {
     cyprusRouteLarnacaNicosia: "Larnaca Airport → Nicosia",
     cyprusRouteLarnacaNicosiaDesc: "35-45 min to the divided capital city of Cyprus",
     cyprusRequestPrice: "Request Price",
+    cyprusAskAI: "Ask AI",
     
     // Quick Booking Confirm Page
     qbLoadingPriceQuote: "Loading your price quote...",
@@ -10832,6 +10833,7 @@ const translations: Record<Language, Record<string, string>> = {
     cyprusRouteLarnacaNicosia: "Larnaka Havalimanı → Lefkoşa",
     cyprusRouteLarnacaNicosiaDesc: "35-45 dk, Kıbrıs'ın bölünmüş başkenti",
     cyprusRequestPrice: "Fiyat Al",
+    cyprusAskAI: "AI'a Sor",
     
     // Quick Booking Confirm Page
     qbLoadingPriceQuote: "Fiyat teklifiniz yükleniyor...",
