@@ -4700,6 +4700,12 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     galleryTitle: "Галерея нашого автопарку",
     blogMeetTransferTeam: "Команда Meet Transfer",
     
+    // Blog Gallery Captions (UK)
+    blogGalleryCaption1: "Просторий сімейний салон",
+    blogGalleryCaption2: "Преміум Mercedes Vito для курортних трансферів",
+    blogGalleryCaption3: "Місткий багажник для сімей",
+    blogGalleryCaption4: "Комфортна подорож до вашого курорту",
+
     // Istanbul Price Guide Content - Ukrainian
     blogPriceSeoTitle: "Ціни на трансфер з аеропорту Стамбула 2025 | Повний цінник",
     blogPriceSeoDesc: "Повний гід з цін на трансфер з аеропорту Стамбула 2025. Порівняння приватних трансферів та автобусів. Фіксовані ціни до Таксіма, Султанахмета, Кадикоя.",
@@ -5319,6 +5325,12 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     galleryTitle: "車両ギャラリー",
     blogMeetTransferTeam: "Meet Transferチーム",
     
+    // Blog Gallery Captions (JA)
+    blogGalleryCaption1: "ファミリー向け広々とした内装",
+    blogGalleryCaption2: "リゾート送迎用プレミアムメルセデスVito",
+    blogGalleryCaption3: "ファミリー向けの十分な荷物スペース",
+    blogGalleryCaption4: "リゾートへの快適な移動",
+
     // Istanbul Price Guide Content - Japanese
     blogPriceSeoTitle: "イスタンブール空港送迎料金2025｜完全料金ガイド",
     blogPriceSeoDesc: "2025年イスタンブール空港送迎料金の完全ガイド。プライベート送迎とバスを比較。タクシム、スルタンアフメット、カドゥキョイへの固定料金。",
@@ -5387,6 +5399,18 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogPriceFaq1A: "イスタンブール空港から市内中心部（タクシム、スルタンアフメット）へのプライベート送迎の平均料金は、メルセデスVito（最大6名）で€50-55です。",
     blogPriceFaq2Q: "イスタンブール空港送迎料金は固定ですか？",
     blogPriceFaq2A: "はい、当社の料金は固定で予約前に確認されます。通常交通機関とは異なり、渋滞、時間帯、荷物数で追加料金はありません。",
+    blogPriceFaq3Q: "深夜送迎に追加料金はかかりますか？",
+    blogPriceFaq3A: "いいえ、Meet Transferでは深夜や早朝の送迎に追加料金はかかりません。料金は24時間同一です。",
+    blogPriceFaq4Q: "他の旅行者と送迎を共有すると安くなりますか？",
+    blogPriceFaq4A: "当社のプライベート送迎はお客様グループ専用です。4-6名で料金を分けると、一人当たりの料金は非常にお得になります。",
+    blogPriceFaq5Q: "料金はどの通貨で表示されていますか？",
+    blogPriceFaq5A: "料金は比較しやすいようユーロ（€）で表示しています。EUR、USD、GBP、TRYでお支払いいただけます。",
+    blogPriceFaq6Q: "チャイルドシートは料金に含まれていますか？",
+    blogPriceFaq6A: "はい、チャイルドシート（ベビー、幼児用、ブースター）は無料でご利用いただけます。予約時にお申し付けください。",
+    blogPriceGalleryCaption1: "メルセデスVito VIP - ラグジュアリー空港送迎",
+    blogPriceGalleryCaption2: "スターライト天井付きプレミアムレザー内装",
+    blogPriceGalleryCaption3: "Sprinter VIP - グループに最適",
+    blogPriceGalleryCaption4: "プロフェッショナルお出迎えサービス",
     
     // Private vs Taxi Turkey Content - Japanese
     blogTaxiDatePublished: "2024年12月5日",
