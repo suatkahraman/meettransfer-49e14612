@@ -61,52 +61,173 @@ export const useActivePromoCode = (appliesTo: string = "return_transfer") => {
   return { promoCode, loading, error };
 };
 
-export const validatePromoCode = async (code: string): Promise<{ valid: boolean; discount: number; appliesTo: string; validUntil: string | null } | null> => {
+export type PromoValidationResult = {
+  valid: true;
+  discount: number;
+  appliesTo: string;
+  validUntil: string | null;
+} | {
+  valid: false;
+  errorCode: 'not_found' | 'not_active' | 'not_started' | 'expired' | 'max_usage_reached' | 'error';
+  errorMessage: string;
+};
+
+export const getPromoErrorMessage = (errorCode: string, lang: string = 'en'): string => {
+  const messages: Record<string, Record<string, string>> = {
+    not_found: {
+      en: "Promo code not found",
+      tr: "Promosyon kodu bulunamadı",
+      de: "Aktionscode nicht gefunden",
+      fr: "Code promo introuvable",
+      ru: "Промокод не найден",
+      it: "Codice promo non trovato",
+      es: "Código promocional no encontrado",
+      ar: "لم يتم العثور على الرمز الترويجي",
+      uk: "Промокод не знайдено",
+      ja: "プロモコードが見つかりません",
+    },
+    not_active: {
+      en: "This promo code is no longer active",
+      tr: "Bu promosyon kodu artık aktif değil",
+      de: "Dieser Aktionscode ist nicht mehr aktiv",
+      fr: "Ce code promo n'est plus actif",
+      ru: "Этот промокод больше не активен",
+      it: "Questo codice promo non è più attivo",
+      es: "Este código promocional ya no está activo",
+      ar: "هذا الرمز الترويجي لم يعد نشطًا",
+      uk: "Цей промокод більше не активний",
+      ja: "このプロモコードは無効です",
+    },
+    not_started: {
+      en: "This promo code is not yet valid",
+      tr: "Bu promosyon kodu henüz geçerli değil",
+      de: "Dieser Aktionscode ist noch nicht gültig",
+      fr: "Ce code promo n'est pas encore valide",
+      ru: "Этот промокод еще не действителен",
+      it: "Questo codice promo non è ancora valido",
+      es: "Este código promocional aún no es válido",
+      ar: "هذا الرمز الترويجي غير صالح بعد",
+      uk: "Цей промокод ще не дійсний",
+      ja: "このプロモコードはまだ有効ではありません",
+    },
+    expired: {
+      en: "This promo code has expired",
+      tr: "Bu promosyon kodunun süresi dolmuş",
+      de: "Dieser Aktionscode ist abgelaufen",
+      fr: "Ce code promo a expiré",
+      ru: "Срок действия этого промокода истек",
+      it: "Questo codice promo è scaduto",
+      es: "Este código promocional ha caducado",
+      ar: "انتهت صلاحية هذا الرمز الترويجي",
+      uk: "Термін дії цього промокоду закінчився",
+      ja: "このプロモコードは期限切れです",
+    },
+    max_usage_reached: {
+      en: "This promo code has reached its maximum usage limit",
+      tr: "Bu promosyon kodu maksimum kullanım limitine ulaştı",
+      de: "Dieser Aktionscode hat seine maximale Nutzungsgrenze erreicht",
+      fr: "Ce code promo a atteint sa limite d'utilisation maximale",
+      ru: "Этот промокод достиг максимального лимита использования",
+      it: "Questo codice promo ha raggiunto il limite massimo di utilizzo",
+      es: "Este código promocional ha alcanzado su límite máximo de uso",
+      ar: "وصل هذا الرمز الترويجي إلى الحد الأقصى للاستخدام",
+      uk: "Цей промокод досяг максимального ліміту використання",
+      ja: "このプロモコードは使用上限に達しました",
+    },
+    error: {
+      en: "Error validating promo code",
+      tr: "Promosyon kodu doğrulanırken hata oluştu",
+      de: "Fehler bei der Validierung des Aktionscodes",
+      fr: "Erreur lors de la validation du code promo",
+      ru: "Ошибка при проверке промокода",
+      it: "Errore durante la convalida del codice promo",
+      es: "Error al validar el código promocional",
+      ar: "خطأ في التحقق من الرمز الترويجي",
+      uk: "Помилка перевірки промокоду",
+      ja: "プロモコードの検証エラー",
+    },
+  };
+
+  return messages[errorCode]?.[lang] || messages[errorCode]?.['en'] || messages['error']['en'];
+};
+
+export const validatePromoCode = async (code: string, lang: string = 'en'): Promise<PromoValidationResult> => {
   try {
-    const { data, error } = await supabase
+    // First check if code exists at all (including inactive)
+    const { data: anyCode, error: anyError } = await supabase
       .from("promo_codes")
       .select("discount_percentage, applies_to, is_active, valid_from, valid_until, max_usage, usage_count")
       .eq("code", code.toUpperCase().trim())
-      .eq("is_active", true)
       .maybeSingle();
 
-    if (error) {
-      console.error("Error validating promo code:", error);
-      return null;
+    if (anyError) {
+      console.error("Error validating promo code:", anyError);
+      return {
+        valid: false,
+        errorCode: 'error',
+        errorMessage: getPromoErrorMessage('error', lang),
+      };
     }
 
-    if (!data) {
-      console.log("Promo code not found:", code);
-      return null;
+    if (!anyCode) {
+      return {
+        valid: false,
+        errorCode: 'not_found',
+        errorMessage: getPromoErrorMessage('not_found', lang),
+      };
+    }
+
+    // Check if active
+    if (!anyCode.is_active) {
+      return {
+        valid: false,
+        errorCode: 'not_active',
+        errorMessage: getPromoErrorMessage('not_active', lang),
+      };
     }
 
     const now = new Date();
 
-    // Check validity dates
-    if (data.valid_from && new Date(data.valid_from) > now) {
-      console.log("Promo code not yet valid:", data.valid_from);
-      return null;
+    // Check if started
+    if (anyCode.valid_from && new Date(anyCode.valid_from) > now) {
+      return {
+        valid: false,
+        errorCode: 'not_started',
+        errorMessage: getPromoErrorMessage('not_started', lang),
+      };
     }
-    if (data.valid_until && new Date(data.valid_until) < now) {
-      console.log("Promo code expired:", data.valid_until);
-      return null;
+
+    // Check if expired
+    if (anyCode.valid_until && new Date(anyCode.valid_until) < now) {
+      return {
+        valid: false,
+        errorCode: 'expired',
+        errorMessage: getPromoErrorMessage('expired', lang),
+      };
     }
 
     // Check max usage
-    if (data.max_usage && data.usage_count >= data.max_usage) {
-      console.log("Promo code max usage reached:", data.usage_count, "/", data.max_usage);
-      return null;
+    if (anyCode.max_usage && anyCode.usage_count >= anyCode.max_usage) {
+      return {
+        valid: false,
+        errorCode: 'max_usage_reached',
+        errorMessage: getPromoErrorMessage('max_usage_reached', lang),
+      };
     }
 
     return {
       valid: true,
-      discount: data.discount_percentage,
-      appliesTo: data.applies_to,
-      validUntil: data.valid_until,
+      discount: anyCode.discount_percentage,
+      appliesTo: anyCode.applies_to,
+      validUntil: anyCode.valid_until,
     };
   } catch (err) {
     console.error("Error validating promo code:", err);
-    return null;
+    return {
+      valid: false,
+      errorCode: 'error',
+      errorMessage: getPromoErrorMessage('error', lang),
+    };
   }
 };
 

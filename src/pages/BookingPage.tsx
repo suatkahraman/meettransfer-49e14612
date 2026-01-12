@@ -4,6 +4,7 @@ import { format, parse } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
+import { validatePromoCode } from "@/hooks/useActivePromoCode";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,6 +107,8 @@ const BookingPage = () => {
   const [returnTime, setReturnTime] = useState("");
   const [promoCode, setPromoCode] = useState("");
   const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
+  const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   
   // Hourly rental state
   const [selectedDuration, setSelectedDuration] = useState(urlDuration);
@@ -294,16 +297,29 @@ const BookingPage = () => {
   // Handle promo code - check against database
   const handlePromoCodeChange = async (value: string) => {
     setPromoCode(value);
+    setPromoCodeError(null);
+    
     if (value.trim() === "") {
       setIsPromoCodeValid(null);
-    } else {
-      // Check against common promo codes (case insensitive)
-      const validCodes = ['meet30return', 'gidisdonus', 'return30', 'meet30'];
-      if (validCodes.includes(value.trim().toLowerCase())) {
+      return;
+    }
+    
+    setIsValidatingPromo(true);
+    try {
+      const result = await validatePromoCode(value, language);
+      
+      if (result.valid) {
         setIsPromoCodeValid(true);
+        setPromoCodeError(null);
       } else {
         setIsPromoCodeValid(false);
+        setPromoCodeError('errorMessage' in result ? result.errorMessage : null);
       }
+    } catch (err) {
+      setIsPromoCodeValid(false);
+      setPromoCodeError(t("errorValidatingPromoCode") || "Error validating promo code");
+    } finally {
+      setIsValidatingPromo(false);
     }
   };
 
@@ -1549,12 +1565,18 @@ const BookingPage = () => {
                                 isPromoCodeValid === false && "border-red-500 ring-1 ring-red-500"
                               )}
                             />
-                            {isPromoCodeValid === true && (
+                            {isValidatingPromo && (
+                              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground animate-spin" />
+                            )}
+                            {!isValidatingPromo && isPromoCodeValid === true && (
                               <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                             )}
                           </div>
                           {isPromoCodeValid === true && (
                             <p className="text-green-600 text-sm mt-1">✓ {t("promoCodeAccepted") || "30% discount will be applied!"}</p>
+                          )}
+                          {isPromoCodeValid === false && promoCodeError && (
+                            <p className="text-red-500 text-sm mt-1">✗ {promoCodeError}</p>
                           )}
                         </div>
                       </div>
