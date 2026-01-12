@@ -126,11 +126,27 @@ const AgencyLoginScreen = () => {
       const userEmail = result.email || twoFactorState.email || '';
       await logLoginAttempt(userEmail, true, undefined, undefined, pendingRole);
       
-      // After successful 2FA, we need to sign the user back in
-      // The user was signed out before 2FA, now we redirect to complete login
-      toast.success(language === 'TR' ? 'Doğrulama başarılı! Yönlendiriliyorsunuz...' : 'Verification successful! Redirecting...');
+      toast.success(language === 'TR' ? 'Doğrulama başarılı! Giriş yapılıyor...' : 'Verification successful! Signing in...');
       
-      // Small delay to show success message, then redirect
+      // Try auto-login with the magic link token
+      if (result.autoLogin && result.tokenHash && result.email) {
+        try {
+          const { error: verifyError } = await supabase.auth.verifyOtp({
+            email: result.email,
+            token: result.tokenHash,
+            type: 'magiclink'
+          });
+          
+          if (verifyError) {
+            console.error('Auto-login failed:', verifyError);
+            // Redirect anyway - user will need to login again
+          }
+        } catch (e) {
+          console.error('Auto-login error:', e);
+        }
+      }
+      
+      // Navigate to the appropriate page
       setTimeout(() => {
         switch (pendingRole) {
           case 'admin':
