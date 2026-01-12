@@ -50,6 +50,20 @@ const BlogHourlyRentalPromo = () => {
                   </div>
                 </div>
                 
+                {/* Important Notes */}
+                <div className="flex flex-col gap-2 pt-2">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md">
+                    <span className="text-xs font-medium text-amber-800 dark:text-amber-200">
+                      📍 {t("hourlyDailyKmLimit")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md">
+                    <span className="text-xs font-medium text-blue-800 dark:text-blue-200">
+                      🏙️ {t("hourlySameCityOnly")}
+                    </span>
+                  </div>
+                </div>
+                
                 <div className="pt-4">
                   <Link to={getLocalizedPath("/book?type=hourly")}>
                     <Button size="lg" className="gap-2 w-full md:w-auto">
