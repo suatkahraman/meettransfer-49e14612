@@ -45,19 +45,13 @@ Deno.serve(async (req) => {
     const sessionStart = body.session_start || nowIso;
     const lastActivity = body.last_activity || nowIso;
 
-    // Prefer updating an existing visit if visit_id is provided.
+    // Try to update existing visit first if visit_id provided
     if (body.visit_id) {
       const { data: updated, error: updateError } = await supabaseAdmin
         .from("page_visits")
         .update({
           last_activity: lastActivity,
           page_path: body.page_path,
-          country_code: body.country_code ?? null,
-          country_name: body.country_name ?? null,
-          city: body.city ?? null,
-          browser: body.browser ?? null,
-          device: body.device ?? null,
-          referrer: body.referrer ?? null,
         })
         .eq("id", body.visit_id)
         .eq("visitor_id", body.visitor_id)
@@ -72,7 +66,43 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Otherwise insert a new visit row
+    // Check for recent visit from same visitor (within 30 minutes)
+    const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    
+    const { data: recentVisit } = await supabaseAdmin
+      .from("page_visits")
+      .select("id")
+      .eq("visitor_id", body.visitor_id)
+      .gte("last_activity", thirtyMinAgo)
+      .order("last_activity", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (recentVisit?.id) {
+      // Update existing recent visit
+      const { data: updated, error: updateError } = await supabaseAdmin
+        .from("page_visits")
+        .update({
+          last_activity: lastActivity,
+          page_path: body.page_path,
+          // Update geo/device only if provided and different
+          ...(body.country_code && { country_code: body.country_code }),
+          ...(body.country_name && { country_name: body.country_name }),
+          ...(body.city && { city: body.city }),
+        })
+        .eq("id", recentVisit.id)
+        .select("id")
+        .single();
+
+      if (!updateError && updated) {
+        return new Response(JSON.stringify({ visit_id: updated.id }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-store" },
+        });
+      }
+    }
+
+    // Insert new visit
     const { data: inserted, error: insertError } = await supabaseAdmin
       .from("page_visits")
       .insert({
