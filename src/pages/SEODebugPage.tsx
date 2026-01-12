@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, ExternalLink, AlertTriangle, Info, Globe, Languages, Link2, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle, Code, Star, Search, Home, RefreshCw, ExternalLink, AlertTriangle, Info, Globe, Languages, Link2, FileText, Tag } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, type Language } from '@/hooks/useLanguageFromUrl';
 
 interface AggregateRating {
@@ -214,6 +214,51 @@ interface CanonicalSummary {
   inconsistentPatterns: boolean;
 }
 
+// Meta tag validation interfaces
+interface MetaTagData {
+  title: string | null;
+  titleLength: number;
+  description: string | null;
+  descriptionLength: number;
+  robots: string | null;
+  keywords: string | null;
+  viewport: string | null;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImage: string | null;
+  ogType: string | null;
+  twitterCard: string | null;
+  twitterTitle: string | null;
+  twitterDescription: string | null;
+}
+
+interface MetaTagValidationResult {
+  language: Language;
+  url: string;
+  metaTags: MetaTagData;
+  issues: MetaTagIssue[];
+  scannedAt: Date;
+  error?: string;
+}
+
+interface MetaTagIssue {
+  level: 'error' | 'warning' | 'info';
+  field: string;
+  message: string;
+}
+
+interface MetaTagSummary {
+  totalLanguages: number;
+  scannedLanguages: number;
+  languagesWithIssues: number;
+  missingTitle: number;
+  missingDescription: number;
+  titleTooLong: number;
+  descriptionTooLong: number;
+  missingOgTags: number;
+  inconsistentTitles: boolean;
+}
+
 const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   EN: "",
   TR: "/tr",
@@ -234,7 +279,7 @@ const SEODebugPage = () => {
   const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [customUrl, setCustomUrl] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical'>('current');
+  const [activeTab, setActiveTab] = useState<'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical' | 'metatags'>('current');
   
   // Language scanning state
   const [languageScanResults, setLanguageScanResults] = useState<LanguageScanResult[]>([]);
@@ -253,6 +298,12 @@ const SEODebugPage = () => {
   const [isScanningCanonical, setIsScanningCanonical] = useState(false);
   const [canonicalScanProgress, setCanonicalScanProgress] = useState(0);
   const [canonicalScanPath, setCanonicalScanPath] = useState('/');
+
+  // Meta tag validation state
+  const [metaTagResults, setMetaTagResults] = useState<MetaTagValidationResult[]>([]);
+  const [isScanningMetaTags, setIsScanningMetaTags] = useState(false);
+  const [metaTagScanProgress, setMetaTagScanProgress] = useState(0);
+  const [metaTagScanPath, setMetaTagScanPath] = useState('/');
 
   // Scan current page
   useEffect(() => {
@@ -817,6 +868,216 @@ const SEODebugPage = () => {
     };
   };
 
+  // Parse meta tags from HTML
+  const parseMetaTags = (html: string): MetaTagData => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    const getMetaContent = (name: string, property?: string): string | null => {
+      let meta = doc.querySelector(`meta[name="${name}"]`);
+      if (!meta && property) {
+        meta = doc.querySelector(`meta[property="${property}"]`);
+      }
+      return meta?.getAttribute('content') || null;
+    };
+
+    const title = doc.querySelector('title')?.textContent || null;
+    const description = getMetaContent('description');
+    const robots = getMetaContent('robots');
+    const keywords = getMetaContent('keywords');
+    const viewport = getMetaContent('viewport');
+    const ogTitle = getMetaContent('og:title', 'og:title');
+    const ogDescription = getMetaContent('og:description', 'og:description');
+    const ogImage = getMetaContent('og:image', 'og:image');
+    const ogType = getMetaContent('og:type', 'og:type');
+    const twitterCard = getMetaContent('twitter:card');
+    const twitterTitle = getMetaContent('twitter:title');
+    const twitterDescription = getMetaContent('twitter:description');
+
+    return {
+      title,
+      titleLength: title?.length || 0,
+      description,
+      descriptionLength: description?.length || 0,
+      robots,
+      keywords,
+      viewport,
+      ogTitle,
+      ogDescription,
+      ogImage,
+      ogType,
+      twitterCard,
+      twitterTitle,
+      twitterDescription,
+    };
+  };
+
+  // Validate meta tags
+  const validateMetaTags = (metaTags: MetaTagData): MetaTagIssue[] => {
+    const issues: MetaTagIssue[] = [];
+
+    // Title validation
+    if (!metaTags.title) {
+      issues.push({ level: 'error', field: 'title', message: 'Title etiketi eksik - her sayfada title olmalı' });
+    } else {
+      if (metaTags.titleLength < 30) {
+        issues.push({ level: 'warning', field: 'title', message: `Title çok kısa (${metaTags.titleLength} karakter) - 50-60 karakter önerilir` });
+      } else if (metaTags.titleLength > 60) {
+        issues.push({ level: 'warning', field: 'title', message: `Title çok uzun (${metaTags.titleLength} karakter) - 60 karakteri geçmemeli` });
+      }
+    }
+
+    // Description validation
+    if (!metaTags.description) {
+      issues.push({ level: 'error', field: 'description', message: 'Meta description eksik - SEO için kritik' });
+    } else {
+      if (metaTags.descriptionLength < 70) {
+        issues.push({ level: 'warning', field: 'description', message: `Description çok kısa (${metaTags.descriptionLength} karakter) - 120-160 karakter önerilir` });
+      } else if (metaTags.descriptionLength > 160) {
+        issues.push({ level: 'warning', field: 'description', message: `Description çok uzun (${metaTags.descriptionLength} karakter) - 160 karakteri geçmemeli` });
+      }
+    }
+
+    // Robots validation
+    if (!metaTags.robots) {
+      issues.push({ level: 'info', field: 'robots', message: 'Robots meta etiketi tanımlı değil (varsayılan: index, follow)' });
+    } else if (metaTags.robots.includes('noindex')) {
+      issues.push({ level: 'warning', field: 'robots', message: 'Sayfa noindex olarak işaretlenmiş - Google\'da görünmeyecek' });
+    }
+
+    // Viewport validation
+    if (!metaTags.viewport) {
+      issues.push({ level: 'error', field: 'viewport', message: 'Viewport meta etiketi eksik - mobil uyumluluk için gerekli' });
+    }
+
+    // Open Graph validation
+    if (!metaTags.ogTitle) {
+      issues.push({ level: 'warning', field: 'og:title', message: 'Open Graph title eksik - sosyal medya paylaşımları için önemli' });
+    }
+    if (!metaTags.ogDescription) {
+      issues.push({ level: 'warning', field: 'og:description', message: 'Open Graph description eksik' });
+    }
+    if (!metaTags.ogImage) {
+      issues.push({ level: 'warning', field: 'og:image', message: 'Open Graph image eksik - sosyal medya görseleri için' });
+    }
+    if (!metaTags.ogType) {
+      issues.push({ level: 'info', field: 'og:type', message: 'Open Graph type tanımlı değil (varsayılan: website)' });
+    }
+
+    // Twitter Card validation
+    if (!metaTags.twitterCard) {
+      issues.push({ level: 'info', field: 'twitter:card', message: 'Twitter Card meta etiketi eksik' });
+    }
+
+    return issues;
+  };
+
+  // Scan all languages for meta tags
+  const scanMetaTags = async (basePath: string = '/') => {
+    setIsScanningMetaTags(true);
+    setMetaTagScanProgress(0);
+    setMetaTagResults([]);
+    setActiveTab('metatags');
+
+    const baseUrl = window.location.origin;
+    const results: MetaTagValidationResult[] = [];
+
+    for (let i = 0; i < SUPPORTED_LANGUAGES.length; i++) {
+      const lang = SUPPORTED_LANGUAGES[i];
+      const prefix = LANGUAGE_TO_PREFIX[lang];
+      const path = prefix + (basePath === '/' ? '' : basePath);
+      const url = baseUrl + (path || '/');
+
+      try {
+        const response = await fetch(url, {
+          headers: { 'Accept': 'text/html' },
+        });
+
+        if (!response.ok) {
+          results.push({
+            language: lang,
+            url,
+            metaTags: {
+              title: null, titleLength: 0,
+              description: null, descriptionLength: 0,
+              robots: null, keywords: null, viewport: null,
+              ogTitle: null, ogDescription: null, ogImage: null, ogType: null,
+              twitterCard: null, twitterTitle: null, twitterDescription: null,
+            },
+            issues: [],
+            scannedAt: new Date(),
+            error: `HTTP ${response.status}`,
+          });
+        } else {
+          const html = await response.text();
+          const metaTags = parseMetaTags(html);
+          const issues = validateMetaTags(metaTags);
+
+          results.push({
+            language: lang,
+            url,
+            metaTags,
+            issues,
+            scannedAt: new Date(),
+          });
+        }
+      } catch (error) {
+        results.push({
+          language: lang,
+          url,
+          metaTags: {
+            title: null, titleLength: 0,
+            description: null, descriptionLength: 0,
+            robots: null, keywords: null, viewport: null,
+            ogTitle: null, ogDescription: null, ogImage: null, ogType: null,
+            twitterCard: null, twitterTitle: null, twitterDescription: null,
+          },
+          issues: [],
+          scannedAt: new Date(),
+          error: error instanceof Error ? error.message : 'Bilinmeyen hata',
+        });
+      }
+
+      setMetaTagScanProgress(((i + 1) / SUPPORTED_LANGUAGES.length) * 100);
+      setMetaTagResults([...results]);
+    }
+
+    setIsScanningMetaTags(false);
+  };
+
+  // Calculate meta tag summary
+  const getMetaTagSummary = (): MetaTagSummary => {
+    const successfulScans = metaTagResults.filter(r => !r.error);
+    const withIssues = metaTagResults.filter(r => 
+      r.issues.some(i => i.level === 'error' || i.level === 'warning')
+    );
+    const missingTitle = metaTagResults.filter(r => !r.error && !r.metaTags.title);
+    const missingDescription = metaTagResults.filter(r => !r.error && !r.metaTags.description);
+    const titleTooLong = metaTagResults.filter(r => !r.error && r.metaTags.titleLength > 60);
+    const descriptionTooLong = metaTagResults.filter(r => !r.error && r.metaTags.descriptionLength > 160);
+    const missingOgTags = metaTagResults.filter(r => 
+      !r.error && (!r.metaTags.ogTitle || !r.metaTags.ogDescription || !r.metaTags.ogImage)
+    );
+
+    // Check title consistency across languages
+    const titles = successfulScans
+      .filter(r => r.metaTags.title)
+      .map(r => r.metaTags.title);
+    const uniqueTitles = [...new Set(titles)];
+    
+    return {
+      totalLanguages: SUPPORTED_LANGUAGES.length,
+      scannedLanguages: successfulScans.length,
+      languagesWithIssues: withIssues.length,
+      missingTitle: missingTitle.length,
+      missingDescription: missingDescription.length,
+      titleTooLong: titleTooLong.length,
+      descriptionTooLong: descriptionTooLong.length,
+      missingOgTags: missingOgTags.length,
+      inconsistentTitles: uniqueTitles.length === successfulScans.length && successfulScans.length > 1, // All different = localized
+    };
+  };
+
   const getIssueCounts = (issues: ValidationIssue[]) => {
     return {
       errors: issues.filter(i => i.level === 'error').length,
@@ -1203,7 +1464,49 @@ const SEODebugPage = () => {
           </CardContent>
         </Card>
 
-        <div className="flex gap-2 border-b overflow-x-auto">
+        {/* Meta Tag Scan Card */}
+        <Card className="border-purple-500/30 bg-purple-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Meta Tag Kontrolü
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Tüm dil versiyonlarının title, description, robots, Open Graph etiketlerini doğrulayın
+            </p>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Sayfa yolu (örn: / veya /reviews)"
+                value={metaTagScanPath}
+                onChange={(e) => setMetaTagScanPath(e.target.value)}
+                className="text-sm"
+              />
+              <Button
+                onClick={() => scanMetaTags(metaTagScanPath)}
+                disabled={isScanningMetaTags}
+                size="sm"
+                variant="default"
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <Tag className="h-4 w-4 mr-1" />
+                Meta Tara
+                {isScanningMetaTags && <RefreshCw className="h-3 w-3 ml-1 animate-spin" />}
+              </Button>
+            </div>
+
+            {isScanningMetaTags && (
+              <div className="space-y-1">
+                <Progress value={metaTagScanProgress} className="h-2" />
+                <p className="text-xs text-muted-foreground text-center">
+                  {Math.round(metaTagScanProgress)}% tamamlandı
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
           <button
             onClick={() => setActiveTab('current')}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
@@ -1256,6 +1559,17 @@ const SEODebugPage = () => {
           >
             <FileText className="h-3 w-3" />
             Canonical ({canonicalResults.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('metatags')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 ${
+              activeTab === 'metatags'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Tag className="h-3 w-3" />
+            Meta Tags ({metaTagResults.length})
           </button>
         </div>
 
@@ -1949,6 +2263,69 @@ const SEODebugPage = () => {
                     ))}
                   </div>
                 </details>
+              </>
+            )}
+          </div>
+        ) : activeTab === 'metatags' ? (
+          <div className="space-y-4">
+            {metaTagResults.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Henüz meta tag taraması yapılmadı. Yukarıdaki "Meta Tara" butonunu kullanın.
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {(() => {
+                  const summary = getMetaTagSummary();
+                  const hasIssues = summary.languagesWithIssues > 0 || summary.missingTitle > 0 || summary.missingDescription > 0;
+                  return (
+                    <Card className={hasIssues ? 'border-destructive' : 'border-green-500'}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                          {hasIssues ? (<><AlertCircle className="h-5 w-5 text-destructive" /><span className="text-destructive">Meta Tag Kontrolü - Sorunlar Var</span></>) : (<><CheckCircle className="h-5 w-5 text-green-500" /><span className="text-green-500">Meta Tag Kontrolü - Tamamlandı</span></>)}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+                          <div className="text-center p-2 bg-muted rounded-lg"><div className="text-xl font-bold">{summary.totalLanguages}</div><div className="text-xs text-muted-foreground">Toplam Dil</div></div>
+                          <div className="text-center p-2 bg-green-50 dark:bg-green-950 rounded-lg"><div className="text-xl font-bold text-green-600">{summary.scannedLanguages}</div><div className="text-xs text-muted-foreground">Başarılı</div></div>
+                          <div className={`text-center p-2 rounded-lg ${summary.missingTitle > 0 ? 'bg-red-50 dark:bg-red-950' : 'bg-green-50 dark:bg-green-950'}`}><div className={`text-xl font-bold ${summary.missingTitle > 0 ? 'text-destructive' : 'text-green-600'}`}>{summary.missingTitle}</div><div className="text-xs text-muted-foreground">Eksik Title</div></div>
+                          <div className={`text-center p-2 rounded-lg ${summary.missingDescription > 0 ? 'bg-red-50 dark:bg-red-950' : 'bg-green-50 dark:bg-green-950'}`}><div className={`text-xl font-bold ${summary.missingDescription > 0 ? 'text-destructive' : 'text-green-600'}`}>{summary.missingDescription}</div><div className="text-xs text-muted-foreground">Eksik Desc</div></div>
+                          <div className={`text-center p-2 rounded-lg ${summary.missingOgTags > 0 ? 'bg-yellow-50 dark:bg-yellow-950' : 'bg-green-50 dark:bg-green-950'}`}><div className={`text-xl font-bold ${summary.missingOgTags > 0 ? 'text-yellow-600' : 'text-green-600'}`}>{summary.missingOgTags}</div><div className="text-xs text-muted-foreground">Eksik OG</div></div>
+                        </div>
+                        {summary.missingTitle > 0 && (<div className="p-2 bg-red-50 dark:bg-red-950 rounded-lg text-sm text-destructive flex items-start gap-2"><AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" /><span>Title etiketi eksik!</span></div>)}
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+                <Card>
+                  <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><Tag className="h-4 w-4" />Dil Bazlı Meta Tag Sonuçları</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead><tr className="border-b"><th className="text-left py-2 px-3">Dil</th><th className="text-left py-2 px-3">Title</th><th className="text-center py-2 px-3">Title Uzunluğu</th><th className="text-center py-2 px-3">Desc Uzunluğu</th><th className="text-center py-2 px-3">OG</th><th className="text-center py-2 px-3">Durum</th></tr></thead>
+                        <tbody>
+                          {metaTagResults.map((result, idx) => {
+                            const errorCount = result.issues.filter(i => i.level === 'error').length;
+                            const warningCount = result.issues.filter(i => i.level === 'warning').length;
+                            const hasOgTags = result.metaTags.ogTitle && result.metaTags.ogDescription;
+                            return (
+                              <tr key={idx} className="border-b hover:bg-muted/50">
+                                <td className="py-2 px-3"><Badge variant="outline" className="text-xs">{result.language}</Badge></td>
+                                <td className="py-2 px-3">{result.error ? <Badge variant="destructive" className="text-xs">Hata</Badge> : result.metaTags.title ? <span className="text-xs text-muted-foreground truncate block max-w-[200px]" title={result.metaTags.title}>{result.metaTags.title}</span> : <Badge variant="destructive" className="text-xs">Eksik</Badge>}</td>
+                                <td className="py-2 px-3 text-center"><span className={`text-xs font-medium ${result.metaTags.titleLength > 60 ? 'text-yellow-600' : result.metaTags.titleLength < 30 ? 'text-yellow-600' : 'text-green-600'}`}>{result.metaTags.titleLength || '—'}</span></td>
+                                <td className="py-2 px-3 text-center">{result.metaTags.description ? <span className={`text-xs font-medium ${result.metaTags.descriptionLength > 160 ? 'text-yellow-600' : 'text-green-600'}`}>{result.metaTags.descriptionLength}</span> : <Badge variant="destructive" className="text-xs">Eksik</Badge>}</td>
+                                <td className="py-2 px-3 text-center">{hasOgTags ? <CheckCircle className="h-4 w-4 text-green-500 mx-auto" /> : <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto" />}</td>
+                                <td className="py-2 px-3 text-center">{result.error ? <Badge variant="destructive" className="text-xs">{result.error}</Badge> : errorCount > 0 ? <Badge variant="destructive" className="text-xs">{errorCount} hata</Badge> : warningCount > 0 ? <Badge className="bg-yellow-500 text-xs">{warningCount} uyarı</Badge> : <Badge className="bg-green-500 text-xs">OK</Badge>}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
               </>
             )}
           </div>
