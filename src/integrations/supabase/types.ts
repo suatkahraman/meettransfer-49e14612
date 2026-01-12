@@ -1113,6 +1113,7 @@ export type Database = {
           agency_user_id: string | null
           all_vehicle_prices: Json | null
           baby_seat_count: number | null
+          city: string | null
           confirmation_token: string
           confirmed_at: string | null
           created_at: string | null
@@ -1122,6 +1123,7 @@ export type Database = {
           customer_phone: string | null
           customer_session_id: string
           dropoff: string
+          duration_hours: number | null
           expires_at: string | null
           has_return_trip: boolean | null
           id: string
@@ -1139,6 +1141,7 @@ export type Database = {
           return_date: string | null
           return_price: number | null
           return_time: string | null
+          service_type: string
           status: string
           updated_at: string | null
           vehicle_type: string
@@ -1149,6 +1152,7 @@ export type Database = {
           agency_user_id?: string | null
           all_vehicle_prices?: Json | null
           baby_seat_count?: number | null
+          city?: string | null
           confirmation_token?: string
           confirmed_at?: string | null
           created_at?: string | null
@@ -1158,6 +1162,7 @@ export type Database = {
           customer_phone?: string | null
           customer_session_id: string
           dropoff: string
+          duration_hours?: number | null
           expires_at?: string | null
           has_return_trip?: boolean | null
           id?: string
@@ -1175,6 +1180,7 @@ export type Database = {
           return_date?: string | null
           return_price?: number | null
           return_time?: string | null
+          service_type?: string
           status?: string
           updated_at?: string | null
           vehicle_type: string
@@ -1185,6 +1191,7 @@ export type Database = {
           agency_user_id?: string | null
           all_vehicle_prices?: Json | null
           baby_seat_count?: number | null
+          city?: string | null
           confirmation_token?: string
           confirmed_at?: string | null
           created_at?: string | null
@@ -1194,6 +1201,7 @@ export type Database = {
           customer_phone?: string | null
           customer_session_id?: string
           dropoff?: string
+          duration_hours?: number | null
           expires_at?: string | null
           has_return_trip?: boolean | null
           id?: string
@@ -1211,6 +1219,7 @@ export type Database = {
           return_date?: string | null
           return_price?: number | null
           return_time?: string | null
+          service_type?: string
           status?: string
           updated_at?: string | null
           vehicle_type?: string
