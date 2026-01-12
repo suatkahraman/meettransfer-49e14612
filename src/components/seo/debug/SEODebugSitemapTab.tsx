@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AlertCircle, CheckCircle, AlertTriangle, Play, RotateCcw, Clock, Loader2, XCircle, Globe } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertCircle, CheckCircle, AlertTriangle, Play, RotateCcw, Clock, Loader2, XCircle, Globe, Filter } from 'lucide-react';
 import { type RobotsResult, type SitemapResult } from '@/hooks/useSitemapRobotsValidation';
 import { useSitemapUrlValidation } from '@/hooks/useSitemapUrlValidation';
+
+type StatusFilter = 'all' | '2xx' | '3xx' | '4xx' | '5xx' | 'error';
 
 interface SEODebugSitemapTabProps {
   robotsResult: RobotsResult | null;
@@ -15,6 +18,7 @@ interface SEODebugSitemapTabProps {
 
 export const SEODebugSitemapTab = ({ robotsResult, sitemapResults }: SEODebugSitemapTabProps) => {
   const [showValidation, setShowValidation] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const { results, summary, isValidating, progress, startedAt, completedAt, validateUrls, reset } = useSitemapUrlValidation();
 
   const handleValidateUrls = async () => {
@@ -28,12 +32,14 @@ export const SEODebugSitemapTab = ({ robotsResult, sitemapResults }: SEODebugSit
     }
 
     setShowValidation(true);
+    setStatusFilter('all');
     await validateUrls(allUrls, 3); // Validate 3 URLs at a time
   };
 
   const handleReset = () => {
     reset();
     setShowValidation(false);
+    setStatusFilter('all');
   };
 
   const getStatusColor = (ok: boolean, status: number | null) => {
@@ -48,6 +54,49 @@ export const SEODebugSitemapTab = ({ robotsResult, sitemapResults }: SEODebugSit
     if (status && status >= 300 && status < 400) return <AlertTriangle className="h-3.5 w-3.5" />;
     return <XCircle className="h-3.5 w-3.5" />;
   };
+
+  // Filter results based on selected status
+  const filteredResults = useMemo(() => {
+    if (statusFilter === 'all') return results;
+    
+    return results.filter(result => {
+      const status = result.status;
+      switch (statusFilter) {
+        case '2xx':
+          return status !== null && status >= 200 && status < 300;
+        case '3xx':
+          return status !== null && status >= 300 && status < 400;
+        case '4xx':
+          return status !== null && status >= 400 && status < 500;
+        case '5xx':
+          return status !== null && status >= 500 && status < 600;
+        case 'error':
+          return !result.ok;
+        default:
+          return true;
+      }
+    });
+  }, [results, statusFilter]);
+
+  // Count results by status category
+  const statusCounts = useMemo(() => {
+    return results.reduce((acc, result) => {
+      const status = result.status;
+      if (status === null) {
+        acc.error++;
+      } else if (status >= 200 && status < 300) {
+        acc['2xx']++;
+      } else if (status >= 300 && status < 400) {
+        acc['3xx']++;
+      } else if (status >= 400 && status < 500) {
+        acc['4xx']++;
+      } else if (status >= 500 && status < 600) {
+        acc['5xx']++;
+      }
+      if (!result.ok) acc.error++;
+      return acc;
+    }, { '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0, error: 0 } as Record<string, number>);
+  }, [results]);
 
   const totalSitemapUrls = sitemapResults.reduce((acc, s) => acc + s.urlCount, 0);
 
@@ -198,35 +247,76 @@ export const SEODebugSitemapTab = ({ robotsResult, sitemapResults }: SEODebugSit
                 {/* Results List */}
                 {results.length > 0 && (
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium">Sonuçlar</h4>
-                    <ScrollArea className="h-[300px] border rounded-md">
-                      <div className="p-2 space-y-1">
-                        {results.map((result, idx) => (
-                          <div 
-                            key={idx} 
-                            className={`flex items-center justify-between p-2 rounded text-xs ${getStatusColor(result.ok, result.status)}`}
-                          >
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              {getStatusIcon(result.ok, result.status)}
-                              <span className="truncate" title={result.url}>
-                                {result.url.replace(window.location.origin, '')}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 ml-2 shrink-0">
-                              {result.responseTime && (
-                                <span className="text-muted-foreground">{result.responseTime}ms</span>
-                              )}
-                              <Badge 
-                                variant={result.ok ? "secondary" : "destructive"} 
-                                className="text-xs font-mono"
-                              >
-                                {result.status ?? 'ERR'}
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium">Sonuçlar</h4>
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-muted-foreground" />
+                        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
+                          <SelectTrigger className="w-[160px] h-8 text-xs">
+                            <SelectValue placeholder="Status Filtrele" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Tümü ({results.length})</SelectItem>
+                            <SelectItem value="2xx" disabled={statusCounts['2xx'] === 0}>
+                              2xx Başarılı ({statusCounts['2xx']})
+                            </SelectItem>
+                            <SelectItem value="3xx" disabled={statusCounts['3xx'] === 0}>
+                              3xx Yönlendirme ({statusCounts['3xx']})
+                            </SelectItem>
+                            <SelectItem value="4xx" disabled={statusCounts['4xx'] === 0}>
+                              4xx İstemci Hatası ({statusCounts['4xx']})
+                            </SelectItem>
+                            <SelectItem value="5xx" disabled={statusCounts['5xx'] === 0}>
+                              5xx Sunucu Hatası ({statusCounts['5xx']})
+                            </SelectItem>
+                            <SelectItem value="error" disabled={summary.errors === 0}>
+                              Tüm Hatalar ({summary.errors})
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                    </ScrollArea>
+                    </div>
+                    
+                    {filteredResults.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground text-sm border rounded-md">
+                        Bu filtreye uygun sonuç bulunamadı.
+                      </div>
+                    ) : (
+                      <ScrollArea className="h-[300px] border rounded-md">
+                        <div className="p-2 space-y-1">
+                          {filteredResults.map((result, idx) => (
+                            <div 
+                              key={idx} 
+                              className={`flex items-center justify-between p-2 rounded text-xs ${getStatusColor(result.ok, result.status)}`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                {getStatusIcon(result.ok, result.status)}
+                                <span className="truncate" title={result.url}>
+                                  {result.url.replace(window.location.origin, '')}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 ml-2 shrink-0">
+                                {result.responseTime && (
+                                  <span className="text-muted-foreground">{result.responseTime}ms</span>
+                                )}
+                                <Badge 
+                                  variant={result.ok ? "secondary" : "destructive"} 
+                                  className="text-xs font-mono"
+                                >
+                                  {result.status ?? 'ERR'}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    )}
+                    
+                    {statusFilter !== 'all' && (
+                      <div className="text-xs text-muted-foreground text-center">
+                        {filteredResults.length} / {results.length} sonuç gösteriliyor
+                      </div>
+                    )}
                   </div>
                 )}
 
