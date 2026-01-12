@@ -951,17 +951,46 @@ export async function getPromoCodeFromDB(supabase: any, code: string): Promise<P
   }
 }
 
-export function calculateDiscount(
+// Fetch active promo code for return transfers from database
+export async function getActiveReturnPromoCode(supabase: any): Promise<PromoCodeInfo | null> {
+  try {
+    const { data, error } = await supabase
+      .from('promo_codes')
+      .select('code, discount_percentage, applies_to, is_active')
+      .eq('applies_to', 'return_transfer')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !data) {
+      console.log('No active return promo code found in DB, using fallback MEET30RETURN');
+      return PROMO_CODE_CONFIG['MEET30RETURN'];
+    }
+
+    console.log('Active return promo code from DB:', data.code, data.discount_percentage + '%');
+    return {
+      code: data.code,
+      discountPercent: data.discount_percentage,
+      appliesToReturn: true,
+      appliesToTotal: false,
+    };
+  } catch (err) {
+    console.error('Error fetching active return promo code:', err);
+    return PROMO_CODE_CONFIG['MEET30RETURN'];
+  }
+}
+
+// Calculate discount using promo code config (already fetched from DB)
+export function calculateDiscountWithConfig(
   basePrice: number,
   hasReturnTrip: boolean,
-  promoCode: string | null
-): { price: number; returnPrice: number | null; totalPrice: number; discountApplied: boolean; discountPercent: number } {
+  promoConfig: PromoCodeInfo | null
+): { price: number; returnPrice: number | null; totalPrice: number; discountApplied: boolean; discountPercent: number; promoCode: string | null } {
   let discountApplied = false;
   let discountPercent = 0;
   let returnPrice: number | null = null;
   let price = basePrice;
-  
-  const promoConfig = promoCode ? PROMO_CODE_CONFIG[promoCode.toUpperCase()] : null;
   
   if (hasReturnTrip) {
     returnPrice = basePrice;
@@ -971,6 +1000,7 @@ export function calculateDiscount(
       returnPrice = Math.round(basePrice * (1 - promoConfig.discountPercent / 100));
       discountApplied = true;
       discountPercent = promoConfig.discountPercent;
+      console.log(`Applied ${promoConfig.discountPercent}% discount to return trip: ${basePrice} -> ${returnPrice}`);
     }
   }
   
@@ -991,7 +1021,25 @@ export function calculateDiscount(
     returnPrice,
     totalPrice,
     discountApplied,
-    discountPercent
+    discountPercent,
+    promoCode: promoConfig?.code || null
+  };
+}
+
+// Legacy function for backward compatibility - uses hardcoded config
+export function calculateDiscount(
+  basePrice: number,
+  hasReturnTrip: boolean,
+  promoCode: string | null
+): { price: number; returnPrice: number | null; totalPrice: number; discountApplied: boolean; discountPercent: number } {
+  const promoConfig = promoCode ? PROMO_CODE_CONFIG[promoCode.toUpperCase()] : null;
+  const result = calculateDiscountWithConfig(basePrice, hasReturnTrip, promoConfig);
+  return {
+    price: result.price,
+    returnPrice: result.returnPrice,
+    totalPrice: result.totalPrice,
+    discountApplied: result.discountApplied,
+    discountPercent: result.discountPercent
   };
 }
 
