@@ -25,9 +25,11 @@ import vitoFamilyInterior from "@/assets/vito-family-interior.jpg";
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
 import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
+import { useBlogDate } from "@/hooks/useBlogDate";
 
 const AydinAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
+  const { formatBlogDate } = useBlogDate();
 
   const faqItems = [
     { question: t("blogAydinFaq1Q"), answer: t("blogAydinFaq1A") },
@@ -124,7 +126,7 @@ const AydinAirportTransferGuide = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {t("lastUpdated")}: January 12, 2025
+              {t("lastUpdated")}: {formatBlogDate("2025-01-12")}
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />

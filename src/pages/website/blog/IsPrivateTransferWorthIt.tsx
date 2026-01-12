@@ -12,9 +12,11 @@ import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import BlogCTA from "@/components/website/BlogCTA";
+import { useBlogDate } from "@/hooks/useBlogDate";
 
 const IsPrivateTransferWorthIt = () => {
   const { t, getLocalizedPath } = useLanguage();
+  const { formatBlogDate } = useBlogDate();
 
   const faqItems = [
     {
@@ -112,7 +114,7 @@ const IsPrivateTransferWorthIt = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              November 20, 2024
+              {formatBlogDate("2024-11-20")}
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />

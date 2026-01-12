@@ -25,9 +25,11 @@ import vitoVip1 from "@/assets/vito-vip-1.jpg";
 import vitoVip2 from "@/assets/vito-vip-2.jpg";
 import sprinterInteriorBlue from "@/assets/sprinter-interior-blue.jpg";
 import vitoAirportAnime from "@/assets/vito-airport-anime.jpg";
+import { useBlogDate } from "@/hooks/useBlogDate";
 
 const IstanbulTransferPriceGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
+  const { formatBlogDate } = useBlogDate();
 
   const faqItems = [
     { question: t("blogPriceFaq1Q"), answer: t("blogPriceFaq1A") },
@@ -136,7 +138,7 @@ const IstanbulTransferPriceGuide = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {t("lastUpdated")}: January 10, 2025
+              {t("lastUpdated")}: {formatBlogDate("2025-01-10")}
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
