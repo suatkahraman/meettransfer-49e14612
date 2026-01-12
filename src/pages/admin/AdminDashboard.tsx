@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { endOfDay, endOfMonth, format, startOfDay, startOfMonth } from 'date-fns';
-import { AlertCircle, Banknote, BarChart3, Building2, Calculator, Calendar, CalendarDays, Car, CheckCircle, ClipboardList, Clock, DollarSign, Download, FileText, Inbox, LogOut, MapPin, MessageCircle, Plane, Receipt, Settings, Users } from 'lucide-react';
+import { AlertCircle, Banknote, BarChart3, Building2, Calculator, Calendar, CalendarDays, Car, CheckCircle, ClipboardList, Clock, DollarSign, FileText, Inbox, LogOut, MapPin, MessageCircle, Plane, Receipt, Settings, Users } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import NotificationBell from '@/components/NotificationBell';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { InvoiceDialog } from '@/components/admin/InvoiceDialog';
+import PWAInstallWidget from '@/components/admin/PWAInstallWidget';
 import { supabase } from '@/integrations/supabase/client';
 interface KPIs {
   newToday: number;
@@ -43,7 +44,7 @@ const AdminDashboard = () => {
   const [unreadWhatsApp, setUnreadWhatsApp] = useState(0);
   const [pendingQuickBookings, setPendingQuickBookings] = useState(0);
   const [pendingAdminReview, setPendingAdminReview] = useState(0);
-  const [appInstallCount, setAppInstallCount] = useState(0);
+  
 
   const monthLabel = format(new Date(), 'MM.yyyy');
   const formatTRY = (amount: number) =>
@@ -234,33 +235,6 @@ const AdminDashboard = () => {
     };
   }, []);
 
-  // Fetch app installation count
-  useEffect(() => {
-    const fetchInstallCount = async () => {
-      const { count } = await supabase
-        .from('app_installations')
-        .select('*', { count: 'exact', head: true });
-      
-      setAppInstallCount(count || 0);
-    };
-
-    fetchInstallCount();
-
-    // Subscribe to realtime updates
-    const channel = supabase
-      .channel('app-installations-count')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'app_installations' },
-        () => fetchInstallCount()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
   // Fetch pending agency applications count
   const [pendingAgencyApps, setPendingAgencyApps] = useState(0);
   
@@ -419,17 +393,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-purple-500/50 cursor-pointer hover:shadow-lg transition-shadow hover:border-purple-400" onClick={() => navigate('/admin/app-installations')}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Uygulama İndirme
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">{appInstallCount}</div>
-            </CardContent>
-          </Card>
+          <PWAInstallWidget />
 
           <Card 
             className="border-amber-500/50 cursor-pointer hover:shadow-lg transition-shadow hover:border-amber-400"
