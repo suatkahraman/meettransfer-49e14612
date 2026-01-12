@@ -13,8 +13,8 @@ const platforms = [
         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
       </svg>
     ),
-    rating: "4.9",
-    reviews: "488+",
+    rating: "4.8",
+    reviews: "2,847+",
     url: "https://search.google.com/local/reviews?placeid=ChIJxWLW5C_byxQRxSUmLFnp2dU",
     color: "hover:bg-blue-50 dark:hover:bg-blue-950",
   },
@@ -71,7 +71,7 @@ const platforms = [
         <path fill="#005128" d="M16.18 15.73l-.94-2.9L12 15.73z"/>
       </svg>
     ),
-    rating: "4.9",
+    rating: "4.8",
     reviews: "980+",
     url: "https://www.trustpilot.com/review/meettransfer.app",
     color: "hover:bg-emerald-50 dark:hover:bg-emerald-950",

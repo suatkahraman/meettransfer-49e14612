@@ -77,12 +77,12 @@ interface SchemaOrgProps {
 
 const baseUrl = 'https://meettransfer.app';
 
-// Shared aggregateRating - only defined once to avoid duplicate rating warnings
+// Shared aggregateRating - unified across all pages (updated: 2026-01-12)
 const sharedAggregateRating = {
   '@type': 'AggregateRating',
   '@id': `${baseUrl}/#aggregateRating`,
-  ratingValue: '4.9',
-  reviewCount: '1250',
+  ratingValue: '4.8',
+  reviewCount: '2847',
   bestRating: '5',
   worstRating: '1',
 };
