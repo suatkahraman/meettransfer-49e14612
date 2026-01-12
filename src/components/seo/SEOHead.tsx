@@ -34,9 +34,9 @@ const LANGUAGE_CODES: Record<Language, string> = {
   JA: "ja",
 };
 
-// Default OG images for different page types
+// Default OG images for different page types (1200x630 recommended for social media)
 const DEFAULT_OG_IMAGES = {
-  home: 'https://meettransfer.app/og/home-og.jpg',
+  home: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
   transfer: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
   fleet: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
   blog: 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
