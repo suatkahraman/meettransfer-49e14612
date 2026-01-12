@@ -95,6 +95,9 @@ const DriverLoginScreen = () => {
   const handle2FAVerify = async (code: string) => {
     const result = await verify2FA(code);
     if (result.success && pendingRole) {
+      // 2FA complete – allow global redirects again
+      localStorage.removeItem('suppress_auth_redirect');
+
       // Log successful login attempt
       const userEmail = result.email || twoFactorState.email || '';
       await logLoginAttempt(userEmail, true, undefined, undefined, pendingRole);
@@ -138,6 +141,9 @@ const DriverLoginScreen = () => {
 
   // Handle 2FA cancel
   const handle2FACancel = async () => {
+    // User aborted 2FA – allow redirects again
+    localStorage.removeItem('suppress_auth_redirect');
+
     cancel2FA();
     setPendingRole(null);
     setViewMode('login');
@@ -157,6 +163,10 @@ const DriverLoginScreen = () => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
+
+    // We sometimes sign in briefly (to validate password) and then sign out again to enforce 2FA.
+    // During that window, AuthContext must NOT auto-redirect away from this screen.
+    let keepRedirectSuppressed = false;
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
@@ -181,7 +191,10 @@ const DriverLoginScreen = () => {
         localStorage.removeItem('driverRememberMe');
         localStorage.removeItem('driverSavedEmail');
       }
-      
+
+      // Prevent global auth redirect racing our 2FA flow
+      localStorage.setItem('suppress_auth_redirect', 'true');
+
       // Use supabase directly to get the user data for 2FA check
       const { error, data: authData } = await supabase.auth.signInWithPassword({
         email: validation.email,
@@ -236,6 +249,8 @@ const DriverLoginScreen = () => {
         
         // Require 2FA if: device not trusted OR there were failed login attempts
         if (!isTrusted || require2FADueToFailedAttempts) {
+          keepRedirectSuppressed = true;
+
           // IMPORTANT: Switch UI to 2FA immediately to avoid redirect race conditions
           setPendingRole(userRole);
           setViewMode('2fa');
@@ -255,6 +270,7 @@ const DriverLoginScreen = () => {
             toast.error(result.error || (language === 'TR' ? 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.' : 'Failed to send verification code. Please try again.'));
             setPendingRole(null);
             setViewMode('login');
+            keepRedirectSuppressed = false;
           }
         } else {
           // Device trusted and no suspicious activity - proceed with login
@@ -275,6 +291,9 @@ const DriverLoginScreen = () => {
         toast.error(t('loginFailed') || 'Login failed. Please try again.');
       }
     } finally {
+      if (!keepRedirectSuppressed) {
+        localStorage.removeItem('suppress_auth_redirect');
+      }
       setIsLoading(false);
     }
   };

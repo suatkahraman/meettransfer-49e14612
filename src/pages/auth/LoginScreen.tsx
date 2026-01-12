@@ -242,6 +242,9 @@ const LoginScreen = () => {
   const handle2FAVerify = async (code: string) => {
     const result = await verify2FA(code);
     if (result.success && pendingRole) {
+      // 2FA complete – allow global redirects again
+      localStorage.removeItem('suppress_auth_redirect');
+
       // Log successful login after 2FA
       const userEmail = result.email || twoFactorState.email || '';
       await logLoginAttempt(userEmail, true, undefined, undefined, pendingRole);
@@ -285,6 +288,9 @@ const LoginScreen = () => {
 
   // Handle 2FA cancel - sign out and go back to login
   const handle2FACancel = async () => {
+    // User aborted 2FA – allow redirects again
+    localStorage.removeItem('suppress_auth_redirect');
+
     cancel2FA();
     setPendingRole(null);
     setViewMode('login');
@@ -304,6 +310,10 @@ const LoginScreen = () => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
+
+    // We sometimes sign in briefly (to validate password) and then sign out again to enforce 2FA.
+    // During that window, AuthContext must NOT auto-redirect away from this screen.
+    let keepRedirectSuppressed = false;
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
@@ -328,6 +338,9 @@ const LoginScreen = () => {
         localStorage.removeItem('guestRememberMe');
         localStorage.removeItem('guestSavedEmail');
       }
+
+      // Prevent global auth redirect racing our 2FA flow
+      localStorage.setItem('suppress_auth_redirect', 'true');
       
       // Use supabase directly to get the user data for 2FA check
       const { error, data: authData } = await supabase.auth.signInWithPassword({
@@ -374,6 +387,8 @@ const LoginScreen = () => {
         
         // Require 2FA if: device not trusted OR there were failed login attempts
         if (!isTrusted || require2FADueToFailedAttempts) {
+          keepRedirectSuppressed = true;
+
           // IMPORTANT: Switch UI to 2FA immediately to avoid redirect race conditions
           setPendingRole(userRole);
           setViewMode('2fa');
@@ -395,6 +410,7 @@ const LoginScreen = () => {
             // Revert back to login if failed
             setPendingRole(null);
             setViewMode('login');
+            keepRedirectSuppressed = false;
           }
 
           // Clear the flag after initiating 2FA
@@ -415,6 +431,9 @@ const LoginScreen = () => {
         setErrors(fieldErrors);
       }
     } finally {
+      if (!keepRedirectSuppressed) {
+        localStorage.removeItem('suppress_auth_redirect');
+      }
       setIsLoading(false);
     }
   };
