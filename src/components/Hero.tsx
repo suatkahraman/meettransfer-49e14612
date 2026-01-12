@@ -107,10 +107,12 @@ export const Hero = () => {
           // Map duration_type to our fixed options
           const durationType = item.duration_type.replace("_hours", "").replace("h", "");
           
-          // Map to our fixed durations: 4, 8, or custom (9+)
+          // Map to our fixed durations: 4, 6, 8, or custom (9+)
           let mappedDuration: string;
           if (durationType === "4") {
             mappedDuration = "4";
+          } else if (durationType === "6") {
+            mappedDuration = "6";
           } else if (durationType === "8") {
             mappedDuration = "8";
           } else if (durationType === "custom" || parseInt(durationType) >= 9) {
@@ -124,8 +126,8 @@ export const Hero = () => {
           }
         });
         
-        // Sort durations: 4, 8, custom
-        const sortOrder = ["4", "8", "custom"];
+        // Sort durations: 4, 6, 8, custom
+        const sortOrder = ["4", "6", "8", "custom"];
         Object.keys(durationsMap).forEach(city => {
           durationsMap[city].sort((a, b) => sortOrder.indexOf(a) - sortOrder.indexOf(b));
         });

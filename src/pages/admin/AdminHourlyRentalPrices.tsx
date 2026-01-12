@@ -58,6 +58,8 @@ const durationTypes = [
   { value: "4h", label: "4 Saat (Yarım Gün)" },
   { value: "6h", label: "6 Saat" },
   { value: "8h", label: "8 Saat (Tam Gün)" },
+  { value: "10h", label: "10 Saat" },
+  { value: "12h", label: "12 Saat" },
   { value: "custom", label: "Özel (Saatlik)" },
 ];
 
