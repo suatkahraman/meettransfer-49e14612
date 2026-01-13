@@ -69,14 +69,14 @@ export const VehicleSelector = memo(({
               onMouseEnter={() => !isDisabled && setHoveredVehicle(vehicle.value)}
               onMouseLeave={() => setHoveredVehicle(null)}
             >
-              {/* Tooltip */}
+              {/* Tooltip - with proper alignment for right-side items */}
               <Suspense fallback={null}>
                 <VehicleTooltip 
                   vehicleType={vehicle.value}
                   isVisible={isHovered && !isDisabled}
                   position="top"
                   isTurkish={language === 'TR'}
-                  className={isRightSide ? "!left-auto !right-0 !translate-x-0" : ""}
+                  alignRight={isRightSide}
                 />
               </Suspense>
               
