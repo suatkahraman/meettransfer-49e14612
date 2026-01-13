@@ -171,6 +171,14 @@ const getLocationColor = (type: string) => {
   }
 };
 
+// Comparison mode types
+interface ComparisonResult {
+  distance: string;
+  duration: string;
+  from: Location;
+  to: Location;
+}
+
 export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -182,6 +190,13 @@ export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
   const city = cityKey;
   const { language } = useLanguage();
   const isTR = language?.toLowerCase() === 'tr';
+  
+  // Comparison mode state
+  const [comparisonMode, setComparisonMode] = useState(false);
+  const [compareFrom, setCompareFrom] = useState<Location | null>(null);
+  const [compareTo, setCompareTo] = useState<Location | null>(null);
+  const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
+  const [calculatingRoute, setCalculatingRoute] = useState(false);
 
   const cityData = cityCoordinates[cityKey.toLowerCase()];
   const airport = cityData?.locations.find(l => l.type === 'airport');
@@ -342,6 +357,133 @@ export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
     };
   }, [showRouteToLocation, airport]);
 
+  // Calculate route between two comparison points
+  useEffect(() => {
+    if (!compareFrom || !compareTo || !map.current) {
+      setComparisonResult(null);
+      return;
+    }
+
+    const calculateComparison = async () => {
+      setCalculatingRoute(true);
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/directions/v5/mapbox/driving/${compareFrom.lng},${compareFrom.lat};${compareTo.lng},${compareTo.lat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`
+        );
+        const data = await response.json();
+        
+        if (data.routes && data.routes[0]) {
+          const route = data.routes[0];
+          const distanceKm = (route.distance / 1000).toFixed(1);
+          const durationMin = Math.round(route.duration / 60);
+          
+          setComparisonResult({
+            distance: `${distanceKm} km`,
+            duration: `${durationMin} ${isTR ? 'dk' : 'min'}`,
+            from: compareFrom,
+            to: compareTo,
+          });
+
+          // Draw comparison route on map
+          if (map.current?.getSource('comparison-route')) {
+            (map.current.getSource('comparison-route') as mapboxgl.GeoJSONSource).setData({
+              type: 'Feature',
+              properties: {},
+              geometry: route.geometry
+            });
+          } else {
+            map.current?.addSource('comparison-route', {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                properties: {},
+                geometry: route.geometry
+              }
+            });
+
+            map.current?.addLayer({
+              id: 'comparison-route',
+              type: 'line',
+              source: 'comparison-route',
+              layout: {
+                'line-join': 'round',
+                'line-cap': 'round'
+              },
+              paint: {
+                'line-color': '#10b981',
+                'line-width': 5,
+                'line-opacity': 0.9
+              }
+            });
+          }
+
+          // Fit map to show both points
+          const bounds = new mapboxgl.LngLatBounds()
+            .extend([compareFrom.lng, compareFrom.lat])
+            .extend([compareTo.lng, compareTo.lat]);
+          
+          map.current?.fitBounds(bounds, { padding: 80, duration: 1000 });
+        }
+      } catch (error) {
+        console.error('Error calculating comparison route:', error);
+      } finally {
+        setCalculatingRoute(false);
+      }
+    };
+
+    calculateComparison();
+
+    return () => {
+      if (map.current?.getLayer('comparison-route')) {
+        map.current.removeLayer('comparison-route');
+      }
+      if (map.current?.getSource('comparison-route')) {
+        map.current.removeSource('comparison-route');
+      }
+    };
+  }, [compareFrom, compareTo, isTR]);
+
+  // Reset comparison when mode is disabled
+  const resetComparison = () => {
+    setCompareFrom(null);
+    setCompareTo(null);
+    setComparisonResult(null);
+    if (map.current?.getLayer('comparison-route')) {
+      map.current.removeLayer('comparison-route');
+    }
+    if (map.current?.getSource('comparison-route')) {
+      map.current.removeSource('comparison-route');
+    }
+  };
+
+  // Handle location click in comparison mode
+  const handleLocationClick = (location: Location) => {
+    if (comparisonMode) {
+      if (!compareFrom) {
+        setCompareFrom(location);
+      } else if (!compareTo && location.name !== compareFrom.name) {
+        setCompareTo(location);
+      } else {
+        // Reset and start new comparison
+        setCompareFrom(location);
+        setCompareTo(null);
+        setComparisonResult(null);
+      }
+      map.current?.flyTo({
+        center: [location.lng, location.lat],
+        zoom: 13,
+        duration: 800,
+      });
+    } else {
+      setSelectedLocation(location);
+      map.current?.flyTo({
+        center: [location.lng, location.lat],
+        zoom: 14,
+        duration: 1000,
+      });
+    }
+  };
+
   if (!cityData) return null;
 
   return (
@@ -351,9 +493,114 @@ export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
       viewport={{ once: true }}
       className="mb-12"
     >
-      <h2 className="text-2xl font-bold mb-6">
-        {isTR ? 'Şehir Haritası & Popüler Lokasyonlar' : 'City Map & Popular Locations'}
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold">
+          {isTR ? 'Şehir Haritası & Popüler Lokasyonlar' : 'City Map & Popular Locations'}
+        </h2>
+        
+        {/* Comparison Mode Toggle */}
+        <Button
+          variant={comparisonMode ? "default" : "outline"}
+          size="sm"
+          onClick={() => {
+            setComparisonMode(!comparisonMode);
+            if (comparisonMode) resetComparison();
+          }}
+          className="gap-2"
+        >
+          <Navigation className="h-4 w-4" />
+          {isTR ? 'Karşılaştır' : 'Compare'}
+        </Button>
+      </div>
+      
+      {/* Comparison Mode Instructions */}
+      <AnimatePresence>
+        {comparisonMode && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-4"
+          >
+            <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
+              <p className="text-sm font-medium text-primary">
+                {isTR 
+                  ? '📍 İki nokta seçerek aralarındaki mesafe ve süreyi hesaplayın'
+                  : '📍 Select two points to calculate distance and duration between them'}
+              </p>
+              
+              {/* Selected points */}
+              <div className="flex items-center gap-3 mt-3 flex-wrap">
+                <div className={`px-3 py-1.5 rounded-full text-sm ${compareFrom ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                  {compareFrom 
+                    ? (isTR ? (compareFrom.nameTR || compareFrom.name) : compareFrom.name)
+                    : (isTR ? '1. Nokta seçin' : 'Select 1st point')}
+                </div>
+                <span className="text-muted-foreground">→</span>
+                <div className={`px-3 py-1.5 rounded-full text-sm ${compareTo ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'}`}>
+                  {compareTo 
+                    ? (isTR ? (compareTo.nameTR || compareTo.name) : compareTo.name)
+                    : (isTR ? '2. Nokta seçin' : 'Select 2nd point')}
+                </div>
+                
+                {(compareFrom || compareTo) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetComparison}
+                    className="ml-auto text-xs"
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    {isTR ? 'Sıfırla' : 'Reset'}
+                  </Button>
+                )}
+              </div>
+              
+              {/* Comparison Result */}
+              <AnimatePresence>
+                {comparisonResult && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mt-4 p-4 bg-card rounded-xl border-2 border-primary/30"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">
+                          {isTR ? 'Hesaplanan Rota' : 'Calculated Route'}
+                        </p>
+                        <p className="font-semibold text-sm">
+                          {isTR 
+                            ? `${comparisonResult.from.nameTR || comparisonResult.from.name} → ${comparisonResult.to.nameTR || comparisonResult.to.name}`
+                            : `${comparisonResult.from.name} → ${comparisonResult.to.name}`}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-primary">{comparisonResult.distance}</p>
+                          <p className="text-xs text-muted-foreground">{isTR ? 'Mesafe' : 'Distance'}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-accent">{comparisonResult.duration}</p>
+                          <p className="text-xs text-muted-foreground">{isTR ? 'Süre' : 'Duration'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              {calculatingRoute && (
+                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {isTR ? 'Rota hesaplanıyor...' : 'Calculating route...'}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Map */}
@@ -412,6 +659,9 @@ export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
             {cityData.locations.map((location, idx) => {
               const Icon = getLocationIcon(location.type);
               const color = getLocationColor(location.type);
+              const isSelected = comparisonMode && (
+                compareFrom?.name === location.name || compareTo?.name === location.name
+              );
               return (
                 <motion.div
                   key={idx}
@@ -419,15 +669,12 @@ export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.03 }}
-                  className="group flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                  onClick={() => {
-                    setSelectedLocation(location);
-                    map.current?.flyTo({
-                      center: [location.lng, location.lat],
-                      zoom: 14,
-                      duration: 1000,
-                    });
-                  }}
+                  className={`group flex items-center gap-3 p-3 rounded-xl transition-colors cursor-pointer ${
+                    isSelected 
+                      ? 'bg-primary/20 ring-2 ring-primary' 
+                      : 'bg-muted/50 hover:bg-muted'
+                  }`}
+                  onClick={() => handleLocationClick(location)}
                 >
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
@@ -452,7 +699,19 @@ export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
                       </div>
                     )}
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  {comparisonMode ? (
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold ${
+                      compareFrom?.name === location.name 
+                        ? 'bg-primary border-primary text-primary-foreground' 
+                        : compareTo?.name === location.name
+                          ? 'bg-accent border-accent text-accent-foreground'
+                          : 'border-muted-foreground/30'
+                    }`}>
+                      {compareFrom?.name === location.name ? '1' : compareTo?.name === location.name ? '2' : ''}
+                    </div>
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  )}
                 </motion.div>
               );
             })}
