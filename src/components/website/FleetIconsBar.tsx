@@ -1,8 +1,8 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Users, Briefcase, ArrowRight, Star, Shield } from "lucide-react";
-import { useState, useEffect, lazy, Suspense } from "react";
+import { Users, Briefcase, ArrowRight, Star, Shield, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
 
 // Import all vehicle images for carousel
 import vitoImg1 from "@/assets/vito-1.jpg";
@@ -164,21 +164,40 @@ interface VehicleCardProps {
   getLocalizedPath: (path: string) => string;
 }
 
+const CAROUSEL_INTERVAL = 4000; // 4 seconds - adjustable
+
 const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
-  // Auto-rotate images every 3 seconds
+  // Auto-rotate images
   useEffect(() => {
-    if (item.images.length <= 1 || isHovered) return;
+    if (item.images.length <= 1 || isPaused) return;
     
     const timer = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % item.images.length);
-    }, 3000 + index * 500); // Stagger the timing
+    }, CAROUSEL_INTERVAL + index * 300); // Stagger timing
 
     return () => clearInterval(timer);
-  }, [item.images.length, index, isHovered]);
+  }, [item.images.length, index, isPaused]);
+
+  const goToPrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev - 1 + item.images.length) % item.images.length);
+    setIsPaused(true);
+    setTimeout(() => setIsPaused(false), 5000); // Resume auto-play after 5s
+  };
+
+  const goToNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev + 1) % item.images.length);
+    setIsPaused(true);
+    setTimeout(() => setIsPaused(false), 5000);
+  };
 
   return (
     <motion.div
@@ -228,6 +247,28 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
             <div className="absolute inset-0 bg-muted animate-pulse" />
           )}
 
+          {/* Arrow Navigation - Show on hover */}
+          {item.images.length > 1 && (
+            <>
+              <button
+                onClick={goToPrevious}
+                className={`absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-md transition-all duration-300 hover:bg-background hover:scale-110 z-10 ${
+                  isHovered ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={goToNext}
+                className={`absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-md transition-all duration-300 hover:bg-background hover:scale-110 z-10 ${
+                  isHovered ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </>
+          )}
+
           {/* Carousel Dots */}
           {item.images.length > 1 && (
             <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 z-10">
@@ -237,6 +278,8 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
                   onClick={(e) => {
                     e.preventDefault();
                     setCurrentImageIndex(imgIndex);
+                    setIsPaused(true);
+                    setTimeout(() => setIsPaused(false), 5000);
                   }}
                   className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
                     imgIndex === currentImageIndex 
