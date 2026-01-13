@@ -546,11 +546,21 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     const viewport = window.visualViewport;
     if (!viewport) return;
 
+    let prevKeyboardHeight = 0;
+
     const handleResize = () => {
       // Calculate keyboard height by comparing viewport height with window height
       const windowHeight = window.innerHeight;
       const viewportHeight = viewport.height;
       const keyboardH = Math.max(0, windowHeight - viewportHeight);
+      
+      // Detect keyboard closing (was open, now closed)
+      if (prevKeyboardHeight > 50 && keyboardH < 50) {
+        // Blur the input when keyboard closes for better UX
+        inputRef.current?.blur();
+      }
+      
+      prevKeyboardHeight = keyboardH;
       setKeyboardHeight(keyboardH);
     };
 
