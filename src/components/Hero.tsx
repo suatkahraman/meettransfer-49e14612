@@ -1,36 +1,42 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from "react";
 import { format, parse } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Plane, Globe, Check, Wifi, Baby, Briefcase, Play, Award, Zap } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Plane, Globe, Check, Wifi, Baby, Briefcase, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
 import { cn } from "@/lib/utils";
-import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
-import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
-import heroVideo from "@/assets/hero-mercedes-video.mp4";
-import heroIstanbul from "@/assets/hero-istanbul.mp4";
-import heroAntalya from "@/assets/hero-antalya.mp4";
-import heroBodrum from "@/assets/hero-bodrum.mp4";
-import vitoImg from "@/assets/vito-1.jpg";
-import vitoVipImg from "@/assets/vito-vip-1.jpg";
-import maybachImg from "@/assets/maybach-1.jpg";
-import sprinterImg from "@/assets/sprinter-1.jpg";
-import CityMarquee from "@/components/website/CityMarquee";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { VEHICLE_TYPES, isMinibusRequired } from "@/lib/vehicleTypes";
-import BookingChatAssistant from "@/components/website/BookingChatAssistant";
-import { CompactRouteMap } from "@/components/ui/compact-route-map";
+import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VehicleTooltip } from "@/components/VehicleTooltip";
 import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
+
+// Lazy load heavy components
+const CityMarquee = lazy(() => import("@/components/website/CityMarquee"));
+const BookingChatAssistant = lazy(() => import("@/components/website/BookingChatAssistant"));
+const CompactRouteMap = lazy(() => import("@/components/ui/compact-route-map").then(m => ({ default: m.CompactRouteMap })));
+
+// Critical images loaded eagerly
+import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
+import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
+
+// Video imports
+import heroVideo from "@/assets/hero-mercedes-video.mp4";
+import heroIstanbul from "@/assets/hero-istanbul.mp4";
+import heroAntalya from "@/assets/hero-antalya.mp4";
+import heroBodrum from "@/assets/hero-bodrum.mp4";
+
+// Vehicle images
+import vitoImg from "@/assets/vito-1.jpg";
+import vitoVipImg from "@/assets/vito-vip-1.jpg";
+import maybachImg from "@/assets/maybach-1.jpg";
+import sprinterImg from "@/assets/sprinter-1.jpg";
 
 // Vehicle image mapping
 const vehicleImages: Record<string, string> = {
@@ -674,7 +680,9 @@ export const Hero = () => {
                 <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
                 <span>{t("bookTransferOrHourlyWithAI") || "Book with AI"}</span>
               </div>
-              <BookingChatAssistant onApplyBooking={handleApplyBooking} />
+              <Suspense fallback={<Skeleton className="h-10 w-full rounded-lg" />}>
+                <BookingChatAssistant onApplyBooking={handleApplyBooking} />
+              </Suspense>
             </motion.div>
 
             {/* Booking Form Card */}
@@ -776,7 +784,11 @@ export const Hero = () => {
                         icon={<Navigation className="h-4 w-4 text-accent" />}
                       />
                       
-                      {pickup && dropoff && <CompactRouteMap pickup={pickup} dropoff={dropoff} className="mt-2" />}
+                      {pickup && dropoff && (
+                        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg mt-2" />}>
+                          <CompactRouteMap pickup={pickup} dropoff={dropoff} className="mt-2" />
+                        </Suspense>
+                      )}
                     </div>
 
                     {/* Date, Time, Passengers with Floating Labels */}
@@ -1360,7 +1372,9 @@ export const Hero = () => {
 
               {/* City Marquee Below Image - Hidden on tablet */}
               <div className="mt-4 lg:mt-6 hidden lg:block">
-                <CityMarquee />
+                <Suspense fallback={<Skeleton className="h-12 w-full rounded-lg" />}>
+                  <CityMarquee />
+                </Suspense>
               </div>
 
               {/* Feature List - Compact grid on tablet */}
