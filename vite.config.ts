@@ -365,7 +365,13 @@ export default defineConfig(({ mode }) => ({
             "@radix-ui/react-label",
             "@radix-ui/react-slot",
             "@radix-ui/react-switch",
-            "@radix-ui/react-tooltip"
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-alert-dialog",
+            "@radix-ui/react-radio-group",
+            "@radix-ui/react-progress",
+            "@radix-ui/react-scroll-area",
+            "@radix-ui/react-separator",
+            "@radix-ui/react-collapsible"
           ],
           "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
           "vendor-query": ["@tanstack/react-query"],
