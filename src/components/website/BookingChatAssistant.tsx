@@ -1000,782 +1000,272 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           )}
         </AnimatePresence>
 
-        {/* Mobile Floating Panel - Full screen overlay for better mobile UX */}
+        {/* Mobile Floating Panel */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm"
-              onClick={() => setIsOpen(false)}
-            />
-          )}
-        </AnimatePresence>
-        
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: "100%" }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: "100%" }}
-              transition={{ type: "spring", stiffness: 400, damping: 40 }}
-               drag="y"
-               dragControls={dragControls}
-               dragListener={false}
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0, bottom: 0.5 }}
-              onDragEnd={(_, info) => {
-                if (info.offset.y > 100 || info.velocity.y > 500) {
-                  setIsOpen(false);
-                }
-              }}
-              data-mobile-panel
-              className="fixed inset-x-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col transition-all duration-200"
-              style={{ 
-                bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
-                height: keyboardHeight > 0 ? `min(50vh, 400px)` : 'min(60vh, 500px)',
-                maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px - 20px)` : undefined
-              }}
+              className="fixed inset-0 z-[9998]"
             >
-              {/* Drag Handle - Swipe indicator */}
-               <div 
-                 className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
-                 style={{ touchAction: 'none' }}
-                 onPointerDown={(e) => dragControls.start(e.nativeEvent)}
-               >
-                 <div className="w-12 h-1.5 bg-muted-foreground/40 rounded-full" />
-               </div>
-              
-              {/* Mobile Header - Compact */}
-              <div className="flex items-center justify-between px-4 py-2 border-b border-border/50">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Bot className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <span className="font-medium text-sm">
-                    {language === "TR" ? "AI Asistan" : "AI Assistant"}
-                  </span>
-                  <span className="px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[8px] font-bold rounded">
-                    NEW
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={clearConversation}
-                    className="h-7 w-7 rounded-full"
-                  >
-                    <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsOpen(false)}
-                    className="h-7 w-7 rounded-full"
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+              {/* Backdrop (kept behind panel to avoid iOS hit-testing issues) */}
+              <button
+                type="button"
+                aria-label={language === "TR" ? "Kapat" : "Close"}
+                onClick={() => setIsOpen(false)}
+                data-mobile-backdrop
+                className="absolute inset-0 z-0 bg-background/80 backdrop-blur-sm"
+              />
 
-              {/* Mobile Messages - Flexible scroll area */}
-              <ScrollArea className="flex-1 min-h-0 overflow-y-auto pb-20">
-                <div className="p-3 space-y-2.5">
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={cn(
-                        "flex gap-2",
-                        msg.role === "user" ? "justify-end" : "justify-start"
-                      )}
+              <motion.div
+                initial={{ opacity: 0, y: "100%" }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: "100%" }}
+                transition={{ type: "spring", stiffness: 400, damping: 40 }}
+                drag="y"
+                dragControls={dragControls}
+                dragListener={false}
+                dragConstraints={{ top: 0, bottom: 0 }}
+                dragElastic={{ top: 0, bottom: 0.5 }}
+                onDragEnd={(_, info) => {
+                  if (info.offset.y > 100 || info.velocity.y > 500) {
+                    setIsOpen(false);
+                  }
+                }}
+                data-mobile-panel
+                className="absolute inset-x-0 bottom-0 z-10 bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col transition-all duration-200"
+                style={{
+                  bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
+                  height: keyboardHeight > 0 ? `min(50vh, 400px)` : "min(60vh, 500px)",
+                  maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px - 20px)` : undefined,
+                  // iOS Safari: keep taps/focus working reliably while still allowing scroll
+                  touchAction: "pan-y",
+                }}
+              >
+                {/* Drag Handle - Swipe indicator */}
+                 <div 
+                   className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
+                   style={{ touchAction: 'none' }}
+                   onPointerDown={(e) => dragControls.start(e.nativeEvent)}
+                 >
+                   <div className="w-12 h-1.5 bg-muted-foreground/40 rounded-full" />
+                 </div>
+                
+                {/* Mobile Header - Compact */}
+                <div className="flex items-center justify-between px-4 py-2 border-b border-border/50">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Bot className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <span className="font-medium text-sm">
+                      {language === "TR" ? "AI Asistan" : "AI Assistant"}
+                    </span>
+                    <span className="px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[8px] font-bold rounded">
+                      NEW
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={clearConversation}
+                      className="h-7 w-7 rounded-full"
                     >
-                      {msg.role === "assistant" && (
-                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                          <Bot className="h-2.5 w-2.5 text-primary" />
-                        </div>
-                      )}
+                      <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsOpen(false)}
+                      className="h-7 w-7 rounded-full"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Mobile Messages - Flexible scroll area */}
+                <ScrollArea className="flex-1 min-h-0 overflow-y-auto pb-20">
+                  <div className="p-3 space-y-2.5">
+                    {messages.map((msg) => (
                       <div
+                        key={msg.id}
                         className={cn(
-                          "max-w-[80%] rounded-2xl px-3 py-2 text-[13px] leading-relaxed",
-                          msg.role === "user"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted"
+                          "flex gap-2",
+                          msg.role === "user" ? "justify-end" : "justify-start"
                         )}
                       >
-                        {msg.role === "assistant" ? (
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                            {cleanResponseForDisplay(msg.content)}
-                          </ReactMarkdown>
-                        ) : (
-                          msg.content
+                        {msg.role === "assistant" && (
+                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                            <Bot className="h-2.5 w-2.5 text-primary" />
+                          </div>
                         )}
-                        
-                        {/* Booking Card for Mobile - Compact */}
-                        {msg.bookingData && msg.bookingData.estimatedPrice && (
-                          <div className="mt-2 p-2 bg-background rounded-lg border border-border">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[11px] text-muted-foreground">
-                                {language === "TR" ? "Fiyat" : "Price"}
-                              </span>
-                              <span className="font-bold text-primary text-sm">
-                                {msg.bookingData.currency === "TRY" ? "₺" : "€"}
-                                {msg.bookingData.estimatedPrice}
-                              </span>
+                        <div
+                          className={cn(
+                            "max-w-[80%] rounded-2xl px-3 py-2 text-[13px] leading-relaxed",
+                            msg.role === "user"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted"
+                          )}
+                        >
+                          {msg.role === "assistant" ? (
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                              {cleanResponseForDisplay(msg.content)}
+                            </ReactMarkdown>
+                          ) : (
+                            msg.content
+                          )}
+                          
+                          {/* Booking Card for Mobile - Compact */}
+                          {msg.bookingData && msg.bookingData.estimatedPrice && (
+                            <div className="mt-2 p-2 bg-background rounded-lg border border-border">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] text-muted-foreground">
+                                  {language === "TR" ? "Fiyat" : "Price"}
+                                </span>
+                                <span className="font-bold text-primary text-sm">
+                                  {msg.bookingData.currency === "TRY" ? "₺" : "€"}
+                                  {msg.bookingData.estimatedPrice}
+                                </span>
+                              </div>
+                              {onApplyBooking && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleApplyBooking(msg.bookingData!)}
+                                  className="w-full mt-1.5 h-7 text-xs"
+                                >
+                                  {language === "TR" ? "Forma Uygula" : "Apply"}
+                                  <ArrowRight className="h-3 w-3 ml-1" />
+                                </Button>
+                              )}
                             </div>
-                            {onApplyBooking && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleApplyBooking(msg.bookingData!)}
-                                className="w-full mt-1.5 h-7 text-xs"
-                              >
-                                {language === "TR" ? "Forma Uygula" : "Apply"}
-                                <ArrowRight className="h-3 w-3 ml-1" />
-                              </Button>
-                            )}
+                          )}
+                        </div>
+                        {msg.role === "user" && (
+                          <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
+                            <User className="h-2.5 w-2.5 text-primary-foreground" />
                           </div>
                         )}
                       </div>
-                      {msg.role === "user" && (
-                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
-                          <User className="h-2.5 w-2.5 text-primary-foreground" />
+                    ))}
+                    {isLoading && (
+                      <div className="flex gap-2">
+                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <Bot className="h-2.5 w-2.5 text-primary" />
                         </div>
-                      )}
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="flex gap-2">
-                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Bot className="h-2.5 w-2.5 text-primary" />
-                      </div>
-                      <div className="bg-muted rounded-2xl px-3 py-2">
-                        <div className="flex gap-1">
-                          <motion.span 
-                            className="w-1.5 h-1.5 bg-primary/60 rounded-full"
-                            animate={{ y: [-2, 2, -2] }}
-                            transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
-                          />
-                          <motion.span 
-                            className="w-1.5 h-1.5 bg-primary/60 rounded-full"
-                            animate={{ y: [-2, 2, -2] }}
-                            transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
-                          />
-                          <motion.span 
-                            className="w-1.5 h-1.5 bg-primary/60 rounded-full"
-                            animate={{ y: [-2, 2, -2] }}
-                            transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
-                          />
+                        <div className="bg-muted rounded-2xl px-3 py-2">
+                          <div className="flex gap-1">
+                            <motion.span 
+                              className="w-1.5 h-1.5 bg-primary/60 rounded-full"
+                              animate={{ y: [-2, 2, -2] }}
+                              transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
+                            />
+                            <motion.span 
+                              className="w-1.5 h-1.5 bg-primary/60 rounded-full"
+                              animate={{ y: [-2, 2, -2] }}
+                              transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
+                            />
+                            <motion.span 
+                              className="w-1.5 h-1.5 bg-primary/60 rounded-full"
+                              animate={{ y: [-2, 2, -2] }}
+                              transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
+                            />
+                          </div>
                         </div>
                       </div>
+                    )}
+                    <div ref={scrollRef} />
+                  </div>
+                </ScrollArea>
+
+                {/* Mobile Input - Sticky at bottom */}
+                <div 
+                  className="shrink-0 p-3 border-t border-border bg-card mt-auto"
+                  style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}
+                >
+                  {/* Recording indicator */}
+                  {isRecording && (
+                    <div className="flex items-center justify-center gap-2 text-xs text-destructive font-medium mb-2">
+                      <motion.div
+                        animate={{ scale: [1, 1.3, 1] }}
+                        transition={{ repeat: Infinity, duration: 0.8 }}
+                        className="w-2 h-2 bg-destructive rounded-full"
+                      />
+                      {language === "TR" ? "Dinleniyor..." : "Listening..."}
                     </div>
                   )}
-                  <div ref={scrollRef} />
-                </div>
-              </ScrollArea>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={isRecording ? stopRecording : startRecording}
+                      disabled={isLoading || isProcessing}
+                      size="icon"
+                      variant="outline"
+                      className={cn(
+                        "h-11 w-11 rounded-xl shrink-0 touch-manipulation",
+                        isRecording && "bg-destructive/10 border-destructive text-destructive"
+                      )}
+                    >
+                      {isProcessing ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : isRecording ? (
+                        <Square className="h-4 w-4 fill-current" />
+                      ) : (
+                        <Mic className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Input
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      onFocus={() => {
+                        const isIOS = isIOSDevice();
 
-              {/* Mobile Input - Sticky at bottom */}
-              <div 
-                className="shrink-0 p-3 border-t border-border bg-card mt-auto"
-                style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}
-              >
-                {/* Recording indicator */}
-                {isRecording && (
-                  <div className="flex items-center justify-center gap-2 text-xs text-destructive font-medium mb-2">
-                    <motion.div
-                      animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ repeat: Infinity, duration: 0.8 }}
-                      className="w-2 h-2 bg-destructive rounded-full"
+                        if (isIOS) {
+                          // iOS: let the keyboard + viewport settle, then keep the bottom visible
+                          window.setTimeout(() => {
+                            scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+                            inputRef.current?.scrollIntoView({
+                              behavior: "smooth",
+                              block: "end",
+                              inline: "nearest",
+                            });
+                          }, 60);
+                        } else {
+                          window.setTimeout(() => {
+                            inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                          }, 200);
+                        }
+                      }}
+
+                      placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
+                      disabled={isLoading || isRecording}
+                      className="h-11 rounded-xl text-sm flex-1 touch-manipulation"
+                      style={{ fontSize: '16px' }}
                     />
-                    {language === "TR" ? "Dinleniyor..." : "Listening..."}
+                    <Button
+                      onClick={sendMessage}
+                      disabled={isLoading || !input.trim()}
+                      size="icon"
+                      className={cn(
+                        "h-11 w-11 rounded-xl shrink-0 touch-manipulation",
+                        input.trim() ? "bg-primary" : "bg-muted"
+                      )}
+                    >
+                      {isLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
-                )}
-                <div className="flex gap-2">
-                  <Button
-                    onClick={isRecording ? stopRecording : startRecording}
-                    disabled={isLoading || isProcessing}
-                    size="icon"
-                    variant="outline"
-                    className={cn(
-                      "h-11 w-11 rounded-xl shrink-0 touch-manipulation",
-                      isRecording && "bg-destructive/10 border-destructive text-destructive"
-                    )}
-                  >
-                    {isProcessing ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : isRecording ? (
-                      <Square className="h-4 w-4 fill-current" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Input
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onFocus={() => {
-                      const isIOS = isIOSDevice();
-
-                      if (isIOS) {
-                        // iOS: let the keyboard + viewport settle, then keep the bottom visible
-                        window.setTimeout(() => {
-                          scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-                          inputRef.current?.scrollIntoView({
-                            behavior: "smooth",
-                            block: "end",
-                            inline: "nearest",
-                          });
-                        }, 60);
-                      } else {
-                        window.setTimeout(() => {
-                          inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-                        }, 200);
-                      }
-                    }}
-
-                    placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
-                    disabled={isLoading || isRecording}
-                    className="h-11 rounded-xl text-sm flex-1 touch-manipulation"
-                    style={{ fontSize: '16px' }}
-                  />
-                  <Button
-                    onClick={sendMessage}
-                    disabled={isLoading || !input.trim()}
-                    size="icon"
-                    className={cn(
-                      "h-11 w-11 rounded-xl shrink-0 touch-manipulation",
-                      input.trim() ? "bg-primary" : "bg-muted"
-                    )}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
-      </>
-    );
-  }
 
-  return (
-    <>
-      {/* Floating Toggle Button - Desktop - Always visible when chat closed */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ scale: 0.98, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.98, opacity: 0 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setIsOpen(true)}
-            data-chat-trigger
-            className="hidden md:flex fixed bottom-6 right-6 z-[9999] items-center gap-2 px-4 py-3 bg-card text-foreground rounded-full shadow-lg border border-border/60"
-          >
-            <Sparkles className="h-4 w-4 text-muted-foreground" />
-            <span className="font-semibold text-sm">AI</span>
-          </motion.button>
-        )}
-      </AnimatePresence>
-
-      {/* Modern Chat Panel */}
-      <motion.div 
-        layout
-        initial={false}
-        animate={{
-          height: isOpen ? "auto" : "auto",
-          scale: isOpen ? 1 : 1,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-          mass: 0.8,
-        }}
-        className={cn(
-          "relative overflow-hidden",
-          "bg-card",
-          "shadow-xl border border-border/50",
-          "backdrop-blur-sm",
-          isOpen 
-            ? "h-[500px] rounded-3xl" 
-            : "h-auto rounded-3xl"
-        )}
-      >
-        {/* Header */}
-        <motion.button
-          onClick={() => setIsOpen(!isOpen)}
-          data-chat-trigger
-          whileHover={{ backgroundColor: "hsl(var(--muted) / 0.5)" }}
-          className="relative w-full flex items-center justify-between p-4 md:p-5 transition-all z-10"
-        >
-          <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-            {/* Avatar */}
-            <div className="relative flex-shrink-0">
-              <motion.div 
-                className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-muted border border-border/60 flex items-center justify-center shadow-sm"
-                whileHover={{ rotate: 2 }}
-              >
-                <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
-              </motion.div>
-              {/* Online indicator */}
-              <span className="absolute -bottom-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-primary/40 rounded-full border-2 border-card shadow-sm" />
-            </div>
-            
-            <div className="text-left min-w-0 flex-1">
-              <h3 className="font-bold text-base md:text-lg text-foreground flex items-center gap-2">
-                <span className="truncate">{t("aiAssistant") || "AI Booking Assistant"}</span>
-                <motion.span 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="text-[9px] md:text-[10px] px-2 py-0.5 md:px-2.5 md:py-1 bg-muted rounded-full text-muted-foreground font-bold uppercase tracking-wide shadow-sm flex-shrink-0"
-                >
-                  {t("new") || "NEW"}
-                </motion.span>
-              </h3>
-              <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5 truncate">
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                  className="flex-shrink-0"
-                >
-                  <Mic className="h-3 w-3 md:h-3.5 md:w-3.5 text-primary" />
-                </motion.div>
-                <span className="truncate">{t("aiAssistantHint") || "Voice & text in any language"}</span>
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-            {/* Voice Settings Popover */}
-            {isOpen && isVoiceEnabled && (
-              <Popover open={showVoiceSettings} onOpenChange={setShowVoiceSettings}>
-                <PopoverTrigger asChild>
-                  <motion.button
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-muted/50 flex items-center justify-center transition-all hover:bg-primary/10"
-                    title={language === "TR" ? "Ses Ayarları" : "Voice Settings"}
-                  >
-                    <Settings2 className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
-                  </motion.button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  className="w-64 p-3" 
-                  align="end"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="space-y-4">
-                    {/* Voice Selection */}
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-2 block">
-                        {language === "TR" ? "Ses Tonu" : "Voice"}
-                      </label>
-                      <div className="space-y-1 max-h-32 overflow-y-auto">
-                        {availableVoices.length > 0 ? (
-                          availableVoices.map((voice) => (
-                            <button
-                              key={voice.id}
-                              onClick={() => selectVoice(voice.id)}
-                              className={cn(
-                                "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all text-left",
-                                selectedVoiceId === voice.id
-                                  ? "bg-primary/20 text-primary"
-                                  : "hover:bg-muted"
-                              )}
-                            >
-                              <span className="text-lg">
-                                {voice.gender === 'female' ? '👩' : voice.gender === 'male' ? '👨' : '🤖'}
-                              </span>
-                              <span className="flex-1 truncate">{voice.name}</span>
-                              {selectedVoiceId === voice.id && (
-                                <span className="w-2 h-2 bg-primary rounded-full" />
-                              )}
-                            </button>
-                          ))
-                        ) : (
-                          <p className="text-xs text-muted-foreground px-3 py-2">
-                            {language === "TR" ? "Bu dil için ses bulunamadı" : "No voices found for this language"}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Speech Rate */}
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-2 block">
-                        {language === "TR" ? "Konuşma Hızı" : "Speech Rate"}
-                      </label>
-                      <div className="flex items-center gap-2">
-                        {[0.75, 1.0, 1.25, 1.5].map((rate) => (
-                          <button
-                            key={rate}
-                            onClick={() => changeRate(rate)}
-                            className={cn(
-                              "flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all",
-                              speechRate === rate
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted hover:bg-muted/80"
-                            )}
-                          >
-                            {rate === 0.75 ? '0.75x' : rate === 1.0 ? '1x' : rate === 1.25 ? '1.25x' : '1.5x'}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
-
-            {/* Clear Conversation Button */}
-            {isOpen && messages.length > 1 && (
-              <motion.button
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  clearConversation();
-                }}
-                className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-muted/50 flex items-center justify-center transition-all hover:bg-destructive/20 hover:text-destructive"
-                title={language === "TR" ? "Sohbeti Temizle" : "Clear Chat"}
-              >
-                <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
-              </motion.button>
-            )}
-
-            {/* Voice Toggle Button */}
-            {isOpen && (
-              <motion.button
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleVoice();
-                }}
-                className={cn(
-                  "w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center transition-all",
-                  isVoiceEnabled 
-                    ? "bg-primary/20 text-primary" 
-                    : "bg-muted/50 text-muted-foreground"
-                )}
-                title={isVoiceEnabled ? "Sesi Kapat" : "Sesi Aç"}
-              >
-                {isSpeaking ? (
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ repeat: Infinity, duration: 0.5 }}
-                  >
-                    <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
-                  </motion.div>
-                ) : isVoiceEnabled ? (
-                  <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
-                ) : (
-                  <VolumeX className="h-4 w-4 md:h-5 md:w-5" />
-                )}
-              </motion.button>
-            )}
-            
-            <motion.div
-              animate={{ rotate: isOpen ? 180 : 0 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-muted/50 flex items-center justify-center"
-            >
-              {isOpen ? (
-                <X className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
-              ) : (
-                <MessageCircle className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-              )}
-            </motion.div>
-          </div>
-        </motion.button>
-
-        {/* Chat Content */}
-        <AnimatePresence mode="wait">
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0, y: 20 }}
-              animate={{ 
-                opacity: 1, 
-                height: "auto", 
-                y: 0,
-                transition: {
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 35,
-                  mass: 0.8,
-                  opacity: { duration: 0.2 },
-                  height: { duration: 0.4 }
-                }
-              }}
-              exit={{ 
-                opacity: 0, 
-                height: 0, 
-                y: -10,
-                transition: {
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 40,
-                  opacity: { duration: 0.15 },
-                  height: { duration: 0.3 }
-                }
-              }}
-              className="relative flex flex-col z-10 overflow-hidden h-[calc(70vh-88px)] md:h-[calc(500px-88px)]"
-            >
-              {/* Messages Area */}
-              <ScrollArea className="flex-1 px-4 py-4 md:px-5">
-                <div className="space-y-5">
-                  {messages.map((msg, index) => (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ delay: index * 0.05 }}
-                      className={cn(
-                        "flex gap-3",
-                        msg.role === "user" ? "justify-end" : "justify-start"
-                      )}
-                    >
-                      {msg.role === "assistant" && (
-                        <motion.div 
-                          className="w-8 h-8 rounded-xl bg-muted border border-border/60 flex items-center justify-center flex-shrink-0 shadow-sm"
-                          whileHover={{ scale: 1.05, rotate: 2 }}
-                        >
-                          <Bot className="h-4 w-4 text-muted-foreground" />
-                        </motion.div>
-                      )}
-                      
-                      <div className="flex flex-col gap-2 max-w-[85%] md:max-w-[80%]">
-                        <div className="flex items-start gap-2">
-                          <motion.div
-                            whileHover={{ scale: 1.01 }}
-                            className={cn(
-                              "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm flex-1",
-                              msg.role === "user"
-                                ? "bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-br-lg"
-                                : "bg-gradient-to-br from-muted to-muted/80 text-foreground rounded-bl-lg border border-border/30"
-                            )}
-                          >
-                            {msg.role === "assistant" ? (
-                              <ReactMarkdown
-                                remarkPlugins={[remarkGfm]}
-                                components={markdownComponents}
-                                skipHtml
-                              >
-                                {msg.content}
-                              </ReactMarkdown>
-                            ) : (
-                              <span className="whitespace-pre-wrap">{msg.content}</span>
-                            )}
-                          </motion.div>
-                          
-                          {/* Speak button for assistant messages */}
-                          {msg.role === "assistant" && msg.id !== "welcome" && (
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => {
-                                if (isSpeaking) {
-                                  stopSpeaking();
-                                } else {
-                                  speak(msg.content);
-                                }
-                              }}
-                              className={cn(
-                                "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
-                                isSpeaking 
-                                  ? "bg-primary/20 text-primary" 
-                                  : "bg-muted/50 text-muted-foreground hover:text-primary"
-                              )}
-                              title={isSpeaking ? "Durdur" : "Sesli oku"}
-                            >
-                              {isSpeaking ? (
-                                <Square className="h-3.5 w-3.5" />
-                              ) : (
-                                <Volume2 className="h-3.5 w-3.5" />
-                              )}
-                            </motion.button>
-                          )}
-                        </div>
-                        
-                        {/* Booking Action Buttons */}
-                        {msg.bookingData?.isComplete && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            transition={{ delay: 0.2 }}
-                            className="space-y-2"
-                          >
-                            {/* Price Display */}
-                            {msg.bookingData.estimatedPrice && (
-                              <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl px-4 py-3">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-2xl">💰</span>
-                                  <div>
-                                    <p className="text-xs text-muted-foreground">
-                                      {language === "TR" ? "Fiyat" : "Price"}
-                                    </p>
-                                    <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                                      {msg.bookingData.currency === "TRY" ? "₺" : 
-                                       msg.bookingData.currency === "USD" ? "$" : "€"}
-                                      {msg.bookingData.estimatedPrice}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            
-                            {/* Confirm Booking Button */}
-                            {bookingCreated?.token ? (
-                              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                                <CheckCircle2 className="h-5 w-5" />
-                                <span className="text-sm font-medium">
-                                  {language === "TR" ? "Yönlendiriliyor..." : "Redirecting..."}
-                                </span>
-                              </div>
-                            ) : (
-                              <Button
-                                size="lg"
-                                onClick={() => {
-                                  if (bookingCreated?.token) {
-                                    navigate(`/quick-booking-confirm?token=${bookingCreated.token}&new=true`);
-                                  }
-                                }}
-                                disabled={!bookingCreated}
-                                className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-green-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold gap-2 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 text-base py-6"
-                              >
-                                <CheckCircle2 className="h-5 w-5" />
-                                {language === "TR" ? "Rezervasyonu Onayla" : "Confirm Booking"}
-                              </Button>
-                            )}
-                            
-                            {/* Apply to Form Button (secondary) */}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleApplyBooking(msg.bookingData!)}
-                              className="w-full gap-2 rounded-xl"
-                            >
-                              <ArrowRight className="h-4 w-4" />
-                              {t("applyToForm") || "Apply to Form"}
-                            </Button>
-                          </motion.div>
-                        )}
-                      </div>
-                      
-                      {msg.role === "user" && (
-                        <motion.div 
-                          className="w-8 h-8 rounded-xl bg-gradient-to-br from-muted to-muted/80 flex items-center justify-center flex-shrink-0 border border-border/30"
-                          whileHover={{ scale: 1.1, rotate: -5 }}
-                        >
-                          <User className="h-4 w-4 text-muted-foreground" />
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  ))}
-                  
-                  {/* Streaming Response or Typing Indicator */}
-                  {(isLoading || isTyping) && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex gap-3 items-start"
-                    >
-                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md">
-                        <Bot className="h-4 w-4 text-primary-foreground" />
-                      </div>
-                      <div className="bg-gradient-to-br from-muted to-muted/80 rounded-2xl rounded-bl-lg px-4 py-3 border border-border/30 max-w-[85%] md:max-w-[80%]">
-                        {streamingContent ? (
-                          // Show streaming content
-                          <div className="text-sm leading-relaxed text-foreground">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              components={markdownComponents}
-                              skipHtml
-                            >
-                              {streamingContent}
-                            </ReactMarkdown>
-                            <motion.span
-                              animate={{ opacity: [1, 0, 1] }}
-                              transition={{ repeat: Infinity, duration: 0.8 }}
-                              className="inline-block w-2 h-4 bg-primary/70 ml-1 align-middle"
-                            />
-                          </div>
-                        ) : (
-                          // Show typing indicator
-                          <div className="flex items-center gap-2">
-                            <div className="flex gap-1.5">
-                              <motion.span 
-                                className="w-2.5 h-2.5 bg-primary/60 rounded-full"
-                                animate={{ y: [-3, 3, -3] }}
-                                transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
-                              />
-                              <motion.span 
-                                className="w-2.5 h-2.5 bg-primary/60 rounded-full"
-                                animate={{ y: [-3, 3, -3] }}
-                                transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
-                              />
-                              <motion.span 
-                                className="w-2.5 h-2.5 bg-primary/60 rounded-full"
-                                animate={{ y: [-3, 3, -3] }}
-                                transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
-                              />
-                            </div>
-                            <span className="text-xs text-muted-foreground ml-2">
-                              {language === "TR" ? "Yazıyor..." : "Typing..."}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                  {/* Auto-scroll anchor */}
-                  <div ref={scrollRef} />
-                </div>
-              </ScrollArea>
-
-              {/* Input Area */}
-              <div className="p-3 md:p-4 border-t border-border/30 bg-muted/20" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-                {/* Browser Support Warning */}
-                <AnimatePresence>
-                  {showBrowserWarning && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="mb-3"
-                    >
-                      <Alert variant="destructive" className="relative py-2 px-3">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription className="text-xs pr-6">
-                          {language === "TR" 
-                            ? "Tarayıcınız ses tanıma özelliğini desteklemiyor. Chrome, Edge veya Safari kullanın." 
-                            : "Your browser doesn't support speech recognition. Please use Chrome, Edge, or Safari."}
-                        </AlertDescription>
-                        <button 
-                          onClick={dismissWarning}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-destructive-foreground/70 hover:text-destructive-foreground"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </Alert>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                
                 {/* Recording Indicator */}
                 <AnimatePresence>
                   {isRecording && (
