@@ -1,20 +1,61 @@
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
+import { supabase } from "@/integrations/supabase/client";
+import { format, parseISO } from "date-fns";
+import { tr, enUS } from "date-fns/locale";
 
 interface ReturnTripPromoBannerProps {
   language: string;
   onApplyPromoCode?: (code: string) => void;
 }
 
+interface PromoCodeData {
+  code: string;
+  discount_percentage: number;
+  valid_until: string | null;
+  description: string | null;
+}
+
 export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: ReturnTripPromoBannerProps) => {
-  const promoCode = "RETURN30";
+  const [promoData, setPromoData] = useState<PromoCodeData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPromoCode = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('promo_codes')
+          .select('code, discount_percentage, valid_until, description')
+          .eq('is_active', true)
+          .eq('applies_to', 'return_transfer')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error) {
+          console.error('Error fetching promo code:', error);
+          return;
+        }
+
+        if (data) {
+          setPromoData(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch promo code:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPromoCode();
+  }, []);
 
   const handleClick = () => {
-    if (onApplyPromoCode) {
-      onApplyPromoCode(promoCode);
+    if (onApplyPromoCode && promoData) {
+      onApplyPromoCode(promoData.code);
       
       // Confetti animation
       confetti({
@@ -26,11 +67,28 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
       
       toast.success(
         language === 'TR' 
-          ? `Promo kodu "${promoCode}" uygulandı! Dönüş yolculuğunuzda %30 indirim kazandınız.`
-          : `Promo code "${promoCode}" applied! You'll get 30% off on your return trip.`
+          ? `Promo kodu "${promoData.code}" uygulandı! Dönüş yolculuğunuzda %${promoData.discount_percentage} indirim kazandınız.`
+          : `Promo code "${promoData.code}" applied! You'll get ${promoData.discount_percentage}% off on your return trip.`
       );
     }
   };
+
+  const formatExpiryDate = (dateString: string | null) => {
+    if (!dateString) return null;
+    try {
+      const date = parseISO(dateString);
+      return format(date, 'dd.MM.yyyy', { locale: language === 'TR' ? tr : enUS });
+    } catch {
+      return null;
+    }
+  };
+
+  // Don't render if no promo data or still loading
+  if (isLoading || !promoData) {
+    return null;
+  }
+
+  const expiryDate = formatExpiryDate(promoData.valid_until);
 
   return (
     <motion.div
@@ -64,7 +122,7 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
               </motion.span>
               <span className="font-bold text-green-700 dark:text-green-400 text-xs md:text-sm">
                 {language === 'TR' ? 'Dönüş' : 'Return'}: 
-                <span className="ml-1 text-sm md:text-base">%30 {language === 'TR' ? 'İndirim' : 'OFF'}</span>
+                <span className="ml-1 text-sm md:text-base">%{promoData.discount_percentage} {language === 'TR' ? 'İndirim' : 'OFF'}</span>
               </span>
             </div>
             
@@ -74,7 +132,7 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
                 {language === 'TR' ? 'Kod' : 'Code'}:
               </span>
               <code className="font-mono font-bold text-green-700 dark:text-green-300 text-xs md:text-sm">
-                {promoCode}
+                {promoData.code}
               </code>
             </div>
           </div>
@@ -82,15 +140,17 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
           {/* Bottom Row - Expiry Date */}
           <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3">
             {/* Expiry Date Display */}
-            <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3 text-muted-foreground" />
-              <span className="text-[10px] md:text-xs text-muted-foreground">
-                {language === 'TR' ? 'Son Geçerlilik:' : 'Valid until:'}
-              </span>
-              <span className="text-[10px] md:text-xs font-bold text-foreground">
-                31.03.2026
-              </span>
-            </div>
+            {expiryDate && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3 text-muted-foreground" />
+                <span className="text-[10px] md:text-xs text-muted-foreground">
+                  {language === 'TR' ? 'Son Geçerlilik:' : 'Valid until:'}
+                </span>
+                <span className="text-[10px] md:text-xs font-bold text-foreground">
+                  {expiryDate}
+                </span>
+              </div>
+            )}
             
             {/* Click hint - Desktop only */}
             <motion.span
