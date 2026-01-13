@@ -56,21 +56,11 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
             <Sparkles className="h-5 w-5 text-primary" />
           </motion.div>
           
-          <motion.span 
-            className="text-sm md:text-base font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent"
-            animate={{
-              backgroundPosition: ["0%", "100%", "0%"],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          >
+          <span className="text-sm md:text-base font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent">
             {language === 'TR' 
               ? "🌍 Dünyada İlk: AI ile Transfer & Saatlik Kiralama" 
               : "🌍 World's First: Book Transfer & Hourly Rental With AI"}
-          </motion.span>
+          </span>
           
           {/* NEW Badge */}
           <motion.span 

@@ -754,7 +754,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
             data-chat-trigger
-            className="fixed bottom-6 right-4 z-[9999] md:hidden flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
+            className="fixed bottom-20 right-4 z-[9999] md:hidden flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
             style={{ 
               boxShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(var(--primary), 0.3)',
             }}
