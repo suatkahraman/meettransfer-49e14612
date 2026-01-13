@@ -296,8 +296,8 @@ export const Hero = () => {
             <HeroAIAssistant language={language} onApplyBooking={handleApplyBooking} />
             <ReturnTripPromoBanner language={language} onApplyPromoCode={handleApplyPromoCode} />
 
-            {/* Booking Form Card */}
-            <div className="bg-card rounded-xl md:rounded-2xl shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm">
+            {/* Booking Form Card - Enhanced visibility */}
+            <div className="bg-card rounded-xl md:rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] border-2 border-primary/20 overflow-hidden ring-1 ring-primary/10">
               {/* Tabs */}
               <div className="flex bg-muted/50 relative">
                 <div 
