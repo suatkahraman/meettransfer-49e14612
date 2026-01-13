@@ -71,6 +71,7 @@ export const HeroBackground = memo(({
                     type="video/mp4"
                   />
                 </video>
+              </motion.div>
             </AnimatePresence>
             
             {/* City Label Badge */}
