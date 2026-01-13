@@ -14,9 +14,11 @@ import { calculateCurrencyBalances, CurrencyBalance, getCurrencySymbol } from '@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+
+// Heavy libraries loaded dynamically for better bundle size
+const loadJsPDF = () => import('jspdf');
+const loadAutoTable = () => import('jspdf-autotable');
+const loadXLSX = () => import('xlsx');
 
 interface AgencyReservationDetail {
   id: string;
@@ -250,191 +252,219 @@ const AgencyReports = () => {
   
   combinedBalances.sort((a, b) => Math.abs(b.netBalance) - Math.abs(a.netBalance));
 
-  // Export functions
-  const generatePDF = useCallback(() => {
+  // Export functions - dynamically load heavy libraries
+  const generatePDF = useCallback(async () => {
     if (!agency) return;
     
-    const monthName = format(currentMonth, 'MMMM yyyy', { locale: tr });
-    const doc = new jsPDF();
-    
-    // Title
-    doc.setFontSize(18);
-    doc.text(`${agency.agency_name} - Aylık Rapor`, 14, 20);
-    doc.setFontSize(12);
-    doc.text(monthName, 14, 28);
-    
-    // Summary section
-    doc.setFontSize(14);
-    doc.text('Özet', 14, 42);
-    doc.setFontSize(10);
-    doc.text(`Toplam Rezervasyon: ${totalReservations}`, 14, 50);
-    doc.text(`Tamamlanan: ${completedReservations}`, 14, 56);
-    doc.text(`Ödenen: ${paidCount}`, 14, 62);
-    doc.text(`Bekleyen Ödeme: ${pendingPayments}`, 14, 68);
-    
-    // Balance per currency
-    let yPos = 82;
-    doc.setFontSize(14);
-    doc.text('Bakiye Özeti', 14, yPos);
-    yPos += 10;
-    
-    if (combinedBalances.length > 0) {
-      const balanceData = combinedBalances.map(cb => [
-        cb.currency,
-        `${getCurrencySymbol(cb.currency)}${cb.totalCompanyAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
-        `${getCurrencySymbol(cb.currency)}${cb.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
-        `${getCurrencySymbol(cb.currency)}${cb.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
-        `${cb.netBalance > 0 ? '' : '-'}${getCurrencySymbol(cb.currency)}${Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+    try {
+      toast.loading('PDF oluşturuluyor...');
+      
+      // Dynamically import heavy libraries
+      const [{ default: jsPDF }, autoTableModule] = await Promise.all([
+        loadJsPDF(),
+        loadAutoTable()
       ]);
+      const autoTable = autoTableModule.default;
       
-      autoTable(doc, {
-        startY: yPos,
-        head: [['Para Birimi', 'Toplam Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye']],
-        body: balanceData,
-        theme: 'striped',
-        headStyles: { fillColor: [59, 130, 246] },
-      });
+      const monthName = format(currentMonth, 'MMMM yyyy', { locale: tr });
+      const doc = new jsPDF();
       
-      yPos = (doc as any).lastAutoTable.finalY + 15;
-    }
-    
-    // Current month breakdown
-    if (currentMonthBalances.length > 0) {
+      // Title
+      doc.setFontSize(18);
+      doc.text(`${agency.agency_name} - Aylık Rapor`, 14, 20);
+      doc.setFontSize(12);
+      doc.text(monthName, 14, 28);
+      
+      // Summary section
       doc.setFontSize(14);
-      doc.text(`${monthName} Detay`, 14, yPos);
+      doc.text('Özet', 14, 42);
+      doc.setFontSize(10);
+      doc.text(`Toplam Rezervasyon: ${totalReservations}`, 14, 50);
+      doc.text(`Tamamlanan: ${completedReservations}`, 14, 56);
+      doc.text(`Ödenen: ${paidCount}`, 14, 62);
+      doc.text(`Bekleyen Ödeme: ${pendingPayments}`, 14, 68);
+      
+      // Balance per currency
+      let yPos = 82;
+      doc.setFontSize(14);
+      doc.text('Bakiye Özeti', 14, yPos);
       yPos += 10;
       
-      const monthData = currentMonthBalances.map(cb => [
-        cb.currency,
-        `${getCurrencySymbol(cb.currency)}${cb.totalCompanyAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
-        `${getCurrencySymbol(cb.currency)}${cb.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
-        `${getCurrencySymbol(cb.currency)}${cb.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
-        `${cb.netBalance > 0 ? '' : '-'}${getCurrencySymbol(cb.currency)}${Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
-      ]);
-      
-      autoTable(doc, {
-        startY: yPos,
-        head: [['Para Birimi', 'Gider', 'Nakit', 'Ödenen', 'Net']],
-        body: monthData,
-        theme: 'striped',
-        headStyles: { fillColor: [34, 197, 94] },
-      });
-      
-      yPos = (doc as any).lastAutoTable.finalY + 15;
-    }
-    
-    // Transactions
-    if (transactions.length > 0) {
-      doc.setFontSize(14);
-      doc.text('Son İşlemler', 14, yPos);
-      yPos += 10;
-      
-      const txData = transactions.slice(0, 10).map(tx => [
-        format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm'),
-        tx.type === 'top_up' ? 'Ödeme' : 'Kesinti',
-        `${tx.type === 'top_up' ? '+' : '-'}${getCurrencySymbol(tx.currency)}${Math.abs(tx.amount).toLocaleString('tr-TR')}`,
-        tx.description || '-',
-      ]);
-      
-      autoTable(doc, {
-        startY: yPos,
-        head: [['Tarih', 'Tür', 'Tutar', 'Açıklama']],
-        body: txData,
-        theme: 'striped',
-        headStyles: { fillColor: [168, 85, 247] },
-      });
-    }
-    
-    // Footer
-    const pageCount = doc.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(8);
-      doc.text(
-        `Oluşturulma: ${format(new Date(), 'dd/MM/yyyy HH:mm')} - Sayfa ${i}/${pageCount}`,
-        14,
-        doc.internal.pageSize.height - 10
-      );
-    }
-    
-    doc.save(`${agency.agency_name.replace(/\s+/g, '_')}_Rapor_${format(currentMonth, 'yyyy_MM')}.pdf`);
-    toast.success('PDF başarıyla oluşturuldu');
-  }, [agency, currentMonth, totalReservations, completedReservations, paidCount, pendingPayments, combinedBalances, currentMonthBalances, transactions]);
-
-  const generateExcel = useCallback(() => {
-    if (!agency) return;
-    
-    const monthName = format(currentMonth, 'MMMM yyyy', { locale: tr });
-    const wb = XLSX.utils.book_new();
-    
-    // Summary sheet
-    const summaryData = [
-      ['Acenta Adı', agency.agency_name],
-      ['Rapor Dönemi', monthName],
-      ['Oluşturulma Tarihi', format(new Date(), 'dd/MM/yyyy HH:mm')],
-      [''],
-      ['ÖZET'],
-      ['Toplam Rezervasyon', totalReservations],
-      ['Tamamlanan', completedReservations],
-      ['Ödenen', paidCount],
-      ['Bekleyen Ödeme', pendingPayments],
-    ];
-    
-    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-    XLSX.utils.book_append_sheet(wb, summarySheet, 'Özet');
-    
-    // Balance sheet
-    if (combinedBalances.length > 0) {
-      const balanceRows = [
-        ['Para Birimi', 'Toplam Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye', 'Durum'],
-        ...combinedBalances.map(cb => [
+      if (combinedBalances.length > 0) {
+        const balanceData = combinedBalances.map(cb => [
           cb.currency,
-          cb.totalCompanyAmount,
-          cb.totalPassengerCash,
-          cb.totalPaid,
-          cb.netBalance,
-          cb.netBalance > 0 ? 'Borç' : cb.netBalance < 0 ? 'Alacak' : 'Hesaplaşıldı',
-        ]),
-      ];
-      const balanceSheet = XLSX.utils.aoa_to_sheet(balanceRows);
-      XLSX.utils.book_append_sheet(wb, balanceSheet, 'Bakiye');
-    }
-    
-    // Current month sheet
-    if (currentMonthBalances.length > 0) {
-      const monthRows = [
-        ['Para Birimi', 'Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye'],
-        ...currentMonthBalances.map(cb => [
+          `${getCurrencySymbol(cb.currency)}${cb.totalCompanyAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+          `${getCurrencySymbol(cb.currency)}${cb.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+          `${getCurrencySymbol(cb.currency)}${cb.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+          `${cb.netBalance > 0 ? '' : '-'}${getCurrencySymbol(cb.currency)}${Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+        ]);
+        
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Para Birimi', 'Toplam Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye']],
+          body: balanceData,
+          theme: 'striped',
+          headStyles: { fillColor: [59, 130, 246] },
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 15;
+      }
+      
+      // Current month breakdown
+      if (currentMonthBalances.length > 0) {
+        doc.setFontSize(14);
+        doc.text(`${monthName} Detay`, 14, yPos);
+        yPos += 10;
+        
+        const monthData = currentMonthBalances.map(cb => [
           cb.currency,
-          cb.totalCompanyAmount,
-          cb.totalPassengerCash,
-          cb.totalPaid,
-          cb.netBalance,
-        ]),
-      ];
-      const monthSheet = XLSX.utils.aoa_to_sheet(monthRows);
-      XLSX.utils.book_append_sheet(wb, monthSheet, monthName);
-    }
-    
-    // Transactions sheet
-    if (transactions.length > 0) {
-      const txRows = [
-        ['Tarih', 'Tür', 'Tutar', 'Para Birimi', 'Bakiye Sonrası', 'Açıklama'],
-        ...transactions.map(tx => [
+          `${getCurrencySymbol(cb.currency)}${cb.totalCompanyAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+          `${getCurrencySymbol(cb.currency)}${cb.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+          `${getCurrencySymbol(cb.currency)}${cb.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+          `${cb.netBalance > 0 ? '' : '-'}${getCurrencySymbol(cb.currency)}${Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+        ]);
+        
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Para Birimi', 'Gider', 'Nakit', 'Ödenen', 'Net']],
+          body: monthData,
+          theme: 'striped',
+          headStyles: { fillColor: [34, 197, 94] },
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 15;
+      }
+      
+      // Transactions
+      if (transactions.length > 0) {
+        doc.setFontSize(14);
+        doc.text('Son İşlemler', 14, yPos);
+        yPos += 10;
+        
+        const txData = transactions.slice(0, 10).map(tx => [
           format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm'),
           tx.type === 'top_up' ? 'Ödeme' : 'Kesinti',
-          tx.type === 'top_up' ? tx.amount : -tx.amount,
-          tx.currency,
-          tx.balance_after,
-          tx.description || '',
-        ]),
-      ];
-      const txSheet = XLSX.utils.aoa_to_sheet(txRows);
-      XLSX.utils.book_append_sheet(wb, txSheet, 'İşlemler');
+          `${tx.type === 'top_up' ? '+' : '-'}${getCurrencySymbol(tx.currency)}${Math.abs(tx.amount).toLocaleString('tr-TR')}`,
+          tx.description || '-',
+        ]);
+        
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Tarih', 'Tür', 'Tutar', 'Açıklama']],
+          body: txData,
+          theme: 'striped',
+          headStyles: { fillColor: [168, 85, 247] },
+        });
+      }
+      
+      // Footer
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.text(
+          `Oluşturulma: ${format(new Date(), 'dd/MM/yyyy HH:mm')} - Sayfa ${i}/${pageCount}`,
+          14,
+          doc.internal.pageSize.height - 10
+        );
+      }
+      
+      doc.save(`${agency.agency_name.replace(/\s+/g, '_')}_Rapor_${format(currentMonth, 'yyyy_MM')}.pdf`);
+      toast.dismiss();
+      toast.success('PDF başarıyla oluşturuldu');
+    } catch (error) {
+      toast.dismiss();
+      toast.error('PDF oluşturulamadı');
+      console.error('PDF generation error:', error);
     }
+  }, [agency, currentMonth, totalReservations, completedReservations, paidCount, pendingPayments, combinedBalances, currentMonthBalances, transactions]);
+
+  const generateExcel = useCallback(async () => {
+    if (!agency) return;
     
-    XLSX.writeFile(wb, `${agency.agency_name.replace(/\s+/g, '_')}_Rapor_${format(currentMonth, 'yyyy_MM')}.xlsx`);
-    toast.success('Excel başarıyla oluşturuldu');
+    try {
+      toast.loading('Excel oluşturuluyor...');
+      
+      // Dynamically import heavy library
+      const XLSX = await loadXLSX();
+      
+      const monthName = format(currentMonth, 'MMMM yyyy', { locale: tr });
+      const wb = XLSX.utils.book_new();
+      
+      // Summary sheet
+      const summaryData = [
+        ['Acenta Adı', agency.agency_name],
+        ['Rapor Dönemi', monthName],
+        ['Oluşturulma Tarihi', format(new Date(), 'dd/MM/yyyy HH:mm')],
+        [''],
+        ['ÖZET'],
+        ['Toplam Rezervasyon', totalReservations],
+        ['Tamamlanan', completedReservations],
+        ['Ödenen', paidCount],
+        ['Bekleyen Ödeme', pendingPayments],
+      ];
+      
+      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(wb, summarySheet, 'Özet');
+      
+      // Balance sheet
+      if (combinedBalances.length > 0) {
+        const balanceRows = [
+          ['Para Birimi', 'Toplam Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye', 'Durum'],
+          ...combinedBalances.map(cb => [
+            cb.currency,
+            cb.totalCompanyAmount,
+            cb.totalPassengerCash,
+            cb.totalPaid,
+            cb.netBalance,
+            cb.netBalance > 0 ? 'Borç' : cb.netBalance < 0 ? 'Alacak' : 'Hesaplaşıldı',
+          ]),
+        ];
+        const balanceSheet = XLSX.utils.aoa_to_sheet(balanceRows);
+        XLSX.utils.book_append_sheet(wb, balanceSheet, 'Bakiye');
+      }
+      
+      // Current month sheet
+      if (currentMonthBalances.length > 0) {
+        const monthRows = [
+          ['Para Birimi', 'Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye'],
+          ...currentMonthBalances.map(cb => [
+            cb.currency,
+            cb.totalCompanyAmount,
+            cb.totalPassengerCash,
+            cb.totalPaid,
+            cb.netBalance,
+          ]),
+        ];
+        const monthSheet = XLSX.utils.aoa_to_sheet(monthRows);
+        XLSX.utils.book_append_sheet(wb, monthSheet, monthName);
+      }
+      
+      // Transactions sheet
+      if (transactions.length > 0) {
+        const txRows = [
+          ['Tarih', 'Tür', 'Tutar', 'Para Birimi', 'Bakiye Sonrası', 'Açıklama'],
+          ...transactions.map(tx => [
+            format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm'),
+            tx.type === 'top_up' ? 'Ödeme' : 'Kesinti',
+            tx.type === 'top_up' ? tx.amount : -tx.amount,
+            tx.currency,
+            tx.balance_after,
+            tx.description || '',
+          ]),
+        ];
+        const txSheet = XLSX.utils.aoa_to_sheet(txRows);
+        XLSX.utils.book_append_sheet(wb, txSheet, 'İşlemler');
+      }
+      
+      XLSX.writeFile(wb, `${agency.agency_name.replace(/\s+/g, '_')}_Rapor_${format(currentMonth, 'yyyy_MM')}.xlsx`);
+      toast.dismiss();
+      toast.success('Excel başarıyla oluşturuldu');
+    } catch (error) {
+      toast.dismiss();
+      toast.error('Excel oluşturulamadı');
+      console.error('Excel generation error:', error);
+    }
   }, [agency, currentMonth, totalReservations, completedReservations, paidCount, pendingPayments, combinedBalances, currentMonthBalances, transactions]);
 
   if (loading) {
