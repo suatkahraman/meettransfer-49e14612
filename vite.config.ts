@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -330,6 +331,14 @@ export default defineConfig(({ mode }) => ({
       devOptions: {
         enabled: false
       }
+    }),
+    // Bundle analyzer - generates stats.html in project root
+    mode === "production" && visualizer({
+      filename: "stats.html",
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+      template: "treemap", // treemap, sunburst, network
     })
   ].filter(Boolean),
   resolve: {
@@ -337,4 +346,45 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Manual chunks for better code splitting
+        manualChunks: {
+          // Vendor chunks - split by usage pattern
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-ui": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-toast",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-accordion",
+            "@radix-ui/react-checkbox",
+            "@radix-ui/react-label",
+            "@radix-ui/react-slot",
+            "@radix-ui/react-switch",
+            "@radix-ui/react-tooltip"
+          ],
+          "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
+          "vendor-query": ["@tanstack/react-query"],
+          "vendor-motion": ["framer-motion"],
+          "vendor-supabase": ["@supabase/supabase-js"],
+          "vendor-date": ["date-fns", "react-day-picker"],
+          "vendor-pdf": ["jspdf", "jspdf-autotable"],
+          "vendor-excel": ["xlsx"],
+          "vendor-markdown": ["react-markdown", "remark-gfm"]
+        }
+      }
+    },
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 500,
+    // Enable source maps for production debugging
+    sourcemap: false,
+    // Minification
+    minify: "esbuild",
+    // Target modern browsers
+    target: "es2020"
+  }
 }));
