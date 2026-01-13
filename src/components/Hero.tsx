@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Plane, Globe, Check, Wifi, Baby, Briefcase } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Plane, Globe, Check, Wifi, Baby, Briefcase, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
@@ -12,13 +12,14 @@ import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-p
 import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
+import heroVideo from "@/assets/hero-mercedes-video.mp4";
 import CityMarquee from "@/components/website/CityMarquee";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES, isMinibusRequired } from "@/lib/vehicleTypes";
 import BookingChatAssistant from "@/components/website/BookingChatAssistant";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -85,6 +86,19 @@ export const Hero = () => {
   const [hourlyCurrency, setHourlyCurrency] = useState<string>("EUR");
   const [convertingHourlyPrices, setConvertingHourlyPrices] = useState(false);
   const [originalHourlyPrices, setOriginalHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
+  
+  // Video/Image background state
+  const [showVideo, setShowVideo] = useState(true);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  // Rotate between video and image every 8 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMediaIndex((prev) => (prev + 1) % 2);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch available cities and their durations
   useEffect(() => {
@@ -415,12 +429,50 @@ export const Hero = () => {
   
   return (
     <section ref={heroRef} id="booking-form" className="relative min-h-screen overflow-hidden bg-background">
-      {/* Parallax Background */}
+      {/* Video/Image Background with Parallax */}
       <motion.div 
         style={{ y, opacity }}
         className="absolute inset-0 z-0"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+        {/* Video Background - Desktop */}
+        <div className="absolute inset-0 hidden md:block">
+          <AnimatePresence mode="wait">
+            {currentMediaIndex === 0 ? (
+              <motion.video
+                key="video"
+                ref={videoRef}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.3 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+              >
+                <source src={heroVideo} type="video/mp4" />
+              </motion.video>
+            ) : (
+              <motion.img
+                key="image"
+                src={heroMercedes}
+                alt="Mercedes VIP Transfer"
+                className="absolute inset-0 w-full h-full object-cover"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.3 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-background/80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
+        
+        {/* Pattern Overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
       </motion.div>
       
@@ -767,25 +819,158 @@ export const Hero = () => {
             </div>
           </motion.div>
 
+          {/* Mobile Visual Section - Shows below form */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="order-2 md:hidden"
+          >
+            <div className="relative rounded-2xl overflow-hidden shadow-xl">
+              {/* Mobile Video/Image */}
+              <div className="relative h-40">
+                <AnimatePresence mode="wait">
+                  {currentMediaIndex === 0 ? (
+                    <motion.video
+                      key="mobile-video"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="absolute inset-0 w-full h-full object-cover"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <source src={heroVideo} type="video/mp4" />
+                    </motion.video>
+                  ) : (
+                    <motion.img
+                      key="mobile-image"
+                      src={heroMercedes}
+                      alt="Mercedes VIP Transfer"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  )}
+                </AnimatePresence>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                
+                {/* Video indicator */}
+                <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2 py-1">
+                  <Play className="h-2.5 w-2.5 text-white fill-white" />
+                  <span className="text-[10px] text-white">LIVE</span>
+                </div>
+                
+                {/* Mobile Overlay Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <div className="text-white">
+                    <h3 className="text-sm font-bold mb-1">{t("premiumFleet") || "Premium Mercedes Fleet"}</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      <div className="flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5">
+                        <Wifi className="h-2.5 w-2.5" />
+                        <span>WiFi</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5">
+                        <Baby className="h-2.5 w-2.5" />
+                        <span>Baby Seat</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5">
+                        <Briefcase className="h-2.5 w-2.5" />
+                        <span>Meet & Greet</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Mobile Stats Row */}
+              <div className="flex items-center justify-around bg-card p-3 border-t border-border/30">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Globe className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-foreground">100+</div>
+                    <div className="text-[9px] text-muted-foreground">{t("cities") || "Cities"}</div>
+                  </div>
+                </div>
+                <div className="w-px h-8 bg-border/50" />
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center">
+                    <Plane className="h-3.5 w-3.5 text-accent" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-foreground">670+</div>
+                    <div className="text-[9px] text-muted-foreground">{t("airports") || "Airports"}</div>
+                  </div>
+                </div>
+                <div className="w-px h-8 bg-border/50" />
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                    <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-foreground">4.9</div>
+                    <div className="text-[9px] text-muted-foreground">Google</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
           {/* Right Side - Visual (Tablet: 2 cols compact, Desktop: full) */}
           <motion.div 
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="order-2 hidden md:block md:col-span-2 lg:col-span-1"
+            className="order-3 hidden md:block md:col-span-2 lg:col-span-1"
           >
             <div className="relative">
-              {/* Main Image with Overlay */}
+              {/* Main Video/Image with Overlay */}
               <div className="relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl">
-                <motion.img 
-                  src={heroMercedes}
-                  alt="Mercedes Vito VIP Transfer"
-                  className="w-full h-48 md:h-56 lg:h-auto object-cover"
-                  initial={{ scale: 1.1 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 1 }}
-                />
+                <AnimatePresence mode="wait">
+                  {currentMediaIndex === 0 ? (
+                    <motion.video
+                      key="desktop-video"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-48 md:h-56 lg:h-80 object-cover"
+                      initial={{ opacity: 0, scale: 1.1 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 1 }}
+                    >
+                      <source src={heroVideo} type="video/mp4" />
+                    </motion.video>
+                  ) : (
+                    <motion.img 
+                      key="desktop-image"
+                      src={heroMercedes}
+                      alt="Mercedes Vito VIP Transfer"
+                      className="w-full h-48 md:h-56 lg:h-80 object-cover"
+                      initial={{ opacity: 0, scale: 1.1 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 1 }}
+                    />
+                  )}
+                </AnimatePresence>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                {/* Video indicator */}
+                {currentMediaIndex === 0 && (
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
+                    <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                    <span className="text-xs text-white font-medium">LIVE</span>
+                  </div>
+                )}
                 
                 {/* Overlay Content - Compact on tablet */}
                 <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-6">
