@@ -1,5 +1,5 @@
 import { memo, useState, useCallback, useMemo } from "react";
-import { CalendarIcon, Clock, Users, MapPin, Timer, ArrowRight, Loader2, Zap, ChevronDown, ChevronUp, Car } from "lucide-react";
+import { CalendarIcon, Clock, Users, MapPin, Timer, ArrowRight, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
@@ -81,17 +81,10 @@ export const HourlyFormContent = memo(({
   setHourlyVehicleType,
   handleHourlyContinue,
 }: HourlyFormContentProps) => {
-  const [showVehicles, setShowVehicles] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
   
   const hasRoute = !!(hourlyCity && hourlyDuration);
-  
-  // Memoize price lookup
-  const selectedPrice = useMemo(() => 
-    allHourlyPrices.find(p => p.vehicleType === hourlyVehicleType),
-    [allHourlyPrices, hourlyVehicleType]
-  );
   
   const currency = allHourlyPrices[0]?.currency || "EUR";
 
@@ -261,68 +254,20 @@ export const HourlyFormContent = memo(({
         />
       </div>
 
-      {/* Vehicle Selection - Collapsible on mobile */}
-      <div className="md:block">
-        {/* Mobile: Collapsible toggle - larger touch target */}
-        <button
-          type="button"
-          onClick={() => setShowVehicles(!showVehicles)}
-          className="md:hidden w-full flex items-center justify-between p-3 min-h-[52px] bg-muted/50 rounded-xl border border-border mb-2 active:bg-muted/70 transition-colors"
-        >
-          <div className="flex items-center gap-2.5">
-            <Car className="h-5 w-5 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              {language === 'TR' ? 'Araç Seçimi' : 'Select Vehicle'}
-            </span>
-            {selectedPrice && (
-              <span className="text-sm font-bold text-primary">
-                {currency === "EUR" ? "€" : currency}{selectedPrice.price}
-              </span>
-            )}
-          </div>
-          {showVehicles ? (
-            <ChevronUp className="h-5 w-5 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="h-5 w-5 text-muted-foreground" />
-          )}
-        </button>
-
-        {/* Mobile: Expandable vehicle selector - CSS transition */}
-        <div 
-          className={cn(
-            "overflow-hidden md:hidden transition-all duration-200 ease-out",
-            showVehicles ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-          )}
-        >
-          <VehicleSelector 
-            selectedVehicle={hourlyVehicleType} 
-            onSelectVehicle={(type) => {
-              setHourlyVehicleType(type);
-              setShowVehicles(false);
-            }} 
-            passengers={hourlyPassengers} 
-            prices={allHourlyPrices} 
-            loadingPrices={loadingPrice} 
-            hasRoute={hasRoute} 
-            language={language} 
-            currency={currency} 
-          />
-        </div>
-
-        {/* Desktop: Always visible */}
-        <div className="hidden md:block">
-          <VehicleSelector 
-            selectedVehicle={hourlyVehicleType} 
-            onSelectVehicle={setHourlyVehicleType} 
-            passengers={hourlyPassengers} 
-            prices={allHourlyPrices} 
-            loadingPrices={loadingPrice} 
-            hasRoute={hasRoute} 
-            language={language} 
-            currency={currency} 
-          />
-        </div>
+      {/* Vehicle Selection - Always visible */}
+      <div className="space-y-2">
+        <VehicleSelector 
+          selectedVehicle={hourlyVehicleType} 
+          onSelectVehicle={setHourlyVehicleType}
+          passengers={hourlyPassengers} 
+          prices={allHourlyPrices} 
+          loadingPrices={loadingPrice} 
+          hasRoute={hasRoute} 
+          language={language} 
+          currency={currency} 
+        />
       </div>
+
 
       {/* Submit Button - larger touch target on mobile */}
       <div>

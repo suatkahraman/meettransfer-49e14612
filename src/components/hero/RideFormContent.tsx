@@ -1,5 +1,5 @@
 import { memo, useState, useCallback, useMemo } from "react";
-import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, ChevronDown, ChevronUp, Car } from "lucide-react";
+import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
@@ -72,18 +72,13 @@ export const RideFormContent = memo(({
   setVehicleType,
   handleRideContinue,
 }: RideFormContentProps) => {
-  const [showVehicles, setShowVehicles] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
   
   const hasRoute = !!(pickup && dropoff);
   
-  // Memoize price lookup
-  const selectedPrice = useMemo(() => 
-    allVehiclePrices.find(p => p.vehicleType === vehicleType),
-    [allVehiclePrices, vehicleType]
-  );
-  
+  // Vehicle selection is always visible; price will appear on each card once available.
+
   // Memoize time options for Select
   const memoizedTimeOptions = useMemo(() => 
     timeOptions.map(opt => ({ value: opt, label: opt })),
@@ -220,67 +215,18 @@ export const RideFormContent = memo(({
         />
       </div>
 
-      {/* Vehicle Selection - Collapsible on mobile */}
-      <div className="md:block">
-        {/* Mobile: Collapsible toggle - larger touch target */}
-        <button
-          type="button"
-          onClick={() => setShowVehicles(!showVehicles)}
-          className="md:hidden w-full flex items-center justify-between p-3 min-h-[52px] bg-muted/50 rounded-xl border border-border mb-2 active:bg-muted/70 transition-colors"
-        >
-          <div className="flex items-center gap-2.5">
-            <Car className="h-5 w-5 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              {language === 'TR' ? 'Araç Seçimi' : 'Select Vehicle'}
-            </span>
-            {selectedPrice && (
-              <span className="text-sm font-bold text-primary">
-                {transferPriceCurrency === "EUR" ? "€" : transferPriceCurrency}{selectedPrice.price}
-              </span>
-            )}
-          </div>
-          {showVehicles ? (
-            <ChevronUp className="h-5 w-5 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="h-5 w-5 text-muted-foreground" />
-          )}
-        </button>
-
-        {/* Mobile: Expandable vehicle selector - CSS transition */}
-        <div 
-          className={cn(
-            "overflow-hidden md:hidden transition-all duration-200 ease-out",
-            showVehicles ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-          )}
-        >
-          <VehicleSelector 
-            selectedVehicle={vehicleType} 
-            onSelectVehicle={(type) => {
-              setVehicleType(type);
-              setShowVehicles(false);
-            }} 
-            passengers={passengers} 
-            prices={allVehiclePrices} 
-            loadingPrices={loadingTransferPrice} 
-            hasRoute={hasRoute} 
-            language={language} 
-            currency={transferPriceCurrency} 
-          />
-        </div>
-
-        {/* Desktop: Always visible */}
-        <div className="hidden md:block">
-          <VehicleSelector 
-            selectedVehicle={vehicleType} 
-            onSelectVehicle={setVehicleType} 
-            passengers={passengers} 
-            prices={allVehiclePrices} 
-            loadingPrices={loadingTransferPrice} 
-            hasRoute={hasRoute} 
-            language={language} 
-            currency={transferPriceCurrency} 
-          />
-        </div>
+      {/* Vehicle Selection - Always visible */}
+      <div className="space-y-2">
+        <VehicleSelector 
+          selectedVehicle={vehicleType} 
+          onSelectVehicle={setVehicleType}
+          passengers={passengers} 
+          prices={allVehiclePrices} 
+          loadingPrices={loadingTransferPrice} 
+          hasRoute={hasRoute} 
+          language={language} 
+          currency={transferPriceCurrency} 
+        />
       </div>
 
       {/* Submit Button - larger touch target on mobile */}
