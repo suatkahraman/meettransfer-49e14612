@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useCustomerNotification } from '@/hooks/useCustomerNotification';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,8 @@ import { getCurrencySymbol } from '@/lib/currency';
 interface Reservation {
   id: string;
   customer_name: string;
+  customer_id: string | null;
+  reservation_code: string | null;
   pickup: string;
   dropoff: string;
   pickup_place_name: string | null;
@@ -48,6 +51,7 @@ const statusColors: Record<string, string> = {
 const AdminCalendar = () => {
   const navigate = useNavigate();
   const { logAction } = useAuditLog();
+  const { notifyStatusChange } = useCustomerNotification();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -138,6 +142,20 @@ const AdminCalendar = () => {
         });
       } catch (err) {
         console.error('Failed to notify driver:', err);
+      }
+
+      // Notify customer that driver has been assigned
+      if (reservation.customer_id && reservation.reservation_code) {
+        try {
+          await notifyStatusChange({
+            customerId: reservation.customer_id,
+            reservationCode: reservation.reservation_code,
+            oldStatus: reservation.status,
+            newStatus: 'driver_assigned',
+          });
+        } catch (err) {
+          console.error('Failed to notify customer:', err);
+        }
       }
 
       toast.success(`Assigned to ${draggedDriver.name}`);
