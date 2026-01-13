@@ -137,8 +137,7 @@ const PrivacyPage = () => {
         <p>
           <strong>Meet Transfer</strong><br />
           Email: info@meettransfer.app<br />
-          Phone/WhatsApp: +1 (555) 805-1101<br />
-          Address: Istanbul, Turkey
+          Phone/WhatsApp: +1 (555) 805-1101
         </p>
 
         <p className="text-muted-foreground text-sm mt-8">
