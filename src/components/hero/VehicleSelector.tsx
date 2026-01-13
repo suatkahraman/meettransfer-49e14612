@@ -23,15 +23,13 @@ const vehicleImages: Record<string, string> = {
   'minibus': sprinterImg,
 };
 
-// Hook to detect touch device - with passive event check
+// Hook to detect touch device - SSR safe with immediate check
 const useIsTouchDevice = () => {
-  const [isTouch, setIsTouch] = useState(false);
-  
-  useEffect(() => {
-    // Check on mount without causing reflow
-    const checkTouch = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    setIsTouch(checkTouch());
-  }, []);
+  // Initialize with SSR-safe check
+  const [isTouch, setIsTouch] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  });
   
   return isTouch;
 };
