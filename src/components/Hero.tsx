@@ -29,6 +29,8 @@ import { CompactRouteMap } from "@/components/ui/compact-route-map";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VehicleTooltip } from "@/components/VehicleTooltip";
+import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
+import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 
 // Vehicle image mapping
 const vehicleImages: Record<string, string> = {
@@ -720,48 +722,37 @@ export const Hero = () => {
                       {pickup && dropoff && <CompactRouteMap pickup={pickup} dropoff={dropoff} className="mt-2" />}
                     </div>
 
-                    {/* Date, Time, Passengers */}
+                    {/* Date, Time, Passengers with Floating Labels */}
                     <div className="grid grid-cols-3 gap-2">
-                      <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className={cn(
-                            "w-full h-11 justify-start bg-muted/50 border-border rounded-xl text-xs px-2.5",
-                            !date && "text-muted-foreground"
-                          )}>
-                            <CalendarIcon className="mr-1 h-3.5 w-3.5 text-primary" />
-                            <span className="truncate">{date ? format(date, "dd MMM") : t("date") || "Date"}</span>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 z-50" align="start">
-                          <Calendar mode="single" selected={date} 
-                            onSelect={(d) => { setDate(d); setDatePopoverOpen(false); }} 
-                            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-                            initialFocus className="p-3" 
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <FloatingLabelDatePicker
+                        label={t("date") || "Date"}
+                        date={date}
+                        onSelect={setDate}
+                        icon={<CalendarIcon className="h-4 w-4" />}
+                        disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                        className="col-span-1"
+                      />
                       
-                      <Select value={time} onValueChange={setTime}>
-                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-xs px-2.5">
-                          <Clock className="mr-1 h-3.5 w-3.5 text-primary" />
-                          <span className="truncate">{time || t("time") || "Time"}</span>
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[250px] z-50">
-                          {timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                      <FloatingLabelSelect
+                        label={t("time") || "Time"}
+                        value={time}
+                        onValueChange={setTime}
+                        options={timeOptions.map(opt => ({ value: opt, label: opt }))}
+                        icon={<Clock className="h-4 w-4" />}
+                        className="col-span-1"
+                      />
                       
-                      <Select value={passengers} onValueChange={setPassengers}>
-                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-xs px-2.5">
-                          <Users className="mr-1 h-3.5 w-3.5 text-primary" />
-                          <span>{passengers}</span>
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[250px] z-50">
-                          {Array.from({ length: 18 }, (_, i) => i + 1).map((num) => (
-                            <SelectItem key={num} value={num.toString()}>{num} pax</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FloatingLabelSelect
+                        label={t("passengers") || "Passengers"}
+                        value={passengers}
+                        onValueChange={setPassengers}
+                        options={Array.from({ length: 18 }, (_, i) => ({ 
+                          value: (i + 1).toString(), 
+                          label: `${i + 1} pax` 
+                        }))}
+                        icon={<Users className="h-4 w-4" />}
+                        className="col-span-1"
+                      />
                     </div>
 
                     {/* Vehicle Selection with Images & Tooltips */}
@@ -920,47 +911,37 @@ export const Hero = () => {
                       </Select>
                     )}
 
+                    {/* Hourly Date, Time, Passengers with Floating Labels */}
                     <div className="grid grid-cols-3 gap-2">
-                      <Popover open={hourlyDatePopoverOpen} onOpenChange={setHourlyDatePopoverOpen}>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className={cn(
-                            "w-full h-11 justify-start bg-muted/50 border-border rounded-xl text-xs px-2.5",
-                            !hourlyDate && "text-muted-foreground"
-                          )}>
-                            <CalendarIcon className="mr-1 h-3.5 w-3.5 text-primary" />
-                            <span className="truncate">{hourlyDate ? format(hourlyDate, "dd MMM") : t("date") || "Date"}</span>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 z-50" align="start">
-                          <Calendar mode="single" selected={hourlyDate} 
-                            onSelect={(d) => { setHourlyDate(d); setHourlyDatePopoverOpen(false); }} 
-                            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-                            initialFocus className="p-3" 
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <FloatingLabelDatePicker
+                        label={t("date") || "Date"}
+                        date={hourlyDate}
+                        onSelect={setHourlyDate}
+                        icon={<CalendarIcon className="h-4 w-4" />}
+                        disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                        className="col-span-1"
+                      />
                       
-                      <Select value={hourlyTime} onValueChange={setHourlyTime}>
-                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-xs px-2.5">
-                          <Clock className="mr-1 h-3.5 w-3.5 text-primary" />
-                          <span className="truncate">{hourlyTime || t("time") || "Time"}</span>
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[250px] z-50">
-                          {timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                      <FloatingLabelSelect
+                        label={t("time") || "Time"}
+                        value={hourlyTime}
+                        onValueChange={setHourlyTime}
+                        options={timeOptions.map(opt => ({ value: opt, label: opt }))}
+                        icon={<Clock className="h-4 w-4" />}
+                        className="col-span-1"
+                      />
                       
-                      <Select value={hourlyPassengers} onValueChange={setHourlyPassengers}>
-                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-xs px-2.5">
-                          <Users className="mr-1 h-3.5 w-3.5 text-primary" />
-                          <span>{hourlyPassengers}</span>
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[250px] z-50">
-                          {Array.from({ length: 6 }, (_, i) => i + 1).map((num) => (
-                            <SelectItem key={num} value={num.toString()}>{num} pax</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FloatingLabelSelect
+                        label={t("passengers") || "Passengers"}
+                        value={hourlyPassengers}
+                        onValueChange={setHourlyPassengers}
+                        options={Array.from({ length: 6 }, (_, i) => ({ 
+                          value: (i + 1).toString(), 
+                          label: `${i + 1} pax` 
+                        }))}
+                        icon={<Users className="h-4 w-4" />}
+                        className="col-span-1"
+                      />
                     </div>
 
                     {hourlyCity && hourlyDuration && (
