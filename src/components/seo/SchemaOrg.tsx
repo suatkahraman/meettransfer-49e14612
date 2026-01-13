@@ -79,22 +79,24 @@ const baseUrl = 'https://meettransfer.app';
 
 const companyInfo = {
   name: 'Meet Transfer',
-  legalName: 'Meet Transfer Ltd.',
+  legalName: 'Meet Transfer USA, LLC',
   url: baseUrl,
   logo: `${baseUrl}/favicon.png`,
-  description: 'Premium VIP airport transfer and chauffeur service in Turkey, Dubai and Cyprus. Luxury Mercedes fleet with professional drivers.',
+  description: 'Premium VIP airport transfer and chauffeur service worldwide. Luxury Mercedes fleet with professional drivers.',
   telephone: '+15558051101',
   email: 'info@meettransfer.app',
   address: {
     '@type': 'PostalAddress',
-    addressCountry: 'TR',
-    addressLocality: 'Istanbul',
-    addressRegion: 'Istanbul',
+    addressCountry: 'US',
+    addressLocality: 'Sheridan',
+    addressRegion: 'Wyoming',
+    postalCode: '82801',
+    streetAddress: '30 N Gould St',
   },
   geo: {
     '@type': 'GeoCoordinates',
-    latitude: 41.0082,
-    longitude: 28.9784,
+    latitude: 44.7972,
+    longitude: -106.9561,
   },
   openingHoursSpecification: {
     '@type': 'OpeningHoursSpecification',
@@ -148,11 +150,11 @@ const generateLocalBusinessSchema = (
             name: 'VIP Airport Transfer',
             description: 'Luxury airport transfer with meet & greet service',
           },
-          hasMerchantReturnPolicy: {
-            '@type': 'MerchantReturnPolicy',
-            applicableCountry: 'TR',
-            returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
-          },
+        hasMerchantReturnPolicy: {
+          '@type': 'MerchantReturnPolicy',
+          applicableCountry: 'US',
+          returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+        },
         },
         {
           '@type': 'Offer',
@@ -161,11 +163,11 @@ const generateLocalBusinessSchema = (
             name: 'Hourly Chauffeur Service',
             description: 'Private chauffeur service by the hour',
           },
-          hasMerchantReturnPolicy: {
-            '@type': 'MerchantReturnPolicy',
-            applicableCountry: 'TR',
-            returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
-          },
+        hasMerchantReturnPolicy: {
+          '@type': 'MerchantReturnPolicy',
+          applicableCountry: 'US',
+          returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+        },
         },
       ],
     },
@@ -193,7 +195,7 @@ const generateTransportationServiceSchema = (areaServed?: string[]) => ({
   '@context': 'https://schema.org',
   '@type': 'TransportationService',
   name: 'Meet Transfer',
-  description: 'Premium VIP airport transfer and private chauffeur service across Turkey',
+  description: 'Premium VIP airport transfer and private chauffeur service worldwide',
   provider: {
     '@type': 'Organization',
     name: 'Meet Transfer',
@@ -215,7 +217,7 @@ const generateTransportationServiceSchema = (areaServed?: string[]) => ({
     availability: 'https://schema.org/InStock',
     hasMerchantReturnPolicy: {
       '@type': 'MerchantReturnPolicy',
-      applicableCountry: 'TR',
+      applicableCountry: 'US',
       returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
     },
   },
@@ -273,7 +275,7 @@ const generateMerchantProductSchema = () => ({
   '@context': 'https://schema.org',
   '@type': 'Service',
   name: 'Meet Transfer – VIP Airport Transfer Service',
-  description: 'Luxury private airport transfer service in Turkey with fixed prices, professional chauffeurs and VIP Mercedes vehicles.',
+  description: 'Luxury private airport transfer service worldwide with fixed prices, professional chauffeurs and VIP Mercedes vehicles.',
   provider: {
     '@type': 'Organization',
     name: 'Meet Transfer',
@@ -281,10 +283,11 @@ const generateMerchantProductSchema = () => ({
     logo: companyInfo.logo,
   },
   serviceType: 'Airport Transfer',
-  areaServed: {
-    '@type': 'Country',
-    name: 'Turkey',
-  },
+  areaServed: [
+    { '@type': 'Country', name: 'Turkey' },
+    { '@type': 'Country', name: 'United Arab Emirates' },
+    { '@type': 'Country', name: 'Cyprus' },
+  ],
   image: [
     'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
     'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
@@ -298,7 +301,7 @@ const generateMerchantProductSchema = () => ({
     availability: 'https://schema.org/InStock',
     hasMerchantReturnPolicy: {
       '@type': 'MerchantReturnPolicy',
-      applicableCountry: 'TR',
+      applicableCountry: 'US',
       returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
     },
   },

@@ -271,9 +271,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Services Page
     servicesTitle: "Premium VIP Airport & Chauffeur Services",
-    servicesSubtitle: "Luxury transfers across Turkey's top destinations",
-    servicesMainTitle: "VIP Airport Transfer Services Across Turkey",
-    servicesIntro: "Meet Transfer provides luxury airport transfers, private chauffeur service, and VIP minivan transportation across Turkey's most important airports and holiday destinations. Our fleet includes Mercedes Vito, Mercedes V-Class, VIP Minibuses, and Maybach options. All transfers include professional chauffeurs, flight tracking, meet & greet, bottled water, and 24/7 support.",
+    servicesSubtitle: "Luxury transfers across top destinations worldwide",
+    servicesMainTitle: "VIP Airport Transfer Services Worldwide",
+    servicesIntro: "Meet Transfer provides luxury airport transfers, private chauffeur service, and VIP minivan transportation across the most important airports and holiday destinations. Our fleet includes Mercedes Vito, Mercedes V-Class, VIP Minibuses, and Maybach options. All transfers include professional chauffeurs, flight tracking, meet & greet, bottled water, and 24/7 support.",
     readyToBook: "Ready to Book Your VIP Transfer?",
     contactViaWhatsApp: "Contact us via WhatsApp for instant booking and personalized service. Our team is available 24/7 to assist you.",
     
@@ -1960,9 +1960,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Services Page
     servicesTitle: "Premium VIP Flughafen- & Chauffeurservices",
-    servicesSubtitle: "Luxustransfers zu den Top-Destinationen der Türkei",
-    servicesMainTitle: "VIP Flughafentransfer-Services in der Türkei",
-    servicesIntro: "Meet Transfer bietet luxuriöse Flughafentransfers, privaten Chauffeurservice und VIP-Minivan-Transport zu den wichtigsten Flughäfen und Urlaubszielen der Türkei. Unsere Flotte umfasst Mercedes Vito, Mercedes V-Klasse, VIP-Minibusse und Maybach-Optionen. Alle Transfers beinhalten professionelle Chauffeure, Flugverfolgung, Meet & Greet, Wasser und 24/7-Support.",
+    servicesSubtitle: "Luxustransfers zu den Top-Destinationen weltweit",
+    servicesMainTitle: "VIP Flughafentransfer-Services Weltweit",
+    servicesIntro: "Meet Transfer bietet luxuriöse Flughafentransfers, privaten Chauffeurservice und VIP-Minivan-Transport zu den wichtigsten Flughäfen und Urlaubszielen weltweit. Unsere Flotte umfasst Mercedes Vito, Mercedes V-Klasse, VIP-Minibusse und Maybach-Optionen. Alle Transfers beinhalten professionelle Chauffeure, Flugverfolgung, Meet & Greet, Wasser und 24/7-Support.",
     readyToBook: "Bereit, Ihren VIP-Transfer zu buchen?",
     contactViaWhatsApp: "Kontaktieren Sie uns über WhatsApp für sofortige Buchung und persönlichen Service. Unser Team steht Ihnen 24/7 zur Verfügung.",
     
@@ -3691,9 +3691,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Services Page
     servicesTitle: "Services VIP Aéroport & Chauffeur Premium",
-    servicesSubtitle: "Transferts de luxe vers les meilleures destinations de Turquie",
-    servicesMainTitle: "Services de Transfert VIP Aéroport en Turquie",
-    servicesIntro: "Meet Transfer propose des transferts aéroport de luxe, un service de chauffeur privé et un transport VIP en minivan vers les aéroports et destinations de vacances les plus importants de Turquie. Notre flotte comprend Mercedes Vito, Mercedes Classe V, minibus VIP et options Maybach. Tous les transferts incluent chauffeurs professionnels, suivi de vol, accueil personnalisé, eau et support 24/7.",
+    servicesSubtitle: "Transferts de luxe vers les meilleures destinations du monde",
+    servicesMainTitle: "Services de Transfert VIP Aéroport Mondial",
+    servicesIntro: "Meet Transfer propose des transferts aéroport de luxe, un service de chauffeur privé et un transport VIP en minivan vers les aéroports et destinations de vacances les plus importantes du monde. Notre flotte comprend Mercedes Vito, Mercedes Classe V, minibus VIP et options Maybach. Tous les transferts incluent chauffeurs professionnels, suivi de vol, accueil personnalisé, eau et support 24/7.",
     readyToBook: "Prêt à réserver votre transfert VIP?",
     contactViaWhatsApp: "Contactez-nous via WhatsApp pour une réservation instantanée et un service personnalisé. Notre équipe est disponible 24/7 pour vous aider.",
     
@@ -5133,9 +5133,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Services Page
     servicesTitle: "Премиум VIP Аэропорт и Услуги Водителя",
-    servicesSubtitle: "Люкс трансферы по лучшим направлениям Турции",
-    servicesMainTitle: "VIP Трансфер из Аэропорта по Турции",
-    servicesIntro: "Meet Transfer предоставляет роскошные трансферы из аэропорта, частный сервис водителя и VIP транспорт на минивэнах по важнейшим аэропортам и курортам Турции. Наш автопарк включает Mercedes Vito, Mercedes V-Class, VIP минибусы и Maybach. Все трансферы включают профессиональных водителей, отслеживание рейса, встречу с табличкой, воду и поддержку 24/7.",
+    servicesSubtitle: "Люкс трансферы по лучшим направлениям мира",
+    servicesMainTitle: "VIP Трансфер из Аэропорта по всему Миру",
+    servicesIntro: "Meet Transfer предоставляет роскошные трансферы из аэропорта, частный сервис водителя и VIP транспорт на минивэнах по важнейшим аэропортам и курортам мира. Наш автопарк включает Mercedes Vito, Mercedes V-Class, VIP минибусы и Maybach. Все трансферы включают профессиональных водителей, отслеживание рейса, встречу с табличкой, воду и поддержку 24/7.",
     readyToBook: "Готовы забронировать VIP трансфер?",
     contactViaWhatsApp: "Свяжитесь с нами через WhatsApp для мгновенного бронирования и персонального сервиса. Наша команда доступна 24/7.",
     
@@ -6461,9 +6461,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Services Page
     servicesTitle: "Servizi VIP Aeroporto e Autista Premium",
-    servicesSubtitle: "Trasferimenti di lusso nelle migliori destinazioni della Turchia",
-    servicesMainTitle: "Servizi di Trasferimento VIP Aeroporto in Turchia",
-    servicesIntro: "Meet Transfer offre trasferimenti aeroportuali di lusso, servizio di autista privato e trasporto VIP in minivan verso gli aeroporti e le destinazioni turistiche più importanti della Turchia. La nostra flotta include Mercedes Vito, Mercedes Classe V, minibus VIP e opzioni Maybach. Tutti i trasferimenti includono autisti professionisti, tracciamento voli, accoglienza personalizzata, acqua e supporto 24/7.",
+    servicesSubtitle: "Trasferimenti di lusso nelle migliori destinazioni del mondo",
+    servicesMainTitle: "Servizi di Trasferimento VIP Aeroporto nel Mondo",
+    servicesIntro: "Meet Transfer offre trasferimenti aeroportuali di lusso, servizio di autista privato e trasporto VIP in minivan verso gli aeroporti e le destinazioni turistiche più importanti del mondo. La nostra flotta include Mercedes Vito, Mercedes Classe V, minibus VIP e opzioni Maybach. Tutti i trasferimenti includono autisti professionisti, tracciamento voli, accoglienza personalizzata, acqua e supporto 24/7.",
     readyToBook: "Pronto a prenotare il tuo trasferimento VIP?",
     contactViaWhatsApp: "Contattaci via WhatsApp per prenotazione istantanea e servizio personalizzato. Il nostro team è disponibile 24/7 per assisterti.",
     
@@ -7836,9 +7836,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Services Page
     servicesTitle: "Servicios VIP de Aeropuerto y Chófer Premium",
-    servicesSubtitle: "Traslados de lujo a los mejores destinos de Turquía",
-    servicesMainTitle: "Servicios de Traslado VIP en Turquía",
-    servicesIntro: "Meet Transfer ofrece traslados de lujo desde el aeropuerto, servicio de chófer privado y transporte VIP en minivan a los aeropuertos y destinos turísticos más importantes de Turquía. Nuestra flota incluye Mercedes Vito, Mercedes Clase V, minibuses VIP y opciones Maybach. Todos los traslados incluyen chóferes profesionales, seguimiento de vuelos, recepción personalizada, agua y soporte 24/7.",
+    servicesSubtitle: "Traslados de lujo a los mejores destinos del mundo",
+    servicesMainTitle: "Servicios de Traslado VIP en todo el Mundo",
+    servicesIntro: "Meet Transfer ofrece traslados de lujo desde el aeropuerto, servicio de chófer privado y transporte VIP en minivan a los aeropuertos y destinos turísticos más importantes del mundo. Nuestra flota incluye Mercedes Vito, Mercedes Clase V, minibuses VIP y opciones Maybach. Todos los traslados incluyen chóferes profesionales, seguimiento de vuelos, recepción personalizada, agua y soporte 24/7.",
     readyToBook: "¿Listo para reservar tu traslado VIP?",
     contactViaWhatsApp: "Contáctanos vía WhatsApp para reserva instantánea y servicio personalizado. Nuestro equipo está disponible 24/7 para asistirte.",
     
@@ -9211,9 +9211,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Services Page
     servicesTitle: "خدمات VIP للمطار والسائق الخاص",
-    servicesSubtitle: "نقل فاخر عبر أفضل وجهات تركيا",
-    servicesMainTitle: "خدمات نقل VIP من المطار في تركيا",
-    servicesIntro: "تقدم Meet Transfer خدمات نقل فاخرة من المطار، خدمة سائق خاص، ونقل VIP بالميني فان عبر أهم مطارات ووجهات العطلات في تركيا. يشمل أسطولنا مرسيدس فيتو، مرسيدس V-Class، ميني باص VIP، وخيارات مايباخ. جميع عمليات النقل تشمل سائقين محترفين، تتبع الرحلات، استقبال وترحيب، مياه معبأة، ودعم 24/7.",
+    servicesSubtitle: "نقل فاخر عبر أفضل الوجهات العالمية",
+    servicesMainTitle: "خدمات نقل VIP من المطار عالمياً",
+    servicesIntro: "تقدم Meet Transfer خدمات نقل فاخرة من المطار، خدمة سائق خاص، ونقل VIP بالميني فان عبر أهم المطارات ووجهات العطلات في العالم. يشمل أسطولنا مرسيدس فيتو، مرسيدس V-Class، ميني باص VIP، وخيارات مايباخ. جميع عمليات النقل تشمل سائقين محترفين، تتبع الرحلات، استقبال وترحيب، مياه معبأة، ودعم 24/7.",
     readyToBook: "مستعد لحجز نقل VIP الخاص بك؟",
     contactViaWhatsApp: "تواصل معنا عبر واتساب للحجز الفوري والخدمة الشخصية. فريقنا متاح 24/7 لمساعدتك.",
     
@@ -10505,9 +10505,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Services Page
     servicesTitle: "Premium VIP Havalimanı ve Şoför Hizmetleri",
-    servicesSubtitle: "Türkiye'nin en popüler destinasyonlarına lüks transferler",
-    servicesMainTitle: "Türkiye Genelinde VIP Havalimanı Transfer Hizmetleri",
-    servicesIntro: "Meet Transfer, Türkiye'nin en önemli havalimanları ve tatil destinasyonlarına lüks havalimanı transferleri, özel şoför hizmeti ve VIP minivan taşımacılığı sunmaktadır. Filomuz Mercedes Vito, Mercedes V-Class, VIP Minibüsler ve Maybach seçeneklerini içerir. Tüm transferler profesyonel şoförler, uçuş takibi, karşılama, su ve 7/24 destek içerir.",
+    servicesSubtitle: "Dünya genelinde en popüler destinasyonlara lüks transferler",
+    servicesMainTitle: "Dünya Genelinde VIP Havalimanı Transfer Hizmetleri",
+    servicesIntro: "Meet Transfer, dünyanın en önemli havalimanları ve tatil destinasyonlarına lüks havalimanı transferleri, özel şoför hizmeti ve VIP minivan taşımacılığı sunmaktadır. Filomuz Mercedes Vito, Mercedes V-Class, VIP Minibüsler ve Maybach seçeneklerini içerir. Tüm transferler profesyonel şoförler, uçuş takibi, karşılama, su ve 7/24 destek içerir.",
     readyToBook: "VIP Transferinizi Rezerve Etmeye Hazır mısınız?",
     contactViaWhatsApp: "Anında rezervasyon ve kişiselleştirilmiş hizmet için WhatsApp üzerinden bizimle iletişime geçin. Ekibimiz size yardımcı olmak için 7/24 hazır.",
     
@@ -12008,9 +12008,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Services Page
     servicesTitle: "Преміум VIP аеропортові та шоферські послуги",
-    servicesSubtitle: "Люксові трансфери до найпопулярніших напрямків Туреччини",
-    servicesMainTitle: "VIP трансфери з аеропорту по всій Туреччині",
-    servicesIntro: "Meet Transfer забезпечує люксові трансфери з аеропорту, приватний шоферський сервіс та VIP мікроавтобусні перевезення по найважливіших аеропортах та туристичних напрямках Туреччини. Наш автопарк включає Mercedes Vito, Mercedes V-Class, VIP мікроавтобуси та Maybach. Всі трансфери включають професійних водіїв, відстеження рейсів, зустріч, воду та підтримку 24/7.",
+    servicesSubtitle: "Люксові трансфери до найпопулярніших напрямків світу",
+    servicesMainTitle: "VIP трансфери з аеропорту по всьому Світу",
+    servicesIntro: "Meet Transfer забезпечує люксові трансфери з аеропорту, приватний шоферський сервіс та VIP мікроавтобусні перевезення по найважливіших аеропортах та туристичних напрямках світу. Наш автопарк включає Mercedes Vito, Mercedes V-Class, VIP мікроавтобуси та Maybach. Всі трансфери включають професійних водіїв, відстеження рейсів, зустріч, воду та підтримку 24/7.",
     readyToBook: "Готові забронювати VIP трансфер?",
     contactViaWhatsApp: "Зв'яжіться з нами через WhatsApp для миттєвого бронювання. Наша команда доступна 24/7.",
     
@@ -13277,9 +13277,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Services Page
     servicesTitle: "プレミアムVIP空港・シャトルサービス",
-    servicesSubtitle: "トルコの主要目的地への高級送迎",
-    servicesMainTitle: "トルコ全土のVIP空港送迎サービス",
-    servicesIntro: "ミートトランスファーは、トルコの人気観光地への高級空港送迎、プライベートシャトルサービス、VIPミニバン輸送を提供しています。車両にはメルセデス・ヴィト、メルセデス・Vクラス、VIPミニバス、マイバッハオプションがあります。すべての送迎にはプロのシャトル、フライト追跡、ミート＆グリート、ボトルウォーター、24時間サポートが含まれています。",
+    servicesSubtitle: "世界中の主要目的地への高級送迎",
+    servicesMainTitle: "世界中のVIP空港送迎サービス",
+    servicesIntro: "ミートトランスファーは、世界の人気観光地への高級空港送迎、プライベートシャトルサービス、VIPミニバン輸送を提供しています。車両にはメルセデス・ヴィト、メルセデス・Vクラス、VIPミニバス、マイバッハオプションがあります。すべての送迎にはプロのシャトル、フライト追跡、ミート＆グリート、ボトルウォーター、24時間サポートが含まれています。",
     readyToBook: "VIP送迎を予約する準備はできましたか？",
     contactViaWhatsApp: "即時予約とパーソナライズされたサービスについては、WhatsAppでお問い合わせください。チームは24時間対応しています。",
     
