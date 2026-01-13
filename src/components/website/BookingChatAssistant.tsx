@@ -80,15 +80,25 @@ function isSpeechRecognitionSupported(): boolean {
   return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 }
 
-// Voice recording hook using Web Speech API with iOS Safari support
+// Voice recording hook using Web Speech API with Whisper fallback for unsupported browsers
 function useVoiceRecorder(onTranscription: (text: string) => void, language: string) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showBrowserWarning, setShowBrowserWarning] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const [useWhisperFallback, setUseWhisperFallback] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const isSupported = isSpeechRecognitionSupported();
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const isNativeSupported = isSpeechRecognitionSupported();
   const transcriptRef = useRef<string>('');
+
+  // Check if MediaRecorder is supported for Whisper fallback
+  const isMediaRecorderSupported = typeof MediaRecorder !== 'undefined';
+  
+  // Effective support: native or fallback
+  const isSupported = isNativeSupported || isMediaRecorderSupported;
 
   // Detect iOS Safari
   const isIOS = useCallback(() => {
@@ -120,9 +130,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
   // Request microphone permission explicitly for iOS
   const requestMicrophonePermission = useCallback(async (): Promise<boolean> => {
     try {
-      // Request audio permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Stop the stream immediately, we just needed permission
       stream.getTracks().forEach(track => track.stop());
       setPermissionGranted(true);
       return true;
@@ -133,11 +141,153 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     }
   }, []);
 
+  // Send audio to Whisper API for transcription
+  const transcribeWithWhisper = useCallback(async (audioBlob: Blob) => {
+    console.log('🎤 Whisper: Transcribing audio blob, size:', audioBlob.size);
+    setIsProcessing(true);
+    
+    try {
+      // Convert blob to base64
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      let binary = '';
+      const chunkSize = 0x8000;
+      
+      for (let i = 0; i < uint8Array.length; i += chunkSize) {
+        const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
+        binary += String.fromCharCode.apply(null, Array.from(chunk));
+      }
+      
+      const base64Audio = btoa(binary);
+      console.log('🎤 Whisper: Base64 audio length:', base64Audio.length);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-to-text`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ audio: base64Audio, language }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('🎤 Whisper: API error:', response.status, errorText);
+        throw new Error(`Whisper API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('🎤 Whisper: Transcription result:', result.text);
+      
+      if (result.text && result.text.trim()) {
+        onTranscription(result.text.trim());
+      }
+    } catch (error) {
+      console.error('🎤 Whisper: Transcription error:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [language, onTranscription]);
+
+  // Start recording with Whisper fallback
+  const startWhisperRecording = useCallback(async () => {
+    console.log('🎤 Whisper: Starting recording...');
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 16000,
+        }
+      });
+      
+      streamRef.current = stream;
+      audioChunksRef.current = [];
+      
+      // Determine supported MIME type
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : MediaRecorder.isTypeSupported('audio/mp4')
+        ? 'audio/mp4'
+        : 'audio/wav';
+      
+      console.log('🎤 Whisper: Using MIME type:', mimeType);
+      
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = mediaRecorder;
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+          console.log('🎤 Whisper: Audio chunk received, size:', event.data.size);
+        }
+      };
+      
+      mediaRecorder.onstop = async () => {
+        console.log('🎤 Whisper: Recording stopped, chunks:', audioChunksRef.current.length);
+        
+        if (audioChunksRef.current.length > 0) {
+          const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+          console.log('🎤 Whisper: Total audio blob size:', audioBlob.size);
+          
+          if (audioBlob.size > 1000) { // Only transcribe if there's meaningful audio
+            await transcribeWithWhisper(audioBlob);
+          } else {
+            console.log('🎤 Whisper: Audio too short, skipping transcription');
+          }
+        }
+        
+        // Cleanup stream
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+          streamRef.current = null;
+        }
+      };
+      
+      mediaRecorder.start(100); // Collect data every 100ms
+      setIsRecording(true);
+      console.log('🎤 Whisper: Recording started');
+      
+    } catch (error) {
+      console.error('🎤 Whisper: Error starting recording:', error);
+      setShowBrowserWarning(true);
+    }
+  }, [transcribeWithWhisper]);
+
+  // Stop Whisper recording
+  const stopWhisperRecording = useCallback(() => {
+    console.log('🎤 Whisper: Stopping recording...');
+    
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    
+    setIsRecording(false);
+  }, []);
+
   const startRecording = useCallback(async () => {
     console.log('🎤 startRecording called');
     console.log('🎤 Browser info:', navigator.userAgent);
     console.log('🎤 Is iOS:', isIOS());
     console.log('🎤 Permission granted:', permissionGranted);
+    console.log('🎤 Native Speech API supported:', isNativeSupported);
+    console.log('🎤 MediaRecorder supported:', isMediaRecorderSupported);
+    
+    // If Web Speech API is not supported, use Whisper fallback
+    if (!isNativeSupported) {
+      console.log('🎤 Using Whisper fallback (Web Speech API not supported)');
+      setUseWhisperFallback(true);
+      await startWhisperRecording();
+      return;
+    }
     
     // Check for browser support
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -145,8 +295,9 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     console.log('🎤 SpeechRecognition available:', !!SpeechRecognition);
     
     if (!SpeechRecognition) {
-      console.error('🎤 Speech recognition not supported in this browser');
-      setShowBrowserWarning(true);
+      console.log('🎤 Falling back to Whisper');
+      setUseWhisperFallback(true);
+      await startWhisperRecording();
       return;
     }
 
@@ -168,10 +319,8 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         console.log('🎤 iOS microphone stream obtained:', stream);
         console.log('🎤 Audio tracks:', stream.getAudioTracks().length);
         
-        // Keep stream reference for iOS - stopping immediately can cause issues
         stream.getTracks().forEach(track => {
           console.log('🎤 Microphone track:', track.label, 'state:', track.readyState, 'enabled:', track.enabled);
-          // Don't stop immediately on iOS - let it stay active briefly
           setTimeout(() => {
             track.stop();
             console.log('🎤 Track stopped after delay');
@@ -187,7 +336,6 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         return;
       }
     } else if (!permissionGranted) {
-      // For non-iOS, use standard permission request
       console.log('🎤 Non-iOS: requesting permission...');
       const granted = await requestMicrophonePermission();
       console.log('🎤 Permission result:', granted);
@@ -197,7 +345,6 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     }
 
     try {
-      // Stop any existing recognition
       if (recognitionRef.current) {
         console.log('🎤 Stopping existing recognition...');
         try {
@@ -215,9 +362,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       console.log('🎤 Setting language:', langCode);
       recognition.lang = langCode;
       
-      // For iOS Safari, enable interim results for better UX
       recognition.interimResults = true;
-      // Don't use continuous on iOS - it can cause issues
       recognition.continuous = !isIOS();
       recognition.maxAlternatives = 1;
 
@@ -228,13 +373,13 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         maxAlternatives: recognition.maxAlternatives
       });
 
-      // Reset transcript
       transcriptRef.current = '';
 
       recognition.onstart = () => {
         console.log('🎤 ✅ Speech recognition STARTED successfully');
         setIsRecording(true);
         setIsProcessing(false);
+        setUseWhisperFallback(false);
       };
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -255,14 +400,12 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
           }
         }
 
-        // Use final transcript if available, otherwise interim
         const transcript = finalTranscript || interimTranscript;
         
         if (transcript) {
           transcriptRef.current = transcript;
           console.log('🎤 Current transcript:', transcript, 'isFinal:', !!finalTranscript);
           
-          // For non-iOS or final results, trigger transcription immediately
           if (finalTranscript) {
             console.log('🎤 Sending final transcript to onTranscription...');
             setIsProcessing(true);
@@ -276,14 +419,18 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         console.error('🎤 ❌ Speech recognition ERROR:', event.error);
         console.error('🎤 Error message:', event.message);
         
-        // Handle specific iOS errors
+        // If speech recognition fails, try Whisper fallback
         if (event.error === 'not-allowed') {
           console.error('🎤 Permission not allowed - showing warning');
           setShowBrowserWarning(true);
           setPermissionGranted(false);
+        } else if (event.error === 'network' || event.error === 'service-not-allowed') {
+          console.log('🎤 Network/service error - trying Whisper fallback');
+          setUseWhisperFallback(true);
+          startWhisperRecording();
+          return;
         }
         
-        // Don't set isRecording to false for "no-speech" on iOS
         if (event.error !== 'no-speech') {
           setIsRecording(false);
         } else {
@@ -295,10 +442,8 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       recognition.onend = () => {
         console.log('🎤 Speech recognition ENDED');
         console.log('🎤 Current transcript ref:', transcriptRef.current);
-        console.log('🎤 isProcessing:', isProcessing);
         
-        // On iOS, if we have an interim transcript but no final, use it
-        if (isIOS() && transcriptRef.current && !isProcessing) {
+        if (isIOS() && transcriptRef.current) {
           console.log('🎤 iOS: Using interim transcript as final');
           setIsProcessing(true);
           onTranscription(transcriptRef.current);
@@ -308,7 +453,6 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         setIsRecording(false);
       };
 
-      // Add event listeners using addEventListener for better type safety
       (recognition as any).onaudiostart = () => {
         console.log('🎤 Audio capture started');
       };
@@ -341,23 +485,31 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       console.error('🎤 Error name:', (error as Error).name);
       console.error('🎤 Error message:', (error as Error).message);
       console.error('🎤 Error stack:', (error as Error).stack);
-      setIsRecording(false);
+      
+      // Try Whisper fallback on any error
+      console.log('🎤 Trying Whisper fallback after error...');
+      setUseWhisperFallback(true);
+      await startWhisperRecording();
     }
-  }, [language, getLanguageCode, onTranscription, isIOS, permissionGranted, requestMicrophonePermission, isProcessing]);
+  }, [language, getLanguageCode, onTranscription, isIOS, permissionGranted, requestMicrophonePermission, isNativeSupported, isMediaRecorderSupported, startWhisperRecording]);
 
   const stopRecording = useCallback(() => {
-    console.log('Stopping recording, isRecording:', isRecording);
-    if (recognitionRef.current) {
+    console.log('Stopping recording, isRecording:', isRecording, 'useWhisperFallback:', useWhisperFallback);
+    
+    if (useWhisperFallback) {
+      stopWhisperRecording();
+    } else if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
       } catch (e) {
         console.error('Error stopping recognition:', e);
       }
     }
+    
     setIsRecording(false);
-  }, [isRecording]);
+  }, [isRecording, useWhisperFallback, stopWhisperRecording]);
 
-  return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning };
+  return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning, useWhisperFallback };
 }
 
 // Voice option type
