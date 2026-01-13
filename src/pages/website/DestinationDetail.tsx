@@ -9,6 +9,7 @@ import PriceTable from "@/components/website/PriceTable";
 import FAQSection from "@/components/website/FAQSection";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import VehicleComparison from "@/components/website/VehicleComparison";
+import DestinationMap from "@/components/website/DestinationMap";
 import { motion } from "framer-motion";
 import { 
   MapPin, Star, Plane, Users, Luggage, Clock, Shield, 
@@ -529,6 +530,9 @@ const DestinationDetail = () => {
 
         {/* Feature List */}
         <FeatureList />
+
+        {/* City Map & Popular Locations */}
+        <DestinationMap cityKey={cityName || ''} />
 
         {/* Locations Grid */}
         <motion.section
