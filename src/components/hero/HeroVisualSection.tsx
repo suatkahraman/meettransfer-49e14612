@@ -47,6 +47,10 @@ export const HeroVisualSection = memo(({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const currentVideo = cityVideos[currentVideoIndex];
+  const showVideo = !isMobile && videosLoaded && cityVideos.length > 0;
+  const currentGalleryImage = GALLERY_IMAGES[galleryIndex];
+
   // Auto-rotate gallery images when video is not showing
   useEffect(() => {
     if (showVideo) return; // Don't rotate if video is playing
@@ -56,11 +60,8 @@ export const HeroVisualSection = memo(({
     }, 4000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [showVideo]);
 
-  const currentVideo = cityVideos[currentVideoIndex];
-  const showVideo = !isMobile && videosLoaded && cityVideos.length > 0;
-  const currentGalleryImage = GALLERY_IMAGES[galleryIndex];
 
   const nextImage = () => setGalleryIndex((prev) => (prev + 1) % GALLERY_IMAGES.length);
   const prevImage = () => setGalleryIndex((prev) => (prev - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length);
