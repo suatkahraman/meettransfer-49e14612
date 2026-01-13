@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { format, parse } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, Users, MapPin, Zap } from "lucide-react";
+import { Car, Timer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
@@ -250,7 +249,11 @@ export const Hero = () => {
     return () => clearTimeout(timer);
   }, [pickup, dropoff]);
 
-  const availableDurations = hourlyCity ? (cityDurations[hourlyCity] || []) : [];
+  // Memoize available durations
+  const availableDurations = useMemo(() => 
+    hourlyCity ? (cityDurations[hourlyCity] || []) : [],
+    [hourlyCity, cityDurations]
+  );
   
   useEffect(() => {
     if (hourlyCity && availableDurations.length > 0 && !availableDurations.includes(hourlyDuration)) setHourlyDuration(availableDurations[0]);
@@ -301,7 +304,7 @@ export const Hero = () => {
     fetchPrices();
   }, [hourlyCity, hourlyDuration, customHours]);
 
-  const handleRideContinue = () => {
+  const handleRideContinue = useCallback(() => {
     const missing: string[] = [];
     if (!pickup) missing.push(t("pickupPoint") || "Pickup");
     if (!dropoff) missing.push(t("dropoffLocation") || "Drop-off");
@@ -315,9 +318,9 @@ export const Hero = () => {
     params.set("passengers", passengers); params.set("vehicleType", vehicleType);
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
     navigate(`/book?${params.toString()}`);
-  };
+  }, [pickup, dropoff, date, time, passengers, vehicleType, appliedPromoCode, navigate, t]);
 
-  const handleHourlyContinue = () => {
+  const handleHourlyContinue = useCallback(() => {
     const missing: string[] = [];
     if (!hourlyCity) missing.push(t("city") || "City");
     if (!hourlyDate) missing.push(t("pickupDate") || "Date");
@@ -330,11 +333,39 @@ export const Hero = () => {
     params.set("passengers", hourlyPassengers); params.set("vehicleType", hourlyVehicleType); params.set("type", "hourly");
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
     navigate(`/book?${params.toString()}`);
-  };
+  }, [hourlyCity, hourlyDate, hourlyTime, hourlyDuration, customHours, hourlyPassengers, hourlyVehicleType, appliedPromoCode, navigate, t]);
 
-  const handlePickupSelected = (value: string, details?: PlaceDetails) => setPickup(details?.displayText || value);
-  const handleDropoffSelected = (value: string, details?: PlaceDetails) => setDropoff(details?.displayText || value);
-  const handleSwapLocations = () => { const temp = pickup; setPickup(dropoff); setDropoff(temp); };
+  // Memoize callbacks to prevent child re-renders
+  const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => 
+    setPickup(details?.displayText || value), 
+    []
+  );
+  
+  const handleDropoffSelected = useCallback((value: string, details?: PlaceDetails) => 
+    setDropoff(details?.displayText || value), 
+    []
+  );
+  
+  const handleSwapLocations = useCallback(() => { 
+    setPickup(prev => {
+      setDropoff(prevDropoff => prev);
+      return dropoff;
+    });
+  }, [dropoff]);
+  
+  // Memoize setters wrapped as stable callbacks
+  const handleSetDate = useCallback((d: Date | undefined) => setDate(d), []);
+  const handleSetTime = useCallback((t: string) => setTime(t), []);
+  const handleSetPassengers = useCallback((p: string) => setPassengers(p), []);
+  const handleSetVehicleType = useCallback((v: string) => setVehicleType(v), []);
+  
+  const handleSetHourlyCity = useCallback((c: string) => setHourlyCity(c), []);
+  const handleSetHourlyDuration = useCallback((d: string) => setHourlyDuration(d), []);
+  const handleSetCustomHours = useCallback((h: string) => setCustomHours(h), []);
+  const handleSetHourlyDate = useCallback((d: Date | undefined) => setHourlyDate(d), []);
+  const handleSetHourlyTime = useCallback((t: string) => setHourlyTime(t), []);
+  const handleSetHourlyPassengers = useCallback((p: string) => setHourlyPassengers(p), []);
+  const handleSetHourlyVehicleType = useCallback((v: string) => setHourlyVehicleType(v), []);
 
   const handleApplyBooking = useCallback((data: BookingData) => {
     if (data.pickup) setPickup(data.pickup);
@@ -407,10 +438,10 @@ export const Hero = () => {
                       onPickupSelected={handlePickupSelected}
                       onDropoffSelected={handleDropoffSelected}
                       onSwapLocations={handleSwapLocations}
-                      setDate={setDate}
-                      setTime={setTime}
-                      setPassengers={setPassengers}
-                      setVehicleType={setVehicleType}
+                      setDate={handleSetDate}
+                      setTime={handleSetTime}
+                      setPassengers={handleSetPassengers}
+                      setVehicleType={handleSetVehicleType}
                       handleRideContinue={handleRideContinue}
                     />
                   ) : (
@@ -429,13 +460,13 @@ export const Hero = () => {
                       availableDurations={availableDurations}
                       language={language}
                       t={t}
-                      setHourlyCity={setHourlyCity}
-                      setHourlyDuration={setHourlyDuration}
-                      setCustomHours={setCustomHours}
-                      setHourlyDate={setHourlyDate}
-                      setHourlyTime={setHourlyTime}
-                      setHourlyPassengers={setHourlyPassengers}
-                      setHourlyVehicleType={setHourlyVehicleType}
+                      setHourlyCity={handleSetHourlyCity}
+                      setHourlyDuration={handleSetHourlyDuration}
+                      setCustomHours={handleSetCustomHours}
+                      setHourlyDate={handleSetHourlyDate}
+                      setHourlyTime={handleSetHourlyTime}
+                      setHourlyPassengers={handleSetHourlyPassengers}
+                      setHourlyVehicleType={handleSetHourlyVehicleType}
                       handleHourlyContinue={handleHourlyContinue}
                     />
                   )}
