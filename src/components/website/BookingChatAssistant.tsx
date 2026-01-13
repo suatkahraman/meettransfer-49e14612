@@ -954,11 +954,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   setIsOpen(false);
                 }
               }}
-              className="fixed inset-x-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col touch-pan-x"
+              className="fixed inset-x-0 bottom-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border"
               style={{ 
-                bottom: 0,
-                top: '15%',
-                maxHeight: '85dvh'
+                height: '60vh',
+                maxHeight: '500px'
               }}
             >
               {/* Drag Handle - Swipe indicator */}
@@ -1002,8 +1001,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 </div>
               </div>
 
-              {/* Mobile Messages - Flexible height */}
-              <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: 'calc(100dvh - 200px)' }}>
+              {/* Mobile Messages - Fixed height scroll area */}
+              <ScrollArea className="flex-1 overflow-y-auto" style={{ height: 'calc(60vh - 140px)', maxHeight: '360px' }}>
                 <div className="p-3 space-y-2.5">
                   {messages.map((msg) => (
                     <div
@@ -1096,10 +1095,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 </div>
               </ScrollArea>
 
-              {/* Mobile Input - Sticky at bottom */}
+              {/* Mobile Input - Always visible at bottom */}
               <div 
-                className="shrink-0 p-3 border-t border-border bg-card"
-                style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+                className="absolute bottom-0 left-0 right-0 p-3 border-t border-border bg-card"
+                style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
               >
                 {/* Recording indicator */}
                 {isRecording && (
