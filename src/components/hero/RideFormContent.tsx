@@ -1,4 +1,4 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useMemo } from "react";
 import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, ChevronDown, ChevronUp, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
@@ -6,11 +6,11 @@ import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepick
 import { LocationInputs, VehicleSelector } from "@/components/hero";
 import { VehiclePrice } from "./types";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-const generateTimeOptions = () => {
+// Memoize time options generation - only compute once
+const timeOptions = (() => {
   const times: string[] = [];
   for (let hour = 0; hour < 24; hour++) {
     for (let minute = 0; minute < 60; minute += 30) {
@@ -18,9 +18,7 @@ const generateTimeOptions = () => {
     }
   }
   return times;
-};
-
-const timeOptions = generateTimeOptions();
+})();
 
 interface RideFormContentProps {
   pickup: string;
@@ -79,7 +77,24 @@ export const RideFormContent = memo(({
   const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
   
   const hasRoute = !!(pickup && dropoff);
-  const selectedPrice = allVehiclePrices.find(p => p.vehicleType === vehicleType);
+  
+  // Memoize price lookup
+  const selectedPrice = useMemo(() => 
+    allVehiclePrices.find(p => p.vehicleType === vehicleType),
+    [allVehiclePrices, vehicleType]
+  );
+  
+  // Memoize time options for Select
+  const memoizedTimeOptions = useMemo(() => 
+    timeOptions.map(opt => ({ value: opt, label: opt })),
+    []
+  );
+  
+  // Memoize passenger options
+  const passengerOptions = useMemo(() => 
+    Array.from({ length: 18 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1}` })),
+    []
+  );
 
   const validateAndContinue = useCallback(() => {
     const newErrors: ValidationErrors = {};
@@ -181,24 +196,24 @@ export const RideFormContent = memo(({
           />
         </div>
         <div className={cn(shakeFields.time && "animate-shake")}>
-          <FloatingLabelSelect 
-            label={t("time") || "Time"} 
-            value={time} 
-            onValueChange={handleTimeChange} 
-            options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
-            icon={<Clock className="h-4 w-4 md:h-4 md:w-4" />} 
-            className="col-span-1" 
-            triggerClassName={cn(
-              "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm",
-              errors.time && "border-destructive ring-2 ring-destructive/20"
-            )}
-          />
+        <FloatingLabelSelect 
+          label={t("time") || "Time"} 
+          value={time} 
+          onValueChange={handleTimeChange} 
+          options={memoizedTimeOptions} 
+          icon={<Clock className="h-4 w-4 md:h-4 md:w-4" />} 
+          className="col-span-1" 
+          triggerClassName={cn(
+            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm",
+            errors.time && "border-destructive ring-2 ring-destructive/20"
+          )}
+        />
         </div>
         <FloatingLabelSelect 
           label={t("passengers") || "Pax"} 
           value={passengers} 
           onValueChange={setPassengers} 
-          options={Array.from({ length: 18 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1}` }))} 
+          options={passengerOptions} 
           icon={<Users className="h-4 w-4 md:h-4 md:w-4" />} 
           className="col-span-1" 
           triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm"
@@ -231,32 +246,27 @@ export const RideFormContent = memo(({
           )}
         </button>
 
-        {/* Mobile: Expandable vehicle selector */}
-        <AnimatePresence>
-          {showVehicles && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden md:hidden"
-            >
-              <VehicleSelector 
-                selectedVehicle={vehicleType} 
-                onSelectVehicle={(type) => {
-                  setVehicleType(type);
-                  setShowVehicles(false);
-                }} 
-                passengers={passengers} 
-                prices={allVehiclePrices} 
-                loadingPrices={loadingTransferPrice} 
-                hasRoute={hasRoute} 
-                language={language} 
-                currency={transferPriceCurrency} 
-              />
-            </motion.div>
+        {/* Mobile: Expandable vehicle selector - CSS transition */}
+        <div 
+          className={cn(
+            "overflow-hidden md:hidden transition-all duration-200 ease-out",
+            showVehicles ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
           )}
-        </AnimatePresence>
+        >
+          <VehicleSelector 
+            selectedVehicle={vehicleType} 
+            onSelectVehicle={(type) => {
+              setVehicleType(type);
+              setShowVehicles(false);
+            }} 
+            passengers={passengers} 
+            prices={allVehiclePrices} 
+            loadingPrices={loadingTransferPrice} 
+            hasRoute={hasRoute} 
+            language={language} 
+            currency={transferPriceCurrency} 
+          />
+        </div>
 
         {/* Desktop: Always visible */}
         <div className="hidden md:block">

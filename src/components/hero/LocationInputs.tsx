@@ -1,6 +1,5 @@
-import { memo, lazy, Suspense } from "react";
+import { memo, lazy, Suspense, useCallback } from "react";
 import { MapPin, Navigation, ArrowUpDown } from "lucide-react";
-import { motion } from "framer-motion";
 import { LazyGooglePlacesAutocomplete as GooglePlacesAutocomplete } from "@/components/ui/lazy-google-places-autocomplete";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlaceSelectedHandler } from "./types";
@@ -29,6 +28,14 @@ export const LocationInputs = memo(({
   pickupError,
   dropoffError
 }: LocationInputsProps) => {
+  // Memoize swap handler to prevent re-renders
+  const handleSwap = useCallback(() => {
+    // Use requestAnimationFrame to batch DOM updates
+    requestAnimationFrame(() => {
+      onSwapLocations();
+    });
+  }, [onSwapLocations]);
+
   return (
     <div className="space-y-2">
       <GooglePlacesAutocomplete 
@@ -43,25 +50,16 @@ export const LocationInputs = memo(({
         value={pickup}
         floatingLabel
         icon={
-          <motion.div
-            whileHover={{ scale: 1.2, rotate: 10 }}
-            whileTap={{ scale: 0.9 }}
-            animate={{ y: [0, -2, 0] }}
-            transition={{ 
-              y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-              scale: { duration: 0.2 },
-              rotate: { duration: 0.2 }
-            }}
-          >
+          <div className="transition-transform duration-200 hover:scale-110">
             <MapPin className={cn("h-5 w-5 md:h-4 md:w-4", pickupError ? "text-destructive" : "text-primary")} />
-          </motion.div>
+          </div>
         }
       />
       
       <div className="flex justify-center -my-0.5">
         <button
           type="button"
-          onClick={onSwapLocations}
+          onClick={handleSwap}
           disabled={!pickup && !dropoff}
           className="w-9 h-9 md:w-7 md:h-7 rounded-full bg-primary text-primary-foreground shadow hover:shadow-lg hover:scale-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center touch-manipulation"
         >
@@ -81,18 +79,9 @@ export const LocationInputs = memo(({
         value={dropoff}
         floatingLabel
         icon={
-          <motion.div
-            whileHover={{ scale: 1.2, rotate: -10 }}
-            whileTap={{ scale: 0.9 }}
-            animate={{ y: [0, -2, 0] }}
-            transition={{ 
-              y: { duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 },
-              scale: { duration: 0.2 },
-              rotate: { duration: 0.2 }
-            }}
-          >
+          <div className="transition-transform duration-200 hover:scale-110">
             <Navigation className={cn("h-5 w-5 md:h-4 md:w-4", dropoffError ? "text-destructive" : "text-accent")} />
-          </motion.div>
+          </div>
         }
       />
       

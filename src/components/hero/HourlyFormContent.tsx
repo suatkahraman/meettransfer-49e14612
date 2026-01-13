@@ -1,15 +1,15 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useMemo } from "react";
 import { CalendarIcon, Clock, Users, MapPin, Timer, ArrowRight, Loader2, Zap, ChevronDown, ChevronUp, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 import { VehicleSelector } from "@/components/hero";
 import { VehiclePrice } from "./types";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-const generateTimeOptions = () => {
+// Memoize time options - only compute once
+const timeOptions = (() => {
   const times: string[] = [];
   for (let hour = 0; hour < 24; hour++) {
     for (let minute = 0; minute < 60; minute += 30) {
@@ -17,9 +17,7 @@ const generateTimeOptions = () => {
     }
   }
   return times;
-};
-
-const timeOptions = generateTimeOptions();
+})();
 
 const hourlyDurationOptions = [
   { value: "4", labelKey: "halfDay", defaultLabel: "4 Hours (Half Day)" },
@@ -88,8 +86,43 @@ export const HourlyFormContent = memo(({
   const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
   
   const hasRoute = !!(hourlyCity && hourlyDuration);
-  const selectedPrice = allHourlyPrices.find(p => p.vehicleType === hourlyVehicleType);
+  
+  // Memoize price lookup
+  const selectedPrice = useMemo(() => 
+    allHourlyPrices.find(p => p.vehicleType === hourlyVehicleType),
+    [allHourlyPrices, hourlyVehicleType]
+  );
+  
   const currency = allHourlyPrices[0]?.currency || "EUR";
+
+  // Memoize options
+  const memoizedTimeOptions = useMemo(() => 
+    timeOptions.map(opt => ({ value: opt, label: opt })),
+    []
+  );
+  
+  const passengerOptions = useMemo(() => 
+    Array.from({ length: 12 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1}` })),
+    []
+  );
+  
+  const cityOptions = useMemo(() => 
+    availableCities.map(city => ({ value: city, label: city })),
+    [availableCities]
+  );
+  
+  const durationOptions = useMemo(() => 
+    availableDurations.map(d => { 
+      const opt = hourlyDurationOptions.find(o => o.value === d); 
+      return { value: d, label: opt ? (t(opt.labelKey) || opt.defaultLabel) : `${d}h` }; 
+    }),
+    [availableDurations, t]
+  );
+  
+  const customHoursOptions = useMemo(() => 
+    Array.from({ length: 16 }, (_, i) => ({ value: (i + 9).toString(), label: `${i + 9} ${t("hours") || "hours"}` })),
+    [t]
+  );
 
   const validateAndContinue = useCallback(() => {
     const newErrors: ValidationErrors = {};
@@ -154,7 +187,7 @@ export const HourlyFormContent = memo(({
             label={t("city") || "City"} 
             value={hourlyCity} 
             onValueChange={handleCityChange} 
-            options={availableCities.map(city => ({ value: city, label: city }))} 
+            options={cityOptions} 
             icon={<MapPin className="h-4 w-4 md:h-4 md:w-4" />} 
             className="col-span-1" 
             triggerClassName={cn(
@@ -167,10 +200,7 @@ export const HourlyFormContent = memo(({
           label={t("duration") || "Duration"} 
           value={hourlyDuration} 
           onValueChange={setHourlyDuration} 
-          options={availableDurations.map(d => { 
-            const opt = hourlyDurationOptions.find(o => o.value === d); 
-            return { value: d, label: opt ? (t(opt.labelKey) || opt.defaultLabel) : `${d}h` }; 
-          })} 
+          options={durationOptions} 
           icon={<Timer className="h-4 w-4 md:h-4 md:w-4" />} 
           disabled={!hourlyCity} 
           className="col-span-1" 
@@ -184,7 +214,7 @@ export const HourlyFormContent = memo(({
           label={t("customHours") || "Custom Hours"} 
           value={customHours} 
           onValueChange={setCustomHours} 
-          options={Array.from({ length: 16 }, (_, i) => ({ value: (i + 9).toString(), label: `${i + 9} ${t("hours") || "hours"}` }))} 
+          options={customHoursOptions} 
           icon={<Timer className="h-4 w-4 md:h-4 md:w-4" />} 
           triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm"
         />
@@ -207,24 +237,24 @@ export const HourlyFormContent = memo(({
           />
         </div>
         <div className={cn(shakeFields.time && "animate-shake")}>
-          <FloatingLabelSelect 
-            label={t("time") || "Time"} 
-            value={hourlyTime} 
-            onValueChange={handleTimeChange} 
-            options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
-            icon={<Clock className="h-4 w-4 md:h-4 md:w-4" />} 
-            className="col-span-1" 
-            triggerClassName={cn(
-              "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm",
-              errors.time && "border-destructive ring-2 ring-destructive/20"
-            )}
-          />
+        <FloatingLabelSelect 
+          label={t("time") || "Time"} 
+          value={hourlyTime} 
+          onValueChange={handleTimeChange} 
+          options={memoizedTimeOptions} 
+          icon={<Clock className="h-4 w-4 md:h-4 md:w-4" />} 
+          className="col-span-1" 
+          triggerClassName={cn(
+            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm",
+            errors.time && "border-destructive ring-2 ring-destructive/20"
+          )}
+        />
         </div>
         <FloatingLabelSelect 
           label={t("passengers") || "Pax"} 
           value={hourlyPassengers} 
           onValueChange={setHourlyPassengers} 
-          options={Array.from({ length: 12 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1}` }))} 
+          options={passengerOptions} 
           icon={<Users className="h-4 w-4 md:h-4 md:w-4" />} 
           className="col-span-1" 
           triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm"
@@ -257,32 +287,27 @@ export const HourlyFormContent = memo(({
           )}
         </button>
 
-        {/* Mobile: Expandable vehicle selector */}
-        <AnimatePresence>
-          {showVehicles && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden md:hidden"
-            >
-              <VehicleSelector 
-                selectedVehicle={hourlyVehicleType} 
-                onSelectVehicle={(type) => {
-                  setHourlyVehicleType(type);
-                  setShowVehicles(false);
-                }} 
-                passengers={hourlyPassengers} 
-                prices={allHourlyPrices} 
-                loadingPrices={loadingPrice} 
-                hasRoute={hasRoute} 
-                language={language} 
-                currency={currency} 
-              />
-            </motion.div>
+        {/* Mobile: Expandable vehicle selector - CSS transition */}
+        <div 
+          className={cn(
+            "overflow-hidden md:hidden transition-all duration-200 ease-out",
+            showVehicles ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
           )}
-        </AnimatePresence>
+        >
+          <VehicleSelector 
+            selectedVehicle={hourlyVehicleType} 
+            onSelectVehicle={(type) => {
+              setHourlyVehicleType(type);
+              setShowVehicles(false);
+            }} 
+            passengers={hourlyPassengers} 
+            prices={allHourlyPrices} 
+            loadingPrices={loadingPrice} 
+            hasRoute={hasRoute} 
+            language={language} 
+            currency={currency} 
+          />
+        </div>
 
         {/* Desktop: Always visible */}
         <div className="hidden md:block">
