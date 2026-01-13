@@ -41,6 +41,8 @@ export const HeroBackground = memo(({
                   alt=""
                   className="absolute inset-0 w-full h-full object-cover opacity-35"
                   loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                 />
                 {/* Video loads on top - with WebM/MP4 fallback */}
                 <video
@@ -109,16 +111,22 @@ export const HeroBackground = memo(({
             src={heroMercedes}
             alt="VIP Transfer"
             className="absolute inset-0 w-full h-full object-cover opacity-25"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
           />
         )}
       </div>
       
-      {/* Mobile - Static Image */}
+      {/* Mobile - Static Image - LCP Element */}
       <div className="absolute inset-0 md:hidden">
         <img
           src={heroMercedes}
           alt="VIP Transfer"
           className="absolute inset-0 w-full h-full object-cover opacity-20"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
         />
       </div>
       
