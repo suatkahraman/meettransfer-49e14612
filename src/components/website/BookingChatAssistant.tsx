@@ -1000,49 +1000,51 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           )}
         </AnimatePresence>
 
-        {/* Mobile Floating Panel */}
+        {/* Mobile Backdrop - Separate layer for iOS tap reliability */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9998]"
-            >
-              {/* Backdrop (kept behind panel to avoid iOS hit-testing issues) */}
-              <button
-                type="button"
-                aria-label={language === "TR" ? "Kapat" : "Close"}
-                onClick={() => setIsOpen(false)}
-                data-mobile-backdrop
-                className="absolute inset-0 z-0 bg-background/80 backdrop-blur-sm"
-              />
+              onClick={() => setIsOpen(false)}
+              data-mobile-backdrop
+              className="fixed inset-0 z-[9997] bg-background/80 backdrop-blur-sm"
+              style={{ touchAction: 'manipulation' }}
+            />
+          )}
+        </AnimatePresence>
 
-              <motion.div
-                initial={{ opacity: 0, y: "100%" }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: "100%" }}
-                transition={{ type: "spring", stiffness: 400, damping: 40 }}
-                drag="y"
-                dragControls={dragControls}
-                dragListener={false}
-                dragConstraints={{ top: 0, bottom: 0 }}
-                dragElastic={{ top: 0, bottom: 0.5 }}
-                onDragEnd={(_, info) => {
-                  if (info.offset.y > 100 || info.velocity.y > 500) {
-                    setIsOpen(false);
-                  }
-                }}
-                data-mobile-panel
-                className="absolute inset-x-0 bottom-0 z-10 bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col transition-all duration-200"
-                style={{
-                  bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
-                  height: keyboardHeight > 0 ? `min(50vh, 400px)` : "min(60vh, 500px)",
-                  maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px - 20px)` : undefined,
-                  // iOS Safari: keep taps/focus working reliably while still allowing scroll
-                  touchAction: "pan-y",
-                }}
-              >
+        {/* Mobile Floating Panel */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", stiffness: 400, damping: 40 }}
+              drag="y"
+              dragControls={dragControls}
+              dragListener={false}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.5 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 100 || info.velocity.y > 500) {
+                  setIsOpen(false);
+                }
+              }}
+              data-mobile-panel
+              className="fixed inset-x-0 bottom-0 z-[9998] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col"
+              style={{
+                bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
+                height: keyboardHeight > 0 ? `min(50vh, 400px)` : "min(60vh, 500px)",
+                maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px - 20px)` : undefined,
+                // iOS Safari: ensure panel content is tappable
+                touchAction: 'auto',
+                // Prevent pointer-events from being blocked
+                pointerEvents: 'auto',
+              }}
+            >
                 {/* Drag Handle - Swipe indicator */}
                  <div 
                    className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
@@ -1262,7 +1264,6 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   </div>
                 </div>
               </motion.div>
-            </motion.div>
           )}
         </AnimatePresence>
       </>
