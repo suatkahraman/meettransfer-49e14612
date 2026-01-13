@@ -95,6 +95,20 @@ const loadGoogleMapsScript = (): Promise<void> => {
   });
 };
 
+// Preload Google Maps script on page load for faster autocomplete
+if (typeof window !== 'undefined') {
+  // Use requestIdleCallback for non-blocking preload, or setTimeout as fallback
+  const preload = () => {
+    loadGoogleMapsScript().catch(() => {});
+  };
+  
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(preload, { timeout: 2000 });
+  } else {
+    setTimeout(preload, 1000);
+  }
+}
+
 export interface GooglePlacesAutocompleteProps {
   /** Called ONLY when a place is selected from suggestions */
   onPlaceSelected?: (value: string, details?: PlaceDetails) => void;
