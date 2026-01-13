@@ -72,16 +72,48 @@ export function PWAInstallPrompt() {
   }, [dismissed]);
 
   const texts = {
-    title: language === "TR" ? "Uygulamayı Yükle" : "Install Our App",
-    subtitle: language === "TR" 
-      ? "Hızlı erişim ve bildirimler için" 
-      : "For quick access & notifications",
-    benefits: language === "TR" 
-      ? ["Anında bildirimler", "Offline erişim", "Hızlı açılış"]
-      : ["Instant notifications", "Offline access", "Quick launch"],
-    installBtn: language === "TR" ? "Yükle" : "Install",
-    laterBtn: language === "TR" ? "Daha Sonra" : "Later",
-    iosTitle: language === "TR" ? "Ana Ekrana Ekle" : "Add to Home Screen",
+    title: {
+      TR: "Uygulamayı Yükle",
+      EN: "Install Our App",
+      DE: "App installieren",
+      FR: "Installer l'application",
+    }[language] ?? "Install Our App",
+    subtitle: {
+      TR: "Hızlı erişim ve bildirimler için",
+      EN: "For quick access & notifications",
+      DE: "Für schnellen Zugriff & Benachrichtigungen",
+      FR: "Pour un accès rapide et des notifications",
+    }[language] ?? "For quick access & notifications",
+    benefits: {
+      TR: ["Anında bildirimler", "Offline erişim", "Hızlı açılış"],
+      EN: ["Instant notifications", "Offline access", "Quick launch"],
+      DE: ["Sofortige Benachrichtigungen", "Offline-Zugriff", "Schnellstart"],
+      FR: ["Notifications instantanées", "Accès hors ligne", "Lancement rapide"],
+    }[language] ?? ["Instant notifications", "Offline access", "Quick launch"],
+    installBtn: {
+      TR: "Yükle",
+      EN: "Install",
+      DE: "Installieren",
+      FR: "Installer",
+    }[language] ?? "Install",
+    laterBtn: {
+      TR: "Daha Sonra",
+      EN: "Later",
+      DE: "Später",
+      FR: "Plus tard",
+    }[language] ?? "Later",
+    iosTitle: {
+      TR: "Ana Ekrana Ekle",
+      EN: "Add to Home Screen",
+      DE: "Zum Startbildschirm hinzufügen",
+      FR: "Ajouter à l'écran d'accueil",
+    }[language] ?? "Add to Home Screen",
+    gotIt: {
+      TR: "Anladım",
+      EN: "Got it",
+      DE: "Verstanden",
+      FR: "Compris",
+    }[language] ?? "Got it",
   };
 
   const instructions = getInstallInstructions();
@@ -227,7 +259,7 @@ export function PWAInstallPrompt() {
                 className="w-full mt-6"
                 variant="outline"
               >
-                {language === "TR" ? "Anladım" : "Got it"}
+                {texts.gotIt}
               </Button>
             </div>
           </motion.div>
