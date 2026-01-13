@@ -1,4 +1,4 @@
-import { memo, lazy, Suspense, useState } from "react";
+import { memo, lazy, Suspense } from "react";
 import { MapPin, Navigation, ArrowUpDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { LazyGooglePlacesAutocomplete as GooglePlacesAutocomplete } from "@/components/ui/lazy-google-places-autocomplete";
