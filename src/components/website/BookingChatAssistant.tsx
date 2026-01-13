@@ -743,7 +743,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
 
   return (
     <>
-      {/* Floating Toggle Button - Mobile */}
+      {/* Floating Toggle Button - Mobile - Always visible when chat closed */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -754,7 +754,10 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
             data-chat-trigger
-            className="fixed bottom-24 right-4 z-50 md:hidden flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
+            className="fixed bottom-6 right-4 z-[9999] md:hidden flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
+            style={{ 
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(var(--primary), 0.3)',
+            }}
           >
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
@@ -763,6 +766,13 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
               <Sparkles className="h-5 w-5" />
             </motion.div>
             <span className="font-semibold">AI</span>
+            {/* Pulse effect for visibility */}
+            <motion.div
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-accent"
+              animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0, 0.6] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              style={{ zIndex: -1 }}
+            />
           </motion.button>
         )}
       </AnimatePresence>
