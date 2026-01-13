@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, ChevronLeft, ChevronRight, Shield, Star, Plane, Building2, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
@@ -82,8 +82,8 @@ export const Hero = () => {
   const [loadingCities, setLoadingCities] = useState(false);
   const [allHourlyPrices, setAllHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
   const [loadingPrice, setLoadingPrice] = useState(false);
-  const [customHours, setCustomHours] = useState("9"); // For custom duration (9+ hours)
-  const [hourlyCurrency, setHourlyCurrency] = useState<string>("EUR"); // Currency selection for hourly rental
+  const [customHours, setCustomHours] = useState("9");
+  const [hourlyCurrency, setHourlyCurrency] = useState<string>("EUR");
   const [convertingHourlyPrices, setConvertingHourlyPrices] = useState(false);
 
   // Fetch available cities and their durations from hourly_rental_prices
@@ -99,20 +99,16 @@ export const Hero = () => {
         
         if (error) throw error;
         
-        // Get unique cities
         const uniqueCities = [...new Set(data?.map(item => item.city) || [])];
         setAvailableCities(uniqueCities);
         
-        // Build city -> durations map
         const durationsMap: Record<string, string[]> = {};
         data?.forEach(item => {
           if (!durationsMap[item.city]) {
             durationsMap[item.city] = [];
           }
-          // Map duration_type to our fixed options
           const durationType = item.duration_type.replace("_hours", "").replace("h", "");
           
-          // Map to our fixed durations: 4, 6, 8, or custom (9+)
           let mappedDuration: string;
           if (durationType === "4") {
             mappedDuration = "4";
@@ -123,7 +119,7 @@ export const Hero = () => {
           } else if (durationType === "custom" || parseInt(durationType) >= 9) {
             mappedDuration = "custom";
           } else {
-            return; // Skip other durations
+            return;
           }
           
           if (!durationsMap[item.city].includes(mappedDuration)) {
@@ -131,7 +127,6 @@ export const Hero = () => {
           }
         });
         
-        // Sort durations: 4, 6, 8, custom
         const sortOrder = ["4", "6", "8", "custom"];
         Object.keys(durationsMap).forEach(city => {
           durationsMap[city].sort((a, b) => sortOrder.indexOf(a) - sortOrder.indexOf(b));
@@ -182,15 +177,12 @@ export const Hero = () => {
       }
     };
 
-    // Debounce the fetch
     const timer = setTimeout(fetchTransferPrice, 500);
     return () => clearTimeout(timer);
   }, [pickup, dropoff]);
 
-  // Get available durations for selected city
   const availableDurations = hourlyCity ? (cityDurations[hourlyCity] || []) : [];
   
-  // Reset duration when city changes if current duration is not available
   useEffect(() => {
     if (hourlyCity && availableDurations.length > 0) {
       if (!availableDurations.includes(hourlyDuration)) {
@@ -199,16 +191,13 @@ export const Hero = () => {
     } else if (!hourlyCity) {
       setHourlyDuration("");
     }
-    // Reset prices when city changes
     setAllHourlyPrices([]);
   }, [hourlyCity, availableDurations]);
 
-  // Auto-select appropriate vehicle when passenger count changes (Transfer form)
   useEffect(() => {
     const passengerCount = parseInt(passengers);
     const currentVehicle = VEHICLE_TYPES.find(v => v.value === vehicleType);
     
-    // If current vehicle can't fit passengers, switch to a suitable one
     if (currentVehicle && currentVehicle.passengers < passengerCount) {
       const suitableVehicle = VEHICLE_TYPES.find(v => v.passengers >= passengerCount);
       if (suitableVehicle) {
@@ -217,12 +206,10 @@ export const Hero = () => {
     }
   }, [passengers]);
 
-  // Auto-select appropriate vehicle when passenger count changes (Hourly form)
   useEffect(() => {
     const passengerCount = parseInt(hourlyPassengers);
     const currentVehicle = VEHICLE_TYPES.find(v => v.value === hourlyVehicleType);
     
-    // If current vehicle can't fit passengers, switch to a suitable one
     if (currentVehicle && currentVehicle.passengers < passengerCount) {
       const suitableVehicle = VEHICLE_TYPES.find(v => v.passengers >= passengerCount && v.value !== 'minibus');
       if (suitableVehicle) {
@@ -231,10 +218,8 @@ export const Hero = () => {
     }
   }, [hourlyPassengers]);
 
-  // Store original prices in base currency for conversion
   const [originalHourlyPrices, setOriginalHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
 
-  // Fetch all vehicle prices when city and duration are selected
   useEffect(() => {
     const fetchAllPrices = async () => {
       if (!hourlyCity || !hourlyDuration) {
@@ -245,7 +230,6 @@ export const Hero = () => {
 
       setLoadingPrice(true);
       try {
-        // For custom duration (9+), fetch hourly_rate and calculate
         if (hourlyDuration === "custom") {
           const { data: customData, error: customError } = await supabase
             .from("hourly_rental_prices")
@@ -279,11 +263,9 @@ export const Hero = () => {
           setOriginalHourlyPrices(prices);
           setAllHourlyPrices(prices);
         } else {
-          // Try both formats: "4h" and "4_hours"
           const durationKeyShort = `${hourlyDuration}h`;
           const durationKeyLong = `${hourlyDuration}_hours`;
           
-          // Fetch all vehicle types for this city and duration
           const { data: shortData, error: shortError } = await supabase
             .from("hourly_rental_prices")
             .select("vehicle_type, price, price_currency")
@@ -298,10 +280,8 @@ export const Hero = () => {
             .eq("duration_type", durationKeyLong)
             .eq("is_active", true);
           
-          // Combine results, preferring short format
           const combinedData = [...(shortData || []), ...(longData || [])];
           
-          // Map to vehicle types, removing duplicates
           const vehiclePriceMap = new Map<string, { price: number; currency: string }>();
           combinedData.forEach(item => {
             if (!vehiclePriceMap.has(item.vehicle_type)) {
@@ -312,10 +292,8 @@ export const Hero = () => {
             }
           });
           
-          // Convert to array with mapped vehicle types
           const prices: Array<{ vehicleType: string; price: number; currency: string }> = [];
           
-          // Map database vehicle types to our VEHICLE_TYPES
           const vehicleTypeMapping: Record<string, string> = {
             'vito': 'mercedes-vito',
             'vito_vip': 'vip-mercedes',
@@ -351,15 +329,12 @@ export const Hero = () => {
     fetchAllPrices();
   }, [hourlyCity, hourlyDuration, customHours]);
 
-  // Convert prices when currency changes
   useEffect(() => {
     const convertPrices = async () => {
       if (originalHourlyPrices.length === 0) return;
       
-      // Get the base currency from original prices (they should all be same)
       const baseCurrency = originalHourlyPrices[0]?.currency || "EUR";
       
-      // If selected currency matches base currency, no conversion needed
       if (hourlyCurrency === baseCurrency) {
         setAllHourlyPrices(originalHourlyPrices);
         return;
@@ -367,7 +342,6 @@ export const Hero = () => {
 
       setConvertingHourlyPrices(true);
       try {
-        // Call exchange rate API
         const { data: rateData, error: rateError } = await supabase.functions.invoke('get-exchange-rate', {
           body: {
             from_currency: baseCurrency,
@@ -379,7 +353,6 @@ export const Hero = () => {
 
         const rate = rateData?.rate || 1;
         
-        // Convert all prices
         const convertedPrices = originalHourlyPrices.map(p => ({
           vehicleType: p.vehicleType,
           price: Math.round(p.price * rate),
@@ -389,7 +362,6 @@ export const Hero = () => {
         setAllHourlyPrices(convertedPrices);
       } catch (error) {
         console.error("Error converting hourly prices:", error);
-        // Keep original prices on error
         setAllHourlyPrices(originalHourlyPrices);
       } finally {
         setConvertingHourlyPrices(false);
@@ -441,7 +413,6 @@ export const Hero = () => {
     params.set("city", hourlyCity);
     params.set("date", format(hourlyDate!, "yyyy-MM-dd"));
     params.set("time", hourlyTime);
-    // For custom duration, pass the actual hours
     if (hourlyDuration === "custom") {
       params.set("duration", `${customHours}h`);
     } else {
@@ -466,7 +437,6 @@ export const Hero = () => {
     setHourlyCity(details?.displayText || value);
   };
 
-  // Handle booking data from AI chat assistant
   const handleApplyBooking = useCallback((bookingData: {
     pickup?: string | null;
     dropoff?: string | null;
@@ -498,7 +468,6 @@ export const Hero = () => {
       setPassengers(bookingData.passengers.toString());
     }
     if (bookingData.vehicleType) {
-      // Map AI vehicle types to our format
       const vehicleMap: Record<string, string> = {
         'mercedes-vito': 'mercedes-vito',
         'vip-mercedes': 'vip-mercedes',
@@ -509,428 +478,292 @@ export const Hero = () => {
       setVehicleType(mappedType);
     }
     
-    // Show success toast
     toast.success(t("bookingDetailsApplied") || "Booking details applied to form!");
     
-    // Scroll to form
     document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [t]);
   
   return (
-    <section id="booking-form" className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary/80">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40"></div>
+    <section id="booking-form" className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-50"></div>
       
-      <div className="container relative z-10 px-4 py-12 md:py-20">
-        <div className="max-w-3xl mx-auto text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          {/* Logo */}
-          <div className="flex justify-center">
-            <img 
-              src={meetTransferLogo} 
-              alt="Meet Transfer Logo" 
-              width={120}
-              height={120}
-              loading="eager"
-              decoding="async"
-              className="h-28 w-28 md:h-36 md:w-36 rounded-full object-cover shadow-2xl ring-4 ring-white/20"
-            />
-          </div>
-          
-          {/* City Marquee Animation */}
-          <CityMarquee />
-          
-          {/* Hero Text */}
-          <div className="space-y-4">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-              {t("heroTitle")}
-            </h1>
-            <div className="space-y-2">
-              <p className="text-lg md:text-xl text-white/90 max-w-xl mx-auto font-sans">
-                {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language, activePromo.validUntil).heroSubtitle}
-              </p>
-              {activePromo.validUntil && (
-                <p className="text-sm md:text-base text-accent font-medium animate-pulse">
-                  {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language, activePromo.validUntil).validUntilText}
+      {/* Decorative Elements */}
+      <div className="absolute top-20 right-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+
+      <div className="container relative z-10 px-4 py-12 lg:py-20">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left Side - Form */}
+          <div className="order-2 lg:order-1 animate-in fade-in slide-in-from-left-4 duration-700">
+            {/* Logo & Title */}
+            <div className="flex items-center gap-4 mb-6">
+              <img 
+                src={meetTransferLogo} 
+                alt="Meet Transfer Logo" 
+                width={56}
+                height={56}
+                loading="eager"
+                decoding="async"
+                className="h-14 w-14 rounded-full object-cover shadow-lg ring-2 ring-primary/20"
+              />
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
+                  {t("heroTitle")}
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language, activePromo.validUntil).heroSubtitle}
                 </p>
-              )}
-            </div>
-          </div>
-
-          {/* AI Chat Assistant */}
-          <div className="max-w-2xl mx-auto">
-            <p className="text-white/90 text-sm md:text-base font-medium mb-3 flex items-center justify-center gap-2">
-              <Sparkles className="h-4 w-4 text-accent" />
-              {t("bookTransferOrHourlyWithAI") || "Book Transfer & Hourly Rental With AI"}
-            </p>
-            <BookingChatAssistant onApplyBooking={handleApplyBooking} />
-          </div>
-
-          {/* Booking Form with Tabs */}
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl mx-auto overflow-hidden">
-            {/* Tab Switcher */}
-            <div className="flex border-b border-border">
-              <button
-                onClick={() => setActiveTab("ride")}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-4 px-6 font-semibold transition-all relative",
-                  activeTab === "ride"
-                    ? "text-primary bg-primary/5"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-              >
-                <Car className="h-5 w-5" />
-                <span>{t("pointToPoint") || "Transfer"}</span>
-                {activeTab === "ride" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                )}
-              </button>
-              <button
-                onClick={() => setActiveTab("hourly")}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-4 px-6 font-semibold transition-all relative",
-                  activeTab === "hourly"
-                    ? "text-primary bg-primary/5"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-              >
-                <Timer className="h-5 w-5" />
-                <span>{t("perHour") || "Per Hour"}</span>
-                {activeTab === "hourly" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                )}
-              </button>
+              </div>
             </div>
 
-            {/* Form Content */}
-            <div className="p-6 md:p-8">
-              {activeTab === "ride" ? (
-                /* Ride Form */
-                <div className="space-y-4">
-                  {/* Location Fields */}
-                  <div className="relative">
-                    <div className="grid md:grid-cols-2 gap-4">
+            {/* AI Chat Assistant */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span>{t("bookTransferOrHourlyWithAI") || "Book with AI Assistant"}</span>
+              </div>
+              <BookingChatAssistant onApplyBooking={handleApplyBooking} />
+            </div>
+
+            {/* Booking Form Card */}
+            <div className="bg-card rounded-2xl shadow-xl border border-border/50 overflow-hidden">
+              {/* Tab Switcher */}
+              <div className="flex bg-muted/30">
+                <button
+                  onClick={() => setActiveTab("ride")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-4 px-6 font-semibold transition-all relative text-sm",
+                    activeTab === "ride"
+                      ? "text-primary bg-card"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Car className="h-4 w-4" />
+                  <span>{t("pointToPoint") || "Transfer"}</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("hourly")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-4 px-6 font-semibold transition-all relative text-sm",
+                    activeTab === "hourly"
+                      ? "text-primary bg-card"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Timer className="h-4 w-4" />
+                  <span>{t("perHour") || "Per Hour"}</span>
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <div className="p-5 md:p-6">
+                {activeTab === "ride" ? (
+                  /* Ride Form */
+                  <div className="space-y-4">
+                    {/* Location Fields */}
+                    <div className="space-y-3">
                       <div className="relative">
-                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupPoint")}</label>
                         <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary z-10" />
                           <GooglePlacesAutocomplete 
                             onPlaceSelected={handlePickupSelected} 
-                            placeholder={t("enterPickupPoint") || "Airport, hotel, address..."} 
-                            className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-primary text-foreground placeholder:text-muted-foreground rounded-xl transition-all"
+                            placeholder={t("enterPickupPoint") || "Pickup: Airport, hotel, address..."} 
+                            className="pl-10 h-12 bg-muted/50 border border-border focus:border-primary text-foreground placeholder:text-muted-foreground rounded-xl transition-all text-sm"
                             value={pickup}
                           />
                         </div>
                       </div>
+                      
+                      {/* Swap Button */}
+                      <div className="flex justify-center -my-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const temp = pickup;
+                            setPickup(dropoff);
+                            setDropoff(temp);
+                          }}
+                          disabled={!pickup && !dropoff}
+                          className={cn(
+                            "flex items-center justify-center",
+                            "w-8 h-8 rounded-full bg-primary text-primary-foreground shadow",
+                            "hover:bg-primary/90 hover:scale-110 active:scale-95",
+                            "transition-all duration-200",
+                            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                          )}
+                          title={t("swapLocations") || "Swap locations"}
+                        >
+                          <ArrowUpDown className="h-3 w-3" />
+                        </button>
+                      </div>
+                      
                       <div className="relative">
-                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("dropoffLocation")}</label>
                         <div className="relative">
-                          <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-accent z-10" />
+                          <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent z-10" />
                           <GooglePlacesAutocomplete 
                             onPlaceSelected={handleDropoffSelected} 
-                            placeholder={t("hotelOrAddress") || "Where to?"} 
-                            className="pl-10 h-14 bg-muted/50 border-2 border-transparent focus:border-accent text-foreground placeholder:text-muted-foreground rounded-xl transition-all"
+                            placeholder={t("hotelOrAddress") || "Drop-off: Where to?"} 
+                            className="pl-10 h-12 bg-muted/50 border border-border focus:border-accent text-foreground placeholder:text-muted-foreground rounded-xl transition-all text-sm"
                             value={dropoff}
                           />
                         </div>
                       </div>
-                    </div>
-                    {/* Swap Button - Mobile: bottom right, Desktop: center between fields */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const temp = pickup;
-                        setPickup(dropoff);
-                        setDropoff(temp);
-                      }}
-                      disabled={!pickup && !dropoff}
-                      className={cn(
-                        "z-20 flex items-center justify-center",
-                        "w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-lg",
-                        "hover:bg-primary/90 hover:scale-110 active:scale-95",
-                        "transition-all duration-200",
-                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
-                        // Mobile: positioned below the fields, centered
-                        "relative mx-auto -mt-2 mb-2 md:mt-0 md:mb-0",
-                        // Desktop: absolute center between fields
-                        "md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:mx-0"
+                      
+                      {/* Route Map */}
+                      {pickup && dropoff && (
+                        <CompactRouteMap 
+                          pickup={pickup} 
+                          dropoff={dropoff}
+                          className="mt-2"
+                        />
                       )}
-                      title={t("swapLocations") || "Swap locations"}
-                    >
-                      <ArrowUpDown className="h-4 w-4 md:rotate-0 rotate-90" />
-                    </button>
-                    
-                    {/* Route Map - shows when both locations are entered */}
-                    {pickup && dropoff && (
-                      <CompactRouteMap 
-                        pickup={pickup} 
-                        dropoff={dropoff}
-                        className="mt-4"
-                      />
-                    )}
-                  </div>
-
-                  {/* Date, Time & Passengers - 2 rows on mobile, 3 cols on desktop */}
-                  <div className="space-y-4 md:space-y-0">
-                    {/* First row: Date & Time */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      <div className="relative">
-                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupDate")}</label>
-                        <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-                          <PopoverTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              className={cn(
-                                "w-full h-14 justify-start text-left font-normal bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all",
-                                !date && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
-                              <span className="truncate">{date ? format(date, "dd MMM") : t("selectDate")}</span>
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 z-50" align="start">
-                            <Calendar 
-                              mode="single" 
-                              selected={date} 
-                              onSelect={(selectedDate) => { setDate(selectedDate); setDatePopoverOpen(false); }} 
-                              disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-                              initialFocus 
-                              className="p-3 pointer-events-auto" 
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                      <div className="relative">
-                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupTime")}</label>
-                        <Select value={time} onValueChange={setTime}>
-                          <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
-                            <div className="flex items-center">
-                              <Clock className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
-                              <SelectValue placeholder={t("selectTime")} />
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px] z-50">
-                            {timeOptions.map((opt) => (
-                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {/* Passengers - hidden on mobile, shown on desktop in same row */}
-                      <div className="relative hidden md:block">
-                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("passengers") || "Passengers"}</label>
-                        <Select value={passengers} onValueChange={setPassengers}>
-                          <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
-                            <div className="flex items-center">
-                              <Users className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
-                              <SelectValue />
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px] z-50">
-                            {Array.from({ length: 18 }, (_, i) => i + 1).map((num) => (
-                              <SelectItem key={num} value={num.toString()}>
-                                {num} {num === 1 ? (t("passenger") || "passenger") : (t("passengers") || "passengers")}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
                     </div>
-                    {/* Second row: Passengers - shown only on mobile */}
-                    <div className="md:hidden">
-                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("passengers") || "Passengers"}</label>
-                      <Select value={passengers} onValueChange={setPassengers}>
-                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+
+                    {/* Date, Time & Passengers */}
+                    <div className="grid grid-cols-3 gap-2">
+                      <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            className={cn(
+                              "w-full h-12 justify-start text-left font-normal bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3",
+                              !date && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="truncate text-xs">{date ? format(date, "dd MMM") : t("date")}</span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 z-50" align="start">
+                          <Calendar 
+                            mode="single" 
+                            selected={date} 
+                            onSelect={(selectedDate) => { setDate(selectedDate); setDatePopoverOpen(false); }} 
+                            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+                            initialFocus 
+                            className="p-3 pointer-events-auto" 
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      
+                      <Select value={time} onValueChange={setTime}>
+                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3">
                           <div className="flex items-center">
-                            <Users className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
-                            <SelectValue />
+                            <Clock className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="truncate text-xs">{time || t("time")}</span>
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px] z-50">
+                          {timeOptions.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Select value={passengers} onValueChange={setPassengers}>
+                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3">
+                          <div className="flex items-center">
+                            <Users className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="text-xs">{passengers}</span>
                           </div>
                         </SelectTrigger>
                         <SelectContent className="max-h-[300px] z-50">
                           {Array.from({ length: 18 }, (_, i) => i + 1).map((num) => (
                             <SelectItem key={num} value={num.toString()}>
-                              {num} {num === 1 ? (t("passenger") || "passenger") : (t("passengers") || "passengers")}
+                              {num} {num === 1 ? (t("passenger") || "pax") : (t("passengers") || "pax")}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
 
-                  {/* Vehicle Type Selection */}
-                  <div>
-                    <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("vehicleType") || "Vehicle Type"}</label>
-                    {isMinibusRequired(parseInt(passengers), 0) && (
-                      <p className="text-xs text-amber-600 mb-2">
-                        {t("minibusRequiredForPassengers") || "Sprinter minibus is required for 7+ passengers"}
-                      </p>
-                    )}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {VEHICLE_TYPES.map((vehicle) => {
-                        const vehiclePrice = allVehiclePrices.find(v => v.vehicleType === vehicle.value);
-                        const isSelected = vehicleType === vehicle.value;
-                        const passengerCount = parseInt(passengers);
-                        const isDisabled = vehicle.passengers < passengerCount;
-                        const isOnlyOption = isMinibusRequired(passengerCount, 0) && vehicle.value === 'minibus';
-                        const vehicleImages = vehicle.images?.slice(0, 4) || [];
-                        
-                        return (
-                          <div
-                            key={vehicle.value}
-                            className={cn(
-                              "relative rounded-xl border-2 transition-all overflow-hidden",
-                              isDisabled
-                                ? "border-border bg-muted/20 opacity-50 cursor-not-allowed"
-                                : isSelected
-                                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                                  : "border-border hover:border-primary/50 bg-muted/30",
-                              isOnlyOption && "ring-2 ring-amber-400/50"
-                            )}
-                          >
-                            {/* Image Carousel */}
-                            {vehicleImages.length > 0 && (
-                              <div className="relative group">
-                                <Carousel 
-                                  className="w-full"
-                                  plugins={[
-                                    Autoplay({
-                                      delay: 3000,
-                                      stopOnInteraction: true,
-                                      stopOnMouseEnter: true,
-                                    }),
-                                  ]}
-                                  opts={{
-                                    loop: true,
-                                  }}
-                                >
-                                  <CarouselContent>
-                                    {vehicleImages.map((image, imgIdx) => (
-                                      <CarouselItem key={imgIdx}>
-                                        <div className="aspect-[16/10] overflow-hidden">
-                                          <img
-                                            src={image.src}
-                                            alt={image.alt}
-                                            className="w-full h-full object-cover"
-                                          />
-                                        </div>
-                                      </CarouselItem>
-                                    ))}
-                                  </CarouselContent>
-                                  {vehicleImages.length > 1 && (
-                                    <>
-                                      <CarouselPrevious className="absolute left-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                      <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </>
-                                  )}
-                                </Carousel>
-                                {vehicleImages.length > 1 && (
-                                  <div className="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
-                                    1/{vehicleImages.length}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            
-                            {/* Vehicle Info */}
+                    {/* Vehicle Type Selection - Compact */}
+                    <div>
+                      {isMinibusRequired(parseInt(passengers), 0) && (
+                        <p className="text-xs text-amber-600 mb-2">
+                          {t("minibusRequiredForPassengers") || "Sprinter minibus required for 7+ passengers"}
+                        </p>
+                      )}
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {VEHICLE_TYPES.map((vehicle) => {
+                          const vehiclePrice = allVehiclePrices.find(v => v.vehicleType === vehicle.value);
+                          const isSelected = vehicleType === vehicle.value;
+                          const passengerCount = parseInt(passengers);
+                          const isDisabled = vehicle.passengers < passengerCount;
+                          
+                          return (
                             <button
+                              key={vehicle.value}
                               type="button"
                               onClick={() => !isDisabled && setVehicleType(vehicle.value)}
                               disabled={isDisabled}
-                              className="w-full p-2 text-left"
+                              className={cn(
+                                "relative rounded-lg border p-2 transition-all text-center",
+                                isDisabled
+                                  ? "border-border bg-muted/20 opacity-40 cursor-not-allowed"
+                                  : isSelected
+                                    ? "border-primary bg-primary/10 ring-1 ring-primary"
+                                    : "border-border hover:border-primary/50 bg-muted/30"
+                              )}
                             >
-                              <div className="flex items-center gap-1 mb-0.5">
-                                {vehicle.value === 'maybach-minibus' ? (
-                                  <Sparkles className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-amber-500")} />
-                                ) : vehicle.value === 'vip-mercedes' ? (
-                                  <Sparkles className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-purple-500")} />
-                                ) : (
-                                  <Car className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-primary")} />
-                                )}
-                                <span className={cn("font-medium text-xs truncate", isDisabled && "text-muted-foreground")}>
-                                  {vehicle.label}
-                                </span>
-                              </div>
-                              <div className={cn("text-[10px] mb-0.5", isDisabled ? "text-red-400" : "text-muted-foreground")}>
-                                {isDisabled ? (
-                                  <>{t("maxPassengers") || "Max"} {vehicle.passengers}</>
-                                ) : (
-                                  <>{vehicle.passengers} {t("passengers") || "pax"}</>
-                                )}
-                              </div>
-                              {loadingTransferPrice ? (
-                                <div className="h-4">
-                                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                              <div className="text-xs font-medium truncate">{vehicle.label.split(' ')[1] || vehicle.label}</div>
+                              {vehiclePrice && (
+                                <div className="text-xs font-bold text-primary mt-0.5">
+                                  €{vehiclePrice.price}
                                 </div>
-                              ) : vehiclePrice && !isDisabled ? (
-                                <div className="text-base font-bold text-primary">
-                                  {transferPriceCurrency === "EUR" ? "€" : transferPriceCurrency === "USD" ? "$" : transferPriceCurrency === "GBP" ? "£" : "₺"}
-                                  {vehiclePrice.price}
-                                </div>
-                              ) : pickup && dropoff && !isDisabled ? (
-                                <div className="text-[10px] text-muted-foreground">-</div>
-                              ) : null}
+                              )}
+                              {loadingTransferPrice && !vehiclePrice && pickup && dropoff && (
+                                <Loader2 className="h-3 w-3 animate-spin mx-auto mt-0.5 text-muted-foreground" />
+                              )}
                             </button>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Continue Button */}
-                  <Button 
-                    onClick={handleRideContinue} 
-                    size="lg" 
-                    variant="accent" 
-                    className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl group" 
-                    disabled={submitting}
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        {t("loading") || "Loading..."}
-                      </>
-                    ) : (
-                      <>
-                        {t("getPrice") || "Get Price"}
-                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              ) : (
-                /* Hourly Rental Form */
-                <div className="space-y-4">
-                  {/* City & Duration */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="relative">
-                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("city") || "City"}</label>
+                    {/* CTA Button */}
+                    <Button 
+                      onClick={handleRideContinue}
+                      disabled={submitting}
+                      size="lg"
+                      className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all rounded-xl"
+                    >
+                      {submitting ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("loading")}</>
+                      ) : (
+                        <>{t("getQuote") || "Get Quote"} <ArrowRight className="ml-2 h-4 w-4" /></>
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  /* Hourly Rental Form */
+                  <div className="space-y-4">
+                    {/* City & Duration */}
+                    <div className="grid grid-cols-2 gap-3">
                       <Select value={hourlyCity} onValueChange={setHourlyCity}>
-                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm">
                           <div className="flex items-center">
-                            <MapPin className="mr-2 h-5 w-5 text-primary" />
-                            <SelectValue placeholder={loadingCities ? (t("loading") || "Loading...") : (t("selectCity") || "Select city")} />
+                            <MapPin className="mr-2 h-4 w-4 text-primary" />
+                            <SelectValue placeholder={loadingCities ? "..." : (t("selectCity") || "City")} />
                           </div>
                         </SelectTrigger>
                         <SelectContent className="z-50 max-h-[300px]">
                           {availableCities.map((city) => (
-                            <SelectItem key={city} value={city}>
-                              {city}
-                            </SelectItem>
+                            <SelectItem key={city} value={city}>{city}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                    </div>
-                    <div className="relative">
-                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("duration") || "Duration"}</label>
+                      
                       <Select 
                         value={hourlyDuration} 
                         onValueChange={setHourlyDuration}
                         disabled={!hourlyCity || availableDurations.length === 0}
                       >
-                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all disabled:opacity-50">
+                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all disabled:opacity-50 text-sm">
                           <div className="flex items-center">
-                            <Timer className="mr-2 h-5 w-5 text-primary" />
-                            <SelectValue placeholder={!hourlyCity ? (t("selectCityFirst") || "Select city first") : (t("selectDuration") || "Select duration")} />
+                            <Timer className="mr-2 h-4 w-4 text-primary" />
+                            <SelectValue placeholder={t("duration") || "Duration"} />
                           </div>
                         </SelectTrigger>
                         <SelectContent className="z-50">
@@ -938,408 +771,251 @@ export const Hero = () => {
                             const option = hourlyDurationOptions.find(o => o.value === duration);
                             const label = option 
                               ? (t(option.labelKey) || option.defaultLabel)
-                              : `${duration} ${t("hours") || "hours"}`;
+                              : `${duration}h`;
                             return (
-                              <SelectItem key={duration} value={duration}>
-                                {label}
-                              </SelectItem>
+                              <SelectItem key={duration} value={duration}>{label}</SelectItem>
                             );
                           })}
                         </SelectContent>
                       </Select>
                     </div>
                     
-                    {/* Custom Hours Input - shown only when "custom" is selected */}
+                    {/* Custom Hours */}
                     {hourlyDuration === "custom" && (
-                      <div className="relative">
-                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">
-                          {t("numberOfHours") || "Number of Hours"}
-                        </label>
-                        <Select value={customHours} onValueChange={setCustomHours}>
-                          <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
-                            <div className="flex items-center">
-                              <Timer className="mr-2 h-5 w-5 text-primary" />
-                              <SelectValue />
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent className="z-50 max-h-[300px]">
-                            {Array.from({ length: 16 }, (_, i) => i + 9).map((hours) => (
-                              <SelectItem key={hours} value={hours.toString()}>
-                                {hours} {t("hours") || "hours"}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                    
-                    {/* Currency Selection */}
-                    {hourlyCity && hourlyDuration && (
-                      <div className="relative">
-                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">
-                          {t("preferredCurrency") || "Currency"}
-                        </label>
-                        <Select value={hourlyCurrency} onValueChange={setHourlyCurrency}>
-                          <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
-                            <div className="flex items-center">
-                              <span className="mr-2 text-primary font-bold">
-                                {hourlyCurrency === "EUR" ? "€" : hourlyCurrency === "USD" ? "$" : hourlyCurrency === "GBP" ? "£" : hourlyCurrency === "TRY" ? "₺" : hourlyCurrency}
-                              </span>
-                              <SelectValue />
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent className="z-50">
-                            <SelectItem value="EUR">€ EUR - Euro</SelectItem>
-                            <SelectItem value="USD">$ USD - US Dollar</SelectItem>
-                            <SelectItem value="GBP">£ GBP - British Pound</SelectItem>
-                            <SelectItem value="TRY">₺ TRY - Turkish Lira</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {convertingHourlyPrices && (
-                          <div className="absolute right-3 top-1/2 translate-y-1">
-                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Dynamic Price Display for Custom Hours */}
-                  {hourlyDuration === "custom" && allHourlyPrices.length > 0 && (
-                    <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl p-4 border border-primary/20">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Timer className="h-5 w-5 text-primary" />
-                        <span className="font-semibold text-foreground">
-                          {customHours} {t("hours") || "hours"} - {t("pricesPerVehicle") || "Prices per vehicle"}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {allHourlyPrices.map((vp) => {
-                          const vehicleLabels: Record<string, string> = {
-                            'mercedes-vito': 'Mercedes Vito',
-                            'vip-mercedes': 'Mercedes Vito VIP',
-                            'maybach-minibus': 'Mercedes Maybach',
-                            'sprinter-minibus': 'Mercedes Sprinter'
-                          };
-                          const currencySymbol = vp.currency === "EUR" ? "€" : vp.currency === "USD" ? "$" : vp.currency === "GBP" ? "£" : "₺";
-                          return (
-                            <div 
-                              key={vp.vehicleType} 
-                              className={cn(
-                                "flex justify-between items-center p-2 rounded-lg transition-all",
-                                hourlyVehicleType === vp.vehicleType 
-                                  ? "bg-primary/20 border border-primary/30" 
-                                  : "bg-background/50"
-                              )}
-                            >
-                              <span className="text-sm text-muted-foreground truncate">
-                                {vehicleLabels[vp.vehicleType] || vp.vehicleType}
-                              </span>
-                              <span className="font-bold text-primary">
-                                {currencySymbol}{vp.price}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      {(loadingPrice || convertingHourlyPrices) && (
-                        <div className="flex items-center justify-center mt-2">
-                          <Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
-                          <span className="text-sm text-muted-foreground">
-                            {convertingHourlyPrices ? (t("convertingCurrency") || "Converting...") : (t("calculatingPrice") || "Calculating...")}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Date, Time & Passengers - 2 rows on mobile, 3 cols on desktop */}
-                  <div className="space-y-4 md:space-y-0">
-                    {/* First row: Date & Time */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      <div className="relative">
-                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupDate")}</label>
-                        <Popover open={hourlyDatePopoverOpen} onOpenChange={setHourlyDatePopoverOpen}>
-                          <PopoverTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              className={cn(
-                                "w-full h-14 justify-start text-left font-normal bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all",
-                                !hourlyDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
-                              <span className="truncate">{hourlyDate ? format(hourlyDate, "dd MMM") : t("selectDate")}</span>
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 z-50" align="start">
-                            <Calendar 
-                              mode="single" 
-                              selected={hourlyDate} 
-                              onSelect={(selectedDate) => { setHourlyDate(selectedDate); setHourlyDatePopoverOpen(false); }} 
-                              disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-                              initialFocus 
-                              className="p-3 pointer-events-auto" 
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                      <div className="relative">
-                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("pickupTime")}</label>
-                        <Select value={hourlyTime} onValueChange={setHourlyTime}>
-                          <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
-                            <div className="flex items-center">
-                              <Clock className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
-                              <SelectValue placeholder={t("selectTime")} />
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px] z-50">
-                            {timeOptions.map((opt) => (
-                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {/* Passengers - hidden on mobile, shown on desktop in same row */}
-                      <div className="relative hidden md:block">
-                        <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("passengers") || "Passengers"}</label>
-                        <Select value={hourlyPassengers} onValueChange={setHourlyPassengers}>
-                          <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
-                            <div className="flex items-center">
-                              <Users className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
-                              <SelectValue />
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px] z-50">
-                            {Array.from({ length: 18 }, (_, i) => i + 1).map((num) => (
-                              <SelectItem key={num} value={num.toString()}>
-                                {num} {num === 1 ? (t("passenger") || "passenger") : (t("passengers") || "passengers")}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    {/* Second row: Passengers - shown only on mobile */}
-                    <div className="md:hidden">
-                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("passengers") || "Passengers"}</label>
-                      <Select value={hourlyPassengers} onValueChange={setHourlyPassengers}>
-                        <SelectTrigger className="w-full h-14 bg-muted/50 border-2 border-transparent hover:border-primary/50 text-foreground rounded-xl transition-all">
+                      <Select value={customHours} onValueChange={setCustomHours}>
+                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm">
                           <div className="flex items-center">
-                            <Users className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
+                            <Timer className="mr-2 h-4 w-4 text-primary" />
                             <SelectValue />
                           </div>
                         </SelectTrigger>
+                        <SelectContent className="z-50 max-h-[300px]">
+                          {Array.from({ length: 16 }, (_, i) => i + 9).map((hours) => (
+                            <SelectItem key={hours} value={hours.toString()}>
+                              {hours} {t("hours") || "hours"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+
+                    {/* Date, Time & Passengers */}
+                    <div className="grid grid-cols-3 gap-2">
+                      <Popover open={hourlyDatePopoverOpen} onOpenChange={setHourlyDatePopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            className={cn(
+                              "w-full h-12 justify-start text-left font-normal bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3",
+                              !hourlyDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="truncate text-xs">{hourlyDate ? format(hourlyDate, "dd MMM") : t("date")}</span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 z-50" align="start">
+                          <Calendar 
+                            mode="single" 
+                            selected={hourlyDate} 
+                            onSelect={(selectedDate) => { setHourlyDate(selectedDate); setHourlyDatePopoverOpen(false); }} 
+                            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+                            initialFocus 
+                            className="p-3 pointer-events-auto" 
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      
+                      <Select value={hourlyTime} onValueChange={setHourlyTime}>
+                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3">
+                          <div className="flex items-center">
+                            <Clock className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="truncate text-xs">{hourlyTime || t("time")}</span>
+                          </div>
+                        </SelectTrigger>
                         <SelectContent className="max-h-[300px] z-50">
-                          {Array.from({ length: 18 }, (_, i) => i + 1).map((num) => (
+                          {timeOptions.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Select value={hourlyPassengers} onValueChange={setHourlyPassengers}>
+                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3">
+                          <div className="flex items-center">
+                            <Users className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="text-xs">{hourlyPassengers}</span>
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px] z-50">
+                          {Array.from({ length: 6 }, (_, i) => i + 1).map((num) => (
                             <SelectItem key={num} value={num.toString()}>
-                              {num} {num === 1 ? (t("passenger") || "passenger") : (t("passengers") || "passengers")}
+                              {num} {num === 1 ? "pax" : "pax"}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
 
-                  {/* Vehicle Type Selection with Prices */}
-                  {(hourlyCity && hourlyDuration) && (
-                    <div>
-                      <label className="text-muted-foreground text-sm font-medium mb-2 block text-left">{t("vehicleType") || "Vehicle Type"}</label>
-                      {parseInt(hourlyPassengers) > 6 && (
-                        <p className="text-xs text-amber-600 mb-2">
-                          {t("hourlyMaxPassengers") || "Hourly rental is available for up to 6 passengers"}
-                        </p>
-                      )}
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {/* Vehicle Selection with Prices */}
+                    {hourlyCity && hourlyDuration && (
+                      <div className="grid grid-cols-3 gap-1.5">
                         {VEHICLE_TYPES.filter(v => v.value !== 'minibus').map((vehicle) => {
-                          // Map DB vehicle types to our frontend types
-                          const dbToFrontendMap: Record<string, string> = {
-                            'vito': 'mercedes-vito',
-                            'vito_vip': 'vip-mercedes',
-                            'maybach': 'maybach-minibus',
-                            'sprinter': 'minibus'
-                          };
-                          const vehiclePrice = allHourlyPrices.find(v => 
-                            v.vehicleType === vehicle.value || 
-                            dbToFrontendMap[v.vehicleType] === vehicle.value
-                          );
+                          const vehiclePrice = allHourlyPrices.find(v => v.vehicleType === vehicle.value);
                           const isSelected = hourlyVehicleType === vehicle.value;
                           const passengerCount = parseInt(hourlyPassengers);
                           const isDisabled = vehicle.passengers < passengerCount;
-                          const vehicleImages = vehicle.images?.slice(0, 4) || [];
+                          const currencySymbol = vehiclePrice?.currency === "EUR" ? "€" : vehiclePrice?.currency === "USD" ? "$" : vehiclePrice?.currency === "GBP" ? "£" : "₺";
                           
                           return (
-                            <div
+                            <button
                               key={vehicle.value}
+                              type="button"
+                              onClick={() => !isDisabled && setHourlyVehicleType(vehicle.value)}
+                              disabled={isDisabled}
                               className={cn(
-                                "relative rounded-xl border-2 transition-all overflow-hidden",
+                                "relative rounded-lg border p-2 transition-all text-center",
                                 isDisabled
-                                  ? "border-border bg-muted/20 opacity-50 cursor-not-allowed"
+                                  ? "border-border bg-muted/20 opacity-40 cursor-not-allowed"
                                   : isSelected
-                                    ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                    ? "border-primary bg-primary/10 ring-1 ring-primary"
                                     : "border-border hover:border-primary/50 bg-muted/30"
                               )}
                             >
-                              {/* Image Carousel */}
-                              {vehicleImages.length > 0 && (
-                                <div className="relative group">
-                                  <Carousel 
-                                    className="w-full"
-                                    plugins={[
-                                      Autoplay({
-                                        delay: 3000,
-                                        stopOnInteraction: true,
-                                        stopOnMouseEnter: true,
-                                      }),
-                                    ]}
-                                    opts={{
-                                      loop: true,
-                                    }}
-                                  >
-                                    <CarouselContent>
-                                      {vehicleImages.map((image, imgIdx) => (
-                                        <CarouselItem key={imgIdx}>
-                                          <div className="aspect-[16/10] overflow-hidden">
-                                            <img
-                                              src={image.src}
-                                              alt={image.alt}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          </div>
-                                        </CarouselItem>
-                                      ))}
-                                    </CarouselContent>
-                                    {vehicleImages.length > 1 && (
-                                      <>
-                                        <CarouselPrevious className="absolute left-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                      </>
-                                    )}
-                                  </Carousel>
-                                  {vehicleImages.length > 1 && (
-                                    <div className="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
-                                      1/{vehicleImages.length}
-                                    </div>
-                                  )}
+                              <div className="text-xs font-medium truncate">{vehicle.label.split(' ')[1] || vehicle.label}</div>
+                              {vehiclePrice && (
+                                <div className="text-xs font-bold text-primary mt-0.5">
+                                  {currencySymbol}{vehiclePrice.price}
                                 </div>
                               )}
-                              
-                              {/* Vehicle Info */}
-                              <button
-                                type="button"
-                                onClick={() => !isDisabled && setHourlyVehicleType(vehicle.value)}
-                                disabled={isDisabled}
-                                className="w-full p-2 text-left"
-                              >
-                                <div className="flex items-center gap-1 mb-0.5">
-                                  {vehicle.value === 'maybach-minibus' ? (
-                                    <Sparkles className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-amber-500")} />
-                                  ) : vehicle.value === 'vip-mercedes' ? (
-                                    <Sparkles className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-purple-500")} />
-                                  ) : (
-                                    <Car className={cn("h-3 w-3", isDisabled ? "text-muted-foreground" : "text-primary")} />
-                                  )}
-                                  <span className={cn("font-medium text-xs truncate", isDisabled && "text-muted-foreground")}>
-                                    {vehicle.label}
-                                  </span>
-                                </div>
-                                <div className={cn("text-[10px] mb-0.5", isDisabled ? "text-red-400" : "text-muted-foreground")}>
-                                  {isDisabled ? (
-                                    <>{t("maxPassengers") || "Max"} {vehicle.passengers}</>
-                                  ) : (
-                                    <>{vehicle.passengers} {t("passengers") || "pax"}</>
-                                  )}
-                                </div>
-                                {loadingPrice ? (
-                                  <div className="h-4">
-                                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                                  </div>
-                                ) : vehiclePrice && !isDisabled ? (
-                                  <div className="text-base font-bold text-primary">
-                                    {vehiclePrice.currency === "EUR" ? "€" : vehiclePrice.currency === "USD" ? "$" : vehiclePrice.currency === "GBP" ? "£" : "₺"}
-                                    {vehiclePrice.price}
-                                  </div>
-                                ) : !isDisabled ? (
-                                  <div className="text-[10px] text-muted-foreground">-</div>
-                                ) : null}
-                              </button>
-                            </div>
+                              {(loadingPrice || convertingHourlyPrices) && !vehiclePrice && (
+                                <Loader2 className="h-3 w-3 animate-spin mx-auto mt-0.5 text-muted-foreground" />
+                              )}
+                            </button>
                           );
                         })}
                       </div>
-                    </div>
-                  )}
-
-                  {/* Info Box */}
-                  <div className="space-y-2">
-                    <div className="bg-accent/10 rounded-xl p-3 text-left">
-                      <p className="text-sm text-accent font-medium flex items-center gap-2">
-                        <Timer className="h-4 w-4" />
-                        {t("hourlyRentalInfo") || "Driver at your disposal for the selected duration. Visit multiple locations!"}
-                      </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-                        <span className="text-xs font-medium text-amber-800 dark:text-amber-200">
-                          📍 {t("hourlyDailyKmLimit") || "Daily Limit: 100 KM"}
-                        </span>
-                      </div>
-                      <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-                        <span className="text-xs font-medium text-blue-800 dark:text-blue-200">
-                          🏙️ {t("hourlySameCityOnly") || "Hourly Rental Valid Within Same City Only"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Continue Button */}
-                  <Button 
-                    onClick={handleHourlyContinue} 
-                    size="lg" 
-                    variant="accent" 
-                    className="w-full text-lg h-14 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl group" 
-                    disabled={submitting}
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        {t("loading") || "Loading..."}
-                      </>
-                    ) : (
-                      <>
-                        {t("getHourlyPrice") || "Get Hourly Price"}
-                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                      </>
                     )}
-                  </Button>
-                </div>
-              )}
+
+                    {/* CTA Button */}
+                    <Button 
+                      onClick={handleHourlyContinue}
+                      disabled={submitting}
+                      size="lg"
+                      className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all rounded-xl"
+                    >
+                      {submitting ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("loading")}</>
+                      ) : (
+                        <>{t("getQuote") || "Get Quote"} <ArrowRight className="ml-2 h-4 w-4" /></>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <Shield className="h-4 w-4 text-green-500" />
+                <span>{t("freeCancellation") || "Free Cancellation"}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                <span>4.9/5</span>
+              </div>
             </div>
           </div>
 
-          {/* Trust Indicators */}
-          <div className="flex flex-wrap justify-center gap-6 pt-4 text-white/80 text-sm font-sans">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-accent"></div>
-              <span>{t("service247") || "24/7 Service"}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-accent"></div>
-              <span>{t("professionalDrivers") || "Professional Drivers"}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-accent"></div>
-              <span>{t("luxuryFleet") || "Luxury Fleet"}</span>
+          {/* Right Side - Visual/Illustration */}
+          <div className="order-1 lg:order-2 animate-in fade-in slide-in-from-right-4 duration-700 delay-200">
+            <div className="relative">
+              {/* Main Visual Container */}
+              <div className="relative bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 rounded-3xl p-8 lg:p-12">
+                {/* City Marquee */}
+                <div className="mb-8">
+                  <CityMarquee />
+                </div>
+                
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-5 text-center shadow-lg border border-border/50">
+                    <div className="flex justify-center mb-2">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Globe className="h-6 w-6 text-primary" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">100+</div>
+                    <div className="text-sm text-muted-foreground">{t("cities") || "Cities"}</div>
+                  </div>
+                  <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-5 text-center shadow-lg border border-border/50">
+                    <div className="flex justify-center mb-2">
+                      <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+                        <Plane className="h-6 w-6 text-accent" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">670+</div>
+                    <div className="text-sm text-muted-foreground">{t("airports") || "Airports"}</div>
+                  </div>
+                  <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-5 text-center shadow-lg border border-border/50">
+                    <div className="flex justify-center mb-2">
+                      <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                        <Star className="h-6 w-6 text-green-500" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">50K+</div>
+                    <div className="text-sm text-muted-foreground">{t("happyCustomers") || "Happy Customers"}</div>
+                  </div>
+                  <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-5 text-center shadow-lg border border-border/50">
+                    <div className="flex justify-center mb-2">
+                      <div className="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                        <Building2 className="h-6 w-6 text-yellow-600" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">24/7</div>
+                    <div className="text-sm text-muted-foreground">{t("support") || "Support"}</div>
+                  </div>
+                </div>
+
+                {/* Feature Highlights */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 bg-card/60 backdrop-blur-sm rounded-xl p-3 border border-border/30">
+                    <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                      <Shield className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div>
+                      <div className="font-medium text-foreground text-sm">{t("fixedPrices") || "Fixed Prices"}</div>
+                      <div className="text-xs text-muted-foreground">{t("noHiddenFees") || "No hidden fees, no surprises"}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-card/60 backdrop-blur-sm rounded-xl p-3 border border-border/30">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Car className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium text-foreground text-sm">{t("luxuryVehicles") || "Luxury Vehicles"}</div>
+                      <div className="text-xs text-muted-foreground">{t("mercedesFleet") || "Premium Mercedes fleet"}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-card/60 backdrop-blur-sm rounded-xl p-3 border border-border/30">
+                    <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                      <Users className="h-4 w-4 text-accent" />
+                    </div>
+                    <div>
+                      <div className="font-medium text-foreground text-sm">{t("professionalDrivers") || "Professional Drivers"}</div>
+                      <div className="text-xs text-muted-foreground">{t("englishSpeaking") || "English speaking, meet & greet"}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Decorative Elements */}
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/20 rounded-full blur-2xl" />
+                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/20 rounded-full blur-2xl" />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Wave Decoration */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
-          <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="hsl(var(--background))" fillOpacity="1" />
-        </svg>
       </div>
     </section>
   );
