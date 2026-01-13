@@ -112,6 +112,7 @@ const DubaiTransfer = lazy(() => import("./pages/website/DubaiTransfer"));
 const CyprusTransfer = lazy(() => import("./pages/website/CyprusTransfer"));
 const BursaTransfer = lazy(() => import("./pages/website/BursaTransfer"));
 const FrankfurtTransfer = lazy(() => import("./pages/website/FrankfurtTransfer"));
+const GreeceTransfer = lazy(() => import("./pages/website/GreeceTransfer"));
 
 // New SEO Landing Pages
 const IstanbulAirportTransfer = lazy(() => import("./pages/website/IstanbulAirportTransfer"));
@@ -148,6 +149,8 @@ const MarmarisAirportTransferGuide = lazy(() => import("./pages/website/blog/Mar
 const OludenizAirportTransferGuide = lazy(() => import("./pages/website/blog/OludenizAirportTransferGuide"));
 const AydinAirportTransferGuide = lazy(() => import("./pages/website/blog/AydinAirportTransferGuide"));
 const MuglaAirportTransferGuide = lazy(() => import("./pages/website/blog/MuglaAirportTransferGuide"));
+const FrankfurtAirportTransferGuide = lazy(() => import("./pages/website/blog/FrankfurtAirportTransferGuide"));
+const AthensAirportTransferGuide = lazy(() => import("./pages/website/blog/AthensAirportTransferGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
@@ -228,6 +231,8 @@ const App = () => (
               {localizedRoutes("/dubai-transfer", <DubaiTransfer />)}
               {localizedRoutes("/cyprus-transfer", <CyprusTransfer />)}
               {localizedRoutes("/bursa-transfer", <BursaTransfer />)}
+              {localizedRoutes("/frankfurt-transfer", <FrankfurtTransfer />)}
+              {localizedRoutes("/greece-transfer", <GreeceTransfer />)}
               {localizedRoutes("/book", <BookingPage />)}
               {localizedRoutes("/book/complete", <ReservationForm />)}
               
@@ -256,6 +261,8 @@ const App = () => (
               {localizedRoutes("/blog/oludeniz-airport-transfer-guide", <OludenizAirportTransferGuide />)}
               {localizedRoutes("/blog/aydin-airport-transfer-guide", <AydinAirportTransferGuide />)}
               {localizedRoutes("/blog/mugla-airport-transfer-guide", <MuglaAirportTransferGuide />)}
+              {localizedRoutes("/blog/frankfurt-airport-transfer-guide", <FrankfurtAirportTransferGuide />)}
+              {localizedRoutes("/blog/athens-airport-transfer-guide", <AthensAirportTransferGuide />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}

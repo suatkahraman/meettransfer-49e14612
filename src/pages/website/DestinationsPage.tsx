@@ -130,6 +130,17 @@ const DestinationsPage = () => {
       vehicles: "Mercedes Vito, V-Class, Maybach",
       link: "/frankfurt-transfer",
     },
+    {
+      id: 11,
+      name: "Greece",
+      airports: "ATH, SKG, HER",
+      tagline: t("ancientCivilization"),
+      icon: "🇬🇷",
+      IconComponent: Landmark,
+      locations: ["Athens", "Piraeus Port", "Thessaloniki", "Crete", "Rhodes", "Santorini"],
+      vehicles: "Mercedes Vito, V-Class VIP",
+      link: "/greece-transfer",
+    },
   ];
   
   return (
@@ -143,7 +154,7 @@ const DestinationsPage = () => {
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Larnaca', 'Paphos', 'Bursa', 'Uludağ', 'Frankfurt', 'Germany'] },
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Larnaca', 'Paphos', 'Bursa', 'Uludağ', 'Frankfurt', 'Germany', 'Athens', 'Greece', 'Thessaloniki'] },
           {
             type: 'BreadcrumbList',
             items: [

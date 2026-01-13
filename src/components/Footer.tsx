@@ -107,6 +107,8 @@ export const Footer = () => {
               <li><PrefetchLink to={getLocalizedPath("/cappadocia-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerCappadocia')}</PrefetchLink></li>
               <li><PrefetchLink to={getLocalizedPath("/dubai-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerDubai')}</PrefetchLink></li>
               <li><PrefetchLink to={getLocalizedPath("/cyprus-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerCyprus')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/frankfurt-transfer")} className="hover:text-primary-foreground transition-colors">Frankfurt Transfer</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/greece-transfer")} className="hover:text-primary-foreground transition-colors">Greece Transfer</PrefetchLink></li>
               <li><PrefetchLink to={getLocalizedPath("/fleet")} className="hover:text-primary-foreground transition-colors">{t('footerFleet')}</PrefetchLink></li>
             </ul>
           </div>
