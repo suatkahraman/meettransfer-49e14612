@@ -42,13 +42,13 @@ export const HeroBackground = memo(({
                   className="absolute inset-0 w-full h-full object-cover opacity-35"
                   loading="eager"
                 />
-                {/* Video loads on top */}
+                {/* Video loads on top - with WebM/MP4 fallback */}
                 <video
                   autoPlay
                   muted
                   loop
                   playsInline
-                  preload="none"
+                  preload="metadata"
                   poster={cityVideos[currentVideoIndex].poster}
                   className="absolute inset-0 w-full h-full object-cover opacity-35"
                   onLoadedData={(e) => {
@@ -56,7 +56,15 @@ export const HeroBackground = memo(({
                     (e.target as HTMLVideoElement).style.opacity = '0.35';
                   }}
                 >
-                  <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
+                  {/* WebM first (smaller file size, better compression) */}
+                  {cityVideos[currentVideoIndex].src.endsWith('.webm') && (
+                    <source src={cityVideos[currentVideoIndex].src} type="video/webm" />
+                  )}
+                  {/* MP4 fallback */}
+                  <source 
+                    src={cityVideos[currentVideoIndex].srcMp4 || cityVideos[currentVideoIndex].src} 
+                    type="video/mp4" 
+                  />
                 </video>
               </motion.div>
             </AnimatePresence>
