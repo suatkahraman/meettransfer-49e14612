@@ -33,11 +33,11 @@ const WhatsAppButton = ({
     return (
       <button
         onClick={handleClick}
-        className={`fixed bottom-4 sm:bottom-6 right-3 sm:right-6 z-50 bg-[#25D366] hover:bg-[#22c55e] text-white h-14 w-14 sm:h-14 sm:w-14 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center hover:scale-110 border-2 border-white/30 ${className}`}
+        className={`fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3 sm:right-6 z-50 bg-[#25D366] hover:bg-[#22c55e] text-white h-14 w-14 sm:h-14 sm:w-14 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center hover:scale-110 border-2 border-white/30 ${className}`}
         aria-label="WhatsApp"
-        style={{ 
-          paddingBottom: 'max(0px, env(safe-area-inset-bottom))',
-          boxShadow: '0 4px 20px rgba(37, 211, 102, 0.4), 0 0 0 3px rgba(37, 211, 102, 0.2)'
+        style={{
+          boxShadow:
+            "0 4px 20px rgba(37, 211, 102, 0.4), 0 0 0 3px rgba(37, 211, 102, 0.2)",
         }}
       >
         <MessageCircle className="h-7 w-7" />
