@@ -1016,8 +1016,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   }, [input, isRecording, isProcessing]);
 
   // Continuous conversation mode - auto-start recording after AI speaks
-  const [continuousMode, setContinuousMode] = useState(false);
-  const continuousModeRef = useRef(false);
+  // Default to true for hands-free experience
+  const [continuousMode, setContinuousMode] = useState(true);
+  const continuousModeRef = useRef(true);
+  const hasAutoStartedRef = useRef(false);
   const startRecordingRef = useRef<(() => void) | null>(null);
   
   // Keep refs in sync
@@ -1292,8 +1294,23 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     if (!isOpen) {
       hasSpokenWelcomeRef.current = false;
       welcomeMessageRef.current = null;
+      hasAutoStartedRef.current = false;
     }
   }, [isOpen]);
+  
+  // Auto-start recording after welcome message when voice is disabled or not available
+  useEffect(() => {
+    if (isOpen && messages.length === 1 && !hasAutoStartedRef.current && continuousModeRef.current && !isVoiceEnabled) {
+      // If voice is disabled, auto-start recording after a delay
+      hasAutoStartedRef.current = true;
+      setTimeout(() => {
+        if (startRecordingRef.current && !isRecording && !isProcessing) {
+          console.log('🎤 Auto-starting recording (voice disabled)');
+          startRecordingRef.current();
+        }
+      }, 1000);
+    }
+  }, [isOpen, messages.length, isVoiceEnabled, isRecording, isProcessing]);
 
   // Auto-send pending message after chat opens and welcome message is added
   useEffect(() => {
@@ -2572,8 +2589,77 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         )}
       </AnimatePresence>
 
+      {/* Centered Microphone Button - Hero Style */}
+      {isSpeechSupported && !isRecording && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center justify-center py-8"
+        >
+          <motion.button
+            onClick={startRecording}
+            className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            animate={{
+              boxShadow: [
+                "0 0 0 0 rgba(var(--primary), 0.4)",
+                "0 0 0 20px rgba(var(--primary), 0)",
+              ],
+            }}
+            transition={{
+              boxShadow: {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut",
+              },
+            }}
+          >
+            {/* Pulse rings */}
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-primary/30"
+              animate={{
+                scale: [1, 1.5, 1.5],
+                opacity: [0.6, 0, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut",
+              }}
+            />
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-primary/30"
+              animate={{
+                scale: [1, 1.3, 1.3],
+                opacity: [0.6, 0, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: 0.5,
+              }}
+            />
+            <Mic className="h-8 w-8" />
+          </motion.button>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="mt-4 text-sm text-muted-foreground text-center"
+          >
+            {language === "TR" ? "Konuşmak için tıklayın veya bekleyin" : "Click to speak or wait"}
+          </motion.p>
+        </motion.div>
+      )}
+
       {/* Input Area */}
-      <div className="flex gap-2">
+      <div className={cn(
+        "flex gap-2",
+        // Hide input area when showing hero mic button
+        isSpeechSupported && !isRecording && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && "hidden"
+      )}>
         {/* Voice recording button */}
         {isSpeechSupported && (
           <Button
