@@ -50,6 +50,10 @@ All colors MUST be HSL.
     --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.1);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
+    /* Media overlay tokens (for hero videos/images) */
+    --scrim: 0 0% 0%;
+    --scrim-foreground: 0 0% 100%;
+
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
