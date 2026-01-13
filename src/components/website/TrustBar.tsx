@@ -1,6 +1,5 @@
 import { ThumbsUp, Clock, DollarSign, Shield } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { motion } from "framer-motion";
 
 const TrustBar = () => {
   const { t } = useLanguage();
@@ -37,13 +36,11 @@ const TrustBar = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
           {trustItems.map((item, index) => (
-            <motion.div
+            // CLS fix: Remove y offset animation, use opacity-only fade
+            <div
               key={index}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="flex items-start gap-3 group cursor-default"
+              className="flex items-start gap-3 group cursor-default animate-fade-in"
+              style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
             >
               <div className={`p-2 rounded-lg bg-muted/50 group-hover:bg-muted transition-colors`}>
                 <item.icon className={`w-5 h-5 ${item.color}`} />
@@ -56,7 +53,7 @@ const TrustBar = () => {
                   {item.description}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
