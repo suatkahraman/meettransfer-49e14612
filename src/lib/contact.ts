@@ -32,7 +32,7 @@ export const GLOBAL_OFFICES: OfficeLocation[] = [
     flag: "🇹🇷",
     country: "Türkiye",
     city: "İstanbul Headquarters",
-    address: "İstanbul, Türkiye",
+    address: "",
     phone: WHATSAPP_DISPLAY,
     whatsappOnly: true,
     email: SUPPORT_EMAIL,
