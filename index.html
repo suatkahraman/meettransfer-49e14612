@@ -55,9 +55,41 @@
     <!-- Preload LCP Image for Mobile -->
     <link rel="preload" as="image" href="/src/assets/hero-mercedes-vito.jpg" fetchpriority="high" />
     
-    <!-- Non-render-blocking font loading -->
+    <!-- Font Preload - Critical fonts for LCP/FCP -->
+    <!-- Playfair Display - Used in hero headings (most visible first) -->
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtXK-F2qO0g.woff2" crossorigin />
+    <!-- Inter Regular - Used in body text -->
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff2" crossorigin />
+    <!-- Inter Medium - Used in buttons/labels -->
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fAZ9hjp-Ek-_EeA.woff2" crossorigin />
+    
+    <!-- Non-render-blocking font loading with display=swap for FOUT prevention -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" /></noscript>
+    
+    <!-- Font loading detection script -->
+    <script>
+      // Remove font-loading class when fonts are ready
+      if ('fonts' in document) {
+        Promise.all([
+          document.fonts.load('700 1em "Playfair Display"'),
+          document.fonts.load('400 1em Inter')
+        ]).then(function() {
+          document.body.classList.remove('font-loading');
+          document.body.classList.add('fonts-loaded');
+        }).catch(function() {
+          // Fallback: remove class after timeout
+          setTimeout(function() {
+            document.body.classList.remove('font-loading');
+          }, 3000);
+        });
+      } else {
+        // Fallback for older browsers
+        setTimeout(function() {
+          document.body.classList.remove('font-loading');
+        }, 1000);
+      }
+    </script>
 
     <!-- iOS Splash Screens -->
     <link rel="apple-touch-startup-image" href="/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
@@ -260,10 +292,38 @@
       /* Prevent layout shift for images */
       img { max-width: 100%; height: auto; }
       
-      /* Prevent FOUT (Flash of Unstyled Text) */
+      /* Prevent FOUT (Flash of Unstyled Text) - Use system fonts during loading */
+      .font-loading body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
       .font-loading h1, .font-loading h2, .font-loading h3, 
       .font-loading h4, .font-loading h5, .font-loading h6 {
-        font-family: Georgia, serif;
+        font-family: Georgia, 'Times New Roman', serif;
+      }
+      
+      /* Smooth transition when fonts load */
+      .fonts-loaded body {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      .fonts-loaded h1, .fonts-loaded h2, .fonts-loaded h3, 
+      .fonts-loaded h4, .fonts-loaded h5, .fonts-loaded h6 {
+        font-family: 'Playfair Display', Georgia, serif;
+      }
+      
+      /* Font display swap fallback */
+      @font-face {
+        font-family: 'Playfair Display';
+        font-style: normal;
+        font-weight: 600 800;
+        font-display: swap;
+        src: local('Playfair Display');
+      }
+      @font-face {
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 400 700;
+        font-display: swap;
+        src: local('Inter');
       }
     </style>
 
