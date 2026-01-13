@@ -1448,8 +1448,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         isRecording 
                           ? "bg-destructive/10 border-destructive text-destructive hover:bg-destructive/20" 
                           : !isSpeechSupported
-                            ? "border-muted text-muted-foreground/50 cursor-not-allowed"
-                            : "border-border hover:border-primary hover:bg-primary/5"
+                            ? "border-border text-muted-foreground/50 cursor-not-allowed"
+                            : "border-border text-foreground hover:border-primary hover:bg-primary/5"
                       )}
                       title={
                         !isSpeechSupported 
@@ -1503,7 +1503,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       className={cn(
                         "h-11 w-11 md:h-12 md:w-12 rounded-xl transition-all touch-manipulation",
                         input.trim() 
-                          ? "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80" 
+                          ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90" 
                           : "bg-muted text-muted-foreground"
                       )}
                     >
