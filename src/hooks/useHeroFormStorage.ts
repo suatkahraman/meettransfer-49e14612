@@ -23,7 +23,18 @@ export function useHeroFormStorage() {
   const loadSavedFormData = useCallback((): SavedFormData | null => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : null;
+      if (!saved) return null;
+      
+      const parsed = JSON.parse(saved);
+      
+      // IMPORTANT: Always return empty pickup/dropoff - don't remember route locations
+      // This ensures the form always starts fresh for new bookings
+      return {
+        ...parsed,
+        pickup: "", // Never remember pickup location
+        dropoff: "", // Never remember dropoff location
+        hourlyCity: "", // Never remember hourly city
+      };
     } catch {
       return null;
     }
@@ -31,7 +42,14 @@ export function useHeroFormStorage() {
 
   const saveFormData = useCallback((data: SavedFormData) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      // Save form data but exclude pickup/dropoff to ensure fresh start
+      const dataToSave = {
+        ...data,
+        pickup: "", // Don't save pickup location
+        dropoff: "", // Don't save dropoff location
+        hourlyCity: "", // Don't save hourly city
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     } catch {
       // Ignore storage errors
     }

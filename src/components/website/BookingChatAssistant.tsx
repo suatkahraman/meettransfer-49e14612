@@ -2041,12 +2041,39 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                             </Button>
                           </div>
 
-                          {/* Voice selection */}
+                          {/* Voice selection with gender filter */}
                           {availableVoices.length > 0 && (
                             <div className="space-y-1.5">
                               <label className="text-[10px] font-medium text-muted-foreground">
                                 {language === "TR" ? "Ses Seçimi" : "Voice"}
                               </label>
+                              
+                              {/* Gender quick select */}
+                              <div className="flex gap-1 mb-1">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-5 text-[9px] flex-1 px-1"
+                                  onClick={() => {
+                                    const femaleVoice = availableVoices.find(v => v.gender === 'female');
+                                    if (femaleVoice) selectVoice(femaleVoice.id);
+                                  }}
+                                >
+                                  ♀ {language === "TR" ? "Kadın" : "Female"}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-5 text-[9px] flex-1 px-1"
+                                  onClick={() => {
+                                    const maleVoice = availableVoices.find(v => v.gender === 'male');
+                                    if (maleVoice) selectVoice(maleVoice.id);
+                                  }}
+                                >
+                                  ♂ {language === "TR" ? "Erkek" : "Male"}
+                                </Button>
+                              </div>
+                              
                               <div className="grid grid-cols-2 gap-1">
                                 {availableVoices.slice(0, 4).map((voice) => (
                                   <Button
@@ -2502,14 +2529,44 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 </Button>
               </div>
 
-              {/* Voice selection */}
+              {/* Voice selection with gender filter */}
               {availableVoices.length > 0 && (
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-muted-foreground">
                     {language === "TR" ? "Ses Seçimi" : "Voice Selection"}
                   </label>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {availableVoices.slice(0, 6).map((voice) => (
+                  
+                  {/* Gender filter buttons */}
+                  <div className="flex gap-1 mb-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs flex-1 gap-1"
+                      onClick={() => {
+                        const femaleVoice = availableVoices.find(v => v.gender === 'female');
+                        if (femaleVoice) selectVoice(femaleVoice.id);
+                      }}
+                    >
+                      <span>♀</span>
+                      <span>{language === "TR" ? "Kadın" : "Female"}</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs flex-1 gap-1"
+                      onClick={() => {
+                        const maleVoice = availableVoices.find(v => v.gender === 'male');
+                        if (maleVoice) selectVoice(maleVoice.id);
+                      }}
+                    >
+                      <span>♂</span>
+                      <span>{language === "TR" ? "Erkek" : "Male"}</span>
+                    </Button>
+                  </div>
+                  
+                  {/* Voice list */}
+                  <div className="grid grid-cols-2 gap-1.5 max-h-24 overflow-y-auto">
+                    {availableVoices.slice(0, 8).map((voice) => (
                       <Button
                         key={voice.id}
                         variant={selectedVoiceId === voice.id ? "default" : "outline"}
@@ -2519,7 +2576,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       >
                         <span className="truncate">{voice.name}</span>
                         {voice.gender !== 'neutral' && (
-                          <span className="ml-1 opacity-60">
+                          <span className="ml-1 opacity-60 text-[10px]">
                             {voice.gender === 'female' ? '♀' : '♂'}
                           </span>
                         )}
