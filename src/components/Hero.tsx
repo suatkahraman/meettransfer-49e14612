@@ -1,30 +1,24 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { format, parse } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, ChevronLeft, ChevronRight, Shield, Star, Plane, Building2, Globe } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Plane, Globe, Check, Wifi, Baby, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
-import { GooglePlacesAutocomplete, PlaceDetails, GooglePlacesAutocompleteProps } from "@/components/ui/google-places-autocomplete";
+import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
 import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
+import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 import CityMarquee from "@/components/website/CityMarquee";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES, isMinibusRequired } from "@/lib/vehicleTypes";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
 import BookingChatAssistant from "@/components/website/BookingChatAssistant";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -40,7 +34,6 @@ const generateTimeOptions = () => {
 
 const timeOptions = generateTimeOptions();
 
-// Hourly rental duration options
 const hourlyDurationOptions = [
   { value: "4", labelKey: "halfDay", defaultLabel: "4 Hours (Half Day)" },
   { value: "6", labelKey: "sixHours", defaultLabel: "6 Hours" },
@@ -52,6 +45,12 @@ export const Hero = () => {
   const { t, language } = useLanguage();
   const { promoCode: activePromo } = usePromo();
   const navigate = useNavigate();
+  const heroRef = useRef<HTMLElement>(null);
+  
+  // Parallax effect
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 500], [0, 150]);
+  const opacity = useTransform(scrollY, [0, 300], [1, 0.3]);
   
   // Tab state
   const [activeTab, setActiveTab] = useState<"ride" | "hourly">("ride");
@@ -85,8 +84,9 @@ export const Hero = () => {
   const [customHours, setCustomHours] = useState("9");
   const [hourlyCurrency, setHourlyCurrency] = useState<string>("EUR");
   const [convertingHourlyPrices, setConvertingHourlyPrices] = useState(false);
+  const [originalHourlyPrices, setOriginalHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
 
-  // Fetch available cities and their durations from hourly_rental_prices
+  // Fetch available cities and their durations
   useEffect(() => {
     const fetchCitiesAndDurations = async () => {
       setLoadingCities(true);
@@ -110,17 +110,11 @@ export const Hero = () => {
           const durationType = item.duration_type.replace("_hours", "").replace("h", "");
           
           let mappedDuration: string;
-          if (durationType === "4") {
-            mappedDuration = "4";
-          } else if (durationType === "6") {
-            mappedDuration = "6";
-          } else if (durationType === "8") {
-            mappedDuration = "8";
-          } else if (durationType === "custom" || parseInt(durationType) >= 9) {
-            mappedDuration = "custom";
-          } else {
-            return;
-          }
+          if (durationType === "4") mappedDuration = "4";
+          else if (durationType === "6") mappedDuration = "6";
+          else if (durationType === "8") mappedDuration = "8";
+          else if (durationType === "custom" || parseInt(durationType) >= 9) mappedDuration = "custom";
+          else return;
           
           if (!durationsMap[item.city].includes(mappedDuration)) {
             durationsMap[item.city].push(mappedDuration);
@@ -143,7 +137,7 @@ export const Hero = () => {
     fetchCitiesAndDurations();
   }, []);
 
-  // Fetch transfer price when pickup and dropoff are selected
+  // Fetch transfer price
   useEffect(() => {
     const fetchTransferPrice = async () => {
       if (!pickup || !dropoff) {
@@ -154,11 +148,7 @@ export const Hero = () => {
       setLoadingTransferPrice(true);
       try {
         const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
-          body: {
-            pickup,
-            dropoff,
-            customerCurrency: "EUR",
-          },
+          body: { pickup, dropoff, customerCurrency: "EUR" },
         });
 
         if (error) throw error;
@@ -200,9 +190,7 @@ export const Hero = () => {
     
     if (currentVehicle && currentVehicle.passengers < passengerCount) {
       const suitableVehicle = VEHICLE_TYPES.find(v => v.passengers >= passengerCount);
-      if (suitableVehicle) {
-        setVehicleType(suitableVehicle.value);
-      }
+      if (suitableVehicle) setVehicleType(suitableVehicle.value);
     }
   }, [passengers]);
 
@@ -212,14 +200,11 @@ export const Hero = () => {
     
     if (currentVehicle && currentVehicle.passengers < passengerCount) {
       const suitableVehicle = VEHICLE_TYPES.find(v => v.passengers >= passengerCount && v.value !== 'minibus');
-      if (suitableVehicle) {
-        setHourlyVehicleType(suitableVehicle.value);
-      }
+      if (suitableVehicle) setHourlyVehicleType(suitableVehicle.value);
     }
   }, [hourlyPassengers]);
 
-  const [originalHourlyPrices, setOriginalHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
-
+  // Fetch hourly prices
   useEffect(() => {
     const fetchAllPrices = async () => {
       if (!hourlyCity || !hourlyDuration) {
@@ -252,11 +237,7 @@ export const Hero = () => {
           customData?.forEach(item => {
             if (item.hourly_rate) {
               const mappedType = vehicleTypeMapping[item.vehicle_type] || item.vehicle_type;
-              prices.push({
-                vehicleType: mappedType,
-                price: item.hourly_rate * hours,
-                currency: item.price_currency
-              });
+              prices.push({ vehicleType: mappedType, price: item.hourly_rate * hours, currency: item.price_currency });
             }
           });
           
@@ -266,14 +247,14 @@ export const Hero = () => {
           const durationKeyShort = `${hourlyDuration}h`;
           const durationKeyLong = `${hourlyDuration}_hours`;
           
-          const { data: shortData, error: shortError } = await supabase
+          const { data: shortData } = await supabase
             .from("hourly_rental_prices")
             .select("vehicle_type, price, price_currency")
             .eq("city", hourlyCity)
             .eq("duration_type", durationKeyShort)
             .eq("is_active", true);
           
-          const { data: longData, error: longError } = await supabase
+          const { data: longData } = await supabase
             .from("hourly_rental_prices")
             .select("vehicle_type, price, price_currency")
             .eq("city", hourlyCity)
@@ -281,37 +262,24 @@ export const Hero = () => {
             .eq("is_active", true);
           
           const combinedData = [...(shortData || []), ...(longData || [])];
-          
           const vehiclePriceMap = new Map<string, { price: number; currency: string }>();
           combinedData.forEach(item => {
             if (!vehiclePriceMap.has(item.vehicle_type)) {
-              vehiclePriceMap.set(item.vehicle_type, {
-                price: item.price,
-                currency: item.price_currency
-              });
+              vehiclePriceMap.set(item.vehicle_type, { price: item.price, currency: item.price_currency });
             }
           });
           
           const prices: Array<{ vehicleType: string; price: number; currency: string }> = [];
-          
           const vehicleTypeMapping: Record<string, string> = {
-            'vito': 'mercedes-vito',
-            'vito_vip': 'vip-mercedes',
-            'maybach': 'maybach-minibus',
-            'sprinter': 'sprinter-minibus',
-            'mercedes-vito': 'mercedes-vito',
-            'vip-mercedes': 'vip-mercedes',
-            'maybach-minibus': 'maybach-minibus',
-            'sprinter-minibus': 'sprinter-minibus'
+            'vito': 'mercedes-vito', 'vito_vip': 'vip-mercedes',
+            'maybach': 'maybach-minibus', 'sprinter': 'sprinter-minibus',
+            'mercedes-vito': 'mercedes-vito', 'vip-mercedes': 'vip-mercedes',
+            'maybach-minibus': 'maybach-minibus', 'sprinter-minibus': 'sprinter-minibus'
           };
           
           vehiclePriceMap.forEach((value, key) => {
             const mappedType = vehicleTypeMapping[key] || key;
-            prices.push({
-              vehicleType: mappedType,
-              price: value.price,
-              currency: value.currency
-            });
+            prices.push({ vehicleType: mappedType, price: value.price, currency: value.currency });
           });
           
           setOriginalHourlyPrices(prices);
@@ -343,16 +311,12 @@ export const Hero = () => {
       setConvertingHourlyPrices(true);
       try {
         const { data: rateData, error: rateError } = await supabase.functions.invoke('get-exchange-rate', {
-          body: {
-            from_currency: baseCurrency,
-            to_currency: hourlyCurrency,
-          }
+          body: { from_currency: baseCurrency, to_currency: hourlyCurrency }
         });
 
         if (rateError) throw rateError;
 
         const rate = rateData?.rate || 1;
-        
         const convertedPrices = originalHourlyPrices.map(p => ({
           vehicleType: p.vehicleType,
           price: Math.round(p.price * rate),
@@ -384,7 +348,6 @@ export const Hero = () => {
     }
 
     setSubmitting(true);
-    
     const params = new URLSearchParams();
     params.set("pickup", pickup);
     params.set("dropoff", dropoff);
@@ -392,7 +355,6 @@ export const Hero = () => {
     params.set("time", time);
     params.set("passengers", passengers);
     params.set("vehicleType", vehicleType);
-    
     navigate(`/book?${params.toString()}`);
   };
 
@@ -408,34 +370,19 @@ export const Hero = () => {
     }
 
     setSubmitting(true);
-    
     const params = new URLSearchParams();
     params.set("city", hourlyCity);
     params.set("date", format(hourlyDate!, "yyyy-MM-dd"));
     params.set("time", hourlyTime);
-    if (hourlyDuration === "custom") {
-      params.set("duration", `${customHours}h`);
-    } else {
-      params.set("duration", `${hourlyDuration}h`);
-    }
+    params.set("duration", hourlyDuration === "custom" ? `${customHours}h` : `${hourlyDuration}h`);
     params.set("passengers", hourlyPassengers);
     params.set("vehicleType", hourlyVehicleType);
     params.set("type", "hourly");
-    
     navigate(`/book?${params.toString()}`);
   };
 
-  const handlePickupSelected = (value: string, details?: PlaceDetails) => {
-    setPickup(details?.displayText || value);
-  };
-
-  const handleDropoffSelected = (value: string, details?: PlaceDetails) => {
-    setDropoff(details?.displayText || value);
-  };
-
-  const handleHourlyCitySelected = (value: string, details?: PlaceDetails) => {
-    setHourlyCity(details?.displayText || value);
-  };
+  const handlePickupSelected = (value: string, details?: PlaceDetails) => setPickup(details?.displayText || value);
+  const handleDropoffSelected = (value: string, details?: PlaceDetails) => setDropoff(details?.displayText || value);
 
   const handleApplyBooking = useCallback((bookingData: {
     pickup?: string | null;
@@ -445,427 +392,325 @@ export const Hero = () => {
     passengers?: number | null;
     vehicleType?: string | null;
   }) => {
-    if (bookingData.pickup) {
-      setPickup(bookingData.pickup);
-    }
-    if (bookingData.dropoff) {
-      setDropoff(bookingData.dropoff);
-    }
+    if (bookingData.pickup) setPickup(bookingData.pickup);
+    if (bookingData.dropoff) setDropoff(bookingData.dropoff);
     if (bookingData.date) {
       try {
         const parsedDate = parse(bookingData.date, "yyyy-MM-dd", new Date());
-        if (!isNaN(parsedDate.getTime())) {
-          setDate(parsedDate);
-        }
-      } catch (e) {
-        console.error("Failed to parse date:", e);
-      }
+        if (!isNaN(parsedDate.getTime())) setDate(parsedDate);
+      } catch (e) { console.error("Failed to parse date:", e); }
     }
-    if (bookingData.time) {
-      setTime(bookingData.time);
-    }
-    if (bookingData.passengers) {
-      setPassengers(bookingData.passengers.toString());
-    }
+    if (bookingData.time) setTime(bookingData.time);
+    if (bookingData.passengers) setPassengers(bookingData.passengers.toString());
     if (bookingData.vehicleType) {
       const vehicleMap: Record<string, string> = {
-        'mercedes-vito': 'mercedes-vito',
-        'vip-mercedes': 'vip-mercedes',
-        'maybach-minibus': 'maybach-minibus',
-        'minibus': 'minibus'
+        'mercedes-vito': 'mercedes-vito', 'vip-mercedes': 'vip-mercedes',
+        'maybach-minibus': 'maybach-minibus', 'minibus': 'minibus'
       };
-      const mappedType = vehicleMap[bookingData.vehicleType] || 'mercedes-vito';
-      setVehicleType(mappedType);
+      setVehicleType(vehicleMap[bookingData.vehicleType] || 'mercedes-vito');
     }
-    
-    toast.success(t("bookingDetailsApplied") || "Booking details applied to form!");
-    
+    toast.success(t("bookingDetailsApplied") || "Booking details applied!");
     document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [t]);
   
   return (
-    <section id="booking-form" className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
-      {/* Subtle Background Pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-50"></div>
+    <section ref={heroRef} id="booking-form" className="relative min-h-screen overflow-hidden bg-background">
+      {/* Parallax Background */}
+      <motion.div 
+        style={{ y, opacity }}
+        className="absolute inset-0 z-0"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
+      </motion.div>
       
-      {/* Decorative Elements */}
-      <div className="absolute top-20 right-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      {/* Floating Elements */}
+      <div className="absolute top-20 right-[10%] w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-40 left-[5%] w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
 
-      <div className="container relative z-10 px-4 py-12 lg:py-20">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left Side - Form */}
-          <div className="order-2 lg:order-1 animate-in fade-in slide-in-from-left-4 duration-700">
-            {/* Logo & Title */}
-            <div className="flex items-center gap-4 mb-6">
+      <div className="container relative z-10 px-4 py-8 lg:py-16">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(100vh-8rem)]">
+          {/* Left Side - Form (Mobile: First) */}
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            className="order-1"
+          >
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
               <img 
                 src={meetTransferLogo} 
-                alt="Meet Transfer Logo" 
-                width={56}
-                height={56}
+                alt="Meet Transfer" 
+                width={48}
+                height={48}
                 loading="eager"
-                decoding="async"
-                className="h-14 w-14 rounded-full object-cover shadow-lg ring-2 ring-primary/20"
+                className="h-12 w-12 rounded-full object-cover shadow-lg ring-2 ring-primary/20"
               />
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground leading-tight">
                   {t("heroTitle")}
                 </h1>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm text-muted-foreground hidden sm:block">
                   {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language, activePromo.validUntil).heroSubtitle}
                 </p>
               </div>
             </div>
 
-            {/* AI Chat Assistant */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span>{t("bookTransferOrHourlyWithAI") || "Book with AI Assistant"}</span>
+            {/* AI Assistant - Compact on mobile */}
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <span>{t("bookTransferOrHourlyWithAI") || "Book with AI"}</span>
               </div>
               <BookingChatAssistant onApplyBooking={handleApplyBooking} />
             </div>
 
             {/* Booking Form Card */}
-            <div className="bg-card rounded-2xl shadow-xl border border-border/50 overflow-hidden">
-              {/* Tab Switcher */}
-              <div className="flex bg-muted/30">
+            <div className="bg-card rounded-2xl shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm">
+              {/* Tabs */}
+              <div className="flex bg-muted/50">
                 <button
                   onClick={() => setActiveTab("ride")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-4 px-6 font-semibold transition-all relative text-sm",
-                    activeTab === "ride"
-                      ? "text-primary bg-card"
-                      : "text-muted-foreground hover:text-foreground"
+                    "flex-1 flex items-center justify-center gap-1.5 py-3 px-4 font-medium transition-all text-sm",
+                    activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   <Car className="h-4 w-4" />
-                  <span>{t("pointToPoint") || "Transfer"}</span>
+                  <span className="hidden xs:inline">{t("pointToPoint") || "Transfer"}</span>
+                  <span className="xs:hidden">Transfer</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("hourly")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-4 px-6 font-semibold transition-all relative text-sm",
-                    activeTab === "hourly"
-                      ? "text-primary bg-card"
-                      : "text-muted-foreground hover:text-foreground"
+                    "flex-1 flex items-center justify-center gap-1.5 py-3 px-4 font-medium transition-all text-sm",
+                    activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   <Timer className="h-4 w-4" />
-                  <span>{t("perHour") || "Per Hour"}</span>
+                  <span className="hidden xs:inline">{t("perHour") || "Hourly"}</span>
+                  <span className="xs:hidden">Hourly</span>
                 </button>
               </div>
 
               {/* Form Content */}
-              <div className="p-5 md:p-6">
+              <div className="p-4 md:p-5">
                 {activeTab === "ride" ? (
-                  /* Ride Form */
-                  <div className="space-y-4">
-                    {/* Location Fields */}
-                    <div className="space-y-3">
+                  <div className="space-y-3">
+                    {/* Locations */}
+                    <div className="space-y-2">
                       <div className="relative">
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary z-10" />
-                          <GooglePlacesAutocomplete 
-                            onPlaceSelected={handlePickupSelected} 
-                            placeholder={t("enterPickupPoint") || "Pickup: Airport, hotel, address..."} 
-                            className="pl-10 h-12 bg-muted/50 border border-border focus:border-primary text-foreground placeholder:text-muted-foreground rounded-xl transition-all text-sm"
-                            value={pickup}
-                          />
-                        </div>
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary z-10" />
+                        <GooglePlacesAutocomplete 
+                          onPlaceSelected={handlePickupSelected} 
+                          placeholder={t("enterPickupPoint") || "Pickup location"} 
+                          className="pl-10 h-11 bg-muted/50 border border-border focus:border-primary rounded-xl text-sm"
+                          value={pickup}
+                        />
                       </div>
                       
-                      {/* Swap Button */}
-                      <div className="flex justify-center -my-1">
+                      <div className="flex justify-center -my-0.5">
                         <button
                           type="button"
-                          onClick={() => {
-                            const temp = pickup;
-                            setPickup(dropoff);
-                            setDropoff(temp);
-                          }}
+                          onClick={() => { const temp = pickup; setPickup(dropoff); setDropoff(temp); }}
                           disabled={!pickup && !dropoff}
-                          className={cn(
-                            "flex items-center justify-center",
-                            "w-8 h-8 rounded-full bg-primary text-primary-foreground shadow",
-                            "hover:bg-primary/90 hover:scale-110 active:scale-95",
-                            "transition-all duration-200",
-                            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                          )}
-                          title={t("swapLocations") || "Swap locations"}
+                          className="w-7 h-7 rounded-full bg-primary text-primary-foreground shadow hover:scale-110 transition-all disabled:opacity-50 flex items-center justify-center"
                         >
                           <ArrowUpDown className="h-3 w-3" />
                         </button>
                       </div>
                       
                       <div className="relative">
-                        <div className="relative">
-                          <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent z-10" />
-                          <GooglePlacesAutocomplete 
-                            onPlaceSelected={handleDropoffSelected} 
-                            placeholder={t("hotelOrAddress") || "Drop-off: Where to?"} 
-                            className="pl-10 h-12 bg-muted/50 border border-border focus:border-accent text-foreground placeholder:text-muted-foreground rounded-xl transition-all text-sm"
-                            value={dropoff}
-                          />
-                        </div>
+                        <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent z-10" />
+                        <GooglePlacesAutocomplete 
+                          onPlaceSelected={handleDropoffSelected} 
+                          placeholder={t("hotelOrAddress") || "Drop-off location"} 
+                          className="pl-10 h-11 bg-muted/50 border border-border focus:border-accent rounded-xl text-sm"
+                          value={dropoff}
+                        />
                       </div>
                       
-                      {/* Route Map */}
-                      {pickup && dropoff && (
-                        <CompactRouteMap 
-                          pickup={pickup} 
-                          dropoff={dropoff}
-                          className="mt-2"
-                        />
-                      )}
+                      {pickup && dropoff && <CompactRouteMap pickup={pickup} dropoff={dropoff} className="mt-2" />}
                     </div>
 
-                    {/* Date, Time & Passengers */}
+                    {/* Date, Time, Passengers */}
                     <div className="grid grid-cols-3 gap-2">
                       <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                         <PopoverTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            className={cn(
-                              "w-full h-12 justify-start text-left font-normal bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3",
-                              !date && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="truncate text-xs">{date ? format(date, "dd MMM") : t("date")}</span>
+                          <Button variant="outline" className={cn(
+                            "w-full h-11 justify-start bg-muted/50 border-border rounded-xl text-xs px-2.5",
+                            !date && "text-muted-foreground"
+                          )}>
+                            <CalendarIcon className="mr-1 h-3.5 w-3.5 text-primary" />
+                            <span className="truncate">{date ? format(date, "dd MMM") : t("date") || "Date"}</span>
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 z-50" align="start">
-                          <Calendar 
-                            mode="single" 
-                            selected={date} 
-                            onSelect={(selectedDate) => { setDate(selectedDate); setDatePopoverOpen(false); }} 
+                          <Calendar mode="single" selected={date} 
+                            onSelect={(d) => { setDate(d); setDatePopoverOpen(false); }} 
                             disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-                            initialFocus 
-                            className="p-3 pointer-events-auto" 
+                            initialFocus className="p-3" 
                           />
                         </PopoverContent>
                       </Popover>
                       
                       <Select value={time} onValueChange={setTime}>
-                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3">
-                          <div className="flex items-center">
-                            <Clock className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="truncate text-xs">{time || t("time")}</span>
-                          </div>
+                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-xs px-2.5">
+                          <Clock className="mr-1 h-3.5 w-3.5 text-primary" />
+                          <span className="truncate">{time || t("time") || "Time"}</span>
                         </SelectTrigger>
-                        <SelectContent className="max-h-[300px] z-50">
-                          {timeOptions.map((opt) => (
-                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                          ))}
+                        <SelectContent className="max-h-[250px] z-50">
+                          {timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
                         </SelectContent>
                       </Select>
                       
                       <Select value={passengers} onValueChange={setPassengers}>
-                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3">
-                          <div className="flex items-center">
-                            <Users className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="text-xs">{passengers}</span>
-                          </div>
+                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-xs px-2.5">
+                          <Users className="mr-1 h-3.5 w-3.5 text-primary" />
+                          <span>{passengers}</span>
                         </SelectTrigger>
-                        <SelectContent className="max-h-[300px] z-50">
+                        <SelectContent className="max-h-[250px] z-50">
                           {Array.from({ length: 18 }, (_, i) => i + 1).map((num) => (
-                            <SelectItem key={num} value={num.toString()}>
-                              {num} {num === 1 ? (t("passenger") || "pax") : (t("passengers") || "pax")}
-                            </SelectItem>
+                            <SelectItem key={num} value={num.toString()}>{num} pax</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {/* Vehicle Type Selection - Compact */}
-                    <div>
-                      {isMinibusRequired(parseInt(passengers), 0) && (
-                        <p className="text-xs text-amber-600 mb-2">
-                          {t("minibusRequiredForPassengers") || "Sprinter minibus required for 7+ passengers"}
-                        </p>
-                      )}
-                      <div className="grid grid-cols-4 gap-1.5">
-                        {VEHICLE_TYPES.map((vehicle) => {
-                          const vehiclePrice = allVehiclePrices.find(v => v.vehicleType === vehicle.value);
-                          const isSelected = vehicleType === vehicle.value;
-                          const passengerCount = parseInt(passengers);
-                          const isDisabled = vehicle.passengers < passengerCount;
-                          
-                          return (
-                            <button
-                              key={vehicle.value}
-                              type="button"
-                              onClick={() => !isDisabled && setVehicleType(vehicle.value)}
-                              disabled={isDisabled}
-                              className={cn(
-                                "relative rounded-lg border p-2 transition-all text-center",
-                                isDisabled
-                                  ? "border-border bg-muted/20 opacity-40 cursor-not-allowed"
-                                  : isSelected
-                                    ? "border-primary bg-primary/10 ring-1 ring-primary"
-                                    : "border-border hover:border-primary/50 bg-muted/30"
-                              )}
-                            >
-                              <div className="text-xs font-medium truncate">{vehicle.label.split(' ')[1] || vehicle.label}</div>
-                              {vehiclePrice && (
-                                <div className="text-xs font-bold text-primary mt-0.5">
-                                  €{vehiclePrice.price}
-                                </div>
-                              )}
-                              {loadingTransferPrice && !vehiclePrice && pickup && dropoff && (
-                                <Loader2 className="h-3 w-3 animate-spin mx-auto mt-0.5 text-muted-foreground" />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
+                    {/* Vehicle Selection */}
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {VEHICLE_TYPES.map((vehicle) => {
+                        const vehiclePrice = allVehiclePrices.find(v => v.vehicleType === vehicle.value);
+                        const isSelected = vehicleType === vehicle.value;
+                        const isDisabled = vehicle.passengers < parseInt(passengers);
+                        
+                        return (
+                          <button
+                            key={vehicle.value}
+                            type="button"
+                            onClick={() => !isDisabled && setVehicleType(vehicle.value)}
+                            disabled={isDisabled}
+                            className={cn(
+                              "rounded-lg border p-2 transition-all text-center",
+                              isDisabled ? "opacity-40 cursor-not-allowed" : "",
+                              isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border bg-muted/30 hover:border-primary/50"
+                            )}
+                          >
+                            <div className="text-[10px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
+                            {vehiclePrice ? (
+                              <div className="text-xs font-bold text-primary">€{vehiclePrice.price}</div>
+                            ) : loadingTransferPrice && pickup && dropoff ? (
+                              <Loader2 className="h-3 w-3 animate-spin mx-auto text-muted-foreground" />
+                            ) : null}
+                          </button>
+                        );
+                      })}
                     </div>
 
-                    {/* CTA Button */}
+                    {/* CTA */}
                     <Button 
                       onClick={handleRideContinue}
                       disabled={submitting}
-                      size="lg"
-                      className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all rounded-xl"
+                      className="w-full h-11 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-xl"
                     >
-                      {submitting ? (
-                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("loading")}</>
-                      ) : (
+                      {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (
                         <>{t("getQuote") || "Get Quote"} <ArrowRight className="ml-2 h-4 w-4" /></>
                       )}
                     </Button>
                   </div>
                 ) : (
-                  /* Hourly Rental Form */
-                  <div className="space-y-4">
-                    {/* City & Duration */}
-                    <div className="grid grid-cols-2 gap-3">
+                  /* Hourly Form */
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
                       <Select value={hourlyCity} onValueChange={setHourlyCity}>
-                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm">
-                          <div className="flex items-center">
-                            <MapPin className="mr-2 h-4 w-4 text-primary" />
-                            <SelectValue placeholder={loadingCities ? "..." : (t("selectCity") || "City")} />
-                          </div>
+                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-sm">
+                          <MapPin className="mr-1 h-4 w-4 text-primary" />
+                          <SelectValue placeholder={t("city") || "City"} />
                         </SelectTrigger>
-                        <SelectContent className="z-50 max-h-[300px]">
-                          {availableCities.map((city) => (
-                            <SelectItem key={city} value={city}>{city}</SelectItem>
-                          ))}
+                        <SelectContent className="z-50 max-h-[250px]">
+                          {availableCities.map((city) => <SelectItem key={city} value={city}>{city}</SelectItem>)}
                         </SelectContent>
                       </Select>
                       
-                      <Select 
-                        value={hourlyDuration} 
-                        onValueChange={setHourlyDuration}
-                        disabled={!hourlyCity || availableDurations.length === 0}
-                      >
-                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all disabled:opacity-50 text-sm">
-                          <div className="flex items-center">
-                            <Timer className="mr-2 h-4 w-4 text-primary" />
-                            <SelectValue placeholder={t("duration") || "Duration"} />
-                          </div>
+                      <Select value={hourlyDuration} onValueChange={setHourlyDuration} disabled={!hourlyCity}>
+                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-sm disabled:opacity-50">
+                          <Timer className="mr-1 h-4 w-4 text-primary" />
+                          <SelectValue placeholder={t("duration") || "Duration"} />
                         </SelectTrigger>
                         <SelectContent className="z-50">
-                          {availableDurations.map((duration) => {
-                            const option = hourlyDurationOptions.find(o => o.value === duration);
-                            const label = option 
-                              ? (t(option.labelKey) || option.defaultLabel)
-                              : `${duration}h`;
-                            return (
-                              <SelectItem key={duration} value={duration}>{label}</SelectItem>
-                            );
+                          {availableDurations.map((d) => {
+                            const opt = hourlyDurationOptions.find(o => o.value === d);
+                            return <SelectItem key={d} value={d}>{opt ? (t(opt.labelKey) || opt.defaultLabel) : `${d}h`}</SelectItem>;
                           })}
                         </SelectContent>
                       </Select>
                     </div>
                     
-                    {/* Custom Hours */}
                     {hourlyDuration === "custom" && (
                       <Select value={customHours} onValueChange={setCustomHours}>
-                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm">
-                          <div className="flex items-center">
-                            <Timer className="mr-2 h-4 w-4 text-primary" />
-                            <SelectValue />
-                          </div>
+                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-sm">
+                          <Timer className="mr-1 h-4 w-4 text-primary" />
+                          <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="z-50 max-h-[300px]">
-                          {Array.from({ length: 16 }, (_, i) => i + 9).map((hours) => (
-                            <SelectItem key={hours} value={hours.toString()}>
-                              {hours} {t("hours") || "hours"}
-                            </SelectItem>
+                        <SelectContent className="z-50 max-h-[250px]">
+                          {Array.from({ length: 16 }, (_, i) => i + 9).map((h) => (
+                            <SelectItem key={h} value={h.toString()}>{h} {t("hours") || "hours"}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     )}
 
-                    {/* Date, Time & Passengers */}
                     <div className="grid grid-cols-3 gap-2">
                       <Popover open={hourlyDatePopoverOpen} onOpenChange={setHourlyDatePopoverOpen}>
                         <PopoverTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            className={cn(
-                              "w-full h-12 justify-start text-left font-normal bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3",
-                              !hourlyDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="truncate text-xs">{hourlyDate ? format(hourlyDate, "dd MMM") : t("date")}</span>
+                          <Button variant="outline" className={cn(
+                            "w-full h-11 justify-start bg-muted/50 border-border rounded-xl text-xs px-2.5",
+                            !hourlyDate && "text-muted-foreground"
+                          )}>
+                            <CalendarIcon className="mr-1 h-3.5 w-3.5 text-primary" />
+                            <span className="truncate">{hourlyDate ? format(hourlyDate, "dd MMM") : t("date") || "Date"}</span>
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 z-50" align="start">
-                          <Calendar 
-                            mode="single" 
-                            selected={hourlyDate} 
-                            onSelect={(selectedDate) => { setHourlyDate(selectedDate); setHourlyDatePopoverOpen(false); }} 
+                          <Calendar mode="single" selected={hourlyDate} 
+                            onSelect={(d) => { setHourlyDate(d); setHourlyDatePopoverOpen(false); }} 
                             disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-                            initialFocus 
-                            className="p-3 pointer-events-auto" 
+                            initialFocus className="p-3" 
                           />
                         </PopoverContent>
                       </Popover>
                       
                       <Select value={hourlyTime} onValueChange={setHourlyTime}>
-                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3">
-                          <div className="flex items-center">
-                            <Clock className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="truncate text-xs">{hourlyTime || t("time")}</span>
-                          </div>
+                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-xs px-2.5">
+                          <Clock className="mr-1 h-3.5 w-3.5 text-primary" />
+                          <span className="truncate">{hourlyTime || t("time") || "Time"}</span>
                         </SelectTrigger>
-                        <SelectContent className="max-h-[300px] z-50">
-                          {timeOptions.map((opt) => (
-                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                          ))}
+                        <SelectContent className="max-h-[250px] z-50">
+                          {timeOptions.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
                         </SelectContent>
                       </Select>
                       
                       <Select value={hourlyPassengers} onValueChange={setHourlyPassengers}>
-                        <SelectTrigger className="w-full h-12 bg-muted/50 border-border hover:border-primary/50 text-foreground rounded-xl transition-all text-sm px-3">
-                          <div className="flex items-center">
-                            <Users className="mr-1.5 h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="text-xs">{hourlyPassengers}</span>
-                          </div>
+                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-xs px-2.5">
+                          <Users className="mr-1 h-3.5 w-3.5 text-primary" />
+                          <span>{hourlyPassengers}</span>
                         </SelectTrigger>
-                        <SelectContent className="max-h-[300px] z-50">
+                        <SelectContent className="max-h-[250px] z-50">
                           {Array.from({ length: 6 }, (_, i) => i + 1).map((num) => (
-                            <SelectItem key={num} value={num.toString()}>
-                              {num} {num === 1 ? "pax" : "pax"}
-                            </SelectItem>
+                            <SelectItem key={num} value={num.toString()}>{num} pax</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {/* Vehicle Selection with Prices */}
                     {hourlyCity && hourlyDuration && (
                       <div className="grid grid-cols-3 gap-1.5">
                         {VEHICLE_TYPES.filter(v => v.value !== 'minibus').map((vehicle) => {
                           const vehiclePrice = allHourlyPrices.find(v => v.vehicleType === vehicle.value);
                           const isSelected = hourlyVehicleType === vehicle.value;
-                          const passengerCount = parseInt(hourlyPassengers);
-                          const isDisabled = vehicle.passengers < passengerCount;
-                          const currencySymbol = vehiclePrice?.currency === "EUR" ? "€" : vehiclePrice?.currency === "USD" ? "$" : vehiclePrice?.currency === "GBP" ? "£" : "₺";
+                          const isDisabled = vehicle.passengers < parseInt(hourlyPassengers);
+                          const symbol = vehiclePrice?.currency === "EUR" ? "€" : vehiclePrice?.currency === "USD" ? "$" : vehiclePrice?.currency === "GBP" ? "£" : "₺";
                           
                           return (
                             <button
@@ -874,39 +719,29 @@ export const Hero = () => {
                               onClick={() => !isDisabled && setHourlyVehicleType(vehicle.value)}
                               disabled={isDisabled}
                               className={cn(
-                                "relative rounded-lg border p-2 transition-all text-center",
-                                isDisabled
-                                  ? "border-border bg-muted/20 opacity-40 cursor-not-allowed"
-                                  : isSelected
-                                    ? "border-primary bg-primary/10 ring-1 ring-primary"
-                                    : "border-border hover:border-primary/50 bg-muted/30"
+                                "rounded-lg border p-2 transition-all text-center",
+                                isDisabled ? "opacity-40 cursor-not-allowed" : "",
+                                isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border bg-muted/30 hover:border-primary/50"
                               )}
                             >
-                              <div className="text-xs font-medium truncate">{vehicle.label.split(' ')[1] || vehicle.label}</div>
-                              {vehiclePrice && (
-                                <div className="text-xs font-bold text-primary mt-0.5">
-                                  {currencySymbol}{vehiclePrice.price}
-                                </div>
-                              )}
-                              {(loadingPrice || convertingHourlyPrices) && !vehiclePrice && (
-                                <Loader2 className="h-3 w-3 animate-spin mx-auto mt-0.5 text-muted-foreground" />
-                              )}
+                              <div className="text-[10px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
+                              {vehiclePrice ? (
+                                <div className="text-xs font-bold text-primary">{symbol}{vehiclePrice.price}</div>
+                              ) : (loadingPrice || convertingHourlyPrices) ? (
+                                <Loader2 className="h-3 w-3 animate-spin mx-auto text-muted-foreground" />
+                              ) : null}
                             </button>
                           );
                         })}
                       </div>
                     )}
 
-                    {/* CTA Button */}
                     <Button 
                       onClick={handleHourlyContinue}
                       disabled={submitting}
-                      size="lg"
-                      className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all rounded-xl"
+                      className="w-full h-11 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-xl"
                     >
-                      {submitting ? (
-                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("loading")}</>
-                      ) : (
+                      {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (
                         <>{t("getQuote") || "Get Quote"} <ArrowRight className="ml-2 h-4 w-4" /></>
                       )}
                     </Button>
@@ -915,106 +750,143 @@ export const Hero = () => {
               </div>
             </div>
 
-            {/* Trust Indicators */}
-            <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Shield className="h-4 w-4 text-green-500" />
-                <span>{t("freeCancellation") || "Free Cancellation"}</span>
+            {/* Trust Badges - Mobile Compact */}
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Shield className="h-3.5 w-3.5 text-green-500" />
+                <span>{t("freeCancellation") || "Free Cancel"}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                <span>4.9/5</span>
+              <div className="flex items-center gap-1">
+                <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+                <span>4.9/5 (2000+)</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Check className="h-3.5 w-3.5 text-primary" />
+                <span>{t("fixedPrices") || "Fixed Price"}</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Right Side - Visual/Illustration */}
-          <div className="order-1 lg:order-2 animate-in fade-in slide-in-from-right-4 duration-700 delay-200">
+          {/* Right Side - Visual (Mobile: Second/Hidden on very small) */}
+          <motion.div 
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="order-2 hidden md:block"
+          >
             <div className="relative">
-              {/* Main Visual Container */}
-              <div className="relative bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 rounded-3xl p-8 lg:p-12">
-                {/* City Marquee */}
-                <div className="mb-8">
-                  <CityMarquee />
-                </div>
+              {/* Main Image with Overlay */}
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+                <motion.img 
+                  src={heroMercedes}
+                  alt="Mercedes Vito VIP Transfer"
+                  className="w-full h-auto object-cover"
+                  initial={{ scale: 1.1 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 1 }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-5 text-center shadow-lg border border-border/50">
-                    <div className="flex justify-center mb-2">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Globe className="h-6 w-6 text-primary" />
+                {/* Overlay Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="text-white">
+                    <h3 className="text-lg font-bold mb-2">{t("premiumFleet") || "Premium Mercedes Fleet"}</h3>
+                    <div className="flex flex-wrap gap-3">
+                      <div className="flex items-center gap-1.5 text-sm bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                        <Wifi className="h-3.5 w-3.5" />
+                        <span>Free WiFi</span>
                       </div>
-                    </div>
-                    <div className="text-2xl font-bold text-foreground">100+</div>
-                    <div className="text-sm text-muted-foreground">{t("cities") || "Cities"}</div>
-                  </div>
-                  <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-5 text-center shadow-lg border border-border/50">
-                    <div className="flex justify-center mb-2">
-                      <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-                        <Plane className="h-6 w-6 text-accent" />
+                      <div className="flex items-center gap-1.5 text-sm bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                        <Baby className="h-3.5 w-3.5" />
+                        <span>Baby Seat</span>
                       </div>
-                    </div>
-                    <div className="text-2xl font-bold text-foreground">670+</div>
-                    <div className="text-sm text-muted-foreground">{t("airports") || "Airports"}</div>
-                  </div>
-                  <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-5 text-center shadow-lg border border-border/50">
-                    <div className="flex justify-center mb-2">
-                      <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                        <Star className="h-6 w-6 text-green-500" />
+                      <div className="flex items-center gap-1.5 text-sm bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                        <Briefcase className="h-3.5 w-3.5" />
+                        <span>Meet & Greet</span>
                       </div>
-                    </div>
-                    <div className="text-2xl font-bold text-foreground">50K+</div>
-                    <div className="text-sm text-muted-foreground">{t("happyCustomers") || "Happy Customers"}</div>
-                  </div>
-                  <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-5 text-center shadow-lg border border-border/50">
-                    <div className="flex justify-center mb-2">
-                      <div className="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                        <Building2 className="h-6 w-6 text-yellow-600" />
-                      </div>
-                    </div>
-                    <div className="text-2xl font-bold text-foreground">24/7</div>
-                    <div className="text-sm text-muted-foreground">{t("support") || "Support"}</div>
-                  </div>
-                </div>
-
-                {/* Feature Highlights */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 bg-card/60 backdrop-blur-sm rounded-xl p-3 border border-border/30">
-                    <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                      <Shield className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-foreground text-sm">{t("fixedPrices") || "Fixed Prices"}</div>
-                      <div className="text-xs text-muted-foreground">{t("noHiddenFees") || "No hidden fees, no surprises"}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 bg-card/60 backdrop-blur-sm rounded-xl p-3 border border-border/30">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                      <Car className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-foreground text-sm">{t("luxuryVehicles") || "Luxury Vehicles"}</div>
-                      <div className="text-xs text-muted-foreground">{t("mercedesFleet") || "Premium Mercedes fleet"}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 bg-card/60 backdrop-blur-sm rounded-xl p-3 border border-border/30">
-                    <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-                      <Users className="h-4 w-4 text-accent" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-foreground text-sm">{t("professionalDrivers") || "Professional Drivers"}</div>
-                      <div className="text-xs text-muted-foreground">{t("englishSpeaking") || "English speaking, meet & greet"}</div>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Decorative Elements */}
-                <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/20 rounded-full blur-2xl" />
-                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/20 rounded-full blur-2xl" />
+              {/* Floating Stats Cards */}
+              <motion.div 
+                className="absolute -top-4 -right-4 bg-card rounded-xl shadow-xl p-4 border border-border/50"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Globe className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold text-foreground">100+</div>
+                    <div className="text-xs text-muted-foreground">{t("cities") || "Cities"}</div>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                className="absolute -bottom-4 -left-4 bg-card rounded-xl shadow-xl p-4 border border-border/50"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                    <Plane className="h-5 w-5 text-accent" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold text-foreground">670+</div>
+                    <div className="text-xs text-muted-foreground">{t("airports") || "Airports"}</div>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                className="absolute top-1/2 -right-6 bg-card rounded-xl shadow-xl p-4 border border-border/50"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.9 }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                    <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold text-foreground">4.9</div>
+                    <div className="text-xs text-muted-foreground">Google</div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* City Marquee Below Image */}
+              <div className="mt-6">
+                <CityMarquee />
+              </div>
+
+              {/* Feature List */}
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl p-3 border border-border/30">
+                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-foreground">{t("freeCancellation") || "Free Cancellation"}</span>
+                </div>
+                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl p-3 border border-border/30">
+                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-foreground">{t("flightTracking") || "Flight Tracking"}</span>
+                </div>
+                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl p-3 border border-border/30">
+                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-foreground">{t("noHiddenFees") || "No Hidden Fees"}</span>
+                </div>
+                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl p-3 border border-border/30">
+                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-foreground">24/7 {t("support") || "Support"}</span>
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
