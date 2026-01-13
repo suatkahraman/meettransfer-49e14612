@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Users, Briefcase, Check, Sparkles } from "lucide-react";
 import { VEHICLE_TYPES, VehicleTypeInfo } from "@/lib/vehicleTypes";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
 
 // Feature icon mapping
 const getFeatureIcon = (iconName: string) => {
@@ -28,6 +29,7 @@ interface VehicleTooltipProps {
   position?: "top" | "bottom" | "left" | "right";
   isTurkish?: boolean;
   className?: string;
+  alignRight?: boolean; // Force right alignment for right-side items
 }
 
 export const VehicleTooltip = ({ 
@@ -35,24 +37,79 @@ export const VehicleTooltip = ({
   isVisible, 
   position = "top",
   isTurkish = false,
-  className 
+  className,
+  alignRight = false
 }: VehicleTooltipProps) => {
   const vehicle = VEHICLE_TYPES.find(v => v.value === vehicleType);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [adjustedPosition, setAdjustedPosition] = useState({ x: 0, y: 0 });
   
   if (!vehicle) return null;
 
-  const positionClasses = {
-    top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
-    bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
-    left: "right-full top-1/2 -translate-y-1/2 mr-2",
-    right: "left-full top-1/2 -translate-y-1/2 ml-2",
+  // Check if tooltip is outside viewport and adjust
+  useEffect(() => {
+    if (isVisible && tooltipRef.current) {
+      const rect = tooltipRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      let xAdjust = 0;
+      let yAdjust = 0;
+      
+      // Check right overflow
+      if (rect.right > viewportWidth - 10) {
+        xAdjust = viewportWidth - rect.right - 10;
+      }
+      
+      // Check left overflow
+      if (rect.left < 10) {
+        xAdjust = 10 - rect.left;
+      }
+      
+      // Check bottom overflow
+      if (rect.bottom > viewportHeight - 10) {
+        yAdjust = viewportHeight - rect.bottom - 10;
+      }
+      
+      // Check top overflow
+      if (rect.top < 10) {
+        yAdjust = 10 - rect.top;
+      }
+      
+      setAdjustedPosition({ x: xAdjust, y: yAdjust });
+    }
+  }, [isVisible]);
+
+  // Position classes - with right alignment option
+  const getPositionClasses = () => {
+    if (alignRight) {
+      // For right-side items, anchor from the right edge
+      return {
+        top: "bottom-full right-0 mb-2",
+        bottom: "top-full right-0 mt-2",
+        left: "right-full top-1/2 -translate-y-1/2 mr-2",
+        right: "left-full top-1/2 -translate-y-1/2 ml-2",
+      };
+    }
+    return {
+      top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
+      bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
+      left: "right-full top-1/2 -translate-y-1/2 mr-2",
+      right: "left-full top-1/2 -translate-y-1/2 ml-2",
+    };
   };
 
+  const positionClasses = getPositionClasses();
+
   const arrowClasses = {
-    top: "bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-l-transparent border-r-transparent border-b-transparent border-t-border",
-    bottom: "top-0 left-1/2 -translate-x-1/2 -translate-y-full border-l-transparent border-r-transparent border-t-transparent border-b-border",
-    left: "right-0 top-1/2 -translate-y-1/2 translate-x-full border-t-transparent border-b-transparent border-r-transparent border-l-border",
-    right: "left-0 top-1/2 -translate-y-1/2 -translate-x-full border-t-transparent border-b-transparent border-l-transparent border-r-border",
+    top: alignRight 
+      ? "bottom-0 right-4 translate-y-full border-l-transparent border-r-transparent border-b-transparent border-t-card"
+      : "bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-l-transparent border-r-transparent border-b-transparent border-t-card",
+    bottom: alignRight
+      ? "top-0 right-4 -translate-y-full border-l-transparent border-r-transparent border-t-transparent border-b-card"
+      : "top-0 left-1/2 -translate-x-1/2 -translate-y-full border-l-transparent border-r-transparent border-t-transparent border-b-card",
+    left: "right-0 top-1/2 -translate-y-1/2 translate-x-full border-t-transparent border-b-transparent border-r-transparent border-l-card",
+    right: "left-0 top-1/2 -translate-y-1/2 -translate-x-full border-t-transparent border-b-transparent border-l-transparent border-r-card",
   };
 
   const animationVariants = {
@@ -66,11 +123,18 @@ export const VehicleTooltip = ({
     <AnimatePresence>
       {isVisible && (
         <motion.div
+          ref={tooltipRef}
           className={cn(
-            "absolute z-50 w-64 bg-card border border-border rounded-xl shadow-2xl p-3 pointer-events-none",
+            "absolute z-[100] w-56 sm:w-64 bg-card border border-border rounded-xl shadow-2xl p-3 pointer-events-none",
             positionClasses[position],
             className
           )}
+          style={{
+            transform: adjustedPosition.x !== 0 || adjustedPosition.y !== 0
+              ? `translate(${adjustedPosition.x}px, ${adjustedPosition.y}px)`
+              : undefined,
+            maxWidth: 'calc(100vw - 20px)',
+          }}
           initial={animationVariants[position].initial}
           animate={animationVariants[position].animate}
           exit={{ opacity: 0, scale: 0.95 }}
@@ -84,7 +148,7 @@ export const VehicleTooltip = ({
 
           {/* Header */}
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
               <img 
                 src={vehicle.images[0]?.src} 
                 alt={vehicle.label}
@@ -92,8 +156,8 @@ export const VehicleTooltip = ({
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-sm text-foreground truncate">{vehicle.label}</h4>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <h4 className="font-bold text-xs sm:text-sm text-foreground truncate">{vehicle.label}</h4>
+              <div className="flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground">
                 <span className="flex items-center gap-0.5">
                   <Users className="h-3 w-3" />
                   {vehicle.passengers}
@@ -107,7 +171,7 @@ export const VehicleTooltip = ({
           </div>
 
           {/* Description */}
-          <p className="text-[10px] text-muted-foreground mb-2 line-clamp-2">
+          <p className="text-[9px] sm:text-[10px] text-muted-foreground mb-2 line-clamp-2 leading-relaxed">
             {isTurkish ? vehicle.descriptionTr : vehicle.description}
           </p>
 
@@ -116,19 +180,19 @@ export const VehicleTooltip = ({
             {vehicle.features.slice(0, 4).map((feature, index) => (
               <motion.div
                 key={feature.label}
-                className="flex items-center gap-0.5 bg-muted/60 rounded-full px-1.5 py-0.5 text-[9px]"
+                className="flex items-center gap-0.5 bg-muted/60 rounded-full px-1.5 py-0.5 text-[8px] sm:text-[9px]"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
               >
                 <span className="text-[8px]">{getFeatureIcon(feature.icon)}</span>
-                <span className="text-foreground/80 truncate max-w-[50px]">
+                <span className="text-foreground/80 truncate max-w-[45px] sm:max-w-[50px]">
                   {isTurkish ? feature.labelTr : feature.label}
                 </span>
               </motion.div>
             ))}
             {vehicle.features.length > 4 && (
-              <div className="flex items-center gap-0.5 bg-primary/10 text-primary rounded-full px-1.5 py-0.5 text-[9px] font-medium">
+              <div className="flex items-center gap-0.5 bg-primary/10 text-primary rounded-full px-1.5 py-0.5 text-[8px] sm:text-[9px] font-medium">
                 <Sparkles className="h-2 w-2" />
                 +{vehicle.features.length - 4}
               </div>
