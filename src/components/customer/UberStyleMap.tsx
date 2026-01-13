@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Navigation, MapPin, Phone, ExternalLink, Loader2, Clock, Route, Car, User, ChevronUp, ChevronDown } from 'lucide-react';
+import { Navigation, MapPin, Phone, ExternalLink, Loader2, Clock, Route, Car, User, ChevronUp, ChevronDown, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -20,6 +20,8 @@ interface UberStyleMapProps {
   plateNumber?: string | null;
   vehicleColor?: string | null;
   status?: string;
+  pickupTime?: string; // HH:mm format
+  pickupDate?: string; // YYYY-MM-DD format
   className?: string;
 }
 
@@ -31,6 +33,7 @@ interface Coordinates {
 interface TripInfo {
   duration: string;
   distance: string;
+  durationSeconds: number;
 }
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyCk_A1D5LOqb2TuIFuOiVVjGDSAprap38M';
@@ -110,6 +113,8 @@ export const UberStyleMap = ({
   plateNumber,
   vehicleColor,
   status,
+  pickupTime,
+  pickupDate,
   className,
 }: UberStyleMapProps) => {
   const { t } = useLanguage();
@@ -126,6 +131,64 @@ export const UberStyleMap = ({
   const [error, setError] = useState<string | null>(null);
   const [tripInfo, setTripInfo] = useState<TripInfo | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [countdown, setCountdown] = useState<{ hours: number; minutes: number; seconds: number } | null>(null);
+  const [countdownLabel, setCountdownLabel] = useState<string>('');
+
+  // Calculate countdown to pickup time
+  const calculateCountdown = useCallback(() => {
+    if (!pickupDate || !pickupTime) return null;
+    
+    const [hours, minutes] = pickupTime.split(':').map(Number);
+    const pickupDateTime = new Date(pickupDate);
+    pickupDateTime.setHours(hours, minutes, 0, 0);
+    
+    const now = new Date();
+    const diff = pickupDateTime.getTime() - now.getTime();
+    
+    if (diff <= 0) {
+      // Pickup time has passed, show trip duration countdown if active
+      if (status === 'active' && tripInfo?.durationSeconds) {
+        return { type: 'arrival', seconds: tripInfo.durationSeconds };
+      }
+      return null;
+    }
+    
+    return { type: 'pickup', diff };
+  }, [pickupDate, pickupTime, status, tripInfo?.durationSeconds]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    const updateCountdown = () => {
+      const result = calculateCountdown();
+      
+      if (!result) {
+        setCountdown(null);
+        setCountdownLabel('');
+        return;
+      }
+      
+      if (result.type === 'pickup') {
+        const totalSeconds = Math.floor(result.diff / 1000);
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        setCountdown({ hours: hrs, minutes: mins, seconds: secs });
+        setCountdownLabel(t('timeToPickup') || 'Time to pickup');
+      } else if (result.type === 'arrival') {
+        const totalSeconds = result.seconds;
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        setCountdown({ hours: hrs, minutes: mins, seconds: secs });
+        setCountdownLabel(t('estimatedArrival') || 'Est. arrival');
+      }
+    };
+    
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    
+    return () => clearInterval(interval);
+  }, [calculateCountdown, t]);
 
   const geocodeAddress = async (address: string): Promise<Coordinates | null> => {
     const maps = getGoogleMaps();
@@ -281,6 +344,7 @@ export const UberStyleMap = ({
                 setTripInfo({
                   duration: leg.duration?.text || '',
                   distance: leg.distance?.text || '',
+                  durationSeconds: leg.duration?.value || 0,
                 });
               }
 
@@ -397,6 +461,53 @@ export const UberStyleMap = ({
         initial={false}
       >
         <div className="p-4 space-y-4">
+          {/* ETA Countdown Timer */}
+          {countdown && !loading && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col items-center"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Timer className="h-4 w-4 text-amber-400 animate-pulse" />
+                <span className="text-xs text-amber-400 font-medium uppercase tracking-wider">
+                  {countdownLabel}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                {countdown.hours > 0 && (
+                  <>
+                    <div className="bg-neutral-800 rounded-lg px-3 py-2 min-w-[52px] text-center">
+                      <span className="text-2xl font-bold text-white font-mono">
+                        {countdown.hours.toString().padStart(2, '0')}
+                      </span>
+                      <p className="text-[10px] text-neutral-500 uppercase">{t('hours') || 'hrs'}</p>
+                    </div>
+                    <span className="text-xl font-bold text-neutral-500">:</span>
+                  </>
+                )}
+                <div className="bg-neutral-800 rounded-lg px-3 py-2 min-w-[52px] text-center">
+                  <span className="text-2xl font-bold text-white font-mono">
+                    {countdown.minutes.toString().padStart(2, '0')}
+                  </span>
+                  <p className="text-[10px] text-neutral-500 uppercase">{t('minutes') || 'min'}</p>
+                </div>
+                <span className="text-xl font-bold text-neutral-500">:</span>
+                <div className="bg-neutral-800 rounded-lg px-3 py-2 min-w-[52px] text-center">
+                  <motion.span 
+                    key={countdown.seconds}
+                    initial={{ opacity: 0.5, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-2xl font-bold text-emerald-400 font-mono"
+                  >
+                    {countdown.seconds.toString().padStart(2, '0')}
+                  </motion.span>
+                  <p className="text-[10px] text-neutral-500 uppercase">{t('seconds') || 'sec'}</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Trip Info */}
           {tripInfo && !loading && (
             <motion.div 
