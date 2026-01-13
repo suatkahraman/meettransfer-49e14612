@@ -717,11 +717,17 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
 
   // Load and filter voices for current language - prefer high quality voices
   const loadVoices = useCallback(() => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      console.log('🔊 [Voices] speechSynthesis not available');
+      return;
+    }
     
     const voices = window.speechSynthesis.getVoices();
+    console.log('🔊 [Voices] Loading voices, total available:', voices.length);
+    
     const langCode = getLanguageCode(language);
     const langPrefix = langCode.split('-')[0];
+    console.log('🔊 [Voices] Looking for language:', langCode, 'prefix:', langPrefix);
     
     // Keywords indicating higher quality voices
     const premiumKeywords = ['premium', 'enhanced', 'natural', 'neural', 'hd', 'wavenet', 'google', 'microsoft'];
@@ -742,8 +748,14 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
         return 0;
       });
     
+    console.log('🔊 [Voices] Filtered voices for language:', filteredVoices.length);
+    if (filteredVoices.length > 0) {
+      console.log('🔊 [Voices] First 3 voices:', filteredVoices.slice(0, 3).map(v => v.name));
+    }
+    
     // Add fallback voices if none found for the language
     if (filteredVoices.length === 0) {
+      console.log('🔊 [Voices] ⚠️ No voices for language, using defaults');
       const defaultVoices = voices.slice(0, 3).map(voice => ({
         id: voice.voiceURI,
         name: voice.name.replace(/Microsoft |Google |Apple /, '').split(' ')[0],
@@ -757,21 +769,33 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
     
     // Auto-select best quality voice (first in sorted list) if none selected
     if (!selectedVoiceId && filteredVoices.length > 0) {
+      console.log('🔊 [Voices] Auto-selecting voice:', filteredVoices[0].name);
       setSelectedVoiceId(filteredVoices[0].id);
     }
   }, [language, getLanguageCode, detectGender, selectedVoiceId]);
 
   const speak = useCallback((text: string) => {
-    if (!isVoiceEnabled || !text || typeof window === 'undefined') return;
-
-    // Check for browser support
-    if (!('speechSynthesis' in window)) {
-      console.error('Speech synthesis not supported in this browser');
+    console.log('🔊 [TTS] speak() called');
+    console.log('🔊 [TTS] isVoiceEnabled:', isVoiceEnabled);
+    console.log('🔊 [TTS] text length:', text?.length);
+    console.log('🔊 [TTS] window exists:', typeof window !== 'undefined');
+    
+    if (!isVoiceEnabled || !text || typeof window === 'undefined') {
+      console.log('🔊 [TTS] Early return - voice disabled or no text');
       return;
     }
 
+    // Check for browser support
+    if (!('speechSynthesis' in window)) {
+      console.error('🔊 [TTS] ❌ Speech synthesis not supported in this browser');
+      return;
+    }
+    
+    console.log('🔊 [TTS] ✅ speechSynthesis supported');
+
     // Cancel any ongoing speech
     window.speechSynthesis.cancel();
+    console.log('🔊 [TTS] Cancelled any ongoing speech');
 
     // Clean text for speech (remove emojis and special characters)
     const cleanText = text
@@ -783,43 +807,83 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
       .replace(/👋|🎤|📍|📅|👥|🚗|💰/g, '')  // specific emojis
       .trim();
 
-    if (!cleanText) return;
+    if (!cleanText) {
+      console.log('🔊 [TTS] No clean text to speak after removing emojis');
+      return;
+    }
+    
+    console.log('🔊 [TTS] Clean text:', cleanText.substring(0, 50) + '...');
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utteranceRef.current = utterance;
 
-    utterance.lang = getLanguageCode(language);
+    const langCode = getLanguageCode(language);
+    utterance.lang = langCode;
     utterance.rate = speechRate;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
+    
+    console.log('🔊 [TTS] Utterance configured - lang:', langCode, 'rate:', speechRate);
 
     // Use selected voice if available
     const voices = window.speechSynthesis.getVoices();
+    console.log('🔊 [TTS] Available voices:', voices.length);
+    
     if (selectedVoiceId) {
       const selectedVoice = voices.find(v => v.voiceURI === selectedVoiceId);
       if (selectedVoice) {
         utterance.voice = selectedVoice;
+        console.log('🔊 [TTS] Using selected voice:', selectedVoice.name);
+      } else {
+        console.log('🔊 [TTS] ⚠️ Selected voice not found:', selectedVoiceId);
       }
     } else {
       // Fallback to any matching voice
-      const langCode = getLanguageCode(language);
       const matchingVoice = voices.find(voice => voice.lang.startsWith(langCode.split('-')[0]));
       if (matchingVoice) {
         utterance.voice = matchingVoice;
+        console.log('🔊 [TTS] Using fallback voice:', matchingVoice.name);
+      } else {
+        console.log('🔊 [TTS] ⚠️ No matching voice found for language:', langCode);
       }
     }
 
-    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onstart = () => {
+      console.log('🔊 [TTS] 🎵 Speech started');
+      setIsSpeaking(true);
+    };
     utterance.onend = () => {
+      console.log('🔊 [TTS] ✅ Speech ended');
       setIsSpeaking(false);
       // Call the onSpeakEnd callback when speech finishes
       if (onSpeakEndRef.current) {
         onSpeakEndRef.current();
       }
     };
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onerror = (event) => {
+      console.error('🔊 [TTS] ❌ Speech error:', event.error);
+      console.error('🔊 [TTS] Error details:', {
+        error: event.error,
+        message: (event as any).message,
+        charIndex: event.charIndex,
+        elapsedTime: event.elapsedTime
+      });
+      setIsSpeaking(false);
+    };
 
-    window.speechSynthesis.speak(utterance);
+    try {
+      console.log('🔊 [TTS] Calling speechSynthesis.speak()...');
+      window.speechSynthesis.speak(utterance);
+      console.log('🔊 [TTS] speak() called successfully');
+      
+      // Chrome bug workaround: speech can get stuck, resume it
+      if (window.speechSynthesis.paused) {
+        console.log('🔊 [TTS] ⚠️ Speech was paused, resuming...');
+        window.speechSynthesis.resume();
+      }
+    } catch (err) {
+      console.error('🔊 [TTS] ❌ Exception in speak():', err);
+    }
   }, [language, getLanguageCode, isVoiceEnabled, selectedVoiceId, speechRate]);
 
   const stopSpeaking = useCallback(() => {
@@ -1278,15 +1342,28 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
 
   // Auto-speak welcome message once voices are loaded
   useEffect(() => {
+    console.log('🎙️ [Welcome] Effect check:', {
+      welcomeMessage: welcomeMessageRef.current?.substring(0, 30),
+      availableVoices: availableVoices.length,
+      hasSpokenWelcome: hasSpokenWelcomeRef.current,
+      isVoiceEnabled
+    });
+    
     if (welcomeMessageRef.current && availableVoices.length > 0 && !hasSpokenWelcomeRef.current && isVoiceEnabled) {
+      console.log('🎙️ [Welcome] ✅ Speaking welcome message...');
       hasSpokenWelcomeRef.current = true;
       const messageToSpeak = welcomeMessageRef.current;
       welcomeMessageRef.current = null;
       
       // Small delay to ensure everything is ready
       setTimeout(() => {
+        console.log('🎙️ [Welcome] Calling speak() with:', messageToSpeak.substring(0, 30) + '...');
         speak(messageToSpeak);
       }, 300);
+    } else if (welcomeMessageRef.current && !isVoiceEnabled) {
+      console.log('🎙️ [Welcome] ⚠️ Voice disabled, not speaking welcome');
+    } else if (welcomeMessageRef.current && availableVoices.length === 0) {
+      console.log('🎙️ [Welcome] ⚠️ No voices available yet');
     }
   }, [availableVoices.length, isVoiceEnabled, speak]);
 
