@@ -483,18 +483,20 @@ return (
         </div>
       </div>
 
-      {/* Image Gallery Modal */}
+      {/* Image Gallery Modal - Optimized for mobile viewport */}
       <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden">
-          <DialogClose className="absolute right-4 top-4 z-50">
-            <Button variant="secondary" size="icon" className="rounded-full">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] p-0 overflow-hidden mx-2 sm:mx-auto rounded-2xl">
+          <DialogClose className="absolute right-2 top-2 sm:right-4 sm:top-4 z-50">
+            <Button variant="secondary" size="icon" className="rounded-full h-8 w-8 sm:h-10 sm:w-10 shadow-lg">
               <X className="h-4 w-4" />
             </Button>
           </DialogClose>
           
-          <div className="p-6">
-            <h3 className="text-xl font-bold mb-4">{vehicleInfo.label}</h3>
+          <div className="p-4 sm:p-6 max-h-[85vh] overflow-y-auto">
+            {/* Header with vehicle name */}
+            <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 pr-10">{vehicleInfo.label}</h3>
             
+            {/* Image carousel */}
             {vehicleImages.length > 0 && (
               <Carousel 
                 className="w-full" 
@@ -504,15 +506,16 @@ return (
                 <CarouselContent>
                   {vehicleImages.map((img, idx) => (
                     <CarouselItem key={idx}>
-                      <div className="relative aspect-video rounded-xl overflow-hidden">
+                      <div className="relative aspect-[4/3] sm:aspect-video rounded-lg sm:rounded-xl overflow-hidden bg-muted">
                         <img
                           src={img.src}
                           alt={img.alt}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain sm:object-cover"
+                          loading="lazy"
                         />
                         {/* Image Caption */}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
-                          <p className="text-white text-sm font-medium drop-shadow-lg">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 sm:p-4">
+                          <p className="text-white text-xs sm:text-sm font-medium drop-shadow-lg line-clamp-2">
                             {img.alt}
                           </p>
                         </div>
@@ -523,25 +526,38 @@ return (
               </Carousel>
             )}
             
-            {/* Features list in modal */}
-            <div className="mt-4 flex flex-wrap gap-2">
+            {/* Features list - scrollable on mobile */}
+            <div className="mt-3 sm:mt-4 flex flex-wrap gap-1.5 sm:gap-2">
               {vehicleInfo.features.map((feature, idx) => {
                 const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
                 return (
                   <div 
                     key={idx}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm"
+                    className="flex items-center gap-1.5 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full bg-muted text-xs sm:text-sm"
                   >
-                    <FeatureIcon className={`h-4 w-4 ${color}`} />
-                    <span>{isTurkish ? feature.labelTr : feature.label}</span>
+                    <FeatureIcon className={`h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 ${color}`} />
+                    <span className="whitespace-nowrap">{isTurkish ? feature.labelTr : feature.label}</span>
                   </div>
                 );
               })}
             </div>
             
-            <p className="text-muted-foreground mt-4">
+            {/* Description with better readability */}
+            <p className="text-sm sm:text-base text-muted-foreground mt-3 sm:mt-4 leading-relaxed">
               {isTurkish ? vehicleInfo.descriptionTr : vehicleInfo.description}
             </p>
+            
+            {/* Capacity info */}
+            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-border flex items-center gap-4 sm:gap-6">
+              <div className="flex items-center gap-2 text-sm sm:text-base">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <span className="font-medium">{vehicleInfo.passengers} {isTurkish ? 'Yolcu' : 'Passengers'}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm sm:text-base">
+                <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
+                <span className="font-medium">{vehicleInfo.luggage} {isTurkish ? 'Bavul' : 'Luggage'}</span>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

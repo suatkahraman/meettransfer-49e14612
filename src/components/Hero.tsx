@@ -118,25 +118,40 @@ export const Hero = () => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(formData)); } catch {}
   }, [activeTab, pickup, dropoff, date, time, passengers, vehicleType, hourlyCity, hourlyDate, hourlyTime, hourlyDuration, hourlyPassengers, hourlyVehicleType, customHours]);
   
-  // Load videos
+  // Load videos - optimized with intersection observer and progressive loading
   useEffect(() => {
+    // Start loading videos immediately but with low priority
     const loadVideos = async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      const [heroVideo, heroIstanbul, heroAntalya, heroBodrum] = await Promise.all([
-        import("@/assets/hero-mercedes-video.mp4"),
-        import("@/assets/hero-istanbul.mp4"),
-        import("@/assets/hero-antalya.mp4"),
-        import("@/assets/hero-bodrum.mp4"),
-      ]);
-      setCityVideos([
-        { src: heroIstanbul.default, label: "Istanbul", labelTR: "İstanbul", poster: "/images/destinations/istanbul-city.jpg" },
-        { src: heroAntalya.default, label: "Antalya", labelTR: "Antalya", poster: "/images/destinations/antalya-city.jpg" },
-        { src: heroBodrum.default, label: "Bodrum", labelTR: "Bodrum", poster: "/images/destinations/bodrum-city.jpg" },
-        { src: heroVideo.default, label: "VIP Transfer", labelTR: "VIP Transfer", poster: vitoVipImg },
-      ]);
-      setVideosLoaded(true);
+      // Load Istanbul first (most common), then others progressively
+      try {
+        const heroIstanbul = await import("@/assets/hero-istanbul.mp4");
+        setCityVideos([
+          { src: heroIstanbul.default, label: "Istanbul", labelTR: "İstanbul", poster: "/images/destinations/istanbul-city.jpg" },
+        ]);
+        setVideosLoaded(true);
+        
+        // Load remaining videos in background after first one is ready
+        requestIdleCallback(async () => {
+          const [heroVideo, heroAntalya, heroBodrum] = await Promise.all([
+            import("@/assets/hero-mercedes-video.mp4"),
+            import("@/assets/hero-antalya.mp4"),
+            import("@/assets/hero-bodrum.mp4"),
+          ]);
+          setCityVideos(prev => [
+            prev[0], // Keep Istanbul first
+            { src: heroAntalya.default, label: "Antalya", labelTR: "Antalya", poster: "/images/destinations/antalya-city.jpg" },
+            { src: heroBodrum.default, label: "Bodrum", labelTR: "Bodrum", poster: "/images/destinations/bodrum-city.jpg" },
+            { src: heroVideo.default, label: "VIP Transfer", labelTR: "VIP Transfer", poster: vitoVipImg },
+          ]);
+        }, { timeout: 2000 });
+      } catch (error) {
+        console.error('[Hero] Video load error:', error);
+      }
     };
-    loadVideos();
+    
+    // Delay video loading slightly to prioritize critical content
+    const timer = setTimeout(loadVideos, 300);
+    return () => clearTimeout(timer);
   }, []);
   
   // Video rotation

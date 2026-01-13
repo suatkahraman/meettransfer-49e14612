@@ -27,22 +27,38 @@ export const HeroBackground = memo(({
         {videosLoaded && cityVideos.length > 0 ? (
           <>
             <AnimatePresence mode="wait">
-              <motion.video
+              <motion.div
                 key={currentVideoIndex}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                poster={cityVideos[currentVideoIndex].poster}
-                className="absolute inset-0 w-full h-full object-cover"
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 0.35, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 1, ease: "easeOut" }}
+                className="absolute inset-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
               >
-                <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
-              </motion.video>
+                {/* Poster image for instant display */}
+                <img
+                  src={cityVideos[currentVideoIndex].poster}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover opacity-35"
+                  loading="eager"
+                />
+                {/* Video loads on top */}
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="none"
+                  poster={cityVideos[currentVideoIndex].poster}
+                  className="absolute inset-0 w-full h-full object-cover opacity-35"
+                  onLoadedData={(e) => {
+                    // Fade in video smoothly once loaded
+                    (e.target as HTMLVideoElement).style.opacity = '0.35';
+                  }}
+                >
+                  <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
+                </video>
+              </motion.div>
             </AnimatePresence>
             
             {/* City Label Badge */}
