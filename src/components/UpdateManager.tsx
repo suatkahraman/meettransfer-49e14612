@@ -1,16 +1,12 @@
-import { UpdateNotification } from "@/components/UpdateNotification";
 import { PWAUpdatePrompt } from "@/components/website/PWAUpdatePrompt";
 
 /**
- * Ensures we don't show duplicate update UX.
- * - If Service Workers are supported, rely on the PWA update prompt.
- * - Otherwise fall back to the non-PWA update toast.
+ * Single source of truth for app update notifications.
+ * Uses only PWAUpdatePrompt which handles service worker updates.
+ * Preview/development environments are handled inside PWAUpdatePrompt.
  */
 export function UpdateManager() {
-  const supportsServiceWorker =
-    typeof window !== "undefined" &&
-    typeof navigator !== "undefined" &&
-    "serviceWorker" in navigator;
-
-  return supportsServiceWorker ? <PWAUpdatePrompt /> : <UpdateNotification />;
+  // Only use PWAUpdatePrompt - it handles all environments internally
+  // and provides a better UX than the Sonner toast
+  return <PWAUpdatePrompt />;
 }
