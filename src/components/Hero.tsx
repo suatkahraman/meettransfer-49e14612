@@ -770,9 +770,13 @@ export const Hero = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-                <span>{t("bookTransferOrHourlyWithAI") || "Book with AI"}</span>
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+                <span className="text-sm md:text-base font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  {language === 'TR' 
+                    ? "🌍 Dünyada İlk: AI ile Transfer & Saatlik Kiralama" 
+                    : "🌍 World's First: Book Transfer & Hourly Rental With AI"}
+                </span>
               </div>
               <Suspense fallback={<Skeleton className="h-10 w-full rounded-lg" />}>
                 <BookingChatAssistant onApplyBooking={handleApplyBooking} />
