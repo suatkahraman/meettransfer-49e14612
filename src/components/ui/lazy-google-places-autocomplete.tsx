@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef, useCallback, lazy, Suspense, memo } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
 // Debounce hook
@@ -74,7 +73,7 @@ export interface PlaceDetails {
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyCk_A1D5LOqb2TuIFuOiVVjGDSAprap38M';
 
-// Lazy load Google Maps script
+// Lazy load Google Maps script with loading=async parameter
 const loadGoogleMapsScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
     // Already loaded
@@ -95,7 +94,8 @@ const loadGoogleMapsScript = (): Promise<void> => {
     window.__googleMapsCallbacks = [resolve];
 
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+    // Add loading=async to prevent the Google Maps warning
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
     script.async = true;
     script.defer = true;
 
@@ -130,7 +130,7 @@ export interface LazyGooglePlacesAutocompleteProps {
   debounceMs?: number;
 }
 
-// Memoized input component for better performance
+// Pure CSS animated input component - no framer-motion for better performance
 const AutocompleteInput = memo(({
   inputRef,
   className,
@@ -162,39 +162,34 @@ const AutocompleteInput = memo(({
 }) => {
   if (floatingLabel) {
     return (
-      <motion.div 
-        className="relative"
-        animate={{ scale: isFocused ? 1.01 : 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      <div 
+        className={cn(
+          "relative transition-transform duration-150 ease-out",
+          isFocused && "scale-[1.01]"
+        )}
       >
-        {/* Icon */}
+        {/* Icon with CSS transitions */}
         {icon && (
-          <motion.div 
-            className="absolute left-3.5 md:left-3 top-1/2 -translate-y-1/2 z-10"
-            animate={{
-              color: isFocused ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-              scale: isFocused ? 1.15 : 1,
-            }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.15 }}
+          <div 
+            className={cn(
+              "absolute left-3.5 md:left-3 top-1/2 -translate-y-1/2 z-10 transition-all duration-150",
+              isFocused ? "text-primary scale-115" : "text-muted-foreground scale-100"
+            )}
+            style={{ transform: `translateY(-50%) scale(${isFocused ? 1.15 : 1})` }}
           >
             {icon}
-          </motion.div>
+          </div>
         )}
 
-        {/* Loading indicator */}
-        <AnimatePresence>
-          {isLoading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute right-3.5 md:right-3 top-1/2 -translate-y-1/2 z-10"
-            >
-              <Loader2 className="h-5 w-5 md:h-4 md:w-4 animate-spin text-muted-foreground" />
-            </motion.div>
+        {/* Loading indicator with CSS transitions */}
+        <div
+          className={cn(
+            "absolute right-3.5 md:right-3 top-1/2 -translate-y-1/2 z-10 transition-opacity duration-150",
+            isLoading ? "opacity-100" : "opacity-0 pointer-events-none"
           )}
-        </AnimatePresence>
+        >
+          <Loader2 className="h-5 w-5 md:h-4 md:w-4 animate-spin text-muted-foreground" />
+        </div>
 
         <Input
           ref={inputRef}
@@ -217,38 +212,30 @@ const AutocompleteInput = memo(({
           onInput={(e) => onInput((e.currentTarget as HTMLInputElement).value)}
         />
 
-        {/* Floating Label */}
-        <motion.label
+        {/* Floating Label with CSS transitions */}
+        <label
           className={cn(
-            "absolute pointer-events-none transition-all duration-200 text-muted-foreground",
-            icon ? "left-12 md:left-10" : "left-3.5 md:left-3"
+            "absolute pointer-events-none transition-all duration-200 ease-out",
+            icon ? "left-12 md:left-10" : "left-3.5 md:left-3",
+            isFloating 
+              ? "top-1 text-[10px] font-medium" 
+              : "top-1/2 -translate-y-1/2 text-base",
+            isFocused ? "text-primary" : "text-muted-foreground"
           )}
-          initial={false}
-          animate={{
-            top: isFloating ? "4px" : "50%",
-            y: isFloating ? 0 : "-50%",
-            fontSize: isFloating ? "10px" : "16px",
-            color: isFocused ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-            fontWeight: isFloating ? 500 : 400,
-          }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
           {placeholder}
-        </motion.label>
+        </label>
 
-        {/* Focus glow effect */}
-        <AnimatePresence>
-          {isFocused && (
-            <motion.div
-              className="absolute inset-0 rounded-xl pointer-events-none"
-              initial={{ opacity: 0, boxShadow: "0 0 0 0 hsl(var(--primary) / 0)" }}
-              animate={{ opacity: 1, boxShadow: "0 0 0 4px hsl(var(--primary) / 0.15)" }}
-              exit={{ opacity: 0, boxShadow: "0 0 0 0 hsl(var(--primary) / 0)" }}
-              transition={{ duration: 0.15 }}
-            />
+        {/* Focus glow effect with CSS */}
+        <div
+          className={cn(
+            "absolute inset-0 rounded-xl pointer-events-none transition-all duration-150",
+            isFocused 
+              ? "opacity-100 shadow-[0_0_0_4px_hsl(var(--primary)/0.15)]" 
+              : "opacity-0"
           )}
-        </AnimatePresence>
-      </motion.div>
+        />
+      </div>
     );
   }
 
@@ -264,18 +251,14 @@ const AutocompleteInput = memo(({
         autoComplete="off"
         onInput={(e) => onInput((e.currentTarget as HTMLInputElement).value)}
       />
-      <AnimatePresence>
-        {isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute right-3 top-1/2 -translate-y-1/2"
-          >
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-          </motion.div>
+      <div
+        className={cn(
+          "absolute right-3 top-1/2 -translate-y-1/2 transition-opacity duration-150",
+          isLoading ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
-      </AnimatePresence>
+      >
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+      </div>
     </div>
   );
 });
@@ -459,4 +442,3 @@ export const LazyGooglePlacesAutocomplete = memo(({
 LazyGooglePlacesAutocomplete.displayName = 'LazyGooglePlacesAutocomplete';
 
 export default LazyGooglePlacesAutocomplete;
-
