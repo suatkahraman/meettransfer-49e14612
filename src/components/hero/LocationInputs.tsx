@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { LazyGooglePlacesAutocomplete as GooglePlacesAutocomplete } from "@/components/ui/lazy-google-places-autocomplete";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlaceSelectedHandler } from "./types";
+import { cn } from "@/lib/utils";
 
 const CompactRouteMap = lazy(() => import("@/components/ui/compact-route-map").then(m => ({ default: m.CompactRouteMap })));
 
@@ -14,6 +15,8 @@ interface LocationInputsProps {
   onDropoffSelected: PlaceSelectedHandler;
   onSwapLocations: () => void;
   language: string;
+  pickupError?: boolean;
+  dropoffError?: boolean;
 }
 
 export const LocationInputs = memo(({
@@ -22,14 +25,21 @@ export const LocationInputs = memo(({
   onPickupSelected,
   onDropoffSelected,
   onSwapLocations,
-  language
+  language,
+  pickupError,
+  dropoffError
 }: LocationInputsProps) => {
   return (
     <div className="space-y-2">
       <GooglePlacesAutocomplete 
         onPlaceSelected={onPickupSelected} 
         placeholder={language === 'TR' ? 'Nereden alınacak?' : 'Where to pick you up?'} 
-        className="bg-background border-2 border-primary/30 rounded-xl text-base md:text-sm shadow-sm hover:border-primary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all h-14 md:h-12 min-h-[56px] md:min-h-[48px]"
+        className={cn(
+          "bg-background border-2 rounded-xl text-base md:text-sm shadow-sm transition-all h-14 md:h-12 min-h-[56px] md:min-h-[48px]",
+          pickupError 
+            ? "border-destructive ring-2 ring-destructive/20" 
+            : "border-primary/30 hover:border-primary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
+        )}
         value={pickup}
         floatingLabel
         icon={
@@ -43,7 +53,7 @@ export const LocationInputs = memo(({
               rotate: { duration: 0.2 }
             }}
           >
-            <MapPin className="h-5 w-5 md:h-4 md:w-4 text-primary" />
+            <MapPin className={cn("h-5 w-5 md:h-4 md:w-4", pickupError ? "text-destructive" : "text-primary")} />
           </motion.div>
         }
       />
@@ -62,7 +72,12 @@ export const LocationInputs = memo(({
       <GooglePlacesAutocomplete 
         onPlaceSelected={onDropoffSelected} 
         placeholder={language === 'TR' ? 'Nereye gideceksiniz?' : 'Where to drop you off?'} 
-        className="bg-background border-2 border-accent/30 rounded-xl text-base md:text-sm shadow-sm hover:border-accent/50 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 transition-all h-14 md:h-12 min-h-[56px] md:min-h-[48px]"
+        className={cn(
+          "bg-background border-2 rounded-xl text-base md:text-sm shadow-sm transition-all h-14 md:h-12 min-h-[56px] md:min-h-[48px]",
+          dropoffError
+            ? "border-destructive ring-2 ring-destructive/20"
+            : "border-accent/30 hover:border-accent/50 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20"
+        )}
         value={dropoff}
         floatingLabel
         icon={
@@ -76,7 +91,7 @@ export const LocationInputs = memo(({
               rotate: { duration: 0.2 }
             }}
           >
-            <Navigation className="h-5 w-5 md:h-4 md:w-4 text-accent" />
+            <Navigation className={cn("h-5 w-5 md:h-4 md:w-4", dropoffError ? "text-destructive" : "text-accent")} />
           </motion.div>
         }
       />

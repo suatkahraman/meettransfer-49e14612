@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useState, useCallback } from "react";
 import { CalendarIcon, Clock, Users, MapPin, Timer, ArrowRight, Loader2, Zap, ChevronDown, ChevronUp, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
@@ -6,6 +6,8 @@ import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepick
 import { VehicleSelector } from "@/components/hero";
 import { VehiclePrice } from "./types";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -51,6 +53,12 @@ interface HourlyFormContentProps {
   handleHourlyContinue: () => void;
 }
 
+interface ValidationErrors {
+  city?: boolean;
+  date?: boolean;
+  time?: boolean;
+}
+
 export const HourlyFormContent = memo(({
   hourlyCity,
   hourlyDuration,
@@ -76,23 +84,85 @@ export const HourlyFormContent = memo(({
   handleHourlyContinue,
 }: HourlyFormContentProps) => {
   const [showVehicles, setShowVehicles] = useState(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
+  
   const hasRoute = !!(hourlyCity && hourlyDuration);
   const selectedPrice = allHourlyPrices.find(p => p.vehicleType === hourlyVehicleType);
   const currency = allHourlyPrices[0]?.currency || "EUR";
+
+  const validateAndContinue = useCallback(() => {
+    const newErrors: ValidationErrors = {};
+    const missing: string[] = [];
+    
+    if (!hourlyCity) {
+      newErrors.city = true;
+      missing.push(t("city") || "City");
+    }
+    if (!hourlyDate) {
+      newErrors.date = true;
+      missing.push(t("pickupDate") || "Date");
+    }
+    if (!hourlyTime) {
+      newErrors.time = true;
+      missing.push(t("pickupTime") || "Time");
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setShakeFields(newErrors);
+      
+      // Remove shake after animation
+      setTimeout(() => setShakeFields({}), 500);
+      
+      toast.error(`${t("pleaseFilAllFields") || "Please fill in"}: ${missing.join(", ")}`);
+      return;
+    }
+    
+    setErrors({});
+    handleHourlyContinue();
+  }, [hourlyCity, hourlyDate, hourlyTime, t, handleHourlyContinue]);
+
+  // Clear error when field is filled
+  const handleCityChange = useCallback((value: string) => {
+    if (errors.city && value) {
+      setErrors(prev => ({ ...prev, city: false }));
+    }
+    setHourlyCity(value);
+  }, [errors.city, setHourlyCity]);
+
+  const handleDateChange = useCallback((newDate: Date | undefined) => {
+    if (errors.date && newDate) {
+      setErrors(prev => ({ ...prev, date: false }));
+    }
+    setHourlyDate(newDate);
+  }, [errors.date, setHourlyDate]);
+
+  const handleTimeChange = useCallback((newTime: string) => {
+    if (errors.time && newTime) {
+      setErrors(prev => ({ ...prev, time: false }));
+    }
+    setHourlyTime(newTime);
+  }, [errors.time, setHourlyTime]);
 
   return (
     <div key="hourly-form" className="space-y-2 md:space-y-3">
       {/* City & Duration - larger touch targets on mobile */}
       <div className="grid grid-cols-2 gap-2 md:gap-2">
-        <FloatingLabelSelect 
-          label={t("city") || "City"} 
-          value={hourlyCity} 
-          onValueChange={setHourlyCity} 
-          options={availableCities.map(city => ({ value: city, label: city }))} 
-          icon={<MapPin className="h-4 w-4 md:h-4 md:w-4" />} 
-          className="col-span-1" 
-          triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm"
-        />
+        <div className={cn(shakeFields.city && "animate-shake")}>
+          <FloatingLabelSelect 
+            label={t("city") || "City"} 
+            value={hourlyCity} 
+            onValueChange={handleCityChange} 
+            options={availableCities.map(city => ({ value: city, label: city }))} 
+            icon={<MapPin className="h-4 w-4 md:h-4 md:w-4" />} 
+            className="col-span-1" 
+            triggerClassName={cn(
+              "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm",
+              errors.city && "border-destructive ring-2 ring-destructive/20"
+            )}
+          />
+        </div>
         <FloatingLabelSelect 
           label={t("duration") || "Duration"} 
           value={hourlyDuration} 
@@ -122,24 +192,34 @@ export const HourlyFormContent = memo(({
 
       {/* Date/Time/Passengers - larger touch targets on mobile */}
       <div className="grid grid-cols-3 gap-2 md:gap-2">
-        <FloatingLabelDatePicker 
-          label={t("date") || "Date"} 
-          date={hourlyDate} 
-          onSelect={setHourlyDate} 
-          icon={<CalendarIcon className="h-4 w-4 md:h-4 md:w-4" />} 
-          disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-          className="col-span-1" 
-          triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm"
-        />
-        <FloatingLabelSelect 
-          label={t("time") || "Time"} 
-          value={hourlyTime} 
-          onValueChange={setHourlyTime} 
-          options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
-          icon={<Clock className="h-4 w-4 md:h-4 md:w-4" />} 
-          className="col-span-1" 
-          triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm"
-        />
+        <div className={cn(shakeFields.date && "animate-shake")}>
+          <FloatingLabelDatePicker 
+            label={t("date") || "Date"} 
+            date={hourlyDate} 
+            onSelect={handleDateChange} 
+            icon={<CalendarIcon className="h-4 w-4 md:h-4 md:w-4" />} 
+            disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+            className="col-span-1" 
+            triggerClassName={cn(
+              "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm",
+              errors.date && "border-destructive ring-2 ring-destructive/20"
+            )}
+          />
+        </div>
+        <div className={cn(shakeFields.time && "animate-shake")}>
+          <FloatingLabelSelect 
+            label={t("time") || "Time"} 
+            value={hourlyTime} 
+            onValueChange={handleTimeChange} 
+            options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
+            icon={<Clock className="h-4 w-4 md:h-4 md:w-4" />} 
+            className="col-span-1" 
+            triggerClassName={cn(
+              "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm",
+              errors.time && "border-destructive ring-2 ring-destructive/20"
+            )}
+          />
+        </div>
         <FloatingLabelSelect 
           label={t("passengers") || "Pax"} 
           value={hourlyPassengers} 
@@ -222,7 +302,7 @@ export const HourlyFormContent = memo(({
       {/* Submit Button - larger touch target on mobile */}
       <div>
         <Button 
-          onClick={handleHourlyContinue} 
+          onClick={validateAndContinue} 
           disabled={submitting} 
           className="w-full h-14 md:h-12 min-h-[56px] md:min-h-[48px] font-semibold bg-primary hover:bg-primary/90 active:bg-primary/80 shadow-lg rounded-xl text-base md:text-base group touch-manipulation"
         >
