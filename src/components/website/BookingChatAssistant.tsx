@@ -620,6 +620,9 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
     }
   }, [isOpen]);
 
+  const [isTyping, setIsTyping] = useState(false);
+  const [streamingContent, setStreamingContent] = useState("");
+
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -632,6 +635,8 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    setIsTyping(true);
+    setStreamingContent("");
 
     try {
       // Build conversation history for context (exclude welcome message)
@@ -639,24 +644,72 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
         .filter(m => m.id !== "welcome")
         .map(m => ({ role: m.role, content: m.content }));
 
-      const { data, error } = await supabase.functions.invoke("booking-assistant", {
-        body: { 
-          message: userMessage.content, 
-          language,
-          conversationHistory,
-          visitorId
+      // Use streaming API
+      const response = await fetch(
+        `https://zqykoyugubaeealrspxm.supabase.co/functions/v1/booking-assistant`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxeWtveXVndWJhZWVhbHJzcHhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0MTcwNjAsImV4cCI6MjA3OTk5MzA2MH0.0_o4lyVPKHpDe4RRqEJdoogjn3XIk57hEdf5RgrtxMU`,
+          },
+          body: JSON.stringify({
+            message: userMessage.content,
+            language,
+            conversationHistory,
+            visitorId,
+            stream: true
+          })
         }
-      });
+      );
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      console.log("Booking assistant response:", data);
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullContent = "";
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
+
+              try {
+                const parsed = JSON.parse(data);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  fullContent += content;
+                  setStreamingContent(cleanResponseForDisplay(fullContent));
+                }
+              } catch (e) {
+                // Ignore parse errors for incomplete chunks
+              }
+            }
+          }
+        }
+      }
+
+      setIsTyping(false);
+      setStreamingContent("");
+
+      // Parse booking data from the complete response
+      const bookingData = extractBookingDataFromResponse(fullContent);
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: cleanResponseForDisplay(data.response),
-        bookingData: data.bookingData
+        content: cleanResponseForDisplay(fullContent),
+        bookingData
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -666,37 +719,49 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
         speak(assistantMessage.content);
       }
 
-      // If booking was created, show success and navigate to confirm page
-      console.log("Checking booking:", { quickBookingId: data.quickBookingId, confirmationToken: data.confirmationToken });
-      
-      if (data.quickBookingId && data.confirmationToken) {
-        console.log("Booking created! Navigating to confirmation page...");
-        setBookingCreated({ id: data.quickBookingId, token: data.confirmationToken });
+      // If booking is complete, create booking and navigate
+      if (bookingData?.isComplete) {
+        console.log("Complete booking detected, creating booking...");
         
-        // Show price summary message
-        const priceInfo = data.bookingData?.estimatedPrice 
-          ? `${data.bookingData.currency === "TRY" ? "₺" : data.bookingData.currency === "USD" ? "$" : "€"}${data.bookingData.estimatedPrice}` 
-          : "";
-        
-        // Immediately add success message and then navigate
-        const successMessage: Message = {
-          id: (Date.now() + 2).toString(),
-          role: "assistant",
-          content: language === "TR" 
-            ? `✅ Rezervasyonunuz oluşturuldu! ${priceInfo ? `Fiyat: ${priceInfo}` : ""}\n\nBilgilerinizi tamamlamak için onay sayfasına yönlendiriliyorsunuz...`
-            : `✅ Your reservation is ready! ${priceInfo ? `Price: ${priceInfo}` : ""}\n\nRedirecting you to the confirmation page...`
-        };
-        setMessages(prev => [...prev, successMessage]);
-        
-        // Close chat and redirect after short delay
-        setTimeout(() => {
-          setIsOpen(false);
-          navigate(`/quick-booking-confirm?token=${data.confirmationToken}&new=true`);
-        }, 1200);
+        // Make a non-streaming call to actually create the booking
+        const { data: bookingResult, error: bookingError } = await supabase.functions.invoke("booking-assistant", {
+          body: { 
+            message: userMessage.content, 
+            language,
+            conversationHistory,
+            visitorId,
+            stream: false
+          }
+        });
+
+        if (!bookingError && bookingResult?.quickBookingId && bookingResult?.confirmationToken) {
+          console.log("Booking created! Navigating to confirmation page...");
+          setBookingCreated({ id: bookingResult.quickBookingId, token: bookingResult.confirmationToken });
+          
+          const priceInfo = bookingData?.estimatedPrice 
+            ? `${bookingData.currency === "TRY" ? "₺" : bookingData.currency === "USD" ? "$" : "€"}${bookingData.estimatedPrice}` 
+            : "";
+          
+          const successMessage: Message = {
+            id: (Date.now() + 2).toString(),
+            role: "assistant",
+            content: language === "TR" 
+              ? `✅ Rezervasyonunuz oluşturuldu! ${priceInfo ? `Fiyat: ${priceInfo}` : ""}\n\nBilgilerinizi tamamlamak için onay sayfasına yönlendiriliyorsunuz...`
+              : `✅ Your reservation is ready! ${priceInfo ? `Price: ${priceInfo}` : ""}\n\nRedirecting you to the confirmation page...`
+          };
+          setMessages(prev => [...prev, successMessage]);
+          
+          setTimeout(() => {
+            setIsOpen(false);
+            navigate(`/quick-booking-confirm?token=${bookingResult.confirmationToken}&new=true`);
+          }, 1200);
+        }
       }
 
     } catch (error) {
       console.error("Chat error:", error);
+      setIsTyping(false);
+      setStreamingContent("");
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -706,6 +771,28 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
       }]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const extractBookingDataFromResponse = (response: string): BookingData | null => {
+    try {
+      const bookingMatch = response.match(/```booking\s*([\s\S]*?)```/);
+      if (bookingMatch) {
+        return JSON.parse(bookingMatch[1].trim());
+      }
+      
+      const jsonMatch = response.match(/```json\s*([\s\S]*?)```/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[1].trim());
+        if (parsed.pickup !== undefined || parsed.dropoff !== undefined) {
+          return parsed;
+        }
+      }
+      
+      return null;
+    } catch (e) {
+      console.error("Failed to parse booking data:", e);
+      return null;
     }
   };
 
@@ -1175,7 +1262,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                     </motion.div>
                   ))}
                   
-                  {/* Loading State */}
+                  {/* Streaming Response or Typing Indicator */}
                   {isLoading && (
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }}
@@ -1185,24 +1272,42 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                       <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md">
                         <Bot className="h-4 w-4 text-primary-foreground" />
                       </div>
-                      <div className="bg-gradient-to-br from-muted to-muted/80 rounded-2xl rounded-bl-lg px-5 py-4 border border-border/30">
-                        <div className="flex gap-1.5">
-                          <motion.span 
-                            className="w-2.5 h-2.5 bg-primary/60 rounded-full"
-                            animate={{ y: [-3, 3, -3] }}
-                            transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
-                          />
-                          <motion.span 
-                            className="w-2.5 h-2.5 bg-primary/60 rounded-full"
-                            animate={{ y: [-3, 3, -3] }}
-                            transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
-                          />
-                          <motion.span 
-                            className="w-2.5 h-2.5 bg-primary/60 rounded-full"
-                            animate={{ y: [-3, 3, -3] }}
-                            transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
-                          />
-                        </div>
+                      <div className="bg-gradient-to-br from-muted to-muted/80 rounded-2xl rounded-bl-lg px-4 py-3 border border-border/30 max-w-[85%] md:max-w-[80%]">
+                        {streamingContent ? (
+                          // Show streaming content
+                          <div className="text-sm leading-relaxed text-foreground">
+                            {streamingContent}
+                            <motion.span
+                              animate={{ opacity: [1, 0, 1] }}
+                              transition={{ repeat: Infinity, duration: 0.8 }}
+                              className="inline-block w-2 h-4 bg-primary/70 ml-1 align-middle"
+                            />
+                          </div>
+                        ) : (
+                          // Show typing indicator
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1.5">
+                              <motion.span 
+                                className="w-2.5 h-2.5 bg-primary/60 rounded-full"
+                                animate={{ y: [-3, 3, -3] }}
+                                transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
+                              />
+                              <motion.span 
+                                className="w-2.5 h-2.5 bg-primary/60 rounded-full"
+                                animate={{ y: [-3, 3, -3] }}
+                                transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
+                              />
+                              <motion.span 
+                                className="w-2.5 h-2.5 bg-primary/60 rounded-full"
+                                animate={{ y: [-3, 3, -3] }}
+                                transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
+                              />
+                            </div>
+                            <span className="text-xs text-muted-foreground ml-2">
+                              {language === "TR" ? "Yazıyor..." : "Typing..."}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )}

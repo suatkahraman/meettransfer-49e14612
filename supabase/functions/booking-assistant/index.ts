@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, language = 'EN', conversationHistory = [], visitorId } = await req.json();
+    const { message, language = 'EN', conversationHistory = [], visitorId, stream = false } = await req.json();
     
     if (!message || typeof message !== 'string') {
       console.error("Invalid message format");
@@ -257,8 +257,52 @@ WRONG - DO NOT ask clarifying questions if all info is already in the message!`;
       { role: "user", content: message },
     ];
 
-    console.log("Sending request to AI gateway with", messages.length, "messages");
+    console.log("Sending request to AI gateway with", messages.length, "messages, streaming:", stream);
 
+    // If streaming is requested, return a streaming response
+    if (stream) {
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages,
+          stream: true,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("AI gateway error:", response.status, errorText);
+        
+        if (response.status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        
+        return new Response(JSON.stringify({ error: "Failed to get AI response" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Return the stream directly with proper headers
+      return new Response(response.body, {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive",
+        },
+      });
+    }
+
+    // Non-streaming response (original behavior)
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
