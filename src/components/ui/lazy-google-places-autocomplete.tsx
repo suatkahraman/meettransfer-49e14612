@@ -76,9 +76,41 @@ const GOOGLE_MAPS_API_KEY = 'AIzaSyCk_A1D5LOqb2TuIFuOiVVjGDSAprap38M';
 // Lazy load Google Maps script with loading=async parameter
 const loadGoogleMapsScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
-    // Already loaded
-    if (window.__googleMapsLoaded && window.google?.maps?.places) {
+    // If Places is already available (script loaded by another component), just resolve.
+    if (window.google?.maps?.places) {
+      window.__googleMapsLoaded = true;
+      window.__googleMapsLoading = false;
       resolve();
+      return;
+    }
+
+    // Already loaded (our own flags)
+    if (window.__googleMapsLoaded) {
+      resolve();
+      return;
+    }
+
+    // If a script tag already exists, avoid injecting a duplicate. Just wait for it.
+    const existingScript =
+      document.querySelector<HTMLScriptElement>('script[data-google-maps="places"]') ||
+      document.querySelector<HTMLScriptElement>('script[src*="maps.googleapis.com/maps/api/js"]');
+
+    if (existingScript) {
+      const startedAt = Date.now();
+      const poll = () => {
+        if (window.google?.maps?.places) {
+          window.__googleMapsLoaded = true;
+          window.__googleMapsLoading = false;
+          resolve();
+          return;
+        }
+        if (Date.now() - startedAt > 12000) {
+          reject(new Error('Google Maps script present but Places API not available'));
+          return;
+        }
+        setTimeout(poll, 50);
+      };
+      poll();
       return;
     }
 
@@ -94,6 +126,7 @@ const loadGoogleMapsScript = (): Promise<void> => {
     window.__googleMapsCallbacks = [resolve];
 
     const script = document.createElement('script');
+    script.setAttribute('data-google-maps', 'places');
     // Add loading=async to prevent the Google Maps warning
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
     script.async = true;
@@ -102,7 +135,7 @@ const loadGoogleMapsScript = (): Promise<void> => {
     script.onload = () => {
       window.__googleMapsLoaded = true;
       window.__googleMapsLoading = false;
-      window.__googleMapsCallbacks?.forEach(cb => cb());
+      window.__googleMapsCallbacks?.forEach((cb) => cb());
       window.__googleMapsCallbacks = [];
     };
 
@@ -128,6 +161,19 @@ export interface LazyGooglePlacesAutocompleteProps {
   floatingLabel?: boolean;
   icon?: React.ReactNode;
   debounceMs?: number;
+}
+
+// Preload Google Maps script shortly after page load so first input suggestions appear instantly
+if (typeof window !== 'undefined') {
+  const preload = () => {
+    loadGoogleMapsScript().catch(() => {});
+  };
+
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(preload, { timeout: 2000 });
+  } else {
+    setTimeout(preload, 600);
+  }
 }
 
 // Pure CSS animated input component - no framer-motion for better performance

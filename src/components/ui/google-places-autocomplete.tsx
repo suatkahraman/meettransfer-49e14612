@@ -61,8 +61,42 @@ const loadCallbacks: (() => void)[] = [];
 
 const loadGoogleMapsScript = (): Promise<void> => {
   return new Promise((resolve) => {
-    if (isScriptLoaded && window.google?.maps?.places) {
+    // If Places is already available (script loaded elsewhere), mark as loaded and resolve.
+    if (window.google?.maps?.places) {
+      isScriptLoaded = true;
+      isScriptLoading = false;
       resolve();
+      return;
+    }
+
+    if (isScriptLoaded) {
+      resolve();
+      return;
+    }
+
+    // If a script tag already exists, avoid injecting a duplicate.
+    const existingScript =
+      document.querySelector<HTMLScriptElement>('script[data-google-maps="places"]') ||
+      document.querySelector<HTMLScriptElement>('script[src*="maps.googleapis.com/maps/api/js"]');
+
+    if (existingScript) {
+      const startedAt = Date.now();
+      const poll = () => {
+        if (window.google?.maps?.places) {
+          isScriptLoaded = true;
+          isScriptLoading = false;
+          resolve();
+          return;
+        }
+        if (Date.now() - startedAt > 12000) {
+          // Give up silently; component will still fail gracefully.
+          console.error('Google Maps script present but Places API not available');
+          resolve();
+          return;
+        }
+        setTimeout(poll, 50);
+      };
+      poll();
       return;
     }
 
@@ -74,6 +108,7 @@ const loadGoogleMapsScript = (): Promise<void> => {
     isScriptLoading = true;
 
     const script = document.createElement('script');
+    script.setAttribute('data-google-maps', 'places');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
     script.async = true;
     script.defer = true;
@@ -89,6 +124,7 @@ const loadGoogleMapsScript = (): Promise<void> => {
     script.onerror = () => {
       isScriptLoading = false;
       console.error('Failed to load Google Maps script');
+      resolve();
     };
 
     document.head.appendChild(script);
