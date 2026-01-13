@@ -1,8 +1,25 @@
 import { memo, useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
 import { CityVideo } from "./types";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
+
+// Additional hero images for gallery
+import vitoVip1 from "@/assets/vito-vip-1.jpg";
+import vitoVipStarlight from "@/assets/vito-vip-starlight-purple.jpg";
+import vitoPassengers from "@/assets/vito-vip-passengers-1.jpg";
+import sprinterInterior from "@/assets/sprinter-interior-starlight.jpg";
+import maybachInterior from "@/assets/maybach-interior-purple.jpg";
+
+// Gallery images configuration
+const GALLERY_IMAGES = [
+  { src: heroMercedes, label: "Mercedes Vito", labelTR: "Mercedes Vito" },
+  { src: vitoVip1, label: "VIP Interior", labelTR: "VIP İç Mekan" },
+  { src: vitoVipStarlight, label: "Starlight Ceiling", labelTR: "Yıldızlı Tavan" },
+  { src: vitoPassengers, label: "Premium Comfort", labelTR: "Premium Konfor" },
+  { src: sprinterInterior, label: "Sprinter VIP", labelTR: "Sprinter VIP" },
+  { src: maybachInterior, label: "Ultra Luxury", labelTR: "Ultra Lüks" },
+];
 
 interface HeroVisualSectionProps {
   videosLoaded: boolean;
@@ -21,6 +38,7 @@ export const HeroVisualSection = memo(({
 }: HeroVisualSectionProps) => {
   // Mobile: Always show static image for performance
   const [isMobile, setIsMobile] = useState(true);
+  const [galleryIndex, setGalleryIndex] = useState(0);
   
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -29,8 +47,23 @@ export const HeroVisualSection = memo(({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Auto-rotate gallery images when video is not showing
+  useEffect(() => {
+    if (showVideo) return; // Don't rotate if video is playing
+    
+    const interval = setInterval(() => {
+      setGalleryIndex((prev) => (prev + 1) % GALLERY_IMAGES.length);
+    }, 4000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   const currentVideo = cityVideos[currentVideoIndex];
   const showVideo = !isMobile && videosLoaded && cityVideos.length > 0;
+  const currentGalleryImage = GALLERY_IMAGES[galleryIndex];
+
+  const nextImage = () => setGalleryIndex((prev) => (prev + 1) % GALLERY_IMAGES.length);
+  const prevImage = () => setGalleryIndex((prev) => (prev - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length);
 
   return (
     <>
@@ -165,14 +198,63 @@ export const HeroVisualSection = memo(({
                 </div>
               </div>
             ) : (
-              <img
-                src={heroMercedes}
-                alt="VIP Transfer"
-                className="w-full h-48 md:h-56 lg:h-80 object-cover brightness-110 contrast-105"
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
-              />
+              /* Image Gallery with crossfade when video is not available */
+              <div className="relative w-full h-48 md:h-56 lg:h-80 overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={galleryIndex}
+                    src={currentGalleryImage.src}
+                    alt={language === 'TR' ? currentGalleryImage.labelTR : currentGalleryImage.label}
+                    className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105"
+                    initial={{ opacity: 0, scale: 1.05 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                    loading="eager"
+                    decoding="async"
+                  />
+                </AnimatePresence>
+                
+                {/* Image label badge */}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-md rounded-full px-3 py-1.5 z-20 border border-white/20">
+                  <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400" />
+                  <span className="text-xs text-white font-semibold">
+                    {language === 'TR' ? currentGalleryImage.labelTR : currentGalleryImage.label}
+                  </span>
+                </div>
+                
+                {/* Gallery navigation dots */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
+                  {GALLERY_IMAGES.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setGalleryIndex(idx)}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        idx === galleryIndex 
+                          ? 'bg-white w-4' 
+                          : 'bg-white/40 hover:bg-white/60'
+                      }`}
+                      aria-label={`Go to image ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+                
+                {/* Navigation arrows */}
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors z-20 border border-white/20"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors z-20 border border-white/20"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </div>
             )}
             {/* Lighter gradient for better image visibility */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent pointer-events-none" />
