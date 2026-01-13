@@ -475,6 +475,11 @@ const BookingPage = () => {
         if (customerEmail) customerInfoParams.set("email", customerEmail.trim());
         if (customerName) customerInfoParams.set("name", customerName.trim());
         
+        // Add return reservation code if exists
+        if (reservationData.returnReservation?.reservationCode) {
+          customerInfoParams.set("returnReservationCode", reservationData.returnReservation.reservationCode);
+        }
+        
         navigate(`/quick-booking-info?${customerInfoParams.toString()}`);
         toast.success(t("bookingConfirmed") || "Booking confirmed! Please complete your details.");
       } else {
