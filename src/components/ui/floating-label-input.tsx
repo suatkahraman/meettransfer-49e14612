@@ -41,7 +41,7 @@ const FloatingLabelInput = React.forwardRef<HTMLInputElement, FloatingLabelInput
               color: isFocused ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
               scale: isFocused ? 1.1 : 1,
             }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.15 }}
           >
             {icon}
           </motion.div>
@@ -54,11 +54,12 @@ const FloatingLabelInput = React.forwardRef<HTMLInputElement, FloatingLabelInput
           onFocus={handleFocus}
           onBlur={handleBlur}
           className={cn(
-            "flex h-12 w-full rounded-xl border bg-muted/50 px-3 py-2 text-sm transition-all duration-200",
+            "flex h-14 md:h-12 min-h-[56px] md:min-h-[48px] w-full rounded-xl border bg-muted/50 px-3 py-2 text-base md:text-sm transition-all duration-200 touch-manipulation",
             "placeholder:text-transparent border-border",
             "focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20",
+            "active:bg-muted/70 active:scale-[0.995]",
             "disabled:cursor-not-allowed disabled:opacity-50",
-            icon && "pl-10",
+            icon && "pl-11 md:pl-10",
             isFloating && "pt-5 pb-1",
             error && "border-destructive focus:border-destructive focus:ring-destructive/20",
             className
