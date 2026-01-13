@@ -1483,29 +1483,65 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   className="shrink-0 p-3 border-t border-border bg-card mt-auto"
                   style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}
                 >
-                  {/* Recording indicator */}
+                  {/* Recording indicator with waveform */}
                   {(isRecording || isProcessing) && (
-                    <div className="flex items-center justify-center gap-2 text-xs font-medium mb-2">
-                      <motion.div
-                        animate={{ scale: [1, 1.3, 1] }}
-                        transition={{ repeat: Infinity, duration: 0.8 }}
-                        className={cn(
-                          "w-2 h-2 rounded-full",
-                          isProcessing ? "bg-primary" : "bg-destructive"
-                        )}
-                      />
-                      <span className={isProcessing ? "text-primary" : "text-destructive"}>
-                        {isProcessing 
-                          ? (language === "TR" ? "İşleniyor..." : "Processing...")
-                          : (language === "TR" ? "Dinleniyor..." : "Listening...")
-                        }
-                      </span>
-                      {useWhisperFallback && (
-                        <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] font-semibold rounded-full flex items-center gap-1">
-                          <Sparkles className="h-2.5 w-2.5" />
-                          AI
-                        </span>
+                    <div className="flex flex-col items-center gap-2 mb-3">
+                      {/* Audio waveform visualizer */}
+                      {isRecording && !isProcessing && (
+                        <div className="flex items-center justify-center gap-[3px] h-8">
+                          {[...Array(12)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              className="w-1 bg-destructive rounded-full"
+                              animate={{
+                                height: [8, 20 + Math.random() * 12, 8],
+                              }}
+                              transition={{
+                                duration: 0.4 + Math.random() * 0.3,
+                                repeat: Infinity,
+                                repeatType: "reverse",
+                                delay: i * 0.05,
+                                ease: "easeInOut",
+                              }}
+                            />
+                          ))}
+                        </div>
                       )}
+                      
+                      {/* Processing spinner */}
+                      {isProcessing && (
+                        <div className="flex items-center justify-center h-8">
+                          <motion.div
+                            className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Status text with badges */}
+                      <div className="flex items-center gap-2 text-xs font-medium">
+                        <motion.div
+                          animate={{ scale: [1, 1.3, 1] }}
+                          transition={{ repeat: Infinity, duration: 0.8 }}
+                          className={cn(
+                            "w-2 h-2 rounded-full",
+                            isProcessing ? "bg-primary" : "bg-destructive"
+                          )}
+                        />
+                        <span className={isProcessing ? "text-primary" : "text-destructive"}>
+                          {isProcessing 
+                            ? (language === "TR" ? "İşleniyor..." : "Processing...")
+                            : (language === "TR" ? "Dinleniyor..." : "Listening...")
+                          }
+                        </span>
+                        {useWhisperFallback && (
+                          <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] font-semibold rounded-full flex items-center gap-1">
+                            <Sparkles className="h-2.5 w-2.5" />
+                            AI
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
                   <div className="flex gap-2">
