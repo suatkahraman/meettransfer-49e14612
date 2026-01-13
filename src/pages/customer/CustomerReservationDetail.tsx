@@ -863,6 +863,8 @@ const CustomerReservationDetail = () => {
                   plateNumber={reservation.drivers?.plate_number}
                   vehicleColor={reservation.drivers?.vehicle_color}
                   status={reservation.status}
+                  pickupTime={reservation.pickup_time}
+                  pickupDate={reservation.pickup_date}
                 />
               </motion.div>
 
