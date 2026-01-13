@@ -24,14 +24,14 @@ interface HeroAIAssistantProps {
 
 const quickPrompts = {
   TR: [
-    { label: "İstanbul Havalimanı → Taksim", message: "Yarın 15:00'te İstanbul Havalimanı'ndan Taksim'e 2 kişi transfer istiyorum" },
-    { label: "Antalya Havalimanı → Kaleiçi", message: "Yarın 12:00'de Antalya Havalimanı'ndan Kaleiçi'ne 4 kişi transfer" },
-    { label: "İstanbul 4 Saatlik Tur", message: "İstanbul'da yarın 10:00'da 4 saatlik şehir turu istiyorum" },
+    { label: "Antalya Havalimanı → Belek", message: "Yarın 15:00'te Antalya Havalimanı'ndan Belek'e 4 kişi transfer istiyorum" },
+    { label: "Dalaman Havalimanı → Fethiye", message: "Yarın 12:00'de Dalaman Havalimanı'ndan Fethiye'ye 2 kişi transfer" },
+    { label: "Bodrum Havalimanı → Yalıkavak", message: "Yarın 10:00'da Bodrum Havalimanı'ndan Yalıkavak'a 3 kişi transfer" },
   ],
   EN: [
-    { label: "Istanbul Airport → Taksim", message: "I need a transfer from Istanbul Airport to Taksim tomorrow at 3pm for 2 people" },
-    { label: "Antalya Airport → Kaleiçi", message: "Transfer from Antalya Airport to Kaleici tomorrow at noon for 4 people" },
-    { label: "Istanbul 4 Hour Tour", message: "I'd like a 4 hour city tour in Istanbul tomorrow at 10am" },
+    { label: "Antalya Airport → Belek", message: "I need a transfer from Antalya Airport to Belek tomorrow at 3pm for 4 people" },
+    { label: "Dalaman Airport → Fethiye", message: "Transfer from Dalaman Airport to Fethiye tomorrow at noon for 2 people" },
+    { label: "Bodrum Airport → Yalıkavak", message: "I'd like a transfer from Bodrum Airport to Yalıkavak tomorrow at 10am for 3 people" },
   ],
 };
 

@@ -1036,16 +1036,16 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
 }
 
 const placeholderMessages: Record<string, string> = {
-  EN: "e.g., 'Tomorrow at 3pm from Istanbul Airport to Taksim for 4 people'",
-  TR: "örn: 'Yarın 15:00'te İstanbul Havalimanı'ndan Taksim'e 4 kişi'",
-  DE: "z.B. 'Morgen um 15 Uhr vom Flughafen Istanbul nach Taksim für 4 Personen'",
-  FR: "ex: 'Demain à 15h de l'aéroport d'Istanbul à Taksim pour 4 personnes'",
-  RU: "напр: 'Завтра в 15:00 из аэропорта Стамбула в Таксим на 4 человека'",
-  AR: "مثال: 'غداً الساعة 3 عصراً من مطار إسطنبول إلى تقسيم لـ 4 أشخاص'",
-  ES: "ej: 'Mañana a las 15h del aeropuerto de Estambul a Taksim para 4 personas'",
-  IT: "es: 'Domani alle 15 dall'aeroporto di Istanbul a Taksim per 4 persone'",
-  UK: "напр: 'Завтра о 15:00 з аеропорту Стамбула до Таксим на 4 особи'",
-  JA: "例: '明日15時にイスタンブール空港からタクシムへ4人で'"
+  EN: "e.g., 'Tomorrow at 3pm from Antalya Airport to Belek for 4 people'",
+  TR: "örn: 'Yarın 15:00'te Antalya Havalimanı'ndan Belek'e 4 kişi'",
+  DE: "z.B. 'Morgen um 15 Uhr vom Flughafen Antalya nach Belek für 4 Personen'",
+  FR: "ex: 'Demain à 15h de l'aéroport d'Antalya à Belek pour 4 personnes'",
+  RU: "напр: 'Завтра в 15:00 из аэропорта Анталии в Белек на 4 человека'",
+  AR: "مثال: 'غداً الساعة 3 عصراً من مطار أنطاليا إلى بيليك لـ 4 أشخاص'",
+  ES: "ej: 'Mañana a las 15h del aeropuerto de Antalya a Belek para 4 personas'",
+  IT: "es: 'Domani alle 15 dall'aeroporto di Antalya a Belek per 4 persone'",
+  UK: "напр: 'Завтра о 15:00 з аеропорту Анталії до Белека на 4 особи'",
+  JA: "例: '明日15時にアンタルヤ空港からベレクへ4人で'"
 };
 
 const welcomeMessages: Record<string, string> = {
