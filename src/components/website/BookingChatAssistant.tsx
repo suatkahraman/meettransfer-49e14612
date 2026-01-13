@@ -1417,21 +1417,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   if (mobileFloating) {
     return (
       <>
-        {/* Mobile Floating Toggle Button */}
+        {/* Mobile Floating Toggle Button - Optimized for mobile */}
         <AnimatePresence>
           {!isOpen && (
             <motion.button
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsOpen(true)}
               data-chat-trigger
-              className="fixed bottom-20 right-4 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-full shadow-lg"
+              className="fixed bottom-[72px] right-3 z-[9999] flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-full shadow-lg touch-manipulation"
+              style={{ 
+                paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
+                WebkitTapHighlightColor: 'transparent'
+              }}
             >
-              <Sparkles className="h-4 w-4" />
-              <span className="font-semibold text-sm">AI</span>
+              <Sparkles className="h-3.5 w-3.5" />
+              <span className="font-semibold text-xs">AI</span>
             </motion.button>
           )}
         </AnimatePresence>
@@ -1451,7 +1454,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           )}
         </AnimatePresence>
 
-        {/* Mobile Floating Panel */}
+        {/* Mobile Floating Panel - Optimized for small screens */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -1470,62 +1473,61 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 }
               }}
               data-mobile-panel
-              className="fixed inset-x-0 bottom-0 z-[9998] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col"
+              className="fixed inset-x-0 bottom-0 z-[9998] bg-card rounded-t-2xl shadow-2xl border-t border-border flex flex-col"
               style={{
                 bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
-                height: keyboardHeight > 0 ? `min(50vh, 400px)` : "min(60vh, 500px)",
-                maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px - 20px)` : undefined,
-                // iOS Safari: ensure panel content is tappable
+                height: keyboardHeight > 0 ? `min(55vh, 380px)` : "min(65vh, 480px)",
+                maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px - 16px)` : "calc(100vh - 60px)",
                 touchAction: 'auto',
-                // Prevent pointer-events from being blocked
                 pointerEvents: 'auto',
+                paddingBottom: 'env(safe-area-inset-bottom)',
               }}
             >
                 {/* Drag Handle - Swipe indicator */}
                  <div 
-                   className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
+                   className="flex justify-center pt-2 pb-1.5 cursor-grab active:cursor-grabbing shrink-0"
                    style={{ touchAction: 'none' }}
                    onPointerDown={(e) => dragControls.start(e.nativeEvent)}
                  >
-                   <div className="w-12 h-1.5 bg-muted-foreground/40 rounded-full" />
+                   <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
                  </div>
                 
-                {/* Mobile Header - Compact */}
-                <div className="flex items-center justify-between px-4 py-2 border-b border-border/50">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Bot className="h-3.5 w-3.5 text-primary" />
+                {/* Mobile Header - More Compact */}
+                <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/50 shrink-0">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Bot className="h-3 w-3 text-primary" />
                     </div>
-                    <span className="font-medium text-sm">
+                    <span className="font-medium text-xs">
                       {language === "TR" ? "AI Asistan" : "AI Assistant"}
                     </span>
-                    <span className="px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[8px] font-bold rounded">
+                    <span className="px-1 py-0.5 bg-primary/80 text-primary-foreground text-[7px] font-bold rounded">
                       NEW
                     </span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={clearConversation}
-                      className="h-7 w-7 rounded-full"
+                      className="h-6 w-6 rounded-full"
                     >
-                      <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      <Trash2 className="h-3 w-3 text-muted-foreground" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => setIsOpen(false)}
-                      className="h-7 w-7 rounded-full"
+                      className="h-6 w-6 rounded-full"
                     >
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
 
                 {/* Mobile Messages - Flexible scroll area */}
-                <ScrollArea className="flex-1 min-h-0 overflow-y-auto pb-20">
-                  <div className="p-3 space-y-2.5">
+                <ScrollArea className="flex-1 min-h-0 overflow-y-auto pb-16">
+                  <div className="p-2.5 space-y-2">
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
@@ -1535,13 +1537,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         )}
                       >
                         {msg.role === "assistant" && (
-                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                            <Bot className="h-2.5 w-2.5 text-primary" />
+                          <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                            <Bot className="h-2 w-2 text-primary" />
                           </div>
                         )}
                         <div
                           className={cn(
-                            "max-w-[80%] rounded-2xl px-3 py-2 text-[13px] leading-relaxed",
+                            "max-w-[82%] rounded-xl px-2.5 py-1.5 text-[12px] leading-relaxed",
                             msg.role === "user"
                               ? "bg-primary text-primary-foreground"
                               : "bg-muted"
@@ -1581,18 +1583,18 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           )}
                         </div>
                         {msg.role === "user" && (
-                          <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
-                            <User className="h-2.5 w-2.5 text-primary-foreground" />
+                          <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
+                            <User className="h-2 w-2 text-primary-foreground" />
                           </div>
                         )}
                       </div>
                     ))}
                     {isLoading && (
-                      <div className="flex gap-2">
-                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                          <Bot className="h-2.5 w-2.5 text-primary" />
+                      <div className="flex gap-1.5">
+                        <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <Bot className="h-2 w-2 text-primary" />
                         </div>
-                        <div className="bg-muted rounded-2xl px-3 py-2">
+                        <div className="bg-muted rounded-xl px-2.5 py-1.5">
                           <div className="flex gap-1">
                             <motion.span 
                               className="w-1.5 h-1.5 bg-primary/60 rounded-full"
@@ -1619,21 +1621,21 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
 
                 {/* Mobile Input - Sticky at bottom */}
                 <div 
-                  className="shrink-0 p-3 border-t border-border bg-card mt-auto"
-                  style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}
+                  className="shrink-0 p-2 border-t border-border bg-card mt-auto"
+                  style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}
                 >
                   {/* Recording indicator with waveform */}
                   {(isRecording || isProcessing) && (
-                    <div className="flex flex-col items-center gap-2 mb-3">
+                    <div className="flex flex-col items-center gap-1.5 mb-2">
                       {/* Audio waveform visualizer - real-time audio levels */}
                       {isRecording && !isProcessing && (
-                        <div className="flex items-center justify-center gap-[3px] h-8">
-                          {audioLevels.slice(0, 12).map((level, i) => (
+                        <div className="flex items-center justify-center gap-[2px] h-6">
+                          {audioLevels.slice(0, 10).map((level, i) => (
                             <motion.div
                               key={i}
-                              className="w-1 bg-destructive rounded-full"
+                              className="w-0.5 bg-destructive rounded-full"
                               animate={{
-                                height: Math.max(4, 4 + level * 28),
+                                height: Math.max(3, 3 + level * 20),
                               }}
                               transition={{
                                 duration: 0.05,
@@ -1646,9 +1648,9 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       
                       {/* Processing spinner */}
                       {isProcessing && (
-                        <div className="flex items-center justify-center h-8">
+                        <div className="flex items-center justify-center h-5">
                           <motion.div
-                            className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full"
+                            className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full"
                             animate={{ rotate: 360 }}
                             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                           />
@@ -1701,23 +1703,23 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       )}
                     </div>
                   )}
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5">
                     <Button
                       onClick={isRecording ? stopRecording : startRecording}
                       disabled={isLoading || isProcessing}
                       size="icon"
                       variant="outline"
                       className={cn(
-                        "h-11 w-11 rounded-xl shrink-0 touch-manipulation",
+                        "h-9 w-9 rounded-lg shrink-0 touch-manipulation",
                         isRecording && "bg-destructive/10 border-destructive text-destructive"
                       )}
                     >
                       {isProcessing ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : isRecording ? (
-                        <Square className="h-4 w-4 fill-current" />
+                        <Square className="h-3.5 w-3.5 fill-current" />
                       ) : (
-                        <Mic className="h-4 w-4" />
+                        <Mic className="h-3.5 w-3.5" />
                       )}
                     </Button>
                     <Input
@@ -1727,9 +1729,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       onKeyDown={handleKeyDown}
                       onFocus={() => {
                         const isIOS = isIOSDevice();
-
                         if (isIOS) {
-                          // iOS: let the keyboard + viewport settle, then keep the bottom visible
                           window.setTimeout(() => {
                             scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
                             inputRef.current?.scrollIntoView({
@@ -1744,10 +1744,9 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           }, 200);
                         }
                       }}
-
                       placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
                       disabled={isLoading || isRecording}
-                      className="h-11 rounded-xl text-sm flex-1 touch-manipulation"
+                      className="h-9 rounded-lg text-xs flex-1 touch-manipulation"
                       style={{ fontSize: '16px' }}
                     />
                     <Button
@@ -1755,14 +1754,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       disabled={isLoading || !input.trim()}
                       size="icon"
                       className={cn(
-                        "h-11 w-11 rounded-xl shrink-0 touch-manipulation",
+                        "h-9 w-9 rounded-lg shrink-0 touch-manipulation",
                         input.trim() ? "bg-primary" : "bg-muted"
                       )}
                     >
                       {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
-                        <Send className="h-4 w-4" />
+                        <Send className="h-3.5 w-3.5" />
                       )}
                     </Button>
                   </div>

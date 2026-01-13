@@ -288,8 +288,8 @@ export const Hero = () => {
     <section ref={heroRef} id="booking-form" className="relative min-h-screen overflow-hidden bg-background">
       <HeroBackground videosLoaded={videosLoaded} cityVideos={cityVideos} currentVideoIndex={currentVideoIndex} setCurrentVideoIndex={setCurrentVideoIndex} language={language} />
 
-      <div className="container relative z-10 px-3 md:px-4 py-4 md:py-8 lg:py-16">
-        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-8rem)]">
+      <div className="container relative z-10 px-2 sm:px-3 md:px-4 py-3 sm:py-4 md:py-8 lg:py-16">
+        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-8rem)]">
           {/* Left Side - Form */}
           <div className="order-1 md:col-span-3 lg:col-span-1">
             <HeroHeader language={language} />
@@ -297,7 +297,7 @@ export const Hero = () => {
             <ReturnTripPromoBanner language={language} onApplyPromoCode={handleApplyPromoCode} />
 
             {/* Booking Form Card - Enhanced visibility */}
-            <div className="bg-card rounded-xl md:rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] border-2 border-primary/20 overflow-hidden ring-1 ring-primary/10">
+            <div className="bg-card rounded-lg sm:rounded-xl md:rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.1)] sm:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] border sm:border-2 border-primary/20 overflow-hidden ring-1 ring-primary/10">
               {/* Tabs */}
               <div className="flex bg-muted/50 relative">
                 <div 
@@ -315,7 +315,7 @@ export const Hero = () => {
               </div>
 
               {/* Form Content */}
-              <div className="p-3 md:p-4 lg:p-5">
+              <div className="p-2.5 sm:p-3 md:p-4 lg:p-5">
                 <AnimatePresence mode="wait">
                   {activeTab === "ride" ? (
                     <div key="ride-form" className="space-y-2 md:space-y-3">
