@@ -1854,6 +1854,48 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         </div>
                       </div>
                     )}
+                    
+                    {/* AI Speaking Indicator - Mobile */}
+                    {isSpeaking && !isLoading && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="flex gap-2"
+                      >
+                        <motion.div 
+                          className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shrink-0 shadow-lg shadow-primary/30"
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                        >
+                          <Volume2 className="h-3 w-3 text-primary-foreground" />
+                        </motion.div>
+                        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl px-3 py-2 border border-primary/20">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-medium text-primary">
+                              {language === "TR" ? "Konuşuyor" : "Speaking"}
+                            </span>
+                            <div className="flex items-center gap-0.5">
+                              {[0, 1, 2, 3, 4].map((i) => (
+                                <motion.div
+                                  key={i}
+                                  className="w-0.5 bg-primary rounded-full"
+                                  animate={{
+                                    height: [4, 12 + Math.random() * 8, 4],
+                                  }}
+                                  transition={{
+                                    duration: 0.4 + Math.random() * 0.2,
+                                    repeat: Infinity,
+                                    ease: "easeInOut",
+                                    delay: i * 0.08,
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
                     <div ref={scrollRef} />
                   </div>
                 </ScrollArea>
@@ -2390,6 +2432,48 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 </div>
               </div>
             </div>
+          )}
+          
+          {/* AI Speaking Indicator - Desktop */}
+          {isSpeaking && !isTyping && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex gap-2.5 justify-start"
+            >
+              <motion.div 
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shrink-0 shadow-lg shadow-primary/30"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              >
+                <Volume2 className="h-4 w-4 text-primary-foreground" />
+              </motion.div>
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl px-4 py-2.5 border border-primary/20">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-primary">
+                    {language === "TR" ? "Konuşuyor" : "Speaking"}
+                  </span>
+                  <div className="flex items-center gap-0.5">
+                    {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-1 bg-primary rounded-full"
+                        animate={{
+                          height: [6, 18 + Math.random() * 10, 6],
+                        }}
+                        transition={{
+                          duration: 0.4 + Math.random() * 0.2,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: i * 0.08,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           )}
           
           <div ref={scrollRef} />
