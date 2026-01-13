@@ -84,7 +84,7 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
         {/* Chat Assistant */}
         <div className="relative">
           <Suspense fallback={<Skeleton className="h-[120px] w-full rounded-lg" />}>
-            <BookingChatAssistant onApplyBooking={onApplyBooking} defaultOpen />
+            <BookingChatAssistant onApplyBooking={onApplyBooking} />
           </Suspense>
         </div>
       </div>
