@@ -987,46 +987,43 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     const isIOS = isIOSDevice();
     const isAndroid = isAndroidDevice();
     
-    // Capture baseline viewport height when keyboard is definitely closed
-    // Use a small delay to ensure we get the correct initial height
+    // Capture baseline viewport "bottom" when keyboard is definitely closed.
+    // We store (height + offsetTop) so iOS/Android viewport shifting is handled.
     const captureBaseline = () => {
       if (viewport) {
-        baselineViewportHeightRef.current = viewport.height;
+        baselineViewportHeightRef.current = viewport.height + (viewport.offsetTop || 0);
       } else {
         baselineViewportHeightRef.current = window.innerHeight;
       }
     };
-    
+
     // Initial baseline capture
     setTimeout(captureBaseline, 100);
 
     const handleViewportChange = () => {
       if (!viewport) return;
-      
-      const currentHeight = viewport.height;
-      const baseline = baselineViewportHeightRef.current || window.innerHeight;
-      
-      // Calculate keyboard height from baseline difference
-      const heightDiff = Math.max(0, baseline - currentHeight);
-      
-      // Threshold: only consider keyboard if diff > 100px (accounts for address bar changes)
-      const keyboardH = heightDiff > 100 ? heightDiff : 0;
-      
-      // Update baseline if keyboard closes and viewport is larger
-      if (keyboardH === 0 && currentHeight > baseline) {
-        baselineViewportHeightRef.current = currentHeight;
+
+      const currentBottom = viewport.height + (viewport.offsetTop || 0);
+      const baselineBottom = baselineViewportHeightRef.current || window.innerHeight;
+
+      const rawInset = Math.max(0, baselineBottom - currentBottom);
+      const threshold = isIOS ? 60 : 90;
+      const keyboardInset = rawInset > threshold ? rawInset : 0;
+
+      // If keyboard is closed and viewport grew (rotation/address bar), refresh baseline.
+      if (keyboardInset === 0 && currentBottom > baselineBottom) {
+        baselineViewportHeightRef.current = currentBottom;
       }
-      
-      setKeyboardHeight(keyboardH);
-      
+
+      setKeyboardHeight(Math.round(keyboardInset));
+
       // When keyboard opens, scroll input into view
-      if (keyboardH > 0 && inputRef.current) {
+      if (keyboardInset > 0 && inputRef.current) {
         requestAnimationFrame(() => {
-          // iOS: use scrollIntoView with block: 'center' to ensure visibility
           if (isIOS) {
             inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
           }
-          // Android: scroll the messages to bottom
           if (isAndroid) {
             scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
           }
@@ -1556,16 +1553,16 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               data-mobile-panel
               className="fixed inset-x-0 z-[9998] bg-card rounded-t-2xl shadow-2xl border-t border-border flex flex-col"
               style={{
-                // Position panel above keyboard - use top instead of bottom for better keyboard handling
-                top: keyboardHeight > 0 ? '10%' : '25%',
+                // Position panel above keyboard
+                top: keyboardHeight > 0 ? '0.5rem' : '25%',
                 bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
                 maxHeight: keyboardHeight > 0 
-                  ? `calc(90% - ${keyboardHeight}px)` 
+                  ? `calc(100% - ${keyboardHeight}px - 0.5rem)` 
                   : '75%',
                 minHeight: '200px',
                 touchAction: 'auto',
                 pointerEvents: 'auto',
-                paddingBottom: keyboardHeight > 0 ? '0' : 'env(safe-area-inset-bottom)',
+                paddingBottom: '0',
               }}
             >
                 {/* Drag Handle - Swipe indicator */}

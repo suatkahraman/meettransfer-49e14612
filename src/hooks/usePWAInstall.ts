@@ -313,7 +313,7 @@ export function usePWAInstall() {
           }
         }
 
-        const { error } = await supabase.from('app_installations').upsert({
+        const payload = {
           visitor_id: visitorId,
           user_id: user?.id || null,
           device: /mobile|tablet/i.test(userAgent) ? 'mobile' : 'desktop',
@@ -322,10 +322,24 @@ export function usePWAInstall() {
           country_code: geo?.countryCode || null,
           country_name: geo?.countryName || null,
           city: geo?.city || null,
-        }, { 
-          onConflict: 'visitor_id',
-          ignoreDuplicates: true 
-        });
+          // Ensure consistent ordering in admin views
+          installed_at: new Date().toISOString(),
+        };
+
+        // IMPORTANT: use INSERT (not UPSERT) so we don't require UPDATE RLS.
+        const { error } = await supabase.from('app_installations').insert(payload);
+
+        // Treat "already exists" as success (prevents endless retry loops)
+        if (error && (error as any)?.code === '23505') {
+          localStorage.setItem(INSTALL_TRACK_KEY, '1');
+          console.log('[PWA] Installation already tracked');
+          return;
+        }
+
+        if (error) {
+          console.error('[PWA] Error tracking installation:', error);
+          return;
+        }
 
         if (error) {
           console.error('[PWA] Error tracking installation:', error);
