@@ -930,14 +930,17 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   }, [isOpen, mobileFloating, setAIChatOpen]);
   // Ref to track if we should auto-send voice transcription
   const pendingVoiceMessageRef = useRef<string | null>(null);
+  const shouldAutoSendRef = useRef<boolean>(false);
 
   // Voice recording - auto-send transcribed text
   const handleTranscription = useCallback((text: string) => {
     if (!text.trim()) return;
     
     // Store the transcribed text for auto-send
-    pendingVoiceMessageRef.current = text.trim();
-    setInput(text.trim());
+    const trimmedText = text.trim();
+    pendingVoiceMessageRef.current = trimmedText;
+    shouldAutoSendRef.current = true;
+    setInput(trimmedText);
     
     // Close keyboard on mobile
     if (mobileFloating && inputRef.current) {
@@ -952,7 +955,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   
   // Handle interim transcript for real-time display
   const handleInterimTranscript = useCallback((text: string) => {
-    setInput(text);
+    // Only update input if we're still recording (not after final result)
+    if (!shouldAutoSendRef.current) {
+      setInput(text);
+    }
   }, []);
   
   const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels, audioQuality, interimTranscript } = useVoiceRecorder(
@@ -962,21 +968,39 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   );
   
   // Auto-send voice message when transcription is complete and not recording/processing
+  const autoSendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   useEffect(() => {
-    if (pendingVoiceMessageRef.current && !isRecording && !isProcessing && input === pendingVoiceMessageRef.current) {
+    // Clear any existing timeout
+    if (autoSendTimeoutRef.current) {
+      clearTimeout(autoSendTimeoutRef.current);
+      autoSendTimeoutRef.current = null;
+    }
+    
+    // Check if we should auto-send
+    if (shouldAutoSendRef.current && pendingVoiceMessageRef.current && !isRecording && !isProcessing) {
       const messageToSend = pendingVoiceMessageRef.current;
-      pendingVoiceMessageRef.current = null;
       
-      // Small delay to ensure UI has updated
-      const timeoutId = setTimeout(() => {
+      // Reset refs immediately
+      pendingVoiceMessageRef.current = null;
+      shouldAutoSendRef.current = false;
+      
+      // Auto-send after a short delay to ensure UI has updated
+      autoSendTimeoutRef.current = setTimeout(() => {
+        // Directly trigger form submission
         const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
         if (submitButton && !submitButton.disabled) {
+          console.log('🎤 Auto-sending voice message:', messageToSend);
           submitButton.click();
         }
-      }, 100);
-      
-      return () => clearTimeout(timeoutId);
+      }, 200);
     }
+    
+    return () => {
+      if (autoSendTimeoutRef.current) {
+        clearTimeout(autoSendTimeoutRef.current);
+      }
+    };
   }, [input, isRecording, isProcessing]);
 
   // Text-to-Speech
