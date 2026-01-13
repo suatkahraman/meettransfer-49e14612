@@ -754,15 +754,50 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const hasLoadedRef = useRef(false);
   const hasHandledAIParamRef = useRef(false);
 
-  // Voice recording
+  // Ref to track if we should auto-send voice transcription
+  const pendingVoiceMessageRef = useRef<string | null>(null);
+
+  // Voice recording - auto-send transcribed text
   const handleTranscription = useCallback((text: string) => {
-    setInput(text);
-  }, []);
+    if (!text.trim()) return;
+    
+    // Store the transcribed text for auto-send
+    pendingVoiceMessageRef.current = text.trim();
+    setInput(text.trim());
+    
+    // Close keyboard on mobile
+    if (mobileFloating && inputRef.current) {
+      inputRef.current.blur();
+    }
+    
+    // Scroll to bottom
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+  }, [mobileFloating]);
   
   const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning } = useVoiceRecorder(
     handleTranscription,
     language
   );
+  
+  // Auto-send voice message when transcription is complete and not recording/processing
+  useEffect(() => {
+    if (pendingVoiceMessageRef.current && !isRecording && !isProcessing && input === pendingVoiceMessageRef.current) {
+      const messageToSend = pendingVoiceMessageRef.current;
+      pendingVoiceMessageRef.current = null;
+      
+      // Small delay to ensure UI has updated
+      const timeoutId = setTimeout(() => {
+        const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
+        if (submitButton && !submitButton.disabled) {
+          submitButton.click();
+        }
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [input, isRecording, isProcessing]);
 
   // Text-to-Speech
   const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate } = useTextToSpeech(language);
