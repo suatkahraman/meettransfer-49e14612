@@ -1,6 +1,6 @@
-import { memo, useState, useEffect } from "react";
+import { memo, useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
+import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase, ChevronLeft, ChevronRight, Play, Image } from "lucide-react";
 import { CityVideo } from "./types";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 
@@ -21,6 +21,11 @@ const GALLERY_IMAGES = [
   { src: maybachInterior, label: "Ultra Luxury", labelTR: "Ultra Lüks" },
 ];
 
+// Media item type for unified carousel
+type MediaItem = 
+  | { type: 'video'; video: CityVideo; index: number }
+  | { type: 'image'; src: string; label: string; labelTR: string; index: number };
+
 interface HeroVisualSectionProps {
   videosLoaded: boolean;
   cityVideos: CityVideo[];
@@ -38,7 +43,7 @@ export const HeroVisualSection = memo(({
 }: HeroVisualSectionProps) => {
   // Mobile: Always show static image for performance
   const [isMobile, setIsMobile] = useState(true);
-  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -47,24 +52,50 @@ export const HeroVisualSection = memo(({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const currentVideo = cityVideos[currentVideoIndex];
-  const showVideo = !isMobile && videosLoaded && cityVideos.length > 0;
-  const currentGalleryImage = GALLERY_IMAGES[galleryIndex];
+  // Combine videos and images into unified media array
+  const mediaItems: MediaItem[] = useMemo(() => {
+    const items: MediaItem[] = [];
+    
+    // Add videos first (if loaded on desktop)
+    if (!isMobile && videosLoaded && cityVideos.length > 0) {
+      cityVideos.forEach((video, idx) => {
+        items.push({ type: 'video', video, index: idx });
+      });
+    }
+    
+    // Add gallery images
+    GALLERY_IMAGES.forEach((img, idx) => {
+      items.push({ type: 'image', ...img, index: idx });
+    });
+    
+    return items;
+  }, [isMobile, videosLoaded, cityVideos]);
 
-  // Auto-rotate gallery images when video is not showing
+  const currentMedia = mediaItems[currentMediaIndex] || mediaItems[0];
+
+  // Auto-rotate through all media (videos + images)
   useEffect(() => {
-    if (showVideo) return; // Don't rotate if video is playing
+    if (isMobile || mediaItems.length <= 1) return;
+    
+    // Longer interval for videos, shorter for images
+    const intervalTime = currentMedia?.type === 'video' ? 6000 : 4000;
     
     const interval = setInterval(() => {
-      setGalleryIndex((prev) => (prev + 1) % GALLERY_IMAGES.length);
-    }, 4000);
+      setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
+    }, intervalTime);
     
     return () => clearInterval(interval);
-  }, [showVideo]);
+  }, [isMobile, mediaItems.length, currentMedia?.type]);
 
+  // Reset index when media items change
+  useEffect(() => {
+    if (currentMediaIndex >= mediaItems.length) {
+      setCurrentMediaIndex(0);
+    }
+  }, [mediaItems.length, currentMediaIndex]);
 
-  const nextImage = () => setGalleryIndex((prev) => (prev + 1) % GALLERY_IMAGES.length);
-  const prevImage = () => setGalleryIndex((prev) => (prev - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length);
+  const nextMedia = () => setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
+  const prevMedia = () => setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
 
   return (
     <>
@@ -138,7 +169,7 @@ export const HeroVisualSection = memo(({
         </div>
       </div>
 
-      {/* Desktop Visual Section - Video only on desktop */}
+      {/* Desktop Visual Section - Mixed Video + Gallery Carousel */}
       <motion.div 
         className="order-3 hidden md:block md:col-span-2 lg:col-span-1"
         initial={{ opacity: 0, y: 20 }}
@@ -146,31 +177,27 @@ export const HeroVisualSection = memo(({
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         <div className="relative">
-          {/* Main Video/Image */}
+          {/* Main Video/Image Carousel */}
           <div className="relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
-            {showVideo && currentVideo ? (
-              <div className="relative w-full h-48 md:h-56 lg:h-80 overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
-                {/* Fallback image shown while videos load */}
-                <img
-                  src={heroMercedes}
-                  alt="VIP Transfer"
-                  className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 z-0"
-                  loading="eager"
-                />
-                
-                {/* Render all videos with proper crossfade */}
-                {cityVideos.map((video, index) => (
+            <div className="relative w-full h-48 md:h-56 lg:h-80 overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
+              {/* Fallback image */}
+              <img
+                src={heroMercedes}
+                alt="VIP Transfer"
+                className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 z-0"
+                loading="eager"
+              />
+              
+              {/* Render all media items with crossfade */}
+              <AnimatePresence mode="wait">
+                {currentMedia?.type === 'video' ? (
                   <motion.div
-                    key={video.src}
-                    className="absolute inset-0 w-full h-full"
-                    initial={false}
-                    animate={{ 
-                      opacity: index === currentVideoIndex ? 1 : 0,
-                      zIndex: index === currentVideoIndex ? 10 : 1
-                    }}
-                    transition={{ 
-                      opacity: { duration: 1.2, ease: "easeInOut" }
-                    }}
+                    key={`video-${currentMediaIndex}`}
+                    className="absolute inset-0 w-full h-full z-10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
                   >
                     <video
                       autoPlay
@@ -178,35 +205,22 @@ export const HeroVisualSection = memo(({
                       loop
                       playsInline
                       preload="auto"
-                      poster={video.poster}
+                      poster={currentMedia.video.poster}
                       className="w-full h-full object-cover brightness-110 contrast-105"
                       onLoadedData={(e) => {
                         const videoEl = e.target as HTMLVideoElement;
                         videoEl.play().catch(() => {});
                       }}
                     >
-                      <source src={video.src} type="video/mp4" />
+                      <source src={currentMedia.video.src} type="video/mp4" />
                     </video>
                   </motion.div>
-                ))}
-                
-                {/* City label badge */}
-                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-md rounded-full px-3 py-1.5 z-20 border border-white/20">
-                  <Globe className="h-3.5 w-3.5 text-white" />
-                  <span className="text-xs text-white font-semibold">
-                    {language === 'TR' ? currentVideo.labelTR : currentVideo.label}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              /* Image Gallery with crossfade when video is not available */
-              <div className="relative w-full h-48 md:h-56 lg:h-80 overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
-                <AnimatePresence mode="wait">
+                ) : currentMedia?.type === 'image' ? (
                   <motion.img
-                    key={galleryIndex}
-                    src={currentGalleryImage.src}
-                    alt={language === 'TR' ? currentGalleryImage.labelTR : currentGalleryImage.label}
-                    className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105"
+                    key={`image-${currentMediaIndex}`}
+                    src={currentMedia.src}
+                    alt={language === 'TR' ? currentMedia.labelTR : currentMedia.label}
+                    className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 z-10"
                     initial={{ opacity: 0, scale: 1.05 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.98 }}
@@ -214,49 +228,62 @@ export const HeroVisualSection = memo(({
                     loading="eager"
                     decoding="async"
                   />
-                </AnimatePresence>
-                
-                {/* Image label badge */}
-                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-md rounded-full px-3 py-1.5 z-20 border border-white/20">
-                  <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400" />
-                  <span className="text-xs text-white font-semibold">
-                    {language === 'TR' ? currentGalleryImage.labelTR : currentGalleryImage.label}
-                  </span>
-                </div>
-                
-                {/* Gallery navigation dots */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
-                  {GALLERY_IMAGES.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setGalleryIndex(idx)}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        idx === galleryIndex 
-                          ? 'bg-white w-4' 
-                          : 'bg-white/40 hover:bg-white/60'
-                      }`}
-                      aria-label={`Go to image ${idx + 1}`}
-                    />
-                  ))}
-                </div>
-                
-                {/* Navigation arrows */}
-                <button
-                  onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors z-20 border border-white/20"
-                  aria-label="Previous image"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors z-20 border border-white/20"
-                  aria-label="Next image"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
+                ) : null}
+              </AnimatePresence>
+              
+              {/* Media label badge */}
+              <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-md rounded-full px-3 py-1.5 z-20 border border-white/20">
+                {currentMedia?.type === 'video' ? (
+                  <>
+                    <Play className="h-3.5 w-3.5 text-white fill-white" />
+                    <span className="text-xs text-white font-semibold">
+                      {language === 'TR' ? currentMedia.video.labelTR : currentMedia.video.label}
+                    </span>
+                  </>
+                ) : currentMedia?.type === 'image' ? (
+                  <>
+                    <Image className="h-3.5 w-3.5 text-yellow-400" />
+                    <span className="text-xs text-white font-semibold">
+                      {language === 'TR' ? currentMedia.labelTR : currentMedia.label}
+                    </span>
+                  </>
+                ) : null}
               </div>
-            )}
+              
+              {/* Navigation dots */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
+                {mediaItems.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentMediaIndex(idx)}
+                    className={`h-2 rounded-full transition-all duration-300 flex items-center justify-center ${
+                      idx === currentMediaIndex 
+                        ? 'bg-white w-4' 
+                        : item.type === 'video' 
+                          ? 'bg-primary/60 hover:bg-primary/80 w-2' 
+                          : 'bg-white/40 hover:bg-white/60 w-2'
+                    }`}
+                    aria-label={`Go to ${item.type} ${idx + 1}`}
+                  />
+                ))}
+              </div>
+              
+              {/* Navigation arrows */}
+              <button
+                onClick={prevMedia}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors z-20 border border-white/20"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                onClick={nextMedia}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors z-20 border border-white/20"
+                aria-label="Next"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
             {/* Lighter gradient for better image visibility */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent pointer-events-none" />
             
