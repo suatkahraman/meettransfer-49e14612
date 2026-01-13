@@ -18,6 +18,7 @@ interface FloatingLabelDatePickerProps {
   icon?: React.ReactNode;
   disabled?: boolean;
   className?: string;
+  triggerClassName?: string;
   disabledDates?: (date: Date) => boolean;
   dateFormat?: string;
 }
@@ -32,6 +33,7 @@ export const FloatingLabelDatePicker = React.forwardRef<
   icon,
   disabled,
   className,
+  triggerClassName,
   disabledDates,
   dateFormat = "dd MMM"
 }, ref) => {
@@ -77,10 +79,11 @@ export const FloatingLabelDatePicker = React.forwardRef<
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             className={cn(
-              "w-full h-12 justify-start bg-muted/50 border-border rounded-xl text-sm transition-all duration-200",
-              "focus:ring-2 focus:ring-primary/20 focus:border-primary hover:bg-muted/70",
+              "w-full h-12 justify-start bg-muted/50 border-border rounded-xl text-sm transition-all duration-200 touch-manipulation",
+              "focus:ring-2 focus:ring-primary/20 focus:border-primary hover:bg-muted/70 active:bg-muted/80",
               (isFocused || open) && "border-primary shadow-sm shadow-primary/10",
-              !hasValue && "text-transparent"
+              !hasValue && "text-transparent",
+              triggerClassName
             )}
           >
             <motion.span
