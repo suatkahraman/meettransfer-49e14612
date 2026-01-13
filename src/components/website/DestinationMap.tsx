@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Plane, Hotel, Anchor, Camera, UtensilsCrossed, ShoppingBag, Loader2, Clock, Car, X, ChevronRight, Navigation } from 'lucide-react';
+import { MapPin, Plane, Hotel, Anchor, Camera, UtensilsCrossed, ShoppingBag, Loader2, Clock, Car, X, ChevronRight, Navigation, Image } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-
+import { LocationPhotoGallery } from './LocationPhotoGallery';
 interface Location {
   name: string;
   nameTR?: string;
@@ -178,6 +178,8 @@ export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
   const [error, setError] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showRouteToLocation, setShowRouteToLocation] = useState<Location | null>(null);
+  const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+  const city = cityKey;
   const { language } = useLanguage();
   const isTR = language?.toLowerCase() === 'tr';
 
@@ -511,6 +513,16 @@ export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
                 {isTR ? (selectedLocation.descriptionTR || selectedLocation.description) : selectedLocation.description}
               </p>
               
+              {/* Photo Gallery Button */}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setShowPhotoGallery(true)}
+              >
+                <Image className="h-4 w-4 mr-2" />
+                {isTR ? 'Fotoğrafları Görüntüle' : 'View Photos'}
+              </Button>
+              
               {selectedLocation.transferTime && selectedLocation.type !== 'airport' && (
                 <div className="bg-muted/50 rounded-xl p-4">
                   <p className="text-sm font-medium mb-3">
@@ -551,6 +563,25 @@ export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Photo Gallery Modal */}
+      {selectedLocation && (
+        <LocationPhotoGallery
+          city={city}
+          locationName={selectedLocation.name}
+          location={{
+            name: selectedLocation.name,
+            nameTR: selectedLocation.nameTR,
+            description: selectedLocation.description,
+            descriptionTR: selectedLocation.descriptionTR,
+            transferTime: selectedLocation.transferTime,
+            distance: selectedLocation.distance,
+            photos: []
+          }}
+          isOpen={showPhotoGallery}
+          onClose={() => setShowPhotoGallery(false)}
+        />
+      )}
     </motion.section>
   );
 };
