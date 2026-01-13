@@ -36,38 +36,66 @@ export function PWAUpdatePrompt() {
   useEffect(() => {
     // Skip in preview/development environments
     if (isPreviewEnvironment()) {
-      console.log("[PWA Update] Skipping in preview environment");
+      console.log("[PWA Update] Skipping in preview environment:", window.location.hostname);
       return;
     }
     
-    if (!("serviceWorker" in navigator)) return;
+    console.log("[PWA Update] Initializing on production:", window.location.hostname);
+    
+    if (!("serviceWorker" in navigator)) {
+      console.log("[PWA Update] Service Worker not supported");
+      return;
+    }
 
     // Check if we already showed prompt this session
     const alreadyShown = sessionStorage.getItem(PWA_UPDATE_SHOWN_KEY) === "true";
+    console.log("[PWA Update] Already shown this session:", alreadyShown);
 
     const showUpdatePrompt = () => {
+      console.log("[PWA Update] 🚀 Showing update prompt!");
       // Prevent duplicate prompts
-      if (promptShownRef.current || alreadyShown) return;
+      if (promptShownRef.current || alreadyShown) {
+        console.log("[PWA Update] Prompt already shown, skipping");
+        return;
+      }
       promptShownRef.current = true;
       sessionStorage.setItem(PWA_UPDATE_SHOWN_KEY, "true");
       setShowPrompt(true);
     };
 
     // Register SW once.
+    console.log("[PWA Update] Registering service worker...");
     updateSWRef.current = registerSW({
       immediate: true,
-      onRegisteredSW: (_swUrl, registration) => {
+      onRegisteredSW: (swUrl, registration) => {
+        console.log("[PWA Update] ✅ SW registered:", swUrl);
         registrationRef.current = registration ?? null;
 
+        // Log current SW state
+        console.log("[PWA Update] SW State:", {
+          active: registration?.active?.state,
+          waiting: !!registration?.waiting,
+          installing: !!registration?.installing,
+        });
+
         // If there's already a waiting worker (e.g. user kept an old tab open), show immediately.
-        if (registration?.waiting) showUpdatePrompt();
+        if (registration?.waiting) {
+          console.log("[PWA Update] Found waiting worker, showing prompt");
+          showUpdatePrompt();
+        }
 
         const requestUpdateCheck = async () => {
+          console.log("[PWA Update] Checking for updates...");
           try {
             await registration?.update();
-            if (registration?.waiting) showUpdatePrompt();
-          } catch {
-            // ignore
+            if (registration?.waiting) {
+              console.log("[PWA Update] New version waiting after check");
+              showUpdatePrompt();
+            } else {
+              console.log("[PWA Update] No new version found");
+            }
+          } catch (e) {
+            console.log("[PWA Update] Update check error:", e);
           }
         };
 
@@ -96,20 +124,29 @@ export function PWAUpdatePrompt() {
         };
       },
       onNeedRefresh: () => {
+        console.log("[PWA Update] 🔔 onNeedRefresh triggered!");
         showUpdatePrompt();
       },
       onRegisterError: (error) => {
-        console.log("[PWA Update] SW register error:", error);
+        console.error("[PWA Update] ❌ SW register error:", error);
       },
     });
 
     // Fallback: if the browser already has a waiting worker but callbacks didn't fire yet.
     navigator.serviceWorker.getRegistration().then((reg) => {
+      console.log("[PWA Update] Existing registration check:", {
+        hasRegistration: !!reg,
+        waiting: !!reg?.waiting,
+        active: reg?.active?.state,
+      });
       if (reg?.waiting) showUpdatePrompt();
     });
 
     // Fallback reload when the new SW takes control.
-    const onControllerChange = () => window.location.reload();
+    const onControllerChange = () => {
+      console.log("[PWA Update] Controller changed, reloading...");
+      window.location.reload();
+    };
     navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
 
     return () => {
