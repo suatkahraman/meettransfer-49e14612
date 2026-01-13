@@ -812,8 +812,8 @@ export const Hero = () => {
                       />
                     </div>
 
-                    {/* Vehicle Selection with Images & Tooltips */}
-                    <div className="grid grid-cols-4 gap-1.5">
+                    {/* Vehicle Selection with Larger Images & Tooltips */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {VEHICLE_TYPES.map((vehicle, index) => {
                         const vehiclePrice = allVehiclePrices.find(v => v.vehicleType === vehicle.value);
                         const isSelected = vehicleType === vehicle.value;
@@ -842,18 +842,18 @@ export const Hero = () => {
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: 0.05 * index }}
-                              whileHover={{ scale: isDisabled ? 1 : 1.05, y: isDisabled ? 0 : -2 }}
+                              whileHover={{ scale: isDisabled ? 1 : 1.03, y: isDisabled ? 0 : -3 }}
                               whileTap={{ scale: isDisabled ? 1 : 0.97 }}
                               className={cn(
-                                "w-full rounded-xl border p-1.5 transition-all text-center overflow-hidden",
+                                "w-full rounded-xl border p-2 transition-all text-center overflow-hidden",
                                 isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
                                 isSelected 
                                   ? "border-primary bg-primary/10 ring-2 ring-primary shadow-lg" 
-                                  : "border-border bg-muted/30 hover:border-primary/50 hover:shadow-md hover:bg-muted/50"
+                                  : "border-border bg-card hover:border-primary/50 hover:shadow-md"
                               )}
                             >
-                              {/* Vehicle Image */}
-                              <div className="w-full h-8 rounded-lg overflow-hidden mb-1 bg-muted relative">
+                              {/* Larger Vehicle Image */}
+                              <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-2 bg-muted relative">
                                 <img 
                                   src={vehicleImages[vehicle.value]} 
                                   alt={vehicle.label}
@@ -866,14 +866,16 @@ export const Hero = () => {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                   >
-                                    <Check className="h-4 w-4 text-primary" />
+                                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                                      <Check className="h-4 w-4 text-primary-foreground" />
+                                    </div>
                                   </motion.div>
                                 )}
                               </div>
-                              <div className="text-[9px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
-                              <div className="flex items-center justify-center gap-0.5 text-[8px] text-muted-foreground">
-                                <Users className="h-2 w-2" />
-                                <span>{vehicle.passengers}</span>
+                              <div className="text-xs font-semibold truncate mb-0.5">{vehicle.label.split(' ').pop()}</div>
+                              <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
+                                <Users className="h-3 w-3" />
+                                <span>{vehicle.passengers} pax</span>
                               </div>
                               {vehiclePrice ? (
                                 <motion.div 
@@ -929,43 +931,42 @@ export const Hero = () => {
                     transition={{ duration: 0.2 }}
                     className="space-y-3"
                   >
+                    {/* City and Duration with Floating Labels */}
                     <div className="grid grid-cols-2 gap-2">
-                      <Select value={hourlyCity} onValueChange={setHourlyCity}>
-                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-sm">
-                          <MapPin className="mr-1 h-4 w-4 text-primary" />
-                          <SelectValue placeholder={t("city") || "City"} />
-                        </SelectTrigger>
-                        <SelectContent className="z-50 max-h-[250px]">
-                          {availableCities.map((city) => <SelectItem key={city} value={city}>{city}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                      <FloatingLabelSelect
+                        label={t("city") || "City"}
+                        value={hourlyCity}
+                        onValueChange={setHourlyCity}
+                        options={availableCities.map(city => ({ value: city, label: city }))}
+                        icon={<MapPin className="h-4 w-4" />}
+                        className="col-span-1"
+                      />
                       
-                      <Select value={hourlyDuration} onValueChange={setHourlyDuration} disabled={!hourlyCity}>
-                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-sm disabled:opacity-50">
-                          <Timer className="mr-1 h-4 w-4 text-primary" />
-                          <SelectValue placeholder={t("duration") || "Duration"} />
-                        </SelectTrigger>
-                        <SelectContent className="z-50">
-                          {availableDurations.map((d) => {
-                            const opt = hourlyDurationOptions.find(o => o.value === d);
-                            return <SelectItem key={d} value={d}>{opt ? (t(opt.labelKey) || opt.defaultLabel) : `${d}h`}</SelectItem>;
-                          })}
-                        </SelectContent>
-                      </Select>
+                      <FloatingLabelSelect
+                        label={t("duration") || "Duration"}
+                        value={hourlyDuration}
+                        onValueChange={setHourlyDuration}
+                        options={availableDurations.map(d => {
+                          const opt = hourlyDurationOptions.find(o => o.value === d);
+                          return { value: d, label: opt ? (t(opt.labelKey) || opt.defaultLabel) : `${d}h` };
+                        })}
+                        icon={<Timer className="h-4 w-4" />}
+                        disabled={!hourlyCity}
+                        className="col-span-1"
+                      />
                     </div>
                     
                     {hourlyDuration === "custom" && (
-                      <Select value={customHours} onValueChange={setCustomHours}>
-                        <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-sm">
-                          <Timer className="mr-1 h-4 w-4 text-primary" />
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="z-50 max-h-[250px]">
-                          {Array.from({ length: 16 }, (_, i) => i + 9).map((h) => (
-                            <SelectItem key={h} value={h.toString()}>{h} {t("hours") || "hours"}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FloatingLabelSelect
+                        label={t("customHours") || "Custom Hours"}
+                        value={customHours}
+                        onValueChange={setCustomHours}
+                        options={Array.from({ length: 16 }, (_, i) => ({ 
+                          value: (i + 9).toString(), 
+                          label: `${i + 9} ${t("hours") || "hours"}` 
+                        }))}
+                        icon={<Timer className="h-4 w-4" />}
+                      />
                     )}
 
                     {/* Hourly Date, Time, Passengers with Floating Labels */}
@@ -1002,7 +1003,7 @@ export const Hero = () => {
                     </div>
 
                     {hourlyCity && hourlyDuration && (
-                      <div className="grid grid-cols-3 gap-1.5">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         {VEHICLE_TYPES.filter(v => v.value !== 'minibus').map((vehicle, index) => {
                           const vehiclePrice = allHourlyPrices.find(v => v.vehicleType === vehicle.value);
                           const isSelected = hourlyVehicleType === vehicle.value;
@@ -1032,18 +1033,18 @@ export const Hero = () => {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.05 * index }}
-                                whileHover={{ scale: isDisabled ? 1 : 1.05, y: isDisabled ? 0 : -2 }}
+                                whileHover={{ scale: isDisabled ? 1 : 1.03, y: isDisabled ? 0 : -3 }}
                                 whileTap={{ scale: isDisabled ? 1 : 0.97 }}
                                 className={cn(
-                                  "w-full rounded-xl border p-1.5 transition-all text-center overflow-hidden",
+                                  "w-full rounded-xl border p-2 transition-all text-center overflow-hidden",
                                   isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
                                   isSelected 
                                     ? "border-primary bg-primary/10 ring-2 ring-primary shadow-lg" 
-                                    : "border-border bg-muted/30 hover:border-primary/50 hover:shadow-md hover:bg-muted/50"
+                                    : "border-border bg-card hover:border-primary/50 hover:shadow-md"
                                 )}
                               >
-                                {/* Vehicle Image */}
-                                <div className="w-full h-8 rounded-lg overflow-hidden mb-1 bg-muted relative">
+                                {/* Larger Vehicle Image */}
+                                <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-2 bg-muted relative">
                                   <img 
                                     src={vehicleImages[vehicle.value]} 
                                     alt={vehicle.label}
@@ -1056,18 +1057,20 @@ export const Hero = () => {
                                       initial={{ opacity: 0 }}
                                       animate={{ opacity: 1 }}
                                     >
-                                      <Check className="h-4 w-4 text-primary" />
+                                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                                        <Check className="h-4 w-4 text-primary-foreground" />
+                                      </div>
                                     </motion.div>
                                   )}
                                 </div>
-                                <div className="text-[9px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
-                                <div className="flex items-center justify-center gap-0.5 text-[8px] text-muted-foreground">
-                                  <Users className="h-2 w-2" />
-                                  <span>{vehicle.passengers}</span>
+                                <div className="text-xs font-semibold truncate mb-0.5">{vehicle.label.split(' ').pop()}</div>
+                                <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
+                                  <Users className="h-3 w-3" />
+                                  <span>{vehicle.passengers} pax</span>
                                 </div>
                                 {vehiclePrice ? (
                                   <motion.div 
-                                    className="text-xs font-bold text-primary"
+                                    className="text-sm font-bold text-primary mt-1"
                                     initial={{ scale: 0.8 }}
                                     animate={{ scale: 1 }}
                                     transition={{ type: "spring", stiffness: 300 }}
@@ -1075,11 +1078,11 @@ export const Hero = () => {
                                     {symbol}{vehiclePrice.price}
                                   </motion.div>
                                 ) : (loadingPrice || convertingHourlyPrices) ? (
-                                  <div className="h-4 flex items-center justify-center">
-                                    <Skeleton className="h-3 w-8" />
+                                  <div className="h-5 flex items-center justify-center mt-1">
+                                    <Skeleton className="h-4 w-10" />
                                   </div>
                                 ) : (
-                                  <div className="h-4" />
+                                  <div className="h-5 mt-1" />
                                 )}
                               </motion.button>
                             </motion.div>
