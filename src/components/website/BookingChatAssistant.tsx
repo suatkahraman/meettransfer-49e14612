@@ -1322,6 +1322,26 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   // Track if we've spoken the welcome message
   const hasSpokenWelcomeRef = useRef(false);
   const welcomeMessageRef = useRef<string | null>(null);
+  const userInteractedRef = useRef(false);
+
+  // Track user interaction for autoplay policy
+  useEffect(() => {
+    const handleInteraction = () => {
+      userInteractedRef.current = true;
+      console.log('🎙️ [Welcome] User interaction detected');
+    };
+    
+    // Listen for any user interaction
+    document.addEventListener('click', handleInteraction, { once: true });
+    document.addEventListener('touchstart', handleInteraction, { once: true });
+    document.addEventListener('keydown', handleInteraction, { once: true });
+    
+    return () => {
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+      document.removeEventListener('keydown', handleInteraction);
+    };
+  }, []);
 
   // Add welcome message when opened and no messages
   useEffect(() => {
@@ -1340,32 +1360,57 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     }
   }, [isOpen, language, messages.length]);
 
-  // Auto-speak welcome message once voices are loaded
+  // Function to speak welcome message with retry
+  const speakWelcome = useCallback(() => {
+    if (!welcomeMessageRef.current || hasSpokenWelcomeRef.current || !isVoiceEnabled) {
+      return;
+    }
+    
+    const voices = window.speechSynthesis?.getVoices() || [];
+    console.log('🎙️ [Welcome] speakWelcome called, voices:', voices.length, 'userInteracted:', userInteractedRef.current);
+    
+    if (voices.length === 0) {
+      console.log('🎙️ [Welcome] No voices yet, waiting...');
+      return;
+    }
+    
+    hasSpokenWelcomeRef.current = true;
+    const messageToSpeak = welcomeMessageRef.current;
+    welcomeMessageRef.current = null;
+    
+    console.log('🎙️ [Welcome] ✅ Speaking welcome message:', messageToSpeak.substring(0, 30) + '...');
+    
+    // Cancel any ongoing speech first
+    window.speechSynthesis?.cancel();
+    
+    // Small delay for Chrome stability
+    setTimeout(() => {
+      speak(messageToSpeak);
+    }, 100);
+  }, [isVoiceEnabled, speak]);
+
+  // Auto-speak welcome message once voices are loaded and chat is opened (user interaction)
   useEffect(() => {
     console.log('🎙️ [Welcome] Effect check:', {
       welcomeMessage: welcomeMessageRef.current?.substring(0, 30),
       availableVoices: availableVoices.length,
       hasSpokenWelcome: hasSpokenWelcomeRef.current,
-      isVoiceEnabled
+      isVoiceEnabled,
+      isOpen
     });
     
-    if (welcomeMessageRef.current && availableVoices.length > 0 && !hasSpokenWelcomeRef.current && isVoiceEnabled) {
-      console.log('🎙️ [Welcome] ✅ Speaking welcome message...');
-      hasSpokenWelcomeRef.current = true;
-      const messageToSpeak = welcomeMessageRef.current;
-      welcomeMessageRef.current = null;
-      
-      // Small delay to ensure everything is ready
+    // Opening the chat IS a user interaction, so we can speak
+    if (isOpen && welcomeMessageRef.current && availableVoices.length > 0 && !hasSpokenWelcomeRef.current && isVoiceEnabled) {
+      // Small delay to ensure UI is ready
       setTimeout(() => {
-        console.log('🎙️ [Welcome] Calling speak() with:', messageToSpeak.substring(0, 30) + '...');
-        speak(messageToSpeak);
-      }, 300);
+        speakWelcome();
+      }, 500);
     } else if (welcomeMessageRef.current && !isVoiceEnabled) {
       console.log('🎙️ [Welcome] ⚠️ Voice disabled, not speaking welcome');
     } else if (welcomeMessageRef.current && availableVoices.length === 0) {
-      console.log('🎙️ [Welcome] ⚠️ No voices available yet');
+      console.log('🎙️ [Welcome] ⚠️ No voices available yet, will retry when loaded');
     }
-  }, [availableVoices.length, isVoiceEnabled, speak]);
+  }, [availableVoices.length, isVoiceEnabled, speakWelcome, isOpen]);
 
   // Reset the spoken flag when chat is closed
   useEffect(() => {
