@@ -39,7 +39,7 @@ export const HeroBackground = memo(({
                 <img
                   src={cityVideos[currentVideoIndex].poster}
                   alt=""
-                  className="absolute inset-0 w-full h-full object-cover opacity-70 brightness-110"
+                  className="absolute inset-0 w-full h-full object-cover opacity-100 brightness-110 contrast-110 saturate-125"
                   loading="eager"
                   decoding="async"
                   fetchPriority="high"
@@ -50,12 +50,15 @@ export const HeroBackground = memo(({
                   muted
                   loop
                   playsInline
-                  preload="metadata"
+                  preload="auto"
                   poster={cityVideos[currentVideoIndex].poster}
-                  className="absolute inset-0 w-full h-full object-cover opacity-70 brightness-110"
-                  onLoadedData={(e) => {
-                    // Fade in video smoothly once loaded
-                    (e.target as HTMLVideoElement).style.opacity = '0.7';
+                  className="absolute inset-0 w-full h-full object-cover opacity-100 brightness-110 contrast-110 saturate-125"
+                  onError={(e) => {
+                    console.error(
+                      "[Hero Background] Video error:",
+                      cityVideos[currentVideoIndex]?.src,
+                      e
+                    );
                   }}
                 >
                   {/* WebM first (smaller file size, better compression) */}
@@ -63,12 +66,11 @@ export const HeroBackground = memo(({
                     <source src={cityVideos[currentVideoIndex].src} type="video/webm" />
                   )}
                   {/* MP4 fallback */}
-                  <source 
-                    src={cityVideos[currentVideoIndex].srcMp4 || cityVideos[currentVideoIndex].src} 
-                    type="video/mp4" 
+                  <source
+                    src={cityVideos[currentVideoIndex].srcMp4 || cityVideos[currentVideoIndex].src}
+                    type="video/mp4"
                   />
                 </video>
-              </motion.div>
             </AnimatePresence>
             
             {/* City Label Badge */}
@@ -130,9 +132,9 @@ export const HeroBackground = memo(({
         />
       </div>
       
-      {/* Lighter Gradient Overlays - Allow more image/video visibility */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/70 to-background/40" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-transparent" />
+      {/* Gradient Overlays - keep text readable without washing out the media */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/45 to-background/12" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/30 to-transparent" />
       
       {/* Pattern Overlay - More subtle */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
