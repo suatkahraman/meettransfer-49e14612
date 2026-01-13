@@ -954,10 +954,9 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   setIsOpen(false);
                 }
               }}
-              className="fixed inset-x-0 bottom-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border"
+              className="fixed inset-x-0 bottom-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col"
               style={{ 
-                height: '60vh',
-                maxHeight: '500px'
+                height: 'min(60vh, 500px)'
               }}
             >
               {/* Drag Handle - Swipe indicator */}
@@ -1001,8 +1000,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 </div>
               </div>
 
-              {/* Mobile Messages - Fixed height scroll area */}
-              <ScrollArea className="flex-1 overflow-y-auto" style={{ height: 'calc(60vh - 140px)', maxHeight: '360px' }}>
+              {/* Mobile Messages - Flexible scroll area */}
+              <ScrollArea className="flex-1 min-h-0 overflow-y-auto pb-20">
                 <div className="p-3 space-y-2.5">
                   {messages.map((msg) => (
                     <div
@@ -1095,10 +1094,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 </div>
               </ScrollArea>
 
-              {/* Mobile Input - Always visible at bottom */}
+              {/* Mobile Input - Sticky at bottom */}
               <div 
-                className="absolute bottom-0 left-0 right-0 p-3 border-t border-border bg-card"
-                style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+                className="shrink-0 p-3 border-t border-border bg-card mt-auto"
+                style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}
               >
                 {/* Recording indicator */}
                 {isRecording && (
