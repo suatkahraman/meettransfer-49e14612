@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { MobileTooltip } from "@/components/ui/mobile-tooltip";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { trackConversion, CONVERSION_LABELS } from "@/lib/gtag";
 import { WHATSAPP_NUMBER } from "@/lib/contact";
@@ -32,25 +32,26 @@ const WhatsAppButton = ({
 
   if (variant === "floating") {
     return (
-      <Tooltip delayDuration={300}>
-        <TooltipTrigger asChild>
-          <button
-            onClick={handleClick}
-            className={`fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3 sm:right-6 z-50 bg-[#25D366] hover:bg-[#22c55e] text-white h-14 w-14 sm:h-14 sm:w-14 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center hover:scale-110 border-2 border-white/30 ${className}`}
-            aria-label="WhatsApp"
-            style={{
-              boxShadow:
-                "0 4px 20px rgba(37, 211, 102, 0.4), 0 0 0 3px rgba(37, 211, 102, 0.2)",
-            }}
-          >
-            <MessageCircle className="h-7 w-7" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 bg-green-400 rounded-full border-2 border-white animate-pulse" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="left" className="bg-[#25D366] text-white border-[#25D366]">
-          <p className="font-medium">{t("whatsappBooking")}</p>
-        </TooltipContent>
-      </Tooltip>
+      <MobileTooltip
+        content={<span className="font-medium">{t("whatsappBooking")}</span>}
+        side="left"
+        contentClassName="bg-[#25D366] text-white border border-[#25D366]"
+        longPressThreshold={400}
+        autoHideDelay={2500}
+      >
+        <button
+          onClick={handleClick}
+          className={`fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3 sm:right-6 z-50 bg-[#25D366] hover:bg-[#22c55e] text-white h-14 w-14 sm:h-14 sm:w-14 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center hover:scale-110 border-2 border-white/30 ${className}`}
+          aria-label="WhatsApp"
+          style={{
+            boxShadow:
+              "0 4px 20px rgba(37, 211, 102, 0.4), 0 0 0 3px rgba(37, 211, 102, 0.2)",
+          }}
+        >
+          <MessageCircle className="h-7 w-7" />
+          <span className="absolute -top-1 -right-1 h-4 w-4 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+        </button>
+      </MobileTooltip>
     );
   }
 
