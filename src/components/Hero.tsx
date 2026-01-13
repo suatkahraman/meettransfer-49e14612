@@ -30,6 +30,42 @@ import { SwipeableBookingCard } from "@/components/hero/SwipeableBookingCard";
 
 import vitoVipImg from "@/assets/vito-vip-1.jpg";
 
+// CDN URLs for hero videos (Supabase Storage with edge caching)
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const CDN_VIDEO_BASE = `${SUPABASE_URL}/storage/v1/object/public/hero-videos`;
+
+// Video configuration with CDN URLs and local fallbacks
+const VIDEO_CONFIG = {
+  istanbul: {
+    cdn: `${CDN_VIDEO_BASE}/hero-istanbul.mp4`,
+    cdnWebm: `${CDN_VIDEO_BASE}/hero-istanbul.webm`,
+    poster: "/images/destinations/istanbul-city.jpg",
+    label: "Istanbul",
+    labelTR: "İstanbul"
+  },
+  antalya: {
+    cdn: `${CDN_VIDEO_BASE}/hero-antalya.mp4`,
+    cdnWebm: `${CDN_VIDEO_BASE}/hero-antalya.webm`,
+    poster: "/images/destinations/antalya-city.jpg",
+    label: "Antalya",
+    labelTR: "Antalya"
+  },
+  bodrum: {
+    cdn: `${CDN_VIDEO_BASE}/hero-bodrum.mp4`,
+    cdnWebm: `${CDN_VIDEO_BASE}/hero-bodrum.webm`,
+    poster: "/images/destinations/bodrum-city.jpg",
+    label: "Bodrum",
+    labelTR: "Bodrum"
+  },
+  vipTransfer: {
+    cdn: `${CDN_VIDEO_BASE}/hero-mercedes-video.mp4`,
+    cdnWebm: `${CDN_VIDEO_BASE}/hero-mercedes-video.webm`,
+    poster: vitoVipImg,
+    label: "VIP Transfer",
+    labelTR: "VIP Transfer"
+  }
+};
+
 const generateTimeOptions = () => {
   const times: string[] = [];
   for (let hour = 0; hour < 24; hour++) {
@@ -118,39 +154,81 @@ export const Hero = () => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(formData)); } catch {}
   }, [activeTab, pickup, dropoff, date, time, passengers, vehicleType, hourlyCity, hourlyDate, hourlyTime, hourlyDuration, hourlyPassengers, hourlyVehicleType, customHours]);
   
-  // Load videos - optimized with intersection observer and progressive loading
+  // Load videos from CDN with local fallback
   useEffect(() => {
-    // Start loading videos immediately but with low priority
-    const loadVideos = async () => {
-      // Load Istanbul first (most common), then others progressively
-      try {
-        const heroIstanbul = await import("@/assets/hero-istanbul.mp4");
-        setCityVideos([
-          { src: heroIstanbul.default, label: "Istanbul", labelTR: "İstanbul", poster: "/images/destinations/istanbul-city.jpg" },
-        ]);
-        setVideosLoaded(true);
+    const loadVideosFromCDN = async () => {
+      // Check if CDN video exists by making a HEAD request
+      const checkCDNVideo = async (url: string): Promise<boolean> => {
+        try {
+          const response = await fetch(url, { method: 'HEAD' });
+          return response.ok;
+        } catch {
+          return false;
+        }
+      };
+
+      // Try CDN first, fall back to local assets
+      const loadVideo = async (config: typeof VIDEO_CONFIG.istanbul, localImport: () => Promise<any>) => {
+        // Try WebM first (smaller), then MP4
+        const webmExists = await checkCDNVideo(config.cdnWebm);
+        if (webmExists) {
+          return { src: config.cdnWebm, srcMp4: config.cdn, ...config };
+        }
         
-        // Load remaining videos in background after first one is ready
+        const mp4Exists = await checkCDNVideo(config.cdn);
+        if (mp4Exists) {
+          return { src: config.cdn, ...config };
+        }
+        
+        // Fall back to local asset
+        try {
+          const local = await localImport();
+          return { src: local.default, ...config };
+        } catch {
+          return null;
+        }
+      };
+
+      try {
+        // Load Istanbul first (most common destination)
+        const istanbulVideo = await loadVideo(
+          VIDEO_CONFIG.istanbul,
+          () => import("@/assets/hero-istanbul.mp4")
+        );
+        
+        if (istanbulVideo) {
+          setCityVideos([istanbulVideo]);
+          setVideosLoaded(true);
+        }
+        
+        // Load remaining videos in background with low priority
         requestIdleCallback(async () => {
-          const [heroVideo, heroAntalya, heroBodrum] = await Promise.all([
-            import("@/assets/hero-mercedes-video.mp4"),
-            import("@/assets/hero-antalya.mp4"),
-            import("@/assets/hero-bodrum.mp4"),
+          const [antalyaVideo, bodrumVideo, vipVideo] = await Promise.all([
+            loadVideo(VIDEO_CONFIG.antalya, () => import("@/assets/hero-antalya.mp4")),
+            loadVideo(VIDEO_CONFIG.bodrum, () => import("@/assets/hero-bodrum.mp4")),
+            loadVideo(VIDEO_CONFIG.vipTransfer, () => import("@/assets/hero-mercedes-video.mp4")),
           ]);
+          
           setCityVideos(prev => [
             prev[0], // Keep Istanbul first
-            { src: heroAntalya.default, label: "Antalya", labelTR: "Antalya", poster: "/images/destinations/antalya-city.jpg" },
-            { src: heroBodrum.default, label: "Bodrum", labelTR: "Bodrum", poster: "/images/destinations/bodrum-city.jpg" },
-            { src: heroVideo.default, label: "VIP Transfer", labelTR: "VIP Transfer", poster: vitoVipImg },
+            ...[antalyaVideo, bodrumVideo, vipVideo].filter(Boolean) as CityVideo[],
           ]);
         }, { timeout: 2000 });
       } catch (error) {
         console.error('[Hero] Video load error:', error);
+        // Final fallback: try loading all from local
+        try {
+          const heroIstanbul = await import("@/assets/hero-istanbul.mp4");
+          setCityVideos([
+            { src: heroIstanbul.default, label: "Istanbul", labelTR: "İstanbul", poster: "/images/destinations/istanbul-city.jpg" },
+          ]);
+          setVideosLoaded(true);
+        } catch {}
       }
     };
     
-    // Delay video loading slightly to prioritize critical content
-    const timer = setTimeout(loadVideos, 300);
+    // Small delay to prioritize critical content
+    const timer = setTimeout(loadVideosFromCDN, 300);
     return () => clearTimeout(timer);
   }, []);
   

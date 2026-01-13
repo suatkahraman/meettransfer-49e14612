@@ -2,6 +2,7 @@ import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 
 export interface CityVideo {
   src: string;
+  srcMp4?: string; // Fallback MP4 for browsers that don't support WebM
   label: string;
   labelTR: string;
   poster: string;
