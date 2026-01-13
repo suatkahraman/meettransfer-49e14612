@@ -1,7 +1,7 @@
-import { Mail, Phone, Clock, Facebook, Instagram, Twitter, Youtube, Star } from "lucide-react";
+import { Mail, Phone, Clock, Facebook, Instagram, Twitter, Youtube, Star, MapPin } from "lucide-react";
 import { PrefetchLink } from "@/components/ui/prefetch-link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, SUPPORT_EMAIL, COMPANY_NAME } from "@/lib/contact";
+import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, SUPPORT_EMAIL, COMPANY_NAME, GLOBAL_OFFICES } from "@/lib/contact";
 
 const TripAdvisorBadge = () => (
   <a
@@ -115,6 +115,13 @@ export const Footer = () => {
           <div className="space-y-4">
             <h4 className="font-semibold text-lg">{t('contact')}</h4>
             <ul className="space-y-3 text-primary-foreground/80 text-sm">
+              {/* Headquarters Address */}
+              {GLOBAL_OFFICES[0] && (
+                <li className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                  <span>{GLOBAL_OFFICES[0].address}</span>
+                </li>
+              )}
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 flex-shrink-0" />
                 <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors">
