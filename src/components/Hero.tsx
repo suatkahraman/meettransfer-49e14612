@@ -1,11 +1,9 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from "react";
+import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo, useMemo } from "react";
 import { format, parse } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Plane, Globe, Check, Wifi, Baby, Briefcase, Zap } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Globe, Check, Zap, Wifi, Baby, Briefcase, Plane } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -13,26 +11,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
-import { VehicleTooltip } from "@/components/VehicleTooltip";
 import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 
-// Lazy load heavy components
-const CityMarquee = lazy(() => import("@/components/website/CityMarquee"));
+// Lazy load heavy components - deferred loading
 const BookingChatAssistant = lazy(() => import("@/components/website/BookingChatAssistant"));
 const CompactRouteMap = lazy(() => import("@/components/ui/compact-route-map").then(m => ({ default: m.CompactRouteMap })));
+const VehicleTooltip = lazy(() => import("@/components/VehicleTooltip").then(m => ({ default: m.VehicleTooltip })));
 
-// Critical images loaded eagerly
+// Critical images loaded eagerly with optimized paths
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 
-// Video imports
-import heroVideo from "@/assets/hero-mercedes-video.mp4";
-import heroIstanbul from "@/assets/hero-istanbul.mp4";
-import heroAntalya from "@/assets/hero-antalya.mp4";
-import heroBodrum from "@/assets/hero-bodrum.mp4";
-
-// Vehicle images
+// Vehicle images - critical for form display
 import vitoImg from "@/assets/vito-1.jpg";
 import vitoVipImg from "@/assets/vito-vip-1.jpg";
 import maybachImg from "@/assets/maybach-1.jpg";
@@ -70,7 +61,7 @@ const hourlyDurationOptions = [
 
 export const Hero = () => {
   const { t, language } = useLanguage();
-  const { promoCode: activePromo } = usePromo();
+  // PromoCode is not used in this optimized version
   const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   
@@ -113,27 +104,50 @@ export const Hero = () => {
   const [convertingHourlyPrices, setConvertingHourlyPrices] = useState(false);
   const [originalHourlyPrices, setOriginalHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
   
-  // Video/Image background state - City videos with labels and posters
-  const cityVideos = [
-    { src: heroIstanbul, label: "Istanbul", labelTR: "İstanbul", poster: "/src/assets/destinations/istanbul-city.jpg" },
-    { src: heroAntalya, label: "Antalya", labelTR: "Antalya", poster: "/src/assets/destinations/antalya-city.jpg" },
-    { src: heroBodrum, label: "Bodrum", labelTR: "Bodrum", poster: "/src/assets/destinations/bodrum-city.jpg" },
-    { src: heroVideo, label: "VIP Transfer", labelTR: "VIP Transfer", poster: vitoVipImg },
-  ];
+  // Video/Image background state - Lazy loaded videos
+  const [videosLoaded, setVideosLoaded] = useState(false);
+  const [cityVideos, setCityVideos] = useState<Array<{ src: string; label: string; labelTR: string; poster: string }>>([]);
   
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   
+  // Lazy load videos after initial render for faster FCP
+  useEffect(() => {
+    const loadVideos = async () => {
+      // Delay video loading to prioritize form rendering
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const [heroVideo, heroIstanbul, heroAntalya, heroBodrum] = await Promise.all([
+        import("@/assets/hero-mercedes-video.mp4"),
+        import("@/assets/hero-istanbul.mp4"),
+        import("@/assets/hero-antalya.mp4"),
+        import("@/assets/hero-bodrum.mp4"),
+      ]);
+      
+      setCityVideos([
+        { src: heroIstanbul.default, label: "Istanbul", labelTR: "İstanbul", poster: "/images/destinations/istanbul-city.jpg" },
+        { src: heroAntalya.default, label: "Antalya", labelTR: "Antalya", poster: "/images/destinations/antalya-city.jpg" },
+        { src: heroBodrum.default, label: "Bodrum", labelTR: "Bodrum", poster: "/images/destinations/bodrum-city.jpg" },
+        { src: heroVideo.default, label: "VIP Transfer", labelTR: "VIP Transfer", poster: vitoVipImg },
+      ]);
+      setVideosLoaded(true);
+    };
+    
+    loadVideos();
+  }, []);
+  
   // Hover state for vehicle tooltips
   const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
   
-  // Rotate between city videos every 6 seconds
+  // Rotate between city videos every 6 seconds - only when videos are loaded
   useEffect(() => {
+    if (!videosLoaded || cityVideos.length === 0) return;
+    
     const interval = setInterval(() => {
       setCurrentVideoIndex((prev) => (prev + 1) % cityVideos.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, [cityVideos.length]);
+  }, [videosLoaded, cityVideos.length]);
 
   // Fetch available cities and their durations
   useEffect(() => {
@@ -469,74 +483,73 @@ export const Hero = () => {
         style={{ y, opacity }}
         className="absolute inset-0 z-0"
       >
-        {/* Video Background - Desktop */}
+        {/* Video Background - Desktop - Only render when videos are loaded */}
         <div className="absolute inset-0 hidden md:block">
-          <AnimatePresence mode="wait">
-            <motion.video
-              key={currentVideoIndex}
-              ref={videoRef}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              poster={cityVideos[currentVideoIndex].poster}
-              className="absolute inset-0 w-full h-full object-cover"
-              initial={{ opacity: 0, scale: 1.1 }}
-              animate={{ opacity: 0.4, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
-            >
-              <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
-            </motion.video>
-          </AnimatePresence>
-          
-          {/* Preload next video */}
-          {cityVideos.length > 1 && (
-            <link 
-              rel="preload" 
-              as="video" 
-              href={cityVideos[(currentVideoIndex + 1) % cityVideos.length].src} 
+          {videosLoaded && cityVideos.length > 0 ? (
+            <>
+              <AnimatePresence mode="wait">
+                <motion.video
+                  key={currentVideoIndex}
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  poster={cityVideos[currentVideoIndex].poster}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 0.35, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                >
+                  <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
+                </motion.video>
+              </AnimatePresence>
+              
+              {/* City Label Badge */}
+              <motion.div
+                key={`label-${currentVideoIndex}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                className="absolute bottom-8 right-8 z-20"
+              >
+                <div className="flex items-center gap-2 bg-background/80 backdrop-blur-md rounded-full px-4 py-2 border border-primary/30 shadow-xl">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">
+                    {language === 'TR' 
+                      ? cityVideos[currentVideoIndex].labelTR 
+                      : cityVideos[currentVideoIndex].label}
+                  </span>
+                </div>
+              </motion.div>
+              
+              {/* Video Navigation Dots */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+                {cityVideos.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentVideoIndex(index)}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-all duration-300",
+                      currentVideoIndex === index 
+                        ? "bg-primary w-6" 
+                        : "bg-foreground/30 hover:bg-foreground/50"
+                    )}
+                    aria-label={`Go to video ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            /* Fallback static image while videos load */
+            <img
+              src={heroMercedes}
+              alt="VIP Transfer"
+              className="absolute inset-0 w-full h-full object-cover opacity-25"
             />
           )}
-          
-          {/* City Label Badge */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`label-${currentVideoIndex}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="absolute bottom-8 right-8 z-20"
-            >
-              <div className="flex items-center gap-2 bg-background/80 backdrop-blur-md rounded-full px-4 py-2 border border-primary/30 shadow-xl">
-                <Globe className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">
-                  {language === 'TR' 
-                    ? cityVideos[currentVideoIndex].labelTR 
-                    : cityVideos[currentVideoIndex].label}
-                </span>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-          
-          {/* Video Navigation Dots */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-            {cityVideos.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentVideoIndex(index)}
-                className={cn(
-                  "w-2 h-2 rounded-full transition-all duration-300",
-                  currentVideoIndex === index 
-                    ? "bg-primary w-6" 
-                    : "bg-foreground/30 hover:bg-foreground/50"
-                )}
-                aria-label={`Go to video ${index + 1}`}
-              />
-            ))}
-          </div>
         </div>
         
         {/* Mobile - Static Image with Gradient */}
@@ -1185,31 +1198,41 @@ export const Hero = () => {
             <div className="relative rounded-2xl overflow-hidden shadow-xl">
               {/* Mobile Video/Image */}
               <div className="relative h-40">
-                <AnimatePresence mode="wait">
-                  <motion.video
-                    key={`mobile-${currentVideoIndex}`}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
+                {videosLoaded && cityVideos.length > 0 ? (
+                  <>
+                    <AnimatePresence mode="wait">
+                      <motion.video
+                        key={`mobile-${currentVideoIndex}`}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="absolute inset-0 w-full h-full object-cover"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
+                      </motion.video>
+                    </AnimatePresence>
+                    
+                    {/* City label */}
+                    <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2 py-1">
+                      <Globe className="h-2.5 w-2.5 text-white" />
+                      <span className="text-[10px] text-white font-medium">
+                        {language === 'TR' ? cityVideos[currentVideoIndex].labelTR : cityVideos[currentVideoIndex].label}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <img
+                    src={heroMercedes}
+                    alt="VIP Transfer"
                     className="absolute inset-0 w-full h-full object-cover"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
-                  </motion.video>
-                </AnimatePresence>
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                
-                {/* City label + Video indicator */}
-                <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2 py-1">
-                  <Globe className="h-2.5 w-2.5 text-white" />
-                  <span className="text-[10px] text-white font-medium">
-                    {language === 'TR' ? cityVideos[currentVideoIndex].labelTR : cityVideos[currentVideoIndex].label}
-                  </span>
-                </div>
                 
                 {/* Mobile Overlay Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-3">
@@ -1222,7 +1245,7 @@ export const Hero = () => {
                       </div>
                       <div className="flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5">
                         <Baby className="h-2.5 w-2.5" />
-                        <span>Baby Seat</span>
+                        <span>{language === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}</span>
                       </div>
                       <div className="flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5">
                         <Briefcase className="h-2.5 w-2.5" />
@@ -1278,31 +1301,41 @@ export const Hero = () => {
             <div className="relative">
               {/* Main Video/Image with Overlay */}
               <div className="relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl">
-                <AnimatePresence mode="wait">
-                  <motion.video
-                    key={`desktop-${currentVideoIndex}`}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
+                {videosLoaded && cityVideos.length > 0 ? (
+                  <>
+                    <AnimatePresence mode="wait">
+                      <motion.video
+                        key={`desktop-${currentVideoIndex}`}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="w-full h-48 md:h-56 lg:h-80 object-cover"
+                        initial={{ opacity: 0, scale: 1.05 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.8 }}
+                      >
+                        <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
+                      </motion.video>
+                    </AnimatePresence>
+                    
+                    {/* City label indicator */}
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
+                      <Globe className="h-3 w-3 text-white" />
+                      <span className="text-xs text-white font-medium">
+                        {language === 'TR' ? cityVideos[currentVideoIndex].labelTR : cityVideos[currentVideoIndex].label}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <img
+                    src={heroMercedes}
+                    alt="VIP Transfer"
                     className="w-full h-48 md:h-56 lg:h-80 object-cover"
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1 }}
-                  >
-                    <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
-                  </motion.video>
-                </AnimatePresence>
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                
-                {/* City label indicator */}
-                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
-                  <Globe className="h-3 w-3 text-white" />
-                  <span className="text-xs text-white font-medium">
-                    {language === 'TR' ? cityVideos[currentVideoIndex].labelTR : cityVideos[currentVideoIndex].label}
-                  </span>
-                </div>
                 
                 {/* Overlay Content - Compact on tablet */}
                 <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-6">
@@ -1316,8 +1349,8 @@ export const Hero = () => {
                       </div>
                       <div className="flex items-center gap-1 text-xs lg:text-sm bg-white/20 backdrop-blur-sm rounded-full px-2 lg:px-3 py-0.5 lg:py-1">
                         <Baby className="h-3 lg:h-3.5 w-3 lg:w-3.5" />
-                        <span className="hidden lg:inline">Baby Seat</span>
-                        <span className="lg:hidden">Seat</span>
+                        <span className="hidden lg:inline">{language === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}</span>
+                        <span className="lg:hidden">{language === 'TR' ? 'Koltuk' : 'Seat'}</span>
                       </div>
                       <div className="hidden lg:flex items-center gap-1.5 text-sm bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
                         <Briefcase className="h-3.5 w-3.5" />
@@ -1381,11 +1414,13 @@ export const Hero = () => {
                 </div>
               </motion.div>
 
-              {/* City Marquee Below Image - Hidden on tablet */}
+              {/* Destination Cities Row */}
               <div className="mt-4 lg:mt-6 hidden lg:block">
-                <Suspense fallback={<Skeleton className="h-12 w-full rounded-lg" />}>
-                  <CityMarquee />
-                </Suspense>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <span className="font-medium">{t("serviceLocations") || "We Serve"}:</span>
+                  <span>Istanbul • Antalya • Bodrum • Dalaman • İzmir • Dubai • Cyprus</span>
+                </div>
               </div>
 
               {/* Feature List - Compact grid on tablet */}
