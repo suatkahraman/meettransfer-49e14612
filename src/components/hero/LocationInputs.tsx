@@ -1,5 +1,6 @@
-import { memo, lazy, Suspense } from "react";
+import { memo, lazy, Suspense, useState } from "react";
 import { MapPin, Navigation, ArrowUpDown } from "lucide-react";
+import { motion } from "framer-motion";
 import { LazyGooglePlacesAutocomplete as GooglePlacesAutocomplete } from "@/components/ui/lazy-google-places-autocomplete";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlaceSelectedHandler } from "./types";
@@ -31,7 +32,20 @@ export const LocationInputs = memo(({
         className="bg-background border-2 border-primary/30 rounded-xl text-sm shadow-sm hover:border-primary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all"
         value={pickup}
         floatingLabel
-        icon={<MapPin className="h-4 w-4 text-primary" />}
+        icon={
+          <motion.div
+            whileHover={{ scale: 1.2, rotate: 10 }}
+            whileTap={{ scale: 0.9 }}
+            animate={{ y: [0, -2, 0] }}
+            transition={{ 
+              y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+              scale: { duration: 0.2 },
+              rotate: { duration: 0.2 }
+            }}
+          >
+            <MapPin className="h-4 w-4 text-primary" />
+          </motion.div>
+        }
       />
       
       <div className="flex justify-center -my-0.5">
@@ -51,7 +65,20 @@ export const LocationInputs = memo(({
         className="bg-background border-2 border-accent/30 rounded-xl text-sm shadow-sm hover:border-accent/50 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 transition-all"
         value={dropoff}
         floatingLabel
-        icon={<Navigation className="h-4 w-4 text-accent" />}
+        icon={
+          <motion.div
+            whileHover={{ scale: 1.2, rotate: -10 }}
+            whileTap={{ scale: 0.9 }}
+            animate={{ y: [0, -2, 0] }}
+            transition={{ 
+              y: { duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 },
+              scale: { duration: 0.2 },
+              rotate: { duration: 0.2 }
+            }}
+          >
+            <Navigation className="h-4 w-4 text-accent" />
+          </motion.div>
+        }
       />
       
       {pickup && dropoff && (
