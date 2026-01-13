@@ -1,39 +1,36 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { toast } from 'sonner';
 import { RefreshCw, Sparkles } from 'lucide-react';
 import { useAppUpdate } from '@/hooks/useAppUpdate';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-// Fallback translations for when LanguageProvider is not available
+// Fallback translations
 const fallbackTexts = {
   newVersionAvailable: 'New Version Available!',
   refreshToUpdate: 'Refresh to update the app',
   update: 'Update',
 };
 
-// Safe hook to get translations with fallback
-function useSafeTranslation() {
-  try {
-    // Dynamic import to avoid crash if context is missing
-    const { useLanguage } = require('@/contexts/LanguageContext');
-    const { t } = useLanguage();
-    return (key: keyof typeof fallbackTexts) => {
-      const translated = t(key);
-      // If translation returns the key itself, use fallback
-      return translated === key ? fallbackTexts[key] : translated;
-    };
-  } catch {
-    // Return fallback function if context fails
-    return (key: keyof typeof fallbackTexts) => fallbackTexts[key];
-  }
-}
-
 export function UpdateNotification() {
   const { hasUpdate, refreshApp } = useAppUpdate();
   const toastShownRef = useRef(false);
   
-  // Get safe translation function
-  const getText = useSafeTranslation();
+  // Safe translation with fallback - always call hook unconditionally
+  const { t } = useLanguage();
+  
+  // Memoize text getter to avoid recreating function
+  const getText = useMemo(() => {
+    return (key: keyof typeof fallbackTexts) => {
+      try {
+        const translated = t(key);
+        // If translation returns the key itself or is undefined, use fallback
+        return (translated && translated !== key) ? translated : fallbackTexts[key];
+      } catch {
+        return fallbackTexts[key];
+      }
+    };
+  }, [t]);
 
   useEffect(() => {
     if (hasUpdate && !toastShownRef.current) {
@@ -53,7 +50,7 @@ export function UpdateNotification() {
           <Button 
             size="sm" 
             onClick={() => {
-              toast.dismiss();
+              toast.dismiss('app-update');
               refreshApp();
             }}
             className="gap-1.5"
