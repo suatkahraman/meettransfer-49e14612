@@ -861,8 +861,8 @@ const placeholderMessages: Record<string, string> = {
 };
 
 const welcomeMessages: Record<string, string> = {
-  EN: "Hi! 👋 I'm your AI booking assistant. Tell me where and when you need a transfer, and I'll help you book it instantly! You can also use the 🎤 microphone to speak.",
-  TR: "Merhaba! 👋 Ben AI rezervasyon asistanınızım. Nereye ve ne zaman transfer istediğinizi söyleyin, hemen sizin için ayarlayayım! 🎤 Mikrofon ile de konuşabilirsiniz.",
+  EN: "Welcome! I'm MT, your AI assistant. I can help you with your VIP airport transfer. I'm listening.",
+  TR: "Hoşgeldiniz! Ben Yapay Zeka Asistanınız MT, size VIP havalimanı transferiniz için yardımcı olabilirim. Sizi dinliyorum.",
   DE: "Hallo! 👋 Ich bin Ihr KI-Buchungsassistent. Sagen Sie mir, wohin und wann Sie einen Transfer benötigen! Sie können auch 🎤 das Mikrofon verwenden.",
   FR: "Bonjour! 👋 Je suis votre assistant de réservation IA. Dites-moi où et quand vous avez besoin d'un transfert! Vous pouvez aussi utiliser le 🎤 microphone.",
   RU: "Привет! 👋 Я ваш AI-ассистент по бронированию. Скажите, куда и когда вам нужен трансфер! Вы также можете использовать 🎤 микрофон.",
