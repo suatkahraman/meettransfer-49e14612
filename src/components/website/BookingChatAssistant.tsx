@@ -88,6 +88,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [useWhisperFallback, setUseWhisperFallback] = useState(false);
   const [audioLevels, setAudioLevels] = useState<number[]>(new Array(16).fill(0));
+  const [audioQuality, setAudioQuality] = useState<'good' | 'low' | 'noisy' | 'silent'>('good');
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -95,6 +96,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const qualityHistoryRef = useRef<number[]>([]);
   const isNativeSupported = isSpeechRecognitionSupported();
   const transcriptRef = useRef<string>('');
 
@@ -138,7 +140,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       audioContextRef.current = audioContext;
       
       const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 64;
+      analyser.fftSize = 256; // Higher for better quality detection
       analyser.smoothingTimeConstant = 0.8;
       analyserRef.current = analyser;
       
@@ -146,11 +148,14 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       source.connect(analyser);
       
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const timeDomainArray = new Uint8Array(analyser.fftSize);
+      qualityHistoryRef.current = [];
       
       const updateLevels = () => {
         if (!analyserRef.current) return;
         
         analyserRef.current.getByteFrequencyData(dataArray);
+        analyserRef.current.getByteTimeDomainData(timeDomainArray);
         
         // Sample 16 frequency bands for visualization
         const levels: number[] = [];
@@ -166,6 +171,39 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         }
         
         setAudioLevels(levels);
+        
+        // Audio quality detection
+        const avgLevel = levels.reduce((a, b) => a + b, 0) / levels.length;
+        
+        // Check for clipping (too loud / distortion)
+        let clippingCount = 0;
+        for (let i = 0; i < timeDomainArray.length; i++) {
+          if (timeDomainArray[i] <= 5 || timeDomainArray[i] >= 250) {
+            clippingCount++;
+          }
+        }
+        const clippingRatio = clippingCount / timeDomainArray.length;
+        
+        // Track quality history (last 30 frames ~0.5 seconds)
+        qualityHistoryRef.current.push(avgLevel);
+        if (qualityHistoryRef.current.length > 30) {
+          qualityHistoryRef.current.shift();
+        }
+        
+        // Calculate average over history for more stable detection
+        const historyAvg = qualityHistoryRef.current.reduce((a, b) => a + b, 0) / qualityHistoryRef.current.length;
+        
+        // Determine audio quality
+        if (historyAvg < 0.02) {
+          setAudioQuality('silent');
+        } else if (clippingRatio > 0.1 || historyAvg > 0.85) {
+          setAudioQuality('noisy');
+        } else if (historyAvg < 0.08) {
+          setAudioQuality('low');
+        } else {
+          setAudioQuality('good');
+        }
+        
         animationFrameRef.current = requestAnimationFrame(updateLevels);
       };
       
@@ -186,7 +224,9 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       audioContextRef.current = null;
     }
     analyserRef.current = null;
+    qualityHistoryRef.current = [];
     setAudioLevels(new Array(16).fill(0));
+    setAudioQuality('good');
   }, []);
 
   // Request microphone permission explicitly for iOS
@@ -608,7 +648,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     setIsRecording(false);
   }, [isRecording, useWhisperFallback, stopWhisperRecording, cleanupAudioAnalyser]);
 
-  return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels };
+  return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels, audioQuality };
 }
 
 // Voice option type
@@ -875,7 +915,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     });
   }, [mobileFloating]);
   
-  const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels } = useVoiceRecorder(
+  const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels, audioQuality } = useVoiceRecorder(
     handleTranscription,
     language
   );
@@ -1638,6 +1678,27 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           </span>
                         )}
                       </div>
+                      
+                      {/* Audio quality warning */}
+                      {isRecording && !isProcessing && audioQuality !== 'good' && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={cn(
+                            "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium",
+                            audioQuality === 'silent' && "bg-muted text-muted-foreground",
+                            audioQuality === 'low' && "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+                            audioQuality === 'noisy' && "bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                          )}
+                        >
+                          <AlertCircle className="h-3 w-3" />
+                          <span>
+                            {audioQuality === 'silent' && (language === "TR" ? "Ses algılanmıyor" : "No audio detected")}
+                            {audioQuality === 'low' && (language === "TR" ? "Ses çok düşük" : "Volume too low")}
+                            {audioQuality === 'noisy' && (language === "TR" ? "Gürültü algılandı" : "Too much noise")}
+                          </span>
+                        </motion.div>
+                      )}
                     </div>
                   )}
                   <div className="flex gap-2">
@@ -1889,6 +1950,27 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               </span>
             )}
           </div>
+          
+          {/* Audio quality warning */}
+          {isRecording && !isProcessing && audioQuality !== 'good' && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={cn(
+                "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium",
+                audioQuality === 'silent' && "bg-muted text-muted-foreground",
+                audioQuality === 'low' && "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+                audioQuality === 'noisy' && "bg-orange-500/10 text-orange-600 dark:text-orange-400"
+              )}
+            >
+              <AlertCircle className="h-3 w-3" />
+              <span>
+                {audioQuality === 'silent' && (language === "TR" ? "Ses algılanmıyor" : "No audio detected")}
+                {audioQuality === 'low' && (language === "TR" ? "Ses çok düşük" : "Volume too low")}
+                {audioQuality === 'noisy' && (language === "TR" ? "Gürültü algılandı" : "Too much noise")}
+              </span>
+            </motion.div>
+          )}
         </div>
       )}
 
