@@ -199,8 +199,8 @@ const AutocompleteInput = memo(({
           ref={inputRef}
           type="text"
           className={cn(
-            "h-12 transition-all duration-200",
-            icon && "pl-10",
+            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] transition-all duration-200 touch-manipulation text-base md:text-sm",
+            icon && "pl-11 md:pl-10",
             isLoading && "pr-10",
             isFloating && "pt-5 pb-1",
             isFocused && "border-primary ring-2 ring-primary/20",
@@ -219,7 +219,7 @@ const AutocompleteInput = memo(({
         <motion.label
           className={cn(
             "absolute pointer-events-none transition-all duration-200 text-muted-foreground",
-            icon ? "left-10" : "left-3"
+            icon ? "left-11 md:left-10" : "left-3"
           )}
           initial={false}
           animate={{

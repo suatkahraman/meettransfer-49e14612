@@ -29,7 +29,7 @@ export const LocationInputs = memo(({
       <GooglePlacesAutocomplete 
         onPlaceSelected={onPickupSelected} 
         placeholder={language === 'TR' ? 'Nereden alınacak?' : 'Where to pick you up?'} 
-        className="bg-background border-2 border-primary/30 rounded-xl text-sm shadow-sm hover:border-primary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+        className="bg-background border-2 border-primary/30 rounded-xl text-base md:text-sm shadow-sm hover:border-primary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all h-14 md:h-12 min-h-[56px] md:min-h-[48px]"
         value={pickup}
         floatingLabel
         icon={
@@ -43,7 +43,7 @@ export const LocationInputs = memo(({
               rotate: { duration: 0.2 }
             }}
           >
-            <MapPin className="h-4 w-4 text-primary" />
+            <MapPin className="h-5 w-5 md:h-4 md:w-4 text-primary" />
           </motion.div>
         }
       />
@@ -53,16 +53,16 @@ export const LocationInputs = memo(({
           type="button"
           onClick={onSwapLocations}
           disabled={!pickup && !dropoff}
-          className="w-7 h-7 rounded-full bg-primary text-primary-foreground shadow hover:shadow-lg hover:scale-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center"
+          className="w-9 h-9 md:w-7 md:h-7 rounded-full bg-primary text-primary-foreground shadow hover:shadow-lg hover:scale-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center touch-manipulation"
         >
-          <ArrowUpDown className="h-3 w-3" />
+          <ArrowUpDown className="h-4 w-4 md:h-3 md:w-3" />
         </button>
       </div>
       
       <GooglePlacesAutocomplete 
         onPlaceSelected={onDropoffSelected} 
         placeholder={language === 'TR' ? 'Nereye gideceksiniz?' : 'Where to drop you off?'} 
-        className="bg-background border-2 border-accent/30 rounded-xl text-sm shadow-sm hover:border-accent/50 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 transition-all"
+        className="bg-background border-2 border-accent/30 rounded-xl text-base md:text-sm shadow-sm hover:border-accent/50 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 transition-all h-14 md:h-12 min-h-[56px] md:min-h-[48px]"
         value={dropoff}
         floatingLabel
         icon={
@@ -76,7 +76,7 @@ export const LocationInputs = memo(({
               rotate: { duration: 0.2 }
             }}
           >
-            <Navigation className="h-4 w-4 text-accent" />
+            <Navigation className="h-5 w-5 md:h-4 md:w-4 text-accent" />
           </motion.div>
         }
       />
