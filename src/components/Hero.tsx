@@ -1,23 +1,22 @@
-import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from "react";
-import { format, parse } from "date-fns";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Car, Timer } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
+
+// Custom hooks for form state management
+import { useRideForm } from "@/hooks/useRideForm";
+import { useHourlyForm } from "@/hooks/useHourlyForm";
+import { useHeroVideos } from "@/hooks/useHeroVideos";
+import { useHeroFormStorage } from "@/hooks/useHeroFormStorage";
+
+// Critical lightweight components - import directly (no barrel export)
+import { HeroHeader } from "@/components/hero/HeroHeader";
+import { HeroTrustBadges } from "@/components/hero/HeroTrustBadges";
 
 // Lazy load AnimatePresence - framer-motion is heavy
 const AnimatePresence = lazy(() => 
   import("framer-motion").then(m => ({ default: m.AnimatePresence }))
 );
-
-// Critical lightweight components - import directly (no barrel export)
-import { HeroHeader } from "@/components/hero/HeroHeader";
-import { HeroTrustBadges } from "@/components/hero/HeroTrustBadges";
-import type { CityVideo, BookingData } from "@/components/hero/types";
 
 // Lazy load heavier form components - they render after initial paint
 const RideFormContent = lazy(() => import("@/components/hero/RideFormContent").then(m => ({ default: m.RideFormContent })));
@@ -28,377 +27,70 @@ const HeroAIAssistant = lazy(() => import("@/components/hero/HeroAIAssistant").t
 const ReturnTripPromoBanner = lazy(() => import("@/components/hero/ReturnTripPromoBanner").then(m => ({ default: m.ReturnTripPromoBanner })));
 const SwipeableBookingCard = lazy(() => import("@/components/hero/SwipeableBookingCard").then(m => ({ default: m.SwipeableBookingCard })));
 
-import vitoVipImg from "@/assets/vito-vip-1.jpg";
-
-// CDN URLs for hero videos (Supabase Storage with edge caching)
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const CDN_VIDEO_BASE = `${SUPABASE_URL}/storage/v1/object/public/hero-videos`;
-
-// Video configuration with CDN URLs and local fallbacks
-const VIDEO_CONFIG = {
-  istanbul: {
-    cdn: `${CDN_VIDEO_BASE}/hero-istanbul.mp4`,
-    cdnWebm: `${CDN_VIDEO_BASE}/hero-istanbul.webm`,
-    poster: "/images/destinations/istanbul-city.jpg",
-    label: "Istanbul",
-    labelTR: "İstanbul"
-  },
-  antalya: {
-    cdn: `${CDN_VIDEO_BASE}/hero-antalya.mp4`,
-    cdnWebm: `${CDN_VIDEO_BASE}/hero-antalya.webm`,
-    poster: "/images/destinations/antalya-city.jpg",
-    label: "Antalya",
-    labelTR: "Antalya"
-  },
-  bodrum: {
-    cdn: `${CDN_VIDEO_BASE}/hero-bodrum.mp4`,
-    cdnWebm: `${CDN_VIDEO_BASE}/hero-bodrum.webm`,
-    poster: "/images/destinations/bodrum-city.jpg",
-    label: "Bodrum",
-    labelTR: "Bodrum"
-  },
-  vipTransfer: {
-    cdn: `${CDN_VIDEO_BASE}/hero-mercedes-video.mp4`,
-    cdnWebm: `${CDN_VIDEO_BASE}/hero-mercedes-video.webm`,
-    poster: vitoVipImg,
-    label: "VIP Transfer",
-    labelTR: "VIP Transfer"
-  }
-};
-
-const generateTimeOptions = () => {
-  const times: string[] = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      times.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
-    }
-  }
-  return times;
-};
-
-const timeOptions = generateTimeOptions();
-
-const hourlyDurationOptions = [
-  { value: "4", labelKey: "halfDay", defaultLabel: "4 Hours (Half Day)" },
-  { value: "6", labelKey: "sixHours", defaultLabel: "6 Hours" },
-  { value: "8", labelKey: "fullDay", defaultLabel: "8 Hours (Full Day)" },
-  { value: "custom", labelKey: "customHourly", defaultLabel: "9+ Hours (Custom)" },
-];
+// Minimal skeleton for form content
+const FormSkeleton = () => (
+  <div className="space-y-3 animate-pulse">
+    <div className="h-14 bg-muted rounded-xl" />
+    <div className="h-14 bg-muted rounded-xl" />
+    <div className="grid grid-cols-3 gap-2">
+      <div className="h-14 bg-muted rounded-xl" />
+      <div className="h-14 bg-muted rounded-xl" />
+      <div className="h-14 bg-muted rounded-xl" />
+    </div>
+    <div className="h-16 bg-primary/20 rounded-xl" />
+  </div>
+);
 
 export const Hero = () => {
   const { t, language } = useLanguage();
-  const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
-  
-  const STORAGE_KEY = 'hero_form_data';
-  
-  const loadSavedFormData = useCallback(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : null;
-    } catch { return null; }
-  }, []);
+  const { loadSavedFormData, saveFormData } = useHeroFormStorage();
   
   // Tab state
-  const [activeTab, setActiveTab] = useState<"ride" | "hourly">(() => loadSavedFormData()?.activeTab || "ride");
+  const [activeTab, setActiveTab] = useState<"ride" | "hourly">(() => 
+    loadSavedFormData()?.activeTab || "ride"
+  );
   
-  // Ride form state
-  const [pickup, setPickup] = useState(() => loadSavedFormData()?.pickup || "");
-  const [dropoff, setDropoff] = useState(() => loadSavedFormData()?.dropoff || "");
-  const [date, setDate] = useState<Date | undefined>(() => {
-    const saved = loadSavedFormData();
-    if (saved?.date) {
-      const parsedDate = new Date(saved.date);
-      return parsedDate > new Date() ? parsedDate : undefined;
-    }
-    return undefined;
-  });
-  const [time, setTime] = useState(() => loadSavedFormData()?.time || "");
-  const [passengers, setPassengers] = useState(() => loadSavedFormData()?.passengers || "2");
-  const [vehicleType, setVehicleType] = useState(() => loadSavedFormData()?.vehicleType || "mercedes-vito");
-  const [submitting, setSubmitting] = useState(false);
-  const [allVehiclePrices, setAllVehiclePrices] = useState<any[]>([]);
-  const [transferPriceCurrency, setTransferPriceCurrency] = useState("EUR");
-  const [loadingTransferPrice, setLoadingTransferPrice] = useState(false);
-  const [appliedPromoCode, setAppliedPromoCode] = useState<string>("");
-
-  // Hourly form state
-  const [hourlyCity, setHourlyCity] = useState(() => loadSavedFormData()?.hourlyCity || "");
-  const [hourlyDate, setHourlyDate] = useState<Date | undefined>(() => {
-    const saved = loadSavedFormData();
-    if (saved?.hourlyDate) {
-      const parsedDate = new Date(saved.hourlyDate);
-      return parsedDate > new Date() ? parsedDate : undefined;
-    }
-    return undefined;
-  });
-  const [hourlyTime, setHourlyTime] = useState(() => loadSavedFormData()?.hourlyTime || "");
-  const [hourlyDuration, setHourlyDuration] = useState(() => loadSavedFormData()?.hourlyDuration || "");
-  const [hourlyPassengers, setHourlyPassengers] = useState(() => loadSavedFormData()?.hourlyPassengers || "2");
-  const [hourlyVehicleType, setHourlyVehicleType] = useState(() => loadSavedFormData()?.hourlyVehicleType || "mercedes-vito");
-  const [availableCities, setAvailableCities] = useState<string[]>([]);
-  const [cityDurations, setCityDurations] = useState<Record<string, string[]>>({});
-  const [loadingCities, setLoadingCities] = useState(false);
-  const [allHourlyPrices, setAllHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
-  const [loadingPrice, setLoadingPrice] = useState(false);
-  const [customHours, setCustomHours] = useState(() => loadSavedFormData()?.customHours || "9");
+  // Use custom hooks for form management
+  const rideForm = useRideForm(t);
+  const hourlyForm = useHourlyForm(t, rideForm.appliedPromoCode);
+  const videoState = useHeroVideos();
   
-  // Video state
-  const [videosLoaded, setVideosLoaded] = useState(false);
-  const [cityVideos, setCityVideos] = useState<CityVideo[]>([]);
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  
-  // Save form data
+  // Save form data to localStorage when it changes
   useEffect(() => {
-    const formData = { activeTab, pickup, dropoff, date: date?.toISOString(), time, passengers, vehicleType, hourlyCity, hourlyDate: hourlyDate?.toISOString(), hourlyTime, hourlyDuration, hourlyPassengers, hourlyVehicleType, customHours };
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(formData)); } catch {}
-  }, [activeTab, pickup, dropoff, date, time, passengers, vehicleType, hourlyCity, hourlyDate, hourlyTime, hourlyDuration, hourlyPassengers, hourlyVehicleType, customHours]);
-  
-  // Load videos from CDN - DEFERRED to not block initial render
-  useEffect(() => {
-    // On mobile, videos are not shown - skip entirely
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    if (isMobile) return;
-    
-    const loadVideosFromCDN = async () => {
-      // Use a single video initially, load others in background
-      try {
-        // Load Istanbul first (most common destination) - direct URL, no HEAD check
-        const istanbulVideo = {
-          src: VIDEO_CONFIG.istanbul.cdn,
-          srcMp4: VIDEO_CONFIG.istanbul.cdn,
-          ...VIDEO_CONFIG.istanbul
-        };
-        
-        setCityVideos([istanbulVideo]);
-        setVideosLoaded(true);
-        
-        // Load remaining videos much later with very low priority
-        setTimeout(() => {
-          requestIdleCallback(() => {
-            const additionalVideos = [
-              { src: VIDEO_CONFIG.antalya.cdn, ...VIDEO_CONFIG.antalya },
-              { src: VIDEO_CONFIG.bodrum.cdn, ...VIDEO_CONFIG.bodrum },
-              { src: VIDEO_CONFIG.vipTransfer.cdn, ...VIDEO_CONFIG.vipTransfer },
-            ];
-            
-            setCityVideos(prev => [...prev, ...additionalVideos]);
-          }, { timeout: 5000 });
-        }, 3000); // Wait 3 seconds before loading additional videos
-      } catch (error) {
-        console.error('[Hero] Video load error:', error);
-        setVideosLoaded(true); // Allow fallback image to show
-      }
+    const formData = {
+      activeTab,
+      ...rideForm.getFormData(),
+      ...hourlyForm.getFormData()
     };
-    
-    // Delay video loading to prioritize form rendering
-    const timer = setTimeout(loadVideosFromCDN, 500);
-    return () => clearTimeout(timer);
-  }, []);
+    saveFormData(formData);
+  }, [
+    activeTab,
+    rideForm.getFormData,
+    hourlyForm.getFormData,
+    saveFormData
+  ]);
   
-  // Video rotation
+  // Fetch cities when hourly tab becomes active
   useEffect(() => {
-    if (!videosLoaded || cityVideos.length === 0) return;
-    const interval = setInterval(() => setCurrentVideoIndex((prev) => (prev + 1) % cityVideos.length), 6000);
-    return () => clearInterval(interval);
-  }, [videosLoaded, cityVideos.length]);
-
-  // Fetch cities - DEFERRED to not block initial render
-  useEffect(() => {
-    // Only fetch when hourly tab is active
-    if (activeTab !== 'hourly') return;
-    
-    const fetchCities = async () => {
-      if (availableCities.length > 0) return; // Already loaded
-      setLoadingCities(true);
-      try {
-        const { data } = await supabase.from("hourly_rental_prices").select("city, duration_type").eq("is_active", true).order("city");
-        if (data) {
-          setAvailableCities([...new Set(data.map(item => item.city))]);
-          const durationsMap: Record<string, string[]> = {};
-          data.forEach(item => {
-            if (!durationsMap[item.city]) durationsMap[item.city] = [];
-            const d = item.duration_type.replace("_hours", "").replace("h", "");
-            const mapped = d === "4" ? "4" : d === "6" ? "6" : d === "8" ? "8" : (d === "custom" || parseInt(d) >= 9) ? "custom" : null;
-            if (mapped && !durationsMap[item.city].includes(mapped)) durationsMap[item.city].push(mapped);
-          });
-          Object.keys(durationsMap).forEach(city => durationsMap[city].sort((a, b) => ["4", "6", "8", "custom"].indexOf(a) - ["4", "6", "8", "custom"].indexOf(b)));
-          setCityDurations(durationsMap);
-        }
-      } catch {} finally { setLoadingCities(false); }
-    };
-    
-    // Small delay to let the tab animation complete first
-    const timer = setTimeout(fetchCities, 100);
-    return () => clearTimeout(timer);
-  }, [activeTab, availableCities.length]);
-
-  // Fetch transfer prices
-  useEffect(() => {
-    if (!pickup || !dropoff) { setAllVehiclePrices([]); return; }
-    setLoadingTransferPrice(true);
-    const timer = setTimeout(async () => {
-      try {
-        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", { body: { pickup, dropoff, customerCurrency: "EUR" } });
-        if (data?.vehicles?.length > 0) { setAllVehiclePrices(data.vehicles); setTransferPriceCurrency(data.currency || "EUR"); }
-        else setAllVehiclePrices([]);
-      } catch { setAllVehiclePrices([]); }
-      finally { setLoadingTransferPrice(false); }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [pickup, dropoff]);
-
-  // Memoize available durations
-  const availableDurations = useMemo(() => 
-    hourlyCity ? (cityDurations[hourlyCity] || []) : [],
-    [hourlyCity, cityDurations]
-  );
-  
-  useEffect(() => {
-    if (hourlyCity && availableDurations.length > 0 && !availableDurations.includes(hourlyDuration)) setHourlyDuration(availableDurations[0]);
-    else if (!hourlyCity) setHourlyDuration("");
-    setAllHourlyPrices([]);
-  }, [hourlyCity, availableDurations]);
-
-  useEffect(() => {
-    const currentVehicle = VEHICLE_TYPES.find(v => v.value === vehicleType);
-    if (currentVehicle && currentVehicle.passengers < parseInt(passengers)) {
-      const suitable = VEHICLE_TYPES.find(v => v.passengers >= parseInt(passengers));
-      if (suitable) setVehicleType(suitable.value);
+    if (activeTab === 'hourly') {
+      const timer = setTimeout(() => {
+        hourlyForm.fetchCitiesIfNeeded();
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [passengers]);
-
-  useEffect(() => {
-    const currentVehicle = VEHICLE_TYPES.find(v => v.value === hourlyVehicleType);
-    if (currentVehicle && currentVehicle.passengers < parseInt(hourlyPassengers)) {
-      const suitable = VEHICLE_TYPES.find(v => v.passengers >= parseInt(hourlyPassengers) && v.value !== 'minibus');
-      if (suitable) setHourlyVehicleType(suitable.value);
-    }
-  }, [hourlyPassengers]);
-
-  // Fetch hourly prices
-  useEffect(() => {
-    if (!hourlyCity || !hourlyDuration) { setAllHourlyPrices([]); return; }
-    setLoadingPrice(true);
-    const fetchPrices = async () => {
-      try {
-        const vehicleTypeMapping: Record<string, string> = { 'vito': 'mercedes-vito', 'vito_vip': 'vip-mercedes', 'maybach': 'maybach-minibus', 'sprinter': 'sprinter-minibus', 'mercedes-vito': 'mercedes-vito', 'vip-mercedes': 'vip-mercedes', 'maybach-minibus': 'maybach-minibus', 'sprinter-minibus': 'sprinter-minibus' };
-        if (hourlyDuration === "custom") {
-          const { data } = await supabase.from("hourly_rental_prices").select("vehicle_type, hourly_rate, price_currency").eq("city", hourlyCity).eq("duration_type", "custom").eq("is_active", true);
-          const prices = data?.filter(i => i.hourly_rate).map(i => ({ vehicleType: vehicleTypeMapping[i.vehicle_type] || i.vehicle_type, price: i.hourly_rate! * (parseInt(customHours) || 9), currency: i.price_currency })) || [];
-          setAllHourlyPrices(prices);
-        } else {
-          const { data: shortData } = await supabase.from("hourly_rental_prices").select("vehicle_type, price, price_currency").eq("city", hourlyCity).eq("duration_type", `${hourlyDuration}h`).eq("is_active", true);
-          const { data: longData } = await supabase.from("hourly_rental_prices").select("vehicle_type, price, price_currency").eq("city", hourlyCity).eq("duration_type", `${hourlyDuration}_hours`).eq("is_active", true);
-          const combined = [...(shortData || []), ...(longData || [])];
-          const map = new Map<string, { price: number; currency: string }>();
-          combined.forEach(i => { if (!map.has(i.vehicle_type)) map.set(i.vehicle_type, { price: i.price, currency: i.price_currency }); });
-          const prices: Array<{ vehicleType: string; price: number; currency: string }> = [];
-          map.forEach((v, k) => prices.push({ vehicleType: vehicleTypeMapping[k] || k, price: v.price, currency: v.currency }));
-          setAllHourlyPrices(prices);
-        }
-      } catch { setAllHourlyPrices([]); }
-      finally { setLoadingPrice(false); }
-    };
-    fetchPrices();
-  }, [hourlyCity, hourlyDuration, customHours]);
-
-  const handleRideContinue = useCallback(() => {
-    const missing: string[] = [];
-    if (!pickup) missing.push(t("pickupPoint") || "Pickup");
-    if (!dropoff) missing.push(t("dropoffLocation") || "Drop-off");
-    if (!date) missing.push(t("pickupDate") || "Date");
-    if (!time) missing.push(t("pickupTime") || "Time");
-    if (missing.length > 0) { toast.error(`${t("pleaseFilAllFields") || "Please fill in"}: ${missing.join(", ")}`); return; }
-    setSubmitting(true);
-    const params = new URLSearchParams();
-    params.set("pickup", pickup); params.set("dropoff", dropoff);
-    params.set("date", format(date!, "yyyy-MM-dd")); params.set("time", time);
-    params.set("passengers", passengers); params.set("vehicleType", vehicleType);
-    if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
-    navigate(`/book?${params.toString()}`);
-  }, [pickup, dropoff, date, time, passengers, vehicleType, appliedPromoCode, navigate, t]);
-
-  const handleHourlyContinue = useCallback(() => {
-    const missing: string[] = [];
-    if (!hourlyCity) missing.push(t("city") || "City");
-    if (!hourlyDate) missing.push(t("pickupDate") || "Date");
-    if (!hourlyTime) missing.push(t("pickupTime") || "Time");
-    if (missing.length > 0) { toast.error(`${t("pleaseFilAllFields") || "Please fill in"}: ${missing.join(", ")}`); return; }
-    setSubmitting(true);
-    const params = new URLSearchParams();
-    params.set("city", hourlyCity); params.set("date", format(hourlyDate!, "yyyy-MM-dd"));
-    params.set("time", hourlyTime); params.set("duration", hourlyDuration === "custom" ? `${customHours}h` : `${hourlyDuration}h`);
-    params.set("passengers", hourlyPassengers); params.set("vehicleType", hourlyVehicleType); params.set("type", "hourly");
-    if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
-    navigate(`/book?${params.toString()}`);
-  }, [hourlyCity, hourlyDate, hourlyTime, hourlyDuration, customHours, hourlyPassengers, hourlyVehicleType, appliedPromoCode, navigate, t]);
-
-  // Memoize callbacks to prevent child re-renders
-  const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => 
-    setPickup(details?.displayText || value), 
-    []
-  );
-  
-  const handleDropoffSelected = useCallback((value: string, details?: PlaceDetails) => 
-    setDropoff(details?.displayText || value), 
-    []
-  );
-  
-  const handleSwapLocations = useCallback(() => { 
-    setPickup(prev => {
-      setDropoff(prevDropoff => prev);
-      return dropoff;
-    });
-  }, [dropoff]);
-  
-  // Memoize setters wrapped as stable callbacks
-  const handleSetDate = useCallback((d: Date | undefined) => setDate(d), []);
-  const handleSetTime = useCallback((t: string) => setTime(t), []);
-  const handleSetPassengers = useCallback((p: string) => setPassengers(p), []);
-  const handleSetVehicleType = useCallback((v: string) => setVehicleType(v), []);
-  
-  const handleSetHourlyCity = useCallback((c: string) => setHourlyCity(c), []);
-  const handleSetHourlyDuration = useCallback((d: string) => setHourlyDuration(d), []);
-  const handleSetCustomHours = useCallback((h: string) => setCustomHours(h), []);
-  const handleSetHourlyDate = useCallback((d: Date | undefined) => setHourlyDate(d), []);
-  const handleSetHourlyTime = useCallback((t: string) => setHourlyTime(t), []);
-  const handleSetHourlyPassengers = useCallback((p: string) => setHourlyPassengers(p), []);
-  const handleSetHourlyVehicleType = useCallback((v: string) => setHourlyVehicleType(v), []);
-
-  const handleApplyBooking = useCallback((data: BookingData) => {
-    if (data.pickup) setPickup(data.pickup);
-    if (data.dropoff) setDropoff(data.dropoff);
-    if (data.date) { try { const d = parse(data.date, "yyyy-MM-dd", new Date()); if (!isNaN(d.getTime())) setDate(d); } catch {} }
-    if (data.time) setTime(data.time);
-    if (data.passengers) setPassengers(data.passengers.toString());
-    if (data.vehicleType) setVehicleType({ 'mercedes-vito': 'mercedes-vito', 'vip-mercedes': 'vip-mercedes', 'maybach-minibus': 'maybach-minibus', 'minibus': 'minibus' }[data.vehicleType] || 'mercedes-vito');
-    toast.success(t("bookingDetailsApplied") || "Booking details applied!");
-    document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [t]);
-
-  const handleApplyPromoCode = useCallback((code: string) => {
-    setAppliedPromoCode(code);
-  }, []);
-   
-  // Minimal skeleton for form content
-  const FormSkeleton = () => (
-    <div className="space-y-3 animate-pulse">
-      <div className="h-14 bg-muted rounded-xl" />
-      <div className="h-14 bg-muted rounded-xl" />
-      <div className="grid grid-cols-3 gap-2">
-        <div className="h-14 bg-muted rounded-xl" />
-        <div className="h-14 bg-muted rounded-xl" />
-        <div className="h-14 bg-muted rounded-xl" />
-      </div>
-      <div className="h-16 bg-primary/20 rounded-xl" />
-    </div>
-  );
+  }, [activeTab, hourlyForm.fetchCitiesIfNeeded]);
 
   return (
     <section ref={heroRef} id="booking-form" className="relative overflow-hidden bg-background">
       <Suspense fallback={<div className="absolute inset-0 bg-gradient-to-br from-background to-muted" />}>
-        <HeroBackground videosLoaded={videosLoaded} cityVideos={cityVideos} currentVideoIndex={currentVideoIndex} setCurrentVideoIndex={setCurrentVideoIndex} language={language} />
+        <HeroBackground 
+          videosLoaded={videoState.videosLoaded} 
+          cityVideos={videoState.cityVideos} 
+          currentVideoIndex={videoState.currentVideoIndex} 
+          setCurrentVideoIndex={videoState.setCurrentVideoIndex} 
+          language={language} 
+        />
       </Suspense>
 
       {/* Mobile: pb-20 for bottom nav, desktop: normal padding. pt handled by WebsiteLayout */}
@@ -408,10 +100,10 @@ export const Hero = () => {
           <div className="order-1 md:col-span-3 lg:col-span-1">
             <HeroHeader language={language} />
             <Suspense fallback={null}>
-              <HeroAIAssistant language={language} onApplyBooking={handleApplyBooking} />
+              <HeroAIAssistant language={language} onApplyBooking={rideForm.handleApplyBooking} />
             </Suspense>
             <Suspense fallback={null}>
-              <ReturnTripPromoBanner language={language} onApplyPromoCode={handleApplyPromoCode} />
+              <ReturnTripPromoBanner language={language} onApplyPromoCode={rideForm.handleApplyPromoCode} />
             </Suspense>
 
             {/* Booking Form Card - Enhanced visibility */}
@@ -428,11 +120,23 @@ export const Hero = () => {
                     className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300"
                     style={{ left: activeTab === "ride" ? "0%" : "50%", width: "50%" }}
                   />
-                  <button onClick={() => setActiveTab("ride")} className={cn("flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative", activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                  <button 
+                    onClick={() => setActiveTab("ride")} 
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative",
+                      activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
                     <Car className="h-4 w-4 md:h-4 md:w-4" />
                     <span>{t("pointToPoint") || "Transfer"}</span>
                   </button>
-                  <button onClick={() => setActiveTab("hourly")} className={cn("flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm", activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                  <button 
+                    onClick={() => setActiveTab("hourly")} 
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm",
+                      activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
                     <Timer className="h-4 w-4 md:h-4 md:w-4" />
                     <span>{t("perHour") || "Hourly"}</span>
                   </button>
@@ -444,51 +148,51 @@ export const Hero = () => {
                     <AnimatePresence mode="wait">
                       {activeTab === "ride" ? (
                         <RideFormContent
-                          pickup={pickup}
-                          dropoff={dropoff}
-                          date={date}
-                          time={time}
-                          passengers={passengers}
-                          vehicleType={vehicleType}
-                          allVehiclePrices={allVehiclePrices}
-                          loadingTransferPrice={loadingTransferPrice}
-                          transferPriceCurrency={transferPriceCurrency}
-                          submitting={submitting}
+                          pickup={rideForm.pickup}
+                          dropoff={rideForm.dropoff}
+                          date={rideForm.date}
+                          time={rideForm.time}
+                          passengers={rideForm.passengers}
+                          vehicleType={rideForm.vehicleType}
+                          allVehiclePrices={rideForm.allVehiclePrices}
+                          loadingTransferPrice={rideForm.loadingTransferPrice}
+                          transferPriceCurrency={rideForm.transferPriceCurrency}
+                          submitting={rideForm.submitting}
                           language={language}
                           t={t}
-                          onPickupSelected={handlePickupSelected}
-                          onDropoffSelected={handleDropoffSelected}
-                          onSwapLocations={handleSwapLocations}
-                          setDate={handleSetDate}
-                          setTime={handleSetTime}
-                          setPassengers={handleSetPassengers}
-                          setVehicleType={handleSetVehicleType}
-                          handleRideContinue={handleRideContinue}
+                          onPickupSelected={rideForm.handlePickupSelected}
+                          onDropoffSelected={rideForm.handleDropoffSelected}
+                          onSwapLocations={rideForm.handleSwapLocations}
+                          setDate={rideForm.handleSetDate}
+                          setTime={rideForm.handleSetTime}
+                          setPassengers={rideForm.handleSetPassengers}
+                          setVehicleType={rideForm.handleSetVehicleType}
+                          handleRideContinue={rideForm.handleRideContinue}
                         />
                       ) : (
                         <HourlyFormContent
-                          hourlyCity={hourlyCity}
-                          hourlyDuration={hourlyDuration}
-                          customHours={customHours}
-                          hourlyDate={hourlyDate}
-                          hourlyTime={hourlyTime}
-                          hourlyPassengers={hourlyPassengers}
-                          hourlyVehicleType={hourlyVehicleType}
-                          allHourlyPrices={allHourlyPrices}
-                          loadingPrice={loadingPrice}
-                          submitting={submitting}
-                          availableCities={availableCities}
-                          availableDurations={availableDurations}
+                          hourlyCity={hourlyForm.hourlyCity}
+                          hourlyDuration={hourlyForm.hourlyDuration}
+                          customHours={hourlyForm.customHours}
+                          hourlyDate={hourlyForm.hourlyDate}
+                          hourlyTime={hourlyForm.hourlyTime}
+                          hourlyPassengers={hourlyForm.hourlyPassengers}
+                          hourlyVehicleType={hourlyForm.hourlyVehicleType}
+                          allHourlyPrices={hourlyForm.allHourlyPrices}
+                          loadingPrice={hourlyForm.loadingPrice}
+                          submitting={hourlyForm.submitting}
+                          availableCities={hourlyForm.availableCities}
+                          availableDurations={hourlyForm.availableDurations}
                           language={language}
                           t={t}
-                          setHourlyCity={handleSetHourlyCity}
-                          setHourlyDuration={handleSetHourlyDuration}
-                          setCustomHours={handleSetCustomHours}
-                          setHourlyDate={handleSetHourlyDate}
-                          setHourlyTime={handleSetHourlyTime}
-                          setHourlyPassengers={handleSetHourlyPassengers}
-                          setHourlyVehicleType={handleSetHourlyVehicleType}
-                          handleHourlyContinue={handleHourlyContinue}
+                          setHourlyCity={hourlyForm.handleSetHourlyCity}
+                          setHourlyDuration={hourlyForm.handleSetHourlyDuration}
+                          setCustomHours={hourlyForm.handleSetCustomHours}
+                          setHourlyDate={hourlyForm.handleSetHourlyDate}
+                          setHourlyTime={hourlyForm.handleSetHourlyTime}
+                          setHourlyPassengers={hourlyForm.handleSetHourlyPassengers}
+                          setHourlyVehicleType={hourlyForm.handleSetHourlyVehicleType}
+                          handleHourlyContinue={hourlyForm.handleHourlyContinue}
                         />
                       )}
                     </AnimatePresence>
@@ -502,7 +206,13 @@ export const Hero = () => {
 
           {/* Visual Sections */}
           <Suspense fallback={<div className="hidden md:block" />}>
-            <HeroVisualSection videosLoaded={videosLoaded} cityVideos={cityVideos} currentVideoIndex={currentVideoIndex} language={language} t={t} />
+            <HeroVisualSection 
+              videosLoaded={videoState.videosLoaded} 
+              cityVideos={videoState.cityVideos} 
+              currentVideoIndex={videoState.currentVideoIndex} 
+              language={language} 
+              t={t} 
+            />
           </Suspense>
         </div>
       </div>
