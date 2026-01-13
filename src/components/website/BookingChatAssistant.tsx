@@ -946,15 +946,26 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: "100%" }}
               transition={{ type: "spring", stiffness: 400, damping: 40 }}
-              className="fixed inset-x-0 bottom-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col"
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.5 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 100 || info.velocity.y > 500) {
+                  setIsOpen(false);
+                }
+              }}
+              className="fixed inset-x-0 bottom-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col touch-pan-x"
               style={{ 
                 maxHeight: 'calc(100dvh - 60px)',
                 height: 'auto'
               }}
             >
-              {/* Drag Handle */}
-              <div className="flex justify-center pt-2 pb-1">
-                <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+              {/* Drag Handle - Swipe indicator */}
+              <div 
+                className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
+                style={{ touchAction: 'none' }}
+              >
+                <div className="w-12 h-1.5 bg-muted-foreground/40 rounded-full" />
               </div>
               
               {/* Mobile Header - Compact */}
