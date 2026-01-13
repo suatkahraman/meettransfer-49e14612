@@ -954,10 +954,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   setIsOpen(false);
                 }
               }}
-              className="fixed inset-x-0 bottom-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col touch-pan-x"
+              className="fixed inset-x-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col touch-pan-x"
               style={{ 
-                maxHeight: 'calc(100dvh - 60px)',
-                height: 'auto'
+                bottom: 0,
+                top: '15%',
+                maxHeight: '85dvh'
               }}
             >
               {/* Drag Handle - Swipe indicator */}
@@ -1135,6 +1136,12 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    onFocus={() => {
+                      // Scroll input into view when keyboard opens
+                      setTimeout(() => {
+                        inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
                     placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
                     disabled={isLoading || isRecording}
                     className="h-11 rounded-xl text-sm flex-1 touch-manipulation"
