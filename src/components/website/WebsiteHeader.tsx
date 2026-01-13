@@ -87,15 +87,15 @@ const WebsiteHeader = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border pt-[env(safe-area-inset-top)]">
-      <div className="max-w-7xl mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 h-12 sm:h-16 flex items-center justify-between">
         {/* Left - Logo */}
-        <Link to={getLocalizedPath("/")} className="flex items-center gap-2 flex-shrink-0">
+        <Link to={getLocalizedPath("/")} className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           <img 
             src={meetTransferLogo} 
             alt="Meet Transfer Logo" 
-            className="h-9 w-9 rounded-full object-cover"
+            className="h-7 w-7 sm:h-9 sm:w-9 rounded-full object-cover"
           />
-          <span className="font-serif text-lg font-bold hidden sm:block">Meet Transfer</span>
+          <span className="font-serif text-base sm:text-lg font-bold hidden sm:block">Meet Transfer</span>
         </Link>
 
         {/* Center - Desktop Navigation */}
@@ -194,10 +194,10 @@ const WebsiteHeader = () => {
           </Link>
         </nav>
 
-        {/* Center - Book Button (Mobile) */}
+        {/* Center - Book Button (Mobile) - More prominent */}
         {user ? (
-          <Link to={getLocalizedPath("/book")} className="md:hidden">
-            <Button variant="accent" size="sm" className="font-semibold text-xs px-3">
+          <Link to={getLocalizedPath("/book")} className="md:hidden flex-1 mx-2 max-w-[140px]">
+            <Button variant="accent" size="sm" className="w-full font-bold text-xs px-4 py-2 shadow-md animate-pulse-subtle">
               {t("bookNow")}
             </Button>
           </Link>
@@ -205,7 +205,7 @@ const WebsiteHeader = () => {
           <Button 
             variant="accent" 
             size="sm" 
-            className="md:hidden font-semibold text-xs px-3"
+            className="md:hidden flex-1 mx-2 max-w-[140px] font-bold text-xs px-4 py-2 shadow-md"
             onClick={scrollToBookingForm}
           >
             {t("bookNow")}
@@ -280,24 +280,24 @@ const WebsiteHeader = () => {
             </div>
           )}
 
-          {/* Mobile Menu - Dropdown */}
+          {/* Mobile Menu - Dropdown - Compact */}
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="relative w-10 h-10">
+              <Button variant="ghost" size="icon" className="relative w-8 h-8 p-0">
                 <span className="sr-only">Toggle menu</span>
                 <span 
-                  className={`absolute h-0.5 w-5 bg-foreground transition-all duration-300 ease-in-out ${
-                    menuOpen ? "rotate-45" : "-translate-y-1.5"
+                  className={`absolute h-0.5 w-4 bg-foreground transition-all duration-300 ease-in-out ${
+                    menuOpen ? "rotate-45" : "-translate-y-1"
                   }`}
                 />
                 <span 
-                  className={`absolute h-0.5 w-5 bg-foreground transition-all duration-300 ease-in-out ${
+                  className={`absolute h-0.5 w-4 bg-foreground transition-all duration-300 ease-in-out ${
                     menuOpen ? "opacity-0" : "opacity-100"
                   }`}
                 />
                 <span 
-                  className={`absolute h-0.5 w-5 bg-foreground transition-all duration-300 ease-in-out ${
-                    menuOpen ? "-rotate-45" : "translate-y-1.5"
+                  className={`absolute h-0.5 w-4 bg-foreground transition-all duration-300 ease-in-out ${
+                    menuOpen ? "-rotate-45" : "translate-y-1"
                   }`}
                 />
               </Button>
