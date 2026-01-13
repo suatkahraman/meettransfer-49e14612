@@ -2590,36 +2590,31 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       </AnimatePresence>
 
       {/* Centered Microphone Button - Hero Style */}
-      {isSpeechSupported && !isRecording && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && (
+      {isSpeechSupported && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center justify-center py-8"
         >
           <motion.button
-            onClick={startRecording}
-            className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center"
+            onClick={isRecording ? stopRecording : startRecording}
+            className={cn(
+              "relative w-24 h-24 rounded-full flex items-center justify-center transition-colors",
+              isRecording 
+                ? "bg-gradient-to-br from-destructive to-destructive/80 text-destructive-foreground shadow-lg shadow-destructive/30"
+                : "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30"
+            )}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            animate={{
-              boxShadow: [
-                "0 0 0 0 rgba(var(--primary), 0.4)",
-                "0 0 0 20px rgba(var(--primary), 0)",
-              ],
-            }}
-            transition={{
-              boxShadow: {
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeOut",
-              },
-            }}
           >
-            {/* Pulse rings */}
+            {/* Outer pulse rings - always animate */}
             <motion.div
-              className="absolute inset-0 rounded-full border-2 border-primary/30"
+              className={cn(
+                "absolute inset-0 rounded-full border-2",
+                isRecording ? "border-destructive/40" : "border-primary/30"
+              )}
               animate={{
-                scale: [1, 1.5, 1.5],
+                scale: [1, 1.6, 1.6],
                 opacity: [0.6, 0, 0],
               }}
               transition={{
@@ -2629,9 +2624,12 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               }}
             />
             <motion.div
-              className="absolute inset-0 rounded-full border-2 border-primary/30"
+              className={cn(
+                "absolute inset-0 rounded-full border-2",
+                isRecording ? "border-destructive/40" : "border-primary/30"
+              )}
               animate={{
-                scale: [1, 1.3, 1.3],
+                scale: [1, 1.4, 1.4],
                 opacity: [0.6, 0, 0],
               }}
               transition={{
@@ -2641,24 +2639,159 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 delay: 0.5,
               }}
             />
-            <Mic className="h-8 w-8" />
+            <motion.div
+              className={cn(
+                "absolute inset-0 rounded-full border-2",
+                isRecording ? "border-destructive/40" : "border-primary/30"
+              )}
+              animate={{
+                scale: [1, 1.2, 1.2],
+                opacity: [0.6, 0, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: 1,
+              }}
+            />
+            
+            {/* Sound wave bars when recording */}
+            {isRecording && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex items-center gap-1">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1 bg-destructive-foreground/80 rounded-full"
+                      animate={{
+                        height: [8, 20 + Math.random() * 16, 8],
+                      }}
+                      transition={{
+                        duration: 0.5 + Math.random() * 0.3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: i * 0.1,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Mic icon - show when not recording */}
+            {!isRecording && (
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <Mic className="h-10 w-10" />
+              </motion.div>
+            )}
           </motion.button>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-4 text-sm text-muted-foreground text-center"
-          >
-            {language === "TR" ? "Konuşmak için tıklayın veya bekleyin" : "Click to speak or wait"}
-          </motion.p>
+          
+          {/* Status text with wave animation */}
+          <div className="mt-5 flex flex-col items-center gap-2">
+            {isRecording ? (
+              <>
+                {/* Listening text with animated dots */}
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-1.5"
+                >
+                  <motion.div
+                    className="w-2 h-2 rounded-full bg-destructive"
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  />
+                  <span className="text-base font-medium text-destructive">
+                    {language === "TR" ? "Dinliyorum" : "Listening"}
+                  </span>
+                  <motion.span className="flex gap-0.5">
+                    {[0, 1, 2].map((i) => (
+                      <motion.span
+                        key={i}
+                        className="text-destructive font-medium"
+                        animate={{ opacity: [0.3, 1, 0.3] }}
+                        transition={{
+                          duration: 1.2,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                        }}
+                      >
+                        .
+                      </motion.span>
+                    ))}
+                  </motion.span>
+                </motion.div>
+                
+                {/* Sound wave visualization */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center justify-center gap-[3px] h-6"
+                >
+                  {audioLevels.map((level, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1 bg-destructive/70 rounded-full"
+                      animate={{
+                        height: Math.max(4, 4 + level * 20),
+                      }}
+                      transition={{
+                        duration: 0.05,
+                        ease: "linear",
+                      }}
+                    />
+                  ))}
+                </motion.div>
+                
+                {/* Interim transcript */}
+                {interimTranscript && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.8 }}
+                    className="text-sm text-muted-foreground italic max-w-[250px] text-center"
+                  >
+                    "{interimTranscript}"
+                  </motion.p>
+                )}
+                
+                {/* Tap to stop hint */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.5 }}
+                  className="text-xs text-muted-foreground"
+                >
+                  {language === "TR" ? "Durdurmak için butona tıklayın" : "Tap to stop"}
+                </motion.p>
+              </>
+            ) : (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-sm text-muted-foreground text-center"
+              >
+                {language === "TR" ? "Konuşmak için tıklayın" : "Tap to speak"}
+              </motion.p>
+            )}
+          </div>
         </motion.div>
       )}
 
       {/* Input Area */}
       <div className={cn(
         "flex gap-2",
-        // Hide input area when showing hero mic button
-        isSpeechSupported && !isRecording && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && "hidden"
+        // Hide input area when showing hero mic button (but not during processing)
+        isSpeechSupported && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && "hidden"
       )}>
         {/* Voice recording button */}
         {isSpeechSupported && (
