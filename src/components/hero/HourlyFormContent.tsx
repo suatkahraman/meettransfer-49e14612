@@ -269,20 +269,22 @@ export const HourlyFormContent = memo(({
       </div>
 
 
-      {/* Submit Button - larger touch target on mobile */}
-      <div>
+      {/* Submit Button - eye-catching on mobile with pulse animation */}
+      <div className="relative">
+        {/* Glow effect behind button on mobile */}
+        <div className="absolute inset-0 bg-primary/30 blur-xl rounded-2xl animate-pulse md:hidden" />
         <Button 
           onClick={validateAndContinue} 
           disabled={submitting} 
-          className="w-full h-14 md:h-12 min-h-[56px] md:min-h-[48px] font-semibold bg-primary hover:bg-primary/90 active:bg-primary/80 shadow-lg rounded-xl text-base md:text-base group touch-manipulation"
+          className="relative w-full h-16 md:h-12 min-h-[64px] md:min-h-[48px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-xl shadow-primary/30 md:shadow-lg rounded-xl text-lg md:text-base group touch-manipulation border-0 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/40"
         >
           {submitting ? (
-            <Loader2 className="h-5 w-5 md:h-5 md:w-5 animate-spin" />
+            <Loader2 className="h-6 w-6 md:h-5 md:w-5 animate-spin" />
           ) : (
             <>
-              <Zap className="mr-1.5 h-4 w-4 md:h-4 md:w-4" />
-              {language === 'TR' ? 'Fiyat Al' : 'Get Quote'}
-              <ArrowRight className="ml-2 h-5 w-5 md:h-5 md:w-5 group-hover:translate-x-1 transition-transform" />
+              <Zap className="mr-2 h-5 w-5 md:h-4 md:w-4 animate-pulse" />
+              <span className="tracking-wide">{language === 'TR' ? 'Fiyat Al' : 'Get Quote'}</span>
+              <ArrowRight className="ml-2 h-6 w-6 md:h-5 md:w-5 group-hover:translate-x-1.5 transition-transform duration-300" />
             </>
           )}
         </Button>
