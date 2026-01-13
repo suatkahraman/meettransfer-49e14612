@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { PromoProvider } from "./contexts/PromoContext";
+import { AIChatProvider } from "./contexts/AIChatContext";
 import { AgencyLanguageProvider } from "./contexts/AgencyLanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute, AgencyRoute } from "./components/ProtectedRoute";
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
@@ -14,6 +15,7 @@ import FloatingWhatsApp from "./components/website/FloatingWhatsApp";
 import HashScroll from "@/components/HashScroll";
 import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
 import { UpdateNotification } from "./components/UpdateNotification";
+import { PWAUpdatePrompt } from "./components/website/PWAUpdatePrompt";
 
 // Critical pages - lazy loaded with prefetch for better UX
 const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
@@ -192,7 +194,9 @@ const App = () => (
         <OAuthCallbackHandler>
           <LanguageProvider>
             <PromoProvider>
+            <AIChatProvider>
             <UpdateNotification />
+            <PWAUpdatePrompt />
             <AuthProvider>
               <Routes>
               {/* Localized Website Pages - Support all languages */}
@@ -332,6 +336,7 @@ const App = () => (
               </Routes>
               <FloatingWhatsApp />
             </AuthProvider>
+            </AIChatProvider>
             </PromoProvider>
           </LanguageProvider>
         </OAuthCallbackHandler>
