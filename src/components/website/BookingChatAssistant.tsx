@@ -926,56 +926,73 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           )}
         </AnimatePresence>
 
-        {/* Mobile Floating Panel */}
+        {/* Mobile Floating Panel - Full screen overlay for better mobile UX */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed bottom-4 left-4 right-4 z-[9999] bg-card rounded-2xl shadow-2xl border border-border overflow-hidden"
-              style={{ maxHeight: 'calc(100vh - 120px)' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+        
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", stiffness: 400, damping: 40 }}
+              className="fixed inset-x-0 bottom-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col"
+              style={{ 
+                maxHeight: 'calc(100dvh - 60px)',
+                height: 'auto'
+              }}
             >
-              {/* Mobile Header */}
-              <div className="flex items-center justify-between p-3 border-b border-border bg-muted/30">
+              {/* Drag Handle */}
+              <div className="flex justify-center pt-2 pb-1">
+                <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+              </div>
+              
+              {/* Mobile Header - Compact */}
+              <div className="flex items-center justify-between px-4 py-2 border-b border-border/50">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-primary" />
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Bot className="h-3.5 w-3.5 text-primary" />
                   </div>
-                  <div>
-                    <span className="font-medium text-sm">
-                      {language === "TR" ? "AI Asistan" : "AI Assistant"}
-                    </span>
-                    <span className="ml-2 px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[9px] font-bold rounded">
-                      NEW
-                    </span>
-                  </div>
+                  <span className="font-medium text-sm">
+                    {language === "TR" ? "AI Asistan" : "AI Assistant"}
+                  </span>
+                  <span className="px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[8px] font-bold rounded">
+                    NEW
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={clearConversation}
-                    className="h-8 w-8 rounded-full"
-                    title={language === "TR" ? "Sohbeti temizle" : "Clear chat"}
+                    className="h-7 w-7 rounded-full"
                   >
-                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                    <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsOpen(false)}
-                    className="h-8 w-8 rounded-full"
+                    className="h-7 w-7 rounded-full"
                   >
-                    <X className="h-4 w-4" />
+                    <ChevronDown className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
-              {/* Mobile Messages */}
-              <ScrollArea className="h-[300px]">
-                <div className="p-3 space-y-3">
+              {/* Mobile Messages - Flexible height */}
+              <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: 'calc(100dvh - 200px)' }}>
+                <div className="p-3 space-y-2.5">
                   {messages.map((msg) => (
                     <div
                       key={msg.id}
@@ -985,13 +1002,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       )}
                     >
                       {msg.role === "assistant" && (
-                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                          <Bot className="h-3 w-3 text-primary" />
+                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <Bot className="h-2.5 w-2.5 text-primary" />
                         </div>
                       )}
                       <div
                         className={cn(
-                          "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
+                          "max-w-[80%] rounded-2xl px-3 py-2 text-[13px] leading-relaxed",
                           msg.role === "user"
                             ? "bg-primary text-primary-foreground"
                             : "bg-muted"
@@ -1005,23 +1022,25 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           msg.content
                         )}
                         
-                        {/* Booking Card for Mobile */}
+                        {/* Booking Card for Mobile - Compact */}
                         {msg.bookingData && msg.bookingData.estimatedPrice && (
                           <div className="mt-2 p-2 bg-background rounded-lg border border-border">
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {language === "TR" ? "Tahmini Fiyat" : "Estimated Price"}
-                            </div>
-                            <div className="font-bold text-primary">
-                              {msg.bookingData.currency === "TRY" ? "₺" : "€"}
-                              {msg.bookingData.estimatedPrice}
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] text-muted-foreground">
+                                {language === "TR" ? "Fiyat" : "Price"}
+                              </span>
+                              <span className="font-bold text-primary text-sm">
+                                {msg.bookingData.currency === "TRY" ? "₺" : "€"}
+                                {msg.bookingData.estimatedPrice}
+                              </span>
                             </div>
                             {onApplyBooking && (
                               <Button
                                 size="sm"
                                 onClick={() => handleApplyBooking(msg.bookingData!)}
-                                className="w-full mt-2 h-7 text-xs"
+                                className="w-full mt-1.5 h-7 text-xs"
                               >
-                                {language === "TR" ? "Forma Uygula" : "Apply to Form"}
+                                {language === "TR" ? "Forma Uygula" : "Apply"}
                                 <ArrowRight className="h-3 w-3 ml-1" />
                               </Button>
                             )}
@@ -1029,31 +1048,31 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         )}
                       </div>
                       {msg.role === "user" && (
-                        <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
-                          <User className="h-3 w-3 text-primary-foreground" />
+                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
+                          <User className="h-2.5 w-2.5 text-primary-foreground" />
                         </div>
                       )}
                     </div>
                   ))}
                   {isLoading && (
                     <div className="flex gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Bot className="h-3 w-3 text-primary" />
+                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <Bot className="h-2.5 w-2.5 text-primary" />
                       </div>
                       <div className="bg-muted rounded-2xl px-3 py-2">
                         <div className="flex gap-1">
                           <motion.span 
-                            className="w-2 h-2 bg-primary/60 rounded-full"
+                            className="w-1.5 h-1.5 bg-primary/60 rounded-full"
                             animate={{ y: [-2, 2, -2] }}
                             transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
                           />
                           <motion.span 
-                            className="w-2 h-2 bg-primary/60 rounded-full"
+                            className="w-1.5 h-1.5 bg-primary/60 rounded-full"
                             animate={{ y: [-2, 2, -2] }}
                             transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
                           />
                           <motion.span 
-                            className="w-2 h-2 bg-primary/60 rounded-full"
+                            className="w-1.5 h-1.5 bg-primary/60 rounded-full"
                             animate={{ y: [-2, 2, -2] }}
                             transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
                           />
@@ -1065,8 +1084,22 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 </div>
               </ScrollArea>
 
-              {/* Mobile Input */}
-              <div className="p-3 border-t border-border bg-muted/20" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+              {/* Mobile Input - Sticky at bottom */}
+              <div 
+                className="shrink-0 p-3 border-t border-border bg-card"
+                style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+              >
+                {/* Recording indicator */}
+                {isRecording && (
+                  <div className="flex items-center justify-center gap-2 text-xs text-destructive font-medium mb-2">
+                    <motion.div
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ repeat: Infinity, duration: 0.8 }}
+                      className="w-2 h-2 bg-destructive rounded-full"
+                    />
+                    {language === "TR" ? "Dinleniyor..." : "Listening..."}
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <Button
                     onClick={isRecording ? stopRecording : startRecording}
@@ -1074,7 +1107,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     size="icon"
                     variant="outline"
                     className={cn(
-                      "h-10 w-10 rounded-xl shrink-0",
+                      "h-11 w-11 rounded-xl shrink-0 touch-manipulation",
                       isRecording && "bg-destructive/10 border-destructive text-destructive"
                     )}
                   >
@@ -1091,16 +1124,19 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={language === "TR" ? "Mesajınızı yazın..." : "Type your message..."}
+                    placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
                     disabled={isLoading || isRecording}
-                    className="h-10 rounded-xl text-sm"
+                    className="h-11 rounded-xl text-sm flex-1 touch-manipulation"
                     style={{ fontSize: '16px' }}
                   />
                   <Button
                     onClick={sendMessage}
                     disabled={isLoading || !input.trim()}
                     size="icon"
-                    className="h-10 w-10 rounded-xl shrink-0"
+                    className={cn(
+                      "h-11 w-11 rounded-xl shrink-0 touch-manipulation",
+                      input.trim() ? "bg-primary" : "bg-muted"
+                    )}
                   >
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
