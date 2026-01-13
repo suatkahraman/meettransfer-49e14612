@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voiceId } = await req.json();
+    const { text, voiceId, stability, similarityBoost, style, speed } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
 
     if (!ELEVENLABS_API_KEY) {
@@ -34,8 +34,18 @@ serve(async (req) => {
     // Laura - FGY2WhTYpPnrIDTdsKH5 (supports multilingual including Turkish)
     const selectedVoiceId = voiceId || 'FGY2WhTYpPnrIDTdsKH5';
 
+    // Voice settings with customizable parameters
+    const voiceSettings = {
+      stability: typeof stability === 'number' ? stability : 0.5,
+      similarity_boost: typeof similarityBoost === 'number' ? similarityBoost : 0.75,
+      style: typeof style === 'number' ? style : 0.3,
+      use_speaker_boost: true,
+      speed: typeof speed === 'number' ? speed : 1.0,
+    };
+
     console.log('Generating speech for text:', text.substring(0, 100), '...');
     console.log('Using voice ID:', selectedVoiceId);
+    console.log('Voice settings:', voiceSettings);
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}?output_format=mp3_44100_128`,
@@ -48,13 +58,7 @@ serve(async (req) => {
         body: JSON.stringify({
           text,
           model_id: 'eleven_multilingual_v2', // Best for Turkish
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.3,
-            use_speaker_boost: true,
-            speed: 1.0,
-          },
+          voice_settings: voiceSettings,
         }),
       }
     );
