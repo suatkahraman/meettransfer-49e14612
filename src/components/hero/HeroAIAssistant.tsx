@@ -1,10 +1,16 @@
-import { memo, lazy, Suspense, useCallback, useState, useEffect } from "react";
+import { memo, lazy, Suspense, useCallback, useState, useEffect, ComponentType } from "react";
 import { Sparkles, MessageCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { BookingData } from "./types";
 
-const BookingChatAssistant = lazy(() => import("@/components/website/BookingChatAssistant"));
+interface BookingChatAssistantProps {
+  onApplyBooking?: (data: BookingData) => void;
+  defaultOpen?: boolean;
+  mobileFloating?: boolean;
+}
+
+const BookingChatAssistant = lazy(() => import("@/components/website/BookingChatAssistant")) as unknown as ComponentType<BookingChatAssistantProps>;
 
 interface HeroAIAssistantProps {
   language: string;
@@ -45,50 +51,60 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
   const currentPrompt = prompts[currentIndex];
 
   return (
-    <div id="ai-assistant" className="mb-4 relative">
-      {/* Content Container - Softer colors */}
-      <div className="relative bg-muted/50 rounded-xl p-3 border border-border backdrop-blur-sm">
-        {/* Badge */}
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-4 w-4 text-muted-foreground" />
-          
-          <span className="text-sm font-medium text-foreground">
-            {language === 'TR' 
-              ? "🌍 AI ile Transfer & Saatlik Kiralama" 
-              : "🌍 Book Transfer & Hourly Rental With AI"}
-          </span>
-          
-          {/* NEW Badge - Softer */}
-          <span className="px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[9px] font-bold rounded-md">
-            NEW
-          </span>
-        </div>
-
-        {/* Single Rotating Quick Prompt Button */}
-        <div className="mb-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => handleQuickPrompt(currentPrompt.message)}
-            className="h-8 text-xs px-3 py-1.5 rounded-full border-border bg-background hover:bg-primary/10 hover:border-primary/40 transition-all duration-300"
-          >
-            <MessageCircle className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-            <span className="transition-opacity duration-300">
-              {language === 'TR' ? 'AI ile Sor: ' : 'Ask AI: '}
-              {currentPrompt.label}
+    <>
+      {/* Desktop: Full AI Assistant Section */}
+      <div id="ai-assistant" className="mb-4 relative hidden md:block">
+        {/* Content Container - Softer colors */}
+        <div className="relative bg-muted/50 rounded-xl p-3 border border-border backdrop-blur-sm">
+          {/* Badge */}
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-4 w-4 text-muted-foreground" />
+            
+            <span className="text-sm font-medium text-foreground">
+              {language === 'TR' 
+                ? "🌍 AI ile Transfer & Saatlik Kiralama" 
+                : "🌍 Book Transfer & Hourly Rental With AI"}
             </span>
-          </Button>
-        </div>
-        
-        {/* Chat Assistant */}
-        <div className="relative">
-          <Suspense fallback={<Skeleton className="h-[120px] w-full rounded-lg" />}>
-            <BookingChatAssistant onApplyBooking={onApplyBooking} />
-          </Suspense>
+            
+            {/* NEW Badge - Softer */}
+            <span className="px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[9px] font-bold rounded-md">
+              NEW
+            </span>
+          </div>
+
+          {/* Single Rotating Quick Prompt Button */}
+          <div className="mb-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => handleQuickPrompt(currentPrompt.message)}
+              className="h-8 text-xs px-3 py-1.5 rounded-full border-border bg-background hover:bg-primary/10 hover:border-primary/40 transition-all duration-300"
+            >
+              <MessageCircle className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+              <span className="transition-opacity duration-300">
+                {language === 'TR' ? 'AI ile Sor: ' : 'Ask AI: '}
+                {currentPrompt.label}
+              </span>
+            </Button>
+          </div>
+          
+          {/* Chat Assistant */}
+          <div className="relative">
+            <Suspense fallback={<Skeleton className="h-[120px] w-full rounded-lg" />}>
+              <BookingChatAssistant onApplyBooking={onApplyBooking} />
+            </Suspense>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Mobile: Floating Widget handled by BookingChatAssistant itself */}
+      <div className="md:hidden">
+        <Suspense fallback={null}>
+          <BookingChatAssistant onApplyBooking={onApplyBooking} mobileFloating />
+        </Suspense>
+      </div>
+    </>
   );
 });
 
