@@ -115,31 +115,48 @@ export const HeroVisualSection = memo(({
           {/* Main Video/Image */}
           <div className="relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
             {showVideo && currentVideo ? (
-              <div className="relative w-full h-48 md:h-56 lg:h-80 overflow-hidden">
-                {/* Render all videos but only show current - smooth crossfade with subtle scale */}
+              <div className="relative w-full h-48 md:h-56 lg:h-80 overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
+                {/* Fallback image shown while videos load */}
+                <img
+                  src={heroMercedes}
+                  alt="VIP Transfer"
+                  className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 z-0"
+                  loading="eager"
+                />
+                
+                {/* Render all videos with proper crossfade */}
                 {cityVideos.map((video, index) => (
-                  <motion.video
+                  <motion.div
                     key={video.src}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105"
+                    className="absolute inset-0 w-full h-full"
                     initial={false}
                     animate={{ 
                       opacity: index === currentVideoIndex ? 1 : 0,
-                      scale: index === currentVideoIndex ? 1 : 1.05,
                       zIndex: index === currentVideoIndex ? 10 : 1
                     }}
                     transition={{ 
-                      opacity: { duration: 1.2, ease: "easeInOut" },
-                      scale: { duration: 1.5, ease: "easeOut" }
+                      opacity: { duration: 1.2, ease: "easeInOut" }
                     }}
                   >
-                    <source src={video.src} type="video/mp4" />
-                  </motion.video>
+                    <video
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="auto"
+                      poster={video.poster}
+                      className="w-full h-full object-cover brightness-110 contrast-105"
+                      onLoadedData={(e) => {
+                        const videoEl = e.target as HTMLVideoElement;
+                        videoEl.play().catch(() => {});
+                      }}
+                    >
+                      <source src={video.src} type="video/mp4" />
+                    </video>
+                  </motion.div>
                 ))}
                 
+                {/* City label badge */}
                 <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-md rounded-full px-3 py-1.5 z-20 border border-white/20">
                   <Globe className="h-3.5 w-3.5 text-white" />
                   <span className="text-xs text-white font-semibold">
