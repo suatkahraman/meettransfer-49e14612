@@ -74,7 +74,7 @@ export const VehicleSelector = memo(({
 
   return (
     <>
-      <div ref={containerRef} className="grid grid-cols-4 gap-2 sm:gap-3">
+      <div ref={containerRef} className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3">
         {VEHICLE_TYPES.map((vehicle, index) => {
           const vehiclePrice = prices.find(v => v.vehicleType === vehicle.value);
           const isSelected = selectedVehicle === vehicle.value;
@@ -94,7 +94,7 @@ export const VehicleSelector = memo(({
                 onClick={() => handleVehicleClick(vehicle, isDisabled)}
                 disabled={isDisabled}
                 className={cn(
-                  "w-full rounded-xl border-2 p-1.5 sm:p-2 text-center overflow-hidden",
+                  "w-full rounded-xl border-2 p-2.5 sm:p-2 text-center overflow-hidden",
                   "transition-all duration-200 ease-out select-none",
                   "active:scale-[0.97] active:opacity-90",
                   "shadow-sm hover:shadow-md",
