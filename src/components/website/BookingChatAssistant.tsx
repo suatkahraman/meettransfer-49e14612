@@ -195,12 +195,13 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         // Calculate average over history for more stable detection
         const historyAvg = qualityHistoryRef.current.reduce((a, b) => a + b, 0) / qualityHistoryRef.current.length;
         
-        // Determine audio quality
-        if (historyAvg < 0.02) {
+        // Determine audio quality - use less strict thresholds
+        // Only show silent warning after more data is collected (at least 60 frames = ~1 second)
+        if (historyAvg < 0.01 && qualityHistoryRef.current.length >= 60) {
           setAudioQuality('silent');
-        } else if (clippingRatio > 0.1 || historyAvg > 0.85) {
+        } else if (clippingRatio > 0.15 || historyAvg > 0.9) {
           setAudioQuality('noisy');
-        } else if (historyAvg < 0.08) {
+        } else if (historyAvg < 0.05 && qualityHistoryRef.current.length >= 60) {
           setAudioQuality('low');
         } else {
           setAudioQuality('good');
@@ -1719,85 +1720,188 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   className="shrink-0 p-2 border-t border-border bg-card mt-auto"
                   style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}
                 >
-                  {/* Recording indicator with waveform */}
-                  {(isRecording || isProcessing) && (
-                    <div className="flex flex-col items-center gap-1.5 mb-2">
-                      {/* Audio waveform visualizer - real-time audio levels */}
-                      {isRecording && !isProcessing && (
-                        <div className="flex items-center justify-center gap-[2px] h-6">
-                          {audioLevels.slice(0, 10).map((level, i) => (
+                  {/* Large Recording Overlay with animated indicator */}
+                  <AnimatePresence>
+                    {(isRecording || isProcessing) && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex flex-col items-center gap-4 mb-3"
+                      >
+                        {/* Large animated recording circle */}
+                        <div className="relative flex items-center justify-center">
+                          {/* Outer pulsing rings */}
+                          {isRecording && !isProcessing && (
+                            <>
+                              <motion.div
+                                className="absolute w-24 h-24 rounded-full border-2 border-destructive/30"
+                                animate={{
+                                  scale: [1, 1.5, 2],
+                                  opacity: [0.6, 0.3, 0],
+                                }}
+                                transition={{
+                                  duration: 1.5,
+                                  repeat: Infinity,
+                                  ease: "easeOut",
+                                }}
+                              />
+                              <motion.div
+                                className="absolute w-24 h-24 rounded-full border-2 border-destructive/20"
+                                animate={{
+                                  scale: [1, 1.5, 2],
+                                  opacity: [0.4, 0.2, 0],
+                                }}
+                                transition={{
+                                  duration: 1.5,
+                                  repeat: Infinity,
+                                  ease: "easeOut",
+                                  delay: 0.5,
+                                }}
+                              />
+                            </>
+                          )}
+                          
+                          {/* Main recording circle with glow */}
+                          <motion.div
+                            className={cn(
+                              "relative w-20 h-20 rounded-full flex items-center justify-center",
+                              isProcessing 
+                                ? "bg-primary/20" 
+                                : "bg-destructive/20"
+                            )}
+                            animate={isRecording && !isProcessing ? {
+                              scale: [1, 1.08, 1],
+                            } : {}}
+                            transition={{
+                              duration: 1,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            }}
+                          >
+                            {/* Inner glow */}
                             <motion.div
-                              key={i}
-                              className="w-0.5 bg-destructive rounded-full"
-                              animate={{
-                                height: Math.max(3, 3 + level * 20),
-                              }}
+                              className={cn(
+                                "absolute w-16 h-16 rounded-full",
+                                isProcessing 
+                                  ? "bg-primary/30" 
+                                  : "bg-destructive/30"
+                              )}
+                              animate={isRecording && !isProcessing ? {
+                                scale: [0.9, 1.1, 0.9],
+                              } : {}}
                               transition={{
-                                duration: 0.05,
-                                ease: "linear",
+                                duration: 0.8,
+                                repeat: Infinity,
+                                ease: "easeInOut",
                               }}
                             />
-                          ))}
+                            
+                            {/* Icon */}
+                            {isProcessing ? (
+                              <motion.div
+                                className="relative z-10"
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              >
+                                <Loader2 className="h-8 w-8 text-primary" />
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                className="relative z-10"
+                                animate={{
+                                  scale: [1, 1.15, 1],
+                                }}
+                                transition={{
+                                  duration: 0.6,
+                                  repeat: Infinity,
+                                  ease: "easeInOut",
+                                }}
+                              >
+                                <Mic className="h-8 w-8 text-destructive" />
+                              </motion.div>
+                            )}
+                          </motion.div>
                         </div>
-                      )}
-                      
-                      {/* Processing spinner */}
-                      {isProcessing && (
-                        <div className="flex items-center justify-center h-5">
-                          <motion.div
-                            className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full"
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          />
-                        </div>
-                      )}
-                      
-                      {/* Status text with badges */}
-                      <div className="flex items-center gap-2 text-xs font-medium">
-                        <motion.div
-                          animate={{ scale: [1, 1.3, 1] }}
-                          transition={{ repeat: Infinity, duration: 0.8 }}
-                          className={cn(
-                            "w-2 h-2 rounded-full",
-                            isProcessing ? "bg-primary" : "bg-destructive"
-                          )}
-                        />
-                        <span className={isProcessing ? "text-primary" : "text-destructive"}>
-                          {isProcessing 
-                            ? (language === "TR" ? "İşleniyor..." : "Processing...")
-                            : (language === "TR" ? "Dinleniyor..." : "Listening...")
-                          }
-                        </span>
-                        {useWhisperFallback && (
-                          <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] font-semibold rounded-full flex items-center gap-1">
-                            <Sparkles className="h-2.5 w-2.5" />
-                            AI
-                          </span>
+                        
+                        {/* Audio waveform visualizer - real-time audio levels */}
+                        {isRecording && !isProcessing && (
+                          <div className="flex items-center justify-center gap-1 h-8">
+                            {audioLevels.slice(0, 12).map((level, i) => (
+                              <motion.div
+                                key={i}
+                                className="w-1 bg-destructive rounded-full"
+                                animate={{
+                                  height: Math.max(4, 4 + level * 28),
+                                }}
+                                transition={{
+                                  duration: 0.05,
+                                  ease: "linear",
+                                }}
+                              />
+                            ))}
+                          </div>
                         )}
-                      </div>
-                      
-                      {/* Audio quality warning */}
-                      {isRecording && !isProcessing && audioQuality !== 'good' && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className={cn(
-                            "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium",
-                            audioQuality === 'silent' && "bg-muted text-muted-foreground",
-                            audioQuality === 'low' && "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
-                            audioQuality === 'noisy' && "bg-orange-500/10 text-orange-600 dark:text-orange-400"
-                          )}
-                        >
-                          <AlertCircle className="h-3 w-3" />
-                          <span>
-                            {audioQuality === 'silent' && (language === "TR" ? "Ses algılanmıyor" : "No audio detected")}
-                            {audioQuality === 'low' && (language === "TR" ? "Ses çok düşük" : "Volume too low")}
-                            {audioQuality === 'noisy' && (language === "TR" ? "Gürültü algılandı" : "Too much noise")}
+                        
+                        {/* Status text with badges */}
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <motion.div
+                            animate={{ scale: [1, 1.3, 1] }}
+                            transition={{ repeat: Infinity, duration: 0.8 }}
+                            className={cn(
+                              "w-2.5 h-2.5 rounded-full",
+                              isProcessing ? "bg-primary" : "bg-destructive"
+                            )}
+                          />
+                          <span className={isProcessing ? "text-primary" : "text-destructive"}>
+                            {isProcessing 
+                              ? (language === "TR" ? "İşleniyor..." : "Processing...")
+                              : (language === "TR" ? "Dinleniyor..." : "Listening...")
+                            }
                           </span>
-                        </motion.div>
-                      )}
-                    </div>
-                  )}
+                          {useWhisperFallback && (
+                            <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs font-semibold rounded-full flex items-center gap-1">
+                              <Sparkles className="h-3 w-3" />
+                              AI
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Audio quality warning - only show after enough time */}
+                        {isRecording && !isProcessing && audioQuality !== 'good' && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={cn(
+                              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium",
+                              audioQuality === 'silent' && "bg-muted text-muted-foreground",
+                              audioQuality === 'low' && "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+                              audioQuality === 'noisy' && "bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                            )}
+                          >
+                            <AlertCircle className="h-3.5 w-3.5" />
+                            <span>
+                              {audioQuality === 'silent' && (language === "TR" ? "Ses algılanmıyor - Mikrofona yakın konuşun" : "No audio - Speak closer to mic")}
+                              {audioQuality === 'low' && (language === "TR" ? "Ses çok düşük" : "Volume too low")}
+                              {audioQuality === 'noisy' && (language === "TR" ? "Gürültü algılandı" : "Too much noise")}
+                            </span>
+                          </motion.div>
+                        )}
+                        
+                        {/* Tap to stop hint */}
+                        {isRecording && !isProcessing && (
+                          <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.6 }}
+                            className="text-xs text-muted-foreground"
+                          >
+                            {language === "TR" ? "Durdurmak için butona dokunun" : "Tap button to stop"}
+                          </motion.p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   <div className="flex gap-2">
                     <Button
                       onClick={isRecording ? stopRecording : startRecording}
@@ -2104,85 +2208,187 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         </div>
       </ScrollArea>
 
-      {/* Desktop Recording indicator with waveform */}
-      {(isRecording || isProcessing) && (
-        <div className="flex flex-col items-center gap-2 mb-2 py-2 bg-muted/50 rounded-lg">
-          {/* Audio waveform visualizer - real-time audio levels */}
-          {isRecording && !isProcessing && (
-            <div className="flex items-center justify-center gap-[3px] h-6">
-              {audioLevels.map((level, i) => (
+      {/* Desktop Recording indicator with large animated visual */}
+      <AnimatePresence>
+        {(isRecording || isProcessing) && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="flex flex-col items-center gap-3 mb-3 py-4 bg-muted/50 rounded-xl"
+          >
+            {/* Large animated recording circle */}
+            <div className="relative flex items-center justify-center">
+              {/* Outer pulsing rings */}
+              {isRecording && !isProcessing && (
+                <>
+                  <motion.div
+                    className="absolute w-20 h-20 rounded-full border-2 border-destructive/30"
+                    animate={{
+                      scale: [1, 1.4, 1.8],
+                      opacity: [0.5, 0.25, 0],
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeOut",
+                    }}
+                  />
+                  <motion.div
+                    className="absolute w-20 h-20 rounded-full border-2 border-destructive/20"
+                    animate={{
+                      scale: [1, 1.4, 1.8],
+                      opacity: [0.3, 0.15, 0],
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeOut",
+                      delay: 0.5,
+                    }}
+                  />
+                </>
+              )}
+              
+              {/* Main recording circle */}
+              <motion.div
+                className={cn(
+                  "relative w-16 h-16 rounded-full flex items-center justify-center",
+                  isProcessing 
+                    ? "bg-primary/20" 
+                    : "bg-destructive/20"
+                )}
+                animate={isRecording && !isProcessing ? {
+                  scale: [1, 1.08, 1],
+                } : {}}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                {/* Inner glow */}
                 <motion.div
-                  key={i}
-                  className="w-1 bg-destructive rounded-full"
-                  animate={{
-                    height: Math.max(3, 3 + level * 21),
-                  }}
+                  className={cn(
+                    "absolute w-12 h-12 rounded-full",
+                    isProcessing 
+                      ? "bg-primary/30" 
+                      : "bg-destructive/30"
+                  )}
+                  animate={isRecording && !isProcessing ? {
+                    scale: [0.9, 1.1, 0.9],
+                  } : {}}
                   transition={{
-                    duration: 0.05,
-                    ease: "linear",
+                    duration: 0.8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
                   }}
                 />
-              ))}
+                
+                {/* Icon */}
+                {isProcessing ? (
+                  <motion.div
+                    className="relative z-10"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Loader2 className="h-6 w-6 text-primary" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    className="relative z-10"
+                    animate={{
+                      scale: [1, 1.15, 1],
+                    }}
+                    transition={{
+                      duration: 0.6,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    <Mic className="h-6 w-6 text-destructive" />
+                  </motion.div>
+                )}
+              </motion.div>
             </div>
-          )}
-          
-          {/* Processing spinner */}
-          {isProcessing && (
-            <div className="flex items-center justify-center h-6">
-              <motion.div
-                className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              />
-            </div>
-          )}
-          
-          {/* Status text with badges */}
-          <div className="flex items-center gap-2 text-xs font-medium">
-            <motion.div
-              animate={{ scale: [1, 1.3, 1] }}
-              transition={{ repeat: Infinity, duration: 0.8 }}
-              className={cn(
-                "w-2 h-2 rounded-full",
-                isProcessing ? "bg-primary" : "bg-destructive"
-              )}
-            />
-            <span className={isProcessing ? "text-primary" : "text-destructive"}>
-              {isProcessing 
-                ? (language === "TR" ? "İşleniyor..." : "Processing...")
-                : (language === "TR" ? "Dinleniyor..." : "Listening...")
-              }
-            </span>
-            {useWhisperFallback && (
-              <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] font-semibold rounded-full flex items-center gap-1">
-                <Sparkles className="h-2.5 w-2.5" />
-                AI
-              </span>
+
+            {/* Audio waveform visualizer */}
+            {isRecording && !isProcessing && (
+              <div className="flex items-center justify-center gap-[3px] h-7">
+                {audioLevels.map((level, i) => (
+                  <motion.div
+                    key={i}
+                    className="w-1 bg-destructive rounded-full"
+                    animate={{
+                      height: Math.max(4, 4 + level * 24),
+                    }}
+                    transition={{
+                      duration: 0.05,
+                      ease: "linear",
+                    }}
+                  />
+                ))}
+              </div>
             )}
-          </div>
-          
-          {/* Audio quality warning */}
-          {isRecording && !isProcessing && audioQuality !== 'good' && (
-            <motion.div
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={cn(
-                "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium",
-                audioQuality === 'silent' && "bg-muted text-muted-foreground",
-                audioQuality === 'low' && "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
-                audioQuality === 'noisy' && "bg-orange-500/10 text-orange-600 dark:text-orange-400"
-              )}
-            >
-              <AlertCircle className="h-3 w-3" />
-              <span>
-                {audioQuality === 'silent' && (language === "TR" ? "Ses algılanmıyor" : "No audio detected")}
-                {audioQuality === 'low' && (language === "TR" ? "Ses çok düşük" : "Volume too low")}
-                {audioQuality === 'noisy' && (language === "TR" ? "Gürültü algılandı" : "Too much noise")}
+            
+            {/* Status text with badges */}
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <motion.div
+                animate={{ scale: [1, 1.3, 1] }}
+                transition={{ repeat: Infinity, duration: 0.8 }}
+                className={cn(
+                  "w-2.5 h-2.5 rounded-full",
+                  isProcessing ? "bg-primary" : "bg-destructive"
+                )}
+              />
+              <span className={isProcessing ? "text-primary" : "text-destructive"}>
+                {isProcessing 
+                  ? (language === "TR" ? "İşleniyor..." : "Processing...")
+                  : (language === "TR" ? "Dinleniyor..." : "Listening...")
+                }
               </span>
-            </motion.div>
-          )}
-        </div>
-      )}
+              {useWhisperFallback && (
+                <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs font-semibold rounded-full flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  AI
+                </span>
+              )}
+            </div>
+            
+            {/* Audio quality warning */}
+            {isRecording && !isProcessing && audioQuality !== 'good' && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium",
+                  audioQuality === 'silent' && "bg-muted text-muted-foreground",
+                  audioQuality === 'low' && "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+                  audioQuality === 'noisy' && "bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                )}
+              >
+                <AlertCircle className="h-3.5 w-3.5" />
+                <span>
+                  {audioQuality === 'silent' && (language === "TR" ? "Ses algılanmıyor - Mikrofona yakın konuşun" : "No audio - Speak closer to mic")}
+                  {audioQuality === 'low' && (language === "TR" ? "Ses çok düşük" : "Volume too low")}
+                  {audioQuality === 'noisy' && (language === "TR" ? "Gürültü algılandı" : "Too much noise")}
+                </span>
+              </motion.div>
+            )}
+
+            {/* Tap to stop hint */}
+            {isRecording && !isProcessing && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.6 }}
+                className="text-xs text-muted-foreground"
+              >
+                {language === "TR" ? "Durdurmak için butona tıklayın" : "Click button to stop"}
+              </motion.p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Input Area */}
       <div className="flex gap-2">
