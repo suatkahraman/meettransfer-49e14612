@@ -309,7 +309,9 @@ self.addEventListener('activate', function(event) {
 });
 
 // Handle service worker installation
+// NOTE: Do NOT call skipWaiting() here.
+// PWA updates are controlled by the in-app prompt (SKIP_WAITING message).
 self.addEventListener('install', function(event) {
-  console.log('[SW] Installed - background push ready');
-  self.skipWaiting();
+  console.log('[SW] Installed - push handlers loaded');
 });
+
