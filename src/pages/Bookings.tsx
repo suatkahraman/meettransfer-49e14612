@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
@@ -12,9 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Calendar, Clock, MapPin, Users, Car, Search, Filter, X, CalendarIcon } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Car, Search, Filter, X, CalendarIcon, ChevronRight, Share2, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { toast } from 'sonner';
+import { WHATSAPP_NUMBER, getWhatsAppUrl } from '@/lib/contact';
 
 interface Booking {
   id: string;
@@ -143,6 +145,48 @@ const Bookings = () => {
       cancelled: 'İptal',
     };
     return labels[status] || status;
+  };
+
+  // WhatsApp sharing for booking
+  const getBookingDetailsText = (booking: Booking) => {
+    const formattedDate = format(new Date(booking.pickup_date), 'dd MMM yyyy', { locale: tr });
+    
+    const lines = [
+      `🚖 *REZERVASYONUM*`,
+      `━━━━━━━━━━━━━━━━━`,
+      ``,
+      `📅 *Tarih:* ${formattedDate}`,
+      `🕐 *Saat:* ${booking.pickup_time}`,
+      ``,
+      `🟢 *Alış Noktası:*`,
+      booking.pickup_location,
+      ``,
+      booking.dropoff_location ? `🔴 *Varış Noktası:*` : null,
+      booking.dropoff_location || null,
+      booking.dropoff_location ? `` : null,
+      `👥 *Yolcu:* ${booking.passengers}`,
+      `🚗 *Araç:* ${booking.vehicle_type}`,
+      `📋 *Durum:* ${getStatusLabel(booking.status)}`,
+      ``,
+      `━━━━━━━━━━━━━━━━━`,
+    ].filter(Boolean).join('\n');
+
+    return lines;
+  };
+
+  const copyBookingDetails = async (booking: Booking) => {
+    const text = getBookingDetailsText(booking);
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Rezervasyon detayları kopyalandı');
+    } catch (err) {
+      toast.error('Kopyalama başarısız');
+    }
+  };
+
+  const shareViaWhatsApp = (booking: Booking) => {
+    const text = getBookingDetailsText(booking);
+    window.open(getWhatsAppUrl(text), '_blank');
   };
 
   return (
@@ -342,7 +386,7 @@ const Bookings = () => {
         ) : (
           <div className="space-y-4">
             {filteredBookings.map((booking) => (
-              <Card key={booking.id} className="hover:shadow-lg transition-shadow">
+              <Card key={booking.id} className="hover:shadow-lg transition-shadow group">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
@@ -390,6 +434,28 @@ const Bookings = () => {
                         <span className="capitalize">{booking.vehicle_type}</span>
                       </div>
                     </div>
+                  </div>
+                  
+                  {/* Share Actions */}
+                  <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => copyBookingDetails(booking)}
+                      className="gap-2"
+                    >
+                      <Share2 className="h-4 w-4" />
+                      Kopyala
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => shareViaWhatsApp(booking)}
+                      className="gap-2 text-green-600 border-green-300 hover:bg-green-50 hover:text-green-700"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      WhatsApp
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
