@@ -18,6 +18,9 @@ verify_jwt = true
 [functions.chat]
 verify_jwt = true
 
+[functions.booking-assistant]
+verify_jwt = false
+
 [functions.log-admin-action]
 verify_jwt = true
 
