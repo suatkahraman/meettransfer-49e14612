@@ -121,6 +121,15 @@ export default {
             transform: "translateX(4px)",
           },
         },
+        // CLS-safe fade animation - opacity only, no transform
+        "fade-in": {
+          "0%": {
+            opacity: "0",
+          },
+          "100%": {
+            opacity: "1",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -129,6 +138,7 @@ export default {
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         marquee: "marquee 25s linear infinite",
         shake: "shake 0.5s ease-in-out",
+        "fade-in": "fade-in 0.3s ease-out",
       },
     },
   },

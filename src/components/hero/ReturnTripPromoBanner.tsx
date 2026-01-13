@@ -83,19 +83,22 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
     }
   };
 
-  // Don't render if no promo data or still loading
-  if (isLoading || !promoData) {
+  // CLS fix: Reserve space with min-height even during loading
+  // Don't render if no promo data, but show placeholder during loading
+  if (!promoData) {
+    if (isLoading) {
+      // Reserve space during loading to prevent CLS
+      return <div className="mb-3 h-[52px] md:h-[48px]" aria-hidden="true" />;
+    }
     return null;
   }
 
   const expiryDate = formatExpiryDate(promoData.valid_until);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3, duration: 0.4 }}
-      className="mb-3 relative overflow-hidden"
+    // CLS fix: Use CSS animation instead of framer-motion y offset
+    <div
+      className="mb-3 relative overflow-hidden animate-fade-in"
     >
       <button
         type="button"
@@ -163,7 +166,7 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
           </div>
         </div>
       </button>
-    </motion.div>
+    </div>
   );
 });
 

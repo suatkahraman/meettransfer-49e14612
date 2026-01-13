@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase } from "lucide-react";
 import { CityVideo } from "./types";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
@@ -121,12 +121,10 @@ export const HeroVisualSection = memo(({
         </div>
       </div>
 
-      {/* Desktop Visual Section */}
-      <motion.div 
-        initial={{ opacity: 0, x: 30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="order-3 hidden md:block md:col-span-2 lg:col-span-1"
+      {/* Desktop Visual Section - CLS fix: Remove x offset animation */}
+      <div 
+        className="order-3 hidden md:block md:col-span-2 lg:col-span-1 animate-fade-in"
+        style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}
       >
         <div className="relative">
           {/* Main Video/Image */}
@@ -193,12 +191,10 @@ export const HeroVisualSection = memo(({
             </div>
           </div>
 
-          {/* Floating Stats Cards */}
-          <motion.div 
-            className="absolute -top-2 lg:-top-4 -right-2 lg:-right-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+          {/* Floating Stats Cards - CLS fix: Remove y/x offset animations */}
+          <div 
+            className="absolute -top-2 lg:-top-4 -right-2 lg:-right-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50 animate-fade-in"
+            style={{ animationDelay: '0.5s', animationFillMode: 'backwards' }}
           >
             <div className="flex items-center gap-2 lg:gap-3">
               <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -209,13 +205,11 @@ export const HeroVisualSection = memo(({
                 <div className="text-[10px] lg:text-xs text-muted-foreground">{t("cities") || "Cities"}</div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div 
-            className="absolute -bottom-2 lg:-bottom-4 -left-2 lg:-left-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
+          <div 
+            className="absolute -bottom-2 lg:-bottom-4 -left-2 lg:-left-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50 animate-fade-in"
+            style={{ animationDelay: '0.7s', animationFillMode: 'backwards' }}
           >
             <div className="flex items-center gap-2 lg:gap-3">
               <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full bg-accent/10 flex items-center justify-center">
@@ -226,13 +220,11 @@ export const HeroVisualSection = memo(({
                 <div className="text-[10px] lg:text-xs text-muted-foreground">{t("airports") || "Airports"}</div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div 
-            className="absolute top-1/2 -right-6 bg-card rounded-xl shadow-xl p-4 border border-border/50 hidden lg:block"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.9 }}
+          <div 
+            className="absolute top-1/2 -right-6 bg-card rounded-xl shadow-xl p-4 border border-border/50 hidden lg:block animate-fade-in"
+            style={{ animationDelay: '0.9s', animationFillMode: 'backwards' }}
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
@@ -243,7 +235,7 @@ export const HeroVisualSection = memo(({
                 <div className="text-xs text-muted-foreground">Google</div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Destination Cities Row */}
           <div className="mt-4 lg:mt-6 hidden lg:block">
@@ -274,7 +266,7 @@ export const HeroVisualSection = memo(({
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </>
   );
 });

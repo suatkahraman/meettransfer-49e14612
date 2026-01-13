@@ -26,12 +26,14 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
     <div className="mb-3 md:mb-5">
       {/* Compact Header Row - Logo, Title, Badges all in one line on mobile */}
       <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+        {/* CLS fix: Explicit width/height to reserve space */}
         <img 
           src={meetTransferLogo} 
           alt="Meet Transfer" 
-          width={40}
-          height={40}
+          width={48}
+          height={48}
           loading="eager"
+          decoding="async"
           className="h-8 w-8 md:h-12 md:w-12 rounded-lg object-cover shadow-lg ring-1 ring-primary/30 flex-shrink-0"
         />
         <div className="flex-1 min-w-0">
