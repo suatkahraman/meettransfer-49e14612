@@ -674,6 +674,11 @@ const translations: Record<Language, Record<string, string>> = {
     poor: "Poor",
     goToHome: "Go to Home",
     backToMyReservations: "Back to My Reservations",
+    rateYourExperience: "Rate your transfer experience",
+    driverFeedbackPrompt: "Your driver {driverName} would love your feedback",
+    rateNow: "Rate Now",
+    reviewed: "Reviewed",
+    rate: "Rate",
     
     // Customer Portal Page
     yourBookings: "Your Bookings",
@@ -10771,6 +10776,11 @@ const translations: Record<Language, Record<string, string>> = {
     poor: "Kötü",
     goToHome: "Ana Sayfaya Git",
     backToMyReservations: "Rezervasyonlarıma Dön",
+    rateYourExperience: "Transfer deneyiminizi değerlendirin",
+    driverFeedbackPrompt: "Şoförünüz {driverName} geri bildiriminizi bekliyor",
+    rateNow: "Değerlendir",
+    reviewed: "Değerlendirildi",
+    rate: "Puanla",
     
     // Customer Home Panel
     activeCount: "Aktif",
