@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
@@ -6,12 +6,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Loader2, TrendingUp, DollarSign, CreditCard, Wallet, CheckCircle, Clock, Calendar, History, ChevronRight, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Loader2, TrendingUp, DollarSign, CreditCard, Wallet, CheckCircle, Clock, Calendar, History, ChevronRight, RefreshCw, FileDown, FileSpreadsheet } from 'lucide-react';
 import { MonthNavigator } from '@/components/accounting/MonthNavigator';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 import { calculateCurrencyBalances, CurrencyBalance, getCurrencySymbol } from '@/lib/currency';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 interface AgencyReservationDetail {
   id: string;
@@ -245,6 +250,193 @@ const AgencyReports = () => {
   
   combinedBalances.sort((a, b) => Math.abs(b.netBalance) - Math.abs(a.netBalance));
 
+  // Export functions
+  const generatePDF = useCallback(() => {
+    if (!agency) return;
+    
+    const monthName = format(currentMonth, 'MMMM yyyy', { locale: tr });
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(18);
+    doc.text(`${agency.agency_name} - Aylık Rapor`, 14, 20);
+    doc.setFontSize(12);
+    doc.text(monthName, 14, 28);
+    
+    // Summary section
+    doc.setFontSize(14);
+    doc.text('Özet', 14, 42);
+    doc.setFontSize(10);
+    doc.text(`Toplam Rezervasyon: ${totalReservations}`, 14, 50);
+    doc.text(`Tamamlanan: ${completedReservations}`, 14, 56);
+    doc.text(`Ödenen: ${paidCount}`, 14, 62);
+    doc.text(`Bekleyen Ödeme: ${pendingPayments}`, 14, 68);
+    
+    // Balance per currency
+    let yPos = 82;
+    doc.setFontSize(14);
+    doc.text('Bakiye Özeti', 14, yPos);
+    yPos += 10;
+    
+    if (combinedBalances.length > 0) {
+      const balanceData = combinedBalances.map(cb => [
+        cb.currency,
+        `${getCurrencySymbol(cb.currency)}${cb.totalCompanyAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+        `${getCurrencySymbol(cb.currency)}${cb.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+        `${getCurrencySymbol(cb.currency)}${cb.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+        `${cb.netBalance > 0 ? '' : '-'}${getCurrencySymbol(cb.currency)}${Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+      ]);
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Para Birimi', 'Toplam Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye']],
+        body: balanceData,
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+      });
+      
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+    }
+    
+    // Current month breakdown
+    if (currentMonthBalances.length > 0) {
+      doc.setFontSize(14);
+      doc.text(`${monthName} Detay`, 14, yPos);
+      yPos += 10;
+      
+      const monthData = currentMonthBalances.map(cb => [
+        cb.currency,
+        `${getCurrencySymbol(cb.currency)}${cb.totalCompanyAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+        `${getCurrencySymbol(cb.currency)}${cb.totalPassengerCash.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+        `${getCurrencySymbol(cb.currency)}${cb.totalPaid.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+        `${cb.netBalance > 0 ? '' : '-'}${getCurrencySymbol(cb.currency)}${Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`,
+      ]);
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Para Birimi', 'Gider', 'Nakit', 'Ödenen', 'Net']],
+        body: monthData,
+        theme: 'striped',
+        headStyles: { fillColor: [34, 197, 94] },
+      });
+      
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+    }
+    
+    // Transactions
+    if (transactions.length > 0) {
+      doc.setFontSize(14);
+      doc.text('Son İşlemler', 14, yPos);
+      yPos += 10;
+      
+      const txData = transactions.slice(0, 10).map(tx => [
+        format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm'),
+        tx.type === 'top_up' ? 'Ödeme' : 'Kesinti',
+        `${tx.type === 'top_up' ? '+' : '-'}${getCurrencySymbol(tx.currency)}${Math.abs(tx.amount).toLocaleString('tr-TR')}`,
+        tx.description || '-',
+      ]);
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Tarih', 'Tür', 'Tutar', 'Açıklama']],
+        body: txData,
+        theme: 'striped',
+        headStyles: { fillColor: [168, 85, 247] },
+      });
+    }
+    
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(
+        `Oluşturulma: ${format(new Date(), 'dd/MM/yyyy HH:mm')} - Sayfa ${i}/${pageCount}`,
+        14,
+        doc.internal.pageSize.height - 10
+      );
+    }
+    
+    doc.save(`${agency.agency_name.replace(/\s+/g, '_')}_Rapor_${format(currentMonth, 'yyyy_MM')}.pdf`);
+    toast.success('PDF başarıyla oluşturuldu');
+  }, [agency, currentMonth, totalReservations, completedReservations, paidCount, pendingPayments, combinedBalances, currentMonthBalances, transactions]);
+
+  const generateExcel = useCallback(() => {
+    if (!agency) return;
+    
+    const monthName = format(currentMonth, 'MMMM yyyy', { locale: tr });
+    const wb = XLSX.utils.book_new();
+    
+    // Summary sheet
+    const summaryData = [
+      ['Acenta Adı', agency.agency_name],
+      ['Rapor Dönemi', monthName],
+      ['Oluşturulma Tarihi', format(new Date(), 'dd/MM/yyyy HH:mm')],
+      [''],
+      ['ÖZET'],
+      ['Toplam Rezervasyon', totalReservations],
+      ['Tamamlanan', completedReservations],
+      ['Ödenen', paidCount],
+      ['Bekleyen Ödeme', pendingPayments],
+    ];
+    
+    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, summarySheet, 'Özet');
+    
+    // Balance sheet
+    if (combinedBalances.length > 0) {
+      const balanceRows = [
+        ['Para Birimi', 'Toplam Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye', 'Durum'],
+        ...combinedBalances.map(cb => [
+          cb.currency,
+          cb.totalCompanyAmount,
+          cb.totalPassengerCash,
+          cb.totalPaid,
+          cb.netBalance,
+          cb.netBalance > 0 ? 'Borç' : cb.netBalance < 0 ? 'Alacak' : 'Hesaplaşıldı',
+        ]),
+      ];
+      const balanceSheet = XLSX.utils.aoa_to_sheet(balanceRows);
+      XLSX.utils.book_append_sheet(wb, balanceSheet, 'Bakiye');
+    }
+    
+    // Current month sheet
+    if (currentMonthBalances.length > 0) {
+      const monthRows = [
+        ['Para Birimi', 'Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye'],
+        ...currentMonthBalances.map(cb => [
+          cb.currency,
+          cb.totalCompanyAmount,
+          cb.totalPassengerCash,
+          cb.totalPaid,
+          cb.netBalance,
+        ]),
+      ];
+      const monthSheet = XLSX.utils.aoa_to_sheet(monthRows);
+      XLSX.utils.book_append_sheet(wb, monthSheet, monthName);
+    }
+    
+    // Transactions sheet
+    if (transactions.length > 0) {
+      const txRows = [
+        ['Tarih', 'Tür', 'Tutar', 'Para Birimi', 'Bakiye Sonrası', 'Açıklama'],
+        ...transactions.map(tx => [
+          format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm'),
+          tx.type === 'top_up' ? 'Ödeme' : 'Kesinti',
+          tx.type === 'top_up' ? tx.amount : -tx.amount,
+          tx.currency,
+          tx.balance_after,
+          tx.description || '',
+        ]),
+      ];
+      const txSheet = XLSX.utils.aoa_to_sheet(txRows);
+      XLSX.utils.book_append_sheet(wb, txSheet, 'İşlemler');
+    }
+    
+    XLSX.writeFile(wb, `${agency.agency_name.replace(/\s+/g, '_')}_Rapor_${format(currentMonth, 'yyyy_MM')}.xlsx`);
+    toast.success('Excel başarıyla oluşturuldu');
+  }, [agency, currentMonth, totalReservations, completedReservations, paidCount, pendingPayments, combinedBalances, currentMonthBalances, transactions]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -270,15 +462,38 @@ const AgencyReports = () => {
             {agency && <p className="text-sm opacity-80">{agency.agency_name}</p>}
           </div>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={fetchData}
-          disabled={loading}
-          className="text-primary-foreground hover:bg-primary-foreground/10"
-        >
-          <RefreshCw className={cn("h-5 w-5", loading && "animate-spin")} />
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Export Buttons */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={generatePDF}
+            disabled={loading || !agency}
+            className="text-primary-foreground hover:bg-primary-foreground/10 gap-2"
+          >
+            <FileDown className="h-4 w-4" />
+            <span className="hidden sm:inline">PDF</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={generateExcel}
+            disabled={loading || !agency}
+            className="text-primary-foreground hover:bg-primary-foreground/10 gap-2"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            <span className="hidden sm:inline">Excel</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={fetchData}
+            disabled={loading}
+            className="text-primary-foreground hover:bg-primary-foreground/10"
+          >
+            <RefreshCw className={cn("h-5 w-5", loading && "animate-spin")} />
+          </Button>
+        </div>
       </header>
 
       <main className="container mx-auto py-6 px-4 max-w-4xl space-y-6">
