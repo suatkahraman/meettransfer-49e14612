@@ -1,4 +1,4 @@
-import { memo, lazy, Suspense, useCallback } from "react";
+import { memo, lazy, Suspense, useCallback, useState, useEffect } from "react";
 import { Sparkles, MessageCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,23 @@ const quickPrompts = {
 
 export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssistantProps) => {
   const prompts = quickPrompts[language as keyof typeof quickPrompts] || quickPrompts.EN;
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Rotate prompts every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % prompts.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [prompts.length]);
 
   const handleQuickPrompt = useCallback((message: string) => {
     window.dispatchEvent(
       new CustomEvent("booking-ai-open", { detail: { message } })
     );
   }, []);
+
+  const currentPrompt = prompts[currentIndex];
 
   return (
     <div id="ai-assistant" className="mb-4 relative">
@@ -53,21 +64,21 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
           </span>
         </div>
 
-        {/* Quick Prompt Shortcuts */}
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {prompts.map((p, idx) => (
-            <Button
-              key={idx}
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => handleQuickPrompt(p.message)}
-              className="h-7 text-xs px-2.5 py-1 rounded-full border-border bg-background hover:bg-primary/10 hover:border-primary/40 transition-colors"
-            >
-              <MessageCircle className="h-3 w-3 mr-1 text-muted-foreground" />
-              {p.label}
-            </Button>
-          ))}
+        {/* Single Rotating Quick Prompt Button */}
+        <div className="mb-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleQuickPrompt(currentPrompt.message)}
+            className="h-8 text-xs px-3 py-1.5 rounded-full border-border bg-background hover:bg-primary/10 hover:border-primary/40 transition-all duration-300"
+          >
+            <MessageCircle className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+            <span className="transition-opacity duration-300">
+              {language === 'TR' ? 'AI ile Sor: ' : 'Ask AI: '}
+              {currentPrompt.label}
+            </span>
+          </Button>
         </div>
         
         {/* Chat Assistant */}
