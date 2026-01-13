@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { X, Download, Smartphone, Share, Plus, Sparkles, Star } from "lucide-react";
+import { X, Download, Smartphone, Share, Plus, Sparkles, Star, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 /**
- * Shows a beautiful install prompt for PWA installation.
+ * Shows a beautiful glassmorphism install prompt for PWA installation.
  * - Chromium browsers: Native install prompt
  * - iOS Safari: Manual instructions
  * - Already installed or dismissed: Hidden
@@ -125,142 +125,231 @@ export function PWAInstallPrompt() {
     <AnimatePresence>
       {showPrompt && !showIOSInstructions && (
         <motion.div
-          initial={{ opacity: 0, y: 100, scale: 0.9 }}
+          initial={{ opacity: 0, y: 100, scale: 0.8 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 100, scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          exit={{ opacity: 0, y: 100, scale: 0.8 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 260, 
+            damping: 20,
+            mass: 0.8
+          }}
           className="fixed bottom-24 left-4 right-4 z-[9998] md:left-auto md:right-6 md:max-w-sm"
         >
-          <div className="bg-gradient-to-br from-card via-card to-muted border border-border rounded-3xl shadow-2xl overflow-hidden">
-            {/* Animated gradient bar */}
-            <div className="h-1.5 bg-gradient-to-r from-primary via-accent to-primary animate-pulse" />
+          {/* Glassmorphism card */}
+          <motion.div 
+            className="relative backdrop-blur-xl bg-card/80 border border-white/20 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] overflow-hidden"
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          >
+            {/* Animated gradient border glow */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 blur-xl opacity-60" />
             
-            <div className="p-5">
+            {/* Top gradient accent with animation */}
+            <motion.div 
+              className="h-1 bg-gradient-to-r from-primary via-accent to-primary"
+              animate={{ 
+                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] 
+              }}
+              transition={{ 
+                duration: 3, 
+                repeat: Infinity, 
+                ease: "linear" 
+              }}
+              style={{ backgroundSize: "200% 100%" }}
+            />
+            
+            <div className="relative p-5">
+              {/* Floating particles effect */}
+              <div className="absolute top-3 right-12 w-2 h-2 rounded-full bg-primary/40 animate-pulse" />
+              <div className="absolute top-8 right-8 w-1.5 h-1.5 rounded-full bg-accent/50 animate-pulse delay-300" />
+              
               {/* Header with dismiss */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  {/* App icon */}
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-                    <Smartphone className="h-7 w-7 text-primary-foreground" />
-                  </div>
+                  {/* App icon with glow */}
+                  <motion.div 
+                    className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg"
+                    whileHover={{ rotate: [0, -5, 5, 0] }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary to-accent blur-md opacity-50" />
+                    <Smartphone className="relative h-7 w-7 text-primary-foreground" />
+                  </motion.div>
                   <div>
                     <h4 className="font-bold text-base text-foreground flex items-center gap-2">
                       {texts.title}
-                      <Sparkles className="h-4 w-4 text-accent" />
+                      <motion.div
+                        animate={{ rotate: [0, 15, -15, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <Sparkles className="h-4 w-4 text-accent" />
+                      </motion.div>
                     </h4>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {texts.subtitle}
                     </p>
                   </div>
                 </div>
-                <button
+                <motion.button
                   onClick={handleDismiss}
-                  className="p-1.5 rounded-full hover:bg-muted/80 transition-colors"
+                  className="p-1.5 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                   aria-label="Dismiss"
                 >
                   <X className="h-4 w-4 text-muted-foreground" />
-                </button>
+                </motion.button>
               </div>
 
-              {/* Benefits */}
+              {/* Benefits with staggered animation */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {texts.benefits.map((benefit, i) => (
-                  <div 
+                  <motion.div 
                     key={i}
-                    className="flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-full"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * i, duration: 0.3 }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/10"
                   >
                     <Star className="h-3 w-3 text-primary fill-primary" />
                     <span className="text-xs font-medium text-foreground">{benefit}</span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
-              {/* Action buttons */}
+              {/* Action buttons with hover effects */}
               <div className="flex gap-2">
-                <Button
-                  onClick={handleLater}
-                  variant="ghost"
-                  size="sm"
-                  className="flex-1"
-                >
-                  {texts.laterBtn}
-                </Button>
-                <Button
-                  onClick={handleInstall}
-                  size="sm"
-                  className="flex-1 gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
-                >
-                  <Download className="h-4 w-4" />
-                  {texts.installBtn}
-                </Button>
+                <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    onClick={handleLater}
+                    variant="ghost"
+                    size="sm"
+                    className="w-full bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10"
+                  >
+                    {texts.laterBtn}
+                  </Button>
+                </motion.div>
+                <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    onClick={handleInstall}
+                    size="sm"
+                    className="w-full gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-lg shadow-primary/25"
+                  >
+                    <Download className="h-4 w-4" />
+                    {texts.installBtn}
+                  </Button>
+                </motion.div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       )}
 
-      {/* iOS Instructions Modal */}
+      {/* iOS Instructions Modal with glassmorphism */}
       {showIOSInstructions && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center p-4"
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-md flex items-end md:items-center justify-center p-4"
           onClick={handleDismiss}
         >
           <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="bg-card rounded-t-3xl md:rounded-3xl w-full max-w-md overflow-hidden"
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ 
+              type: "spring", 
+              damping: 25, 
+              stiffness: 300,
+              mass: 0.8
+            }}
+            className="relative backdrop-blur-xl bg-card/90 border border-white/20 rounded-t-3xl md:rounded-3xl w-full max-w-md overflow-hidden shadow-[0_-8px_32px_rgba(0,0,0,0.2)]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="h-1.5 bg-gradient-to-r from-primary via-accent to-primary" />
-            <div className="p-6">
+            {/* Gradient glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+            
+            {/* Header gradient */}
+            <motion.div 
+              className="h-1.5 bg-gradient-to-r from-primary via-accent to-primary"
+              animate={{ 
+                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] 
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              style={{ backgroundSize: "200% 100%" }}
+            />
+            
+            <div className="relative p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <Share className="h-5 w-5 text-primary" />
+                  <motion.div
+                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center"
+                    whileHover={{ rotate: 10 }}
+                  >
+                    <Share className="h-5 w-5 text-primary" />
+                  </motion.div>
                   {texts.iosTitle}
                 </h3>
-                <button
+                <motion.button
                   onClick={handleDismiss}
-                  className="p-2 rounded-full hover:bg-muted transition-colors"
+                  className="p-2 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   <X className="h-5 w-5 text-muted-foreground" />
-                </button>
+                </motion.button>
               </div>
 
-              {/* Steps */}
+              {/* Steps with staggered animation */}
               <div className="space-y-4">
                 {instructions.steps.map((step, i) => (
-                  <div key={i} className="flex items-start gap-4">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                      {i === 0 && <Share className="h-4 w-4 text-primary" />}
-                      {i === 1 && <Plus className="h-4 w-4 text-primary" />}
-                      {i === 2 && <Download className="h-4 w-4 text-primary" />}
+                  <motion.div 
+                    key={i} 
+                    className="flex items-start gap-4"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * i, duration: 0.4 }}
+                  >
+                    <motion.div 
+                      className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur-sm border border-white/10 flex items-center justify-center flex-shrink-0"
+                      whileHover={{ scale: 1.1 }}
+                    >
+                      {i === 0 && <Share className="h-5 w-5 text-primary" />}
+                      {i === 1 && <Plus className="h-5 w-5 text-primary" />}
+                      {i === 2 && <Zap className="h-5 w-5 text-primary" />}
+                    </motion.div>
+                    <div className="flex-1 pt-2">
+                      <p className="text-sm text-foreground leading-relaxed">{step}</p>
                     </div>
-                    <div className="flex-1 pt-1">
-                      <p className="text-sm text-foreground">{step}</p>
-                    </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
               {instructions.note && (
-                <p className="mt-4 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                <motion.p 
+                  className="mt-5 text-xs text-muted-foreground bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/10"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
                   {instructions.note}
-                </p>
+                </motion.p>
               )}
 
-              <Button
-                onClick={handleDismiss}
-                className="w-full mt-6"
-                variant="outline"
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                {texts.gotIt}
-              </Button>
+                <Button
+                  onClick={handleDismiss}
+                  className="w-full mt-6 bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-lg shadow-primary/25"
+                >
+                  {texts.gotIt}
+                </Button>
+              </motion.div>
             </div>
           </motion.div>
         </motion.div>
