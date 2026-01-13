@@ -31,8 +31,8 @@ export const GLOBAL_OFFICES: OfficeLocation[] = [
   {
     flag: "🇺🇸",
     country: "USA",
-    city: "Los Angeles",
-    address: "La Fashion District, Los Angeles, CA 854",
+    city: "Sheridan",
+    address: "30 N Gould St, Sheridan, WY 82801",
     phone: WHATSAPP_DISPLAY,
     whatsappOnly: true,
     email: null,
