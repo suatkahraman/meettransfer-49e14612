@@ -23,86 +23,61 @@ interface HeroHeaderProps {
 
 export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   return (
-    <div className="mb-4 md:mb-5">
-      {/* Logo + Title Row */}
-      <div className="flex items-start gap-2 md:gap-3 mb-3 md:mb-4">
+    <div className="mb-3 md:mb-5">
+      {/* Compact Header Row - Logo, Title, Badges all in one line on mobile */}
+      <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
         <img 
           src={meetTransferLogo} 
           alt="Meet Transfer" 
-          width={48}
-          height={48}
+          width={40}
+          height={40}
           loading="eager"
-          className="h-10 w-10 md:h-14 md:w-14 rounded-lg md:rounded-xl object-cover shadow-xl ring-2 ring-primary/30"
+          className="h-8 w-8 md:h-12 md:w-12 rounded-lg object-cover shadow-lg ring-1 ring-primary/30 flex-shrink-0"
         />
-        <div className="flex-1">
-          <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-foreground leading-tight mb-0.5 md:mb-1">
-            {language === 'TR' ? (
-              <>
-                <span className="text-primary">Lüks VIP</span> Transfer
-              </>
-            ) : (
-              <>
-                <span className="text-primary">Premium VIP</span> Transfer
-              </>
-            )}
-          </h1>
-          <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1.5 flex-wrap">
-            <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[10px] font-medium">
-              <Shield className="h-3 w-3" />
-              {language === 'TR' ? 'Güvenli' : 'Safe'}
-            </span>
-            <span className="inline-flex items-center gap-1 bg-accent/10 text-accent rounded-full px-2 py-0.5 text-[10px] font-medium">
-              <Zap className="h-3 w-3" />
-              {language === 'TR' ? 'Hızlı' : 'Fast'}
-            </span>
-            <span className="inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-600 rounded-full px-2 py-0.5 text-[10px] font-medium">
-              <Star className="h-3 w-3 fill-current" />
-              4.9
-            </span>
-          </p>
-        </div>
-      </div>
-      
-      {/* Trust Badges Row - Horizontal scroll on mobile */}
-      <div className="flex items-center gap-2 md:gap-2 mb-2 md:mb-3 overflow-x-auto scrollbar-none pb-1">
-        <div className="flex items-center gap-1 md:gap-1.5 text-[9px] md:text-[10px] text-muted-foreground whitespace-nowrap">
-          <Check className="h-3 w-3 text-green-500" />
-          <span>{language === 'TR' ? 'Sabit Fiyat' : 'Fixed Price'}</span>
-        </div>
-        <div className="w-px h-3 bg-border flex-shrink-0" />
-        <div className="flex items-center gap-1 md:gap-1.5 text-[9px] md:text-[10px] text-muted-foreground whitespace-nowrap">
-          <Check className="h-3 w-3 text-green-500" />
-          <span>{language === 'TR' ? 'Ücretsiz İptal' : 'Free Cancel'}</span>
-        </div>
-        <div className="w-px h-3 bg-border flex-shrink-0" />
-        <div className="flex items-center gap-1 md:gap-1.5 text-[9px] md:text-[10px] text-muted-foreground whitespace-nowrap">
-          <Check className="h-3 w-3 text-green-500" />
-          <span>{language === 'TR' ? 'Pro Şoför' : 'Pro Chauffeur'}</span>
-        </div>
-      </div>
-      
-      {/* Vehicle Fleet Showcase - Hidden on small mobile */}
-      <div className="hidden xs:flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {VEHICLE_TYPES.slice(0, 4).map((vehicle) => (
-          <div
-            key={vehicle.value}
-            className="flex-shrink-0"
-          >
-            <div className="flex items-center gap-1.5 bg-card/80 backdrop-blur-sm rounded-full pl-1 pr-2.5 py-1 border border-border/50 hover:border-primary/50 hover:shadow-md transition-all cursor-default">
-              <div className="relative">
-                <img 
-                  src={vehicleImages[vehicle.value]} 
-                  alt={vehicle.label}
-                  className="w-7 h-7 rounded-full object-cover ring-1 ring-border"
-                />
-                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border border-white" />
-              </div>
-              <span className="text-[10px] font-medium text-foreground whitespace-nowrap">
-                {vehicle.label.split(' ').pop()}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <h1 className="text-base md:text-xl lg:text-2xl font-bold text-foreground leading-tight whitespace-nowrap">
+              {language === 'TR' ? (
+                <><span className="text-primary">Lüks</span> Transfer</>
+              ) : (
+                <><span className="text-primary">VIP</span> Transfer</>
+              )}
+            </h1>
+            {/* Inline badges on mobile */}
+            <div className="flex items-center gap-1">
+              <span className="inline-flex items-center gap-0.5 bg-primary/10 text-primary rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
+                <Shield className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                <span className="hidden xs:inline">{language === 'TR' ? 'Güvenli' : 'Safe'}</span>
+              </span>
+              <span className="inline-flex items-center gap-0.5 bg-accent/10 text-accent rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
+                <Zap className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                <span className="hidden xs:inline">{language === 'TR' ? 'Hızlı' : 'Fast'}</span>
+              </span>
+              <span className="inline-flex items-center gap-0.5 bg-yellow-500/10 text-yellow-600 rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
+                <Star className="h-2.5 w-2.5 md:h-3 md:w-3 fill-current" />
+                4.9
               </span>
             </div>
           </div>
-        ))}
+        </div>
+      </div>
+      
+      {/* Trust Badges Row - More compact */}
+      <div className="flex items-center gap-1.5 md:gap-2 text-[8px] md:text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-0.5">
+          <Check className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
+          <span>{language === 'TR' ? 'Sabit Fiyat' : 'Fixed Price'}</span>
+        </div>
+        <span className="text-border">•</span>
+        <div className="flex items-center gap-0.5">
+          <Check className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
+          <span>{language === 'TR' ? 'Ücretsiz İptal' : 'Free Cancel'}</span>
+        </div>
+        <span className="text-border">•</span>
+        <div className="flex items-center gap-0.5">
+          <Check className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
+          <span>{language === 'TR' ? 'Pro Şoför' : 'Pro'}</span>
+        </div>
       </div>
     </div>
   );
