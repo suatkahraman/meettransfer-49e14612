@@ -699,7 +699,7 @@ function useTextToSpeech(language: string) {
     return 'neutral';
   }, []);
 
-  // Load and filter voices for current language
+  // Load and filter voices for current language - prefer high quality voices
   const loadVoices = useCallback(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     
@@ -707,14 +707,24 @@ function useTextToSpeech(language: string) {
     const langCode = getLanguageCode(language);
     const langPrefix = langCode.split('-')[0];
     
+    // Keywords indicating higher quality voices
+    const premiumKeywords = ['premium', 'enhanced', 'natural', 'neural', 'hd', 'wavenet', 'google', 'microsoft'];
+    
     const filteredVoices: VoiceOption[] = voices
       .filter(voice => voice.lang.startsWith(langPrefix))
       .map(voice => ({
         id: voice.voiceURI,
         name: voice.name.replace(/Microsoft |Google |Apple /, '').split(' ')[0],
         lang: voice.lang,
-        gender: detectGender(voice)
-      }));
+        gender: detectGender(voice),
+        isPremium: premiumKeywords.some(kw => voice.name.toLowerCase().includes(kw)) || voice.localService === false
+      }))
+      .sort((a, b) => {
+        // Sort premium/remote voices first (usually higher quality)
+        if ((a as any).isPremium && !(b as any).isPremium) return -1;
+        if (!(a as any).isPremium && (b as any).isPremium) return 1;
+        return 0;
+      });
     
     // Add fallback voices if none found for the language
     if (filteredVoices.length === 0) {
@@ -729,7 +739,7 @@ function useTextToSpeech(language: string) {
       setAvailableVoices(filteredVoices);
     }
     
-    // Auto-select first voice if none selected
+    // Auto-select best quality voice (first in sorted list) if none selected
     if (!selectedVoiceId && filteredVoices.length > 0) {
       setSelectedVoiceId(filteredVoices[0].id);
     }
@@ -1158,16 +1168,35 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     }
   }, [messages, visitorId]);
 
+  // Track if we've spoken the welcome message
+  const hasSpokenWelcomeRef = useRef(false);
+
   // Add welcome message when opened and no messages
   useEffect(() => {
     if (isOpen && messages.length === 0) {
+      const welcomeMessage = welcomeMessages[language] || welcomeMessages.EN;
       setMessages([{
         id: "welcome",
         role: "assistant",
-        content: welcomeMessages[language] || welcomeMessages.EN
+        content: welcomeMessage
       }]);
+      
+      // Auto-speak the welcome message with a small delay to ensure voices are loaded
+      if (!hasSpokenWelcomeRef.current) {
+        hasSpokenWelcomeRef.current = true;
+        setTimeout(() => {
+          speak(welcomeMessage);
+        }, 500);
+      }
     }
-  }, [isOpen, language, messages.length]);
+  }, [isOpen, language, messages.length, speak]);
+
+  // Reset the spoken flag when chat is closed
+  useEffect(() => {
+    if (!isOpen) {
+      hasSpokenWelcomeRef.current = false;
+    }
+  }, [isOpen]);
 
   // Auto-send pending message after chat opens and welcome message is added
   useEffect(() => {
