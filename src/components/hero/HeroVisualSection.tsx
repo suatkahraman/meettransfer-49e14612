@@ -105,9 +105,11 @@ export const HeroVisualSection = memo(({
       </div>
 
       {/* Desktop Visual Section - Video only on desktop */}
-      <div 
-        className="order-3 hidden md:block md:col-span-2 lg:col-span-1 animate-fade-in"
-        style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}
+      <motion.div 
+        className="order-3 hidden md:block md:col-span-2 lg:col-span-1"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
       >
         <div className="relative">
           {/* Main Video/Image */}
@@ -178,9 +180,11 @@ export const HeroVisualSection = memo(({
           </div>
 
           {/* Floating Stats Cards */}
-          <div 
-            className="absolute -top-2 lg:-top-4 -right-2 lg:-right-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50 animate-fade-in"
-            style={{ animationDelay: '0.5s', animationFillMode: 'backwards' }}
+          <motion.div 
+            className="absolute -top-2 lg:-top-4 -right-2 lg:-right-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
           >
             <div className="flex items-center gap-2 lg:gap-3">
               <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -191,11 +195,13 @@ export const HeroVisualSection = memo(({
                 <div className="text-[10px] lg:text-xs text-muted-foreground">{t("cities") || "Cities"}</div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div 
-            className="absolute -bottom-2 lg:-bottom-4 -left-2 lg:-left-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50 animate-fade-in"
-            style={{ animationDelay: '0.7s', animationFillMode: 'backwards' }}
+          <motion.div 
+            className="absolute -bottom-2 lg:-bottom-4 -left-2 lg:-left-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.7 }}
           >
             <div className="flex items-center gap-2 lg:gap-3">
               <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full bg-accent/10 flex items-center justify-center">
@@ -206,11 +212,13 @@ export const HeroVisualSection = memo(({
                 <div className="text-[10px] lg:text-xs text-muted-foreground">{t("airports") || "Airports"}</div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div 
-            className="absolute top-1/2 -right-6 bg-card rounded-xl shadow-xl p-4 border border-border/50 hidden lg:block animate-fade-in"
-            style={{ animationDelay: '0.9s', animationFillMode: 'backwards' }}
+          <motion.div 
+            className="absolute top-1/2 -right-6 bg-card rounded-xl shadow-xl p-4 border border-border/50 hidden lg:block"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.9 }}
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
@@ -221,7 +229,7 @@ export const HeroVisualSection = memo(({
                 <div className="text-xs text-muted-foreground">Google</div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Destination Cities Row */}
           <div className="mt-4 lg:mt-6 hidden lg:block">
@@ -252,7 +260,7 @@ export const HeroVisualSection = memo(({
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 });
