@@ -672,13 +672,19 @@ interface VoiceOption {
 }
 
 // Text-to-Speech hook using Web Speech API (no API key required)
-function useTextToSpeech(language: string) {
+function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const [availableVoices, setAvailableVoices] = useState<VoiceOption[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
   const [speechRate, setSpeechRate] = useState(1.0);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const onSpeakEndRef = useRef(onSpeakEnd);
+  
+  // Keep callback ref updated
+  useEffect(() => {
+    onSpeakEndRef.current = onSpeakEnd;
+  }, [onSpeakEnd]);
 
   // Map language codes to BCP-47 format for Web Speech API
   const getLanguageCode = useCallback((lang: string): string => {
@@ -803,7 +809,13 @@ function useTextToSpeech(language: string) {
     }
 
     utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      // Call the onSpeakEnd callback when speech finishes
+      if (onSpeakEndRef.current) {
+        onSpeakEndRef.current();
+      }
+    };
     utterance.onerror = () => setIsSpeaking(false);
 
     window.speechSynthesis.speak(utterance);
@@ -1003,9 +1015,42 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     };
   }, [input, isRecording, isProcessing]);
 
-  // Text-to-Speech
-  const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate } = useTextToSpeech(language);
+  // Continuous conversation mode - auto-start recording after AI speaks
+  const [continuousMode, setContinuousMode] = useState(false);
+  const continuousModeRef = useRef(false);
+  const startRecordingRef = useRef<(() => void) | null>(null);
+  
+  // Keep refs in sync
+  useEffect(() => {
+    continuousModeRef.current = continuousMode;
+  }, [continuousMode]);
+  
+  useEffect(() => {
+    startRecordingRef.current = startRecording;
+  }, [startRecording]);
+  
+  // Callback when TTS finishes speaking
+  const handleSpeakEnd = useCallback(() => {
+    console.log('🔊 TTS finished speaking, continuousMode:', continuousModeRef.current);
+    if (continuousModeRef.current && !isRecording && !isProcessing && isOpen) {
+      // Small delay before starting recording to avoid feedback
+      setTimeout(() => {
+        if (continuousModeRef.current && startRecordingRef.current && !isRecording && !isProcessing && isOpen) {
+          console.log('🎤 Auto-starting recording in continuous mode');
+          startRecordingRef.current();
+        }
+      }, 500);
+    }
+  }, [isRecording, isProcessing, isOpen]);
+
+  // Text-to-Speech with callback when speech ends
+  const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate } = useTextToSpeech(language, handleSpeakEnd);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  
+  // Toggle continuous conversation mode
+  const toggleContinuousMode = useCallback(() => {
+    setContinuousMode(prev => !prev);
+  }, []);
 
   // Ref to store pending auto-send message
   const pendingAutoSendRef = useRef<string | null>(null);
@@ -2092,6 +2137,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               }
                             </Button>
                           </div>
+                          
+                          {/* Continuous conversation mode toggle */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium">
+                              {language === "TR" ? "Sürekli Konuşma" : "Continuous Mode"}
+                            </span>
+                            <Button
+                              variant={continuousMode ? "default" : "outline"}
+                              size="sm"
+                              onClick={toggleContinuousMode}
+                              className="h-6 px-2 text-[10px]"
+                            >
+                              {continuousMode 
+                                ? (language === "TR" ? "Açık" : "On")
+                                : (language === "TR" ? "Kapalı" : "Off")
+                              }
+                            </Button>
+                          </div>
 
                           {/* Voice selection with gender filter */}
                           {availableVoices.length > 0 && (
@@ -2586,6 +2649,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   className="h-7 px-3"
                 >
                   {isVoiceEnabled 
+                    ? (language === "TR" ? "Açık" : "On")
+                    : (language === "TR" ? "Kapalı" : "Off")
+                  }
+                </Button>
+              </div>
+              
+              {/* Continuous conversation mode toggle */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  {language === "TR" ? "Sürekli Konuşma" : "Continuous Mode"}
+                </span>
+                <Button
+                  variant={continuousMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={toggleContinuousMode}
+                  className="h-7 px-3"
+                >
+                  {continuousMode 
                     ? (language === "TR" ? "Açık" : "On")
                     : (language === "TR" ? "Kapalı" : "Off")
                   }
