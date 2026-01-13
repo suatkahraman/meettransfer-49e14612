@@ -58,11 +58,11 @@ export const FloatingLabelSelect = React.memo(React.forwardRef<
       {/* Floating Label - CSS transition instead of framer-motion */}
       <label
         className={cn(
-          "absolute left-10 pointer-events-none z-10 origin-left",
-          "text-sm font-medium bg-card px-1",
+          "absolute left-11 md:left-10 pointer-events-none z-10 origin-left",
+          "text-base md:text-sm font-medium bg-card px-1",
           "transition-all duration-200 ease-out",
           isFloating 
-            ? "-translate-y-[22px] -translate-x-1 scale-75 text-xs" 
+            ? "-translate-y-[24px] md:-translate-y-[22px] -translate-x-1 scale-75 text-xs" 
             : "top-1/2 -translate-y-1/2",
           isFocused ? "text-primary" : "text-muted-foreground"
         )}
@@ -76,25 +76,25 @@ export const FloatingLabelSelect = React.memo(React.forwardRef<
           onFocus={handleFocus}
           onBlur={handleBlur}
           className={cn(
-            "h-12 bg-muted/50 border-border rounded-xl text-sm touch-manipulation",
+            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] bg-muted/50 border-border rounded-xl text-base md:text-sm touch-manipulation",
             "transition-all duration-200 ease-out",
             "focus:ring-2 focus:ring-primary/20 focus:border-primary active:bg-muted/80",
             isFocused && "border-primary shadow-sm shadow-primary/10",
             triggerClassName
           )}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5 md:gap-2 pl-0.5">
             {icon && (
               <span
                 className={cn(
-                  "flex-shrink-0 transition-all duration-150",
+                  "flex-shrink-0 transition-all duration-150 [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4",
                   isFocused && "text-primary scale-110"
                 )}
               >
                 {icon}
               </span>
             )}
-            <span className={cn("truncate", !hasValue && "text-transparent")}>
+            <span className={cn("truncate text-base md:text-sm", !hasValue && "text-transparent")}>
               {selectedLabel}
             </span>
           </div>
@@ -104,7 +104,7 @@ export const FloatingLabelSelect = React.memo(React.forwardRef<
             <SelectItem 
               key={option.value} 
               value={option.value}
-              className="cursor-pointer active:bg-primary/20 focus:bg-accent touch-manipulation"
+              className="cursor-pointer active:bg-primary/20 focus:bg-accent touch-manipulation text-base md:text-sm py-3 md:py-2"
             >
               {option.label}
             </SelectItem>
