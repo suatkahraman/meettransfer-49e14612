@@ -12,7 +12,7 @@ interface HeroAIAssistantProps {
 
 export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssistantProps) => {
   return (
-    <div className="mb-4 relative">
+    <div id="ai-assistant" className="mb-4 relative">
       {/* Content Container - Softer colors */}
       <div className="relative bg-muted/50 rounded-xl p-3 border border-border backdrop-blur-sm">
         {/* Badge */}

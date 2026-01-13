@@ -517,6 +517,23 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   // Ref to store pending auto-send message
   const pendingAutoSendRef = useRef<string | null>(null);
 
+  // Allow other parts of the UI to open/prefill the chat (AI shortcut)
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const e = event as CustomEvent<{ message?: string }>;
+      const nextMessage = e.detail?.message;
+
+      setIsOpen(true);
+      if (typeof nextMessage === "string") {
+        setInput(nextMessage);
+        setTimeout(() => inputRef.current?.focus(), 50);
+      }
+    };
+
+    window.addEventListener("booking-ai-open", handler as EventListener);
+    return () => window.removeEventListener("booking-ai-open", handler as EventListener);
+  }, []);
+
   // Handle AI parameter from URL - auto-open chat and auto-send route message
   useEffect(() => {
     if (hasHandledAIParamRef.current) return;
@@ -891,32 +908,17 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       <AnimatePresence>
         {!isOpen && (
           <motion.button
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0.98, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            exit={{ scale: 0.98, opacity: 0 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setIsOpen(true)}
             data-chat-trigger
-            className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-[9999] flex items-center gap-1.5 px-3.5 py-2.5 md:px-4 md:py-3 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
-            style={{ 
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(0,0,0,0.15)',
-            }}
+            className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-[9999] flex items-center gap-2 px-3.5 py-2.5 md:px-4 md:py-3 bg-card text-foreground rounded-full shadow-lg border border-border/60"
           >
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 2, repeatDelay: 3 }}
-            >
-              <Sparkles className="h-4 w-4" />
-            </motion.div>
+            <Sparkles className="h-4 w-4 text-muted-foreground" />
             <span className="font-semibold text-sm">AI</span>
-            {/* Pulse effect for visibility */}
-            <motion.div
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-accent"
-              animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0, 0.6] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              style={{ zIndex: -1 }}
-            />
           </motion.button>
         )}
       </AnimatePresence>
@@ -937,19 +939,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         }}
         className={cn(
           "relative overflow-hidden",
-          "bg-gradient-to-br from-card via-card to-muted/30",
-          "shadow-2xl border border-border/50",
-          "backdrop-blur-xl",
+          "bg-card",
+          "shadow-xl border border-border/50",
+          "backdrop-blur-sm",
           // Mobile: max height when open, not full screen
           isOpen 
             ? "max-h-[70vh] md:max-h-none md:h-[500px] rounded-3xl" 
             : "h-auto rounded-3xl"
         )}
       >
-        {/* Decorative gradient orbs */}
-        <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-tr from-accent/20 to-primary/20 rounded-full blur-3xl pointer-events-none" />
-        
         {/* Header */}
         <motion.button
           onClick={() => setIsOpen(!isOpen)}
@@ -958,16 +956,16 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           className="relative w-full flex items-center justify-between p-4 md:p-5 transition-all z-10"
         >
           <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-            {/* Animated Avatar */}
+            {/* Avatar */}
             <div className="relative flex-shrink-0">
               <motion.div 
-                className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg"
-                whileHover={{ rotate: 5 }}
+                className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-muted border border-border/60 flex items-center justify-center shadow-sm"
+                whileHover={{ rotate: 2 }}
               >
-                <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
+                <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
               </motion.div>
               {/* Online indicator */}
-              <span className="absolute -bottom-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full border-2 border-card shadow-md" />
+              <span className="absolute -bottom-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-primary/40 rounded-full border-2 border-card shadow-sm" />
             </div>
             
             <div className="text-left min-w-0 flex-1">
@@ -976,7 +974,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 <motion.span 
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="text-[9px] md:text-[10px] px-2 py-0.5 md:px-2.5 md:py-1 bg-gradient-to-r from-accent to-accent/80 rounded-full text-accent-foreground font-bold uppercase tracking-wide shadow-sm flex-shrink-0"
+                  className="text-[9px] md:text-[10px] px-2 py-0.5 md:px-2.5 md:py-1 bg-muted rounded-full text-muted-foreground font-bold uppercase tracking-wide shadow-sm flex-shrink-0"
                 >
                   {t("new") || "NEW"}
                 </motion.span>
@@ -1193,10 +1191,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     >
                       {msg.role === "assistant" && (
                         <motion.div 
-                          className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-md"
-                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          className="w-8 h-8 rounded-xl bg-muted border border-border/60 flex items-center justify-center flex-shrink-0 shadow-sm"
+                          whileHover={{ scale: 1.05, rotate: 2 }}
                         >
-                          <Bot className="h-4 w-4 text-primary-foreground" />
+                          <Bot className="h-4 w-4 text-muted-foreground" />
                         </motion.div>
                       )}
                       
@@ -1390,7 +1388,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               </ScrollArea>
 
               {/* Input Area */}
-              <div className="p-3 md:p-4 border-t border-border/30 bg-gradient-to-t from-muted/50 to-transparent" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+              <div className="p-3 md:p-4 border-t border-border/30 bg-muted/20" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
                 {/* Browser Support Warning */}
                 <AnimatePresence>
                   {showBrowserWarning && (
@@ -1505,7 +1503,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       className={cn(
                         "h-11 w-11 md:h-12 md:w-12 rounded-xl transition-all touch-manipulation",
                         input.trim() 
-                          ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg hover:shadow-xl" 
+                          ? "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80" 
                           : "bg-muted text-muted-foreground"
                       )}
                     >
