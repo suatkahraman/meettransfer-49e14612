@@ -105,36 +105,24 @@ export const VehicleSelector = memo(({
                 )}
                 style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                {/* Vehicle Image - Square aspect ratio */}
+                {/* Vehicle Image - Square aspect ratio with carousel */}
                 <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 sm:mb-2 bg-muted relative">
-                  {/* Mobile: Static image for performance */}
-                  <img 
-                    src={vehicleImages[vehicle.value]} 
-                    alt={vehicle.label}
-                    className="w-full h-full object-cover sm:hidden pointer-events-none"
-                    loading={index === 0 ? "eager" : "lazy"}
-                    draggable={false}
-                  />
-                  
-                  {/* Desktop: Auto-rotating carousel */}
-                  <div className="hidden sm:block w-full h-full">
-                    <Suspense fallback={
-                      <img 
-                        src={vehicleImages[vehicle.value]} 
-                        alt={vehicle.label}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    }>
-                      <VehicleImageCarousel
-                        images={vehicle.images.slice(0, 4).map(img => img.src)}
-                        alt={vehicle.label}
-                        className="w-full h-full"
-                        interval={4000}
-                        isHovered={isHovered}
-                      />
-                    </Suspense>
-                  </div>
+                  <Suspense fallback={
+                    <img 
+                      src={vehicleImages[vehicle.value]} 
+                      alt={vehicle.label}
+                      className="w-full h-full object-cover"
+                      loading={index === 0 ? "eager" : "lazy"}
+                    />
+                  }>
+                    <VehicleImageCarousel
+                      images={vehicle.images.slice(0, 4).map(img => img.src)}
+                      alt={vehicle.label}
+                      className="w-full h-full"
+                      interval={4000}
+                      isHovered={isHovered}
+                    />
+                  </Suspense>
                   
                   {/* Info Button */}
                   <div
