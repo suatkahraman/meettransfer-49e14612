@@ -125,7 +125,7 @@ export const VehicleTooltip = ({
         <motion.div
           ref={tooltipRef}
           className={cn(
-            "absolute z-[100] w-56 sm:w-64 bg-card border border-border rounded-xl shadow-2xl p-3 pointer-events-none",
+            "absolute z-[100] w-56 sm:w-64 bg-card border border-border rounded-xl shadow-2xl p-3",
             positionClasses[position],
             className
           )}

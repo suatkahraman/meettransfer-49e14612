@@ -1,4 +1,4 @@
-import { memo, lazy, Suspense, useState } from "react";
+import { memo, lazy, Suspense, useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Check, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,17 @@ const vehicleImages: Record<string, string> = {
   'minibus': sprinterImg,
 };
 
+// Hook to detect touch device
+const useIsTouchDevice = () => {
+  const [isTouch, setIsTouch] = useState(false);
+  
+  useEffect(() => {
+    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+  
+  return isTouch;
+};
+
 interface VehicleSelectorProps {
   selectedVehicle: string;
   onSelectVehicle: (value: string) => void;
@@ -46,8 +57,49 @@ export const VehicleSelector = memo(({
   currency = "EUR"
 }: VehicleSelectorProps) => {
   const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
+  const [tappedVehicle, setTappedVehicle] = useState<string | null>(null);
   const [selectedVehicleForDetail, setSelectedVehicleForDetail] = useState<typeof VEHICLE_TYPES[0] | null>(null);
   const [isVehicleDetailOpen, setIsVehicleDetailOpen] = useState(false);
+  const isTouchDevice = useIsTouchDevice();
+
+  // Close tooltip when clicking outside
+  useEffect(() => {
+    if (!tappedVehicle) return;
+    
+    const handleClickOutside = (e: TouchEvent | MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-vehicle-card]')) {
+        setTappedVehicle(null);
+      }
+    };
+    
+    document.addEventListener('touchstart', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [tappedVehicle]);
+
+  // Handle tap on mobile - first tap shows tooltip, second tap selects
+  const handleVehicleTap = useCallback((vehicle: typeof VEHICLE_TYPES[0], isDisabled: boolean) => {
+    if (isDisabled) return;
+    
+    if (isTouchDevice) {
+      if (tappedVehicle === vehicle.value) {
+        // Second tap - select the vehicle
+        onSelectVehicle(vehicle.value);
+        setTappedVehicle(null);
+      } else {
+        // First tap - show tooltip
+        setTappedVehicle(vehicle.value);
+      }
+    } else {
+      // Desktop - just select
+      onSelectVehicle(vehicle.value);
+    }
+  }, [isTouchDevice, tappedVehicle, onSelectVehicle]);
 
   return (
     <>
@@ -57,6 +109,10 @@ export const VehicleSelector = memo(({
           const isSelected = selectedVehicle === vehicle.value;
           const isDisabled = vehicle.passengers < parseInt(passengers);
           const isHovered = hoveredVehicle === vehicle.value;
+          const isTapped = tappedVehicle === vehicle.value;
+          
+          // Show tooltip on hover (desktop) or tap (mobile)
+          const showTooltip = (isHovered || isTapped) && !isDisabled;
           
           // Determine tooltip position based on vehicle index to prevent off-screen
           // For 4 columns: items 0,1 (left side) use top, items 2,3 (right side) use top-left alignment
@@ -66,14 +122,15 @@ export const VehicleSelector = memo(({
             <motion.div 
               key={vehicle.value}
               className="relative"
-              onMouseEnter={() => !isDisabled && setHoveredVehicle(vehicle.value)}
-              onMouseLeave={() => setHoveredVehicle(null)}
+              data-vehicle-card
+              onMouseEnter={() => !isTouchDevice && !isDisabled && setHoveredVehicle(vehicle.value)}
+              onMouseLeave={() => !isTouchDevice && setHoveredVehicle(null)}
             >
               {/* Tooltip - with proper alignment for right-side items */}
               <Suspense fallback={null}>
                 <VehicleTooltip 
                   vehicleType={vehicle.value}
-                  isVisible={isHovered && !isDisabled}
+                  isVisible={showTooltip}
                   position="top"
                   isTurkish={language === 'TR'}
                   alignRight={isRightSide}
@@ -82,7 +139,7 @@ export const VehicleSelector = memo(({
               
               <motion.button
                 type="button"
-                onClick={() => !isDisabled && onSelectVehicle(vehicle.value)}
+                onClick={() => handleVehicleTap(vehicle, isDisabled)}
                 disabled={isDisabled}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
