@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, Settings2, ChevronDown, Trash2, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { MobileTooltip } from "@/components/ui/mobile-tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -1441,42 +1441,45 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         {/* Mobile Floating Toggle Button - More prominent with animation */}
         <AnimatePresence>
           {!isOpen && (
-            <Tooltip delayDuration={300}>
-              <TooltipTrigger asChild>
-                <motion.button
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsOpen(true)}
-                  data-chat-trigger
-                  className="fixed bottom-[calc(8.75rem+env(safe-area-inset-bottom))] right-3 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
-                  style={{
-                    WebkitTapHighlightColor: "transparent",
-                    boxShadow:
-                      "0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 3px hsl(var(--primary) / 0.2)",
-                  }}
-                >
-                  <motion.div
-                    animate={{ rotate: [0, 15, -15, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Sparkles className="h-4 w-4" />
-                  </motion.div>
-                  <span className="font-bold text-sm">AI</span>
-                  <motion.span
-                    className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  />
-                </motion.button>
-              </TooltipTrigger>
-              <TooltipContent side="left" className="bg-primary text-primary-foreground border-primary">
-                <p className="font-medium">
+            <MobileTooltip
+              content={
+                <span className="font-medium">
                   {language === "TR" ? "AI Rezervasyon Asistanı" : "AI Booking Assistant"}
-                </p>
-              </TooltipContent>
-            </Tooltip>
+                </span>
+              }
+              side="left"
+              contentClassName="bg-primary text-primary-foreground border border-primary"
+              longPressThreshold={400}
+              autoHideDelay={2500}
+            >
+              <motion.button
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsOpen(true)}
+                data-chat-trigger
+                className="fixed bottom-[calc(8.75rem+env(safe-area-inset-bottom))] right-3 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
+                style={{
+                  WebkitTapHighlightColor: "transparent",
+                  boxShadow:
+                    "0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 3px hsl(var(--primary) / 0.2)",
+                }}
+              >
+                <motion.div
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Sparkles className="h-4 w-4" />
+                </motion.div>
+                <span className="font-bold text-sm">AI</span>
+                <motion.span
+                  className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+              </motion.button>
+            </MobileTooltip>
           )}
         </AnimatePresence>
 
