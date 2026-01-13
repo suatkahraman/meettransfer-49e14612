@@ -3,6 +3,7 @@ import { Users, Briefcase, Check, Sparkles } from "lucide-react";
 import { VEHICLE_TYPES, VehicleTypeInfo } from "@/lib/vehicleTypes";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 // Feature icon mapping
 const getFeatureIcon = (iconName: string) => {
@@ -29,7 +30,9 @@ interface VehicleTooltipProps {
   position?: "top" | "bottom" | "left" | "right";
   isTurkish?: boolean;
   className?: string;
-  alignRight?: boolean; // Force right alignment for right-side items
+  alignRight?: boolean;
+  onSelect?: () => void; // Callback for select button
+  isSelected?: boolean;
 }
 
 export const VehicleTooltip = ({ 
@@ -38,7 +41,9 @@ export const VehicleTooltip = ({
   position = "top",
   isTurkish = false,
   className,
-  alignRight = false
+  alignRight = false,
+  onSelect,
+  isSelected = false
 }: VehicleTooltipProps) => {
   const vehicle = VEHICLE_TYPES.find(v => v.value === vehicleType);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -176,7 +181,7 @@ export const VehicleTooltip = ({
           </p>
 
           {/* Features */}
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 mb-2">
             {vehicle.features.slice(0, 4).map((feature, index) => (
               <motion.div
                 key={feature.label}
@@ -198,6 +203,28 @@ export const VehicleTooltip = ({
               </div>
             )}
           </div>
+
+          {/* Select Button - Visible on touch devices */}
+          {onSelect && (
+            <Button
+              size="sm"
+              variant={isSelected ? "secondary" : "default"}
+              className="w-full h-7 text-xs font-medium"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect();
+              }}
+            >
+              {isSelected ? (
+                <>
+                  <Check className="h-3 w-3 mr-1" />
+                  {isTurkish ? 'Seçildi' : 'Selected'}
+                </>
+              ) : (
+                isTurkish ? 'Seç' : 'Select'
+              )}
+            </Button>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

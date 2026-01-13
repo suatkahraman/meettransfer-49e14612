@@ -134,6 +134,11 @@ export const VehicleSelector = memo(({
                   position="top"
                   isTurkish={language === 'TR'}
                   alignRight={isRightSide}
+                  onSelect={isTouchDevice ? () => {
+                    onSelectVehicle(vehicle.value);
+                    setTappedVehicle(null);
+                  } : undefined}
+                  isSelected={isSelected}
                 />
               </Suspense>
               
