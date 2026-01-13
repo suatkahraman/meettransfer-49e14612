@@ -108,11 +108,24 @@ export function PWAUpdatePrompt() {
   }, []);
 
   const texts = {
-    title: language === "TR" ? "Yeni Sürüm Hazır!" : "New Version Available!",
-    description: language === "TR" 
-      ? "Daha iyi deneyim için güncelleyin" 
-      : "Update for a better experience",
-    updateBtn: language === "TR" ? "Şimdi Güncelle" : "Update Now",
+    title: {
+      TR: "Yeni Sürüm Hazır!",
+      EN: "New Version Available!",
+      DE: "Neue Version verfügbar!",
+      FR: "Nouvelle version disponible !",
+    }[language] ?? "New Version Available!",
+    description: {
+      TR: "Daha iyi deneyim için güncelleyin",
+      EN: "Update for a better experience",
+      DE: "Aktualisieren Sie für ein besseres Erlebnis",
+      FR: "Mettez à jour pour une meilleure expérience",
+    }[language] ?? "Update for a better experience",
+    updateBtn: {
+      TR: "Şimdi Güncelle",
+      EN: "Update Now",
+      DE: "Jetzt aktualisieren",
+      FR: "Mettre à jour",
+    }[language] ?? "Update Now",
   };
 
   return (
