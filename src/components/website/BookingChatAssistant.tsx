@@ -888,6 +888,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const [visitorId] = useState(() => getVisitorId());
   const [bookingCreated, setBookingCreated] = useState<{ id: string; token: string } | null>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const baselineViewportHeightRef = useRef<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dragControls = useDragControls();
