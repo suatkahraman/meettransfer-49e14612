@@ -113,7 +113,7 @@ export const HeroVisualSection = memo(({
       >
         <div className="relative">
           {/* Main Video/Image */}
-          <div className="relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl">
+          <div className="relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
             {showVideo && currentVideo ? (
               <div className="relative w-full h-48 md:h-56 lg:h-80 overflow-hidden">
                 {/* Render all videos but only show current - smooth crossfade with subtle scale */}
@@ -124,7 +124,7 @@ export const HeroVisualSection = memo(({
                     muted
                     loop
                     playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105"
                     initial={false}
                     animate={{ 
                       opacity: index === currentVideoIndex ? 1 : 0,
@@ -140,9 +140,9 @@ export const HeroVisualSection = memo(({
                   </motion.video>
                 ))}
                 
-                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 z-20">
-                  <Globe className="h-3 w-3 text-white" />
-                  <span className="text-xs text-white font-medium">
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-md rounded-full px-3 py-1.5 z-20 border border-white/20">
+                  <Globe className="h-3.5 w-3.5 text-white" />
+                  <span className="text-xs text-white font-semibold">
                     {language === 'TR' ? currentVideo.labelTR : currentVideo.label}
                   </span>
                 </div>
@@ -151,32 +151,33 @@ export const HeroVisualSection = memo(({
               <img
                 src={heroMercedes}
                 alt="VIP Transfer"
-                className="w-full h-48 md:h-56 lg:h-80 object-cover"
+                className="w-full h-48 md:h-56 lg:h-80 object-cover brightness-110 contrast-105"
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+            {/* Lighter gradient for better image visibility */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent pointer-events-none" />
             
-            {/* Overlay Content */}
+            {/* Overlay Content - with better contrast */}
             <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-6 z-20">
-              <div className="text-white">
-                <h3 className="text-sm lg:text-lg font-bold mb-1 lg:mb-2">{t("premiumFleet") || "Premium Mercedes Fleet"}</h3>
+              <div className="text-white drop-shadow-lg">
+                <h3 className="text-sm lg:text-lg font-bold mb-1 lg:mb-2 drop-shadow-md">{t("premiumFleet") || "Premium Mercedes Fleet"}</h3>
                 <div className="flex flex-wrap gap-1.5 lg:gap-3">
-                  <div className="flex items-center gap-1 text-xs lg:text-sm bg-white/20 backdrop-blur-sm rounded-full px-2 lg:px-3 py-0.5 lg:py-1">
+                  <div className="flex items-center gap-1 text-xs lg:text-sm bg-black/40 backdrop-blur-md rounded-full px-2.5 lg:px-3.5 py-1 lg:py-1.5 border border-white/20">
                     <Wifi className="h-3 lg:h-3.5 w-3 lg:w-3.5" />
-                    <span className="hidden lg:inline">Free WiFi</span>
-                    <span className="lg:hidden">WiFi</span>
+                    <span className="hidden lg:inline font-medium">Free WiFi</span>
+                    <span className="lg:hidden font-medium">WiFi</span>
                   </div>
-                  <div className="flex items-center gap-1 text-xs lg:text-sm bg-white/20 backdrop-blur-sm rounded-full px-2 lg:px-3 py-0.5 lg:py-1">
+                  <div className="flex items-center gap-1 text-xs lg:text-sm bg-black/40 backdrop-blur-md rounded-full px-2.5 lg:px-3.5 py-1 lg:py-1.5 border border-white/20">
                     <Baby className="h-3 lg:h-3.5 w-3 lg:w-3.5" />
-                    <span className="hidden lg:inline">{language === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}</span>
-                    <span className="lg:hidden">{language === 'TR' ? 'Koltuk' : 'Seat'}</span>
+                    <span className="hidden lg:inline font-medium">{language === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}</span>
+                    <span className="lg:hidden font-medium">{language === 'TR' ? 'Koltuk' : 'Seat'}</span>
                   </div>
-                  <div className="hidden lg:flex items-center gap-1.5 text-sm bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                  <div className="hidden lg:flex items-center gap-1.5 text-sm bg-black/40 backdrop-blur-md rounded-full px-3.5 py-1.5 border border-white/20">
                     <Briefcase className="h-3.5 w-3.5" />
-                    <span>Meet & Greet</span>
+                    <span className="font-medium">Meet & Greet</span>
                   </div>
                 </div>
               </div>
