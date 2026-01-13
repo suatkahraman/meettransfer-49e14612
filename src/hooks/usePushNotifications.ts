@@ -120,36 +120,18 @@ export const usePushNotifications = () => {
         return false;
       }
 
-      // Try to get existing registration or wait with timeout
-      let registration: ServiceWorkerRegistration | null = null;
-      
-      // Check if there's already a registration
-      const existingRegistrations = await navigator.serviceWorker.getRegistrations();
-      const pushSwRegistration = existingRegistrations.find(r => r.active?.scriptURL?.includes('sw-push.js'));
-      
-      if (pushSwRegistration) {
-        registration = pushSwRegistration;
-      } else {
-        // Try to register the push service worker
-        try {
-          registration = await navigator.serviceWorker.register('/sw-push.js');
-          // Wait for it to be ready with a timeout
-          await Promise.race([
-            navigator.serviceWorker.ready,
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Service worker timeout')), 5000))
-          ]);
-        } catch (swError) {
-          console.error('Service worker registration failed:', swError);
-          toast.error('Failed to initialize notifications');
-          return false;
-        }
-      }
+      // Ensure we have an active SW registration (PWA SW controls the page)
+      // The push handlers are merged into the same SW via Workbox importScripts.
+      let registration: ServiceWorkerRegistration;
 
-      if (!registration) {
-        toast.error('Notification service not available');
+      try {
+        registration = await navigator.serviceWorker.ready;
+      } catch (swError) {
+        console.error('Service worker not ready:', swError);
+        toast.error('Failed to initialize notifications');
         return false;
       }
-      
+
       // Subscribe to push
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,

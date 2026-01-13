@@ -106,6 +106,10 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,svg,woff,woff2}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+        cleanupOutdatedCaches: true,
+        // Merge our push-notification handlers into the SAME SW scope
+        // so PWA caching + push can coexist and updates can be prompted.
+        importScripts: ["sw-push.js"],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

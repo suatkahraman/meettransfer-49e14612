@@ -1,89 +1,111 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, X, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { registerSW } from "virtual:pwa-register";
 
 /**
- * Listens for service worker updates and shows a prompt to reload the app.
- * Works with vite-plugin-pwa's "prompt" registerType.
+ * Registers the PWA service worker (vite-plugin-pwa, registerType=prompt)
+ * and shows an in-app prompt when a new version is available.
  */
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
   const [showPrompt, setShowPrompt] = useState(false);
-  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
 
-  // Check for waiting service worker on mount and listen for updates
+  const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
+  const updateSWRef = useRef<((reloadPage?: boolean) => Promise<void>) | null>(null);
+
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
 
-    const checkForUpdates = async () => {
-      try {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        
-        for (const reg of registrations) {
-          // If there's a waiting worker, show prompt immediately
-          if (reg.waiting) {
-            setWaitingWorker(reg.waiting);
-            setShowPrompt(true);
-            return;
+    // Register SW once.
+    updateSWRef.current = registerSW({
+      immediate: true,
+      onRegisteredSW: (_swUrl, registration) => {
+        registrationRef.current = registration ?? null;
+
+        // If there's already a waiting worker (e.g. user kept an old tab open), show immediately.
+        if (registration?.waiting) setShowPrompt(true);
+
+        const requestUpdateCheck = async () => {
+          try {
+            await registration?.update();
+            if (registration?.waiting) setShowPrompt(true);
+          } catch {
+            // ignore
           }
+        };
 
-          // Listen for future updates
-          reg.addEventListener("updatefound", () => {
-            const newWorker = reg.installing;
-            if (!newWorker) return;
+        // Aggressive update checks
+        requestUpdateCheck();
+        const interval = window.setInterval(requestUpdateCheck, 30_000);
 
-            newWorker.addEventListener("statechange", () => {
-              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                // New content is available
-                setWaitingWorker(newWorker);
-                setShowPrompt(true);
-              }
-            });
-          });
-        }
+        const onVisible = () => {
+          if (document.visibilityState === "visible") requestUpdateCheck();
+        };
 
-        // Listen for controllerchange (when new SW takes over)
-        navigator.serviceWorker.addEventListener("controllerchange", () => {
-          // Reload when new SW activates
-          window.location.reload();
-        });
-      } catch (error) {
-        console.log("[PWA Update] Error checking for updates:", error);
-      }
+        window.addEventListener("focus", requestUpdateCheck);
+        window.addEventListener("online", requestUpdateCheck);
+        document.addEventListener("visibilitychange", onVisible);
+
+        return () => {
+          window.clearInterval(interval);
+          window.removeEventListener("focus", requestUpdateCheck);
+          window.removeEventListener("online", requestUpdateCheck);
+          document.removeEventListener("visibilitychange", onVisible);
+        };
+      },
+      onNeedRefresh: () => {
+        setShowPrompt(true);
+      },
+      onRegisterError: (error) => {
+        console.log("[PWA Update] SW register error:", error);
+      },
+    });
+
+    // Fallback: if the browser already has a waiting worker but callbacks didn't fire yet.
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg?.waiting) setShowPrompt(true);
+    });
+
+    // Fallback reload when the new SW takes control.
+    const onControllerChange = () => window.location.reload();
+    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+
+    return () => {
+      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
     };
-
-    // Check immediately and periodically
-    checkForUpdates();
-    const interval = setInterval(checkForUpdates, 60 * 1000); // Check every minute
-
-    return () => clearInterval(interval);
   }, []);
 
   const handleUpdate = useCallback(() => {
-    if (!waitingWorker) {
-      // Fallback: just reload
-      window.location.reload();
+    const updateSW = updateSWRef.current;
+    const waiting = registrationRef.current?.waiting;
+
+    // Preferred flow (vite-plugin-pwa helper)
+    if (updateSW) {
+      void updateSW(true);
+      setShowPrompt(false);
       return;
     }
 
-    // Tell the waiting worker to skip waiting and activate
-    waitingWorker.postMessage({ type: "SKIP_WAITING" });
-    
-    // The controllerchange event will trigger a reload
-    setShowPrompt(false);
-  }, [waitingWorker]);
+    // Hard fallback
+    if (waiting) {
+      waiting.postMessage({ type: "SKIP_WAITING" });
+      setShowPrompt(false);
+      return;
+    }
+
+    window.location.reload();
+  }, []);
 
   const handleDismiss = useCallback(() => {
     setShowPrompt(false);
-    // Show again after 5 minutes if still not updated
-    setTimeout(() => {
-      if (waitingWorker) {
-        setShowPrompt(true);
-      }
+    // If user dismisses, remind later if still waiting.
+    window.setTimeout(() => {
+      if (registrationRef.current?.waiting) setShowPrompt(true);
     }, 5 * 60 * 1000);
-  }, [waitingWorker]);
+  }, []);
 
   const texts = {
     title: language === "TR" ? "Yeni Sürüm Hazır!" : "New Version Available!",
