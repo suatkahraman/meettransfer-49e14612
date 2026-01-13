@@ -11,6 +11,8 @@ import vitoVipImg from "@/assets/vito-vip-1.jpg";
 import maybachImg from "@/assets/maybach-1.jpg";
 import sprinterImg from "@/assets/sprinter-1.jpg";
 
+// Lazy load heavy components
+const VehicleImageCarousel = lazy(() => import("@/components/website/VehicleImageCarousel").then(m => ({ default: m.VehicleImageCarousel })));
 const VehicleDetailModal = lazy(() => import("@/components/website/VehicleDetailModal").then(m => ({ default: m.VehicleDetailModal })));
 
 const vehicleImages: Record<string, string> = {
@@ -42,11 +44,12 @@ export const VehicleSelector = memo(({
   language,
   currency = "EUR"
 }: VehicleSelectorProps) => {
+  const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
   const [selectedVehicleForDetail, setSelectedVehicleForDetail] = useState<typeof VEHICLE_TYPES[0] | null>(null);
   const [isVehicleDetailOpen, setIsVehicleDetailOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Simple direct click handler
+  // Simple click handler
   const handleVehicleClick = useCallback((vehicle: typeof VEHICLE_TYPES[0], isDisabled: boolean) => {
     if (isDisabled) return;
     onSelectVehicle(vehicle.value);
@@ -60,6 +63,15 @@ export const VehicleSelector = memo(({
     setIsVehicleDetailOpen(true);
   }, []);
 
+  // Hover handlers for desktop carousel
+  const handleMouseEnter = useCallback((vehicleValue: string) => {
+    setHoveredVehicle(vehicleValue);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredVehicle(null);
+  }, []);
+
   return (
     <>
       <div ref={containerRef} className="grid grid-cols-4 gap-2 sm:gap-3">
@@ -67,12 +79,15 @@ export const VehicleSelector = memo(({
           const vehiclePrice = prices.find(v => v.vehicleType === vehicle.value);
           const isSelected = selectedVehicle === vehicle.value;
           const isDisabled = vehicle.passengers < parseInt(passengers);
+          const isHovered = hoveredVehicle === vehicle.value;
           
           return (
             <div 
               key={vehicle.value}
               className="relative"
               data-vehicle-card
+              onMouseEnter={() => handleMouseEnter(vehicle.value)}
+              onMouseLeave={handleMouseLeave}
             >
               <button
                 type="button"
@@ -92,13 +107,34 @@ export const VehicleSelector = memo(({
               >
                 {/* Vehicle Image - Square aspect ratio */}
                 <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 sm:mb-2 bg-muted relative">
+                  {/* Mobile: Static image for performance */}
                   <img 
                     src={vehicleImages[vehicle.value]} 
                     alt={vehicle.label}
-                    className="w-full h-full object-cover pointer-events-none"
+                    className="w-full h-full object-cover sm:hidden pointer-events-none"
                     loading={index === 0 ? "eager" : "lazy"}
                     draggable={false}
                   />
+                  
+                  {/* Desktop: Auto-rotating carousel */}
+                  <div className="hidden sm:block w-full h-full">
+                    <Suspense fallback={
+                      <img 
+                        src={vehicleImages[vehicle.value]} 
+                        alt={vehicle.label}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    }>
+                      <VehicleImageCarousel
+                        images={vehicle.images.slice(0, 4).map(img => img.src)}
+                        alt={vehicle.label}
+                        className="w-full h-full"
+                        interval={4000}
+                        isHovered={isHovered}
+                      />
+                    </Suspense>
+                  </div>
                   
                   {/* Info Button */}
                   <div
