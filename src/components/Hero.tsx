@@ -384,8 +384,8 @@ export const Hero = () => {
     <section ref={heroRef} id="booking-form" className="relative min-h-screen overflow-hidden bg-background">
       <HeroBackground videosLoaded={videosLoaded} cityVideos={cityVideos} currentVideoIndex={currentVideoIndex} setCurrentVideoIndex={setCurrentVideoIndex} language={language} />
 
-      <div className="container relative z-10 px-2 sm:px-3 md:px-4 pt-4 pb-3 sm:pt-5 sm:pb-4 md:py-8 lg:py-16">
-        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100vh-5rem)] sm:min-h-[calc(100vh-6rem)] md:min-h-[calc(100vh-8rem)]">
+      <div className="container relative z-10 px-2 sm:px-3 md:px-4 pt-20 md:pt-24 pb-3 sm:pb-4 md:pb-8 lg:pb-16">
+        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100vh-8rem)] sm:min-h-[calc(100vh-9rem)] md:min-h-[calc(100vh-10rem)]">
           {/* Left Side - Form */}
           <div className="order-1 md:col-span-3 lg:col-span-1">
             <HeroHeader language={language} />
