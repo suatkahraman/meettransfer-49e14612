@@ -537,6 +537,12 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     return () => window.removeEventListener("booking-ai-open", handler as EventListener);
   }, []);
 
+  // Detect iOS device
+  const isIOSDevice = useCallback(() => {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }, []);
+
   // Detect keyboard visibility using visualViewport API for mobile
   useEffect(() => {
     if (!mobileFloating || !isOpen) {
@@ -548,17 +554,43 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     if (!viewport) return;
 
     let prevKeyboardHeight = 0;
+    const isIOS = isIOSDevice();
 
     const handleResize = () => {
       // Calculate keyboard height by comparing viewport height with window height
       const windowHeight = window.innerHeight;
       const viewportHeight = viewport.height;
-      const keyboardH = Math.max(0, windowHeight - viewportHeight);
+      const viewportOffsetTop = viewport.offsetTop || 0;
+      
+      // iOS Safari reports offsetTop when scrolled, use it for more accurate calculation
+      const keyboardH = isIOS 
+        ? Math.max(0, windowHeight - viewportHeight - viewportOffsetTop)
+        : Math.max(0, windowHeight - viewportHeight);
       
       // Detect keyboard closing (was open, now closed)
       if (prevKeyboardHeight > 50 && keyboardH < 50) {
         // Blur the input when keyboard closes for better UX
         inputRef.current?.blur();
+        
+        // iOS: Reset any residual scroll position
+        if (isIOS) {
+          window.scrollTo(0, 0);
+        }
+      }
+      
+      // Detect keyboard opening
+      if (prevKeyboardHeight < 50 && keyboardH > 50 && isIOS) {
+        // iOS: Ensure input is visible after keyboard opens
+        requestAnimationFrame(() => {
+          if (inputRef.current && document.activeElement === inputRef.current) {
+            // Use scrollIntoView with specific iOS-friendly options
+            inputRef.current.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'end',
+              inline: 'nearest'
+            });
+          }
+        });
       }
       
       prevKeyboardHeight = keyboardH;
@@ -575,7 +607,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       viewport.removeEventListener('resize', handleResize);
       viewport.removeEventListener('scroll', handleResize);
     };
-  }, [mobileFloating, isOpen]);
+  }, [mobileFloating, isOpen, isIOSDevice]);
 
   // Handle AI parameter from URL - auto-open chat and auto-send route message
   useEffect(() => {
@@ -998,6 +1030,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   setIsOpen(false);
                 }
               }}
+              data-mobile-panel
               className="fixed inset-x-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col transition-all duration-200"
               style={{ 
                 bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
@@ -1182,10 +1215,35 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     onFocus={() => {
-                      // Scroll input into view when keyboard opens
-                      setTimeout(() => {
-                        inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }, 300);
+                      // iOS Safari specific handling for keyboard focus
+                      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                      
+                      if (isIOS) {
+                        // iOS: Use longer delay and requestAnimationFrame for smoother scroll
+                        setTimeout(() => {
+                          requestAnimationFrame(() => {
+                            if (inputRef.current) {
+                              // Scroll the container instead of the input for iOS
+                              const container = inputRef.current.closest('[data-mobile-panel]');
+                              if (container) {
+                                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+                              }
+                              // Also try scrollIntoView as fallback
+                              inputRef.current.scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'end',
+                                inline: 'nearest'
+                              });
+                            }
+                          });
+                        }, 350);
+                      } else {
+                        // Android/other: standard behavior
+                        setTimeout(() => {
+                          inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                      }
                     }}
                     placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
                     disabled={isLoading || isRecording}
