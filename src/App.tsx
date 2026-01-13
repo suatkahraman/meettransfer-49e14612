@@ -122,6 +122,7 @@ const AboutPage = lazy(() => import("./pages/website/AboutPage"));
 const ContactPage = lazy(() => import("./pages/website/ContactPage"));
 const ReviewsPage = lazy(() => import("./pages/website/ReviewsPage"));
 const DestinationsPage = lazy(() => import("./pages/website/DestinationsPage"));
+const DestinationDetail = lazy(() => import("./pages/website/DestinationDetail"));
 const WhatsAppBooking = lazy(() => import("./pages/website/WhatsAppBooking"));
 const TermsPage = lazy(() => import("./pages/website/TermsPage"));
 const PrivacyPage = lazy(() => import("./pages/website/PrivacyPage"));
@@ -198,6 +199,7 @@ const App = () => (
               {localizedRoutes("/", <Index />)}
               {localizedRoutes("/services", <ServicesPage />)}
               {localizedRoutes("/destinations", <DestinationsPage />)}
+              {localizedRoutes("/destinations/:cityName", <DestinationDetail />)}
               {localizedRoutes("/fleet", <FleetPage />)}
               {localizedRoutes("/about", <AboutPage />)}
               {localizedRoutes("/contact", <ContactPage />)}
