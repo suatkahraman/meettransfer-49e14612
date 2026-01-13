@@ -254,9 +254,9 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     }
   }, []);
 
-  // Send audio to Whisper API for transcription
-  const transcribeWithWhisper = useCallback(async (audioBlob: Blob) => {
-    console.log('🎤 Whisper: Transcribing audio blob, size:', audioBlob.size);
+  // Send audio to ElevenLabs Scribe API for transcription (with Whisper fallback)
+  const transcribeWithElevenLabs = useCallback(async (audioBlob: Blob) => {
+    console.log('🎤 ElevenLabs STT: Transcribing audio blob, size:', audioBlob.size);
     setIsProcessing(true);
     
     try {
@@ -272,14 +272,15 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       }
       
       const base64Audio = btoa(binary);
-      console.log('🎤 Whisper: Base64 audio length:', base64Audio.length);
+      console.log('🎤 ElevenLabs STT: Base64 audio length:', base64Audio.length);
 
       // Detect MIME type from blob
       const detectedMimeType = audioBlob.type || 'audio/webm';
-      console.log('🎤 Whisper: Sending audio with type:', detectedMimeType);
+      console.log('🎤 ElevenLabs STT: Sending audio with type:', detectedMimeType);
       
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-to-text`,
+      // Try ElevenLabs first
+      let response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-stt`,
         {
           method: 'POST',
           headers: {
@@ -295,20 +296,41 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         }
       );
 
+      // If ElevenLabs fails, fallback to Whisper
+      if (!response.ok) {
+        console.log('🎤 ElevenLabs STT failed, falling back to Whisper...');
+        response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-to-text`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+            body: JSON.stringify({ 
+              audio: base64Audio, 
+              language,
+              mimeType: detectedMimeType 
+            }),
+          }
+        );
+      }
+
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('🎤 Whisper: API error:', response.status, errorText);
-        throw new Error(`Whisper API error: ${response.status}`);
+        console.error('🎤 STT API error:', response.status, errorText);
+        throw new Error(`STT API error: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log('🎤 Whisper: Transcription result:', result.text);
+      console.log('🎤 Transcription result:', result.text);
       
       if (result.text && result.text.trim()) {
         onTranscription(result.text.trim());
       }
     } catch (error) {
-      console.error('🎤 Whisper: Transcription error:', error);
+      console.error('🎤 Transcription error:', error);
     } finally {
       setIsProcessing(false);
     }
@@ -409,12 +431,12 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         if (audioChunksRef.current.length > 0) {
           // Use actual mimeType from recorder, not the variable
           const audioBlob = new Blob(audioChunksRef.current, { type: actualMimeType });
-          console.log('🎤 Whisper: Total audio blob size:', audioBlob.size, 'type:', actualMimeType);
+          console.log('🎤 ElevenLabs: Total audio blob size:', audioBlob.size, 'type:', actualMimeType);
           
           if (audioBlob.size > 1000) { // Only transcribe if there's meaningful audio
-            await transcribeWithWhisper(audioBlob);
+            await transcribeWithElevenLabs(audioBlob);
           } else {
-            console.log('🎤 Whisper: Audio too short, skipping transcription');
+            console.log('🎤 ElevenLabs: Audio too short, skipping transcription');
           }
         }
         
@@ -427,13 +449,13 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       
       mediaRecorder.start(100); // Collect data every 100ms
       setIsRecording(true);
-      console.log('🎤 Whisper: Recording started');
+      console.log('🎤 ElevenLabs: Recording started');
       
     } catch (error) {
-      console.error('🎤 Whisper: Error starting recording:', error);
+      console.error('🎤 ElevenLabs: Error starting recording:', error);
       setShowBrowserWarning(true);
     }
-  }, [transcribeWithWhisper, setupAudioAnalyser, cleanupAudioAnalyser]);
+  }, [transcribeWithElevenLabs, setupAudioAnalyser, cleanupAudioAnalyser]);
 
   // Stop Whisper recording
   const stopWhisperRecording = useCallback(() => {
@@ -742,6 +764,13 @@ interface VoiceOption {
   gender: 'male' | 'female' | 'neutral';
 }
 
+// Voice settings interface
+interface VoiceSettings {
+  stability: number;
+  similarityBoost: number;
+  style: number;
+}
+
 // Text-to-Speech hook using ElevenLabs API for high-quality voice
 function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -749,6 +778,11 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
   const [availableVoices, setAvailableVoices] = useState<VoiceOption[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
   const [speechRate, setSpeechRate] = useState(1.0);
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
+    stability: 0.5,
+    similarityBoost: 0.75,
+    style: 0.3,
+  });
   const [useElevenLabs, setUseElevenLabs] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
@@ -822,6 +856,10 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
           body: JSON.stringify({
             text: cleanText,
             voiceId: selectedVoiceId || 'FGY2WhTYpPnrIDTdsKH5',
+            stability: voiceSettings.stability,
+            similarityBoost: voiceSettings.similarityBoost,
+            style: voiceSettings.style,
+            speed: speechRate,
           }),
         }
       );
@@ -877,7 +915,7 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
       console.log('🔊 [ElevenLabs] Falling back to Web Speech API');
       speakWithWebSpeech(text);
     }
-  }, [selectedVoiceId, speechRate]);
+  }, [selectedVoiceId, speechRate, voiceSettings]);
 
   // Fallback Web Speech API
   const speakWithWebSpeech = useCallback((text: string) => {
@@ -977,6 +1015,10 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
     setSpeechRate(rate);
   }, []);
 
+  const changeVoiceSettings = useCallback((settings: VoiceSettings) => {
+    setVoiceSettings(settings);
+  }, []);
+
   return { 
     isSpeaking, 
     isVoiceEnabled, 
@@ -987,7 +1029,9 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
     selectedVoiceId, 
     selectVoice,
     speechRate,
-    changeRate
+    changeRate,
+    voiceSettings,
+    changeVoiceSettings
   };
 }
 
@@ -1178,7 +1222,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   }, [isRecording, isProcessing, isOpen]);
 
   // Text-to-Speech with callback when speech ends
-  const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate } = useTextToSpeech(language, handleSpeakEnd);
+  const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate, voiceSettings, changeVoiceSettings } = useTextToSpeech(language, handleSpeakEnd);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   
   // Toggle continuous conversation mode
@@ -2363,6 +2407,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       selectVoice={selectVoice}
                       speechRate={speechRate}
                       changeRate={changeRate}
+                      voiceSettings={voiceSettings}
+                      changeVoiceSettings={changeVoiceSettings}
                     />
                   </div>
                 </div>

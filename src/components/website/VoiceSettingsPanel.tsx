@@ -12,6 +12,12 @@ interface VoiceOption {
   gender: 'male' | 'female' | 'neutral';
 }
 
+interface VoiceSettings {
+  stability: number;
+  similarityBoost: number;
+  style: number;
+}
+
 interface VoiceSettingsPanelProps {
   language: string;
   isVoiceEnabled: boolean;
@@ -23,6 +29,8 @@ interface VoiceSettingsPanelProps {
   selectVoice: (voiceId: string) => void;
   speechRate: number;
   changeRate: (rate: number) => void;
+  voiceSettings?: VoiceSettings;
+  changeVoiceSettings?: (settings: VoiceSettings) => void;
   triggerClassName?: string;
 }
 
@@ -37,6 +45,8 @@ export function VoiceSettingsPanel({
   selectVoice,
   speechRate,
   changeRate,
+  voiceSettings = { stability: 0.5, similarityBoost: 0.75, style: 0.3 },
+  changeVoiceSettings,
   triggerClassName,
 }: VoiceSettingsPanelProps) {
   const [open, setOpen] = useState(false);
@@ -251,6 +261,183 @@ export function VoiceSettingsPanel({
                 <span>{language === "TR" ? "Hızlı" : "Fast"}</span>
               </div>
             </div>
+
+            {/* Voice Quality Settings - Stability, Similarity, Style */}
+            {changeVoiceSettings && (
+              <div className="space-y-4">
+                <p className="text-sm font-medium px-1">
+                  {language === "TR" ? "Ses Kalitesi Ayarları" : "Voice Quality Settings"}
+                </p>
+                
+                {/* Stability Control */}
+                <div className="p-4 rounded-xl bg-muted/50 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">
+                        {language === "TR" ? "Kararlılık" : "Stability"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === "TR" 
+                          ? "Düşük = daha ifadeli, Yüksek = daha tutarlı" 
+                          : "Low = more expressive, High = more consistent"}
+                      </p>
+                    </div>
+                    <span className="text-sm font-mono bg-background px-2 py-1 rounded-lg">
+                      {(voiceSettings.stability * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg"
+                      onClick={() => changeVoiceSettings({
+                        ...voiceSettings,
+                        stability: Math.max(0, voiceSettings.stability - 0.1)
+                      })}
+                      disabled={voiceSettings.stability <= 0}
+                    >
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-primary rounded-full"
+                        initial={false}
+                        animate={{ width: `${voiceSettings.stability * 100}%` }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg"
+                      onClick={() => changeVoiceSettings({
+                        ...voiceSettings,
+                        stability: Math.min(1, voiceSettings.stability + 0.1)
+                      })}
+                      disabled={voiceSettings.stability >= 1}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Similarity Boost Control */}
+                <div className="p-4 rounded-xl bg-muted/50 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">
+                        {language === "TR" ? "Ses Benzerliği" : "Similarity"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === "TR" 
+                          ? "Orijinal sese yakınlık" 
+                          : "Closeness to original voice"}
+                      </p>
+                    </div>
+                    <span className="text-sm font-mono bg-background px-2 py-1 rounded-lg">
+                      {(voiceSettings.similarityBoost * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg"
+                      onClick={() => changeVoiceSettings({
+                        ...voiceSettings,
+                        similarityBoost: Math.max(0, voiceSettings.similarityBoost - 0.1)
+                      })}
+                      disabled={voiceSettings.similarityBoost <= 0}
+                    >
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-primary rounded-full"
+                        initial={false}
+                        animate={{ width: `${voiceSettings.similarityBoost * 100}%` }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg"
+                      onClick={() => changeVoiceSettings({
+                        ...voiceSettings,
+                        similarityBoost: Math.min(1, voiceSettings.similarityBoost + 0.1)
+                      })}
+                      disabled={voiceSettings.similarityBoost >= 1}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Style Control */}
+                <div className="p-4 rounded-xl bg-muted/50 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">
+                        {language === "TR" ? "Stil Yoğunluğu" : "Style Intensity"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === "TR" 
+                          ? "Konuşma stili abartısı" 
+                          : "Speaking style exaggeration"}
+                      </p>
+                    </div>
+                    <span className="text-sm font-mono bg-background px-2 py-1 rounded-lg">
+                      {(voiceSettings.style * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg"
+                      onClick={() => changeVoiceSettings({
+                        ...voiceSettings,
+                        style: Math.max(0, voiceSettings.style - 0.1)
+                      })}
+                      disabled={voiceSettings.style <= 0}
+                    >
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-primary rounded-full"
+                        initial={false}
+                        animate={{ width: `${voiceSettings.style * 100}%` }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg"
+                      onClick={() => changeVoiceSettings({
+                        ...voiceSettings,
+                        style: Math.min(1, voiceSettings.style + 0.1)
+                      })}
+                      disabled={voiceSettings.style >= 1}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </DrawerContent>
