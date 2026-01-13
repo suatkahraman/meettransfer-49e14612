@@ -292,12 +292,12 @@ export const Hero = () => {
     <section ref={heroRef} id="booking-form" className="relative min-h-screen overflow-hidden bg-background">
       <HeroBackground y={y} opacity={opacity} videosLoaded={videosLoaded} cityVideos={cityVideos} currentVideoIndex={currentVideoIndex} setCurrentVideoIndex={setCurrentVideoIndex} language={language} />
       
-      {/* Floating Elements */}
-      <div className="absolute top-20 right-[10%] w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-40 left-[5%] w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
+      {/* Floating Elements - Hidden on mobile for performance */}
+      <div className="absolute top-20 right-[10%] w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse hidden md:block" />
+      <div className="absolute bottom-40 left-[5%] w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000 hidden md:block" />
 
-      <div className="container relative z-10 px-4 py-6 md:py-8 lg:py-16">
-        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-6 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100vh-6rem)] md:min-h-[calc(100vh-8rem)]">
+      <div className="container relative z-10 px-3 md:px-4 py-4 md:py-8 lg:py-16">
+        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-8rem)]">
           {/* Left Side - Form */}
           <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }} className="order-1 md:col-span-3 lg:col-span-1">
             <HeroHeader language={language} />
@@ -305,54 +305,54 @@ export const Hero = () => {
             <ReturnTripPromoBanner language={language} onApplyPromoCode={handleApplyPromoCode} />
 
             {/* Booking Form Card */}
-            <motion.div className="bg-card rounded-2xl shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
+            <motion.div className="bg-card rounded-xl md:rounded-2xl shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
               {/* Tabs */}
               <div className="flex bg-muted/50 relative">
                 <motion.div className="absolute bottom-0 h-0.5 bg-primary" initial={false} animate={{ left: activeTab === "ride" ? "0%" : "50%", width: "50%" }} transition={{ type: "spring", stiffness: 300, damping: 30 }} />
-                <button onClick={() => setActiveTab("ride")} className={cn("flex-1 flex items-center justify-center gap-1.5 py-3 px-4 font-medium transition-all text-sm relative", activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
-                  <motion.div animate={{ scale: activeTab === "ride" ? 1.1 : 1 }} transition={{ type: "spring", stiffness: 300 }}><Car className="h-4 w-4" /></motion.div>
-                  <span className="hidden xs:inline">{t("pointToPoint") || "Transfer"}</span><span className="xs:hidden">Transfer</span>
+                <button onClick={() => setActiveTab("ride")} className={cn("flex-1 flex items-center justify-center gap-1 md:gap-1.5 py-2.5 md:py-3 px-3 md:px-4 font-medium transition-all text-xs md:text-sm relative", activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                  <motion.div animate={{ scale: activeTab === "ride" ? 1.1 : 1 }} transition={{ type: "spring", stiffness: 300 }}><Car className="h-3.5 w-3.5 md:h-4 md:w-4" /></motion.div>
+                  <span>{t("pointToPoint") || "Transfer"}</span>
                 </button>
-                <button onClick={() => setActiveTab("hourly")} className={cn("flex-1 flex items-center justify-center gap-1.5 py-3 px-4 font-medium transition-all text-sm", activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
-                  <motion.div animate={{ scale: activeTab === "hourly" ? 1.1 : 1 }} transition={{ type: "spring", stiffness: 300 }}><Timer className="h-4 w-4" /></motion.div>
-                  <span className="hidden xs:inline">{t("perHour") || "Hourly"}</span><span className="xs:hidden">Hourly</span>
+                <button onClick={() => setActiveTab("hourly")} className={cn("flex-1 flex items-center justify-center gap-1 md:gap-1.5 py-2.5 md:py-3 px-3 md:px-4 font-medium transition-all text-xs md:text-sm", activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                  <motion.div animate={{ scale: activeTab === "hourly" ? 1.1 : 1 }} transition={{ type: "spring", stiffness: 300 }}><Timer className="h-3.5 w-3.5 md:h-4 md:w-4" /></motion.div>
+                  <span>{t("perHour") || "Hourly"}</span>
                 </button>
               </div>
 
               {/* Form Content */}
-              <div className="p-4 md:p-5">
+              <div className="p-3 md:p-4 lg:p-5">
                 <AnimatePresence mode="wait">
                   {activeTab === "ride" ? (
-                    <motion.div key="ride-form" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }} className="space-y-3">
+                    <motion.div key="ride-form" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }} className="space-y-2 md:space-y-3">
                       <LocationInputs pickup={pickup} dropoff={dropoff} onPickupSelected={handlePickupSelected} onDropoffSelected={handleDropoffSelected} onSwapLocations={handleSwapLocations} language={language} />
-                      <div className="grid grid-cols-3 gap-2">
-                        <FloatingLabelDatePicker label={t("date") || "Date"} date={date} onSelect={setDate} icon={<CalendarIcon className="h-4 w-4" />} disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} className="col-span-1" />
-                        <FloatingLabelSelect label={t("time") || "Time"} value={time} onValueChange={setTime} options={timeOptions.map(opt => ({ value: opt, label: opt }))} icon={<Clock className="h-4 w-4" />} className="col-span-1" />
-                        <FloatingLabelSelect label={t("passengers") || "Passengers"} value={passengers} onValueChange={setPassengers} options={Array.from({ length: 18 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1} pax` }))} icon={<Users className="h-4 w-4" />} className="col-span-1" />
+                      <div className="grid grid-cols-3 gap-1.5 md:gap-2">
+                        <FloatingLabelDatePicker label={t("date") || "Date"} date={date} onSelect={setDate} icon={<CalendarIcon className="h-3.5 w-3.5 md:h-4 md:w-4" />} disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} className="col-span-1" />
+                        <FloatingLabelSelect label={t("time") || "Time"} value={time} onValueChange={setTime} options={timeOptions.map(opt => ({ value: opt, label: opt }))} icon={<Clock className="h-3.5 w-3.5 md:h-4 md:w-4" />} className="col-span-1" />
+                        <FloatingLabelSelect label={t("passengers") || "Pax"} value={passengers} onValueChange={setPassengers} options={Array.from({ length: 18 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1}` }))} icon={<Users className="h-3.5 w-3.5 md:h-4 md:w-4" />} className="col-span-1" />
                       </div>
                       <VehicleSelector selectedVehicle={vehicleType} onSelectVehicle={setVehicleType} passengers={passengers} prices={allVehiclePrices} loadingPrices={loadingTransferPrice} hasRoute={!!(pickup && dropoff)} language={language} currency={transferPriceCurrency} />
                       <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-                        <Button onClick={handleRideContinue} disabled={submitting} className="w-full h-12 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-xl text-base group">
-                          {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="mr-1 h-4 w-4" />{language === 'TR' ? 'Anında Fiyat Al' : 'Get Instant Quote'}<ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" /></>}
+                        <Button onClick={handleRideContinue} disabled={submitting} className="w-full h-10 md:h-12 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-lg md:rounded-xl text-sm md:text-base group">
+                          {submitting ? <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <><Zap className="mr-1 h-3.5 w-3.5 md:h-4 md:w-4" />{language === 'TR' ? 'Fiyat Al' : 'Get Quote'}<ArrowRight className="ml-1.5 md:ml-2 h-4 w-4 md:h-5 md:w-5 group-hover:translate-x-1 transition-transform" /></>}
                         </Button>
                       </motion.div>
                     </motion.div>
                   ) : (
-                    <motion.div key="hourly-form" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }} className="space-y-3">
-                      <div className="grid grid-cols-2 gap-2">
-                        <FloatingLabelSelect label={t("city") || "City"} value={hourlyCity} onValueChange={setHourlyCity} options={availableCities.map(city => ({ value: city, label: city }))} icon={<MapPin className="h-4 w-4" />} className="col-span-1" />
-                        <FloatingLabelSelect label={t("duration") || "Duration"} value={hourlyDuration} onValueChange={setHourlyDuration} options={availableDurations.map(d => { const opt = hourlyDurationOptions.find(o => o.value === d); return { value: d, label: opt ? (t(opt.labelKey) || opt.defaultLabel) : `${d}h` }; })} icon={<Timer className="h-4 w-4" />} disabled={!hourlyCity} className="col-span-1" />
+                    <motion.div key="hourly-form" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }} className="space-y-2 md:space-y-3">
+                      <div className="grid grid-cols-2 gap-1.5 md:gap-2">
+                        <FloatingLabelSelect label={t("city") || "City"} value={hourlyCity} onValueChange={setHourlyCity} options={availableCities.map(city => ({ value: city, label: city }))} icon={<MapPin className="h-3.5 w-3.5 md:h-4 md:w-4" />} className="col-span-1" />
+                        <FloatingLabelSelect label={t("duration") || "Duration"} value={hourlyDuration} onValueChange={setHourlyDuration} options={availableDurations.map(d => { const opt = hourlyDurationOptions.find(o => o.value === d); return { value: d, label: opt ? (t(opt.labelKey) || opt.defaultLabel) : `${d}h` }; })} icon={<Timer className="h-3.5 w-3.5 md:h-4 md:w-4" />} disabled={!hourlyCity} className="col-span-1" />
                       </div>
-                      {hourlyDuration === "custom" && <FloatingLabelSelect label={t("customHours") || "Custom Hours"} value={customHours} onValueChange={setCustomHours} options={Array.from({ length: 16 }, (_, i) => ({ value: (i + 9).toString(), label: `${i + 9} ${t("hours") || "hours"}` }))} icon={<Timer className="h-4 w-4" />} />}
-                      <div className="grid grid-cols-3 gap-2">
-                        <FloatingLabelDatePicker label={t("date") || "Date"} date={hourlyDate} onSelect={setHourlyDate} icon={<CalendarIcon className="h-4 w-4" />} disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} className="col-span-1" />
-                        <FloatingLabelSelect label={t("time") || "Time"} value={hourlyTime} onValueChange={setHourlyTime} options={timeOptions.map(opt => ({ value: opt, label: opt }))} icon={<Clock className="h-4 w-4" />} className="col-span-1" />
-                        <FloatingLabelSelect label={t("passengers") || "Passengers"} value={hourlyPassengers} onValueChange={setHourlyPassengers} options={Array.from({ length: 12 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1} pax` }))} icon={<Users className="h-4 w-4" />} className="col-span-1" />
+                      {hourlyDuration === "custom" && <FloatingLabelSelect label={t("customHours") || "Custom Hours"} value={customHours} onValueChange={setCustomHours} options={Array.from({ length: 16 }, (_, i) => ({ value: (i + 9).toString(), label: `${i + 9} ${t("hours") || "hours"}` }))} icon={<Timer className="h-3.5 w-3.5 md:h-4 md:w-4" />} />}
+                      <div className="grid grid-cols-3 gap-1.5 md:gap-2">
+                        <FloatingLabelDatePicker label={t("date") || "Date"} date={hourlyDate} onSelect={setHourlyDate} icon={<CalendarIcon className="h-3.5 w-3.5 md:h-4 md:w-4" />} disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} className="col-span-1" />
+                        <FloatingLabelSelect label={t("time") || "Time"} value={hourlyTime} onValueChange={setHourlyTime} options={timeOptions.map(opt => ({ value: opt, label: opt }))} icon={<Clock className="h-3.5 w-3.5 md:h-4 md:w-4" />} className="col-span-1" />
+                        <FloatingLabelSelect label={t("passengers") || "Pax"} value={hourlyPassengers} onValueChange={setHourlyPassengers} options={Array.from({ length: 12 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1}` }))} icon={<Users className="h-3.5 w-3.5 md:h-4 md:w-4" />} className="col-span-1" />
                       </div>
                       <VehicleSelector selectedVehicle={hourlyVehicleType} onSelectVehicle={setHourlyVehicleType} passengers={hourlyPassengers} prices={allHourlyPrices} loadingPrices={loadingPrice} hasRoute={!!(hourlyCity && hourlyDuration)} language={language} currency={allHourlyPrices[0]?.currency || "EUR"} />
                       <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-                        <Button onClick={handleHourlyContinue} disabled={submitting} className="w-full h-12 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-xl text-base group">
-                          {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="mr-1 h-4 w-4" />{language === 'TR' ? 'Anında Fiyat Al' : 'Get Instant Quote'}<ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" /></>}
+                        <Button onClick={handleHourlyContinue} disabled={submitting} className="w-full h-10 md:h-12 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-lg md:rounded-xl text-sm md:text-base group">
+                          {submitting ? <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <><Zap className="mr-1 h-3.5 w-3.5 md:h-4 md:w-4" />{language === 'TR' ? 'Fiyat Al' : 'Get Quote'}<ArrowRight className="ml-1.5 md:ml-2 h-4 w-4 md:h-5 md:w-5 group-hover:translate-x-1 transition-transform" /></>}
                         </Button>
                       </motion.div>
                     </motion.div>
