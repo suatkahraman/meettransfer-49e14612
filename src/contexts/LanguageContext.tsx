@@ -400,6 +400,9 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryCity: "Luxury City Destination",
     mediterraneanIsland: "Mediterranean Island",
     historicOttomanCapital: "Historic Ottoman Capital",
+    europeanFinanceHub: "European Finance Hub",
+    frankfurtTours: "Frankfurt Airport",
+    frankfurtDesc: "Premium VIP transfer from Frankfurt Airport (FRA) to city center, trade fairs, and nearby destinations. Mercedes fleet with professional chauffeurs.",
     
     // Common
     passengers: "Passengers",
@@ -2089,6 +2092,9 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryCity: "Luxus-Stadtziel",
     mediterraneanIsland: "Mittelmeerinsel",
     historicOttomanCapital: "Historische Osmanische Hauptstadt",
+    europeanFinanceHub: "Europäisches Finanzzentrum",
+    frankfurtTours: "Frankfurt Flughafen",
+    frankfurtDesc: "Premium VIP-Transfer vom Frankfurter Flughafen (FRA) ins Stadtzentrum, zu Messen und in die Umgebung. Mercedes-Flotte mit professionellen Chauffeuren.",
     
     // Common
     passengers: "Passagiere",
@@ -3820,6 +3826,9 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryCity: "Destination Ville de Luxe",
     mediterraneanIsland: "Île Méditerranéenne",
     historicOttomanCapital: "Capitale Ottomane Historique",
+    europeanFinanceHub: "Centre Financier Européen",
+    frankfurtTours: "Aéroport de Francfort",
+    frankfurtDesc: "Transfert VIP premium de l'aéroport de Francfort (FRA) vers le centre-ville, les foires et les environs. Flotte Mercedes avec chauffeurs professionnels.",
     
     // Common
     passengers: "Passagers",
@@ -5262,6 +5271,9 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryCity: "Роскошный Город",
     mediterraneanIsland: "Средиземноморский Остров",
     historicOttomanCapital: "Историческая Османская Столица",
+    europeanFinanceHub: "Европейский Финансовый Центр",
+    frankfurtTours: "Аэропорт Франкфурта",
+    frankfurtDesc: "Премиум VIP-трансфер из аэропорта Франкфурта (FRA) в центр города, на выставки и в окрестности. Автопарк Mercedes с профессиональными водителями.",
     
     // Common
     passengers: "Пассажиры",
@@ -6590,6 +6602,9 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryCity: "Destinazione Città di Lusso",
     mediterraneanIsland: "Isola Mediterranea",
     historicOttomanCapital: "Storica Capitale Ottomana",
+    europeanFinanceHub: "Centro Finanziario Europeo",
+    frankfurtTours: "Aeroporto di Francoforte",
+    frankfurtDesc: "Trasferimento VIP premium dall'aeroporto di Francoforte (FRA) al centro città, alle fiere e nelle aree circostanti. Flotta Mercedes con autisti professionisti.",
     
     // Common
     passengers: "Passeggeri",
@@ -7965,6 +7980,9 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryCity: "Destino Ciudad de Lujo",
     mediterraneanIsland: "Isla Mediterránea",
     historicOttomanCapital: "Histórica Capital Otomana",
+    europeanFinanceHub: "Centro Financiero Europeo",
+    frankfurtTours: "Aeropuerto de Frankfurt",
+    frankfurtDesc: "Traslado VIP premium desde el aeropuerto de Frankfurt (FRA) al centro de la ciudad, ferias y alrededores. Flota Mercedes con chóferes profesionales.",
     
     // Common
     passengers: "Pasajeros",
@@ -9340,6 +9358,9 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryCity: "وجهة المدينة الفاخرة",
     mediterraneanIsland: "جزيرة البحر الأبيض المتوسط",
     historicOttomanCapital: "العاصمة العثمانية التاريخية",
+    europeanFinanceHub: "المركز المالي الأوروبي",
+    frankfurtTours: "مطار فرانكفورت",
+    frankfurtDesc: "نقل VIP فاخر من مطار فرانكفورت (FRA) إلى وسط المدينة والمعارض التجارية والمناطق المحيطة. أسطول مرسيدس مع سائقين محترفين.",
     
     // Common
     passengers: "الركاب",
@@ -10634,6 +10655,9 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryCity: "Lüks Şehir Destinasyonu",
     mediterraneanIsland: "Akdeniz Adası",
     historicOttomanCapital: "Tarihi Osmanlı Başkenti",
+    europeanFinanceHub: "Avrupa Finans Merkezi",
+    frankfurtTours: "Frankfurt Havalimanı",
+    frankfurtDesc: "Frankfurt Havalimanı'ndan (FRA) şehir merkezine, fuarlara ve çevre bölgelere premium VIP transfer. Profesyonel şoförlerle Mercedes filosu.",
     
     // Common
     passengers: "Yolcular",
@@ -12077,6 +12101,9 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryCity: "Розкішне місто",
     mediterraneanIsland: "Середземноморський острів",
     historicOttomanCapital: "Історична Османська столиця",
+    europeanFinanceHub: "Європейський фінансовий центр",
+    frankfurtTours: "Аеропорт Франкфурта",
+    frankfurtDesc: "Преміум VIP-трансфер з аеропорту Франкфурта (FRA) до центру міста, на виставки та в околиці. Автопарк Mercedes з професійними водіями.",
     
     // Common
     passengers: "Пасажири",
@@ -13406,6 +13433,9 @@ const translations: Record<Language, Record<string, string>> = {
     luxuryCity: "高級都市目的地",
     mediterraneanIsland: "地中海の島",
     historicOttomanCapital: "歴史的なオスマン帝国の首都",
+    europeanFinanceHub: "ヨーロッパ金融センター",
+    frankfurtTours: "フランクフルト空港",
+    frankfurtDesc: "フランクフルト空港（FRA）から市内中心部、見本市会場、周辺地域へのプレミアムVIP送迎。プロのシャトル付きメルセデス車両。",
     
     // Common
     passengers: "乗客",

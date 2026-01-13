@@ -143,6 +143,18 @@ const cityCoordinates: Record<string, { center: { lat: number; lng: number }; zo
       { name: "Bar Street", nameTR: "Bar Sokağı", lat: 36.8500, lng: 28.2700, type: 'restaurant', description: "Marmaris's famous nightlife strip with clubs, bars, and entertainment.", descriptionTR: "Kulüpler, barlar ve eğlenceyle Marmaris'in ünlü gece hayatı caddesi.", transferTime: "85-100 min", distance: "95 km" },
     ]
   },
+  frankfurt: {
+    center: { lat: 50.1109, lng: 8.6821 },
+    zoom: 10,
+    locations: [
+      { name: "Frankfurt Airport (FRA)", nameTR: "Frankfurt Havalimanı (FRA)", lat: 50.0379, lng: 8.5622, type: 'airport', description: "Germany's busiest airport and major European hub. Modern terminals with excellent connections.", descriptionTR: "Almanya'nın en yoğun havalimanı ve önemli Avrupa hub'ı. Mükemmel bağlantılarla modern terminaller." },
+      { name: "Frankfurt City Center (Römerberg)", nameTR: "Frankfurt Şehir Merkezi (Römerberg)", lat: 50.1109, lng: 8.6821, type: 'landmark', description: "Historic heart of Frankfurt with medieval buildings and famous town hall.", descriptionTR: "Ortaçağ binaları ve ünlü belediye binasıyla Frankfurt'un tarihi kalbi.", transferTime: "25-35 min", distance: "12 km" },
+      { name: "Messe Frankfurt", nameTR: "Messe Frankfurt", lat: 50.1117, lng: 8.6449, type: 'landmark', description: "One of the world's largest trade fair venues. Major international exhibitions.", descriptionTR: "Dünyanın en büyük fuar alanlarından biri. Önemli uluslararası sergiler.", transferTime: "20-25 min", distance: "10 km" },
+      { name: "Frankfurt Financial District (Bankenviertel)", nameTR: "Frankfurt Finans Bölgesi", lat: 50.1136, lng: 8.6718, type: 'shopping', description: "European banking capital with iconic skyline. ECB headquarters nearby.", descriptionTR: "İkonik siluetiyle Avrupa bankacılık başkenti. Yakınlarda AMB merkezi.", transferTime: "25-30 min", distance: "11 km" },
+      { name: "Main Tower", nameTR: "Main Tower", lat: 50.1133, lng: 8.6731, type: 'landmark', description: "200m observation deck with panoramic city views. Frankfurt's skyline symbol.", descriptionTR: "Panoramik şehir manzaralı 200m gözlem güvertesi. Frankfurt silüetinin sembolü.", transferTime: "25-30 min", distance: "11 km" },
+      { name: "Palmengarten", nameTR: "Palmengarten", lat: 50.1225, lng: 8.6561, type: 'landmark', description: "Beautiful botanical garden with tropical plants and greenhouses.", descriptionTR: "Tropikal bitkiler ve seralarla güzel botanik bahçesi.", transferTime: "25-35 min", distance: "13 km" },
+    ]
+  },
 };
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || '';

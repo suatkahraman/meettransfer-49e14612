@@ -15,6 +15,7 @@ import dubaiImg from "@/assets/destinations/dubai-city.jpg";
 import cyprusImg from "@/assets/destinations/cyprus-city.jpg";
 import fethiyeImg from "@/assets/destinations/fethiye-city.jpg";
 import marmarisImg from "@/assets/destinations/marmaris-city.jpg";
+import frankfurtImg from "@/assets/destinations/frankfurt-city.jpg";
 
 // City data with images and starting prices
 const cities = [
@@ -117,6 +118,16 @@ const cities = [
     rating: 4.7,
     popular: false,
     gradient: "from-rose-500/60 to-pink-600/60",
+  },
+  {
+    name: "Frankfurt",
+    nameTR: "Frankfurt",
+    image: frankfurtImg,
+    fromPrice: 55,
+    airports: ["FRA"],
+    rating: 4.9,
+    popular: true,
+    gradient: "from-slate-500/60 to-zinc-600/60",
   },
 ];
 

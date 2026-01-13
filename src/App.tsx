@@ -111,6 +111,7 @@ const LuxuryChauffeur = lazy(() => import("./pages/website/LuxuryChauffeur"));
 const DubaiTransfer = lazy(() => import("./pages/website/DubaiTransfer"));
 const CyprusTransfer = lazy(() => import("./pages/website/CyprusTransfer"));
 const BursaTransfer = lazy(() => import("./pages/website/BursaTransfer"));
+const FrankfurtTransfer = lazy(() => import("./pages/website/FrankfurtTransfer"));
 
 // New SEO Landing Pages
 const IstanbulAirportTransfer = lazy(() => import("./pages/website/IstanbulAirportTransfer"));

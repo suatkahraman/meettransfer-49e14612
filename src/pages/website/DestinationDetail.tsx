@@ -340,6 +340,36 @@ const destinationData: Record<string, {
     locations: ["Marmaris Center", "İçmeler", "Turunç", "Marmaris Marina", "Datça", "Akyaka"],
     gradient: "from-rose-500/80 to-pink-600/80",
   },
+  frankfurt: {
+    name: "Frankfurt",
+    nameTR: "Frankfurt",
+    airports: ["FRA"],
+    rating: 4.9,
+    fromPrice: 55,
+    popular: true,
+    description: {
+      en: "Welcome to Frankfurt, Germany's financial capital and major European hub. From Frankfurt Airport (FRA), one of Europe's busiest airports, we provide premium transfers to the city center, Messe Frankfurt trade fair, and all surrounding areas.",
+      tr: "Almanya'nın finans başkenti ve önemli Avrupa hub'ı Frankfurt'a hoş geldiniz. Avrupa'nın en yoğun havalimanlarından biri olan Frankfurt Havalimanı'ndan (FRA) şehir merkezine, Messe Frankfurt fuarına ve tüm çevre bölgelere premium transferler sağlıyoruz."
+    },
+    highlights: {
+      en: ["Europe's major hub airport", "Messe Frankfurt specialists", "Business district transfers", "Luxury Maybach available"],
+      tr: ["Avrupa'nın önemli hub havalimanı", "Messe Frankfurt uzmanları", "İş bölgesi transferleri", "Lüks Maybach mevcut"]
+    },
+    prices: [
+      { route: "FRA → Frankfurt City Center", price: "€55" },
+      { route: "FRA → Messe Frankfurt", price: "€50" },
+      { route: "FRA → Financial District", price: "€55" },
+      { route: "FRA → Sachsenhausen", price: "€60" },
+      { route: "FRA → Wiesbaden", price: "€75" },
+      { route: "FRA → Mainz", price: "€70" },
+    ],
+    faqItems: [
+      { question: "How long is the transfer from Frankfurt Airport to city center?", answer: "The transfer takes approximately 25-35 minutes depending on traffic. Our drivers know the best routes to avoid congestion." },
+      { question: "Do you provide transfers to Messe Frankfurt?", answer: "Yes! We specialize in Messe Frankfurt transfers for trade fair visitors. We can accommodate luggage and exhibition materials." },
+    ],
+    locations: ["City Center", "Messe Frankfurt", "Financial District", "Sachsenhausen", "Wiesbaden", "Mainz"],
+    gradient: "from-slate-500/80 to-zinc-600/80",
+  },
 };
 
 const DestinationDetail = () => {
