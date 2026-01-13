@@ -108,9 +108,18 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
         cleanupOutdatedCaches: true,
         // Merge our push-notification handlers into the SAME SW scope
-        // so PWA caching + push can coexist and updates can be prompted.
         importScripts: ["sw-push.js"],
+        // Skip waiting for immediate activation
+        skipWaiting: false,
+        clientsClaim: true,
+        // Navigation preload for faster page loads
+        navigationPreload: true,
         runtimeCaching: [
+          // ============================================
+          // STATIC ASSETS - CacheFirst (immutable content)
+          // ============================================
+          
+          // Google Fonts CSS - CacheFirst (1 year)
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: "CacheFirst",
@@ -125,13 +134,14 @@ export default defineConfig(({ mode }) => ({
               }
             }
           },
+          // Google Fonts Files - CacheFirst (1 year)
           {
             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
             handler: "CacheFirst",
             options: {
               cacheName: "gstatic-fonts-cache",
               expiration: {
-                maxEntries: 10,
+                maxEntries: 20,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
               },
               cacheableResponse: {
@@ -139,20 +149,94 @@ export default defineConfig(({ mode }) => ({
               }
             }
           },
+          // Local static JS/CSS bundles - CacheFirst (hashed filenames)
           {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            urlPattern: /\/assets\/.*\.(?:js|css)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "static-assets-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year (hashed files)
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          // Supabase Storage - CacheFirst for static assets
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "supabase-storage-cache",
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          // Mapbox tiles and assets - CacheFirst
+          {
+            urlPattern: /^https:\/\/api\.mapbox\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "mapbox-cache",
+              expiration: {
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          
+          // ============================================
+          // IMAGES - StaleWhileRevalidate (fast + fresh)
+          // ============================================
+          
+          // Local images - StaleWhileRevalidate
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif|ico)$/i,
             handler: "StaleWhileRevalidate",
             options: {
               cacheName: "images-cache",
               expiration: {
-                maxEntries: 60,
+                maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           },
-          // Supabase Edge Functions - StaleWhileRevalidate for fast responses
+          // External images (Unsplash, etc) - StaleWhileRevalidate
           {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/v1\/(get-google-reviews|get-all-vehicle-prices|get-exchange-rate)/i,
+            urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "external-images-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          
+          // ============================================
+          // API CALLS - StaleWhileRevalidate (instant + fresh)
+          // ============================================
+          
+          // Supabase Edge Functions (cacheable) - StaleWhileRevalidate
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/v1\/(get-google-reviews|get-all-vehicle-prices|get-exchange-rate|get-destinations)/i,
             handler: "StaleWhileRevalidate",
             options: {
               cacheName: "supabase-functions-cache",
@@ -162,33 +246,36 @@ export default defineConfig(({ mode }) => ({
               },
               cacheableResponse: {
                 statuses: [0, 200]
-              },
-              plugins: [
-                {
-                  // Add cache timestamp for debugging
-                  cacheWillUpdate: async ({ response }) => {
-                    if (response && response.status === 200) {
-                      const headers = new Headers(response.headers);
-                      headers.set('sw-cache-time', new Date().toISOString());
-                      return new Response(response.body, {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers
-                      });
-                    }
-                    return response;
-                  }
-                }
-              ]
+              }
             }
           },
-          // Supabase REST API - NetworkFirst with fast timeout
+          // Supabase REST API (read-only tables) - StaleWhileRevalidate
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(hourly_rental_prices|region_prices|intercity_prices|google_reviews_cache)/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "supabase-readonly-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 15 // 15 minutes
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          
+          // ============================================
+          // DYNAMIC API - NetworkFirst (fresh data priority)
+          // ============================================
+          
+          // Supabase REST API (dynamic tables) - NetworkFirst with timeout
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "supabase-rest-cache",
-              networkTimeoutSeconds: 3,
+              networkTimeoutSeconds: 3, // Fast fallback to cache
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 5 // 5 minutes
@@ -198,25 +285,45 @@ export default defineConfig(({ mode }) => ({
               }
             }
           },
-          // Supabase Auth - NetworkOnly (never cache auth)
+          // Other Edge Functions - NetworkFirst
           {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
-            handler: "NetworkOnly"
-          },
-          // Supabase Storage - CacheFirst for static assets
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
-            handler: "CacheFirst",
+            urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/v1\/.*/i,
+            handler: "NetworkFirst",
             options: {
-              cacheName: "supabase-storage-cache",
+              cacheName: "supabase-edge-cache",
+              networkTimeoutSeconds: 5,
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 10 // 10 minutes
               },
               cacheableResponse: {
                 statuses: [0, 200]
               }
             }
+          },
+          
+          // ============================================
+          // NEVER CACHE - NetworkOnly
+          // ============================================
+          
+          // Supabase Auth - Never cache
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
+            handler: "NetworkOnly"
+          },
+          // Supabase Realtime - Never cache
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/realtime\/.*/i,
+            handler: "NetworkOnly"
+          },
+          // Google Analytics - Never cache
+          {
+            urlPattern: /^https:\/\/www\.google-analytics\.com\/.*/i,
+            handler: "NetworkOnly"
+          },
+          {
+            urlPattern: /^https:\/\/www\.googletagmanager\.com\/.*/i,
+            handler: "NetworkOnly"
           }
         ]
       },
