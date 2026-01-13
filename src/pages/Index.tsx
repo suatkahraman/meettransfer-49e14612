@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Hero } from "@/components/Hero";
-import { BookingForm } from "@/components/BookingForm";
+// BookingForm removed - form is now inside Hero component
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
@@ -54,7 +54,6 @@ const Index = () => {
       {/* Critical above-the-fold content - loaded immediately */}
       <Hero />
       <TrustBar />
-      <BookingForm />
       
       {/* Below-the-fold content - lazy loaded for better TTFB */}
       <Suspense fallback={<SectionPlaceholder />}>
