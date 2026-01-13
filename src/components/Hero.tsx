@@ -13,6 +13,10 @@ import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 import heroVideo from "@/assets/hero-mercedes-video.mp4";
+import vitoImg from "@/assets/vito-1.jpg";
+import vitoVipImg from "@/assets/vito-vip-1.jpg";
+import maybachImg from "@/assets/maybach-1.jpg";
+import sprinterImg from "@/assets/sprinter-1.jpg";
 import CityMarquee from "@/components/website/CityMarquee";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +24,16 @@ import { VEHICLE_TYPES, isMinibusRequired } from "@/lib/vehicleTypes";
 import BookingChatAssistant from "@/components/website/BookingChatAssistant";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Vehicle image mapping
+const vehicleImages: Record<string, string> = {
+  'mercedes-vito': vitoImg,
+  'vip-mercedes': vitoVipImg,
+  'maybach-minibus': maybachImg,
+  'sprinter-minibus': sprinterImg,
+  'minibus': sprinterImg,
+};
 
 const generateTimeOptions = () => {
   const times: string[] = [];
@@ -489,47 +503,102 @@ export const Hero = () => {
             transition={{ duration: 0.6 }}
             className="order-1 md:col-span-3 lg:col-span-1"
           >
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-4">
-              <img 
-                src={meetTransferLogo} 
-                alt="Meet Transfer" 
-                width={48}
-                height={48}
-                loading="eager"
-                className="h-12 w-12 rounded-full object-cover shadow-lg ring-2 ring-primary/20"
-              />
-              <div>
-                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground leading-tight">
-                  {t("heroTitle")}
-                </h1>
-                <p className="text-sm text-muted-foreground hidden sm:block">
-                  {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language, activePromo.validUntil).heroSubtitle}
-                </p>
+            {/* Header with Vehicles */}
+            <motion.div 
+              className="mb-5"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <img 
+                  src={meetTransferLogo} 
+                  alt="Meet Transfer" 
+                  width={48}
+                  height={48}
+                  loading="eager"
+                  className="h-12 w-12 rounded-full object-cover shadow-lg ring-2 ring-primary/20"
+                />
+                <div className="flex-1">
+                  <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground leading-tight">
+                    {t("heroTitle")}
+                  </h1>
+                  <p className="text-sm text-muted-foreground hidden sm:block">
+                    {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language, activePromo.validUntil).heroSubtitle}
+                  </p>
+                </div>
               </div>
-            </div>
+              
+              {/* Vehicle Icons Row */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {VEHICLE_TYPES.slice(0, 4).map((vehicle, index) => (
+                  <motion.div
+                    key={vehicle.value}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.1 * index, duration: 0.3 }}
+                    className="flex-shrink-0"
+                  >
+                    <div className="flex items-center gap-1.5 bg-muted/60 rounded-full pl-1 pr-2.5 py-1 border border-border/50 hover:border-primary/50 transition-colors cursor-default">
+                      <img 
+                        src={vehicleImages[vehicle.value]} 
+                        alt={vehicle.label}
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
+                      <span className="text-[10px] font-medium text-foreground whitespace-nowrap">
+                        {vehicle.label.split(' ').pop()}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
 
             {/* AI Assistant - Compact on mobile */}
-            <div className="mb-4">
+            <motion.div 
+              className="mb-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
               <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
                 <span>{t("bookTransferOrHourlyWithAI") || "Book with AI"}</span>
               </div>
               <BookingChatAssistant onApplyBooking={handleApplyBooking} />
-            </div>
+            </motion.div>
 
             {/* Booking Form Card */}
-            <div className="bg-card rounded-2xl shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm">
+            <motion.div 
+              className="bg-card rounded-2xl shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
               {/* Tabs */}
-              <div className="flex bg-muted/50">
+              <div className="flex bg-muted/50 relative">
+                <motion.div
+                  className="absolute bottom-0 h-0.5 bg-primary"
+                  initial={false}
+                  animate={{
+                    left: activeTab === "ride" ? "0%" : "50%",
+                    width: "50%"
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
                 <button
                   onClick={() => setActiveTab("ride")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-1.5 py-3 px-4 font-medium transition-all text-sm",
+                    "flex-1 flex items-center justify-center gap-1.5 py-3 px-4 font-medium transition-all text-sm relative",
                     activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Car className="h-4 w-4" />
+                  <motion.div
+                    animate={{ scale: activeTab === "ride" ? 1.1 : 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Car className="h-4 w-4" />
+                  </motion.div>
                   <span className="hidden xs:inline">{t("pointToPoint") || "Transfer"}</span>
                   <span className="xs:hidden">Transfer</span>
                 </button>
@@ -540,7 +609,12 @@ export const Hero = () => {
                     activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Timer className="h-4 w-4" />
+                  <motion.div
+                    animate={{ scale: activeTab === "hourly" ? 1.1 : 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Timer className="h-4 w-4" />
+                  </motion.div>
                   <span className="hidden xs:inline">{t("perHour") || "Hourly"}</span>
                   <span className="xs:hidden">Hourly</span>
                 </button>
@@ -548,40 +622,58 @@ export const Hero = () => {
 
               {/* Form Content */}
               <div className="p-4 md:p-5">
+                <AnimatePresence mode="wait">
                 {activeTab === "ride" ? (
-                  <div className="space-y-3">
+                  <motion.div 
+                    key="ride-form"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-3"
+                  >
                     {/* Locations */}
                     <div className="space-y-2">
-                      <div className="relative">
+                      <motion.div 
+                        className="relative"
+                        whileFocus={{ scale: 1.01 }}
+                      >
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary z-10" />
                         <GooglePlacesAutocomplete 
                           onPlaceSelected={handlePickupSelected} 
                           placeholder={t("enterPickupPoint") || "Pickup location"} 
-                          className="pl-10 h-11 bg-muted/50 border border-border focus:border-primary rounded-xl text-sm"
+                          className="pl-10 h-11 bg-muted/50 border border-border focus:border-primary rounded-xl text-sm transition-all focus:ring-2 focus:ring-primary/20"
                           value={pickup}
                         />
-                      </div>
+                      </motion.div>
                       
-                      <div className="flex justify-center -my-0.5">
+                      <motion.div 
+                        className="flex justify-center -my-0.5"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
                         <button
                           type="button"
                           onClick={() => { const temp = pickup; setPickup(dropoff); setDropoff(temp); }}
                           disabled={!pickup && !dropoff}
-                          className="w-7 h-7 rounded-full bg-primary text-primary-foreground shadow hover:scale-110 transition-all disabled:opacity-50 flex items-center justify-center"
+                          className="w-7 h-7 rounded-full bg-primary text-primary-foreground shadow hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center"
                         >
                           <ArrowUpDown className="h-3 w-3" />
                         </button>
-                      </div>
+                      </motion.div>
                       
-                      <div className="relative">
+                      <motion.div 
+                        className="relative"
+                        whileFocus={{ scale: 1.01 }}
+                      >
                         <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent z-10" />
                         <GooglePlacesAutocomplete 
                           onPlaceSelected={handleDropoffSelected} 
                           placeholder={t("hotelOrAddress") || "Drop-off location"} 
-                          className="pl-10 h-11 bg-muted/50 border border-border focus:border-accent rounded-xl text-sm"
+                          className="pl-10 h-11 bg-muted/50 border border-border focus:border-accent rounded-xl text-sm transition-all focus:ring-2 focus:ring-accent/20"
                           value={dropoff}
                         />
-                      </div>
+                      </motion.div>
                       
                       {pickup && dropoff && <CompactRouteMap pickup={pickup} dropoff={dropoff} className="mt-2" />}
                     </div>
@@ -630,50 +722,91 @@ export const Hero = () => {
                       </Select>
                     </div>
 
-                    {/* Vehicle Selection */}
+                    {/* Vehicle Selection with Images */}
                     <div className="grid grid-cols-4 gap-1.5">
-                      {VEHICLE_TYPES.map((vehicle) => {
+                      {VEHICLE_TYPES.map((vehicle, index) => {
                         const vehiclePrice = allVehiclePrices.find(v => v.vehicleType === vehicle.value);
                         const isSelected = vehicleType === vehicle.value;
                         const isDisabled = vehicle.passengers < parseInt(passengers);
                         
                         return (
-                          <button
+                          <motion.button
                             key={vehicle.value}
                             type="button"
                             onClick={() => !isDisabled && setVehicleType(vehicle.value)}
                             disabled={isDisabled}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.05 * index }}
+                            whileHover={{ scale: isDisabled ? 1 : 1.03 }}
+                            whileTap={{ scale: isDisabled ? 1 : 0.97 }}
                             className={cn(
-                              "rounded-lg border p-2 transition-all text-center",
+                              "rounded-xl border p-1.5 transition-all text-center overflow-hidden",
                               isDisabled ? "opacity-40 cursor-not-allowed" : "",
-                              isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border bg-muted/30 hover:border-primary/50"
+                              isSelected ? "border-primary bg-primary/10 ring-2 ring-primary shadow-lg" : "border-border bg-muted/30 hover:border-primary/50 hover:shadow-md"
                             )}
                           >
-                            <div className="text-[10px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
+                            {/* Vehicle Image */}
+                            <div className="w-full h-8 rounded-lg overflow-hidden mb-1 bg-muted">
+                              <img 
+                                src={vehicleImages[vehicle.value]} 
+                                alt={vehicle.label}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="text-[9px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
                             {vehiclePrice ? (
-                              <div className="text-xs font-bold text-primary">€{vehiclePrice.price}</div>
+                              <motion.div 
+                                className="text-xs font-bold text-primary"
+                                initial={{ scale: 0.8 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 300 }}
+                              >
+                                €{vehiclePrice.price}
+                              </motion.div>
                             ) : loadingTransferPrice && pickup && dropoff ? (
-                              <Loader2 className="h-3 w-3 animate-spin mx-auto text-muted-foreground" />
-                            ) : null}
-                          </button>
+                              <div className="h-4 flex items-center justify-center">
+                                <Skeleton className="h-3 w-8" />
+                              </div>
+                            ) : (
+                              <div className="h-4" />
+                            )}
+                          </motion.button>
                         );
                       })}
                     </div>
 
                     {/* CTA */}
-                    <Button 
-                      onClick={handleRideContinue}
-                      disabled={submitting}
-                      className="w-full h-11 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-xl"
+                    <motion.div
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
                     >
-                      {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (
-                        <>{t("getQuote") || "Get Quote"} <ArrowRight className="ml-2 h-4 w-4" /></>
-                      )}
-                    </Button>
-                  </div>
+                      <Button 
+                        onClick={handleRideContinue}
+                        disabled={submitting}
+                        className="w-full h-12 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-xl text-base group"
+                      >
+                        {submitting ? (
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                          <>
+                            {t("getQuote") || "Get Quote"} 
+                            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                          </>
+                        )}
+                      </Button>
+                    </motion.div>
+                  </motion.div>
                 ) : (
                   /* Hourly Form */
-                  <div className="space-y-3">
+                  <motion.div 
+                    key="hourly-form"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-3"
+                  >
                     <div className="grid grid-cols-2 gap-2">
                       <Select value={hourlyCity} onValueChange={setHourlyCity}>
                         <SelectTrigger className="h-11 bg-muted/50 border-border rounded-xl text-sm">
@@ -758,49 +891,84 @@ export const Hero = () => {
 
                     {hourlyCity && hourlyDuration && (
                       <div className="grid grid-cols-3 gap-1.5">
-                        {VEHICLE_TYPES.filter(v => v.value !== 'minibus').map((vehicle) => {
+                        {VEHICLE_TYPES.filter(v => v.value !== 'minibus').map((vehicle, index) => {
                           const vehiclePrice = allHourlyPrices.find(v => v.vehicleType === vehicle.value);
                           const isSelected = hourlyVehicleType === vehicle.value;
                           const isDisabled = vehicle.passengers < parseInt(hourlyPassengers);
                           const symbol = vehiclePrice?.currency === "EUR" ? "€" : vehiclePrice?.currency === "USD" ? "$" : vehiclePrice?.currency === "GBP" ? "£" : "₺";
                           
                           return (
-                            <button
+                            <motion.button
                               key={vehicle.value}
                               type="button"
                               onClick={() => !isDisabled && setHourlyVehicleType(vehicle.value)}
                               disabled={isDisabled}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.05 * index }}
+                              whileHover={{ scale: isDisabled ? 1 : 1.03 }}
+                              whileTap={{ scale: isDisabled ? 1 : 0.97 }}
                               className={cn(
-                                "rounded-lg border p-2 transition-all text-center",
+                                "rounded-xl border p-1.5 transition-all text-center overflow-hidden",
                                 isDisabled ? "opacity-40 cursor-not-allowed" : "",
-                                isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border bg-muted/30 hover:border-primary/50"
+                                isSelected ? "border-primary bg-primary/10 ring-2 ring-primary shadow-lg" : "border-border bg-muted/30 hover:border-primary/50 hover:shadow-md"
                               )}
                             >
-                              <div className="text-[10px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
+                              {/* Vehicle Image */}
+                              <div className="w-full h-8 rounded-lg overflow-hidden mb-1 bg-muted">
+                                <img 
+                                  src={vehicleImages[vehicle.value]} 
+                                  alt={vehicle.label}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="text-[9px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
                               {vehiclePrice ? (
-                                <div className="text-xs font-bold text-primary">{symbol}{vehiclePrice.price}</div>
+                                <motion.div 
+                                  className="text-xs font-bold text-primary"
+                                  initial={{ scale: 0.8 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                  {symbol}{vehiclePrice.price}
+                                </motion.div>
                               ) : (loadingPrice || convertingHourlyPrices) ? (
-                                <Loader2 className="h-3 w-3 animate-spin mx-auto text-muted-foreground" />
-                              ) : null}
-                            </button>
+                                <div className="h-4 flex items-center justify-center">
+                                  <Skeleton className="h-3 w-8" />
+                                </div>
+                              ) : (
+                                <div className="h-4" />
+                              )}
+                            </motion.button>
                           );
                         })}
                       </div>
                     )}
 
-                    <Button 
-                      onClick={handleHourlyContinue}
-                      disabled={submitting}
-                      className="w-full h-11 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-xl"
+                    <motion.div
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
                     >
-                      {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (
-                        <>{t("getQuote") || "Get Quote"} <ArrowRight className="ml-2 h-4 w-4" /></>
-                      )}
-                    </Button>
-                  </div>
+                      <Button 
+                        onClick={handleHourlyContinue}
+                        disabled={submitting}
+                        className="w-full h-12 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-xl text-base group"
+                      >
+                        {submitting ? (
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                          <>
+                            {t("getQuote") || "Get Quote"} 
+                            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                          </>
+                        )}
+                      </Button>
+                    </motion.div>
+                  </motion.div>
                 )}
+                </AnimatePresence>
               </div>
-            </div>
+            </motion.div>
 
             {/* Trust Badges - Mobile Compact */}
             <div className="flex flex-wrap items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
