@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useRef, memo, useCallback } from "react";
 import { motion } from "framer-motion";
+import { useSwipeable } from "react-swipeable";
 
 interface VehicleImageCarouselProps {
   images: string[];
@@ -18,8 +19,59 @@ export const VehicleImageCarousel = memo(({
 }: VehicleImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set([0]));
+  const [isPaused, setIsPaused] = useState(false);
   const preloadedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
+  const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Navigate to next/previous image
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  }, [images.length]);
+
+  const goToPrev = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  }, [images.length]);
+
+  // Pause autoplay temporarily after swipe
+  const pauseAutoplay = useCallback(() => {
+    setIsPaused(true);
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+    }
+    pauseTimeoutRef.current = setTimeout(() => {
+      setIsPaused(false);
+    }, 5000); // Resume autoplay after 5 seconds
+  }, []);
+
+  // Swipe handlers
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (images.length > 1) {
+        goToNext();
+        pauseAutoplay();
+      }
+    },
+    onSwipedRight: () => {
+      if (images.length > 1) {
+        goToPrev();
+        pauseAutoplay();
+      }
+    },
+    preventScrollOnSwipe: true,
+    trackMouse: false,
+    trackTouch: true,
+    delta: 30,
+  });
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Preload images once on mount - avoid repeated DOM manipulation
   useEffect(() => {
@@ -38,23 +90,27 @@ export const VehicleImageCarousel = memo(({
     });
   }, [images]);
 
-  // Auto-rotate images
+  // Auto-rotate images (paused when hovered or after swipe)
   useEffect(() => {
-    if (images.length <= 1 || isHovered) return;
+    if (images.length <= 1 || isHovered || isPaused) return;
     
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % images.length);
     }, interval);
 
     return () => clearInterval(timer);
-  }, [images.length, interval, isHovered]);
+  }, [images.length, interval, isHovered, isPaused]);
 
   if (images.length === 0) return null;
 
   const isCurrentLoaded = imagesLoaded.has(currentIndex);
 
   return (
-    <div ref={containerRef} className={`relative overflow-hidden ${className}`}>
+    <div 
+      ref={containerRef} 
+      className={`relative overflow-hidden touch-pan-y ${className}`}
+      {...swipeHandlers}
+    >
       {/* Render all images but only show current one - prevents DOM flicker */}
       {images.map((src, index) => (
         <motion.img
@@ -71,8 +127,9 @@ export const VehicleImageCarousel = memo(({
             opacity: { duration: 0.4 },
             scale: { duration: 0.3 }
           }}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           loading={index === 0 ? "eager" : "lazy"}
+          draggable={false}
           onLoad={() => {
             setImagesLoaded(prev => new Set([...prev, index]));
           }}
@@ -89,6 +146,7 @@ export const VehicleImageCarousel = memo(({
               onClick={(e) => {
                 e.stopPropagation();
                 setCurrentIndex(index);
+                pauseAutoplay();
               }}
               className={`w-1.5 h-1.5 rounded-full transition-all ${
                 index === currentIndex 
