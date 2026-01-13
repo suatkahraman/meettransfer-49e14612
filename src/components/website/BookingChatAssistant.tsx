@@ -1417,7 +1417,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   if (mobileFloating) {
     return (
       <>
-        {/* Mobile Floating Toggle Button - Optimized for mobile */}
+        {/* Mobile Floating Toggle Button - Positioned above WhatsApp button */}
         <AnimatePresence>
           {!isOpen && (
             <motion.button
@@ -1429,7 +1429,6 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               data-chat-trigger
               className="fixed bottom-[72px] right-3 z-[9999] flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-full shadow-lg touch-manipulation"
               style={{ 
-                paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
                 WebkitTapHighlightColor: 'transparent'
               }}
             >
