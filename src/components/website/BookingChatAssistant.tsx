@@ -83,7 +83,7 @@ function isSpeechRecognitionSupported(): boolean {
 }
 
 // Voice recording hook using Web Speech API with Whisper fallback for unsupported browsers
-function useVoiceRecorder(onTranscription: (text: string) => void, language: string) {
+function useVoiceRecorder(onTranscription: (text: string) => void, language: string, onInterimTranscript?: (text: string) => void) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showBrowserWarning, setShowBrowserWarning] = useState(false);
@@ -91,6 +91,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
   const [useWhisperFallback, setUseWhisperFallback] = useState(false);
   const [audioLevels, setAudioLevels] = useState<number[]>(new Array(16).fill(0));
   const [audioQuality, setAudioQuality] = useState<'good' | 'low' | 'noisy' | 'silent'>('good');
+  const [interimTranscript, setInterimTranscript] = useState<string>('');
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -511,7 +512,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         console.log('🎤 onresult event received, results:', event.results.length);
         let finalTranscript = '';
-        let interimTranscript = '';
+        let currentInterimTranscript = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const result = event.results[i];
@@ -522,18 +523,25 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
           if (result.isFinal) {
             finalTranscript += transcript;
           } else {
-            interimTranscript += transcript;
+            currentInterimTranscript += transcript;
           }
         }
 
-        const transcript = finalTranscript || interimTranscript;
+        const transcript = finalTranscript || currentInterimTranscript;
         
         if (transcript) {
           transcriptRef.current = transcript;
           console.log('🎤 Current transcript:', transcript, 'isFinal:', !!finalTranscript);
           
+          // Always update interim transcript for real-time display
+          if (currentInterimTranscript) {
+            setInterimTranscript(currentInterimTranscript);
+            onInterimTranscript?.(currentInterimTranscript);
+          }
+          
           if (finalTranscript) {
             console.log('🎤 Sending final transcript to onTranscription...');
+            setInterimTranscript(''); // Clear interim when final is received
             setIsProcessing(true);
             onTranscription(finalTranscript);
             setIsProcessing(false);
@@ -583,6 +591,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
           setIsProcessing(false);
         }
         
+        setInterimTranscript(''); // Clear interim transcript on end
         setIsRecording(false);
       };
 
@@ -651,7 +660,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     setIsRecording(false);
   }, [isRecording, useWhisperFallback, stopWhisperRecording, cleanupAudioAnalyser]);
 
-  return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels, audioQuality };
+  return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels, audioQuality, interimTranscript };
 }
 
 // Voice option type
@@ -861,8 +870,8 @@ const placeholderMessages: Record<string, string> = {
 };
 
 const welcomeMessages: Record<string, string> = {
-  EN: "Welcome! I'm MT, your AI assistant. I can help you with your VIP airport transfer. I'm listening.",
-  TR: "Hoşgeldiniz! Ben Yapay Zeka Asistanınız MT, size VIP havalimanı transferiniz için yardımcı olabilirim. Sizi dinliyorum.",
+  EN: "Hello! I'm MT, your VIP transfer assistant. How can I help you?",
+  TR: "Merhaba! Ben MT, VIP transfer asistanınız. Size nasıl yardımcı olabilirim?",
   DE: "Hallo! 👋 Ich bin Ihr KI-Buchungsassistent. Sagen Sie mir, wohin und wann Sie einen Transfer benötigen! Sie können auch 🎤 das Mikrofon verwenden.",
   FR: "Bonjour! 👋 Je suis votre assistant de réservation IA. Dites-moi où et quand vous avez besoin d'un transfert! Vous pouvez aussi utiliser le 🎤 microphone.",
   RU: "Привет! 👋 Я ваш AI-ассистент по бронированию. Скажите, куда и когда вам нужен трансфер! Вы также можете использовать 🎤 микрофон.",
@@ -941,9 +950,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     });
   }, [mobileFloating]);
   
-  const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels, audioQuality } = useVoiceRecorder(
+  // Handle interim transcript for real-time display
+  const handleInterimTranscript = useCallback((text: string) => {
+    setInput(text);
+  }, []);
+  
+  const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels, audioQuality, interimTranscript } = useVoiceRecorder(
     handleTranscription,
-    language
+    language,
+    handleInterimTranscript
   );
   
   // Auto-send voice message when transcription is complete and not recording/processing
@@ -2423,6 +2438,17 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 </span>
               )}
             </div>
+            
+            {/* Real-time transcript display */}
+            {isRecording && interimTranscript && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-[280px] px-4 py-2 bg-background/80 border border-border/50 rounded-xl text-sm text-foreground/80 text-center"
+              >
+                <span className="italic">"{interimTranscript}"</span>
+              </motion.div>
+            )}
             
             {/* Audio quality warning */}
             {isRecording && !isProcessing && audioQuality !== 'good' && (
