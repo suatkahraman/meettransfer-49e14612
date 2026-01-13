@@ -780,8 +780,19 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
       {/* Modern Chat Panel */}
       <motion.div 
         layout
+        initial={false}
+        animate={{
+          height: isOpen ? "auto" : "auto",
+          scale: isOpen ? 1 : 1,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 30,
+          mass: 0.8,
+        }}
         className={cn(
-          "relative overflow-hidden transition-all duration-500",
+          "relative overflow-hidden",
           "bg-gradient-to-br from-card via-card to-muted/30",
           "shadow-2xl border border-border/50",
           "backdrop-blur-xl",
@@ -997,13 +1008,35 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
         </motion.button>
 
         {/* Chat Content */}
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, height: 0, y: 20 }}
+              animate={{ 
+                opacity: 1, 
+                height: "auto", 
+                y: 0,
+                transition: {
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 35,
+                  mass: 0.8,
+                  opacity: { duration: 0.2 },
+                  height: { duration: 0.4 }
+                }
+              }}
+              exit={{ 
+                opacity: 0, 
+                height: 0, 
+                y: -10,
+                transition: {
+                  type: "spring",
+                  stiffness: 500,
+                  damping: 40,
+                  opacity: { duration: 0.15 },
+                  height: { duration: 0.3 }
+                }
+              }}
               className="relative flex flex-col z-10 overflow-hidden h-[calc(70vh-88px)] md:h-[calc(500px-88px)]"
             >
               {/* Messages Area */}
