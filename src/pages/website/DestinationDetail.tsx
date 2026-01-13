@@ -8,6 +8,7 @@ import FeatureList from "@/components/website/FeatureList";
 import PriceTable from "@/components/website/PriceTable";
 import FAQSection from "@/components/website/FAQSection";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
+import VehicleComparison from "@/components/website/VehicleComparison";
 import { motion } from "framer-motion";
 import { 
   MapPin, Star, Plane, Users, Luggage, Clock, Shield, 
@@ -552,6 +553,12 @@ const DestinationDetail = () => {
           </div>
         </motion.section>
 
+        {/* Vehicle Comparison Section */}
+        <VehicleComparison 
+          cityName={isTR ? destination.nameTR : destination.name} 
+          basePrice={destination.fromPrice} 
+        />
+
         {/* Price Table */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
@@ -561,7 +568,7 @@ const DestinationDetail = () => {
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">
-              {isTR ? "Transfer Fiyatları" : "Transfer Prices"}
+              {isTR ? "Rota Fiyatları" : "Route Prices"}
             </h2>
             {promoCode.isActive && (
               <span className="text-sm text-primary font-medium flex items-center gap-1">

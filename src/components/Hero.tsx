@@ -113,12 +113,12 @@ export const Hero = () => {
   const [convertingHourlyPrices, setConvertingHourlyPrices] = useState(false);
   const [originalHourlyPrices, setOriginalHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
   
-  // Video/Image background state - City videos with labels
+  // Video/Image background state - City videos with labels and posters
   const cityVideos = [
-    { src: heroIstanbul, label: "Istanbul", labelTR: "İstanbul" },
-    { src: heroAntalya, label: "Antalya", labelTR: "Antalya" },
-    { src: heroBodrum, label: "Bodrum", labelTR: "Bodrum" },
-    { src: heroVideo, label: "VIP Transfer", labelTR: "VIP Transfer" },
+    { src: heroIstanbul, label: "Istanbul", labelTR: "İstanbul", poster: "/src/assets/destinations/istanbul-city.jpg" },
+    { src: heroAntalya, label: "Antalya", labelTR: "Antalya", poster: "/src/assets/destinations/antalya-city.jpg" },
+    { src: heroBodrum, label: "Bodrum", labelTR: "Bodrum", poster: "/src/assets/destinations/bodrum-city.jpg" },
+    { src: heroVideo, label: "VIP Transfer", labelTR: "VIP Transfer", poster: vitoVipImg },
   ];
   
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -479,6 +479,8 @@ export const Hero = () => {
               muted
               loop
               playsInline
+              preload="auto"
+              poster={cityVideos[currentVideoIndex].poster}
               className="absolute inset-0 w-full h-full object-cover"
               initial={{ opacity: 0, scale: 1.1 }}
               animate={{ opacity: 0.4, scale: 1 }}
@@ -488,6 +490,15 @@ export const Hero = () => {
               <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
             </motion.video>
           </AnimatePresence>
+          
+          {/* Preload next video */}
+          {cityVideos.length > 1 && (
+            <link 
+              rel="preload" 
+              as="video" 
+              href={cityVideos[(currentVideoIndex + 1) % cityVideos.length].src} 
+            />
+          )}
           
           {/* City Label Badge */}
           <AnimatePresence mode="wait">
