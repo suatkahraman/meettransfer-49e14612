@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from "react";
 import { format, parse } from "date-fns";
 import { Car, Timer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -9,25 +9,23 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 import { AnimatePresence } from "framer-motion";
-import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
-import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 
-// Import refactored components
+// Critical lightweight components - import directly
 import {
-  HeroBackground,
   HeroHeader,
-  HeroAIAssistant,
-  ReturnTripPromoBanner,
-  VehicleSelector,
-  LocationInputs,
-  HeroVisualSection,
   HeroTrustBadges,
   CityVideo,
   BookingData,
-  RideFormContent,
-  HourlyFormContent,
 } from "@/components/hero";
-import { SwipeableBookingCard } from "@/components/hero/SwipeableBookingCard";
+
+// Lazy load heavier form components - they render after initial paint
+const RideFormContent = lazy(() => import("@/components/hero/RideFormContent").then(m => ({ default: m.RideFormContent })));
+const HourlyFormContent = lazy(() => import("@/components/hero/HourlyFormContent").then(m => ({ default: m.HourlyFormContent })));
+const HeroBackground = lazy(() => import("@/components/hero/HeroBackground").then(m => ({ default: m.HeroBackground })));
+const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
+const HeroAIAssistant = lazy(() => import("@/components/hero/HeroAIAssistant").then(m => ({ default: m.HeroAIAssistant })));
+const ReturnTripPromoBanner = lazy(() => import("@/components/hero/ReturnTripPromoBanner").then(m => ({ default: m.ReturnTripPromoBanner })));
+const SwipeableBookingCard = lazy(() => import("@/components/hero/SwipeableBookingCard").then(m => ({ default: m.SwipeableBookingCard })));
 
 import vitoVipImg from "@/assets/vito-vip-1.jpg";
 
@@ -382,9 +380,25 @@ export const Hero = () => {
     setAppliedPromoCode(code);
   }, []);
    
+  // Minimal skeleton for form content
+  const FormSkeleton = () => (
+    <div className="space-y-3 animate-pulse">
+      <div className="h-14 bg-muted rounded-xl" />
+      <div className="h-14 bg-muted rounded-xl" />
+      <div className="grid grid-cols-3 gap-2">
+        <div className="h-14 bg-muted rounded-xl" />
+        <div className="h-14 bg-muted rounded-xl" />
+        <div className="h-14 bg-muted rounded-xl" />
+      </div>
+      <div className="h-16 bg-primary/20 rounded-xl" />
+    </div>
+  );
+
   return (
     <section ref={heroRef} id="booking-form" className="relative overflow-hidden bg-background">
-      <HeroBackground videosLoaded={videosLoaded} cityVideos={cityVideos} currentVideoIndex={currentVideoIndex} setCurrentVideoIndex={setCurrentVideoIndex} language={language} />
+      <Suspense fallback={<div className="absolute inset-0 bg-gradient-to-br from-background to-muted" />}>
+        <HeroBackground videosLoaded={videosLoaded} cityVideos={cityVideos} currentVideoIndex={currentVideoIndex} setCurrentVideoIndex={setCurrentVideoIndex} language={language} />
+      </Suspense>
 
       {/* Mobile: pb-20 for bottom nav, desktop: normal padding. pt handled by WebsiteLayout */}
       <div className="container relative z-10 px-2 sm:px-3 md:px-4 pt-4 md:pt-8 pb-4 md:pb-8 lg:pb-16">
@@ -392,93 +406,103 @@ export const Hero = () => {
           {/* Left Side - Form */}
           <div className="order-1 md:col-span-3 lg:col-span-1">
             <HeroHeader language={language} />
-            <HeroAIAssistant language={language} onApplyBooking={handleApplyBooking} />
-            <ReturnTripPromoBanner language={language} onApplyPromoCode={handleApplyPromoCode} />
+            <Suspense fallback={null}>
+              <HeroAIAssistant language={language} onApplyBooking={handleApplyBooking} />
+            </Suspense>
+            <Suspense fallback={null}>
+              <ReturnTripPromoBanner language={language} onApplyPromoCode={handleApplyPromoCode} />
+            </Suspense>
 
             {/* Booking Form Card - Enhanced visibility */}
-            <SwipeableBookingCard 
-              activeTab={activeTab} 
-              setActiveTab={setActiveTab}
-              language={language}
-              t={t}
-            >
-              {/* Tabs */}
-              <div className="flex bg-muted/50 relative">
-                <div 
-                  className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300"
-                  style={{ left: activeTab === "ride" ? "0%" : "50%", width: "50%" }}
-                />
-                <button onClick={() => setActiveTab("ride")} className={cn("flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative", activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
-                  <Car className="h-4 w-4 md:h-4 md:w-4" />
-                  <span>{t("pointToPoint") || "Transfer"}</span>
-                </button>
-                <button onClick={() => setActiveTab("hourly")} className={cn("flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm", activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
-                  <Timer className="h-4 w-4 md:h-4 md:w-4" />
-                  <span>{t("perHour") || "Hourly"}</span>
-                </button>
-              </div>
+            <Suspense fallback={<div className="bg-card rounded-2xl shadow-lg p-4"><FormSkeleton /></div>}>
+              <SwipeableBookingCard 
+                activeTab={activeTab} 
+                setActiveTab={setActiveTab}
+                language={language}
+                t={t}
+              >
+                {/* Tabs */}
+                <div className="flex bg-muted/50 relative">
+                  <div 
+                    className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300"
+                    style={{ left: activeTab === "ride" ? "0%" : "50%", width: "50%" }}
+                  />
+                  <button onClick={() => setActiveTab("ride")} className={cn("flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative", activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                    <Car className="h-4 w-4 md:h-4 md:w-4" />
+                    <span>{t("pointToPoint") || "Transfer"}</span>
+                  </button>
+                  <button onClick={() => setActiveTab("hourly")} className={cn("flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm", activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                    <Timer className="h-4 w-4 md:h-4 md:w-4" />
+                    <span>{t("perHour") || "Hourly"}</span>
+                  </button>
+                </div>
 
-              {/* Form Content */}
-              <div className="p-4 sm:p-4 md:p-5 lg:p-5">
-                <AnimatePresence mode="wait">
-                  {activeTab === "ride" ? (
-                    <RideFormContent
-                      pickup={pickup}
-                      dropoff={dropoff}
-                      date={date}
-                      time={time}
-                      passengers={passengers}
-                      vehicleType={vehicleType}
-                      allVehiclePrices={allVehiclePrices}
-                      loadingTransferPrice={loadingTransferPrice}
-                      transferPriceCurrency={transferPriceCurrency}
-                      submitting={submitting}
-                      language={language}
-                      t={t}
-                      onPickupSelected={handlePickupSelected}
-                      onDropoffSelected={handleDropoffSelected}
-                      onSwapLocations={handleSwapLocations}
-                      setDate={handleSetDate}
-                      setTime={handleSetTime}
-                      setPassengers={handleSetPassengers}
-                      setVehicleType={handleSetVehicleType}
-                      handleRideContinue={handleRideContinue}
-                    />
-                  ) : (
-                    <HourlyFormContent
-                      hourlyCity={hourlyCity}
-                      hourlyDuration={hourlyDuration}
-                      customHours={customHours}
-                      hourlyDate={hourlyDate}
-                      hourlyTime={hourlyTime}
-                      hourlyPassengers={hourlyPassengers}
-                      hourlyVehicleType={hourlyVehicleType}
-                      allHourlyPrices={allHourlyPrices}
-                      loadingPrice={loadingPrice}
-                      submitting={submitting}
-                      availableCities={availableCities}
-                      availableDurations={availableDurations}
-                      language={language}
-                      t={t}
-                      setHourlyCity={handleSetHourlyCity}
-                      setHourlyDuration={handleSetHourlyDuration}
-                      setCustomHours={handleSetCustomHours}
-                      setHourlyDate={handleSetHourlyDate}
-                      setHourlyTime={handleSetHourlyTime}
-                      setHourlyPassengers={handleSetHourlyPassengers}
-                      setHourlyVehicleType={handleSetHourlyVehicleType}
-                      handleHourlyContinue={handleHourlyContinue}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
-            </SwipeableBookingCard>
+                {/* Form Content */}
+                <div className="p-4 sm:p-4 md:p-5 lg:p-5">
+                  <Suspense fallback={<FormSkeleton />}>
+                    <AnimatePresence mode="wait">
+                      {activeTab === "ride" ? (
+                        <RideFormContent
+                          pickup={pickup}
+                          dropoff={dropoff}
+                          date={date}
+                          time={time}
+                          passengers={passengers}
+                          vehicleType={vehicleType}
+                          allVehiclePrices={allVehiclePrices}
+                          loadingTransferPrice={loadingTransferPrice}
+                          transferPriceCurrency={transferPriceCurrency}
+                          submitting={submitting}
+                          language={language}
+                          t={t}
+                          onPickupSelected={handlePickupSelected}
+                          onDropoffSelected={handleDropoffSelected}
+                          onSwapLocations={handleSwapLocations}
+                          setDate={handleSetDate}
+                          setTime={handleSetTime}
+                          setPassengers={handleSetPassengers}
+                          setVehicleType={handleSetVehicleType}
+                          handleRideContinue={handleRideContinue}
+                        />
+                      ) : (
+                        <HourlyFormContent
+                          hourlyCity={hourlyCity}
+                          hourlyDuration={hourlyDuration}
+                          customHours={customHours}
+                          hourlyDate={hourlyDate}
+                          hourlyTime={hourlyTime}
+                          hourlyPassengers={hourlyPassengers}
+                          hourlyVehicleType={hourlyVehicleType}
+                          allHourlyPrices={allHourlyPrices}
+                          loadingPrice={loadingPrice}
+                          submitting={submitting}
+                          availableCities={availableCities}
+                          availableDurations={availableDurations}
+                          language={language}
+                          t={t}
+                          setHourlyCity={handleSetHourlyCity}
+                          setHourlyDuration={handleSetHourlyDuration}
+                          setCustomHours={handleSetCustomHours}
+                          setHourlyDate={handleSetHourlyDate}
+                          setHourlyTime={handleSetHourlyTime}
+                          setHourlyPassengers={handleSetHourlyPassengers}
+                          setHourlyVehicleType={handleSetHourlyVehicleType}
+                          handleHourlyContinue={handleHourlyContinue}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </Suspense>
+                </div>
+              </SwipeableBookingCard>
+            </Suspense>
 
             <HeroTrustBadges language={language} />
           </div>
 
           {/* Visual Sections */}
-          <HeroVisualSection videosLoaded={videosLoaded} cityVideos={cityVideos} currentVideoIndex={currentVideoIndex} language={language} t={t} />
+          <Suspense fallback={<div className="hidden md:block" />}>
+            <HeroVisualSection videosLoaded={videosLoaded} cityVideos={cityVideos} currentVideoIndex={currentVideoIndex} language={language} t={t} />
+          </Suspense>
         </div>
       </div>
     </section>
