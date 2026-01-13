@@ -150,15 +150,68 @@ export default defineConfig(({ mode }) => ({
               }
             }
           },
+          // Supabase Edge Functions - StaleWhileRevalidate for fast responses
           {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+            urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/v1\/(get-google-reviews|get-all-vehicle-prices|get-exchange-rate)/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "supabase-functions-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              plugins: [
+                {
+                  // Add cache timestamp for debugging
+                  cacheWillUpdate: async ({ response }) => {
+                    if (response && response.status === 200) {
+                      const headers = new Headers(response.headers);
+                      headers.set('sw-cache-time', new Date().toISOString());
+                      return new Response(response.body, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers
+                      });
+                    }
+                    return response;
+                  }
+                }
+              ]
+            }
+          },
+          // Supabase REST API - NetworkFirst with fast timeout
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
             handler: "NetworkFirst",
             options: {
-              cacheName: "api-cache",
-              networkTimeoutSeconds: 10,
+              cacheName: "supabase-rest-cache",
+              networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 5 // 5 minutes
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          // Supabase Auth - NetworkOnly (never cache auth)
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
+            handler: "NetworkOnly"
+          },
+          // Supabase Storage - CacheFirst for static assets
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "supabase-storage-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
               },
               cacheableResponse: {
                 statuses: [0, 200]
