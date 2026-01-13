@@ -842,11 +842,34 @@ const CustomerReservationDetail = () => {
                 />
               </motion.div>
 
-              {/* Route Map - Enhanced */}
+              {/* Route Map with Navigation - Enhanced */}
               <motion.div variants={itemVariants} className="py-4 border-t border-border/50">
-                <div className="flex items-center gap-2 mb-3">
-                  <Map className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold">{t('routeMap')}</span>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Map className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-semibold">{t('routeMap')}</span>
+                  </div>
+                  {/* Open in Maps Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 text-xs"
+                    onClick={() => {
+                      const origin = reservation.pickup_lat && reservation.pickup_lng 
+                        ? `${reservation.pickup_lat},${reservation.pickup_lng}` 
+                        : encodeURIComponent(reservation.pickup);
+                      const dest = reservation.dropoff_lat && reservation.dropoff_lng 
+                        ? `${reservation.dropoff_lat},${reservation.dropoff_lng}` 
+                        : encodeURIComponent(reservation.dropoff);
+                      window.open(
+                        `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`,
+                        '_blank'
+                      );
+                    }}
+                  >
+                    <Map className="h-3.5 w-3.5" />
+                    {t('openInMaps') || 'Open in Maps'}
+                  </Button>
                 </div>
                 <div className="rounded-xl overflow-hidden shadow-md">
                   <GoogleRouteMap
@@ -854,6 +877,48 @@ const CustomerReservationDetail = () => {
                     dropoff={reservation.dropoff}
                     showNavigationButtons={false}
                   />
+                </div>
+                
+                {/* Navigation Buttons for Customer */}
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="gap-2 text-xs sm:text-sm"
+                    onClick={() => {
+                      const coords = reservation.pickup_lat && reservation.pickup_lng 
+                        ? `${reservation.pickup_lat},${reservation.pickup_lng}` 
+                        : encodeURIComponent(reservation.pickup);
+                      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                      if (isIOS) {
+                        window.open(`maps://maps.apple.com/?daddr=${coords}&dirflg=d`, '_blank');
+                      } else {
+                        window.open(`https://www.google.com/maps/dir/?api=1&destination=${coords}`, '_blank');
+                      }
+                    }}
+                  >
+                    <MapPin className="h-4 w-4" />
+                    {t('navigateToPickup') || 'Navigate to Pickup'}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="gap-2 text-xs sm:text-sm"
+                    onClick={() => {
+                      const coords = reservation.dropoff_lat && reservation.dropoff_lng 
+                        ? `${reservation.dropoff_lat},${reservation.dropoff_lng}` 
+                        : encodeURIComponent(reservation.dropoff);
+                      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                      if (isIOS) {
+                        window.open(`maps://maps.apple.com/?daddr=${coords}&dirflg=d`, '_blank');
+                      } else {
+                        window.open(`https://www.google.com/maps/dir/?api=1&destination=${coords}`, '_blank');
+                      }
+                    }}
+                  >
+                    <MapPin className="h-4 w-4" />
+                    {t('navigateToDropoff') || 'Navigate to Dropoff'}
+                  </Button>
                 </div>
               </motion.div>
 
