@@ -193,6 +193,8 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Book Airport Transfer With AI",
     bookTransferOrHourlyWithAI: "Book Transfer & Hourly Rental With AI",
     new: "New",
+    airports: "Airports",
+    support: "Support",
     
     // Hourly Rental Form
     city: "City",
@@ -1869,6 +1871,8 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Flughafentransfer mit KI buchen",
     bookTransferOrHourlyWithAI: "Transfer & Stundenvermietung mit KI buchen",
     new: "Neu",
+    airports: "Flughäfen",
+    support: "Support",
     
     // Hourly Rental Form
     city: "Stadt",
@@ -3583,6 +3587,8 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Réservez votre transfert aéroport avec l'IA",
     bookTransferOrHourlyWithAI: "Réservez transfert & location horaire avec l'IA",
     new: "Nouveau",
+    airports: "Aéroports",
+    support: "Assistance",
     
     // Hourly Rental Form
     city: "Ville",
@@ -5008,6 +5014,8 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Забронируйте трансфер из аэропорта с ИИ",
     bookTransferOrHourlyWithAI: "Забронируйте трансфер и почасовую аренду с ИИ",
     new: "Новый",
+    airports: "Аэропорты",
+    support: "Поддержка",
     
     // Hourly Rental Form
     city: "Город",
@@ -6319,6 +6327,8 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Prenota il trasferimento aeroportuale con l'IA",
     bookTransferOrHourlyWithAI: "Prenota trasferimento e noleggio orario con l'IA",
     new: "Nuovo",
+    airports: "Aeroporti",
+    support: "Supporto",
     
     // Hourly Rental Form
     city: "Città",
@@ -7677,6 +7687,8 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Reserva tu traslado al aeropuerto con IA",
     bookTransferOrHourlyWithAI: "Reserva traslado y alquiler por horas con IA",
     new: "Nuevo",
+    airports: "Aeropuertos",
+    support: "Soporte",
     
     // Hourly Rental Form
     city: "Ciudad",
@@ -9035,6 +9047,8 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "احجز نقل المطار مع الذكاء الاصطناعي",
     bookTransferOrHourlyWithAI: "احجز النقل والإيجار بالساعة مع الذكاء الاصطناعي",
     new: "جديد",
+    airports: "المطارات",
+    support: "الدعم",
     
     // Hourly Rental Form
     city: "المدينة",
@@ -10308,6 +10322,8 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Havalimanı Transferini AI ile Rezerve Et",
     bookTransferOrHourlyWithAI: "Transfer & Saatlik Kiralama AI ile Rezerve Et",
     new: "Yeni",
+    airports: "Havalimanları",
+    support: "Destek",
     
     // Hourly Rental Form
     city: "Şehir",
@@ -11798,6 +11814,8 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "Забронюйте трансфер з аеропорту зі ШІ",
     bookTransferOrHourlyWithAI: "Забронюйте трансфер і погодинну оренду зі ШІ",
     new: "Новий",
+    airports: "Аеропорти",
+    support: "Підтримка",
     
     // Hourly Rental Form
     city: "Місто",
@@ -13047,6 +13065,8 @@ const translations: Record<Language, Record<string, string>> = {
     bookAirportTransferWithAI: "AIで空港送迎を予約",
     bookTransferOrHourlyWithAI: "AIで送迎と時間貸しを予約",
     new: "新着",
+    airports: "空港",
+    support: "サポート",
     
     // Hourly Rental Form
     city: "都市",
