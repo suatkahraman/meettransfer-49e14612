@@ -51,6 +51,16 @@ const translations: Record<Language, Record<string, string>> = {
     aiPromoImageAlt: "AI Chat Assistant for booking transfers",
     aiPromoOnline: "AI Online",
     
+    // TrustBar
+    wePriceMatch: "We Price Match",
+    wePriceMatchDesc: "We return the difference in price",
+    freeWaitingTime: "Free Waiting Time",
+    freeWaitingTimeDesc: "60 min at airports, 15 min elsewhere",
+    noHiddenCosts: "No Hidden Costs",
+    noHiddenCostsDesc: "Taxes, tolls and gratuity included",
+    safeRides: "Safe Rides",
+    safeRidesDesc: "All drivers thoroughly verified",
+    
     // Best Price Animation
     preparingBestPrice: "Preparing Your Best Price",
     preparingBestPriceDesc: "We're calculating the best possible price for you...",
@@ -1732,6 +1742,16 @@ const translations: Record<Language, Record<string, string>> = {
     aiPromoHint: "Versuchen Sie: \"Morgen 15:00 vom Istanbul Flughafen zum Taksim für 4 Personen\"",
     aiPromoImageAlt: "KI-Chat-Assistent für Transfer-Buchungen",
     aiPromoOnline: "KI Online",
+    
+    // TrustBar
+    wePriceMatch: "Preisanpassung",
+    wePriceMatchDesc: "Wir erstatten die Differenz",
+    freeWaitingTime: "Kostenlose Wartezeit",
+    freeWaitingTimeDesc: "60 Min. am Flughafen, 15 Min. anderswo",
+    noHiddenCosts: "Keine versteckten Kosten",
+    noHiddenCostsDesc: "Steuern, Maut und Trinkgeld inklusive",
+    safeRides: "Sichere Fahrten",
+    safeRidesDesc: "Alle Fahrer gründlich überprüft",
     
     // Best Price Animation
     preparingBestPrice: "Wir bereiten Ihren besten Preis vor",
@@ -3452,6 +3472,16 @@ const translations: Record<Language, Record<string, string>> = {
     aiPromoImageAlt: "Assistant IA pour réserver des transferts",
     aiPromoOnline: "IA En ligne",
     
+    // TrustBar
+    wePriceMatch: "Alignement des prix",
+    wePriceMatchDesc: "Nous remboursons la différence",
+    freeWaitingTime: "Attente gratuite",
+    freeWaitingTimeDesc: "60 min aéroports, 15 min ailleurs",
+    noHiddenCosts: "Pas de coûts cachés",
+    noHiddenCostsDesc: "Taxes, péages et pourboires inclus",
+    safeRides: "Trajets sécurisés",
+    safeRidesDesc: "Tous les chauffeurs vérifiés",
+    
     // Best Price Animation
     preparingBestPrice: "Préparation de votre meilleur prix",
     preparingBestPriceDesc: "Nous calculons le meilleur prix possible pour vous...",
@@ -4883,6 +4913,16 @@ const translations: Record<Language, Record<string, string>> = {
     aiPromoImageAlt: "ИИ-ассистент для бронирования трансферов",
     aiPromoOnline: "ИИ Онлайн",
     
+    // TrustBar
+    wePriceMatch: "Гарантия цены",
+    wePriceMatchDesc: "Вернём разницу в цене",
+    freeWaitingTime: "Бесплатное ожидание",
+    freeWaitingTimeDesc: "60 мин в аэропортах, 15 мин в других местах",
+    noHiddenCosts: "Без скрытых платежей",
+    noHiddenCostsDesc: "Налоги, пошлины и чаевые включены",
+    safeRides: "Безопасные поездки",
+    safeRidesDesc: "Все водители проверены",
+    
     // Best Price Animation
     preparingBestPrice: "Готовим лучшую цену для вас",
     preparingBestPriceDesc: "Мы рассчитываем лучшую возможную цену для вас...",
@@ -6199,6 +6239,16 @@ const translations: Record<Language, Record<string, string>> = {
     aiPromoHint: "Prova: \"Domani alle 15 dall'aeroporto di Istanbul a Taksim per 4 persone\"",
     aiPromoImageAlt: "Assistente IA per prenotare transfer",
     aiPromoOnline: "IA Online",
+    
+    // TrustBar
+    wePriceMatch: "Adeguamento prezzi",
+    wePriceMatchDesc: "Rimborsiamo la differenza",
+    freeWaitingTime: "Attesa gratuita",
+    freeWaitingTimeDesc: "60 min aeroporti, 15 min altrove",
+    noHiddenCosts: "Nessun costo nascosto",
+    noHiddenCostsDesc: "Tasse, pedaggi e mance incluse",
+    safeRides: "Viaggi sicuri",
+    safeRidesDesc: "Tutti gli autisti verificati",
     
     // Best Price Animation
     preparingBestPrice: "Prepariamo il miglior prezzo per te",
@@ -7564,6 +7614,16 @@ const translations: Record<Language, Record<string, string>> = {
     aiPromoImageAlt: "Asistente IA para reservar transfers",
     aiPromoOnline: "IA En línea",
     
+    // TrustBar
+    wePriceMatch: "Igualamos precios",
+    wePriceMatchDesc: "Devolvemos la diferencia",
+    freeWaitingTime: "Espera gratuita",
+    freeWaitingTimeDesc: "60 min aeropuertos, 15 min otros",
+    noHiddenCosts: "Sin costes ocultos",
+    noHiddenCostsDesc: "Impuestos, peajes y propinas incluidos",
+    safeRides: "Viajes seguros",
+    safeRidesDesc: "Todos los conductores verificados",
+    
     // Best Price Animation
     preparingBestPrice: "Preparando tu mejor precio",
     preparingBestPriceDesc: "Estamos calculando el mejor precio posible para ti...",
@@ -8928,6 +8988,16 @@ const translations: Record<Language, Record<string, string>> = {
     aiPromoImageAlt: "مساعد الدردشة الذكي لحجز النقل",
     aiPromoOnline: "الذكاء الاصطناعي متصل",
     
+    // TrustBar
+    wePriceMatch: "مطابقة الأسعار",
+    wePriceMatchDesc: "نعيد الفرق في السعر",
+    freeWaitingTime: "انتظار مجاني",
+    freeWaitingTimeDesc: "60 دقيقة في المطارات، 15 دقيقة في أماكن أخرى",
+    noHiddenCosts: "بدون تكاليف مخفية",
+    noHiddenCostsDesc: "الضرائب والرسوم والإكراميات شاملة",
+    safeRides: "رحلات آمنة",
+    safeRidesDesc: "جميع السائقين تم التحقق منهم",
+    
     // Best Price Animation
     preparingBestPrice: "نحضر لك أفضل سعر",
     preparingBestPriceDesc: "نحن نحسب أفضل سعر ممكن لك...",
@@ -10206,6 +10276,16 @@ const translations: Record<Language, Record<string, string>> = {
     aiPromoHint: "Deneyin: \"Yarın saat 15:00'te İstanbul Havalimanı'ndan Taksim'e 4 kişiyiz\"",
     aiPromoImageAlt: "Transfer rezervasyonu için yapay zeka sohbet asistanı",
     aiPromoOnline: "AI Çevrimiçi",
+    
+    // TrustBar
+    wePriceMatch: "Fiyat Eşleştirme",
+    wePriceMatchDesc: "Farkı iade ediyoruz",
+    freeWaitingTime: "Ücretsiz Bekleme",
+    freeWaitingTimeDesc: "Havalimanlarında 60 dk, diğer yerlerde 15 dk",
+    noHiddenCosts: "Gizli Maliyet Yok",
+    noHiddenCostsDesc: "Vergiler, gişe ücretleri dahil",
+    safeRides: "Güvenli Yolculuk",
+    safeRidesDesc: "Tüm sürücüler doğrulanmış",
     
     // Best Price Animation
     preparingBestPrice: "En İyi Fiyatımız Hazırlanıyor",
@@ -11703,6 +11783,16 @@ const translations: Record<Language, Record<string, string>> = {
     aiPromoImageAlt: "ШІ-асистент для бронювання трансферів",
     aiPromoOnline: "ШІ Онлайн",
     
+    // TrustBar
+    wePriceMatch: "Гарантія ціни",
+    wePriceMatchDesc: "Повернемо різницю в ціні",
+    freeWaitingTime: "Безкоштовне очікування",
+    freeWaitingTimeDesc: "60 хв в аеропортах, 15 хв в інших місцях",
+    noHiddenCosts: "Без прихованих платежів",
+    noHiddenCostsDesc: "Податки, збори та чайові включені",
+    safeRides: "Безпечні поїздки",
+    safeRidesDesc: "Усі водії перевірені",
+    
     // Best Price Animation
     preparingBestPrice: "Готуємо найкращу ціну для вас",
     preparingBestPriceDesc: "Ми розраховуємо найкращу можливу ціну для вас...",
@@ -12957,6 +13047,16 @@ const translations: Record<Language, Record<string, string>> = {
     aiPromoHint: "試してみて：「明日15時にイスタンブール空港からタクシムまで4人で」",
     aiPromoImageAlt: "送迎予約用AIチャットアシスタント",
     aiPromoOnline: "AI オンライン",
+    
+    // TrustBar
+    wePriceMatch: "価格マッチ保証",
+    wePriceMatchDesc: "差額を返金します",
+    freeWaitingTime: "無料待機時間",
+    freeWaitingTimeDesc: "空港60分、その他15分",
+    noHiddenCosts: "追加費用なし",
+    noHiddenCostsDesc: "税金、通行料、チップ込み",
+    safeRides: "安全な乗車",
+    safeRidesDesc: "全ドライバー身元確認済み",
     
     // Best Price Animation
     preparingBestPrice: "最高の価格を準備中",
