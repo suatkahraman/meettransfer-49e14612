@@ -143,8 +143,31 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       return;
     }
 
-    // For iOS, request microphone permission first
-    if (isIOS() && !permissionGranted) {
+    // For iOS Safari, ALWAYS request microphone permission first within user gesture
+    if (isIOS()) {
+      try {
+        console.log('iOS detected - requesting microphone permission...');
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
+        });
+        // Keep stream reference for iOS - stopping immediately can cause issues
+        stream.getTracks().forEach(track => {
+          console.log('Microphone track:', track.label, track.readyState);
+          // Don't stop immediately on iOS - let it stay active briefly
+          setTimeout(() => track.stop(), 100);
+        });
+        setPermissionGranted(true);
+      } catch (error) {
+        console.error('iOS microphone permission denied:', error);
+        setShowBrowserWarning(true);
+        return;
+      }
+    } else if (!permissionGranted) {
+      // For non-iOS, use standard permission request
       const granted = await requestMicrophonePermission();
       if (!granted) {
         return;
@@ -165,17 +188,17 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       recognitionRef.current = recognition;
 
       recognition.lang = getLanguageCode(language);
-      // For iOS, use interim results for better UX
-      recognition.interimResults = isIOS();
+      // For iOS Safari, enable interim results for better UX
+      recognition.interimResults = true;
       // Don't use continuous on iOS - it can cause issues
-      recognition.continuous = false;
+      recognition.continuous = !isIOS();
       recognition.maxAlternatives = 1;
 
       // Reset transcript
       transcriptRef.current = '';
 
       recognition.onstart = () => {
-        console.log('Speech recognition started');
+        console.log('Speech recognition started successfully');
         setIsRecording(true);
         setIsProcessing(false);
       };
@@ -926,7 +949,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   };
 
   const markdownComponents = {
-    p: ({ children }: any) => <p className="m-0 whitespace-pre-wrap">{children}</p>,
+    // Use div instead of p to avoid validateDOMNesting warning (div inside p)
+    p: ({ children }: any) => <div className="m-0 whitespace-pre-wrap">{children}</div>,
     ul: ({ children }: any) => <ul className="my-2 pl-5 list-disc space-y-1">{children}</ul>,
     ol: ({ children }: any) => <ol className="my-2 pl-5 list-decimal space-y-1">{children}</ol>,
     li: ({ children }: any) => <li className="m-0">{children}</li>,
