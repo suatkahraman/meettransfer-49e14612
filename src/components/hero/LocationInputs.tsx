@@ -18,7 +18,7 @@ interface LocationInputsProps {
   dropoffError?: boolean;
 }
 
-export const LocationInputs = memo(({
+const LocationInputsComponent = ({
   pickup,
   dropoff,
   onPickupSelected,
@@ -92,6 +92,23 @@ export const LocationInputs = memo(({
       )}
     </div>
   );
-});
+};
+
+// Custom comparison function - only re-render when these specific values change
+const arePropsEqual = (prevProps: LocationInputsProps, nextProps: LocationInputsProps): boolean => {
+  return (
+    prevProps.pickup === nextProps.pickup &&
+    prevProps.dropoff === nextProps.dropoff &&
+    prevProps.language === nextProps.language &&
+    prevProps.pickupError === nextProps.pickupError &&
+    prevProps.dropoffError === nextProps.dropoffError &&
+    // Callback references - if parent uses useCallback, these will be stable
+    prevProps.onPickupSelected === nextProps.onPickupSelected &&
+    prevProps.onDropoffSelected === nextProps.onDropoffSelected &&
+    prevProps.onSwapLocations === nextProps.onSwapLocations
+  );
+};
+
+export const LocationInputs = memo(LocationInputsComponent, arePropsEqual);
 
 LocationInputs.displayName = "LocationInputs";
