@@ -639,20 +639,16 @@ export const Hero = () => {
                     transition={{ duration: 0.2 }}
                     className="space-y-3"
                   >
-                    {/* Locations */}
+                    {/* Locations with Floating Labels */}
                     <div className="space-y-2">
-                      <motion.div 
-                        className="relative"
-                        whileFocus={{ scale: 1.01 }}
-                      >
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary z-10" />
-                        <GooglePlacesAutocomplete 
-                          onPlaceSelected={handlePickupSelected} 
-                          placeholder={t("enterPickupPoint") || "Pickup location"} 
-                          className="pl-10 h-11 bg-muted/50 border border-border focus:border-primary rounded-xl text-sm transition-all focus:ring-2 focus:ring-primary/20"
-                          value={pickup}
-                        />
-                      </motion.div>
+                      <GooglePlacesAutocomplete 
+                        onPlaceSelected={handlePickupSelected} 
+                        placeholder={language === 'TR' ? 'Nereden alınacak?' : 'Where to pick you up?'} 
+                        className="bg-muted/50 border border-border rounded-xl text-sm"
+                        value={pickup}
+                        floatingLabel
+                        icon={<MapPin className="h-4 w-4 text-primary" />}
+                      />
                       
                       <motion.div 
                         className="flex justify-center -my-0.5"
@@ -669,18 +665,14 @@ export const Hero = () => {
                         </button>
                       </motion.div>
                       
-                      <motion.div 
-                        className="relative"
-                        whileFocus={{ scale: 1.01 }}
-                      >
-                        <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent z-10" />
-                        <GooglePlacesAutocomplete 
-                          onPlaceSelected={handleDropoffSelected} 
-                          placeholder={t("hotelOrAddress") || "Drop-off location"} 
-                          className="pl-10 h-11 bg-muted/50 border border-border focus:border-accent rounded-xl text-sm transition-all focus:ring-2 focus:ring-accent/20"
-                          value={dropoff}
-                        />
-                      </motion.div>
+                      <GooglePlacesAutocomplete 
+                        onPlaceSelected={handleDropoffSelected} 
+                        placeholder={language === 'TR' ? 'Nereye gideceksiniz?' : 'Where to drop you off?'} 
+                        className="bg-muted/50 border border-border rounded-xl text-sm"
+                        value={dropoff}
+                        floatingLabel
+                        icon={<Navigation className="h-4 w-4 text-accent" />}
+                      />
                       
                       {pickup && dropoff && <CompactRouteMap pickup={pickup} dropoff={dropoff} className="mt-2" />}
                     </div>

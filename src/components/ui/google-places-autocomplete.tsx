@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Extend Window interface for Google Maps
 declare global {
@@ -109,6 +110,10 @@ export interface GooglePlacesAutocompleteProps {
   initialValue?: string;
   /** Controlled value - updates input when changed externally */
   value?: string;
+  /** Enable floating label effect */
+  floatingLabel?: boolean;
+  /** Icon to show on the left */
+  icon?: React.ReactNode;
 }
 
 export const GooglePlacesAutocomplete = ({
@@ -121,11 +126,15 @@ export const GooglePlacesAutocomplete = ({
   maxLength = 200,
   initialValue,
   value,
+  floatingLabel = false,
+  icon,
 }: GooglePlacesAutocompleteProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
   const onPlaceSelectedRef = useRef(onPlaceSelected);
   const hasInitializedRef = useRef(false); // StrictMode + "only once" guard
+  const [isFocused, setIsFocused] = useState(false);
+  const [hasValue, setHasValue] = useState(!!initialValue || !!value);
 
   // Keep callback ref up to date
   useEffect(() => {
@@ -143,6 +152,7 @@ export const GooglePlacesAutocomplete = ({
   useEffect(() => {
     if (value !== undefined && inputRef.current) {
       inputRef.current.value = value;
+      setHasValue(!!value);
     }
   }, [value]);
 
@@ -236,6 +246,87 @@ export const GooglePlacesAutocomplete = ({
       }
     };
   }, []);
+
+  const isFloating = isFocused || hasValue;
+
+  if (floatingLabel) {
+    return (
+      <motion.div 
+        className="relative"
+        animate={{ scale: isFocused ? 1.01 : 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      >
+        {/* Icon */}
+        {icon && (
+          <motion.div 
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-10"
+            animate={{
+              color: isFocused ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+              scale: isFocused ? 1.1 : 1,
+            }}
+            transition={{ duration: 0.2 }}
+          >
+            {icon}
+          </motion.div>
+        )}
+
+        <Input
+          ref={inputRef}
+          type="text"
+          className={cn(
+            "h-12 transition-all duration-200",
+            icon && "pl-10",
+            isFloating && "pt-5 pb-1",
+            isFocused && "border-primary ring-2 ring-primary/20",
+            className
+          )}
+          disabled={disabled}
+          maxLength={maxLength}
+          autoComplete="off"
+          placeholder=""
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          onInput={(e) => {
+            const val = (e.currentTarget as HTMLInputElement).value;
+            setHasValue(!!val);
+            onInputChange?.(val);
+          }}
+        />
+
+        {/* Floating Label */}
+        <motion.label
+          className={cn(
+            "absolute pointer-events-none transition-all duration-200 text-muted-foreground",
+            icon ? "left-10" : "left-3"
+          )}
+          initial={false}
+          animate={{
+            top: isFloating ? "4px" : "50%",
+            y: isFloating ? 0 : "-50%",
+            fontSize: isFloating ? "10px" : "14px",
+            color: isFocused ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+            fontWeight: isFloating ? 500 : 400,
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        >
+          {placeholder}
+        </motion.label>
+
+        {/* Focus glow effect */}
+        <AnimatePresence>
+          {isFocused && (
+            <motion.div
+              className="absolute inset-0 rounded-xl pointer-events-none"
+              initial={{ opacity: 0, boxShadow: "0 0 0 0 hsl(var(--primary) / 0)" }}
+              animate={{ opacity: 1, boxShadow: "0 0 0 3px hsl(var(--primary) / 0.1)" }}
+              exit={{ opacity: 0, boxShadow: "0 0 0 0 hsl(var(--primary) / 0)" }}
+              transition={{ duration: 0.2 }}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+    );
+  }
 
   return (
     <Input
