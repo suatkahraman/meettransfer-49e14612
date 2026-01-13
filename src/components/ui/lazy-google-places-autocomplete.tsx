@@ -173,9 +173,10 @@ const AutocompleteInput = memo(({
             className="absolute left-3 top-1/2 -translate-y-1/2 z-10"
             animate={{
               color: isFocused ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-              scale: isFocused ? 1.1 : 1,
+              scale: isFocused ? 1.15 : 1,
             }}
-            transition={{ duration: 0.2 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.15 }}
           >
             {icon}
           </motion.div>
@@ -199,7 +200,8 @@ const AutocompleteInput = memo(({
           ref={inputRef}
           type="text"
           className={cn(
-            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] transition-all duration-200 touch-manipulation text-base md:text-sm",
+            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] transition-all duration-150 touch-manipulation text-base md:text-sm",
+            "active:bg-muted/70 active:scale-[0.995]",
             icon && "pl-11 md:pl-10",
             isLoading && "pr-10",
             isFloating && "pt-5 pb-1",
@@ -240,9 +242,9 @@ const AutocompleteInput = memo(({
             <motion.div
               className="absolute inset-0 rounded-xl pointer-events-none"
               initial={{ opacity: 0, boxShadow: "0 0 0 0 hsl(var(--primary) / 0)" }}
-              animate={{ opacity: 1, boxShadow: "0 0 0 3px hsl(var(--primary) / 0.1)" }}
+              animate={{ opacity: 1, boxShadow: "0 0 0 4px hsl(var(--primary) / 0.15)" }}
               exit={{ opacity: 0, boxShadow: "0 0 0 0 hsl(var(--primary) / 0)" }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.15 }}
             />
           )}
         </AnimatePresence>

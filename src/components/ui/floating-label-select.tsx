@@ -77,7 +77,11 @@ export const FloatingLabelSelect = React.forwardRef<
           <div className="flex items-center gap-2">
             {icon && (
               <motion.span
-                animate={{ color: isFocused ? "hsl(var(--primary))" : undefined }}
+                animate={{ 
+                  color: isFocused ? "hsl(var(--primary))" : undefined,
+                  scale: isFocused ? 1.1 : 1
+                }}
+                transition={{ duration: 0.15 }}
                 className="flex-shrink-0"
               >
                 {icon}
@@ -88,9 +92,13 @@ export const FloatingLabelSelect = React.forwardRef<
             </span>
           </div>
         </SelectTrigger>
-        <SelectContent className="max-h-[250px] z-50">
+        <SelectContent className="max-h-[250px] z-50 bg-popover border border-border shadow-lg">
           {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
+            <SelectItem 
+              key={option.value} 
+              value={option.value}
+              className="cursor-pointer active:bg-primary/20 focus:bg-accent"
+            >
               {option.label}
             </SelectItem>
           ))}
