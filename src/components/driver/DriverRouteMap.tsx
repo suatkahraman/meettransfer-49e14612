@@ -22,6 +22,13 @@ interface TripInfo {
   distance: number; // in meters
 }
 
+// HTML escape function to prevent XSS attacks
+const escapeHtml = (text: string): string => {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+};
+
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || '';
 
 const DriverRouteMap = ({ pickup, dropoff, customerPhone, className }: DriverRouteMapProps) => {
@@ -135,9 +142,12 @@ const DriverRouteMap = ({ pickup, dropoff, customerPhone, className }: DriverRou
             </div>
           `;
           
+          const pickupPopup = new mapboxgl.Popup();
+          pickupPopup.setHTML(`<strong>Pickup</strong><br/>${escapeHtml(pickup)}`);
+          
           new mapboxgl.Marker({ element: pickupEl })
             .setLngLat([pickupResult.lng, pickupResult.lat])
-            .setPopup(new mapboxgl.Popup().setHTML(`<strong>Pickup</strong><br/>${pickup}`))
+            .setPopup(pickupPopup)
             .addTo(map.current);
         }
 
@@ -154,9 +164,12 @@ const DriverRouteMap = ({ pickup, dropoff, customerPhone, className }: DriverRou
             </div>
           `;
           
+          const dropoffPopup = new mapboxgl.Popup();
+          dropoffPopup.setHTML(`<strong>Drop-off</strong><br/>${escapeHtml(dropoff)}`);
+          
           new mapboxgl.Marker({ element: dropoffEl })
             .setLngLat([dropoffResult.lng, dropoffResult.lat])
-            .setPopup(new mapboxgl.Popup().setHTML(`<strong>Drop-off</strong><br/>${dropoff}`))
+            .setPopup(dropoffPopup)
             .addTo(map.current);
         }
 
