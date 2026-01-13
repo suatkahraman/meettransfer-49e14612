@@ -12,7 +12,10 @@ interface BookingChatAssistantProps {
   mobileFloating?: boolean;
 }
 
-const BookingChatAssistant = lazy(() => import("@/components/website/BookingChatAssistant")) as unknown as ComponentType<BookingChatAssistantProps>;
+// Lazy load the heavy chat component - only load when needed
+const BookingChatAssistant = lazy(() => 
+  import("@/components/website/BookingChatAssistant")
+) as unknown as ComponentType<BookingChatAssistantProps>;
 
 interface HeroAIAssistantProps {
   language: string;
@@ -36,14 +39,24 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
   const prompts = quickPrompts[language as keyof typeof quickPrompts] || quickPrompts.EN;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [shouldLoadMobile, setShouldLoadMobile] = useState(false);
+
+  // Defer mobile chat loading until after initial paint
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldLoadMobile(true);
+    }, 2000); // Load mobile chat widget after 2 seconds
+    return () => clearTimeout(timer);
+  }, []);
 
   // Rotate prompts every 3 seconds
   useEffect(() => {
+    if (!isExpanded) return; // Only rotate when visible
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % prompts.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [prompts.length]);
+  }, [prompts.length, isExpanded]);
 
   const handleQuickPrompt = useCallback((message: string) => {
     setIsExpanded(true);
@@ -136,12 +149,14 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
         </div>
       </div>
 
-      {/* Mobile: Floating Widget handled by BookingChatAssistant itself */}
-      <div className="md:hidden">
-        <Suspense fallback={null}>
-          <BookingChatAssistant onApplyBooking={onApplyBooking} mobileFloating />
-        </Suspense>
-      </div>
+      {/* Mobile: Floating Widget - deferred loading */}
+      {shouldLoadMobile && (
+        <div className="md:hidden">
+          <Suspense fallback={null}>
+            <BookingChatAssistant onApplyBooking={onApplyBooking} mobileFloating />
+          </Suspense>
+        </div>
+      )}
     </>
   );
 });

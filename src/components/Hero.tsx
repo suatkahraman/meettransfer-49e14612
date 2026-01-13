@@ -156,88 +156,45 @@ export const Hero = () => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(formData)); } catch {}
   }, [activeTab, pickup, dropoff, date, time, passengers, vehicleType, hourlyCity, hourlyDate, hourlyTime, hourlyDuration, hourlyPassengers, hourlyVehicleType, customHours]);
   
-  // Load videos from CDN with local fallback
+  // Load videos from CDN - DEFERRED to not block initial render
   useEffect(() => {
+    // On mobile, videos are not shown - skip entirely
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile) return;
+    
     const loadVideosFromCDN = async () => {
-      // Check if CDN video exists by making a HEAD request
-      const checkCDNVideo = async (url: string): Promise<boolean> => {
-        try {
-          const response = await fetch(url, { method: 'HEAD' });
-          return response.ok;
-        } catch {
-          return false;
-        }
-      };
-
-      // Try CDN first, fall back to local assets
-      const loadVideo = async (config: typeof VIDEO_CONFIG.istanbul, localImport: () => Promise<any>) => {
-        // Try WebM first (smaller), then MP4
-        const webmExists = await checkCDNVideo(config.cdnWebm);
-        if (webmExists) {
-          return { src: config.cdnWebm, srcMp4: config.cdn, ...config };
-        }
-        
-        const mp4Exists = await checkCDNVideo(config.cdn);
-        if (mp4Exists) {
-          return { src: config.cdn, ...config };
-        }
-        
-        // Fall back to local asset
-        try {
-          const local = await localImport();
-          return { src: local.default, ...config };
-        } catch {
-          return null;
-        }
-      };
-
+      // Use a single video initially, load others in background
       try {
-        // Load Istanbul first (most common destination)
-        const istanbulVideo = await loadVideo(
-          VIDEO_CONFIG.istanbul,
-          () => import("@/assets/hero-istanbul.mp4")
-        );
+        // Load Istanbul first (most common destination) - direct URL, no HEAD check
+        const istanbulVideo = {
+          src: VIDEO_CONFIG.istanbul.cdn,
+          srcMp4: VIDEO_CONFIG.istanbul.cdn,
+          ...VIDEO_CONFIG.istanbul
+        };
         
-        if (istanbulVideo) {
-          setCityVideos([istanbulVideo]);
-          setVideosLoaded(true);
-        }
+        setCityVideos([istanbulVideo]);
+        setVideosLoaded(true);
         
-        // Load remaining videos in background with low priority
-        requestIdleCallback(async () => {
-          const [antalyaVideo, bodrumVideo, vipVideo] = await Promise.all([
-            loadVideo(VIDEO_CONFIG.antalya, () => import("@/assets/hero-antalya.mp4")),
-            loadVideo(VIDEO_CONFIG.bodrum, () => import("@/assets/hero-bodrum.mp4")),
-            loadVideo(VIDEO_CONFIG.vipTransfer, () => import("@/assets/hero-mercedes-video.mp4")),
-          ]);
-          
-          setCityVideos(prev => [
-            prev[0], // Keep Istanbul first
-            ...[antalyaVideo, bodrumVideo, vipVideo].filter(Boolean) as CityVideo[],
-          ]);
-        }, { timeout: 2000 });
+        // Load remaining videos much later with very low priority
+        setTimeout(() => {
+          requestIdleCallback(() => {
+            const additionalVideos = [
+              { src: VIDEO_CONFIG.antalya.cdn, ...VIDEO_CONFIG.antalya },
+              { src: VIDEO_CONFIG.bodrum.cdn, ...VIDEO_CONFIG.bodrum },
+              { src: VIDEO_CONFIG.vipTransfer.cdn, ...VIDEO_CONFIG.vipTransfer },
+            ];
+            
+            setCityVideos(prev => [...prev, ...additionalVideos]);
+          }, { timeout: 5000 });
+        }, 3000); // Wait 3 seconds before loading additional videos
       } catch (error) {
         console.error('[Hero] Video load error:', error);
-        // Final fallback: try loading all from local
-        try {
-          const heroIstanbul = await import("@/assets/hero-istanbul.mp4");
-          setCityVideos([
-            { src: heroIstanbul.default, label: "Istanbul", labelTR: "İstanbul", poster: "/images/destinations/istanbul-city.jpg" },
-          ]);
-          setVideosLoaded(true);
-        } catch {}
+        setVideosLoaded(true); // Allow fallback image to show
       }
     };
     
-    // On mobile, videos are not shown - load immediately for desktop
-    // On desktop, small delay to prioritize critical content first
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    if (isMobile) {
-      // Skip video loading on mobile - static image is used
-      return;
-    }
-    
-    const timer = setTimeout(loadVideosFromCDN, 100);
+    // Delay video loading to prioritize form rendering
+    const timer = setTimeout(loadVideosFromCDN, 500);
     return () => clearTimeout(timer);
   }, []);
   
@@ -248,9 +205,13 @@ export const Hero = () => {
     return () => clearInterval(interval);
   }, [videosLoaded, cityVideos.length]);
 
-  // Fetch cities
+  // Fetch cities - DEFERRED to not block initial render
   useEffect(() => {
+    // Only fetch when hourly tab is active
+    if (activeTab !== 'hourly') return;
+    
     const fetchCities = async () => {
+      if (availableCities.length > 0) return; // Already loaded
       setLoadingCities(true);
       try {
         const { data } = await supabase.from("hourly_rental_prices").select("city, duration_type").eq("is_active", true).order("city");
@@ -268,8 +229,11 @@ export const Hero = () => {
         }
       } catch {} finally { setLoadingCities(false); }
     };
-    fetchCities();
-  }, []);
+    
+    // Small delay to let the tab animation complete first
+    const timer = setTimeout(fetchCities, 100);
+    return () => clearTimeout(timer);
+  }, [activeTab, availableCities.length]);
 
   // Fetch transfer prices
   useEffect(() => {
