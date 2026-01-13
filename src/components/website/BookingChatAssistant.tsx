@@ -872,14 +872,14 @@ const placeholderMessages: Record<string, string> = {
 const welcomeMessages: Record<string, string> = {
   EN: "Hello! I'm MT, your VIP transfer assistant. How can I help you?",
   TR: "Merhaba! Ben MT, VIP transfer asistanınız. Size nasıl yardımcı olabilirim?",
-  DE: "Hallo! 👋 Ich bin Ihr KI-Buchungsassistent. Sagen Sie mir, wohin und wann Sie einen Transfer benötigen! Sie können auch 🎤 das Mikrofon verwenden.",
-  FR: "Bonjour! 👋 Je suis votre assistant de réservation IA. Dites-moi où et quand vous avez besoin d'un transfert! Vous pouvez aussi utiliser le 🎤 microphone.",
-  RU: "Привет! 👋 Я ваш AI-ассистент по бронированию. Скажите, куда и когда вам нужен трансфер! Вы также можете использовать 🎤 микрофон.",
-  AR: "مرحباً! 👋 أنا مساعد الحجز الذكي. أخبرني أين ومتى تحتاج النقل! يمكنك أيضاً استخدام 🎤 الميكروفون.",
-  ES: "¡Hola! 👋 Soy tu asistente de reservas IA. ¡Dime dónde y cuándo necesitas un transfer! También puedes usar el 🎤 micrófono.",
-  IT: "Ciao! 👋 Sono il tuo assistente AI per le prenotazioni. Dimmi dove e quando hai bisogno di un transfer! Puoi anche usare il 🎤 microfono.",
-  UK: "Привіт! 👋 Я ваш AI-асистент з бронювання. Скажіть, куди і коли вам потрібен трансфер! Ви також можете використовувати 🎤 мікрофон.",
-  JA: "こんにちは！👋 AI予約アシスタントです。どこへ、いつ送迎が必要か教えてください！🎤 マイクも使えます。"
+  DE: "Hallo! Ich bin MT, Ihr VIP-Transfer-Assistent. Wie kann ich Ihnen helfen?",
+  FR: "Bonjour! Je suis MT, votre assistant de transfert VIP. Comment puis-je vous aider?",
+  RU: "Здравствуйте! Я MT, ваш VIP-ассистент по трансферу. Чем могу помочь?",
+  AR: "مرحباً! أنا MT، مساعدك للنقل VIP. كيف يمكنني مساعدتك؟",
+  ES: "¡Hola! Soy MT, tu asistente de transfer VIP. ¿Cómo puedo ayudarte?",
+  IT: "Ciao! Sono MT, il tuo assistente VIP per i trasferimenti. Come posso aiutarti?",
+  UK: "Вітаю! Я MT, ваш VIP-асистент з трансферу. Чим можу допомогти?",
+  JA: "こんにちは！VIPトランスファーアシスタントのMTです。どのようにお手伝いしましょうか？"
 };
 
 // Generate or get visitor ID for conversation persistence
