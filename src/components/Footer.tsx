@@ -1,5 +1,5 @@
 import { Mail, MapPin, Phone, Facebook, Instagram, Twitter, Youtube, Star } from "lucide-react";
-import { Link } from "react-router-dom";
+import { PrefetchLink } from "@/components/ui/prefetch-link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, SUPPORT_EMAIL, GLOBAL_OFFICES } from "@/lib/contact";
 
@@ -84,13 +84,13 @@ export const Footer = () => {
           <div className="space-y-4">
             <h4 className="font-semibold text-lg">{t('footerQuickLinks')}</h4>
             <ul className="space-y-2 text-primary-foreground/80 text-sm">
-              <li><Link to={getLocalizedPath("/")} className="hover:text-primary-foreground transition-colors">{t('home')}</Link></li>
-              <li><Link to={getLocalizedPath("/services")} className="hover:text-primary-foreground transition-colors">{t('services')}</Link></li>
-              <li><Link to={getLocalizedPath("/destinations")} className="hover:text-primary-foreground transition-colors">{t('footerDestinations')}</Link></li>
-              <li><Link to={getLocalizedPath("/about")} className="hover:text-primary-foreground transition-colors">{t('about')}</Link></li>
-              <li><Link to={getLocalizedPath("/contact")} className="hover:text-primary-foreground transition-colors">{t('contact')}</Link></li>
-              <li><Link to={getLocalizedPath("/terms")} className="hover:text-primary-foreground transition-colors">{t('footerTerms')}</Link></li>
-              <li><Link to={getLocalizedPath("/privacy")} className="hover:text-primary-foreground transition-colors">{t('footerPrivacy')}</Link></li>
+              <li><PrefetchLink to={getLocalizedPath("/")} className="hover:text-primary-foreground transition-colors">{t('home')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/services")} className="hover:text-primary-foreground transition-colors">{t('services')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/destinations")} className="hover:text-primary-foreground transition-colors">{t('footerDestinations')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/about")} className="hover:text-primary-foreground transition-colors">{t('about')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/contact")} className="hover:text-primary-foreground transition-colors">{t('contact')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/terms")} className="hover:text-primary-foreground transition-colors">{t('footerTerms')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/privacy")} className="hover:text-primary-foreground transition-colors">{t('footerPrivacy')}</PrefetchLink></li>
             </ul>
           </div>
 
@@ -98,15 +98,15 @@ export const Footer = () => {
           <div className="space-y-4">
             <h4 className="font-semibold text-lg">{t('services')}</h4>
             <ul className="space-y-2 text-primary-foreground/80 text-sm">
-              <li><Link to={getLocalizedPath("/istanbul-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerIstanbul')}</Link></li>
-              <li><Link to={getLocalizedPath("/antalya-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerAntalya')}</Link></li>
-              <li><Link to={getLocalizedPath("/bodrum-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerBodrum')}</Link></li>
-              <li><Link to={getLocalizedPath("/dalaman-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerDalaman')}</Link></li>
-              <li><Link to={getLocalizedPath("/izmir-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerIzmir')}</Link></li>
-              <li><Link to={getLocalizedPath("/cappadocia-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerCappadocia')}</Link></li>
-              <li><Link to={getLocalizedPath("/dubai-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerDubai')}</Link></li>
-              <li><Link to={getLocalizedPath("/cyprus-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerCyprus')}</Link></li>
-              <li><Link to={getLocalizedPath("/fleet")} className="hover:text-primary-foreground transition-colors">{t('footerFleet')}</Link></li>
+              <li><PrefetchLink to={getLocalizedPath("/istanbul-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerIstanbul')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/antalya-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerAntalya')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/bodrum-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerBodrum')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/dalaman-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerDalaman')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/izmir-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerIzmir')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/cappadocia-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerCappadocia')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/dubai-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerDubai')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/cyprus-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerCyprus')}</PrefetchLink></li>
+              <li><PrefetchLink to={getLocalizedPath("/fleet")} className="hover:text-primary-foreground transition-colors">{t('footerFleet')}</PrefetchLink></li>
             </ul>
           </div>
 

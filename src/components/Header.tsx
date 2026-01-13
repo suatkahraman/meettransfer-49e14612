@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { PrefetchLink } from "@/components/ui/prefetch-link";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 
 export const Header = () => {
@@ -20,26 +21,31 @@ export const Header = () => {
     <header className="absolute top-0 left-0 right-0 z-50 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+          <PrefetchLink 
+            to="/" 
+            className="flex items-center gap-3"
+          >
             <img 
               src={meetTransferLogo} 
               alt="Meet Transfer Logo" 
               className="h-12 w-12 rounded-full object-cover"
+              width={48}
+              height={48}
             />
             <h1 className="text-2xl md:text-3xl font-bold text-white">
               Meet Transfer
             </h1>
-          </div>
+          </PrefetchLink>
 
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a 
+              <PrefetchLink 
                 key={link.path}
-                href={link.path} 
+                to={link.path} 
                 className="text-white/90 hover:text-white transition-colors font-sans"
               >
                 {link.label}
-              </a>
+              </PrefetchLink>
             ))}
             
             {user ? (
@@ -88,14 +94,14 @@ export const Header = () => {
           <div className="md:hidden bg-black/90 backdrop-blur-md rounded-lg mt-2 p-4 animate-in fade-in slide-in-from-top-2 duration-200">
             <nav className="flex flex-col gap-3">
               {navLinks.map((link) => (
-                <a
+                <PrefetchLink
                   key={link.path}
-                  href={link.path}
+                  to={link.path}
                   className="text-white/90 hover:text-white transition-colors py-2 px-3 rounded-md hover:bg-white/10"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
-                </a>
+                </PrefetchLink>
               ))}
               
               <div className="border-t border-white/20 my-2" />
