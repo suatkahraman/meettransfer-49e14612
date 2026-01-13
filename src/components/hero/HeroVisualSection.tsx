@@ -341,7 +341,7 @@ export const HeroVisualSection = memo(({
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Globe className="h-4 w-4 text-primary" />
               <span className="font-medium">{t("serviceLocations") || "We Serve"}:</span>
-              <span>Istanbul • Antalya • Bodrum • Dalaman • İzmir • Dubai • Cyprus</span>
+              <span>Antalya • Bodrum • Dalaman • İzmir • Dubai • Cyprus</span>
             </div>
           </div>
 
