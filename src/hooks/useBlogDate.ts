@@ -1,30 +1,28 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { format, Locale } from "date-fns";
-import { enUS, de, fr, ru, it, es, ar, tr, uk, ja } from "date-fns/locale";
-
-const localeMap: Record<string, Locale> = {
-  EN: enUS,
-  DE: de,
-  FR: fr,
-  RU: ru,
-  IT: it,
-  ES: es,
-  AR: ar,
-  TR: tr,
-  UK: uk,
-  JA: ja,
-};
+import { format } from "date-fns";
+import { useState, useEffect, useCallback } from "react";
+import type { Locale } from "date-fns";
+import { enUS } from "date-fns/locale";
+import { loadLocale, getCachedLocale, languageToLocaleKey } from "@/utils/dateFnsLocaleLoader";
 
 export const useBlogDate = () => {
   const { language } = useLanguage();
+  const [locale, setLocale] = useState<Locale>(() => {
+    const localeKey = languageToLocaleKey[language] || 'en';
+    return getCachedLocale(localeKey) || enUS;
+  });
 
-  const formatBlogDate = (dateString: string): string => {
+  // Load locale dynamically when language changes
+  useEffect(() => {
+    const localeKey = languageToLocaleKey[language] || 'en';
+    loadLocale(localeKey).then(setLocale);
+  }, [language]);
+
+  const formatBlogDate = useCallback((dateString: string): string => {
     const date = new Date(dateString);
-    const locale = localeMap[language] || enUS;
-    
     // Format: "10 January 2025" style, adapted per locale
     return format(date, "d MMMM yyyy", { locale });
-  };
+  }, [locale]);
 
   return { formatBlogDate };
 };
