@@ -14,8 +14,7 @@ import { lazy, Suspense } from "react";
 import FloatingWhatsApp from "./components/website/FloatingWhatsApp";
 import HashScroll from "@/components/HashScroll";
 import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
-import { UpdateNotification } from "./components/UpdateNotification";
-import { PWAUpdatePrompt } from "./components/website/PWAUpdatePrompt";
+import { UpdateManager } from "./components/UpdateManager";
 import { PWAInstallPrompt } from "./components/website/PWAInstallPrompt";
 import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
 // Debug panel disabled - uncomment to re-enable
@@ -200,8 +199,7 @@ const App = () => (
             <LanguageProvider>
               <PromoProvider>
               <AIChatProvider>
-              <UpdateNotification />
-              <PWAUpdatePrompt />
+              <UpdateManager />
               <PWAInstallPrompt />
               {/* <PWADebugPanel /> */}
               <AuthProvider>
