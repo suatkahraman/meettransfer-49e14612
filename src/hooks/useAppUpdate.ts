@@ -30,18 +30,24 @@ export function useAppUpdate() {
 
       const html = await response.text();
       
-      // Extract script src from the fetched HTML (contains hash)
-      const scriptMatch = html.match(/src="\/assets\/index-([a-zA-Z0-9]+)\.js"/);
-      const fetchedHash = scriptMatch?.[1];
-      
-      // Get current script hash from DOM
-      const currentScript = document.querySelector('script[src*="/assets/index-"]');
-      const currentSrc = currentScript?.getAttribute('src') || '';
-      const currentMatch = currentSrc.match(/index-([a-zA-Z0-9]+)\.js/);
-      const currentHash = currentMatch?.[1];
+      // Extract entry script from the fetched HTML (works across build naming)
+      const scriptMatch = html.match(
+        /<script[^>]+type="module"[^>]*src="(\/assets\/[^\"?]+\.js)(?:\?[^\"]*)?"/i
+      );
+      const fetchedEntry = scriptMatch?.[1];
 
-      // Compare hashes
-      const hasNewVersion = Boolean(fetchedHash && currentHash && fetchedHash !== currentHash);
+      // Get current entry script from DOM
+      const currentScript = document.querySelector(
+        'script[type="module"][src^="/assets/"]'
+      ) as HTMLScriptElement | null;
+      const currentEntry = currentScript?.getAttribute('src') || '';
+
+      const normalize = (src: string) => src.split('?')[0];
+
+      // Compare entry script paths
+      const hasNewVersion = Boolean(
+        fetchedEntry && currentEntry && normalize(fetchedEntry) !== normalize(currentEntry)
+      );
       
       setState({
         hasUpdate: hasNewVersion,

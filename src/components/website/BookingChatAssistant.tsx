@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -499,6 +499,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dragControls = useDragControls();
   const hasLoadedRef = useRef(false);
   const hasHandledAIParamRef = useRef(false);
 
@@ -987,7 +988,9 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: "100%" }}
               transition={{ type: "spring", stiffness: 400, damping: 40 }}
-              drag="y"
+               drag="y"
+               dragControls={dragControls}
+               dragListener={false}
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={{ top: 0, bottom: 0.5 }}
               onDragEnd={(_, info) => {
@@ -1003,12 +1006,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               }}
             >
               {/* Drag Handle - Swipe indicator */}
-              <div 
-                className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
-                style={{ touchAction: 'none' }}
-              >
-                <div className="w-12 h-1.5 bg-muted-foreground/40 rounded-full" />
-              </div>
+               <div 
+                 className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
+                 style={{ touchAction: 'none' }}
+                 onPointerDown={(e) => dragControls.start(e.nativeEvent)}
+               >
+                 <div className="w-12 h-1.5 bg-muted-foreground/40 rounded-full" />
+               </div>
               
               {/* Mobile Header - Compact */}
               <div className="flex items-center justify-between px-4 py-2 border-b border-border/50">
