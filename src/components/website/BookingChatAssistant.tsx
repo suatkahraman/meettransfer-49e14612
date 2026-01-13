@@ -923,11 +923,15 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
       setIsSpeaking(true);
     };
     utterance.onend = () => {
-      console.log('🔊 [TTS] ✅ Speech ended');
+      console.log('🔊 [TTS] ✅ Speech ended naturally');
       setIsSpeaking(false);
       // Call the onSpeakEnd callback when speech finishes
       if (onSpeakEndRef.current) {
-        onSpeakEndRef.current();
+        console.log('🔊 [TTS] Calling onSpeakEnd callback...');
+        // Use setTimeout to ensure state is updated before callback
+        setTimeout(() => {
+          onSpeakEndRef.current?.();
+        }, 100);
       }
     };
     utterance.onerror = (event) => {
@@ -939,6 +943,14 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
         elapsedTime: event.elapsedTime
       });
       setIsSpeaking(false);
+      
+      // Even on error (like 'interrupted'), try to call the callback for continuous mode
+      if (event.error !== 'canceled' && onSpeakEndRef.current) {
+        console.log('🔊 [TTS] Calling onSpeakEnd after error for continuous mode...');
+        setTimeout(() => {
+          onSpeakEndRef.current?.();
+        }, 100);
+      }
     };
 
     try {
@@ -1168,15 +1180,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   
   // Callback when TTS finishes speaking
   const handleSpeakEnd = useCallback(() => {
-    console.log('🔊 TTS finished speaking, continuousMode:', continuousModeRef.current);
-    if (continuousModeRef.current && !isRecording && !isProcessing && isOpen) {
-      // Small delay before starting recording to avoid feedback
-      setTimeout(() => {
-        if (continuousModeRef.current && startRecordingRef.current && !isRecording && !isProcessing && isOpen) {
-          console.log('🎤 Auto-starting recording in continuous mode');
-          startRecordingRef.current();
+    console.log('🔊 TTS finished speaking, continuousMode:', continuousModeRef.current, 'isRecording:', isRecording, 'isProcessing:', isProcessing, 'isOpen:', isOpen);
+    
+    // Use a longer delay and check conditions more robustly
+    if (continuousModeRef.current && isOpen) {
+      // Small delay before starting recording to avoid feedback and ensure state is settled
+      const checkAndStartRecording = () => {
+        console.log('🎤 Checking if should auto-start recording...');
+        if (continuousModeRef.current && startRecordingRef.current && isOpen) {
+          console.log('🎤 ✅ Auto-starting recording in continuous mode');
+          try {
+            startRecordingRef.current();
+          } catch (err) {
+            console.error('🎤 ❌ Failed to auto-start recording:', err);
+          }
         }
-      }, 500);
+      };
+      
+      setTimeout(checkAndStartRecording, 800);
     }
   }, [isRecording, isProcessing, isOpen]);
 
@@ -1433,6 +1454,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   // Function to speak welcome message with retry
   const speakWelcome = useCallback(() => {
     if (!welcomeMessageRef.current || hasSpokenWelcomeRef.current || !isVoiceEnabled) {
+      console.log('🎙️ [Welcome] speakWelcome skipped:', {
+        hasMessage: !!welcomeMessageRef.current,
+        alreadySpoken: hasSpokenWelcomeRef.current,
+        voiceEnabled: isVoiceEnabled
+      });
       return;
     }
     
@@ -1440,7 +1466,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     console.log('🎙️ [Welcome] speakWelcome called, voices:', voices.length, 'userInteracted:', userInteractedRef.current);
     
     if (voices.length === 0) {
-      console.log('🎙️ [Welcome] No voices yet, waiting...');
+      console.log('🎙️ [Welcome] No voices yet, retrying in 500ms...');
+      // Retry after a short delay - voices may still be loading
+      setTimeout(() => {
+        if (welcomeMessageRef.current && !hasSpokenWelcomeRef.current) {
+          speakWelcome();
+        }
+      }, 500);
       return;
     }
     
@@ -1453,10 +1485,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     // Cancel any ongoing speech first
     window.speechSynthesis?.cancel();
     
-    // Small delay for Chrome stability
+    // Small delay for Chrome stability, then speak
     setTimeout(() => {
+      console.log('🎙️ [Welcome] Calling speak() now...');
       speak(messageToSpeak);
-    }, 100);
+    }, 150);
   }, [isVoiceEnabled, speak]);
 
   // Auto-speak welcome message once voices are loaded and chat is opened (user interaction)
@@ -1470,17 +1503,43 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     });
     
     // Opening the chat IS a user interaction, so we can speak
-    if (isOpen && welcomeMessageRef.current && availableVoices.length > 0 && !hasSpokenWelcomeRef.current && isVoiceEnabled) {
-      // Small delay to ensure UI is ready
-      setTimeout(() => {
-        speakWelcome();
-      }, 500);
+    if (isOpen && welcomeMessageRef.current && !hasSpokenWelcomeRef.current && isVoiceEnabled) {
+      // Check if voices are available
+      if (availableVoices.length > 0) {
+        // Small delay to ensure UI is ready
+        setTimeout(() => {
+          speakWelcome();
+        }, 600);
+      } else {
+        // Voices not loaded yet - try again after onvoiceschanged fires
+        console.log('🎙️ [Welcome] Waiting for voices to load...');
+        const checkVoices = () => {
+          const voices = window.speechSynthesis?.getVoices() || [];
+          if (voices.length > 0 && welcomeMessageRef.current && !hasSpokenWelcomeRef.current) {
+            console.log('🎙️ [Welcome] Voices now available, speaking...');
+            speakWelcome();
+          }
+        };
+        // Try again after a delay
+        setTimeout(checkVoices, 1000);
+        setTimeout(checkVoices, 2000);
+      }
     } else if (welcomeMessageRef.current && !isVoiceEnabled) {
       console.log('🎙️ [Welcome] ⚠️ Voice disabled, not speaking welcome');
+      // If voice is disabled, start recording directly
+      if (continuousModeRef.current && !hasAutoStartedRef.current && isOpen) {
+        hasAutoStartedRef.current = true;
+        setTimeout(() => {
+          if (startRecordingRef.current && !isRecording && !isProcessing) {
+            console.log('🎤 Auto-starting recording (voice disabled, after welcome)');
+            startRecordingRef.current();
+          }
+        }, 800);
+      }
     } else if (welcomeMessageRef.current && availableVoices.length === 0) {
       console.log('🎙️ [Welcome] ⚠️ No voices available yet, will retry when loaded');
     }
-  }, [availableVoices.length, isVoiceEnabled, speakWelcome, isOpen]);
+  }, [availableVoices.length, isVoiceEnabled, speakWelcome, isOpen, isRecording, isProcessing]);
 
   // Reset the spoken flag when chat is closed
   useEffect(() => {
@@ -1498,10 +1557,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       hasAutoStartedRef.current = true;
       setTimeout(() => {
         if (startRecordingRef.current && !isRecording && !isProcessing) {
-          console.log('🎤 Auto-starting recording (voice disabled)');
+          console.log('🎤 Auto-starting recording (voice disabled, from effect)');
           startRecordingRef.current();
         }
-      }, 1000);
+      }, 1200);
     }
   }, [isOpen, messages.length, isVoiceEnabled, isRecording, isProcessing]);
 
