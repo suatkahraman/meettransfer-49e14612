@@ -1,11 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck } from "../_shared/priceMatching.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders, dynamicCacheHeaders } from "../_shared/cacheHeaders.ts";
 
 interface GetPricesRequest {
   pickup: string;
@@ -376,7 +372,7 @@ const handler = async (req: Request): Promise<Response> => {
         sanityCheckFailed: sanityFailedCount > 0,
         requiresManualPricing: sanityFailedCount > 0,
       }),
-      { headers: { "Content-Type": "application/json", ...corsHeaders } }
+      { headers: { "Content-Type": "application/json", ...dynamicCacheHeaders } }
     );
 
   } catch (error: unknown) {
