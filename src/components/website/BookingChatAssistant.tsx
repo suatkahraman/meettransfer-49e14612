@@ -1170,6 +1170,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
 
   // Track if we've spoken the welcome message
   const hasSpokenWelcomeRef = useRef(false);
+  const welcomeMessageRef = useRef<string | null>(null);
 
   // Add welcome message when opened and no messages
   useEffect(() => {
@@ -1181,20 +1182,32 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         content: welcomeMessage
       }]);
       
-      // Auto-speak the welcome message with a small delay to ensure voices are loaded
+      // Store the welcome message for speaking after voices are loaded
       if (!hasSpokenWelcomeRef.current) {
-        hasSpokenWelcomeRef.current = true;
-        setTimeout(() => {
-          speak(welcomeMessage);
-        }, 500);
+        welcomeMessageRef.current = welcomeMessage;
       }
     }
-  }, [isOpen, language, messages.length, speak]);
+  }, [isOpen, language, messages.length]);
+
+  // Auto-speak welcome message once voices are loaded
+  useEffect(() => {
+    if (welcomeMessageRef.current && availableVoices.length > 0 && !hasSpokenWelcomeRef.current && isVoiceEnabled) {
+      hasSpokenWelcomeRef.current = true;
+      const messageToSpeak = welcomeMessageRef.current;
+      welcomeMessageRef.current = null;
+      
+      // Small delay to ensure everything is ready
+      setTimeout(() => {
+        speak(messageToSpeak);
+      }, 300);
+    }
+  }, [availableVoices.length, isVoiceEnabled, speak]);
 
   // Reset the spoken flag when chat is closed
   useEffect(() => {
     if (!isOpen) {
       hasSpokenWelcomeRef.current = false;
+      welcomeMessageRef.current = null;
     }
   }, [isOpen]);
 
