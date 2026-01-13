@@ -43,13 +43,13 @@ serve(async (req) => {
   }
 
   try {
-    const { audio, language } = await req.json();
+    const { audio, language, mimeType } = await req.json();
     
     if (!audio) {
       throw new Error('No audio data provided');
     }
 
-    console.log('Processing audio for transcription, language:', language);
+    console.log('Processing audio for transcription, language:', language, 'mimeType:', mimeType);
 
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     if (!OPENAI_API_KEY) {
@@ -60,14 +60,38 @@ serve(async (req) => {
     const binaryAudio = processBase64Chunks(audio);
     console.log('Audio size:', binaryAudio.length, 'bytes');
     
+    // Determine file extension and mime type for OpenAI
+    const actualMimeType = mimeType || 'audio/webm';
+    let fileExtension = 'webm';
+    let contentType = 'audio/webm';
+    
+    if (actualMimeType.includes('mp4') || actualMimeType.includes('m4a')) {
+      fileExtension = 'm4a';
+      contentType = 'audio/mp4';
+    } else if (actualMimeType.includes('mpeg') || actualMimeType.includes('mp3')) {
+      fileExtension = 'mp3';
+      contentType = 'audio/mpeg';
+    } else if (actualMimeType.includes('ogg')) {
+      fileExtension = 'ogg';
+      contentType = 'audio/ogg';
+    } else if (actualMimeType.includes('wav')) {
+      fileExtension = 'wav';
+      contentType = 'audio/wav';
+    } else if (actualMimeType.includes('aac')) {
+      fileExtension = 'aac';
+      contentType = 'audio/aac';
+    }
+    
+    console.log('Using file extension:', fileExtension, 'content type:', contentType);
+    
     // Prepare form data
     const formData = new FormData();
     // Create a proper ArrayBuffer from Uint8Array for Deno compatibility
     const audioArrayBuffer = new ArrayBuffer(binaryAudio.length);
     const audioView = new Uint8Array(audioArrayBuffer);
     audioView.set(binaryAudio);
-    const blob = new Blob([audioArrayBuffer], { type: 'audio/webm' });
-    formData.append('file', blob, 'audio.webm');
+    const blob = new Blob([audioArrayBuffer], { type: contentType });
+    formData.append('file', blob, `audio.${fileExtension}`);
     formData.append('model', 'whisper-1');
     
     // Add language hint if provided (improves accuracy)
