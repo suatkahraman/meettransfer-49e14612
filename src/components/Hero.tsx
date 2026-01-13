@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Plane, Globe, Check, Wifi, Baby, Briefcase, Play } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Plane, Globe, Check, Wifi, Baby, Briefcase, Play, Award, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
@@ -25,6 +25,7 @@ import BookingChatAssistant from "@/components/website/BookingChatAssistant";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
+import { VehicleTooltip } from "@/components/VehicleTooltip";
 
 // Vehicle image mapping
 const vehicleImages: Record<string, string> = {
@@ -105,6 +106,9 @@ export const Hero = () => {
   const [showVideo, setShowVideo] = useState(true);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  
+  // Hover state for vehicle tooltips
+  const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
   
   // Rotate between video and image every 8 seconds
   useEffect(() => {
@@ -521,10 +525,13 @@ export const Hero = () => {
                 />
                 <div className="flex-1">
                   <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground leading-tight">
-                    {t("heroTitle")}
+                    {language === 'TR' ? 'Lüks VIP Transfer Hizmeti' : 'Premium VIP Transfer Service'}
                   </h1>
-                  <p className="text-sm text-muted-foreground hidden sm:block">
-                    {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language, activePromo.validUntil).heroSubtitle}
+                  <p className="text-sm text-muted-foreground hidden sm:flex items-center gap-1.5">
+                    <Award className="h-3.5 w-3.5 text-primary" />
+                    {language === 'TR' 
+                      ? 'Profesyonel şoför • Sabit fiyat • Ücretsiz iptal' 
+                      : 'Professional chauffeur • Fixed price • Free cancellation'}
                   </p>
                 </div>
               </div>
@@ -722,56 +729,87 @@ export const Hero = () => {
                       </Select>
                     </div>
 
-                    {/* Vehicle Selection with Images */}
+                    {/* Vehicle Selection with Images & Tooltips */}
                     <div className="grid grid-cols-4 gap-1.5">
                       {VEHICLE_TYPES.map((vehicle, index) => {
                         const vehiclePrice = allVehiclePrices.find(v => v.vehicleType === vehicle.value);
                         const isSelected = vehicleType === vehicle.value;
                         const isDisabled = vehicle.passengers < parseInt(passengers);
+                        const isHovered = hoveredVehicle === vehicle.value;
                         
                         return (
-                          <motion.button
+                          <motion.div 
                             key={vehicle.value}
-                            type="button"
-                            onClick={() => !isDisabled && setVehicleType(vehicle.value)}
-                            disabled={isDisabled}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.05 * index }}
-                            whileHover={{ scale: isDisabled ? 1 : 1.03 }}
-                            whileTap={{ scale: isDisabled ? 1 : 0.97 }}
-                            className={cn(
-                              "rounded-xl border p-1.5 transition-all text-center overflow-hidden",
-                              isDisabled ? "opacity-40 cursor-not-allowed" : "",
-                              isSelected ? "border-primary bg-primary/10 ring-2 ring-primary shadow-lg" : "border-border bg-muted/30 hover:border-primary/50 hover:shadow-md"
-                            )}
+                            className="relative"
+                            onMouseEnter={() => !isDisabled && setHoveredVehicle(vehicle.value)}
+                            onMouseLeave={() => setHoveredVehicle(null)}
                           >
-                            {/* Vehicle Image */}
-                            <div className="w-full h-8 rounded-lg overflow-hidden mb-1 bg-muted">
-                              <img 
-                                src={vehicleImages[vehicle.value]} 
-                                alt={vehicle.label}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="text-[9px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
-                            {vehiclePrice ? (
-                              <motion.div 
-                                className="text-xs font-bold text-primary"
-                                initial={{ scale: 0.8 }}
-                                animate={{ scale: 1 }}
-                                transition={{ type: "spring", stiffness: 300 }}
-                              >
-                                €{vehiclePrice.price}
-                              </motion.div>
-                            ) : loadingTransferPrice && pickup && dropoff ? (
-                              <div className="h-4 flex items-center justify-center">
-                                <Skeleton className="h-3 w-8" />
+                            {/* Tooltip */}
+                            <VehicleTooltip 
+                              vehicleType={vehicle.value}
+                              isVisible={isHovered && !isDisabled}
+                              position="top"
+                              isTurkish={language === 'TR'}
+                            />
+                            
+                            <motion.button
+                              type="button"
+                              onClick={() => !isDisabled && setVehicleType(vehicle.value)}
+                              disabled={isDisabled}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.05 * index }}
+                              whileHover={{ scale: isDisabled ? 1 : 1.05, y: isDisabled ? 0 : -2 }}
+                              whileTap={{ scale: isDisabled ? 1 : 0.97 }}
+                              className={cn(
+                                "w-full rounded-xl border p-1.5 transition-all text-center overflow-hidden",
+                                isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
+                                isSelected 
+                                  ? "border-primary bg-primary/10 ring-2 ring-primary shadow-lg" 
+                                  : "border-border bg-muted/30 hover:border-primary/50 hover:shadow-md hover:bg-muted/50"
+                              )}
+                            >
+                              {/* Vehicle Image */}
+                              <div className="w-full h-8 rounded-lg overflow-hidden mb-1 bg-muted relative">
+                                <img 
+                                  src={vehicleImages[vehicle.value]} 
+                                  alt={vehicle.label}
+                                  className="w-full h-full object-cover transition-transform duration-300"
+                                  style={{ transform: isHovered ? 'scale(1.1)' : 'scale(1)' }}
+                                />
+                                {isSelected && (
+                                  <motion.div 
+                                    className="absolute inset-0 bg-primary/20 flex items-center justify-center"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                  >
+                                    <Check className="h-4 w-4 text-primary" />
+                                  </motion.div>
+                                )}
                               </div>
-                            ) : (
-                              <div className="h-4" />
-                            )}
-                          </motion.button>
+                              <div className="text-[9px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
+                              <div className="flex items-center justify-center gap-0.5 text-[8px] text-muted-foreground">
+                                <Users className="h-2 w-2" />
+                                <span>{vehicle.passengers}</span>
+                              </div>
+                              {vehiclePrice ? (
+                                <motion.div 
+                                  className="text-xs font-bold text-primary"
+                                  initial={{ scale: 0.8 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                  €{vehiclePrice.price}
+                                </motion.div>
+                              ) : loadingTransferPrice && pickup && dropoff ? (
+                                <div className="h-4 flex items-center justify-center">
+                                  <Skeleton className="h-3 w-8" />
+                                </div>
+                              ) : (
+                                <div className="h-4" />
+                              )}
+                            </motion.button>
+                          </motion.div>
                         );
                       })}
                     </div>
@@ -790,7 +828,8 @@ export const Hero = () => {
                           <Loader2 className="h-5 w-5 animate-spin" />
                         ) : (
                           <>
-                            {t("getQuote") || "Get Quote"} 
+                            <Zap className="mr-1 h-4 w-4" />
+                            {language === 'TR' ? 'Anında Fiyat Al' : 'Get Instant Quote'} 
                             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                           </>
                         )}
@@ -896,50 +935,81 @@ export const Hero = () => {
                           const isSelected = hourlyVehicleType === vehicle.value;
                           const isDisabled = vehicle.passengers < parseInt(hourlyPassengers);
                           const symbol = vehiclePrice?.currency === "EUR" ? "€" : vehiclePrice?.currency === "USD" ? "$" : vehiclePrice?.currency === "GBP" ? "£" : "₺";
+                          const isHovered = hoveredVehicle === `hourly-${vehicle.value}`;
                           
                           return (
-                            <motion.button
+                            <motion.div 
                               key={vehicle.value}
-                              type="button"
-                              onClick={() => !isDisabled && setHourlyVehicleType(vehicle.value)}
-                              disabled={isDisabled}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: 0.05 * index }}
-                              whileHover={{ scale: isDisabled ? 1 : 1.03 }}
-                              whileTap={{ scale: isDisabled ? 1 : 0.97 }}
-                              className={cn(
-                                "rounded-xl border p-1.5 transition-all text-center overflow-hidden",
-                                isDisabled ? "opacity-40 cursor-not-allowed" : "",
-                                isSelected ? "border-primary bg-primary/10 ring-2 ring-primary shadow-lg" : "border-border bg-muted/30 hover:border-primary/50 hover:shadow-md"
-                              )}
+                              className="relative"
+                              onMouseEnter={() => !isDisabled && setHoveredVehicle(`hourly-${vehicle.value}`)}
+                              onMouseLeave={() => setHoveredVehicle(null)}
                             >
-                              {/* Vehicle Image */}
-                              <div className="w-full h-8 rounded-lg overflow-hidden mb-1 bg-muted">
-                                <img 
-                                  src={vehicleImages[vehicle.value]} 
-                                  alt={vehicle.label}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div className="text-[9px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
-                              {vehiclePrice ? (
-                                <motion.div 
-                                  className="text-xs font-bold text-primary"
-                                  initial={{ scale: 0.8 }}
-                                  animate={{ scale: 1 }}
-                                  transition={{ type: "spring", stiffness: 300 }}
-                                >
-                                  {symbol}{vehiclePrice.price}
-                                </motion.div>
-                              ) : (loadingPrice || convertingHourlyPrices) ? (
-                                <div className="h-4 flex items-center justify-center">
-                                  <Skeleton className="h-3 w-8" />
+                              {/* Tooltip */}
+                              <VehicleTooltip 
+                                vehicleType={vehicle.value}
+                                isVisible={isHovered && !isDisabled}
+                                position="top"
+                                isTurkish={language === 'TR'}
+                              />
+                              
+                              <motion.button
+                                type="button"
+                                onClick={() => !isDisabled && setHourlyVehicleType(vehicle.value)}
+                                disabled={isDisabled}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.05 * index }}
+                                whileHover={{ scale: isDisabled ? 1 : 1.05, y: isDisabled ? 0 : -2 }}
+                                whileTap={{ scale: isDisabled ? 1 : 0.97 }}
+                                className={cn(
+                                  "w-full rounded-xl border p-1.5 transition-all text-center overflow-hidden",
+                                  isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
+                                  isSelected 
+                                    ? "border-primary bg-primary/10 ring-2 ring-primary shadow-lg" 
+                                    : "border-border bg-muted/30 hover:border-primary/50 hover:shadow-md hover:bg-muted/50"
+                                )}
+                              >
+                                {/* Vehicle Image */}
+                                <div className="w-full h-8 rounded-lg overflow-hidden mb-1 bg-muted relative">
+                                  <img 
+                                    src={vehicleImages[vehicle.value]} 
+                                    alt={vehicle.label}
+                                    className="w-full h-full object-cover transition-transform duration-300"
+                                    style={{ transform: isHovered ? 'scale(1.1)' : 'scale(1)' }}
+                                  />
+                                  {isSelected && (
+                                    <motion.div 
+                                      className="absolute inset-0 bg-primary/20 flex items-center justify-center"
+                                      initial={{ opacity: 0 }}
+                                      animate={{ opacity: 1 }}
+                                    >
+                                      <Check className="h-4 w-4 text-primary" />
+                                    </motion.div>
+                                  )}
                                 </div>
-                              ) : (
-                                <div className="h-4" />
-                              )}
-                            </motion.button>
+                                <div className="text-[9px] font-medium truncate">{vehicle.label.split(' ').pop()}</div>
+                                <div className="flex items-center justify-center gap-0.5 text-[8px] text-muted-foreground">
+                                  <Users className="h-2 w-2" />
+                                  <span>{vehicle.passengers}</span>
+                                </div>
+                                {vehiclePrice ? (
+                                  <motion.div 
+                                    className="text-xs font-bold text-primary"
+                                    initial={{ scale: 0.8 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                  >
+                                    {symbol}{vehiclePrice.price}
+                                  </motion.div>
+                                ) : (loadingPrice || convertingHourlyPrices) ? (
+                                  <div className="h-4 flex items-center justify-center">
+                                    <Skeleton className="h-3 w-8" />
+                                  </div>
+                                ) : (
+                                  <div className="h-4" />
+                                )}
+                              </motion.button>
+                            </motion.div>
                           );
                         })}
                       </div>
@@ -958,7 +1028,8 @@ export const Hero = () => {
                           <Loader2 className="h-5 w-5 animate-spin" />
                         ) : (
                           <>
-                            {t("getQuote") || "Get Quote"} 
+                            <Zap className="mr-1 h-4 w-4" />
+                            {language === 'TR' ? 'Anında Fiyat Al' : 'Get Instant Quote'} 
                             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                           </>
                         )}
@@ -970,21 +1041,39 @@ export const Hero = () => {
               </div>
             </motion.div>
 
-            {/* Trust Badges - Mobile Compact */}
-            <div className="flex flex-wrap items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
+            {/* Trust Badges - Animated */}
+            <motion.div 
+              className="flex flex-wrap items-center justify-center gap-3 mt-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <motion.div 
+                className="flex items-center gap-1.5 bg-green-500/10 rounded-full px-3 py-1.5"
+                whileHover={{ scale: 1.05 }}
+              >
                 <Shield className="h-3.5 w-3.5 text-green-500" />
-                <span>{t("freeCancellation") || "Free Cancel"}</span>
-              </div>
-              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium text-green-600">
+                  {language === 'TR' ? 'Ücretsiz İptal' : 'Free Cancellation'}
+                </span>
+              </motion.div>
+              <motion.div 
+                className="flex items-center gap-1.5 bg-yellow-500/10 rounded-full px-3 py-1.5"
+                whileHover={{ scale: 1.05 }}
+              >
                 <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
-                <span>4.9/5 (2000+)</span>
-              </div>
-              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium text-yellow-600">4.9/5 (2,500+)</span>
+              </motion.div>
+              <motion.div 
+                className="flex items-center gap-1.5 bg-primary/10 rounded-full px-3 py-1.5"
+                whileHover={{ scale: 1.05 }}
+              >
                 <Check className="h-3.5 w-3.5 text-primary" />
-                <span>{t("fixedPrices") || "Fixed Price"}</span>
-              </div>
-            </div>
+                <span className="text-xs font-medium text-primary">
+                  {language === 'TR' ? 'Sabit Fiyat' : 'Fixed Price'}
+                </span>
+              </motion.div>
+            </motion.div>
           </motion.div>
 
           {/* Mobile Visual Section - Shows below form */}
