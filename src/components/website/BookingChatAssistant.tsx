@@ -742,14 +742,16 @@ interface VoiceOption {
   gender: 'male' | 'female' | 'neutral';
 }
 
-// Text-to-Speech hook using Web Speech API (no API key required)
+// Text-to-Speech hook using ElevenLabs API for high-quality voice
 function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const [availableVoices, setAvailableVoices] = useState<VoiceOption[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
   const [speechRate, setSpeechRate] = useState(1.0);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [useElevenLabs, setUseElevenLabs] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
   const onSpeakEndRef = useRef(onSpeakEnd);
   
   // Keep callback ref updated
@@ -757,228 +759,210 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
     onSpeakEndRef.current = onSpeakEnd;
   }, [onSpeakEnd]);
 
-  // Map language codes to BCP-47 format for Web Speech API
-  const getLanguageCode = useCallback((lang: string): string => {
-    const languageMap: Record<string, string> = {
-      'TR': 'tr-TR',
-      'EN': 'en-US',
-      'DE': 'de-DE',
-      'FR': 'fr-FR',
-      'RU': 'ru-RU',
-      'AR': 'ar-SA',
-      'ES': 'es-ES',
-      'IT': 'it-IT',
-      'UK': 'uk-UA',
-      'JA': 'ja-JP'
+  // ElevenLabs voices with Turkish support
+  const elevenLabsVoices: VoiceOption[] = [
+    { id: 'FGY2WhTYpPnrIDTdsKH5', name: 'Laura', lang: 'multilingual', gender: 'female' },
+    { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', lang: 'multilingual', gender: 'female' },
+    { id: 'XrExE9yKIg1WjnnlVkGX', name: 'Matilda', lang: 'multilingual', gender: 'female' },
+    { id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Lily', lang: 'multilingual', gender: 'female' },
+    { id: 'JBFqnCBsd6RMkjVDRZzb', name: 'George', lang: 'multilingual', gender: 'male' },
+    { id: 'N2lVS1w4EtoT3dr4eOWO', name: 'Callum', lang: 'multilingual', gender: 'male' },
+    { id: 'TX3LPaxmHKxFdv7VOQHJ', name: 'Liam', lang: 'multilingual', gender: 'male' },
+    { id: 'onwK4e9ZLuTAKqWW03F9', name: 'Daniel', lang: 'multilingual', gender: 'male' },
+  ];
+
+  // Load voices on mount
+  useEffect(() => {
+    setAvailableVoices(elevenLabsVoices);
+    if (!selectedVoiceId) {
+      // Default to Laura (female, Turkish-friendly)
+      setSelectedVoiceId('FGY2WhTYpPnrIDTdsKH5');
+    }
+  }, []);
+
+  // Cleanup audio URL on unmount
+  useEffect(() => {
+    return () => {
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+      }
     };
-    return languageMap[lang] || 'en-US';
   }, []);
 
-  // Detect gender from voice name
-  const detectGender = useCallback((voice: SpeechSynthesisVoice): 'male' | 'female' | 'neutral' => {
-    const nameLower = voice.name.toLowerCase();
-    const femaleKeywords = ['female', 'woman', 'girl', 'kadın', 'kız', 'femme', 'mujer', 'donna', 'frau', 'женщина', 'zira', 'hazel', 'susan', 'samantha', 'victoria', 'karen', 'moira', 'fiona', 'tessa', 'veena', 'yelda', 'filiz'];
-    const maleKeywords = ['male', 'man', 'boy', 'erkek', 'homme', 'hombre', 'uomo', 'mann', 'мужчина', 'david', 'mark', 'alex', 'daniel', 'james', 'thomas', 'tolga', 'ahmet'];
+  const speakWithElevenLabs = useCallback(async (text: string) => {
+    console.log('🔊 [ElevenLabs] Speaking text:', text.substring(0, 50) + '...');
     
-    if (femaleKeywords.some(kw => nameLower.includes(kw))) return 'female';
-    if (maleKeywords.some(kw => nameLower.includes(kw))) return 'male';
-    return 'neutral';
-  }, []);
-
-  // Load and filter voices for current language - prefer high quality voices
-  const loadVoices = useCallback(() => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      console.log('🔊 [Voices] speechSynthesis not available');
-      return;
-    }
-    
-    const voices = window.speechSynthesis.getVoices();
-    console.log('🔊 [Voices] Loading voices, total available:', voices.length);
-    
-    const langCode = getLanguageCode(language);
-    const langPrefix = langCode.split('-')[0];
-    console.log('🔊 [Voices] Looking for language:', langCode, 'prefix:', langPrefix);
-    
-    // Keywords indicating higher quality voices
-    const premiumKeywords = ['premium', 'enhanced', 'natural', 'neural', 'hd', 'wavenet', 'google', 'microsoft'];
-    
-    const filteredVoices: VoiceOption[] = voices
-      .filter(voice => voice.lang.startsWith(langPrefix))
-      .map(voice => ({
-        id: voice.voiceURI,
-        name: voice.name.replace(/Microsoft |Google |Apple /, '').split(' ')[0],
-        lang: voice.lang,
-        gender: detectGender(voice),
-        isPremium: premiumKeywords.some(kw => voice.name.toLowerCase().includes(kw)) || voice.localService === false
-      }))
-      .sort((a, b) => {
-        // Sort premium/remote voices first (usually higher quality)
-        if ((a as any).isPremium && !(b as any).isPremium) return -1;
-        if (!(a as any).isPremium && (b as any).isPremium) return 1;
-        return 0;
-      });
-    
-    console.log('🔊 [Voices] Filtered voices for language:', filteredVoices.length);
-    if (filteredVoices.length > 0) {
-      console.log('🔊 [Voices] First 3 voices:', filteredVoices.slice(0, 3).map(v => v.name));
-    }
-    
-    // Add fallback voices if none found for the language
-    if (filteredVoices.length === 0) {
-      console.log('🔊 [Voices] ⚠️ No voices for language, using defaults');
-      const defaultVoices = voices.slice(0, 3).map(voice => ({
-        id: voice.voiceURI,
-        name: voice.name.replace(/Microsoft |Google |Apple /, '').split(' ')[0],
-        lang: voice.lang,
-        gender: detectGender(voice)
-      }));
-      setAvailableVoices(defaultVoices);
-    } else {
-      setAvailableVoices(filteredVoices);
-    }
-    
-    // Auto-select best quality voice (first in sorted list) if none selected
-    if (!selectedVoiceId && filteredVoices.length > 0) {
-      console.log('🔊 [Voices] Auto-selecting voice:', filteredVoices[0].name);
-      setSelectedVoiceId(filteredVoices[0].id);
-    }
-  }, [language, getLanguageCode, detectGender, selectedVoiceId]);
-
-  const speak = useCallback((text: string) => {
-    console.log('🔊 [TTS] speak() called');
-    console.log('🔊 [TTS] isVoiceEnabled:', isVoiceEnabled);
-    console.log('🔊 [TTS] text length:', text?.length);
-    console.log('🔊 [TTS] window exists:', typeof window !== 'undefined');
-    
-    if (!isVoiceEnabled || !text || typeof window === 'undefined') {
-      console.log('🔊 [TTS] Early return - voice disabled or no text');
-      return;
-    }
-
-    // Check for browser support
-    if (!('speechSynthesis' in window)) {
-      console.error('🔊 [TTS] ❌ Speech synthesis not supported in this browser');
-      return;
-    }
-    
-    console.log('🔊 [TTS] ✅ speechSynthesis supported');
-
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
-    console.log('🔊 [TTS] Cancelled any ongoing speech');
-
     // Clean text for speech (remove emojis and special characters)
     const cleanText = text
-      .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // emoticons
-      .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // symbols & pictographs
-      .replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // transport & map symbols
-      .replace(/[\u{2600}-\u{26FF}]/gu, '')   // misc symbols
-      .replace(/[\u{2700}-\u{27BF}]/gu, '')   // dingbats
-      .replace(/👋|🎤|📍|📅|👥|🚗|💰/g, '')  // specific emojis
+      .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+      .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+      .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+      .replace(/[\u{2600}-\u{26FF}]/gu, '')
+      .replace(/[\u{2700}-\u{27BF}]/gu, '')
+      .replace(/👋|🎤|📍|📅|👥|🚗|💰/g, '')
       .trim();
 
     if (!cleanText) {
-      console.log('🔊 [TTS] No clean text to speak after removing emojis');
+      console.log('🔊 [ElevenLabs] No clean text to speak');
       return;
     }
-    
-    console.log('🔊 [TTS] Clean text:', cleanText.substring(0, 50) + '...');
+
+    try {
+      setIsSpeaking(true);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            text: cleanText,
+            voiceId: selectedVoiceId || 'FGY2WhTYpPnrIDTdsKH5',
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('🔊 [ElevenLabs] API error:', response.status, errorData);
+        throw new Error(`ElevenLabs API error: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      
+      // Cleanup previous audio URL
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+      }
+
+      const audioUrl = URL.createObjectURL(audioBlob);
+      audioUrlRef.current = audioUrl;
+
+      // Create and play audio
+      const audio = new Audio(audioUrl);
+      audio.playbackRate = speechRate;
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        console.log('🔊 [ElevenLabs] Audio ended');
+        setIsSpeaking(false);
+        if (onSpeakEndRef.current) {
+          setTimeout(() => {
+            onSpeakEndRef.current?.();
+          }, 100);
+        }
+      };
+
+      audio.onerror = (e) => {
+        console.error('🔊 [ElevenLabs] Audio playback error:', e);
+        setIsSpeaking(false);
+        if (onSpeakEndRef.current) {
+          setTimeout(() => {
+            onSpeakEndRef.current?.();
+          }, 100);
+        }
+      };
+
+      await audio.play();
+      console.log('🔊 [ElevenLabs] Audio playing');
+
+    } catch (error) {
+      console.error('🔊 [ElevenLabs] Error:', error);
+      setIsSpeaking(false);
+      // Fallback to Web Speech API
+      console.log('🔊 [ElevenLabs] Falling back to Web Speech API');
+      speakWithWebSpeech(text);
+    }
+  }, [selectedVoiceId, speechRate]);
+
+  // Fallback Web Speech API
+  const speakWithWebSpeech = useCallback((text: string) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      console.error('🔊 [WebSpeech] Not supported');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const cleanText = text
+      .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+      .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+      .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+      .replace(/[\u{2600}-\u{26FF}]/gu, '')
+      .replace(/[\u{2700}-\u{27BF}]/gu, '')
+      .replace(/👋|🎤|📍|📅|👥|🚗|💰/g, '')
+      .trim();
+
+    if (!cleanText) return;
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utteranceRef.current = utterance;
-
-    const langCode = getLanguageCode(language);
-    utterance.lang = langCode;
+    
+    const languageMap: Record<string, string> = {
+      'TR': 'tr-TR', 'EN': 'en-US', 'DE': 'de-DE', 'FR': 'fr-FR',
+      'RU': 'ru-RU', 'AR': 'ar-SA', 'ES': 'es-ES', 'IT': 'it-IT',
+      'UK': 'uk-UA', 'JA': 'ja-JP'
+    };
+    
+    utterance.lang = languageMap[language] || 'en-US';
     utterance.rate = speechRate;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
-    
-    console.log('🔊 [TTS] Utterance configured - lang:', langCode, 'rate:', speechRate);
 
-    // Use selected voice if available
-    const voices = window.speechSynthesis.getVoices();
-    console.log('🔊 [TTS] Available voices:', voices.length);
-    
-    if (selectedVoiceId) {
-      const selectedVoice = voices.find(v => v.voiceURI === selectedVoiceId);
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-        console.log('🔊 [TTS] Using selected voice:', selectedVoice.name);
-      } else {
-        console.log('🔊 [TTS] ⚠️ Selected voice not found:', selectedVoiceId);
-      }
-    } else {
-      // Fallback to any matching voice
-      const matchingVoice = voices.find(voice => voice.lang.startsWith(langCode.split('-')[0]));
-      if (matchingVoice) {
-        utterance.voice = matchingVoice;
-        console.log('🔊 [TTS] Using fallback voice:', matchingVoice.name);
-      } else {
-        console.log('🔊 [TTS] ⚠️ No matching voice found for language:', langCode);
-      }
-    }
-
-    utterance.onstart = () => {
-      console.log('🔊 [TTS] 🎵 Speech started');
-      setIsSpeaking(true);
-    };
+    utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => {
-      console.log('🔊 [TTS] ✅ Speech ended naturally');
       setIsSpeaking(false);
-      // Call the onSpeakEnd callback when speech finishes
       if (onSpeakEndRef.current) {
-        console.log('🔊 [TTS] Calling onSpeakEnd callback...');
-        // Use setTimeout to ensure state is updated before callback
-        setTimeout(() => {
-          onSpeakEndRef.current?.();
-        }, 100);
+        setTimeout(() => onSpeakEndRef.current?.(), 100);
       }
     };
-    utterance.onerror = (event) => {
-      console.error('🔊 [TTS] ❌ Speech error:', event.error);
-      console.error('🔊 [TTS] Error details:', {
-        error: event.error,
-        message: (event as any).message,
-        charIndex: event.charIndex,
-        elapsedTime: event.elapsedTime
-      });
+    utterance.onerror = () => {
       setIsSpeaking(false);
-      
-      // Even on error (like 'interrupted'), try to call the callback for continuous mode
-      if (event.error !== 'canceled' && onSpeakEndRef.current) {
-        console.log('🔊 [TTS] Calling onSpeakEnd after error for continuous mode...');
-        setTimeout(() => {
-          onSpeakEndRef.current?.();
-        }, 100);
+      if (onSpeakEndRef.current) {
+        setTimeout(() => onSpeakEndRef.current?.(), 100);
       }
     };
 
-    try {
-      console.log('🔊 [TTS] Calling speechSynthesis.speak()...');
-      window.speechSynthesis.speak(utterance);
-      console.log('🔊 [TTS] speak() called successfully');
-      
-      // Chrome bug workaround: speech can get stuck, resume it
-      if (window.speechSynthesis.paused) {
-        console.log('🔊 [TTS] ⚠️ Speech was paused, resuming...');
-        window.speechSynthesis.resume();
-      }
-    } catch (err) {
-      console.error('🔊 [TTS] ❌ Exception in speak():', err);
+    window.speechSynthesis.speak(utterance);
+  }, [language, speechRate]);
+
+  const speak = useCallback((text: string) => {
+    console.log('🔊 [TTS] speak() called, useElevenLabs:', useElevenLabs);
+    
+    if (!isVoiceEnabled || !text) {
+      console.log('🔊 [TTS] Voice disabled or no text');
+      return;
     }
-  }, [language, getLanguageCode, isVoiceEnabled, selectedVoiceId, speechRate]);
+
+    if (useElevenLabs) {
+      speakWithElevenLabs(text);
+    } else {
+      speakWithWebSpeech(text);
+    }
+  }, [isVoiceEnabled, useElevenLabs, speakWithElevenLabs, speakWithWebSpeech]);
 
   const stopSpeaking = useCallback(() => {
+    // Stop ElevenLabs audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    
+    // Stop Web Speech
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      setIsSpeaking(false);
     }
+    
+    setIsSpeaking(false);
   }, []);
 
   const toggleVoice = useCallback(() => {
     setIsVoiceEnabled(prev => {
       if (prev) {
-        // If turning off, stop any current speech
         stopSpeaking();
       }
       return !prev;
@@ -992,14 +976,6 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
   const changeRate = useCallback((rate: number) => {
     setSpeechRate(rate);
   }, []);
-
-  // Load voices on mount and language change
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      loadVoices();
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
-  }, [loadVoices]);
 
   return { 
     isSpeaking, 
