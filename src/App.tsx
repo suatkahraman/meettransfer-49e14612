@@ -17,6 +17,7 @@ import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
 import { UpdateNotification } from "./components/UpdateNotification";
 import { PWAUpdatePrompt } from "./components/website/PWAUpdatePrompt";
 import { PWAInstallPrompt } from "./components/website/PWAInstallPrompt";
+import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
 // Debug panel disabled - uncomment to re-enable
 // import { PWADebugPanel } from "./components/website/PWADebugPanel";
 
@@ -187,23 +188,24 @@ const LazyRoute = ({ children }: { children: React.ReactNode }) => (
 );
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <HashScroll />
-        <LanguageQueryRedirect />
-        <OAuthCallbackHandler>
-          <LanguageProvider>
-            <PromoProvider>
-            <AIChatProvider>
-            <UpdateNotification />
-            <PWAUpdatePrompt />
-            <PWAInstallPrompt />
-            {/* <PWADebugPanel /> */}
-            <AuthProvider>
-              <Routes>
+  <ChunkErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <HashScroll />
+          <LanguageQueryRedirect />
+          <OAuthCallbackHandler>
+            <LanguageProvider>
+              <PromoProvider>
+              <AIChatProvider>
+              <UpdateNotification />
+              <PWAUpdatePrompt />
+              <PWAInstallPrompt />
+              {/* <PWADebugPanel /> */}
+              <AuthProvider>
+                <Routes>
               {/* Localized Website Pages - Support all languages */}
               {localizedRoutes("/", <Index />)}
               {localizedRoutes("/services", <ServicesPage />)}
@@ -348,6 +350,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </ChunkErrorBoundary>
 );
 
 export default App;
