@@ -17,7 +17,8 @@ import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
 import { UpdateNotification } from "./components/UpdateNotification";
 import { PWAUpdatePrompt } from "./components/website/PWAUpdatePrompt";
 import { PWAInstallPrompt } from "./components/website/PWAInstallPrompt";
-import { PWADebugPanel } from "./components/website/PWADebugPanel";
+// Debug panel disabled - uncomment to re-enable
+// import { PWADebugPanel } from "./components/website/PWADebugPanel";
 
 // Critical pages - lazy loaded with prefetch for better UX
 const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
@@ -200,7 +201,7 @@ const App = () => (
             <UpdateNotification />
             <PWAUpdatePrompt />
             <PWAInstallPrompt />
-            <PWADebugPanel />
+            {/* <PWADebugPanel /> */}
             <AuthProvider>
               <Routes>
               {/* Localized Website Pages - Support all languages */}
