@@ -116,6 +116,9 @@ const CustomerHome = () => {
     pickup_time: string;
     status: string;
     vehicle_type: string;
+    driver_id: string | null;
+    drivers: { name: string } | null;
+    hasReview?: boolean;
   }>>([]);
   const [nextTransfer, setNextTransfer] = useState<{date: string; time: string; pickup: string; dropoff: string; reservationCode?: string} | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -205,17 +208,40 @@ const CustomerHome = () => {
         setNextTransfer(null);
       }
 
-      // Fetch completed reservations
+      // Fetch completed reservations with driver info
       const { data: pastReservations } = await supabase
         .from('reservations')
-        .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, status, vehicle_type')
+        .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, status, vehicle_type, driver_id, drivers:driver_id(name)')
         .eq('customer_id', user.id)
         .in('status', ['completed', 'cancelled'])
         .order('pickup_date', { ascending: false })
         .order('pickup_time', { ascending: false })
         .limit(5);
       
-      setCompletedReservations(pastReservations || []);
+      // Check for existing reviews for completed reservations
+      if (pastReservations && pastReservations.length > 0) {
+        const completedIds = pastReservations
+          .filter(r => r.status === 'completed' && r.driver_id)
+          .map(r => r.id);
+        
+        if (completedIds.length > 0) {
+          const { data: existingReviews } = await supabase
+            .from('driver_reviews')
+            .select('reservation_id')
+            .in('reservation_id', completedIds);
+          
+          const reviewedIds = new Set(existingReviews?.map(r => r.reservation_id) || []);
+          
+          setCompletedReservations(pastReservations.map(r => ({
+            ...r,
+            hasReview: reviewedIds.has(r.id)
+          })));
+        } else {
+          setCompletedReservations(pastReservations.map(r => ({ ...r, hasReview: false })));
+        }
+      } else {
+        setCompletedReservations([]);
+      }
 
       // Fetch favorite routes
       const { data: favorites } = await supabase
@@ -1493,6 +1519,49 @@ const CustomerHome = () => {
             transition={{ delay: 0.4 }}
             className="mb-6"
           >
+            {/* Review Prompt Banner for unreviewed completed transfers */}
+            {(() => {
+              const unreviewedTransfer = completedReservations.find(
+                r => r.status === 'completed' && r.driver_id && !r.hasReview
+              );
+              if (unreviewedTransfer && unreviewedTransfer.drivers) {
+                return (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mb-4 bg-gradient-to-r from-accent/20 to-accent/10 border border-accent/30 rounded-lg p-3 sm:p-4"
+                  >
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-accent/20 p-2 rounded-full shrink-0">
+                          <Star className="h-4 w-4 sm:h-5 sm:w-5 text-accent fill-accent" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground text-sm sm:text-base">
+                            {t('rateYourExperience') || 'Rate your transfer experience'}
+                          </p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            {t('driverFeedbackPrompt')?.replace('{driverName}', unreviewedTransfer.drivers.name) || 
+                             `Your driver ${unreviewedTransfer.drivers.name} would love your feedback`}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => navigate(`/customer/review/${unreviewedTransfer.id}`)}
+                        variant="accent"
+                        size="sm"
+                        className="shrink-0 gap-1"
+                      >
+                        <Star className="h-4 w-4" />
+                        {t('rateNow') || 'Rate Now'}
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              }
+              return null;
+            })()}
+
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <History className="h-4 w-4 text-muted-foreground" />
@@ -1569,18 +1638,28 @@ const CustomerHome = () => {
                           </div>
                           
                           {/* Review button for completed transfers */}
-                          {isCompleted ? (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="shrink-0 text-accent hover:text-accent hover:bg-accent/10"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/customer/review/${reservation.id}`);
-                              }}
-                            >
-                              <Star className="h-4 w-4" />
-                            </Button>
+                          {isCompleted && reservation.driver_id ? (
+                            reservation.hasReview ? (
+                              <div className="shrink-0 flex items-center gap-1 text-green-600 text-xs">
+                                <CheckCircle className="h-4 w-4" />
+                                <span className="hidden sm:inline">{t('reviewed') || 'Reviewed'}</span>
+                              </div>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="shrink-0 text-accent hover:text-accent hover:bg-accent/10 gap-1"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/customer/review/${reservation.id}`);
+                                }}
+                              >
+                                <Star className="h-4 w-4 fill-accent" />
+                                <span className="hidden sm:inline text-xs">{t('rate') || 'Rate'}</span>
+                              </Button>
+                            )
+                          ) : isCompleted ? (
+                            <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           ) : (
                             <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           )}
