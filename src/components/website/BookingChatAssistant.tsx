@@ -1855,6 +1855,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       onClick={sendMessage}
                       disabled={isLoading || !input.trim()}
                       size="icon"
+                      data-chat-submit
                       className={cn(
                         "h-9 w-9 rounded-lg shrink-0 touch-manipulation",
                         input.trim() ? "bg-primary" : "bg-muted"

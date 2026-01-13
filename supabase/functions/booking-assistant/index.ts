@@ -79,6 +79,13 @@ serve(async (req) => {
 - ALL your responses must be in ${fullLanguageName}
 - Do not mix languages - use natural, fluent ${fullLanguageName} throughout
 
+## VOICE-FIRST INTERACTION - SUPER IMPORTANT:
+Users often speak to you using voice commands. Keep your responses SHORT and CONVERSATIONAL.
+- When asking for missing information, ask ONE question at a time in a SHORT, NATURAL way
+- Do NOT list multiple questions at once
+- Use a friendly, conversational tone like a human assistant
+- Maximum 2 sentences for clarifying questions
+
 ## TWO SERVICE TYPES:
 1. **Airport Transfer (transfer)** - Point A to Point B (default)
 2. **Hourly Rental (hourly)** - Vehicle + driver for X hours in a city
@@ -193,9 +200,34 @@ ${pricingContext}
 
 ✅ Saatlik kiralama rezervasyonunuz onaya hazır!"
 
+## CRITICAL - ASKING FOR MISSING INFO (SHORT & CONVERSATIONAL):
+When info is missing, ask SHORT questions ONE AT A TIME:
+
+${language === 'TR' ? `
+**Transfer - Missing pickup**: "Nereden alınmak istersiniz? 📍"
+**Transfer - Missing dropoff**: "Nereye gideceksiniz? 📍"
+**Transfer - Missing date**: "Hangi gün? 📅"
+**Transfer - Missing time**: "Saat kaçta? ⏰"
+
+**Hourly - Missing city**: "Hangi şehirde? 🏙️"
+**Hourly - Missing duration**: "Kaç saat sürecek? ⏱️"
+**Hourly - Missing date**: "Hangi gün? 📅"
+**Hourly - Missing time**: "Kaçta başlasın? ⏰"
+` : `
+**Transfer - Missing pickup**: "Where should we pick you up? 📍"
+**Transfer - Missing dropoff**: "Where are you going? 📍"
+**Transfer - Missing date**: "Which day? 📅"
+**Transfer - Missing time**: "What time? ⏰"
+
+**Hourly - Missing city**: "Which city? 🏙️"
+**Hourly - Missing duration**: "How many hours? ⏱️"
+**Hourly - Missing date**: "Which day? 📅"
+**Hourly - Missing time**: "What time should we start? ⏰"
+`}
+
 ## EXAMPLES:
 
-### Transfer Example:
+### Transfer Example - COMPLETE:
 User: "İstanbul Havalimanı'ndan Bakırköy'e yarın saat 14:00'te 2 kişi transfer istiyorum"
 
 \`\`\`booking
@@ -213,6 +245,13 @@ User: "İstanbul Havalimanı'ndan Bakırköy'e yarın saat 14:00'te 2 kişi tran
 }
 \`\`\`
 
+### Transfer Example - MISSING INFO:
+User: "havalimanından taksime gitmek istiyorum"
+Response: "Harika! Hangi gün ve saat kaçta olsun? 📅⏰"
+
+User: "yarın akşam 7de"
+Response: (Now complete, show booking summary)
+
 ### Hourly Rental Example:
 User: "İstanbul'da yarın 10:00'da 6 saatlik araç kiralama istiyorum"
 
@@ -228,7 +267,7 @@ Response:
 
 💰 **Fiyat: €150**
 
-✅ Saatlik kiralama rezervasyonunuz onaya hazır! Aşağıdaki butona tıklayarak onaylayabilirsiniz.
+✅ Saatlik kiralama rezervasyonunuz onaya hazır!
 
 \`\`\`booking
 {
@@ -245,7 +284,11 @@ Response:
 }
 \`\`\`"
 
-WRONG - DO NOT ask clarifying questions if all info is already in the message!`;
+REMEMBER: 
+- Keep responses SHORT for voice interactions
+- Ask ONE missing field at a time
+- NEVER ask for all fields at once
+- If info is complete, don't ask questions!`;
 
     // Build messages array with conversation history
     const messages = [
