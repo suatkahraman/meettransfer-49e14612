@@ -121,6 +121,9 @@ const companyInfo = {
     { '@type': 'City', name: 'Dubai' },
     { '@type': 'City', name: 'Cyprus' },
     { '@type': 'City', name: 'Bursa' },
+    { '@type': 'City', name: 'Frankfurt' },
+    { '@type': 'City', name: 'Athens' },
+    { '@type': 'City', name: 'Greece' },
   ],
   // aggregateRating is conditionally added only on homepage
 };
@@ -287,6 +290,8 @@ const generateMerchantProductSchema = () => ({
     { '@type': 'Country', name: 'Turkey' },
     { '@type': 'Country', name: 'United Arab Emirates' },
     { '@type': 'Country', name: 'Cyprus' },
+    { '@type': 'Country', name: 'Germany' },
+    { '@type': 'Country', name: 'Greece' },
   ],
   image: [
     'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',

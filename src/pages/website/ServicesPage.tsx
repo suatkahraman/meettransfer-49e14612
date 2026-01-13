@@ -79,6 +79,50 @@ const ServicesPage = () => {
         t("cappadociaFeature3"),
       ],
     },
+    {
+      id: "dubai",
+      title: "Dubai Airport Transfer (DXB)",
+      emoji: "🌆",
+      icon: Building,
+      features: [
+        "Downtown Dubai, Palm Jumeirah, Marina",
+        "Business Bay & JBR Beach Transfers",
+        "Maybach & VIP Mercedes Fleet",
+      ],
+    },
+    {
+      id: "cyprus",
+      title: "Cyprus Airport Transfer (LCA, PFO)",
+      emoji: "🏖️",
+      icon: Anchor,
+      features: [
+        "Larnaca, Paphos, Ayia Napa, Limassol",
+        "Kyrenia & Famagusta Transfers",
+        "24/7 VIP Service",
+      ],
+    },
+    {
+      id: "frankfurt",
+      title: "Frankfurt Airport Transfer (FRA)",
+      emoji: "🏙️",
+      icon: Building,
+      features: [
+        "City Center & Messe Frankfurt",
+        "Financial District Transfers",
+        "Business Chauffeur Service",
+      ],
+    },
+    {
+      id: "greece",
+      title: "Greece Airport Transfer (ATH, SKG)",
+      emoji: "🇬🇷",
+      icon: Plane,
+      features: [
+        "Athens, Piraeus Port, Thessaloniki",
+        "Greek Islands & Cruise Port Transfers",
+        "VIP Mercedes Fleet",
+      ],
+    },
   ];
 
   return (
@@ -92,7 +136,7 @@ const ServicesPage = () => {
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia'] },
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Frankfurt', 'Athens', 'Greece'] },
           {
             type: 'BreadcrumbList',
             items: [
