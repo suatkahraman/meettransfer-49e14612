@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
+import { COMPANY_NAME, GLOBAL_OFFICES } from "@/lib/contact";
 
 const cities = [
   "Istanbul", "Antalya", "Bodrum", "Dalaman", "Izmir",
@@ -78,6 +79,14 @@ const AboutPage = () => {
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             {t("whoWeAre")}
           </h1>
+          <div className="mb-4 inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-lg font-semibold">
+            {COMPANY_NAME}
+          </div>
+          {GLOBAL_OFFICES[0] && (
+            <p className="text-sm text-muted-foreground mb-4">
+              {GLOBAL_OFFICES[0].address}, {GLOBAL_OFFICES[0].country}
+            </p>
+          )}
           <p className="text-muted-foreground leading-relaxed text-lg">
             {t("aboutIntro1")}
           </p>

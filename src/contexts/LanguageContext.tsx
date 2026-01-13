@@ -355,6 +355,7 @@ const translations: Record<Language, Record<string, string>> = {
     emailDesc: "For detailed inquiries and documentation",
     globalOffices: "Our Global Offices",
     globalOfficesDesc: "Serving you from strategic locations worldwide",
+    headquarters: "Headquarters",
     
     // Fleet Page
     fleetTitle: "Our Luxury Fleet",
@@ -2043,6 +2044,7 @@ const translations: Record<Language, Record<string, string>> = {
     emailDesc: "Für detaillierte Anfragen und Dokumentation",
     globalOffices: "Unsere globalen Büros",
     globalOfficesDesc: "Wir bedienen Sie von strategischen Standorten weltweit",
+    headquarters: "Hauptsitz",
     
     // Fleet Page
     fleetTitle: "Unsere Luxusflotte",
@@ -3745,6 +3747,7 @@ const translations: Record<Language, Record<string, string>> = {
     emailDesc: "Pour les demandes détaillées et la documentation",
     globalOffices: "Nos bureaux mondiaux",
     globalOfficesDesc: "Nous vous servons depuis des emplacements stratégiques dans le monde entier",
+    headquarters: "Siège social",
     
     // Fleet Page
     fleetTitle: "Notre flotte de luxe",
@@ -5186,6 +5189,7 @@ const translations: Record<Language, Record<string, string>> = {
     emailDesc: "Для детальных запросов и документации",
     globalOffices: "Наши глобальные офисы",
     globalOfficesDesc: "Мы обслуживаем вас из стратегических локаций по всему миру",
+    headquarters: "Головной офис",
     
     // Fleet Page
     fleetTitle: "Наш люкс автопарк",
@@ -6513,6 +6517,7 @@ const translations: Record<Language, Record<string, string>> = {
     emailDesc: "Per richieste dettagliate e documentazione",
     globalOffices: "I nostri uffici globali",
     globalOfficesDesc: "Ti serviamo da posizioni strategiche in tutto il mondo",
+    headquarters: "Sede centrale",
     
     // Fleet Page
     fleetTitle: "La nostra flotta di lusso",
@@ -7887,6 +7892,7 @@ const translations: Record<Language, Record<string, string>> = {
     emailDesc: "Para consultas detalladas y documentación",
     globalOffices: "Nuestras oficinas globales",
     globalOfficesDesc: "Te servimos desde ubicaciones estratégicas en todo el mundo",
+    headquarters: "Sede central",
     
     // Fleet Page
     fleetTitle: "Nuestra flota de lujo",
@@ -9289,6 +9295,7 @@ const translations: Record<Language, Record<string, string>> = {
     emailDesc: "للاستفسارات التفصيلية والوثائق",
     globalOffices: "مكاتبنا العالمية",
     globalOfficesDesc: "نخدمك من مواقع استراتيجية حول العالم",
+    headquarters: "المقر الرئيسي",
     
     // Fleet Page
     fleetTitle: "أسطولنا الفاخر",
@@ -10582,6 +10589,7 @@ const translations: Record<Language, Record<string, string>> = {
     emailDesc: "Detaylı sorular ve belgeler için",
     globalOffices: "Global Ofislerimiz",
     globalOfficesDesc: "Dünya genelinde stratejik lokasyonlardan hizmet veriyoruz",
+    headquarters: "Merkez Ofis",
     
     // Fleet Page
     fleetTitle: "Lüks Filomuz",
@@ -12157,6 +12165,7 @@ const translations: Record<Language, Record<string, string>> = {
     emailDesc: "Для детальних запитів та документації",
     globalOffices: "Наші глобальні офіси",
     globalOfficesDesc: "Обслуговуємо вас зі стратегічних локацій по всьому світу",
+    headquarters: "Головний офіс",
     
     // Fleet Page
     fleetTitle: "Наш люкс автопарк",
@@ -13352,6 +13361,7 @@ const translations: Record<Language, Record<string, string>> = {
     emailDesc: "詳細なお問い合わせと書類について",
     globalOffices: "グローバルオフィス",
     globalOfficesDesc: "世界中の戦略的拠点からサービス提供",
+    headquarters: "本社",
     
     // Fleet Page
     fleetTitle: "高級車両",

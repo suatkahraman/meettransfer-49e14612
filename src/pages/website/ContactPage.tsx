@@ -139,71 +139,89 @@ const ContactPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {GLOBAL_OFFICES.map((office, index) => (
-              <motion.div
-                key={office.city}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-              >
-                <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow duration-300 border-border/50">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="text-4xl bg-secondary/50 rounded-xl p-3 flex-shrink-0">
-                        {office.flag}
-                      </div>
-                      <div className="flex-1 space-y-3">
-                        <div>
-                          <h3 className="font-bold text-lg text-foreground">
-                            {office.country}
-                          </h3>
-                          <p className="text-sm text-accent font-medium">{office.city}</p>
+            {GLOBAL_OFFICES.map((office, index) => {
+              const isHeadquarters = index === 0;
+              return (
+                <motion.div
+                  key={office.city}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  className={isHeadquarters ? "md:col-span-2" : ""}
+                >
+                  <Card className={`overflow-hidden h-full transition-shadow duration-300 ${
+                    isHeadquarters 
+                      ? "border-2 border-accent shadow-lg hover:shadow-xl bg-gradient-to-br from-accent/5 to-transparent" 
+                      : "border-border/50 hover:shadow-lg"
+                  }`}>
+                    <CardContent className="p-6">
+                      {isHeadquarters && (
+                        <div className="mb-4 inline-flex items-center gap-2 bg-accent/10 text-accent px-3 py-1 rounded-full text-sm font-medium">
+                          <MapPin className="h-4 w-4" />
+                          {t("headquarters")}
                         </div>
-                        
-                        <div className="space-y-2 text-sm">
-                          {office.address && (
-                            <div className="flex items-start gap-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <span className="text-muted-foreground">{office.address}</span>
-                            </div>
-                          )}
-                          
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                              <a 
-                                href={`tel:${office.phone.replace(/\s/g, '')}`}
-                                className="text-foreground hover:text-accent transition-colors font-medium"
-                              >
-                                {office.phone}
-                              </a>
-                            </div>
-                            {office.whatsappOnly && (
-                              <span className="text-xs text-green-500 ml-6 mt-0.5 flex items-center gap-1">
-                                <MessageCircle className="h-3 w-3" />
-                                {t("whatsappOnly")}
-                              </span>
-                            )}
+                      )}
+                      <div className="flex items-start gap-4">
+                        <div className={`text-4xl rounded-xl p-3 flex-shrink-0 ${
+                          isHeadquarters ? "bg-accent/20" : "bg-secondary/50"
+                        }`}>
+                          {office.flag}
+                        </div>
+                        <div className="flex-1 space-y-3">
+                          <div>
+                            <h3 className={`font-bold text-foreground ${isHeadquarters ? "text-xl" : "text-lg"}`}>
+                              {office.country}
+                            </h3>
+                            <p className="text-sm text-accent font-medium">{office.city}</p>
                           </div>
                           
-                          {office.email && (
-                            <div className="flex items-center gap-2">
-                              <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                              <a 
-                                href={`mailto:${office.email}`}
-                                className="text-foreground hover:text-accent transition-colors"
-                              >
-                                {office.email}
-                              </a>
+                          <div className="space-y-2 text-sm">
+                            {office.address && (
+                              <div className="flex items-start gap-2">
+                                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <span className={isHeadquarters ? "text-foreground font-medium" : "text-muted-foreground"}>
+                                  {office.address}
+                                </span>
+                              </div>
+                            )}
+                            
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                <a 
+                                  href={`tel:${office.phone.replace(/\s/g, '')}`}
+                                  className="text-foreground hover:text-accent transition-colors font-medium"
+                                >
+                                  {office.phone}
+                                </a>
+                              </div>
+                              {office.whatsappOnly && (
+                                <span className="text-xs text-green-500 ml-6 mt-0.5 flex items-center gap-1">
+                                  <MessageCircle className="h-3 w-3" />
+                                  {t("whatsappOnly")}
+                                </span>
+                              )}
                             </div>
-                          )}
+                            
+                            {office.email && (
+                              <div className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                <a 
+                                  href={`mailto:${office.email}`}
+                                  className="text-foreground hover:text-accent transition-colors"
+                                >
+                                  {office.email}
+                                </a>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         </section>
 
