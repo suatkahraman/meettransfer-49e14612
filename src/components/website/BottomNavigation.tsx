@@ -26,11 +26,11 @@ const BottomNavigation = () => {
   return (
     <nav 
       className={cn(
-        "fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-bottom transition-transform duration-300",
+        "fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border z-40 safe-area-bottom transition-transform duration-300 md:hidden",
         isAIChatOpen && "translate-y-full pointer-events-none"
       )}
     >
-      <div className="flex items-center justify-around h-16 sm:h-18">
+      <div className="flex items-center justify-around h-14">
         {navItems.map((item) => {
           const active = isActive(item.path);
           return (
