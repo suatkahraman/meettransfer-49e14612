@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo, useMemo } from "react";
 import { format, parse } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Globe, Check, Zap, Wifi, Baby, Briefcase, Plane } from "lucide-react";
+import { MapPin, Navigation, CalendarIcon, Clock, ArrowRight, Loader2, Car, Timer, ArrowUpDown, Users, Sparkles, Shield, Star, Globe, Check, Zap, Wifi, Baby, Briefcase, Plane, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LazyGooglePlacesAutocomplete as GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
@@ -19,6 +19,7 @@ const BookingChatAssistant = lazy(() => import("@/components/website/BookingChat
 const CompactRouteMap = lazy(() => import("@/components/ui/compact-route-map").then(m => ({ default: m.CompactRouteMap })));
 const VehicleTooltip = lazy(() => import("@/components/VehicleTooltip").then(m => ({ default: m.VehicleTooltip })));
 const VehicleImageCarousel = lazy(() => import("@/components/website/VehicleImageCarousel").then(m => ({ default: m.VehicleImageCarousel })));
+const VehicleDetailModal = lazy(() => import("@/components/website/VehicleDetailModal").then(m => ({ default: m.VehicleDetailModal })));
 
 // Critical images loaded eagerly with optimized paths
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
@@ -142,6 +143,11 @@ export const Hero = () => {
   const [hourlyCurrency, setHourlyCurrency] = useState<string>("EUR");
   const [convertingHourlyPrices, setConvertingHourlyPrices] = useState(false);
   const [originalHourlyPrices, setOriginalHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
+  
+  // Vehicle detail modal state
+  const [selectedVehicleForDetail, setSelectedVehicleForDetail] = useState<typeof VEHICLE_TYPES[0] | null>(null);
+  const [isVehicleDetailOpen, setIsVehicleDetailOpen] = useState(false);
+  const [detailModalContext, setDetailModalContext] = useState<'ride' | 'hourly'>('ride');
   
   // Save form data to localStorage when it changes
   useEffect(() => {
@@ -963,7 +969,7 @@ export const Hero = () => {
                               )}
                             >
                               {/* Larger Vehicle Image with Carousel */}
-                              <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-2 bg-muted relative">
+                              <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-2 bg-muted relative group/image">
                                 <Suspense fallback={
                                   <img 
                                     src={vehicleImages[vehicle.value]} 
@@ -979,6 +985,21 @@ export const Hero = () => {
                                     isHovered={isHovered}
                                   />
                                 </Suspense>
+                                
+                                {/* Info Button */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedVehicleForDetail(vehicle);
+                                    setDetailModalContext('ride');
+                                    setIsVehicleDetailOpen(true);
+                                  }}
+                                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white opacity-0 group-hover/image:opacity-100 transition-opacity z-20"
+                                >
+                                  <Info className="h-3.5 w-3.5" />
+                                </button>
+                                
                                 {isSelected && (
                                   <motion.div 
                                     className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10"
@@ -1163,7 +1184,7 @@ export const Hero = () => {
                                 )}
                               >
                                 {/* Larger Vehicle Image with Carousel */}
-                                <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-2 bg-muted relative">
+                                <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-2 bg-muted relative group/image">
                                   <Suspense fallback={
                                     <img 
                                       src={vehicleImages[vehicle.value]} 
@@ -1179,6 +1200,21 @@ export const Hero = () => {
                                       isHovered={isHovered}
                                     />
                                   </Suspense>
+                                  
+                                  {/* Info Button */}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedVehicleForDetail(vehicle);
+                                      setDetailModalContext('hourly');
+                                      setIsVehicleDetailOpen(true);
+                                    }}
+                                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white opacity-0 group-hover/image:opacity-100 transition-opacity z-20"
+                                  >
+                                    <Info className="h-3.5 w-3.5" />
+                                  </button>
+                                  
                                   {isSelected && (
                                     <motion.div 
                                       className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10"
@@ -1538,6 +1574,40 @@ export const Hero = () => {
           </motion.div>
         </div>
       </div>
+      
+      {/* Vehicle Detail Modal */}
+      <Suspense fallback={null}>
+        <VehicleDetailModal
+          vehicle={selectedVehicleForDetail}
+          isOpen={isVehicleDetailOpen}
+          onClose={() => setIsVehicleDetailOpen(false)}
+          onSelect={() => {
+            if (selectedVehicleForDetail) {
+              if (detailModalContext === 'ride') {
+                setVehicleType(selectedVehicleForDetail.value);
+              } else {
+                setHourlyVehicleType(selectedVehicleForDetail.value);
+              }
+            }
+          }}
+          isSelected={
+            selectedVehicleForDetail 
+              ? (detailModalContext === 'ride' 
+                  ? vehicleType === selectedVehicleForDetail.value 
+                  : hourlyVehicleType === selectedVehicleForDetail.value)
+              : false
+          }
+          price={
+            selectedVehicleForDetail
+              ? (detailModalContext === 'ride'
+                  ? allVehiclePrices.find(v => v.vehicleType === selectedVehicleForDetail.value)?.price
+                  : allHourlyPrices.find(v => v.vehicleType === selectedVehicleForDetail.value)?.price)
+              : undefined
+          }
+          currency={detailModalContext === 'ride' ? transferPriceCurrency : (allHourlyPrices[0]?.currency || "EUR")}
+          isTurkish={language === 'TR'}
+        />
+      </Suspense>
     </section>
   );
 };
