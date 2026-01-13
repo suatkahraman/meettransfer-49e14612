@@ -1427,7 +1427,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     }
   }, [isOpen, language, messages.length]);
 
-  // Function to speak welcome message with retry
+  // Function to speak welcome message - simplified for ElevenLabs
   const speakWelcome = useCallback(() => {
     if (!welcomeMessageRef.current || hasSpokenWelcomeRef.current || !isVoiceEnabled) {
       console.log('🎙️ [Welcome] speakWelcome skipped:', {
@@ -1438,19 +1438,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       return;
     }
     
-    const voices = window.speechSynthesis?.getVoices() || [];
-    console.log('🎙️ [Welcome] speakWelcome called, voices:', voices.length, 'userInteracted:', userInteractedRef.current);
-    
-    if (voices.length === 0) {
-      console.log('🎙️ [Welcome] No voices yet, retrying in 500ms...');
-      // Retry after a short delay - voices may still be loading
-      setTimeout(() => {
-        if (welcomeMessageRef.current && !hasSpokenWelcomeRef.current) {
-          speakWelcome();
-        }
-      }, 500);
-      return;
-    }
+    console.log('🎙️ [Welcome] speakWelcome called with ElevenLabs');
     
     hasSpokenWelcomeRef.current = true;
     const messageToSpeak = welcomeMessageRef.current;
@@ -1458,21 +1446,17 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     
     console.log('🎙️ [Welcome] ✅ Speaking welcome message:', messageToSpeak.substring(0, 30) + '...');
     
-    // Cancel any ongoing speech first
-    window.speechSynthesis?.cancel();
-    
-    // Small delay for Chrome stability, then speak
+    // Small delay for UI stability, then speak
     setTimeout(() => {
-      console.log('🎙️ [Welcome] Calling speak() now...');
+      console.log('🎙️ [Welcome] Calling speak() now with ElevenLabs...');
       speak(messageToSpeak);
-    }, 150);
+    }, 300);
   }, [isVoiceEnabled, speak]);
 
-  // Auto-speak welcome message once voices are loaded and chat is opened (user interaction)
+  // Auto-speak welcome message when chat is opened
   useEffect(() => {
     console.log('🎙️ [Welcome] Effect check:', {
       welcomeMessage: welcomeMessageRef.current?.substring(0, 30),
-      availableVoices: availableVoices.length,
       hasSpokenWelcome: hasSpokenWelcomeRef.current,
       isVoiceEnabled,
       isOpen
@@ -1480,26 +1464,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     
     // Opening the chat IS a user interaction, so we can speak
     if (isOpen && welcomeMessageRef.current && !hasSpokenWelcomeRef.current && isVoiceEnabled) {
-      // Check if voices are available
-      if (availableVoices.length > 0) {
-        // Small delay to ensure UI is ready
-        setTimeout(() => {
-          speakWelcome();
-        }, 600);
-      } else {
-        // Voices not loaded yet - try again after onvoiceschanged fires
-        console.log('🎙️ [Welcome] Waiting for voices to load...');
-        const checkVoices = () => {
-          const voices = window.speechSynthesis?.getVoices() || [];
-          if (voices.length > 0 && welcomeMessageRef.current && !hasSpokenWelcomeRef.current) {
-            console.log('🎙️ [Welcome] Voices now available, speaking...');
-            speakWelcome();
-          }
-        };
-        // Try again after a delay
-        setTimeout(checkVoices, 1000);
-        setTimeout(checkVoices, 2000);
-      }
+      // Small delay to ensure UI is ready
+      setTimeout(() => {
+        speakWelcome();
+      }, 600);
     } else if (welcomeMessageRef.current && !isVoiceEnabled) {
       console.log('🎙️ [Welcome] ⚠️ Voice disabled, not speaking welcome');
       // If voice is disabled, start recording directly
@@ -1512,10 +1480,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           }
         }, 800);
       }
-    } else if (welcomeMessageRef.current && availableVoices.length === 0) {
-      console.log('🎙️ [Welcome] ⚠️ No voices available yet, will retry when loaded');
     }
-  }, [availableVoices.length, isVoiceEnabled, speakWelcome, isOpen, isRecording, isProcessing]);
+  }, [isVoiceEnabled, speakWelcome, isOpen, isRecording, isProcessing]);
 
   // Reset the spoken flag when chat is closed
   useEffect(() => {
