@@ -1768,31 +1768,29 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
   },
 };
 
-// Date-fns locale imports
-import { tr, de, fr, ru, it, es, enUS, ar, uk, ja } from 'date-fns/locale';
+// Dynamic locale loading for tree-shaking optimization
+import { useState, useEffect } from 'react';
 import type { Locale } from 'date-fns';
-
-const localeMap: Record<AgencyLanguage, Locale> = {
-  TR: tr,
-  DE: de,
-  FR: fr,
-  RU: ru,
-  IT: it,
-  ES: es,
-  EN: enUS,
-  AR: ar,
-  UK: uk,
-  JA: ja,
-};
+import { enUS } from 'date-fns/locale';
+import { loadLocale, getCachedLocale, languageToLocaleKey } from '@/utils/dateFnsLocaleLoader';
 
 export const useAgencyTranslations = () => {
   const { language } = useAgencyLanguage();
+  const [locale, setLocale] = useState<Locale>(() => {
+    // Try to get cached locale, fallback to enUS
+    const localeKey = languageToLocaleKey[language] || 'en';
+    return getCachedLocale(localeKey) || enUS;
+  });
+
+  // Load locale dynamically when language changes
+  useEffect(() => {
+    const localeKey = languageToLocaleKey[language] || 'en';
+    loadLocale(localeKey).then(setLocale);
+  }, [language]);
 
   const t = (key: string): string => {
     return agencyTranslations[language][key] || agencyTranslations['EN'][key] || key;
   };
-
-  const locale = localeMap[language] || enUS;
 
   return { t, language, locale };
 };

@@ -5,7 +5,9 @@ import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO } from "date-fns";
-import { tr, enUS } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
+import type { Locale } from "date-fns";
+import { loadLocale, getCachedLocale } from "@/utils/dateFnsLocaleLoader";
 
 interface ReturnTripPromoBannerProps {
   language: string;
@@ -22,6 +24,18 @@ interface PromoCodeData {
 export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: ReturnTripPromoBannerProps) => {
   const [promoData, setPromoData] = useState<PromoCodeData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [locale, setLocale] = useState<Locale>(enUS);
+
+  // Load locale dynamically based on language
+  useEffect(() => {
+    const localeKey = language === 'TR' ? 'tr' : 'en';
+    const cached = getCachedLocale(localeKey);
+    if (cached) {
+      setLocale(cached);
+    } else {
+      loadLocale(localeKey).then(setLocale);
+    }
+  }, [language]);
 
   useEffect(() => {
     const fetchPromoCode = async () => {
@@ -77,7 +91,7 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
     if (!dateString) return null;
     try {
       const date = parseISO(dateString);
-      return format(date, 'dd.MM.yyyy', { locale: language === 'TR' ? tr : enUS });
+      return format(date, 'dd.MM.yyyy', { locale });
     } catch {
       return null;
     }
