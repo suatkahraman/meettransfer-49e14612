@@ -61,9 +61,9 @@ export const LocationInputs = memo(({
           type="button"
           onClick={handleSwap}
           disabled={!pickup && !dropoff}
-          className="w-9 h-9 md:w-7 md:h-7 rounded-full bg-primary text-primary-foreground shadow hover:shadow-lg hover:scale-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center touch-manipulation"
+          className="w-11 h-11 md:w-8 md:h-8 rounded-full bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center touch-manipulation min-h-[44px] md:min-h-[32px]"
         >
-          <ArrowUpDown className="h-4 w-4 md:h-3 md:w-3" />
+          <ArrowUpDown className="h-5 w-5 md:h-4 md:w-4" />
         </button>
       </div>
       

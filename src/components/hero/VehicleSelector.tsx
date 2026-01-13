@@ -140,9 +140,9 @@ export const VehicleSelector = memo(({
                     tabIndex={0}
                     onClick={(e) => handleInfoClick(e, vehicle)}
                     onKeyDown={(e) => e.key === 'Enter' && handleInfoClick(e as unknown as React.MouseEvent, vehicle)}
-                    className="absolute top-1.5 right-1.5 w-7 h-7 sm:w-7 sm:h-7 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white z-20 cursor-pointer backdrop-blur-sm"
+                    className="absolute top-1.5 right-1.5 w-9 h-9 md:w-7 md:h-7 min-w-[36px] min-h-[36px] md:min-w-[28px] md:min-h-[28px] rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white z-20 cursor-pointer backdrop-blur-sm touch-manipulation"
                   >
-                    <Info className="h-3.5 w-3.5 sm:h-3.5 sm:w-3.5" />
+                    <Info className="h-4 w-4 md:h-3.5 md:w-3.5" />
                   </div>
                   
                   {/* Selected Overlay */}
