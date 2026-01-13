@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -645,56 +647,85 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
         .map(m => ({ role: m.role, content: m.content }));
 
       // Use streaming API
-      const response = await fetch(
-        `https://zqykoyugubaeealrspxm.supabase.co/functions/v1/booking-assistant`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxeWtveXVndWJhZWVhbHJzcHhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0MTcwNjAsImV4cCI6MjA3OTk5MzA2MH0.0_o4lyVPKHpDe4RRqEJdoogjn3XIk57hEdf5RgrtxMU`,
-          },
-          body: JSON.stringify({
-            message: userMessage.content,
-            language,
-            conversationHistory,
-            visitorId,
-            stream: true
-          })
-        }
-      );
+      const streamUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/booking-assistant`;
+      const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-      if (!response.ok) {
+      const response = await fetch(streamUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(publishableKey
+            ? { Authorization: `Bearer ${publishableKey}`, apikey: publishableKey }
+            : {}),
+        },
+        body: JSON.stringify({
+          message: userMessage.content,
+          language,
+          conversationHistory,
+          visitorId,
+          stream: true,
+        }),
+      });
+
+      if (!response.ok || !response.body) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const reader = response.body?.getReader();
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let textBuffer = "";
       let fullContent = "";
+      let streamDone = false;
 
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
+        textBuffer += decoder.decode(value, { stream: true });
 
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              if (data === '[DONE]') continue;
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
 
-              try {
-                const parsed = JSON.parse(data);
-                const content = parsed.choices?.[0]?.delta?.content;
-                if (content) {
-                  fullContent += content;
-                  setStreamingContent(cleanResponseForDisplay(fullContent));
-                }
-              } catch (e) {
-                // Ignore parse errors for incomplete chunks
-              }
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":")) continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") {
+            streamDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              fullContent += content;
+              setStreamingContent(cleanResponseForDisplay(fullContent));
             }
+          } catch {
+            // JSON chunk split across buffers: put it back and wait for more
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+
+      // Final flush for remaining buffered line (best-effort)
+      if (textBuffer.trim().startsWith("data: ")) {
+        const jsonStr = textBuffer.trim().slice(6).trim();
+        if (jsonStr !== "[DONE]") {
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              fullContent += content;
+              setStreamingContent(cleanResponseForDisplay(fullContent));
+            }
+          } catch {
+            // ignore leftovers
           }
         }
       }
@@ -801,6 +832,31 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
     return response.replace(/```booking[\s\S]*?```/g, '').replace(/```json[\s\S]*?```/g, '').trim();
   };
 
+  const markdownComponents = {
+    p: ({ children }: any) => <p className="m-0 whitespace-pre-wrap">{children}</p>,
+    ul: ({ children }: any) => <ul className="my-2 pl-5 list-disc space-y-1">{children}</ul>,
+    ol: ({ children }: any) => <ol className="my-2 pl-5 list-decimal space-y-1">{children}</ol>,
+    li: ({ children }: any) => <li className="m-0">{children}</li>,
+    strong: ({ children }: any) => <strong className="font-semibold">{children}</strong>,
+    em: ({ children }: any) => <em className="italic">{children}</em>,
+    a: ({ children, href }: any) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="text-primary underline underline-offset-4"
+      >
+        {children}
+      </a>
+    ),
+    code: ({ children }: any) => (
+      <code className="font-mono text-xs px-1 py-0.5 rounded bg-muted">{children}</code>
+    ),
+    pre: ({ children }: any) => (
+      <pre className="font-mono text-xs p-3 rounded bg-muted overflow-x-auto">{children}</pre>
+    ),
+  } as const;
+
   const handleApplyBooking = (data: BookingData) => {
     if (onApplyBooking) {
       onApplyBooking(data);
@@ -841,9 +897,9 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
             data-chat-trigger
-            className="fixed bottom-20 right-4 z-[9999] md:hidden flex items-center gap-1.5 px-3.5 py-2.5 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
+            className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-[9999] flex items-center gap-1.5 px-3.5 py-2.5 md:px-4 md:py-3 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
             style={{ 
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(var(--primary), 0.3)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(0,0,0,0.15)',
             }}
           >
             <motion.div
@@ -1154,7 +1210,17 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                                 : "bg-gradient-to-br from-muted to-muted/80 text-foreground rounded-bl-lg border border-border/30"
                             )}
                           >
-                            {msg.content}
+                            {msg.role === "assistant" ? (
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={markdownComponents}
+                                skipHtml
+                              >
+                                {msg.content}
+                              </ReactMarkdown>
+                            ) : (
+                              <span className="whitespace-pre-wrap">{msg.content}</span>
+                            )}
                           </motion.div>
                           
                           {/* Speak button for assistant messages */}
@@ -1263,7 +1329,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                   ))}
                   
                   {/* Streaming Response or Typing Indicator */}
-                  {isLoading && (
+                  {(isLoading || isTyping) && (
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -1276,7 +1342,13 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
                         {streamingContent ? (
                           // Show streaming content
                           <div className="text-sm leading-relaxed text-foreground">
-                            {streamingContent}
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={markdownComponents}
+                              skipHtml
+                            >
+                              {streamingContent}
+                            </ReactMarkdown>
                             <motion.span
                               animate={{ opacity: [1, 0, 1] }}
                               transition={{ repeat: Infinity, duration: 0.8 }}
