@@ -21,14 +21,14 @@ const isPreviewEnvironment = () => {
   );
 };
 
-// Session storage key to prevent showing prompt multiple times for same version
-const PWA_UPDATE_SHOWN_KEY = "pwa_update_prompt_shown";
+// We dedupe prompts by the waiting service worker script URL.
+// This avoids getting stuck on an old cached version when multiple updates happen.
 
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
   const [showPrompt, setShowPrompt] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const promptShownRef = useRef(false);
+  const lastPromptedSwUrlRef = useRef<string | null>(null);
 
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const updateSWRef = useRef<((reloadPage?: boolean) => Promise<void>) | null>(null);
@@ -39,27 +39,25 @@ export function PWAUpdatePrompt() {
       console.log("[PWA Update] Skipping in preview environment:", window.location.hostname);
       return;
     }
-    
+
     console.log("[PWA Update] Initializing on production:", window.location.hostname);
-    
+
     if (!("serviceWorker" in navigator)) {
       console.log("[PWA Update] Service Worker not supported");
       return;
     }
 
-    // Check if we already showed prompt this session
-    const alreadyShown = sessionStorage.getItem(PWA_UPDATE_SHOWN_KEY) === "true";
-    console.log("[PWA Update] Already shown this session:", alreadyShown);
-
     const showUpdatePrompt = () => {
-      console.log("[PWA Update] 🚀 Showing update prompt!");
-      // Prevent duplicate prompts
-      if (promptShownRef.current || alreadyShown) {
-        console.log("[PWA Update] Prompt already shown, skipping");
+      const waitingUrl = registrationRef.current?.waiting?.scriptURL ?? null;
+      console.log("[PWA Update] 🚀 Showing update prompt!", { waitingUrl });
+
+      // If the same waiting SW was already prompted, don't spam.
+      if (waitingUrl && lastPromptedSwUrlRef.current === waitingUrl) {
+        console.log("[PWA Update] Prompt already shown for this version, skipping");
         return;
       }
-      promptShownRef.current = true;
-      sessionStorage.setItem(PWA_UPDATE_SHOWN_KEY, "true");
+
+      lastPromptedSwUrlRef.current = waitingUrl;
       setShowPrompt(true);
     };
 
