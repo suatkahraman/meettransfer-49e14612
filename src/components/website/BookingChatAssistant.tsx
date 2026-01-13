@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { MobileTooltip } from "@/components/ui/mobile-tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAIChat } from "@/contexts/AIChatContext";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -879,6 +880,7 @@ function getConversationKey(visitorId: string): string {
 
 export default function BookingChatAssistant({ onApplyBooking, defaultOpen = false, mobileFloating = false }: BookingChatAssistantProps) {
   const { t, language } = useLanguage();
+  const { setAIChatOpen } = useAIChat();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -895,6 +897,17 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const hasLoadedRef = useRef(false);
   const hasHandledAIParamRef = useRef(false);
 
+  // Sync isOpen state with global AIChatContext (for hiding BottomNav/WhatsApp)
+  useEffect(() => {
+    if (mobileFloating) {
+      setAIChatOpen(isOpen);
+    }
+    return () => {
+      if (mobileFloating) {
+        setAIChatOpen(false);
+      }
+    };
+  }, [isOpen, mobileFloating, setAIChatOpen]);
   // Ref to track if we should auto-send voice transcription
   const pendingVoiceMessageRef = useRef<string | null>(null);
 

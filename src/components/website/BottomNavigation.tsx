@@ -1,10 +1,13 @@
 import { Home, MapPin, Car, Info, Phone } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAIChat } from "@/contexts/AIChatContext";
+import { cn } from "@/lib/utils";
 
 const BottomNavigation = () => {
   const location = useLocation();
   const { t, getLocalizedPath } = useLanguage();
+  const { isAIChatOpen } = useAIChat();
 
   const navItems = [
     { path: "/", icon: Home, label: t("home") },
@@ -21,7 +24,12 @@ const BottomNavigation = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-bottom">
+    <nav 
+      className={cn(
+        "fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-bottom transition-transform duration-300",
+        isAIChatOpen && "translate-y-full pointer-events-none"
+      )}
+    >
       <div className="flex items-center justify-around h-16 sm:h-18">
         {navItems.map((item) => {
           const active = isActive(item.path);
