@@ -10,14 +10,14 @@ import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 import TrustedPartners from "@/components/website/TrustedPartners";
 import WhyChooseUs from "@/components/website/WhyChooseUs";
 import GoogleReviewsCarousel from "@/components/website/GoogleReviewsCarousel";
-import VideoPromo from "@/components/website/VideoPromo";
 import HourlyRentalSection from "@/components/website/HourlyRentalSection";
 import StatsCounter from "@/components/website/StatsCounter";
-import LivePriceCalculator from "@/components/website/LivePriceCalculator";
 import TrustBar from "@/components/website/TrustBar";
 import FleetIconsBar from "@/components/website/FleetIconsBar";
 import ReviewPlatformLogos from "@/components/website/ReviewPlatformLogos";
 import AIAssistantPromo from "@/components/website/AIAssistantPromo";
+import HowItWorks from "@/components/website/HowItWorks";
+import CoreServices from "@/components/website/CoreServices";
 
 
 const Index = () => {
@@ -41,21 +41,43 @@ const Index = () => {
           { type: 'MerchantProduct' },
         ]}
       />
+      {/* Hero with Booking Form integrated */}
       <Hero />
       <TrustBar />
       <BookingForm />
-      <LivePriceCalculator />
-      <FleetIconsBar />
-      <AIAssistantPromo />
+      
+      {/* Core Services - Transfeero style */}
+      <CoreServices />
+      
+      {/* Stats - Dark section like Transfeero */}
       <StatsCounter />
-      <WhyChooseUs />
+      
+      {/* How It Works - 3 step process */}
+      <HowItWorks />
+      
+      {/* Fleet Showcase */}
+      <FleetIconsBar />
+      
+      {/* Top Destinations - Bento grid style */}
       <Destinations />
+      
+      {/* Why Choose Us - Two column layout */}
+      <WhyChooseUs />
+      
+      {/* Hourly Rental */}
       <HourlyRentalSection />
-      <VideoPromo />
+      
+      {/* Reviews */}
       <GoogleReviewsCarousel />
       <ReviewPlatformLogos />
+      
+      {/* AI Assistant */}
+      <AIAssistantPromo />
+      
+      {/* Partners & Trust */}
       <TrustedPartners />
       <PWAPromoBanner />
+      
       <Footer />
     </WebsiteLayout>
   );

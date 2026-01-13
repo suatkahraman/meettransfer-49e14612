@@ -1,57 +1,39 @@
 import { useEffect, useState, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Users, Car, Globe, Award, ThumbsUp, Clock } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface StatItem {
-  icon: React.ReactNode;
   value: number;
   suffix?: string;
+  prefix?: string;
   labelKey: string;
   labelFallback: string;
 }
 
 const stats: StatItem[] = [
   {
-    icon: <Car className="h-8 w-8" />,
+    value: 100,
+    suffix: "+",
+    labelKey: "statsCities",
+    labelFallback: "Cities",
+  },
+  {
+    value: 670,
+    suffix: "+",
+    labelKey: "statsAirports",
+    labelFallback: "Airports",
+  },
+  {
     value: 25000,
     suffix: "+",
     labelKey: "statsTransfers",
-    labelFallback: "Transfers Completed",
+    labelFallback: "Transfers",
   },
   {
-    icon: <Users className="h-8 w-8" />,
-    value: 18500,
-    suffix: "+",
-    labelKey: "statsCustomers",
-    labelFallback: "Happy Customers",
-  },
-  {
-    icon: <ThumbsUp className="h-8 w-8" />,
-    value: 99,
-    suffix: "%",
-    labelKey: "statsSatisfaction",
-    labelFallback: "Satisfaction Rate",
-  },
-  {
-    icon: <Globe className="h-8 w-8" />,
     value: 45,
     suffix: "+",
     labelKey: "statsCountries",
-    labelFallback: "Countries Served",
-  },
-  {
-    icon: <Clock className="h-8 w-8" />,
-    value: 24,
-    suffix: "/7",
-    labelKey: "statsAvailability",
-    labelFallback: "Availability",
-  },
-  {
-    icon: <Award className="h-8 w-8" />,
-    value: 5,
-    suffix: "+",
-    labelKey: "statsYears",
-    labelFallback: "Years Experience",
+    labelFallback: "Countries",
   },
 ];
 
@@ -69,8 +51,6 @@ const useCountUp = (end: number, duration: number = 2000, startCounting: boolean
       }
 
       const progress = Math.min((timestamp - startTimeRef.current) / duration, 1);
-      
-      // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       const currentCount = Math.floor(easeOutQuart * end);
 
@@ -108,26 +88,22 @@ const StatCard = ({ stat, index, isVisible }: { stat: StatItem; index: number; i
   };
 
   return (
-    <div 
-      className="text-center p-6 group"
-      style={{ 
-        animationDelay: `${index * 100}ms`,
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-        transition: `opacity 0.5s ease ${index * 100}ms, transform 0.5s ease ${index * 100}ms`
-      }}
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      className="text-center"
     >
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4 group-hover:scale-110 transition-transform">
-        {stat.icon}
-      </div>
-      <div className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+      <div className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-2 tracking-tight">
+        {stat.prefix}
         {formatNumber(count)}
         <span className="text-primary">{stat.suffix}</span>
       </div>
-      <p className="text-muted-foreground font-medium">
+      <div className="text-lg text-muted-foreground font-medium">
         {t(stat.labelKey) || stat.labelFallback}
-      </p>
-    </div>
+      </div>
+    </motion.div>
   );
 };
 
@@ -155,20 +131,25 @@ const StatsCounter = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-16 px-4 bg-gradient-to-b from-background to-muted/30">
-      <div className="container max-w-6xl mx-auto">
+    <section ref={sectionRef} className="py-20 md:py-28 bg-foreground text-background">
+      <div className="container max-w-6xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {t("statsTitle") || "Trusted by Thousands"}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-background">
+            {t("globalCoverage") || "Global Coverage"}
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t("statsSubtitle") || "Our numbers speak for themselves. Join thousands of satisfied travelers who trust us for their transfers."}
+          <p className="text-lg text-background/70 max-w-2xl mx-auto">
+            {t("statsSubtitle") || "Book your private chauffeur in seconds and enjoy a premium travel experience tailored to your schedule."}
           </p>
-        </div>
+        </motion.div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-8">
+        {/* Stats Grid - Transfeero Style */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {stats.map((stat, index) => (
             <StatCard 
               key={index} 

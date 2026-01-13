@@ -1,92 +1,135 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
-import { Car, Truck, Crown, Bus, Users } from "lucide-react";
 import { motion } from "framer-motion";
+import { Users, Briefcase, ArrowRight } from "lucide-react";
 
 const FleetIconsBar = () => {
   const { t, getLocalizedPath } = useLanguage();
 
   const fleetItems = [
     {
-      icon: Car,
-      label: t("economy") || "Economy",
-      type: "mercedes-vito",
-      color: "from-gray-500 to-gray-600",
+      name: "Economy",
+      passengers: "3",
+      luggage: "3",
+      description: "Skoda Octavia, Toyota Prius or similar",
     },
     {
-      icon: Car,
-      label: t("comfort") || "Comfort", 
-      type: "mercedes-vito",
-      color: "from-blue-500 to-blue-600",
+      name: "Standard",
+      passengers: "3",
+      luggage: "3",
+      description: "Mercedes E Class, BMW 5 Series or similar",
     },
     {
-      icon: Crown,
-      label: t("business") || "Business",
-      type: "vip-mercedes",
-      color: "from-indigo-500 to-indigo-600",
+      name: "Business",
+      passengers: "3",
+      luggage: "3",
+      description: "Mercedes S Class, BMW 7 Series or similar",
     },
     {
-      icon: Crown,
-      label: t("premium") || "Premium",
-      type: "vip-mercedes",
-      color: "from-purple-500 to-purple-600",
+      name: "Van Standard",
+      passengers: "7",
+      luggage: "7",
+      description: "Mercedes Vito, Ford Custom or similar",
     },
     {
-      icon: Crown,
-      label: "VIP",
-      type: "maybach-minibus",
-      color: "from-amber-500 to-amber-600",
+      name: "Van First Class",
+      passengers: "6",
+      luggage: "6",
+      description: "Mercedes V Class, Cadillac Escalade or similar",
     },
     {
-      icon: Truck,
-      label: "SUV",
-      type: "vip-mercedes",
-      color: "from-emerald-500 to-emerald-600",
-    },
-    {
-      icon: Users,
-      label: t("van") || "Van",
-      type: "mercedes-vito",
-      color: "from-cyan-500 to-cyan-600",
-    },
-    {
-      icon: Bus,
-      label: t("minibus") || "Minibus",
-      type: "minibus",
-      color: "from-orange-500 to-orange-600",
+      name: "Minibus",
+      passengers: "12",
+      luggage: "12",
+      description: "Mercedes Sprinter, Ford Transit or similar",
     },
   ];
 
   return (
-    <section className="bg-muted/30 py-6 md:py-8 overflow-hidden">
-      <div className="container mx-auto px-4">
-        <h2 className="text-center text-lg font-semibold text-foreground mb-6">
-          {t("ourFleet") || "Our Fleet"}
-        </h2>
-        
-        <div className="flex justify-center gap-3 md:gap-6 flex-wrap">
+    <section className="py-16 md:py-24 bg-background">
+      <div className="container max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            {t("maximumComfort") || "Maximum Comfort and Safety"}
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            {t("licensedVehicles") || "Licensed vehicles, professional drivers"}
+          </p>
+        </motion.div>
+
+        {/* Fleet Grid - Transfeero Style */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {fleetItems.map((item, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.05 }}
             >
               <Link
                 to={getLocalizedPath("/fleet")}
-                className="flex flex-col items-center gap-2 group"
+                className="group block p-5 bg-card rounded-2xl border hover:border-primary/30 hover:shadow-lg transition-all duration-300 h-full"
               >
-                <div className={`w-14 h-14 md:w-16 md:h-16 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                  <item.icon className="w-7 h-7 md:w-8 md:h-8 text-white" />
+                {/* Vehicle Icon Placeholder */}
+                <div className="h-20 mb-4 flex items-center justify-center">
+                  <div className="w-24 h-12 bg-muted rounded-lg flex items-center justify-center">
+                    <svg viewBox="0 0 100 40" className="w-20 h-8 text-muted-foreground">
+                      <rect x="10" y="20" width="80" height="15" rx="5" fill="currentColor" opacity="0.3"/>
+                      <circle cx="25" cy="35" r="6" fill="currentColor" opacity="0.5"/>
+                      <circle cx="75" cy="35" r="6" fill="currentColor" opacity="0.5"/>
+                      <rect x="15" y="12" width="30" height="12" rx="3" fill="currentColor" opacity="0.2"/>
+                    </svg>
+                  </div>
                 </div>
-                <span className="text-xs md:text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                  {item.label}
-                </span>
+
+                {/* Name */}
+                <h3 className="font-bold text-foreground mb-2 text-center group-hover:text-primary transition-colors">
+                  {item.name}
+                </h3>
+
+                {/* Capacity */}
+                <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground mb-3">
+                  <div className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    <span>{item.passengers}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Briefcase className="h-4 w-4" />
+                    <span>{item.luggage}</span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-xs text-muted-foreground text-center line-clamp-2">
+                  {item.description}
+                </p>
               </Link>
             </motion.div>
           ))}
         </div>
+
+        {/* View Fleet CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mt-10"
+        >
+          <Link 
+            to={getLocalizedPath("/fleet")}
+            className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
+          >
+            {t("viewFullFleet") || "View Full Fleet"}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );

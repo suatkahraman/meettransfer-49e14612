@@ -1,6 +1,7 @@
-import { Clock, Shield, CreditCard, Plane, Baby, Wifi, Car, Award, HeadphonesIcon, XCircle } from "lucide-react";
+import { Clock, Shield, CreditCard, Plane, Baby, Wifi, Car, Award, HeadphonesIcon, XCircle, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
+import { motion } from "framer-motion";
 
 interface Benefit {
   icon: React.ElementType;
@@ -20,7 +21,7 @@ const benefits: Benefit[] = [
     icon: XCircle,
     titleKey: "whyFreeCancellation",
     descKey: "whyFreeCancellationDesc",
-    highlight: "90 min",
+    highlight: "Free",
   },
   {
     icon: Plane,
@@ -59,69 +60,89 @@ const WhyChooseUs = () => {
   const { rating } = useGoogleReviewStats();
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-b from-background to-muted/30">
-      <div className="container max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12 space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
-            <Award className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-sm text-primary">
-              {t("whyTrustedService") || "Trusted Since 2001"}
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold">
-            {t("whyChooseUsTitle") || "Why Choose Meet Transfer?"}
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            {t("whyChooseUsSubtitle") || "Experience the difference with our premium transfer service"}
-          </p>
-        </div>
+    <section className="py-20 md:py-28 bg-muted/30">
+      <div className="container max-w-7xl mx-auto px-4">
+        {/* Two-column layout like Transfeero */}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+          {/* Left Column - Header & Stats */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="lg:sticky lg:top-24"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
+              <Award className="h-4 w-4 text-primary" />
+              <span className="font-semibold text-sm text-primary">
+                {t("whyTrustedService") || "Trusted Since 2001"}
+              </span>
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+              {t("whyChooseUsTitle") || "Why Choose Meet Transfer?"}
+            </h2>
+            
+            <p className="text-lg text-muted-foreground mb-10 leading-relaxed">
+              {t("whyChooseUsSubtitle") || "Experience the difference with our premium transfer service. Professional drivers, luxury vehicles, and seamless booking."}
+            </p>
 
-        {/* Benefits Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {benefits.map((benefit, index) => {
-            const Icon = benefit.icon;
-            return (
-              <div
-                key={index}
-                className="group relative p-6 bg-card rounded-2xl border hover:border-primary/50 hover:shadow-lg transition-all duration-300"
-              >
-                {benefit.highlight && (
-                  <div className="absolute -top-3 right-4 px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
-                    {benefit.highlight}
-                  </div>
-                )}
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <Icon className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-bold text-lg mb-2">
-                  {t(benefit.titleKey) || benefit.titleKey}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {t(benefit.descKey) || benefit.descKey}
-                </p>
+            {/* Stats Grid - Transfeero Style */}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="p-6 bg-card rounded-2xl border">
+                <div className="text-4xl md:text-5xl font-bold text-primary mb-1">25+</div>
+                <div className="text-muted-foreground font-medium">{t("whyYearsExperience") || "Years Experience"}</div>
               </div>
-            );
-          })}
-        </div>
+              <div className="p-6 bg-card rounded-2xl border">
+                <div className="text-4xl md:text-5xl font-bold text-primary mb-1">50K+</div>
+                <div className="text-muted-foreground font-medium">{t("whyHappyCustomers") || "Happy Customers"}</div>
+              </div>
+              <div className="p-6 bg-card rounded-2xl border">
+                <div className="text-4xl md:text-5xl font-bold text-primary mb-1">15+</div>
+                <div className="text-muted-foreground font-medium">{t("whyDestinations") || "Destinations"}</div>
+              </div>
+              <div className="p-6 bg-card rounded-2xl border">
+                <div className="text-4xl md:text-5xl font-bold text-primary mb-1">{rating.toFixed(1)}</div>
+                <div className="text-muted-foreground font-medium">{t("whyAverageRating") || "Average Rating"}</div>
+              </div>
+            </div>
+          </motion.div>
 
-        {/* Stats Bar */}
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4">
-            <div className="text-3xl md:text-4xl font-bold text-primary">25+</div>
-            <div className="text-sm text-muted-foreground">{t("whyYearsExperience") || "Years Experience"}</div>
-          </div>
-          <div className="text-center p-4">
-            <div className="text-3xl md:text-4xl font-bold text-primary">50K+</div>
-            <div className="text-sm text-muted-foreground">{t("whyHappyCustomers") || "Happy Customers"}</div>
-          </div>
-          <div className="text-center p-4">
-            <div className="text-3xl md:text-4xl font-bold text-primary">15+</div>
-            <div className="text-sm text-muted-foreground">{t("whyDestinations") || "Destinations"}</div>
-          </div>
-          <div className="text-center p-4">
-            <div className="text-3xl md:text-4xl font-bold text-primary">{rating.toFixed(1)}</div>
-            <div className="text-sm text-muted-foreground">{t("whyAverageRating") || "Average Rating"}</div>
+          {/* Right Column - Benefits */}
+          <div className="space-y-4">
+            {benefits.map((benefit, index) => {
+              const Icon = benefit.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                  className="group flex items-start gap-4 p-5 bg-card rounded-xl border hover:border-primary/30 hover:shadow-md transition-all duration-300"
+                >
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="font-bold text-foreground">
+                        {t(benefit.titleKey) || benefit.titleKey}
+                      </h3>
+                      {benefit.highlight && (
+                        <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs font-bold rounded-full">
+                          {benefit.highlight}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {t(benefit.descKey) || benefit.descKey}
+                    </p>
+                  </div>
+                  <CheckCircle2 className="h-5 w-5 text-primary/50 flex-shrink-0 mt-1" />
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>
