@@ -42,7 +42,7 @@ const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) =
       <WebsiteHeader />
       <motion.main 
         key={location.pathname}
-        className={showBottomNav ? "pb-20" : ""}
+        className={`pt-16 ${showBottomNav ? "pb-20 md:pb-0" : ""}`}
         variants={pageVariants}
         initial="initial"
         animate="animate"
