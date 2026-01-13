@@ -1447,10 +1447,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsOpen(true)}
               data-chat-trigger
-              className="fixed bottom-[76px] right-3 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
-              style={{ 
-                WebkitTapHighlightColor: 'transparent',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(var(--primary), 0.2)'
+              className="fixed bottom-[calc(8.75rem+env(safe-area-inset-bottom))] right-3 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
+              style={{
+                WebkitTapHighlightColor: "transparent",
+                boxShadow:
+                  "0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 3px hsl(var(--primary) / 0.2)",
               }}
             >
               <motion.div
