@@ -754,7 +754,7 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
             data-chat-trigger
-            className="fixed bottom-20 right-4 z-[9999] md:hidden flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
+            className="fixed bottom-20 right-4 z-[9999] md:hidden flex items-center gap-1.5 px-3.5 py-2.5 bg-gradient-to-r from-primary via-primary/90 to-accent text-primary-foreground rounded-full shadow-2xl border border-white/20"
             style={{ 
               boxShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(var(--primary), 0.3)',
             }}
@@ -763,9 +763,9 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ repeat: Infinity, duration: 2, repeatDelay: 3 }}
             >
-              <Sparkles className="h-5 w-5" />
+              <Sparkles className="h-4 w-4" />
             </motion.div>
-            <span className="font-semibold">AI</span>
+            <span className="font-semibold text-sm">AI</span>
             {/* Pulse effect for visibility */}
             <motion.div
               className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-accent"
@@ -822,8 +822,6 @@ export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssi
               >
                 <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
               </motion.div>
-              {/* Online indicator */}
-              <span className="absolute -bottom-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full border-2 border-card shadow-md" />
               {/* Online indicator */}
               <span className="absolute -bottom-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full border-2 border-card shadow-md" />
             </div>

@@ -58,6 +58,10 @@ export const VehicleSelector = memo(({
           const isDisabled = vehicle.passengers < parseInt(passengers);
           const isHovered = hoveredVehicle === vehicle.value;
           
+          // Determine tooltip position based on vehicle index to prevent off-screen
+          // For 4 columns: items 0,1 (left side) use top, items 2,3 (right side) use top-left alignment
+          const isRightSide = index >= 2;
+          
           return (
             <motion.div 
               key={vehicle.value}
@@ -72,6 +76,7 @@ export const VehicleSelector = memo(({
                   isVisible={isHovered && !isDisabled}
                   position="top"
                   isTurkish={language === 'TR'}
+                  className={isRightSide ? "!left-auto !right-0 !translate-x-0" : ""}
                 />
               </Suspense>
               

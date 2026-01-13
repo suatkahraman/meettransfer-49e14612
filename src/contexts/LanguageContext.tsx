@@ -228,6 +228,10 @@ const translations: Record<Language, Record<string, string>> = {
     // Customer Reviews Section
     customerReviewsTitle: "What Our Customers Say",
     seeAllReviews: "See All Reviews",
+    translate: "Translate",
+    showOriginal: "Original",
+    translatedFromGoogle: "Translated",
+    leaveReview: "Leave a Review",
     
     // Features Section
     whyChooseUs: "Why Choose Us",
@@ -1902,6 +1906,10 @@ const translations: Record<Language, Record<string, string>> = {
     // Customer Reviews Section
     customerReviewsTitle: "Was unsere Kunden sagen",
     seeAllReviews: "Alle Bewertungen ansehen",
+    translate: "Übersetzen",
+    showOriginal: "Original",
+    translatedFromGoogle: "Übersetzt",
+    leaveReview: "Bewertung abgeben",
     
     // Features Section
     whyChooseUs: "Warum uns wählen",
@@ -3618,6 +3626,10 @@ const translations: Record<Language, Record<string, string>> = {
     // Customer Reviews Section
     customerReviewsTitle: "Ce que disent nos clients",
     seeAllReviews: "Voir tous les avis",
+    translate: "Traduire",
+    showOriginal: "Original",
+    translatedFromGoogle: "Traduit",
+    leaveReview: "Laisser un avis",
 
     // Features Section
     whyChooseUs: "Pourquoi nous choisir",
@@ -5045,6 +5057,10 @@ const translations: Record<Language, Record<string, string>> = {
     // Customer Reviews Section
     customerReviewsTitle: "Что говорят наши клиенты",
     seeAllReviews: "Смотреть все отзывы",
+    translate: "Перевести",
+    showOriginal: "Оригинал",
+    translatedFromGoogle: "Переведено",
+    leaveReview: "Оставить отзыв",
 
     // Features Section
     whyChooseUs: "Почему выбирают нас",
@@ -6358,6 +6374,10 @@ const translations: Record<Language, Record<string, string>> = {
     // Customer Reviews Section
     customerReviewsTitle: "Cosa dicono i nostri clienti",
     seeAllReviews: "Vedi tutte le recensioni",
+    translate: "Traduci",
+    showOriginal: "Originale",
+    translatedFromGoogle: "Tradotto",
+    leaveReview: "Lascia una recensione",
 
     // Features Section
     whyChooseUs: "Perché sceglierci",
@@ -7718,6 +7738,10 @@ const translations: Record<Language, Record<string, string>> = {
     // Customer Reviews Section
     customerReviewsTitle: "Lo que dicen nuestros clientes",
     seeAllReviews: "Ver todas las reseñas",
+    translate: "Traducir",
+    showOriginal: "Original",
+    translatedFromGoogle: "Traducido",
+    leaveReview: "Dejar una reseña",
 
     // Features Section
     whyChooseUs: "Por qué elegirnos",
@@ -9078,6 +9102,10 @@ const translations: Record<Language, Record<string, string>> = {
     // Customer Reviews Section
     customerReviewsTitle: "ماذا يقول عملاؤنا",
     seeAllReviews: "عرض جميع التقييمات",
+    translate: "ترجمة",
+    showOriginal: "الأصلي",
+    translatedFromGoogle: "مترجم",
+    leaveReview: "اترك تقييماً",
     
     // Features Section
     whyChooseUs: "لماذا تختارنا",
@@ -10357,6 +10385,10 @@ const translations: Record<Language, Record<string, string>> = {
     // Customer Reviews Section
     customerReviewsTitle: "Müşterilerimiz Ne Diyor",
     seeAllReviews: "Tüm Yorumları Gör",
+    translate: "Çevir",
+    showOriginal: "Orijinal",
+    translatedFromGoogle: "Çevrildi",
+    leaveReview: "Yorum Bırak",
     
     // Features Section
     whyChooseUs: "Neden Bizi Seçmelisiniz",
@@ -11845,6 +11877,10 @@ const translations: Record<Language, Record<string, string>> = {
     // Customer Reviews Section
     customerReviewsTitle: "Що кажуть наші клієнти",
     seeAllReviews: "Дивитись усі відгуки",
+    translate: "Перекласти",
+    showOriginal: "Оригінал",
+    translatedFromGoogle: "Перекладено",
+    leaveReview: "Залишити відгук",
     
     // Features Section
     whyChooseUs: "Чому обирають нас",
@@ -13099,6 +13135,10 @@ const translations: Record<Language, Record<string, string>> = {
     // Customer Reviews Section
     customerReviewsTitle: "お客様の声",
     seeAllReviews: "すべてのレビューを見る",
+    translate: "翻訳",
+    showOriginal: "原文",
+    translatedFromGoogle: "翻訳済み",
+    leaveReview: "レビューを書く",
     
     // Features Section
     whyChooseUs: "選ばれる理由",
