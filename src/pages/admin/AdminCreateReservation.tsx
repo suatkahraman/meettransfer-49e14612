@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+import { useCustomerNotification } from '@/hooks/useCustomerNotification';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -82,6 +83,7 @@ const AdminCreateReservation = () => {
   const { user } = useAuth();
   const { logAction } = useAuditLog();
   const { emailDriverAssigned } = useEmailNotifications();
+  const { notifyStatusChange } = useCustomerNotification();
   const [saving, setSaving] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -389,6 +391,20 @@ const AdminCreateReservation = () => {
                 send_push: true
               }
             });
+          }
+
+          // Notify customer that driver has been assigned
+          if (reservation.customer_id && reservation.reservation_code) {
+            try {
+              await notifyStatusChange({
+                customerId: reservation.customer_id,
+                reservationCode: reservation.reservation_code,
+                oldStatus: 'confirmed',
+                newStatus: 'driver_assigned',
+              });
+            } catch (customerErr) {
+              console.error('Failed to notify customer:', customerErr);
+            }
           }
         } catch (err) {
           console.error('Failed to notify driver:', err);

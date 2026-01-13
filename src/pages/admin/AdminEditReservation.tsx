@@ -640,6 +640,20 @@ const AdminEditReservation = () => {
           console.error('Failed to notify customer:', e);
         }
 
+        // Send push notification with localized message
+        if (reservationCode) {
+          try {
+            await notifyStatusChange({
+              customerId,
+              reservationCode,
+              oldStatus: formData.status,
+              newStatus: 'driver_assigned',
+            });
+          } catch (e) {
+            console.error('Failed to send customer push notification:', e);
+          }
+        }
+
         // Send confirmation email to customer
         try {
           await supabase.functions.invoke('send-confirmation-email', {
