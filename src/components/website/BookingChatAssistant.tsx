@@ -15,6 +15,7 @@ import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { VoiceSettingsPanel } from "./VoiceSettingsPanel";
+import { MicrophonePermissionAlert } from "./MicrophonePermissionAlert";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -2376,77 +2377,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     <div className="w-full">
       {/* Browser warning - Enhanced microphone permission message */}
       {showBrowserWarning && (
-        <Alert className="mb-2 border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-0.5">
-              <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                <Mic className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <AlertTitle className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-1">
-                {language === "TR" 
-                  ? "Mikrofon İzni Gerekli"
-                  : "Microphone Permission Required"
-                }
-              </AlertTitle>
-              <AlertDescription className="text-xs text-amber-700 dark:text-amber-300 space-y-2">
-                <p>
-                  {language === "TR" 
-                    ? "Sesli komut kullanabilmek için tarayıcınızda mikrofon iznini etkinleştirmeniz gerekiyor."
-                    : "To use voice commands, you need to enable microphone permission in your browser."
-                  }
-                </p>
-                <div className="flex flex-col gap-1.5 mt-2 p-2 bg-amber-100/50 dark:bg-amber-900/30 rounded-md">
-                  <p className="font-medium text-amber-800 dark:text-amber-200">
-                    {language === "TR" ? "📱 Nasıl izin verilir:" : "📱 How to enable:"}
-                  </p>
-                  <ul className="text-[11px] space-y-0.5 list-disc list-inside">
-                    {language === "TR" ? (
-                      <>
-                        <li>Tarayıcı adres çubuğundaki kilit/ayarlar simgesine tıklayın</li>
-                        <li>Mikrofon iznini "İzin Ver" olarak değiştirin</li>
-                        <li>Sayfayı yenileyin ve tekrar deneyin</li>
-                      </>
-                    ) : (
-                      <>
-                        <li>Click the lock/settings icon in the address bar</li>
-                        <li>Change microphone permission to "Allow"</li>
-                        <li>Refresh the page and try again</li>
-                      </>
-                    )}
-                  </ul>
-                </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => window.location.reload()}
-                    className="h-7 px-3 text-xs bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/50 dark:hover:bg-amber-900 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200"
-                  >
-                    {language === "TR" ? "Sayfayı Yenile" : "Refresh Page"}
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={dismissWarning}
-                    className="h-7 px-3 text-xs text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200"
-                  >
-                    {language === "TR" ? "Kapat" : "Dismiss"}
-                  </Button>
-                </div>
-              </AlertDescription>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={dismissWarning} 
-              className="h-6 w-6 p-0 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 flex-shrink-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </Alert>
+        <MicrophonePermissionAlert 
+          language={language} 
+          onDismiss={dismissWarning} 
+        />
       )}
 
       {/* Messages Area */}
