@@ -68,8 +68,8 @@ export const FloatingLabelSelect = React.forwardRef<
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className={cn(
-            "h-12 bg-muted/50 border-border rounded-xl text-sm transition-all duration-200",
-            "focus:ring-2 focus:ring-primary/20 focus:border-primary",
+            "h-12 bg-muted/50 border-border rounded-xl text-sm transition-all duration-200 touch-manipulation",
+            "focus:ring-2 focus:ring-primary/20 focus:border-primary active:bg-muted/80",
             isFocused && "border-primary shadow-sm shadow-primary/10",
             triggerClassName
           )}
