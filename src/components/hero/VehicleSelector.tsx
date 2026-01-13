@@ -46,13 +46,13 @@ export const VehicleSelector = memo(({
   const [isVehicleDetailOpen, setIsVehicleDetailOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Simple direct click handler - no complex touch detection
+  // Simple direct click handler
   const handleVehicleClick = useCallback((vehicle: typeof VEHICLE_TYPES[0], isDisabled: boolean) => {
     if (isDisabled) return;
     onSelectVehicle(vehicle.value);
   }, [onSelectVehicle]);
 
-  // Info button handler - stops propagation properly
+  // Info button handler
   const handleInfoClick = useCallback((e: React.MouseEvent, vehicle: typeof VEHICLE_TYPES[0]) => {
     e.stopPropagation();
     e.preventDefault();
@@ -62,7 +62,7 @@ export const VehicleSelector = memo(({
 
   return (
     <>
-      <div ref={containerRef} className="grid grid-cols-4 gap-1.5 sm:gap-2">
+      <div ref={containerRef} className="grid grid-cols-4 gap-2 sm:gap-3">
         {VEHICLE_TYPES.map((vehicle, index) => {
           const vehiclePrice = prices.find(v => v.vehicleType === vehicle.value);
           const isSelected = selectedVehicle === vehicle.value;
@@ -79,18 +79,19 @@ export const VehicleSelector = memo(({
                 onClick={() => handleVehicleClick(vehicle, isDisabled)}
                 disabled={isDisabled}
                 className={cn(
-                  "w-full rounded-lg border p-1 sm:p-1.5 text-center overflow-hidden",
-                  "transition-all duration-150 ease-out select-none",
+                  "w-full rounded-xl border-2 p-1.5 sm:p-2 text-center overflow-hidden",
+                  "transition-all duration-200 ease-out select-none",
                   "active:scale-[0.97] active:opacity-90",
+                  "shadow-sm hover:shadow-md",
                   isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
                   isSelected 
-                    ? "border-primary bg-primary/10 ring-1 ring-primary shadow-md" 
+                    ? "border-primary bg-primary/5 ring-2 ring-primary/30 shadow-primary/20" 
                     : "border-border bg-card hover:border-primary/50 active:border-primary"
                 )}
                 style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                {/* Vehicle Image */}
-                <div className="w-full aspect-[16/10] rounded-md overflow-hidden mb-1 bg-muted relative">
+                {/* Vehicle Image - Square aspect ratio */}
+                <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 sm:mb-2 bg-muted relative">
                   <img 
                     src={vehicleImages[vehicle.value]} 
                     alt={vehicle.label}
@@ -99,50 +100,50 @@ export const VehicleSelector = memo(({
                     draggable={false}
                   />
                   
-                  {/* Info Button - Only on desktop hover */}
+                  {/* Info Button */}
                   <div
                     role="button"
                     tabIndex={0}
                     onClick={(e) => handleInfoClick(e, vehicle)}
                     onKeyDown={(e) => e.key === 'Enter' && handleInfoClick(e as unknown as React.MouseEvent, vehicle)}
-                    className="absolute top-0.5 right-0.5 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white z-20 cursor-pointer"
+                    className="absolute top-1 right-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white z-20 cursor-pointer backdrop-blur-sm"
                   >
-                    <Info className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
+                    <Info className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   </div>
                   
                   {/* Selected Overlay */}
                   {isSelected && (
-                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10 pointer-events-none">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary flex items-center justify-center">
-                        <Check className="h-3 w-3 sm:h-4 sm:w-4 text-primary-foreground" />
+                    <div className="absolute inset-0 bg-primary/25 flex items-center justify-center z-10 pointer-events-none">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                        <Check className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-primary-foreground" />
                       </div>
                     </div>
                   )}
                 </div>
                 
                 {/* Vehicle Name */}
-                <div className="text-[10px] sm:text-xs font-semibold truncate mb-0.5 pointer-events-none">
+                <div className="text-xs sm:text-sm font-semibold truncate mb-0.5 pointer-events-none text-foreground">
                   {vehicle.label.split(' ').pop()}
                 </div>
                 
                 {/* Passenger Count */}
-                <div className="flex items-center justify-center gap-0.5 text-[8px] sm:text-[10px] text-muted-foreground pointer-events-none">
-                  <Users className="h-2 w-2 sm:h-3 sm:w-3" />
+                <div className="flex items-center justify-center gap-1 text-[10px] sm:text-xs text-muted-foreground pointer-events-none">
+                  <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   <span>{vehicle.passengers}</span>
                 </div>
                 
                 {/* Price */}
-                <div className="pointer-events-none">
+                <div className="pointer-events-none mt-1">
                   {vehiclePrice ? (
-                    <div className="text-[10px] sm:text-xs font-bold text-primary mt-0.5">
+                    <div className="text-xs sm:text-sm font-bold text-primary">
                       {currency === "EUR" ? "€" : currency}{vehiclePrice.price}
                     </div>
                   ) : loadingPrices && hasRoute ? (
-                    <div className="h-3 sm:h-4 flex items-center justify-center mt-0.5">
-                      <Skeleton className="h-2.5 sm:h-3 w-6 sm:w-8" />
+                    <div className="h-4 sm:h-5 flex items-center justify-center">
+                      <Skeleton className="h-3 sm:h-4 w-8 sm:w-10" />
                     </div>
                   ) : (
-                    <div className="h-3 sm:h-4" />
+                    <div className="h-4 sm:h-5" />
                   )}
                 </div>
               </button>
