@@ -976,40 +976,31 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     }
 
     const viewport = window.visualViewport;
-    if (!viewport) return;
-
     const isIOS = isIOSDevice();
-
-    // On iOS, visualViewport can change even without the keyboard (address bar / scroll).
-    // Track a "baseline" diff and only treat large deltas as the keyboard.
-    let minDiff = Number.POSITIVE_INFINITY;
+    
+    // Store initial window height for comparison
+    const initialWindowHeight = window.innerHeight;
     let prevKeyboardH = 0;
-
-    const calcDiff = () => {
-      const windowHeight = window.innerHeight;
-      const viewportHeight = viewport.height;
-      const offsetTop = isIOS ? viewport.offsetTop || 0 : 0;
-      return Math.max(0, windowHeight - viewportHeight - offsetTop);
-    };
+    let focusedInput: HTMLInputElement | null = null;
 
     const handleViewportChange = () => {
-      const diff = calcDiff();
-      minDiff = Math.min(minDiff, diff);
+      if (!viewport) return;
+      
+      const viewportHeight = viewport.height;
+      const heightDiff = Math.max(0, initialWindowHeight - viewportHeight);
+      
+      // Only consider it a keyboard if the height difference is significant (> 150px)
+      const keyboardH = heightDiff > 150 ? heightDiff : 0;
 
-      const rawKeyboardH = Math.max(0, diff - minDiff);
-      // Ignore small deltas that are usually Safari chrome changes, not the keyboard
-      const keyboardH = rawKeyboardH > 120 ? rawKeyboardH : 0;
-
-      const inputEl = inputRef.current;
-      const isInputFocused = !!inputEl && document.activeElement === inputEl;
-
-      // Keyboard closing: blur only if our input is still focused (avoid false positives)
-      if (prevKeyboardH > 0 && keyboardH === 0 && isInputFocused) {
-        inputEl?.blur();
+      // On keyboard close, don't blur immediately - let user interact
+      if (prevKeyboardH > 0 && keyboardH === 0) {
+        // Keyboard closed
+        focusedInput = null;
       }
 
-      // iOS: when keyboard opens, keep the latest message + input visible
+      // iOS: when keyboard opens, scroll to input
       if (isIOS && prevKeyboardH === 0 && keyboardH > 0) {
+        focusedInput = inputRef.current;
         requestAnimationFrame(() => {
           scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
         });
@@ -1019,14 +1010,43 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       setKeyboardHeight(keyboardH);
     };
 
-    viewport.addEventListener("resize", handleViewportChange);
-    viewport.addEventListener("scroll", handleViewportChange);
+    // Focus/blur event handlers for more reliable keyboard detection
+    const handleFocusIn = (e: FocusEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        focusedInput = e.target as HTMLInputElement;
+        // Give keyboard time to appear before measuring
+        setTimeout(() => {
+          handleViewportChange();
+        }, 300);
+      }
+    };
+
+    const handleFocusOut = () => {
+      // Small delay to allow for switching between inputs
+      setTimeout(() => {
+        if (document.activeElement?.tagName !== 'INPUT' && 
+            document.activeElement?.tagName !== 'TEXTAREA') {
+          focusedInput = null;
+          setKeyboardHeight(0);
+        }
+      }, 100);
+    };
+
+    if (viewport) {
+      viewport.addEventListener("resize", handleViewportChange);
+    }
+    
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusout", handleFocusOut);
 
     handleViewportChange();
 
     return () => {
-      viewport.removeEventListener("resize", handleViewportChange);
-      viewport.removeEventListener("scroll", handleViewportChange);
+      if (viewport) {
+        viewport.removeEventListener("resize", handleViewportChange);
+      }
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusout", handleFocusOut);
     };
   }, [mobileFloating, isOpen, isIOSDevice]);
 
@@ -1417,7 +1437,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   if (mobileFloating) {
     return (
       <>
-        {/* Mobile Floating Toggle Button - Positioned above WhatsApp button */}
+        {/* Mobile Floating Toggle Button - More prominent with animation */}
         <AnimatePresence>
           {!isOpen && (
             <motion.button
@@ -1427,13 +1447,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsOpen(true)}
               data-chat-trigger
-              className="fixed bottom-[72px] right-3 z-[9999] flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-full shadow-lg touch-manipulation"
+              className="fixed bottom-[76px] right-3 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
               style={{ 
-                WebkitTapHighlightColor: 'transparent'
+                WebkitTapHighlightColor: 'transparent',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(var(--primary), 0.2)'
               }}
             >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span className="font-semibold text-xs">AI</span>
+              <motion.div
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Sparkles className="h-4 w-4" />
+              </motion.div>
+              <span className="font-bold text-sm">AI</span>
+              <motion.span
+                className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
             </motion.button>
           )}
         </AnimatePresence>
@@ -1725,28 +1756,27 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       ref={inputRef}
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      onFocus={() => {
-                        const isIOS = isIOSDevice();
-                        if (isIOS) {
-                          window.setTimeout(() => {
-                            scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-                            inputRef.current?.scrollIntoView({
-                              behavior: "smooth",
-                              block: "end",
-                              inline: "nearest",
-                            });
-                          }, 60);
-                        } else {
-                          window.setTimeout(() => {
-                            inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-                          }, 200);
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
                         }
+                      }}
+                      onFocus={() => {
+                        // Delay scroll to allow keyboard to appear
+                        setTimeout(() => {
+                          scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+                        }, 350);
                       }}
                       placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
                       disabled={isLoading || isRecording}
-                      className="h-9 rounded-lg text-xs flex-1 touch-manipulation"
+                      className="h-10 rounded-lg text-sm flex-1 touch-manipulation"
                       style={{ fontSize: '16px' }}
+                      autoComplete="off"
+                      autoCorrect="on"
+                      autoCapitalize="sentences"
+                      enterKeyHint="send"
+                      inputMode="text"
                     />
                     <Button
                       onClick={sendMessage}
