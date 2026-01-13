@@ -1617,5 +1617,250 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     );
   }
 
-  return null;
+  // Desktop mode - inline chat interface
+  return (
+    <div className="w-full">
+      {/* Browser warning */}
+      {showBrowserWarning && (
+        <Alert variant="destructive" className="mb-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-xs">
+              {language === "TR" 
+                ? "Ses tanıma için mikrofon izni gerekli"
+                : "Microphone permission required for voice"
+              }
+            </span>
+            <Button variant="ghost" size="sm" onClick={dismissWarning} className="h-6 px-2">
+              <X className="h-3 w-3" />
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Messages Area */}
+      <ScrollArea className="h-[180px] rounded-lg bg-background/50 border border-border mb-2">
+        <div className="p-3 space-y-2">
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={cn(
+                "flex gap-2",
+                msg.role === "user" ? "justify-end" : "justify-start"
+              )}
+            >
+              {msg.role === "assistant" && (
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Bot className="h-3 w-3 text-primary" />
+                </div>
+              )}
+              <div
+                className={cn(
+                  "max-w-[85%] rounded-xl px-3 py-2 text-sm",
+                  msg.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                )}
+              >
+                {msg.role === "assistant" ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                    {cleanResponseForDisplay(msg.content)}
+                  </ReactMarkdown>
+                ) : (
+                  msg.content
+                )}
+                
+                {/* Booking Card */}
+                {msg.bookingData && msg.bookingData.estimatedPrice && (
+                  <div className="mt-2 p-2 bg-background rounded-lg border border-border">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        {language === "TR" ? "Fiyat" : "Price"}
+                      </span>
+                      <span className="font-bold text-primary">
+                        {msg.bookingData.currency === "TRY" ? "₺" : "€"}
+                        {msg.bookingData.estimatedPrice}
+                      </span>
+                    </div>
+                    {onApplyBooking && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleApplyBooking(msg.bookingData!)}
+                        className="w-full mt-2 h-7 text-xs"
+                      >
+                        {language === "TR" ? "Forma Uygula" : "Apply to Form"}
+                        <ArrowRight className="h-3 w-3 ml-1" />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+              {msg.role === "user" && (
+                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
+                  <User className="h-3 w-3 text-primary-foreground" />
+                </div>
+              )}
+            </div>
+          ))}
+          
+          {/* Streaming content */}
+          {isTyping && streamingContent && (
+            <div className="flex gap-2 justify-start">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <Bot className="h-3 w-3 text-primary" />
+              </div>
+              <div className="max-w-[85%] rounded-xl px-3 py-2 text-sm bg-muted">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                  {streamingContent}
+                </ReactMarkdown>
+              </div>
+            </div>
+          )}
+          
+          {/* Typing indicator */}
+          {isTyping && !streamingContent && (
+            <div className="flex gap-2 justify-start">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Bot className="h-3 w-3 text-primary" />
+              </div>
+              <div className="bg-muted rounded-xl px-3 py-2">
+                <div className="flex gap-1">
+                  <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0 }} className="w-1.5 h-1.5 bg-muted-foreground rounded-full" />
+                  <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }} className="w-1.5 h-1.5 bg-muted-foreground rounded-full" />
+                  <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }} className="w-1.5 h-1.5 bg-muted-foreground rounded-full" />
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div ref={scrollRef} />
+        </div>
+      </ScrollArea>
+
+      {/* Desktop Recording indicator with waveform */}
+      {(isRecording || isProcessing) && (
+        <div className="flex flex-col items-center gap-2 mb-2 py-2 bg-muted/50 rounded-lg">
+          {/* Audio waveform visualizer */}
+          {isRecording && !isProcessing && (
+            <div className="flex items-center justify-center gap-[3px] h-6">
+              {[...Array(16)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="w-1 bg-destructive rounded-full"
+                  animate={{
+                    height: [6, 16 + Math.random() * 10, 6],
+                  }}
+                  transition={{
+                    duration: 0.4 + Math.random() * 0.3,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    delay: i * 0.04,
+                    ease: "easeInOut",
+                  }}
+                />
+              ))}
+            </div>
+          )}
+          
+          {/* Processing spinner */}
+          {isProcessing && (
+            <div className="flex items-center justify-center h-6">
+              <motion.div
+                className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+            </div>
+          )}
+          
+          {/* Status text with badges */}
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <motion.div
+              animate={{ scale: [1, 1.3, 1] }}
+              transition={{ repeat: Infinity, duration: 0.8 }}
+              className={cn(
+                "w-2 h-2 rounded-full",
+                isProcessing ? "bg-primary" : "bg-destructive"
+              )}
+            />
+            <span className={isProcessing ? "text-primary" : "text-destructive"}>
+              {isProcessing 
+                ? (language === "TR" ? "İşleniyor..." : "Processing...")
+                : (language === "TR" ? "Dinleniyor..." : "Listening...")
+              }
+            </span>
+            {useWhisperFallback && (
+              <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] font-semibold rounded-full flex items-center gap-1">
+                <Sparkles className="h-2.5 w-2.5" />
+                AI
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Input Area */}
+      <div className="flex gap-2">
+        {/* Voice recording button */}
+        {isSpeechSupported && (
+          <Button
+            onClick={isRecording ? stopRecording : startRecording}
+            disabled={isLoading || isProcessing}
+            size="icon"
+            variant="outline"
+            className={cn(
+              "h-10 w-10 rounded-lg shrink-0",
+              isRecording && "bg-destructive/10 border-destructive text-destructive"
+            )}
+          >
+            {isProcessing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : isRecording ? (
+              <Square className="h-4 w-4 fill-current" />
+            ) : (
+              <Mic className="h-4 w-4" />
+            )}
+          </Button>
+        )}
+        
+        <Input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={language === "TR" ? "Mesajınızı yazın..." : "Type your message..."}
+          disabled={isLoading || isRecording}
+          className="h-10 rounded-lg text-sm flex-1"
+        />
+        
+        <Button
+          onClick={sendMessage}
+          disabled={isLoading || !input.trim()}
+          size="icon"
+          data-chat-submit
+          className="h-10 w-10 rounded-lg shrink-0"
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+        </Button>
+        
+        {/* Voice output toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleVoice}
+          className="h-10 w-10 rounded-lg shrink-0"
+        >
+          {isVoiceEnabled ? (
+            <Volume2 className="h-4 w-4 text-primary" />
+          ) : (
+            <VolumeX className="h-4 w-4 text-muted-foreground" />
+          )}
+        </Button>
+      </div>
+    </div>
+  );
 }
