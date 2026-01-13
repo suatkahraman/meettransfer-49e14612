@@ -9,16 +9,49 @@ import { registerSW } from "virtual:pwa-register";
  * Registers the PWA service worker (vite-plugin-pwa, registerType=prompt)
  * and shows a glassmorphism in-app prompt when a new version is available.
  */
+// Check if we're in a preview/development environment - skip updates there
+const isPreviewEnvironment = () => {
+  if (typeof window === "undefined") return true;
+  const hostname = window.location.hostname;
+  return (
+    hostname === "localhost" ||
+    hostname.includes("preview") ||
+    hostname.includes("lovableproject.com") ||
+    hostname.includes("webcontainer")
+  );
+};
+
+// Session storage key to prevent showing prompt multiple times for same version
+const PWA_UPDATE_SHOWN_KEY = "pwa_update_prompt_shown";
+
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
   const [showPrompt, setShowPrompt] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const promptShownRef = useRef(false);
 
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const updateSWRef = useRef<((reloadPage?: boolean) => Promise<void>) | null>(null);
 
   useEffect(() => {
+    // Skip in preview/development environments
+    if (isPreviewEnvironment()) {
+      console.log("[PWA Update] Skipping in preview environment");
+      return;
+    }
+    
     if (!("serviceWorker" in navigator)) return;
+
+    // Check if we already showed prompt this session
+    const alreadyShown = sessionStorage.getItem(PWA_UPDATE_SHOWN_KEY) === "true";
+
+    const showUpdatePrompt = () => {
+      // Prevent duplicate prompts
+      if (promptShownRef.current || alreadyShown) return;
+      promptShownRef.current = true;
+      sessionStorage.setItem(PWA_UPDATE_SHOWN_KEY, "true");
+      setShowPrompt(true);
+    };
 
     // Register SW once.
     updateSWRef.current = registerSW({
@@ -27,23 +60,27 @@ export function PWAUpdatePrompt() {
         registrationRef.current = registration ?? null;
 
         // If there's already a waiting worker (e.g. user kept an old tab open), show immediately.
-        if (registration?.waiting) setShowPrompt(true);
+        if (registration?.waiting) showUpdatePrompt();
 
         const requestUpdateCheck = async () => {
           try {
             await registration?.update();
-            if (registration?.waiting) setShowPrompt(true);
+            if (registration?.waiting) showUpdatePrompt();
           } catch {
             // ignore
           }
         };
 
-        // Aggressive update checks
-        requestUpdateCheck();
-        const interval = window.setInterval(requestUpdateCheck, 30_000);
+        // Less aggressive update checks - every 5 minutes instead of 30 seconds
+        const interval = window.setInterval(requestUpdateCheck, 5 * 60 * 1000);
 
+        // Debounced visibility check
+        let visibilityTimeout: ReturnType<typeof setTimeout>;
         const onVisible = () => {
-          if (document.visibilityState === "visible") requestUpdateCheck();
+          if (document.visibilityState === "visible") {
+            clearTimeout(visibilityTimeout);
+            visibilityTimeout = setTimeout(requestUpdateCheck, 2000);
+          }
         };
 
         window.addEventListener("focus", requestUpdateCheck);
@@ -52,13 +89,14 @@ export function PWAUpdatePrompt() {
 
         return () => {
           window.clearInterval(interval);
+          clearTimeout(visibilityTimeout);
           window.removeEventListener("focus", requestUpdateCheck);
           window.removeEventListener("online", requestUpdateCheck);
           document.removeEventListener("visibilitychange", onVisible);
         };
       },
       onNeedRefresh: () => {
-        setShowPrompt(true);
+        showUpdatePrompt();
       },
       onRegisterError: (error) => {
         console.log("[PWA Update] SW register error:", error);
@@ -67,7 +105,7 @@ export function PWAUpdatePrompt() {
 
     // Fallback: if the browser already has a waiting worker but callbacks didn't fire yet.
     navigator.serviceWorker.getRegistration().then((reg) => {
-      if (reg?.waiting) setShowPrompt(true);
+      if (reg?.waiting) showUpdatePrompt();
     });
 
     // Fallback reload when the new SW takes control.
