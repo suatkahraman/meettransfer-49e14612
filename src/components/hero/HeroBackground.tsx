@@ -1,13 +1,11 @@
 import { memo } from "react";
-import { motion, MotionValue, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CityVideo } from "./types";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 
 interface HeroBackgroundProps {
-  y: MotionValue<number>;
-  opacity: MotionValue<number>;
   videosLoaded: boolean;
   cityVideos: CityVideo[];
   currentVideoIndex: number;
@@ -16,8 +14,6 @@ interface HeroBackgroundProps {
 }
 
 export const HeroBackground = memo(({
-  y,
-  opacity,
   videosLoaded,
   cityVideos,
   currentVideoIndex,
@@ -25,10 +21,7 @@ export const HeroBackground = memo(({
   language
 }: HeroBackgroundProps) => {
   return (
-    <motion.div 
-      style={{ y, opacity }}
-      className="absolute inset-0 z-0"
-    >
+    <div className="absolute inset-0 z-0">
       {/* Video Background - Desktop */}
       <div className="absolute inset-0 hidden md:block">
         {videosLoaded && cityVideos.length > 0 ? (
@@ -111,7 +104,7 @@ export const HeroBackground = memo(({
       
       {/* Pattern Overlay */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
-    </motion.div>
+    </div>
   );
 });
 

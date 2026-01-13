@@ -1,5 +1,4 @@
 import { memo } from "react";
-import { motion } from "framer-motion";
 import { Shield, Zap, Star, Check } from "lucide-react";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 
@@ -24,32 +23,19 @@ interface HeroHeaderProps {
 
 export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   return (
-    <motion.div 
-      className="mb-4 md:mb-5"
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="mb-4 md:mb-5">
       {/* Logo + Title Row */}
       <div className="flex items-start gap-2 md:gap-3 mb-3 md:mb-4">
-        <motion.img 
+        <img 
           src={meetTransferLogo} 
           alt="Meet Transfer" 
           width={48}
           height={48}
           loading="eager"
           className="h-10 w-10 md:h-14 md:w-14 rounded-lg md:rounded-xl object-cover shadow-xl ring-2 ring-primary/30"
-          initial={{ scale: 0.8, rotate: -5 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
         />
         <div className="flex-1">
-          <motion.h1 
-            className="text-lg md:text-2xl lg:text-3xl font-bold text-foreground leading-tight mb-0.5 md:mb-1"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-foreground leading-tight mb-0.5 md:mb-1">
             {language === 'TR' ? (
               <>
                 <span className="text-primary">Lüks VIP</span> Transfer
@@ -59,13 +45,8 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
                 <span className="text-primary">Premium VIP</span> Transfer
               </>
             )}
-          </motion.h1>
-          <motion.p 
-            className="text-xs md:text-sm text-muted-foreground flex items-center gap-1.5 flex-wrap"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
+          </h1>
+          <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1.5 flex-wrap">
             <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[10px] font-medium">
               <Shield className="h-3 w-3" />
               {language === 'TR' ? 'Güvenli' : 'Safe'}
@@ -78,17 +59,12 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
               <Star className="h-3 w-3 fill-current" />
               4.9
             </span>
-          </motion.p>
+          </p>
         </div>
       </div>
       
       {/* Trust Badges Row - Horizontal scroll on mobile */}
-      <motion.div 
-        className="flex items-center gap-2 md:gap-2 mb-2 md:mb-3 overflow-x-auto scrollbar-none pb-1"
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
+      <div className="flex items-center gap-2 md:gap-2 mb-2 md:mb-3 overflow-x-auto scrollbar-none pb-1">
         <div className="flex items-center gap-1 md:gap-1.5 text-[9px] md:text-[10px] text-muted-foreground whitespace-nowrap">
           <Check className="h-3 w-3 text-green-500" />
           <span>{language === 'TR' ? 'Sabit Fiyat' : 'Fixed Price'}</span>
@@ -103,17 +79,13 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
           <Check className="h-3 w-3 text-green-500" />
           <span>{language === 'TR' ? 'Pro Şoför' : 'Pro Chauffeur'}</span>
         </div>
-      </motion.div>
+      </div>
       
       {/* Vehicle Fleet Showcase - Hidden on small mobile */}
       <div className="hidden xs:flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {VEHICLE_TYPES.slice(0, 4).map((vehicle, index) => (
-          <motion.div
+        {VEHICLE_TYPES.slice(0, 4).map((vehicle) => (
+          <div
             key={vehicle.value}
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay: 0.1 * index + 0.5, duration: 0.3, type: "spring" }}
-            whileHover={{ scale: 1.05, y: -2 }}
             className="flex-shrink-0"
           >
             <div className="flex items-center gap-1.5 bg-card/80 backdrop-blur-sm rounded-full pl-1 pr-2.5 py-1 border border-border/50 hover:border-primary/50 hover:shadow-md transition-all cursor-default">
@@ -129,10 +101,10 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
                 {vehicle.label.split(' ').pop()}
               </span>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 });
 
