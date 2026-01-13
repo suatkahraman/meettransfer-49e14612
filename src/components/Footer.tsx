@@ -1,4 +1,4 @@
-import { Mail, Phone, Facebook, Instagram, Twitter, Youtube, Star } from "lucide-react";
+import { Mail, Phone, Clock, Facebook, Instagram, Twitter, Youtube, Star } from "lucide-react";
 import { PrefetchLink } from "@/components/ui/prefetch-link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, SUPPORT_EMAIL } from "@/lib/contact";
@@ -125,6 +125,10 @@ export const Footer = () => {
                 <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-primary-foreground transition-colors">
                   {SUPPORT_EMAIL}
                 </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Clock className="h-4 w-4 flex-shrink-0" />
+                <span className="text-primary-foreground font-medium">24/7 {t('footerAvailable')}</span>
               </li>
             </ul>
           </div>
