@@ -119,7 +119,10 @@ export const Footer = () => {
               {GLOBAL_OFFICES[0] && (
                 <li className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                  <span>{GLOBAL_OFFICES[0].address}</span>
+                  <div className="flex flex-col">
+                    <span>{GLOBAL_OFFICES[0].address}</span>
+                    <span>{GLOBAL_OFFICES[0].city}, {GLOBAL_OFFICES[0].country}</span>
+                  </div>
                 </li>
               )}
               <li className="flex items-center gap-2">
