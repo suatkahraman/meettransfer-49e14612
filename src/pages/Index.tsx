@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Hero } from "@/components/Hero";
+import { HeroErrorBoundary, HeroSkeleton } from "@/components/hero";
 // BookingForm removed - form is now inside Hero component
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -51,8 +52,12 @@ const Index = () => {
           { type: 'MerchantProduct' },
         ]}
       />
-      {/* Critical above-the-fold content - loaded immediately */}
-      <Hero />
+      {/* Critical above-the-fold content - wrapped with error boundary */}
+      <HeroErrorBoundary>
+        <Suspense fallback={<HeroSkeleton />}>
+          <Hero />
+        </Suspense>
+      </HeroErrorBoundary>
       <TrustBar />
       
       {/* Below-the-fold content - lazy loaded for better TTFB */}

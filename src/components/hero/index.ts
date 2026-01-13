@@ -9,3 +9,5 @@ export * from "./HeroVisualSection";
 export * from "./HeroTrustBadges";
 export * from "./RideFormContent";
 export * from "./HourlyFormContent";
+export { HeroSkeleton } from "./HeroSkeleton";
+export { default as HeroErrorBoundary } from "./HeroErrorBoundary";
