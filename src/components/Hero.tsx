@@ -25,6 +25,8 @@ import {
   HeroTrustBadges,
   CityVideo,
   BookingData,
+  RideFormContent,
+  HourlyFormContent,
 } from "@/components/hero";
 import { SwipeableBookingCard } from "@/components/hero/SwipeableBookingCard";
 
@@ -417,39 +419,53 @@ export const Hero = () => {
               <div className="p-2.5 sm:p-3 md:p-4 lg:p-5">
                 <AnimatePresence mode="wait">
                   {activeTab === "ride" ? (
-                    <div key="ride-form" className="space-y-2 md:space-y-3">
-                      <LocationInputs pickup={pickup} dropoff={dropoff} onPickupSelected={handlePickupSelected} onDropoffSelected={handleDropoffSelected} onSwapLocations={handleSwapLocations} language={language} />
-                      <div className="grid grid-cols-3 gap-1.5 md:gap-2">
-                        <FloatingLabelDatePicker label={t("date") || "Date"} date={date} onSelect={setDate} icon={<CalendarIcon className="h-3.5 w-3.5 md:h-4 md:w-4" />} disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} className="col-span-1" />
-                        <FloatingLabelSelect label={t("time") || "Time"} value={time} onValueChange={setTime} options={timeOptions.map(opt => ({ value: opt, label: opt }))} icon={<Clock className="h-3.5 w-3.5 md:h-4 md:w-4" />} className="col-span-1" />
-                        <FloatingLabelSelect label={t("passengers") || "Pax"} value={passengers} onValueChange={setPassengers} options={Array.from({ length: 18 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1}` }))} icon={<Users className="h-3.5 w-3.5 md:h-4 md:w-4" />} className="col-span-1" />
-                      </div>
-                      <VehicleSelector selectedVehicle={vehicleType} onSelectVehicle={setVehicleType} passengers={passengers} prices={allVehiclePrices} loadingPrices={loadingTransferPrice} hasRoute={!!(pickup && dropoff)} language={language} currency={transferPriceCurrency} />
-                      <div>
-                        <Button onClick={handleRideContinue} disabled={submitting} className="w-full h-10 md:h-12 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-lg md:rounded-xl text-sm md:text-base group">
-                          {submitting ? <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <><Zap className="mr-1 h-3.5 w-3.5 md:h-4 md:w-4" />{language === 'TR' ? 'Fiyat Al' : 'Get Quote'}<ArrowRight className="ml-1.5 md:ml-2 h-4 w-4 md:h-5 md:w-5 group-hover:translate-x-1 transition-transform" /></>}
-                        </Button>
-                      </div>
-                    </div>
+                    <RideFormContent
+                      pickup={pickup}
+                      dropoff={dropoff}
+                      date={date}
+                      time={time}
+                      passengers={passengers}
+                      vehicleType={vehicleType}
+                      allVehiclePrices={allVehiclePrices}
+                      loadingTransferPrice={loadingTransferPrice}
+                      transferPriceCurrency={transferPriceCurrency}
+                      submitting={submitting}
+                      language={language}
+                      t={t}
+                      onPickupSelected={handlePickupSelected}
+                      onDropoffSelected={handleDropoffSelected}
+                      onSwapLocations={handleSwapLocations}
+                      setDate={setDate}
+                      setTime={setTime}
+                      setPassengers={setPassengers}
+                      setVehicleType={setVehicleType}
+                      handleRideContinue={handleRideContinue}
+                    />
                   ) : (
-                    <div key="hourly-form" className="space-y-2 md:space-y-3">
-                      <div className="grid grid-cols-2 gap-1.5 md:gap-2">
-                        <FloatingLabelSelect label={t("city") || "City"} value={hourlyCity} onValueChange={setHourlyCity} options={availableCities.map(city => ({ value: city, label: city }))} icon={<MapPin className="h-3.5 w-3.5 md:h-4 md:w-4" />} className="col-span-1" />
-                        <FloatingLabelSelect label={t("duration") || "Duration"} value={hourlyDuration} onValueChange={setHourlyDuration} options={availableDurations.map(d => { const opt = hourlyDurationOptions.find(o => o.value === d); return { value: d, label: opt ? (t(opt.labelKey) || opt.defaultLabel) : `${d}h` }; })} icon={<Timer className="h-3.5 w-3.5 md:h-4 md:w-4" />} disabled={!hourlyCity} className="col-span-1" />
-                      </div>
-                      {hourlyDuration === "custom" && <FloatingLabelSelect label={t("customHours") || "Custom Hours"} value={customHours} onValueChange={setCustomHours} options={Array.from({ length: 16 }, (_, i) => ({ value: (i + 9).toString(), label: `${i + 9} ${t("hours") || "hours"}` }))} icon={<Timer className="h-3.5 w-3.5 md:h-4 md:w-4" />} />}
-                      <div className="grid grid-cols-3 gap-1.5 md:gap-2">
-                        <FloatingLabelDatePicker label={t("date") || "Date"} date={hourlyDate} onSelect={setHourlyDate} icon={<CalendarIcon className="h-3.5 w-3.5 md:h-4 md:w-4" />} disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} className="col-span-1" />
-                        <FloatingLabelSelect label={t("time") || "Time"} value={hourlyTime} onValueChange={setHourlyTime} options={timeOptions.map(opt => ({ value: opt, label: opt }))} icon={<Clock className="h-3.5 w-3.5 md:h-4 md:w-4" />} className="col-span-1" />
-                        <FloatingLabelSelect label={t("passengers") || "Pax"} value={hourlyPassengers} onValueChange={setHourlyPassengers} options={Array.from({ length: 12 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1}` }))} icon={<Users className="h-3.5 w-3.5 md:h-4 md:w-4" />} className="col-span-1" />
-                      </div>
-                      <VehicleSelector selectedVehicle={hourlyVehicleType} onSelectVehicle={setHourlyVehicleType} passengers={hourlyPassengers} prices={allHourlyPrices} loadingPrices={loadingPrice} hasRoute={!!(hourlyCity && hourlyDuration)} language={language} currency={allHourlyPrices[0]?.currency || "EUR"} />
-                      <div>
-                        <Button onClick={handleHourlyContinue} disabled={submitting} className="w-full h-10 md:h-12 font-semibold bg-primary hover:bg-primary/90 shadow-lg rounded-lg md:rounded-xl text-sm md:text-base group">
-                          {submitting ? <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <><Zap className="mr-1 h-3.5 w-3.5 md:h-4 md:w-4" />{language === 'TR' ? 'Fiyat Al' : 'Get Quote'}<ArrowRight className="ml-1.5 md:ml-2 h-4 w-4 md:h-5 md:w-5 group-hover:translate-x-1 transition-transform" /></>}
-                        </Button>
-                      </div>
-                    </div>
+                    <HourlyFormContent
+                      hourlyCity={hourlyCity}
+                      hourlyDuration={hourlyDuration}
+                      customHours={customHours}
+                      hourlyDate={hourlyDate}
+                      hourlyTime={hourlyTime}
+                      hourlyPassengers={hourlyPassengers}
+                      hourlyVehicleType={hourlyVehicleType}
+                      allHourlyPrices={allHourlyPrices}
+                      loadingPrice={loadingPrice}
+                      submitting={submitting}
+                      availableCities={availableCities}
+                      availableDurations={availableDurations}
+                      language={language}
+                      t={t}
+                      setHourlyCity={setHourlyCity}
+                      setHourlyDuration={setHourlyDuration}
+                      setCustomHours={setCustomHours}
+                      setHourlyDate={setHourlyDate}
+                      setHourlyTime={setHourlyTime}
+                      setHourlyPassengers={setHourlyPassengers}
+                      setHourlyVehicleType={setHourlyVehicleType}
+                      handleHourlyContinue={handleHourlyContinue}
+                    />
                   )}
                 </AnimatePresence>
               </div>
