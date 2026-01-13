@@ -172,9 +172,9 @@ export const HourlyFormContent = memo(({
   }, [errors.time, setHourlyTime]);
 
   return (
-    <div key="hourly-form" className="space-y-2 md:space-y-3">
+    <div key="hourly-form" className="space-y-3 md:space-y-3">
       {/* City & Duration - larger touch targets on mobile */}
-      <div className="grid grid-cols-2 gap-2 md:gap-2">
+      <div className="grid grid-cols-2 gap-2.5 md:gap-2">
         <div className={cn(shakeFields.city && "animate-shake")}>
           <FloatingLabelSelect 
             label={t("city") || "City"} 
@@ -214,7 +214,7 @@ export const HourlyFormContent = memo(({
       )}
 
       {/* Date/Time/Passengers - larger touch targets on mobile */}
-      <div className="grid grid-cols-3 gap-2 md:gap-2">
+      <div className="grid grid-cols-3 gap-2.5 md:gap-2">
         <div className={cn(shakeFields.date && "animate-shake")}>
           <FloatingLabelDatePicker 
             label={t("date") || "Date"} 
@@ -255,7 +255,7 @@ export const HourlyFormContent = memo(({
       </div>
 
       {/* Vehicle Selection - Always visible */}
-      <div className="space-y-2">
+      <div className="space-y-2 mt-1">
         <VehicleSelector 
           selectedVehicle={hourlyVehicleType} 
           onSelectVehicle={setHourlyVehicleType}

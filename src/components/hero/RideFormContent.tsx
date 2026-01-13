@@ -157,7 +157,7 @@ export const RideFormContent = memo(({
   }, [errors.time, setTime]);
 
   return (
-    <div key="ride-form" className="space-y-2 md:space-y-3">
+    <div key="ride-form" className="space-y-3 md:space-y-3">
       {/* Location Inputs - Always visible */}
       <div className={cn(
         (shakeFields.pickup || shakeFields.dropoff) && "animate-shake"
@@ -175,7 +175,7 @@ export const RideFormContent = memo(({
       </div>
       
       {/* Date/Time/Passengers - Always visible, larger touch targets on mobile */}
-      <div className="grid grid-cols-3 gap-2 md:gap-2">
+      <div className="grid grid-cols-3 gap-2.5 md:gap-2">
         <div className={cn(shakeFields.date && "animate-shake")}>
           <FloatingLabelDatePicker 
             label={t("date") || "Date"} 
@@ -216,7 +216,7 @@ export const RideFormContent = memo(({
       </div>
 
       {/* Vehicle Selection - Always visible */}
-      <div className="space-y-2">
+      <div className="space-y-2 mt-1">
         <VehicleSelector 
           selectedVehicle={vehicleType} 
           onSelectVehicle={setVehicleType}

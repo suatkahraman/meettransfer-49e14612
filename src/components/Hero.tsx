@@ -413,18 +413,18 @@ export const Hero = () => {
                   className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300"
                   style={{ left: activeTab === "ride" ? "0%" : "50%", width: "50%" }}
                 />
-                <button onClick={() => setActiveTab("ride")} className={cn("flex-1 flex items-center justify-center gap-1 md:gap-1.5 py-2.5 md:py-3 px-3 md:px-4 font-medium transition-all text-xs md:text-sm relative", activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
-                  <Car className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                <button onClick={() => setActiveTab("ride")} className={cn("flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative", activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                  <Car className="h-4 w-4 md:h-4 md:w-4" />
                   <span>{t("pointToPoint") || "Transfer"}</span>
                 </button>
-                <button onClick={() => setActiveTab("hourly")} className={cn("flex-1 flex items-center justify-center gap-1 md:gap-1.5 py-2.5 md:py-3 px-3 md:px-4 font-medium transition-all text-xs md:text-sm", activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
-                  <Timer className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                <button onClick={() => setActiveTab("hourly")} className={cn("flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm", activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                  <Timer className="h-4 w-4 md:h-4 md:w-4" />
                   <span>{t("perHour") || "Hourly"}</span>
                 </button>
               </div>
 
               {/* Form Content */}
-              <div className="p-2.5 sm:p-3 md:p-4 lg:p-5">
+              <div className="p-4 sm:p-4 md:p-5 lg:p-5">
                 <AnimatePresence mode="wait">
                   {activeTab === "ride" ? (
                     <RideFormContent
