@@ -1,5 +1,4 @@
-import { memo, lazy, Suspense, useState, useCallback, useEffect } from "react";
-import { motion } from "framer-motion";
+import { memo, lazy, Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { Users, Check, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
@@ -24,12 +23,14 @@ const vehicleImages: Record<string, string> = {
   'minibus': sprinterImg,
 };
 
-// Hook to detect touch device
+// Hook to detect touch device - with passive event check
 const useIsTouchDevice = () => {
   const [isTouch, setIsTouch] = useState(false);
   
   useEffect(() => {
-    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    // Check on mount without causing reflow
+    const checkTouch = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    setIsTouch(checkTouch());
   }, []);
   
   return isTouch;
@@ -61,20 +62,22 @@ export const VehicleSelector = memo(({
   const [selectedVehicleForDetail, setSelectedVehicleForDetail] = useState<typeof VEHICLE_TYPES[0] | null>(null);
   const [isVehicleDetailOpen, setIsVehicleDetailOpen] = useState(false);
   const isTouchDevice = useIsTouchDevice();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close tooltip when clicking outside
+  // Use passive event listeners for touch/mouse events
   useEffect(() => {
-    if (!tappedVehicle) return;
+    if (!tappedVehicle || !containerRef.current) return;
     
-    const handleClickOutside = (e: TouchEvent | MouseEvent) => {
+    const handleClickOutside = (e: Event) => {
       const target = e.target as HTMLElement;
       if (!target.closest('[data-vehicle-card]')) {
         setTappedVehicle(null);
       }
     };
     
-    document.addEventListener('touchstart', handleClickOutside);
-    document.addEventListener('mousedown', handleClickOutside);
+    // Add passive listeners for better scroll performance
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+    document.addEventListener('mousedown', handleClickOutside, { passive: true });
     
     return () => {
       document.removeEventListener('touchstart', handleClickOutside);
@@ -82,28 +85,48 @@ export const VehicleSelector = memo(({
     };
   }, [tappedVehicle]);
 
-  // Handle tap on mobile - first tap shows tooltip, second tap selects
+  // Optimized vehicle tap handler with RAF for smooth updates
   const handleVehicleTap = useCallback((vehicle: typeof VEHICLE_TYPES[0], isDisabled: boolean) => {
     if (isDisabled) return;
     
-    if (isTouchDevice) {
-      if (tappedVehicle === vehicle.value) {
-        // Second tap - select the vehicle
-        onSelectVehicle(vehicle.value);
-        setTappedVehicle(null);
+    // Use requestAnimationFrame to batch state updates
+    requestAnimationFrame(() => {
+      if (isTouchDevice) {
+        if (tappedVehicle === vehicle.value) {
+          onSelectVehicle(vehicle.value);
+          setTappedVehicle(null);
+        } else {
+          setTappedVehicle(vehicle.value);
+        }
       } else {
-        // First tap - show tooltip
-        setTappedVehicle(vehicle.value);
+        onSelectVehicle(vehicle.value);
       }
-    } else {
-      // Desktop - just select
-      onSelectVehicle(vehicle.value);
-    }
+    });
   }, [isTouchDevice, tappedVehicle, onSelectVehicle]);
+
+  // Optimized hover handlers
+  const handleMouseEnter = useCallback((vehicleValue: string, isDisabled: boolean) => {
+    if (!isTouchDevice && !isDisabled) {
+      setHoveredVehicle(vehicleValue);
+    }
+  }, [isTouchDevice]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!isTouchDevice) {
+      setHoveredVehicle(null);
+    }
+  }, [isTouchDevice]);
+
+  // Optimized info button handler
+  const handleInfoClick = useCallback((e: React.MouseEvent, vehicle: typeof VEHICLE_TYPES[0]) => {
+    e.stopPropagation();
+    setSelectedVehicleForDetail(vehicle);
+    setIsVehicleDetailOpen(true);
+  }, []);
 
   return (
     <>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div ref={containerRef} className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {VEHICLE_TYPES.map((vehicle, index) => {
           const vehiclePrice = prices.find(v => v.vehicleType === vehicle.value);
           const isSelected = selectedVehicle === vehicle.value;
@@ -115,16 +138,16 @@ export const VehicleSelector = memo(({
           const showTooltip = (isHovered || isTapped) && !isDisabled;
           
           // Determine tooltip position based on vehicle index to prevent off-screen
-          // For 4 columns: items 0,1 (left side) use top, items 2,3 (right side) use top-left alignment
           const isRightSide = index >= 2;
           
           return (
-            <motion.div 
+            <div 
               key={vehicle.value}
-              className="relative"
+              className="relative animate-fade-in"
+              style={{ animationDelay: `${0.05 * index}s` }}
               data-vehicle-card
-              onMouseEnter={() => !isTouchDevice && !isDisabled && setHoveredVehicle(vehicle.value)}
-              onMouseLeave={() => !isTouchDevice && setHoveredVehicle(null)}
+              onMouseEnter={() => handleMouseEnter(vehicle.value, isDisabled)}
+              onMouseLeave={handleMouseLeave}
             >
               {/* Tooltip - with proper alignment for right-side items */}
               <Suspense fallback={null}>
@@ -142,18 +165,15 @@ export const VehicleSelector = memo(({
                 />
               </Suspense>
               
-              <motion.button
+              <button
                 type="button"
                 onClick={() => handleVehicleTap(vehicle, isDisabled)}
                 disabled={isDisabled}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * index }}
-                whileHover={{ scale: isDisabled ? 1 : 1.03, y: isDisabled ? 0 : -3 }}
-                whileTap={{ scale: isDisabled ? 1 : 0.97 }}
                 className={cn(
-                  "w-full rounded-xl border p-2 transition-all text-center overflow-hidden",
-                  isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
+                  "w-full rounded-xl border p-2 text-center overflow-hidden touch-manipulation",
+                  "transition-all duration-200 ease-out",
+                  "hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97]",
+                  isDisabled ? "opacity-40 cursor-not-allowed hover:scale-100 hover:translate-y-0" : "cursor-pointer",
                   isSelected 
                     ? "border-primary bg-primary/10 ring-2 ring-primary shadow-lg" 
                     : "border-border bg-card hover:border-primary/50 hover:shadow-md"
@@ -166,6 +186,7 @@ export const VehicleSelector = memo(({
                       src={vehicleImages[vehicle.value]} 
                       alt={vehicle.label}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   }>
                     <VehicleImageCarousel
@@ -180,26 +201,18 @@ export const VehicleSelector = memo(({
                   {/* Info Button */}
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedVehicleForDetail(vehicle);
-                      setIsVehicleDetailOpen(true);
-                    }}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white opacity-0 group-hover/image:opacity-100 transition-opacity z-20"
+                    onClick={(e) => handleInfoClick(e, vehicle)}
+                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white opacity-0 group-hover/image:opacity-100 transition-opacity z-20 touch-manipulation"
                   >
                     <Info className="h-3.5 w-3.5" />
                   </button>
                   
                   {isSelected && (
-                    <motion.div 
-                      className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
+                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10 animate-fade-in">
                       <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
                         <Check className="h-4 w-4 text-primary-foreground" />
                       </div>
-                    </motion.div>
+                    </div>
                   )}
                 </div>
                 <div className="text-xs font-semibold truncate mb-0.5">{vehicle.label.split(' ').pop()}</div>
@@ -208,14 +221,9 @@ export const VehicleSelector = memo(({
                   <span>{vehicle.passengers} pax</span>
                 </div>
                 {vehiclePrice ? (
-                  <motion.div 
-                    className="text-xs font-bold text-primary"
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
+                  <div className="text-xs font-bold text-primary">
                     {currency === "EUR" ? "€" : currency}{vehiclePrice.price}
-                  </motion.div>
+                  </div>
                 ) : loadingPrices && hasRoute ? (
                   <div className="h-4 flex items-center justify-center">
                     <Skeleton className="h-3 w-8" />
@@ -223,8 +231,8 @@ export const VehicleSelector = memo(({
                 ) : (
                   <div className="h-4" />
                 )}
-              </motion.button>
-            </motion.div>
+              </button>
+            </div>
           );
         })}
       </div>
