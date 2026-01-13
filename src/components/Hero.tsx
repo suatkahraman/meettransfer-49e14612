@@ -391,9 +391,9 @@ export const Hero = () => {
     <section ref={heroRef} id="booking-form" className="relative overflow-hidden bg-background">
       <HeroBackground videosLoaded={videosLoaded} cityVideos={cityVideos} currentVideoIndex={currentVideoIndex} setCurrentVideoIndex={setCurrentVideoIndex} language={language} />
 
-      {/* pt-20 for header space, pb-20 for bottom nav */}
-      <div className="container relative z-10 px-2 sm:px-3 md:px-4 pt-20 sm:pt-6 md:pt-8 pb-20 sm:pb-4 md:pb-8 lg:pb-16">
-        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100svh-10rem)] sm:min-h-[calc(100svh-5.5rem)] md:min-h-[calc(100svh-6rem)]">
+      {/* Mobile: pb-20 for bottom nav, desktop: normal padding. pt handled by WebsiteLayout */}
+      <div className="container relative z-10 px-2 sm:px-3 md:px-4 pt-4 md:pt-8 pb-4 md:pb-8 lg:pb-16">
+        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100svh-8rem)] md:min-h-[calc(100svh-6rem)]">
           {/* Left Side - Form */}
           <div className="order-1 md:col-span-3 lg:col-span-1">
             <HeroHeader language={language} />
