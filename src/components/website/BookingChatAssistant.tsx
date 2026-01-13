@@ -496,6 +496,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const [isLoading, setIsLoading] = useState(false);
   const [visitorId] = useState(() => getVisitorId());
   const [bookingCreated, setBookingCreated] = useState<{ id: string; token: string } | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const hasLoadedRef = useRef(false);
@@ -534,6 +535,36 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     window.addEventListener("booking-ai-open", handler as EventListener);
     return () => window.removeEventListener("booking-ai-open", handler as EventListener);
   }, []);
+
+  // Detect keyboard visibility using visualViewport API for mobile
+  useEffect(() => {
+    if (!mobileFloating || !isOpen) {
+      setKeyboardHeight(0);
+      return;
+    }
+    
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const handleResize = () => {
+      // Calculate keyboard height by comparing viewport height with window height
+      const windowHeight = window.innerHeight;
+      const viewportHeight = viewport.height;
+      const keyboardH = Math.max(0, windowHeight - viewportHeight);
+      setKeyboardHeight(keyboardH);
+    };
+
+    viewport.addEventListener('resize', handleResize);
+    viewport.addEventListener('scroll', handleResize);
+    
+    // Initial check
+    handleResize();
+
+    return () => {
+      viewport.removeEventListener('resize', handleResize);
+      viewport.removeEventListener('scroll', handleResize);
+    };
+  }, [mobileFloating, isOpen]);
 
   // Handle AI parameter from URL - auto-open chat and auto-send route message
   useEffect(() => {
@@ -954,9 +985,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   setIsOpen(false);
                 }
               }}
-              className="fixed inset-x-0 bottom-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col"
+              className="fixed inset-x-0 z-[9999] bg-card rounded-t-3xl shadow-2xl border-t border-border flex flex-col transition-all duration-200"
               style={{ 
-                height: 'min(60vh, 500px)'
+                bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
+                height: keyboardHeight > 0 ? `min(50vh, 400px)` : 'min(60vh, 500px)',
+                maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px - 20px)` : undefined
               }}
             >
               {/* Drag Handle - Swipe indicator */}
