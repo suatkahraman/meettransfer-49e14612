@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -59,6 +60,7 @@ function setCachedGeo(data: GeoCache['data']): void {
 }
 
 export function usePWAInstall() {
+  const { language } = useLanguage();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -442,79 +444,133 @@ export function usePWAInstall() {
     return false;
   }, [isStandalone]);
 
-  // Get install instructions for current browser/platform
+  // Get install instructions for current browser/platform with i18n
   const getInstallInstructions = useCallback((): { steps: string[]; note?: string } => {
+    // Localized text maps
+    const texts = {
+      ios: {
+        steps: {
+          TR: [
+            'Safari\'de paylaş (Share) butonuna dokunun',
+            '"Ana Ekrana Ekle" seçeneğini seçin',
+            '"Ekle" butonuna dokunun'
+          ],
+          EN: [
+            'Tap the Share button in Safari',
+            'Select "Add to Home Screen"',
+            'Tap "Add"'
+          ],
+          DE: [
+            'Tippen Sie auf die Teilen-Schaltfläche in Safari',
+            'Wählen Sie "Zum Home-Bildschirm"',
+            'Tippen Sie auf "Hinzufügen"'
+          ],
+          FR: [
+            'Appuyez sur le bouton Partager dans Safari',
+            'Sélectionnez "Sur l\'écran d\'accueil"',
+            'Appuyez sur "Ajouter"'
+          ],
+        },
+        note: {
+          TR: 'iOS\'ta uygulamayı yüklemek için Safari tarayıcısını kullanın.',
+          EN: 'Use Safari browser to install the app on iOS.',
+          DE: 'Verwenden Sie Safari, um die App unter iOS zu installieren.',
+          FR: 'Utilisez Safari pour installer l\'application sur iOS.',
+        },
+      },
+      samsung: {
+        steps: {
+          TR: ['Menü butonuna (☰) dokunun', '"Sayfayı ekle" veya "Ana ekrana ekle" seçin', 'Onaylayın'],
+          EN: ['Tap the menu button (☰)', 'Select "Add page" or "Add to Home screen"', 'Confirm'],
+          DE: ['Tippen Sie auf die Menütaste (☰)', 'Wählen Sie "Seite hinzufügen" oder "Zum Startbildschirm"', 'Bestätigen'],
+          FR: ['Appuyez sur le bouton menu (☰)', 'Sélectionnez "Ajouter la page" ou "Ajouter à l\'écran d\'accueil"', 'Confirmer'],
+        },
+      },
+      firefox: {
+        steps: {
+          TR: ['Menü butonuna (⋮) dokunun', '"Yükle" veya "Ana ekrana ekle" seçin', 'Onaylayın'],
+          EN: ['Tap the menu button (⋮)', 'Select "Install" or "Add to Home screen"', 'Confirm'],
+          DE: ['Tippen Sie auf die Menütaste (⋮)', 'Wählen Sie "Installieren" oder "Zum Startbildschirm"', 'Bestätigen'],
+          FR: ['Appuyez sur le bouton menu (⋮)', 'Sélectionnez "Installer" ou "Ajouter à l\'écran d\'accueil"', 'Confirmer'],
+        },
+      },
+      android: {
+        steps: {
+          TR: ['Menü butonuna (⋮) dokunun', '"Uygulamayı yükle" veya "Ana ekrana ekle" seçin', 'Onaylayın'],
+          EN: ['Tap the menu button (⋮)', 'Select "Install app" or "Add to Home screen"', 'Confirm'],
+          DE: ['Tippen Sie auf die Menütaste (⋮)', 'Wählen Sie "App installieren" oder "Zum Startbildschirm"', 'Bestätigen'],
+          FR: ['Appuyez sur le bouton menu (⋮)', 'Sélectionnez "Installer l\'application" ou "Ajouter à l\'écran d\'accueil"', 'Confirmer'],
+        },
+      },
+      desktop: {
+        steps: {
+          TR: ['Adres çubuğundaki yükleme simgesine (⊕) tıklayın', '"Yükle" butonuna tıklayın'],
+          EN: ['Click the install icon (⊕) in the address bar', 'Click "Install"'],
+          DE: ['Klicken Sie auf das Installationssymbol (⊕) in der Adressleiste', 'Klicken Sie auf "Installieren"'],
+          FR: ['Cliquez sur l\'icône d\'installation (⊕) dans la barre d\'adresse', 'Cliquez sur "Installer"'],
+        },
+      },
+      firefoxDesktop: {
+        steps: {
+          TR: ['Firefox masaüstünde PWA desteği sınırlıdır', 'Chrome veya Edge kullanmanızı öneririz'],
+          EN: ['Firefox desktop has limited PWA support', 'We recommend using Chrome or Edge'],
+          DE: ['Firefox Desktop hat eingeschränkte PWA-Unterstützung', 'Wir empfehlen Chrome oder Edge'],
+          FR: ['Firefox sur ordinateur a un support PWA limité', 'Nous recommandons Chrome ou Edge'],
+        },
+        note: {
+          TR: 'Firefox masaüstü tarayıcısı PWA yüklemeyi tam olarak desteklememektedir.',
+          EN: 'Firefox desktop browser does not fully support PWA installation.',
+          DE: 'Firefox Desktop-Browser unterstützt PWA-Installation nicht vollständig.',
+          FR: 'Le navigateur Firefox de bureau ne prend pas entièrement en charge l\'installation PWA.',
+        },
+      },
+      fallback: {
+        steps: {
+          TR: ['Tarayıcı menüsünden "Uygulamayı yükle" seçeneğini arayın', 'Veya adres çubuğundaki yükleme simgesine tıklayın'],
+          EN: ['Look for "Install app" in the browser menu', 'Or click the install icon in the address bar'],
+          DE: ['Suchen Sie im Browsermenü nach "App installieren"', 'Oder klicken Sie auf das Installationssymbol in der Adressleiste'],
+          FR: ['Cherchez "Installer l\'application" dans le menu du navigateur', 'Ou cliquez sur l\'icône d\'installation dans la barre d\'adresse'],
+        },
+      },
+    };
+
+    const lang = (language as 'TR' | 'EN' | 'DE' | 'FR') || 'EN';
+
     if (isIOS) {
       return {
-        steps: [
-          'Safari\'de paylaş (Share) butonuna dokunun',
-          '"Ana Ekrana Ekle" seçeneğini seçin',
-          '"Ekle" butonuna dokunun'
-        ],
+        steps: texts.ios.steps[lang] ?? texts.ios.steps.EN,
         note: browserInfo?.name !== 'Safari' 
-          ? 'iOS\'ta uygulamayı yüklemek için Safari tarayıcısını kullanın.'
+          ? (texts.ios.note[lang] ?? texts.ios.note.EN)
           : undefined
       };
     }
     
     if (isAndroid) {
       if (browserInfo?.name === 'Samsung Internet') {
-        return {
-          steps: [
-            'Menü butonuna (☰) dokunun',
-            '"Sayfayı ekle" veya "Ana ekrana ekle" seçin',
-            'Onaylayın'
-          ]
-        };
+        return { steps: texts.samsung.steps[lang] ?? texts.samsung.steps.EN };
       }
       
       if (browserInfo?.name === 'Firefox') {
-        return {
-          steps: [
-            'Menü butonuna (⋮) dokunun',
-            '"Yükle" veya "Ana ekrana ekle" seçin',
-            'Onaylayın'
-          ]
-        };
+        return { steps: texts.firefox.steps[lang] ?? texts.firefox.steps.EN };
       }
       
-      // Chrome and other Chromium browsers
-      return {
-        steps: [
-          'Menü butonuna (⋮) dokunun',
-          '"Uygulamayı yükle" veya "Ana ekrana ekle" seçin',
-          'Onaylayın'
-        ]
-      };
+      return { steps: texts.android.steps[lang] ?? texts.android.steps.EN };
     }
     
     // Desktop
     if (browserInfo?.name === 'Chrome' || browserInfo?.name === 'Edge') {
-      return {
-        steps: [
-          'Adres çubuğundaki yükleme simgesine (⊕) tıklayın',
-          '"Yükle" butonuna tıklayın'
-        ]
-      };
+      return { steps: texts.desktop.steps[lang] ?? texts.desktop.steps.EN };
     }
     
     if (browserInfo?.name === 'Firefox') {
       return {
-        steps: [
-          'Firefox masaüstünde PWA desteği sınırlıdır',
-          'Chrome veya Edge kullanmanızı öneririz'
-        ],
-        note: 'Firefox masaüstü tarayıcısı PWA yüklemeyi tam olarak desteklememektedir.'
+        steps: texts.firefoxDesktop.steps[lang] ?? texts.firefoxDesktop.steps.EN,
+        note: texts.firefoxDesktop.note[lang] ?? texts.firefoxDesktop.note.EN,
       };
     }
     
-    return {
-      steps: [
-        'Tarayıcı menüsünden "Uygulamayı yükle" seçeneğini arayın',
-        'Veya adres çubuğundaki yükleme simgesine tıklayın'
-      ]
-    };
-  }, [isIOS, isAndroid, browserInfo]);
+    return { steps: texts.fallback.steps[lang] ?? texts.fallback.steps.EN };
+  }, [isIOS, isAndroid, browserInfo, language]);
 
   return {
     canInstall,
