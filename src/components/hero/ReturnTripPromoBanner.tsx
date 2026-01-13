@@ -71,9 +71,9 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
             </div>
             
             {/* Expiry Date */}
-            <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />
-              <span>{language === 'TR' ? 'Son' : 'Expires'}: {expiryDate}</span>
+              <span>{language === 'TR' ? 'Son' : 'Valid until'}: {expiryDate}</span>
             </div>
             
             {/* Click hint */}
