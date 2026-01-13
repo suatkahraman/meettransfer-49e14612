@@ -13,6 +13,9 @@ import { cn } from "@/lib/utils";
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 import heroVideo from "@/assets/hero-mercedes-video.mp4";
+import heroIstanbul from "@/assets/hero-istanbul.mp4";
+import heroAntalya from "@/assets/hero-antalya.mp4";
+import heroBodrum from "@/assets/hero-bodrum.mp4";
 import vitoImg from "@/assets/vito-1.jpg";
 import vitoVipImg from "@/assets/vito-vip-1.jpg";
 import maybachImg from "@/assets/maybach-1.jpg";
@@ -102,21 +105,27 @@ export const Hero = () => {
   const [convertingHourlyPrices, setConvertingHourlyPrices] = useState(false);
   const [originalHourlyPrices, setOriginalHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
   
-  // Video/Image background state
-  const [showVideo, setShowVideo] = useState(true);
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  // Video/Image background state - City videos with labels
+  const cityVideos = [
+    { src: heroIstanbul, label: "Istanbul", labelTR: "İstanbul" },
+    { src: heroAntalya, label: "Antalya", labelTR: "Antalya" },
+    { src: heroBodrum, label: "Bodrum", labelTR: "Bodrum" },
+    { src: heroVideo, label: "VIP Transfer", labelTR: "VIP Transfer" },
+  ];
+  
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   
   // Hover state for vehicle tooltips
   const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
   
-  // Rotate between video and image every 8 seconds
+  // Rotate between city videos every 6 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentMediaIndex((prev) => (prev + 1) % 2);
-    }, 8000);
+      setCurrentVideoIndex((prev) => (prev + 1) % cityVideos.length);
+    }, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [cityVideos.length]);
 
   // Fetch available cities and their durations
   useEffect(() => {
@@ -447,7 +456,7 @@ export const Hero = () => {
   
   return (
     <section ref={heroRef} id="booking-form" className="relative min-h-screen overflow-hidden bg-background">
-      {/* Video/Image Background with Parallax */}
+      {/* City Video Background with Smooth Transitions */}
       <motion.div 
         style={{ y, opacity }}
         className="absolute inset-0 z-0"
@@ -455,40 +464,74 @@ export const Hero = () => {
         {/* Video Background - Desktop */}
         <div className="absolute inset-0 hidden md:block">
           <AnimatePresence mode="wait">
-            {currentMediaIndex === 0 ? (
-              <motion.video
-                key="video"
-                ref={videoRef}
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.3 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1 }}
-              >
-                <source src={heroVideo} type="video/mp4" />
-              </motion.video>
-            ) : (
-              <motion.img
-                key="image"
-                src={heroMercedes}
-                alt="Mercedes VIP Transfer"
-                className="absolute inset-0 w-full h-full object-cover"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.3 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1 }}
-              />
-            )}
+            <motion.video
+              key={currentVideoIndex}
+              ref={videoRef}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 0.4, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+            >
+              <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
+            </motion.video>
           </AnimatePresence>
+          
+          {/* City Label Badge */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`label-${currentVideoIndex}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="absolute bottom-8 right-8 z-20"
+            >
+              <div className="flex items-center gap-2 bg-background/80 backdrop-blur-md rounded-full px-4 py-2 border border-primary/30 shadow-xl">
+                <Globe className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">
+                  {language === 'TR' 
+                    ? cityVideos[currentVideoIndex].labelTR 
+                    : cityVideos[currentVideoIndex].label}
+                </span>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+          
+          {/* Video Navigation Dots */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {cityVideos.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentVideoIndex(index)}
+                className={cn(
+                  "w-2 h-2 rounded-full transition-all duration-300",
+                  currentVideoIndex === index 
+                    ? "bg-primary w-6" 
+                    : "bg-foreground/30 hover:bg-foreground/50"
+                )}
+                aria-label={`Go to video ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
         
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-background/80" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
+        {/* Mobile - Static Image with Gradient */}
+        <div className="absolute inset-0 md:hidden">
+          <img
+            src={heroMercedes}
+            alt="VIP Transfer"
+            className="absolute inset-0 w-full h-full object-cover opacity-20"
+          />
+        </div>
+        
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background/90 to-background/70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent" />
         
         {/* Pattern Overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
@@ -1079,40 +1122,29 @@ export const Hero = () => {
               {/* Mobile Video/Image */}
               <div className="relative h-40">
                 <AnimatePresence mode="wait">
-                  {currentMediaIndex === 0 ? (
-                    <motion.video
-                      key="mobile-video"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="absolute inset-0 w-full h-full object-cover"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <source src={heroVideo} type="video/mp4" />
-                    </motion.video>
-                  ) : (
-                    <motion.img
-                      key="mobile-image"
-                      src={heroMercedes}
-                      alt="Mercedes VIP Transfer"
-                      className="absolute inset-0 w-full h-full object-cover"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.5 }}
-                    />
-                  )}
+                  <motion.video
+                    key={`mobile-${currentVideoIndex}`}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
+                  </motion.video>
                 </AnimatePresence>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                 
-                {/* Video indicator */}
+                {/* City label + Video indicator */}
                 <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2 py-1">
-                  <Play className="h-2.5 w-2.5 text-white fill-white" />
-                  <span className="text-[10px] text-white">LIVE</span>
+                  <Globe className="h-2.5 w-2.5 text-white" />
+                  <span className="text-[10px] text-white font-medium">
+                    {language === 'TR' ? cityVideos[currentVideoIndex].labelTR : cityVideos[currentVideoIndex].label}
+                  </span>
                 </div>
                 
                 {/* Mobile Overlay Content */}
@@ -1183,43 +1215,30 @@ export const Hero = () => {
               {/* Main Video/Image with Overlay */}
               <div className="relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl">
                 <AnimatePresence mode="wait">
-                  {currentMediaIndex === 0 ? (
-                    <motion.video
-                      key="desktop-video"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="w-full h-48 md:h-56 lg:h-80 object-cover"
-                      initial={{ opacity: 0, scale: 1.1 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 1 }}
-                    >
-                      <source src={heroVideo} type="video/mp4" />
-                    </motion.video>
-                  ) : (
-                    <motion.img 
-                      key="desktop-image"
-                      src={heroMercedes}
-                      alt="Mercedes Vito VIP Transfer"
-                      className="w-full h-48 md:h-56 lg:h-80 object-cover"
-                      initial={{ opacity: 0, scale: 1.1 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 1 }}
-                    />
-                  )}
+                  <motion.video
+                    key={`desktop-${currentVideoIndex}`}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-48 md:h-56 lg:h-80 object-cover"
+                    initial={{ opacity: 0, scale: 1.1 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1 }}
+                  >
+                    <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
+                  </motion.video>
                 </AnimatePresence>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
-                {/* Video indicator */}
-                {currentMediaIndex === 0 && (
-                  <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
-                    <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    <span className="text-xs text-white font-medium">LIVE</span>
-                  </div>
-                )}
+                {/* City label indicator */}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
+                  <Globe className="h-3 w-3 text-white" />
+                  <span className="text-xs text-white font-medium">
+                    {language === 'TR' ? cityVideos[currentVideoIndex].labelTR : cityVideos[currentVideoIndex].label}
+                  </span>
+                </div>
                 
                 {/* Overlay Content - Compact on tablet */}
                 <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-6">
