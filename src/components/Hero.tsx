@@ -26,6 +26,7 @@ import {
   CityVideo,
   BookingData,
 } from "@/components/hero";
+import { SwipeableBookingCard } from "@/components/hero/SwipeableBookingCard";
 
 import vitoVipImg from "@/assets/vito-vip-1.jpg";
 
@@ -297,7 +298,12 @@ export const Hero = () => {
             <ReturnTripPromoBanner language={language} onApplyPromoCode={handleApplyPromoCode} />
 
             {/* Booking Form Card - Enhanced visibility */}
-            <div className="bg-card rounded-lg sm:rounded-xl md:rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.1)] sm:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] border sm:border-2 border-primary/20 overflow-hidden ring-1 ring-primary/10">
+            <SwipeableBookingCard 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab}
+              language={language}
+              t={t}
+            >
               {/* Tabs */}
               <div className="flex bg-muted/50 relative">
                 <div 
@@ -354,7 +360,7 @@ export const Hero = () => {
                   )}
                 </AnimatePresence>
               </div>
-            </div>
+            </SwipeableBookingCard>
 
             <HeroTrustBadges language={language} />
           </div>
