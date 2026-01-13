@@ -1798,23 +1798,23 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       )}
                     </div>
                   )}
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-2">
                     <Button
                       onClick={isRecording ? stopRecording : startRecording}
                       disabled={isLoading || isProcessing}
                       size="icon"
                       variant="outline"
                       className={cn(
-                        "h-9 w-9 rounded-lg shrink-0 touch-manipulation",
+                        "h-12 w-12 rounded-xl shrink-0 touch-manipulation",
                         isRecording && "bg-destructive/10 border-destructive text-destructive"
                       )}
                     >
                       {isProcessing ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin" />
                       ) : isRecording ? (
-                        <Square className="h-3.5 w-3.5 fill-current" />
+                        <Square className="h-5 w-5 fill-current" />
                       ) : (
-                        <Mic className="h-3.5 w-3.5" />
+                        <Mic className="h-5 w-5" />
                       )}
                     </Button>
                     <Input
@@ -1843,7 +1843,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       }}
                       placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
                       disabled={isLoading || isRecording}
-                      className="h-10 rounded-lg text-sm flex-1 touch-manipulation"
+                      className="h-12 rounded-xl text-sm flex-1 touch-manipulation"
                       style={{ fontSize: '16px' }}
                       autoComplete="off"
                       autoCorrect="on"
@@ -1857,14 +1857,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       size="icon"
                       data-chat-submit
                       className={cn(
-                        "h-9 w-9 rounded-lg shrink-0 touch-manipulation",
+                        "h-12 w-12 rounded-xl shrink-0 touch-manipulation",
                         input.trim() ? "bg-primary" : "bg-muted"
                       )}
                     >
                       {isLoading ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin" />
                       ) : (
-                        <Send className="h-3.5 w-3.5" />
+                        <Send className="h-5 w-5" />
                       )}
                     </Button>
                     
@@ -1872,14 +1872,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="icon"
-                          className="h-9 w-9 rounded-lg shrink-0 touch-manipulation"
+                          className="h-12 w-12 rounded-xl shrink-0 touch-manipulation"
                         >
                           {isVoiceEnabled ? (
-                            <Volume2 className="h-3.5 w-3.5 text-primary" />
+                            <Volume2 className="h-5 w-5 text-primary" />
                           ) : (
-                            <VolumeX className="h-3.5 w-3.5 text-muted-foreground" />
+                            <VolumeX className="h-5 w-5 text-muted-foreground" />
                           )}
                         </Button>
                       </PopoverTrigger>
@@ -2194,16 +2194,16 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
             size="icon"
             variant="outline"
             className={cn(
-              "h-10 w-10 rounded-lg shrink-0",
+              "h-11 w-11 rounded-xl shrink-0",
               isRecording && "bg-destructive/10 border-destructive text-destructive"
             )}
           >
             {isProcessing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : isRecording ? (
-              <Square className="h-4 w-4 fill-current" />
+              <Square className="h-5 w-5 fill-current" />
             ) : (
-              <Mic className="h-4 w-4" />
+              <Mic className="h-5 w-5" />
             )}
           </Button>
         )}
@@ -2215,7 +2215,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           onKeyDown={handleKeyDown}
           placeholder={language === "TR" ? "Mesajınızı yazın..." : "Type your message..."}
           disabled={isLoading || isRecording}
-          className="h-10 rounded-lg text-sm flex-1"
+          className="h-11 rounded-xl text-sm flex-1"
         />
         
         <Button
@@ -2223,12 +2223,12 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           disabled={isLoading || !input.trim()}
           size="icon"
           data-chat-submit
-          className="h-10 w-10 rounded-lg shrink-0"
+          className="h-11 w-11 rounded-xl shrink-0"
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
-            <Send className="h-4 w-4" />
+            <Send className="h-5 w-5" />
           )}
         </Button>
         
@@ -2236,14 +2236,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              className="h-10 w-10 rounded-lg shrink-0"
+              className="h-11 w-11 rounded-xl shrink-0"
             >
               {isVoiceEnabled ? (
-                <Volume2 className="h-4 w-4 text-primary" />
+                <Volume2 className="h-5 w-5 text-primary" />
               ) : (
-                <VolumeX className="h-4 w-4 text-muted-foreground" />
+                <VolumeX className="h-5 w-5 text-muted-foreground" />
               )}
             </Button>
           </PopoverTrigger>
