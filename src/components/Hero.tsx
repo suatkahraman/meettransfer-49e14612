@@ -18,6 +18,7 @@ import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepick
 const BookingChatAssistant = lazy(() => import("@/components/website/BookingChatAssistant"));
 const CompactRouteMap = lazy(() => import("@/components/ui/compact-route-map").then(m => ({ default: m.CompactRouteMap })));
 const VehicleTooltip = lazy(() => import("@/components/VehicleTooltip").then(m => ({ default: m.VehicleTooltip })));
+const VehicleImageCarousel = lazy(() => import("@/components/website/VehicleImageCarousel").then(m => ({ default: m.VehicleImageCarousel })));
 
 // Critical images loaded eagerly with optimized paths
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
@@ -957,17 +958,26 @@ export const Hero = () => {
                                   : "border-border bg-card hover:border-primary/50 hover:shadow-md"
                               )}
                             >
-                              {/* Larger Vehicle Image */}
+                              {/* Larger Vehicle Image with Carousel */}
                               <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-2 bg-muted relative">
-                                <img 
-                                  src={vehicleImages[vehicle.value]} 
-                                  alt={vehicle.label}
-                                  className="w-full h-full object-cover transition-transform duration-300"
-                                  style={{ transform: isHovered ? 'scale(1.1)' : 'scale(1)' }}
-                                />
+                                <Suspense fallback={
+                                  <img 
+                                    src={vehicleImages[vehicle.value]} 
+                                    alt={vehicle.label}
+                                    className="w-full h-full object-cover"
+                                  />
+                                }>
+                                  <VehicleImageCarousel
+                                    images={vehicle.images.slice(0, 5).map(img => img.src)}
+                                    alt={vehicle.label}
+                                    className="w-full h-full"
+                                    interval={3000}
+                                    isHovered={isHovered}
+                                  />
+                                </Suspense>
                                 {isSelected && (
                                   <motion.div 
-                                    className="absolute inset-0 bg-primary/20 flex items-center justify-center"
+                                    className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10"
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                   >
@@ -1148,17 +1158,26 @@ export const Hero = () => {
                                     : "border-border bg-card hover:border-primary/50 hover:shadow-md"
                                 )}
                               >
-                                {/* Larger Vehicle Image */}
+                                {/* Larger Vehicle Image with Carousel */}
                                 <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-2 bg-muted relative">
-                                  <img 
-                                    src={vehicleImages[vehicle.value]} 
-                                    alt={vehicle.label}
-                                    className="w-full h-full object-cover transition-transform duration-300"
-                                    style={{ transform: isHovered ? 'scale(1.1)' : 'scale(1)' }}
-                                  />
+                                  <Suspense fallback={
+                                    <img 
+                                      src={vehicleImages[vehicle.value]} 
+                                      alt={vehicle.label}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  }>
+                                    <VehicleImageCarousel
+                                      images={vehicle.images.slice(0, 5).map(img => img.src)}
+                                      alt={vehicle.label}
+                                      className="w-full h-full"
+                                      interval={3000}
+                                      isHovered={isHovered}
+                                    />
+                                  </Suspense>
                                   {isSelected && (
                                     <motion.div 
-                                      className="absolute inset-0 bg-primary/20 flex items-center justify-center"
+                                      className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10"
                                       initial={{ opacity: 0 }}
                                       animate={{ opacity: 1 }}
                                     >
