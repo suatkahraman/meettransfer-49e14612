@@ -71,6 +71,7 @@ interface Message {
 interface BookingChatAssistantProps {
   onApplyBooking?: (data: BookingData) => void;
   defaultOpen?: boolean;
+  mobileFloating?: boolean;
 }
 
 // Check if Speech Recognition is supported
@@ -485,7 +486,7 @@ function getConversationKey(visitorId: string): string {
   return `meet_transfer_chat_${visitorId}`;
 }
 
-export default function BookingChatAssistant({ onApplyBooking, defaultOpen = false }: BookingChatAssistantProps) {
+export default function BookingChatAssistant({ onApplyBooking, defaultOpen = false, mobileFloating = false }: BookingChatAssistantProps) {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -902,9 +903,223 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     }
   };
 
+  // Mobile floating mode - only show floating button and panel
+  if (mobileFloating) {
+    return (
+      <>
+        {/* Mobile Floating Toggle Button */}
+        <AnimatePresence>
+          {!isOpen && (
+            <motion.button
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsOpen(true)}
+              data-chat-trigger
+              className="fixed bottom-20 right-4 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-full shadow-lg"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span className="font-semibold text-sm">AI</span>
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile Floating Panel */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed bottom-4 left-4 right-4 z-[9999] bg-card rounded-2xl shadow-2xl border border-border overflow-hidden"
+              style={{ maxHeight: 'calc(100vh - 120px)' }}
+            >
+              {/* Mobile Header */}
+              <div className="flex items-center justify-between p-3 border-b border-border bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Bot className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <span className="font-medium text-sm">
+                      {language === "TR" ? "AI Asistan" : "AI Assistant"}
+                    </span>
+                    <span className="ml-2 px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[9px] font-bold rounded">
+                      NEW
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={clearConversation}
+                    className="h-8 w-8 rounded-full"
+                    title={language === "TR" ? "Sohbeti temizle" : "Clear chat"}
+                  >
+                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsOpen(false)}
+                    className="h-8 w-8 rounded-full"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Mobile Messages */}
+              <ScrollArea className="h-[300px]">
+                <div className="p-3 space-y-3">
+                  {messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={cn(
+                        "flex gap-2",
+                        msg.role === "user" ? "justify-end" : "justify-start"
+                      )}
+                    >
+                      {msg.role === "assistant" && (
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <Bot className="h-3 w-3 text-primary" />
+                        </div>
+                      )}
+                      <div
+                        className={cn(
+                          "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
+                          msg.role === "user"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted"
+                        )}
+                      >
+                        {msg.role === "assistant" ? (
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                            {cleanResponseForDisplay(msg.content)}
+                          </ReactMarkdown>
+                        ) : (
+                          msg.content
+                        )}
+                        
+                        {/* Booking Card for Mobile */}
+                        {msg.bookingData && msg.bookingData.estimatedPrice && (
+                          <div className="mt-2 p-2 bg-background rounded-lg border border-border">
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {language === "TR" ? "Tahmini Fiyat" : "Estimated Price"}
+                            </div>
+                            <div className="font-bold text-primary">
+                              {msg.bookingData.currency === "TRY" ? "₺" : "€"}
+                              {msg.bookingData.estimatedPrice}
+                            </div>
+                            {onApplyBooking && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleApplyBooking(msg.bookingData!)}
+                                className="w-full mt-2 h-7 text-xs"
+                              >
+                                {language === "TR" ? "Forma Uygula" : "Apply to Form"}
+                                <ArrowRight className="h-3 w-3 ml-1" />
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {msg.role === "user" && (
+                        <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
+                          <User className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {isLoading && (
+                    <div className="flex gap-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <Bot className="h-3 w-3 text-primary" />
+                      </div>
+                      <div className="bg-muted rounded-2xl px-3 py-2">
+                        <div className="flex gap-1">
+                          <motion.span 
+                            className="w-2 h-2 bg-primary/60 rounded-full"
+                            animate={{ y: [-2, 2, -2] }}
+                            transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
+                          />
+                          <motion.span 
+                            className="w-2 h-2 bg-primary/60 rounded-full"
+                            animate={{ y: [-2, 2, -2] }}
+                            transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
+                          />
+                          <motion.span 
+                            className="w-2 h-2 bg-primary/60 rounded-full"
+                            animate={{ y: [-2, 2, -2] }}
+                            transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={scrollRef} />
+                </div>
+              </ScrollArea>
+
+              {/* Mobile Input */}
+              <div className="p-3 border-t border-border bg-muted/20" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isLoading || isProcessing}
+                    size="icon"
+                    variant="outline"
+                    className={cn(
+                      "h-10 w-10 rounded-xl shrink-0",
+                      isRecording && "bg-destructive/10 border-destructive text-destructive"
+                    )}
+                  >
+                    {isProcessing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isRecording ? (
+                      <Square className="h-4 w-4 fill-current" />
+                    ) : (
+                      <Mic className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Input
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={language === "TR" ? "Mesajınızı yazın..." : "Type your message..."}
+                    disabled={isLoading || isRecording}
+                    className="h-10 rounded-xl text-sm"
+                    style={{ fontSize: '16px' }}
+                  />
+                  <Button
+                    onClick={sendMessage}
+                    disabled={isLoading || !input.trim()}
+                    size="icon"
+                    className="h-10 w-10 rounded-xl shrink-0"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
+    );
+  }
+
   return (
     <>
-      {/* Floating Toggle Button - Mobile - Always visible when chat closed */}
+      {/* Floating Toggle Button - Desktop - Always visible when chat closed */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -915,7 +1130,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
             whileTap={{ scale: 0.98 }}
             onClick={() => setIsOpen(true)}
             data-chat-trigger
-            className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-[9999] flex items-center gap-2 px-3.5 py-2.5 md:px-4 md:py-3 bg-card text-foreground rounded-full shadow-lg border border-border/60"
+            className="hidden md:flex fixed bottom-6 right-6 z-[9999] items-center gap-2 px-4 py-3 bg-card text-foreground rounded-full shadow-lg border border-border/60"
           >
             <Sparkles className="h-4 w-4 text-muted-foreground" />
             <span className="font-semibold text-sm">AI</span>
@@ -942,9 +1157,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           "bg-card",
           "shadow-xl border border-border/50",
           "backdrop-blur-sm",
-          // Mobile: max height when open, not full screen
           isOpen 
-            ? "max-h-[70vh] md:max-h-none md:h-[500px] rounded-3xl" 
+            ? "h-[500px] rounded-3xl" 
             : "h-auto rounded-3xl"
         )}
       >
