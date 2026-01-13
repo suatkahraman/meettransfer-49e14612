@@ -70,39 +70,108 @@ export const Hero = () => {
   const y = useTransform(scrollY, [0, 500], [0, 150]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0.3]);
   
-  // Tab state
-  const [activeTab, setActiveTab] = useState<"ride" | "hourly">("ride");
+  // LocalStorage key for form persistence
+  const STORAGE_KEY = 'hero_form_data';
   
-  // Ride form state
-  const [pickup, setPickup] = useState("");
-  const [dropoff, setDropoff] = useState("");
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [time, setTime] = useState("");
-  const [passengers, setPassengers] = useState("2");
-  const [vehicleType, setVehicleType] = useState("mercedes-vito");
+  // Load saved form data from localStorage
+  const loadSavedFormData = useCallback(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.warn('Failed to load saved form data:', e);
+    }
+    return null;
+  }, []);
+  
+  // Tab state
+  const [activeTab, setActiveTab] = useState<"ride" | "hourly">(() => {
+    const saved = loadSavedFormData();
+    return saved?.activeTab || "ride";
+  });
+  
+  // Ride form state - initialize from localStorage
+  const [pickup, setPickup] = useState(() => loadSavedFormData()?.pickup || "");
+  const [dropoff, setDropoff] = useState(() => loadSavedFormData()?.dropoff || "");
+  const [date, setDate] = useState<Date | undefined>(() => {
+    const saved = loadSavedFormData();
+    if (saved?.date) {
+      const parsedDate = new Date(saved.date);
+      // Only restore if date is in the future
+      if (parsedDate > new Date()) {
+        return parsedDate;
+      }
+    }
+    return undefined;
+  });
+  const [time, setTime] = useState(() => loadSavedFormData()?.time || "");
+  const [passengers, setPassengers] = useState(() => loadSavedFormData()?.passengers || "2");
+  const [vehicleType, setVehicleType] = useState(() => loadSavedFormData()?.vehicleType || "mercedes-vito");
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [allVehiclePrices, setAllVehiclePrices] = useState<any[]>([]);
   const [transferPriceCurrency, setTransferPriceCurrency] = useState<string>("EUR");
   const [loadingTransferPrice, setLoadingTransferPrice] = useState(false);
 
-  // Hourly form state
-  const [hourlyCity, setHourlyCity] = useState("");
-  const [hourlyDate, setHourlyDate] = useState<Date | undefined>(undefined);
-  const [hourlyTime, setHourlyTime] = useState("");
-  const [hourlyDuration, setHourlyDuration] = useState("");
-  const [hourlyPassengers, setHourlyPassengers] = useState("2");
-  const [hourlyVehicleType, setHourlyVehicleType] = useState("mercedes-vito");
+  // Hourly form state - initialize from localStorage
+  const [hourlyCity, setHourlyCity] = useState(() => loadSavedFormData()?.hourlyCity || "");
+  const [hourlyDate, setHourlyDate] = useState<Date | undefined>(() => {
+    const saved = loadSavedFormData();
+    if (saved?.hourlyDate) {
+      const parsedDate = new Date(saved.hourlyDate);
+      if (parsedDate > new Date()) {
+        return parsedDate;
+      }
+    }
+    return undefined;
+  });
+  const [hourlyTime, setHourlyTime] = useState(() => loadSavedFormData()?.hourlyTime || "");
+  const [hourlyDuration, setHourlyDuration] = useState(() => loadSavedFormData()?.hourlyDuration || "");
+  const [hourlyPassengers, setHourlyPassengers] = useState(() => loadSavedFormData()?.hourlyPassengers || "2");
+  const [hourlyVehicleType, setHourlyVehicleType] = useState(() => loadSavedFormData()?.hourlyVehicleType || "mercedes-vito");
   const [hourlyDatePopoverOpen, setHourlyDatePopoverOpen] = useState(false);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [cityDurations, setCityDurations] = useState<Record<string, string[]>>({});
   const [loadingCities, setLoadingCities] = useState(false);
   const [allHourlyPrices, setAllHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
   const [loadingPrice, setLoadingPrice] = useState(false);
-  const [customHours, setCustomHours] = useState("9");
+  const [customHours, setCustomHours] = useState(() => loadSavedFormData()?.customHours || "9");
   const [hourlyCurrency, setHourlyCurrency] = useState<string>("EUR");
   const [convertingHourlyPrices, setConvertingHourlyPrices] = useState(false);
   const [originalHourlyPrices, setOriginalHourlyPrices] = useState<Array<{ vehicleType: string; price: number; currency: string }>>([]);
+  
+  // Save form data to localStorage when it changes
+  useEffect(() => {
+    const formData = {
+      activeTab,
+      // Ride form
+      pickup,
+      dropoff,
+      date: date?.toISOString(),
+      time,
+      passengers,
+      vehicleType,
+      // Hourly form
+      hourlyCity,
+      hourlyDate: hourlyDate?.toISOString(),
+      hourlyTime,
+      hourlyDuration,
+      hourlyPassengers,
+      hourlyVehicleType,
+      customHours,
+    };
+    
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    } catch (e) {
+      console.warn('Failed to save form data:', e);
+    }
+  }, [
+    activeTab, pickup, dropoff, date, time, passengers, vehicleType,
+    hourlyCity, hourlyDate, hourlyTime, hourlyDuration, hourlyPassengers, hourlyVehicleType, customHours
+  ]);
   
   // Video/Image background state - Lazy loaded videos
   const [videosLoaded, setVideosLoaded] = useState(false);
