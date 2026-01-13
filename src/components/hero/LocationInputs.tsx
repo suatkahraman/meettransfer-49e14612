@@ -1,5 +1,4 @@
 import { memo, lazy, Suspense } from "react";
-import { motion } from "framer-motion";
 import { MapPin, Navigation, ArrowUpDown } from "lucide-react";
 import { LazyGooglePlacesAutocomplete as GooglePlacesAutocomplete } from "@/components/ui/lazy-google-places-autocomplete";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,31 +28,27 @@ export const LocationInputs = memo(({
       <GooglePlacesAutocomplete 
         onPlaceSelected={onPickupSelected} 
         placeholder={language === 'TR' ? 'Nereden alınacak?' : 'Where to pick you up?'} 
-        className="bg-muted/50 border border-border rounded-xl text-sm"
+        className="bg-background border-2 border-primary/30 rounded-xl text-sm shadow-sm hover:border-primary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all"
         value={pickup}
         floatingLabel
         icon={<MapPin className="h-4 w-4 text-primary" />}
       />
       
-      <motion.div 
-        className="flex justify-center -my-0.5"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-      >
+      <div className="flex justify-center -my-0.5">
         <button
           type="button"
           onClick={onSwapLocations}
           disabled={!pickup && !dropoff}
-          className="w-7 h-7 rounded-full bg-primary text-primary-foreground shadow hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center"
+          className="w-7 h-7 rounded-full bg-primary text-primary-foreground shadow hover:shadow-lg hover:scale-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center"
         >
           <ArrowUpDown className="h-3 w-3" />
         </button>
-      </motion.div>
+      </div>
       
       <GooglePlacesAutocomplete 
         onPlaceSelected={onDropoffSelected} 
         placeholder={language === 'TR' ? 'Nereye gideceksiniz?' : 'Where to drop you off?'} 
-        className="bg-muted/50 border border-border rounded-xl text-sm"
+        className="bg-background border-2 border-accent/30 rounded-xl text-sm shadow-sm hover:border-accent/50 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 transition-all"
         value={dropoff}
         floatingLabel
         icon={<Navigation className="h-4 w-4 text-accent" />}
