@@ -1,5 +1,5 @@
-import { memo } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { memo, useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase } from "lucide-react";
 import { CityVideo } from "./types";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
@@ -19,109 +19,92 @@ export const HeroVisualSection = memo(({
   language,
   t
 }: HeroVisualSectionProps) => {
+  // Mobile: Always show static image for performance
+  const [isMobile, setIsMobile] = useState(true);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const currentVideo = cityVideos[currentVideoIndex];
+  const showVideo = !isMobile && videosLoaded && cityVideos.length > 0;
+
   return (
     <>
-      {/* Mobile Visual Section - No animation delay for LCP */}
-      <div
-        className="order-2 md:hidden"
-      >
-        <div className="relative rounded-2xl overflow-hidden shadow-xl">
-          <div className="relative h-40">
-            {videosLoaded && cityVideos.length > 0 ? (
-              <>
-                <AnimatePresence mode="wait">
-                  <motion.video
-                    key={`mobile-${currentVideoIndex}`}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
-                  </motion.video>
-                </AnimatePresence>
-                
-                <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2 py-1">
-                  <Globe className="h-2.5 w-2.5 text-white" />
-                  <span className="text-[10px] text-white font-medium">
-                    {language === 'TR' ? cityVideos[currentVideoIndex].labelTR : cityVideos[currentVideoIndex].label}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <img
-                src={heroMercedes}
-                alt="VIP Transfer"
-                className="absolute inset-0 w-full h-full object-cover"
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
-              />
-            )}
+      {/* Mobile Visual Section - Static image only, no video for performance */}
+      <div className="order-2 md:hidden">
+        <div className="relative rounded-xl overflow-hidden shadow-lg">
+          <div className="relative h-36">
+            <img
+              src={heroMercedes}
+              alt="VIP Transfer"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             
-            <div className="absolute bottom-0 left-0 right-0 p-3">
+            <div className="absolute bottom-0 left-0 right-0 p-2.5">
               <div className="text-white">
-                <h3 className="text-sm font-bold mb-1">{t("premiumFleet") || "Premium Mercedes Fleet"}</h3>
-                <div className="flex flex-wrap gap-1.5">
-                  <div className="flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5">
-                    <Wifi className="h-2.5 w-2.5" />
+                <h3 className="text-xs font-bold mb-1">{t("premiumFleet") || "Premium Mercedes Fleet"}</h3>
+                <div className="flex flex-wrap gap-1">
+                  <div className="flex items-center gap-0.5 text-[9px] bg-white/20 backdrop-blur-sm rounded-full px-1.5 py-0.5">
+                    <Wifi className="h-2 w-2" />
                     <span>WiFi</span>
                   </div>
-                  <div className="flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5">
-                    <Baby className="h-2.5 w-2.5" />
-                    <span>{language === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}</span>
+                  <div className="flex items-center gap-0.5 text-[9px] bg-white/20 backdrop-blur-sm rounded-full px-1.5 py-0.5">
+                    <Baby className="h-2 w-2" />
+                    <span>{language === 'TR' ? 'Bebek' : 'Baby'}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-[10px] bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5">
-                    <Briefcase className="h-2.5 w-2.5" />
-                    <span>Meet & Greet</span>
+                  <div className="flex items-center gap-0.5 text-[9px] bg-white/20 backdrop-blur-sm rounded-full px-1.5 py-0.5">
+                    <Briefcase className="h-2 w-2" />
+                    <span>Meet</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           
-          {/* Mobile Stats Row */}
-          <div className="flex items-center justify-around bg-card p-3 border-t border-border/30">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                <Globe className="h-3.5 w-3.5 text-primary" />
+          {/* Mobile Stats Row - More compact */}
+          <div className="flex items-center justify-around bg-card p-2 border-t border-border/30">
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                <Globe className="h-3 w-3 text-primary" />
               </div>
               <div>
-                <div className="text-sm font-bold text-foreground">100+</div>
-                <div className="text-[9px] text-muted-foreground">{t("cities") || "Cities"}</div>
+                <div className="text-xs font-bold text-foreground">100+</div>
+                <div className="text-[8px] text-muted-foreground">{t("cities") || "Cities"}</div>
               </div>
             </div>
-            <div className="w-px h-8 bg-border/50" />
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center">
-                <Plane className="h-3.5 w-3.5 text-accent" />
+            <div className="w-px h-6 bg-border/50" />
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
+                <Plane className="h-3 w-3 text-accent" />
               </div>
               <div>
-                <div className="text-sm font-bold text-foreground">670+</div>
-                <div className="text-[9px] text-muted-foreground">{t("airports") || "Airports"}</div>
+                <div className="text-xs font-bold text-foreground">670+</div>
+                <div className="text-[8px] text-muted-foreground">{t("airports") || "Airports"}</div>
               </div>
             </div>
-            <div className="w-px h-8 bg-border/50" />
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+            <div className="w-px h-6 bg-border/50" />
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-6 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
               </div>
               <div>
-                <div className="text-sm font-bold text-foreground">4.9</div>
-                <div className="text-[9px] text-muted-foreground">Google</div>
+                <div className="text-xs font-bold text-foreground">4.9</div>
+                <div className="text-[8px] text-muted-foreground">Google</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Desktop Visual Section - CLS fix: Remove x offset animation */}
+      {/* Desktop Visual Section - Video only on desktop */}
       <div 
         className="order-3 hidden md:block md:col-span-2 lg:col-span-1 animate-fade-in"
         style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}
@@ -129,32 +112,35 @@ export const HeroVisualSection = memo(({
         <div className="relative">
           {/* Main Video/Image */}
           <div className="relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl">
-            {videosLoaded && cityVideos.length > 0 ? (
-              <>
-                <AnimatePresence mode="wait">
+            {showVideo && currentVideo ? (
+              <div className="relative w-full h-48 md:h-56 lg:h-80">
+                {/* Render all videos but only show current - prevents DOM flicker */}
+                {cityVideos.map((video, index) => (
                   <motion.video
-                    key={`desktop-${currentVideoIndex}`}
+                    key={video.src}
                     autoPlay
                     muted
                     loop
                     playsInline
-                    className="w-full h-48 md:h-56 lg:h-80 object-cover"
-                    initial={{ opacity: 0, scale: 1.05 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.8 }}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    initial={false}
+                    animate={{ 
+                      opacity: index === currentVideoIndex ? 1 : 0,
+                      zIndex: index === currentVideoIndex ? 10 : 1
+                    }}
+                    transition={{ duration: 0.6 }}
                   >
-                    <source src={cityVideos[currentVideoIndex].src} type="video/mp4" />
+                    <source src={video.src} type="video/mp4" />
                   </motion.video>
-                </AnimatePresence>
+                ))}
                 
-                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 z-20">
                   <Globe className="h-3 w-3 text-white" />
                   <span className="text-xs text-white font-medium">
-                    {language === 'TR' ? cityVideos[currentVideoIndex].labelTR : cityVideos[currentVideoIndex].label}
+                    {language === 'TR' ? currentVideo.labelTR : currentVideo.label}
                   </span>
                 </div>
-              </>
+              </div>
             ) : (
               <img
                 src={heroMercedes}
@@ -165,10 +151,10 @@ export const HeroVisualSection = memo(({
                 fetchPriority="high"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
             
             {/* Overlay Content */}
-            <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-6">
+            <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-6 z-20">
               <div className="text-white">
                 <h3 className="text-sm lg:text-lg font-bold mb-1 lg:mb-2">{t("premiumFleet") || "Premium Mercedes Fleet"}</h3>
                 <div className="flex flex-wrap gap-1.5 lg:gap-3">
@@ -191,7 +177,7 @@ export const HeroVisualSection = memo(({
             </div>
           </div>
 
-          {/* Floating Stats Cards - CLS fix: Remove y/x offset animations */}
+          {/* Floating Stats Cards */}
           <div 
             className="absolute -top-2 lg:-top-4 -right-2 lg:-right-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50 animate-fade-in"
             style={{ animationDelay: '0.5s', animationFillMode: 'backwards' }}

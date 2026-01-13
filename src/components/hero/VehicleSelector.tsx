@@ -85,24 +85,25 @@ export const VehicleSelector = memo(({
     };
   }, [tappedVehicle]);
 
-  // Optimized vehicle tap handler with RAF for smooth updates
+  // Optimized vehicle tap handler - instant selection on mobile
   const handleVehicleTap = useCallback((vehicle: typeof VEHICLE_TYPES[0], isDisabled: boolean) => {
     if (isDisabled) return;
     
-    // Use requestAnimationFrame to batch state updates
-    requestAnimationFrame(() => {
-      if (isTouchDevice) {
-        if (tappedVehicle === vehicle.value) {
-          onSelectVehicle(vehicle.value);
-          setTappedVehicle(null);
-        } else {
-          setTappedVehicle(vehicle.value);
-        }
-      } else {
-        onSelectVehicle(vehicle.value);
-      }
-    });
-  }, [isTouchDevice, tappedVehicle, onSelectVehicle]);
+    // On mobile: single tap selects, no double-tap needed
+    if (isTouchDevice) {
+      onSelectVehicle(vehicle.value);
+      setTappedVehicle(null);
+    } else {
+      onSelectVehicle(vehicle.value);
+    }
+  }, [isTouchDevice, onSelectVehicle]);
+
+  // Long press for tooltip on mobile
+  const handleLongPress = useCallback((vehicleValue: string) => {
+    if (isTouchDevice) {
+      setTappedVehicle(vehicleValue);
+    }
+  }, [isTouchDevice]);
 
   // Optimized hover handlers
   const handleMouseEnter = useCallback((vehicleValue: string, isDisabled: boolean) => {
@@ -118,15 +119,16 @@ export const VehicleSelector = memo(({
   }, [isTouchDevice]);
 
   // Optimized info button handler
-  const handleInfoClick = useCallback((e: React.MouseEvent, vehicle: typeof VEHICLE_TYPES[0]) => {
+  const handleInfoClick = useCallback((e: React.MouseEvent | React.TouchEvent, vehicle: typeof VEHICLE_TYPES[0]) => {
     e.stopPropagation();
+    e.preventDefault();
     setSelectedVehicleForDetail(vehicle);
     setIsVehicleDetailOpen(true);
   }, []);
 
   return (
     <>
-      <div ref={containerRef} className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div ref={containerRef} className="grid grid-cols-4 gap-1.5 sm:gap-2">
         {VEHICLE_TYPES.map((vehicle, index) => {
           const vehiclePrice = prices.find(v => v.vehicleType === vehicle.value);
           const isSelected = selectedVehicle === vehicle.value;
@@ -134,7 +136,7 @@ export const VehicleSelector = memo(({
           const isHovered = hoveredVehicle === vehicle.value;
           const isTapped = tappedVehicle === vehicle.value;
           
-          // Show tooltip on hover (desktop) or tap (mobile)
+          // Show tooltip on hover (desktop) or long-tap (mobile)
           const showTooltip = (isHovered || isTapped) && !isDisabled;
           
           // Determine tooltip position based on vehicle index to prevent off-screen
@@ -143,8 +145,7 @@ export const VehicleSelector = memo(({
           return (
             <div 
               key={vehicle.value}
-              className="relative animate-fade-in"
-              style={{ animationDelay: `${0.05 * index}s` }}
+              className="relative"
               data-vehicle-card
               onMouseEnter={() => handleMouseEnter(vehicle.value, isDisabled)}
               onMouseLeave={handleMouseLeave}
@@ -168,68 +169,92 @@ export const VehicleSelector = memo(({
               <button
                 type="button"
                 onClick={() => handleVehicleTap(vehicle, isDisabled)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  handleLongPress(vehicle.value);
+                }}
                 disabled={isDisabled}
                 className={cn(
-                  "w-full rounded-xl border p-2 text-center overflow-hidden touch-manipulation",
-                  "transition-all duration-200 ease-out",
-                  "hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97]",
-                  isDisabled ? "opacity-40 cursor-not-allowed hover:scale-100 hover:translate-y-0" : "cursor-pointer",
+                  "w-full rounded-lg border p-1 sm:p-1.5 text-center overflow-hidden touch-manipulation",
+                  "transition-all duration-150 ease-out",
+                  "active:scale-[0.96]",
+                  isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
                   isSelected 
-                    ? "border-primary bg-primary/10 ring-2 ring-primary shadow-lg" 
-                    : "border-border bg-card hover:border-primary/50 hover:shadow-md"
+                    ? "border-primary bg-primary/10 ring-1 ring-primary shadow-md" 
+                    : "border-border bg-card hover:border-primary/50"
                 )}
               >
-                {/* Vehicle Image with Carousel */}
-                <div className="w-full aspect-[16/10] rounded-lg overflow-hidden mb-2 bg-muted relative group/image">
-                  <Suspense fallback={
-                    <img 
-                      src={vehicleImages[vehicle.value]} 
-                      alt={vehicle.label}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  }>
-                    <VehicleImageCarousel
-                      images={vehicle.images.slice(0, 5).map(img => img.src)}
-                      alt={vehicle.label}
-                      className="w-full h-full"
-                      interval={3000}
-                      isHovered={isHovered}
-                    />
-                  </Suspense>
+                {/* Vehicle Image - Static on mobile for performance */}
+                <div className="w-full aspect-[16/10] rounded-md overflow-hidden mb-1 bg-muted relative group/image">
+                  {/* Mobile: Static image only */}
+                  <img 
+                    src={vehicleImages[vehicle.value]} 
+                    alt={vehicle.label}
+                    className="w-full h-full object-cover sm:hidden"
+                    loading={index === 0 ? "eager" : "lazy"}
+                  />
                   
-                  {/* Info Button */}
+                  {/* Desktop: Carousel */}
+                  <div className="hidden sm:block w-full h-full">
+                    <Suspense fallback={
+                      <img 
+                        src={vehicleImages[vehicle.value]} 
+                        alt={vehicle.label}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    }>
+                      <VehicleImageCarousel
+                        images={vehicle.images.slice(0, 4).map(img => img.src)}
+                        alt={vehicle.label}
+                        className="w-full h-full"
+                        interval={4000}
+                        isHovered={isHovered}
+                      />
+                    </Suspense>
+                  </div>
+                  
+                  {/* Info Button - Larger touch target on mobile */}
                   <button
                     type="button"
                     onClick={(e) => handleInfoClick(e, vehicle)}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white opacity-0 group-hover/image:opacity-100 transition-opacity z-20 touch-manipulation"
+                    onTouchEnd={(e) => handleInfoClick(e, vehicle)}
+                    className="absolute top-0.5 right-0.5 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white opacity-100 sm:opacity-0 sm:group-hover/image:opacity-100 transition-opacity z-20 touch-manipulation"
                   >
-                    <Info className="h-3.5 w-3.5" />
+                    <Info className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
                   </button>
                   
                   {isSelected && (
-                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10 animate-fade-in">
-                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                        <Check className="h-4 w-4 text-primary-foreground" />
+                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10">
+                      <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="h-2.5 w-2.5 sm:h-4 sm:w-4 text-primary-foreground" />
                       </div>
                     </div>
                   )}
                 </div>
-                <div className="text-xs font-semibold truncate mb-0.5">{vehicle.label.split(' ').pop()}</div>
-                <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
-                  <Users className="h-3 w-3" />
-                  <span>{vehicle.passengers} pax</span>
+                
+                {/* Vehicle Name - Compact on mobile */}
+                <div className="text-[10px] sm:text-xs font-semibold truncate mb-0.5">
+                  {vehicle.label.split(' ').pop()}
                 </div>
+                
+                {/* Passenger Count - Smaller on mobile */}
+                <div className="flex items-center justify-center gap-0.5 text-[8px] sm:text-[10px] text-muted-foreground">
+                  <Users className="h-2 w-2 sm:h-3 sm:w-3" />
+                  <span>{vehicle.passengers}</span>
+                </div>
+                
+                {/* Price */}
                 {vehiclePrice ? (
-                  <div className="text-xs font-bold text-primary">
+                  <div className="text-[10px] sm:text-xs font-bold text-primary mt-0.5">
                     {currency === "EUR" ? "€" : currency}{vehiclePrice.price}
                   </div>
                 ) : loadingPrices && hasRoute ? (
-                  <div className="h-4 flex items-center justify-center">
-                    <Skeleton className="h-3 w-8" />
+                  <div className="h-3 sm:h-4 flex items-center justify-center mt-0.5">
+                    <Skeleton className="h-2.5 sm:h-3 w-6 sm:w-8" />
                   </div>
                 ) : (
-                  <div className="h-4" />
+                  <div className="h-3 sm:h-4" />
                 )}
               </button>
             </div>
