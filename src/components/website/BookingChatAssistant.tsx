@@ -970,87 +970,123 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }, []);
 
-  // Detect keyboard visibility using visualViewport API for mobile
+  // Detect Android device
+  const isAndroidDevice = useCallback(() => {
+    return /Android/i.test(navigator.userAgent);
+  }, []);
+
+  // Robust keyboard detection using visualViewport API
   useEffect(() => {
     if (!mobileFloating || !isOpen) {
       setKeyboardHeight(0);
+      baselineViewportHeightRef.current = 0;
       return;
     }
 
     const viewport = window.visualViewport;
     const isIOS = isIOSDevice();
+    const isAndroid = isAndroidDevice();
     
-    // Store initial window height for comparison
-    const initialWindowHeight = window.innerHeight;
-    let prevKeyboardH = 0;
-    let focusedInput: HTMLInputElement | null = null;
+    // Capture baseline viewport height when keyboard is definitely closed
+    // Use a small delay to ensure we get the correct initial height
+    const captureBaseline = () => {
+      if (viewport) {
+        baselineViewportHeightRef.current = viewport.height;
+      } else {
+        baselineViewportHeightRef.current = window.innerHeight;
+      }
+    };
+    
+    // Initial baseline capture
+    setTimeout(captureBaseline, 100);
 
     const handleViewportChange = () => {
       if (!viewport) return;
       
-      const viewportHeight = viewport.height;
-      const heightDiff = Math.max(0, initialWindowHeight - viewportHeight);
+      const currentHeight = viewport.height;
+      const baseline = baselineViewportHeightRef.current || window.innerHeight;
       
-      // Only consider it a keyboard if the height difference is significant (> 150px)
-      const keyboardH = heightDiff > 150 ? heightDiff : 0;
-
-      // On keyboard close, don't blur immediately - let user interact
-      if (prevKeyboardH > 0 && keyboardH === 0) {
-        // Keyboard closed
-        focusedInput = null;
+      // Calculate keyboard height from baseline difference
+      const heightDiff = Math.max(0, baseline - currentHeight);
+      
+      // Threshold: only consider keyboard if diff > 100px (accounts for address bar changes)
+      const keyboardH = heightDiff > 100 ? heightDiff : 0;
+      
+      // Update baseline if keyboard closes and viewport is larger
+      if (keyboardH === 0 && currentHeight > baseline) {
+        baselineViewportHeightRef.current = currentHeight;
       }
-
-      // iOS: when keyboard opens, scroll to input
-      if (isIOS && prevKeyboardH === 0 && keyboardH > 0) {
-        focusedInput = inputRef.current;
+      
+      setKeyboardHeight(keyboardH);
+      
+      // When keyboard opens, scroll input into view
+      if (keyboardH > 0 && inputRef.current) {
         requestAnimationFrame(() => {
-          scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+          // iOS: use scrollIntoView with block: 'center' to ensure visibility
+          if (isIOS) {
+            inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          // Android: scroll the messages to bottom
+          if (isAndroid) {
+            scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          }
         });
       }
-
-      prevKeyboardH = keyboardH;
-      setKeyboardHeight(keyboardH);
     };
 
-    // Focus/blur event handlers for more reliable keyboard detection
+    // Focus handler - explicitly handle keyboard appearance
     const handleFocusIn = (e: FocusEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        focusedInput = e.target as HTMLInputElement;
-        // Give keyboard time to appear before measuring
-        setTimeout(() => {
-          handleViewportChange();
-        }, 300);
+      if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+        return;
       }
+      
+      // iOS needs longer delay for keyboard animation
+      const delay = isIOS ? 400 : 300;
+      
+      setTimeout(() => {
+        handleViewportChange();
+        
+        // Extra scroll for iOS to ensure input is visible
+        if (isIOS && inputRef.current) {
+          inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, delay);
     };
 
+    // Blur handler - reset keyboard height
     const handleFocusOut = () => {
-      // Small delay to allow for switching between inputs
       setTimeout(() => {
-        if (document.activeElement?.tagName !== 'INPUT' && 
-            document.activeElement?.tagName !== 'TEXTAREA') {
-          focusedInput = null;
+        const activeEl = document.activeElement;
+        if (activeEl?.tagName !== 'INPUT' && activeEl?.tagName !== 'TEXTAREA') {
           setKeyboardHeight(0);
         }
-      }, 100);
+      }, 150);
     };
 
+    // Listen to visualViewport resize
     if (viewport) {
-      viewport.addEventListener("resize", handleViewportChange);
+      viewport.addEventListener('resize', handleViewportChange);
+      viewport.addEventListener('scroll', handleViewportChange);
     }
     
-    document.addEventListener("focusin", handleFocusIn);
-    document.addEventListener("focusout", handleFocusOut);
+    // Also listen to window resize as fallback
+    window.addEventListener('resize', handleViewportChange);
+    document.addEventListener('focusin', handleFocusIn);
+    document.addEventListener('focusout', handleFocusOut);
 
+    // Initial check
     handleViewportChange();
 
     return () => {
       if (viewport) {
-        viewport.removeEventListener("resize", handleViewportChange);
+        viewport.removeEventListener('resize', handleViewportChange);
+        viewport.removeEventListener('scroll', handleViewportChange);
       }
-      document.removeEventListener("focusin", handleFocusIn);
-      document.removeEventListener("focusout", handleFocusOut);
+      window.removeEventListener('resize', handleViewportChange);
+      document.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('focusout', handleFocusOut);
     };
-  }, [mobileFloating, isOpen, isIOSDevice]);
+  }, [mobileFloating, isOpen, isIOSDevice, isAndroidDevice]);
 
   // Handle AI parameter from URL - auto-open chat and auto-send route message
   useEffect(() => {
@@ -1518,14 +1554,18 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 }
               }}
               data-mobile-panel
-              className="fixed inset-x-0 bottom-0 z-[9998] bg-card rounded-t-2xl shadow-2xl border-t border-border flex flex-col"
+              className="fixed inset-x-0 z-[9998] bg-card rounded-t-2xl shadow-2xl border-t border-border flex flex-col"
               style={{
+                // Position panel above keyboard - use top instead of bottom for better keyboard handling
+                top: keyboardHeight > 0 ? '10%' : '25%',
                 bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
-                height: keyboardHeight > 0 ? `min(55vh, 380px)` : "min(65vh, 480px)",
-                maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px - 16px)` : "calc(100vh - 60px)",
+                maxHeight: keyboardHeight > 0 
+                  ? `calc(90% - ${keyboardHeight}px)` 
+                  : '75%',
+                minHeight: '200px',
                 touchAction: 'auto',
                 pointerEvents: 'auto',
-                paddingBottom: 'env(safe-area-inset-bottom)',
+                paddingBottom: keyboardHeight > 0 ? '0' : 'env(safe-area-inset-bottom)',
               }}
             >
                 {/* Drag Handle - Swipe indicator */}
@@ -1778,10 +1818,18 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         }
                       }}
                       onFocus={() => {
-                        // Delay scroll to allow keyboard to appear
+                        // iOS needs the input to scroll into view when keyboard opens
+                        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                        const delay = isIOS ? 450 : 350;
+                        
                         setTimeout(() => {
-                          scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-                        }, 350);
+                          // Scroll input into visible area above keyboard
+                          inputRef.current?.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center'
+                          });
+                        }, delay);
                       }}
                       placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
                       disabled={isLoading || isRecording}
