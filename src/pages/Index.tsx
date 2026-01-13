@@ -1,24 +1,34 @@
+import { lazy, Suspense } from "react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Hero } from "@/components/Hero";
 import { BookingForm } from "@/components/BookingForm";
-import { Destinations } from "@/components/Destinations";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
-import TrustedPartners from "@/components/website/TrustedPartners";
-import WhyChooseUs from "@/components/website/WhyChooseUs";
-import GoogleReviewsCarousel from "@/components/website/GoogleReviewsCarousel";
-import HourlyRentalSection from "@/components/website/HourlyRentalSection";
-import StatsCounter from "@/components/website/StatsCounter";
 import TrustBar from "@/components/website/TrustBar";
-import FleetIconsBar from "@/components/website/FleetIconsBar";
-import ReviewPlatformLogos from "@/components/website/ReviewPlatformLogos";
-import AIAssistantPromo from "@/components/website/AIAssistantPromo";
-import HowItWorks from "@/components/website/HowItWorks";
-import CoreServices from "@/components/website/CoreServices";
 
+// Critical above-the-fold components are imported directly
+// Below-the-fold components are lazy loaded for better TTFB
+
+// Lazy loaded below-fold components
+const CoreServices = lazy(() => import("@/components/website/CoreServices"));
+const StatsCounter = lazy(() => import("@/components/website/StatsCounter"));
+const HowItWorks = lazy(() => import("@/components/website/HowItWorks"));
+const FleetIconsBar = lazy(() => import("@/components/website/FleetIconsBar"));
+const Destinations = lazy(() => import("@/components/Destinations").then(m => ({ default: m.Destinations })));
+const WhyChooseUs = lazy(() => import("@/components/website/WhyChooseUs"));
+const HourlyRentalSection = lazy(() => import("@/components/website/HourlyRentalSection"));
+const GoogleReviewsCarousel = lazy(() => import("@/components/website/GoogleReviewsCarousel"));
+const ReviewPlatformLogos = lazy(() => import("@/components/website/ReviewPlatformLogos"));
+const AIAssistantPromo = lazy(() => import("@/components/website/AIAssistantPromo"));
+const TrustedPartners = lazy(() => import("@/components/website/TrustedPartners"));
+const PWAPromoBanner = lazy(() => import("@/components/website/PWAPromoBanner").then(m => ({ default: m.PWAPromoBanner })));
+
+// Minimal loading placeholder for lazy sections
+const SectionPlaceholder = () => (
+  <div className="min-h-[200px]" aria-hidden="true" />
+);
 
 const Index = () => {
   // Auto-redirect first-time visitors based on browser language
@@ -41,42 +51,53 @@ const Index = () => {
           { type: 'MerchantProduct' },
         ]}
       />
-      {/* Hero with Booking Form integrated */}
+      {/* Critical above-the-fold content - loaded immediately */}
       <Hero />
       <TrustBar />
       <BookingForm />
       
-      {/* Core Services - Transfeero style */}
-      <CoreServices />
+      {/* Below-the-fold content - lazy loaded for better TTFB */}
+      <Suspense fallback={<SectionPlaceholder />}>
+        <CoreServices />
+      </Suspense>
       
-      {/* Stats - Dark section like Transfeero */}
-      <StatsCounter />
+      <Suspense fallback={<SectionPlaceholder />}>
+        <StatsCounter />
+      </Suspense>
       
-      {/* How It Works - 3 step process */}
-      <HowItWorks />
+      <Suspense fallback={<SectionPlaceholder />}>
+        <HowItWorks />
+      </Suspense>
       
-      {/* Fleet Showcase */}
-      <FleetIconsBar />
+      <Suspense fallback={<SectionPlaceholder />}>
+        <FleetIconsBar />
+      </Suspense>
       
-      {/* Top Destinations - Bento grid style */}
-      <Destinations />
+      <Suspense fallback={<SectionPlaceholder />}>
+        <Destinations />
+      </Suspense>
       
-      {/* Why Choose Us - Two column layout */}
-      <WhyChooseUs />
+      <Suspense fallback={<SectionPlaceholder />}>
+        <WhyChooseUs />
+      </Suspense>
       
-      {/* Hourly Rental */}
-      <HourlyRentalSection />
+      <Suspense fallback={<SectionPlaceholder />}>
+        <HourlyRentalSection />
+      </Suspense>
       
-      {/* Reviews */}
-      <GoogleReviewsCarousel />
-      <ReviewPlatformLogos />
+      <Suspense fallback={<SectionPlaceholder />}>
+        <GoogleReviewsCarousel />
+        <ReviewPlatformLogos />
+      </Suspense>
       
-      {/* AI Assistant */}
-      <AIAssistantPromo />
+      <Suspense fallback={<SectionPlaceholder />}>
+        <AIAssistantPromo />
+      </Suspense>
       
-      {/* Partners & Trust */}
-      <TrustedPartners />
-      <PWAPromoBanner />
+      <Suspense fallback={<SectionPlaceholder />}>
+        <TrustedPartners />
+        <PWAPromoBanner />
+      </Suspense>
       
       <Footer />
     </WebsiteLayout>
