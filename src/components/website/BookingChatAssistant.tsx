@@ -87,10 +87,14 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
   const [showBrowserWarning, setShowBrowserWarning] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [useWhisperFallback, setUseWhisperFallback] = useState(false);
+  const [audioLevels, setAudioLevels] = useState<number[]>(new Array(16).fill(0));
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
   const isNativeSupported = isSpeechRecognitionSupported();
   const transcriptRef = useRef<string>('');
 
@@ -125,6 +129,64 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
 
   const dismissWarning = useCallback(() => {
     setShowBrowserWarning(false);
+  }, []);
+
+  // Setup audio analyser for visualizing audio levels
+  const setupAudioAnalyser = useCallback((stream: MediaStream) => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioContext;
+      
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 64;
+      analyser.smoothingTimeConstant = 0.8;
+      analyserRef.current = analyser;
+      
+      const source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+      
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      
+      const updateLevels = () => {
+        if (!analyserRef.current) return;
+        
+        analyserRef.current.getByteFrequencyData(dataArray);
+        
+        // Sample 16 frequency bands for visualization
+        const levels: number[] = [];
+        const bandSize = Math.floor(dataArray.length / 16);
+        
+        for (let i = 0; i < 16; i++) {
+          let sum = 0;
+          for (let j = 0; j < bandSize; j++) {
+            sum += dataArray[i * bandSize + j];
+          }
+          // Normalize to 0-1 range with some amplification
+          levels.push(Math.min(1, (sum / bandSize / 255) * 2));
+        }
+        
+        setAudioLevels(levels);
+        animationFrameRef.current = requestAnimationFrame(updateLevels);
+      };
+      
+      updateLevels();
+    } catch (error) {
+      console.error('🎤 Error setting up audio analyser:', error);
+    }
+  }, []);
+
+  // Cleanup audio analyser
+  const cleanupAudioAnalyser = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+    setAudioLevels(new Array(16).fill(0));
   }, []);
 
   // Request microphone permission explicitly for iOS
@@ -210,6 +272,9 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       streamRef.current = stream;
       audioChunksRef.current = [];
       
+      // Setup audio analyser for visualization
+      setupAudioAnalyser(stream);
+      
       // Determine supported MIME type
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
         ? 'audio/webm;codecs=opus'
@@ -233,6 +298,9 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       
       mediaRecorder.onstop = async () => {
         console.log('🎤 Whisper: Recording stopped, chunks:', audioChunksRef.current.length);
+        
+        // Cleanup audio analyser
+        cleanupAudioAnalyser();
         
         if (audioChunksRef.current.length > 0) {
           const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
@@ -260,7 +328,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       console.error('🎤 Whisper: Error starting recording:', error);
       setShowBrowserWarning(true);
     }
-  }, [transcribeWithWhisper]);
+  }, [transcribeWithWhisper, setupAudioAnalyser, cleanupAudioAnalyser]);
 
   // Stop Whisper recording
   const stopWhisperRecording = useCallback(() => {
@@ -319,13 +387,10 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         console.log('🎤 iOS microphone stream obtained:', stream);
         console.log('🎤 Audio tracks:', stream.getAudioTracks().length);
         
-        stream.getTracks().forEach(track => {
-          console.log('🎤 Microphone track:', track.label, 'state:', track.readyState, 'enabled:', track.enabled);
-          setTimeout(() => {
-            track.stop();
-            console.log('🎤 Track stopped after delay');
-          }, 100);
-        });
+        // Keep stream for audio analyser visualization
+        streamRef.current = stream;
+        setupAudioAnalyser(stream);
+        
         setPermissionGranted(true);
         console.log('🎤 iOS permission granted');
       } catch (error) {
@@ -341,6 +406,24 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       console.log('🎤 Permission result:', granted);
       if (!granted) {
         return;
+      }
+      
+      // Get stream for audio visualization on non-iOS
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        streamRef.current = stream;
+        setupAudioAnalyser(stream);
+      } catch (error) {
+        console.log('🎤 Could not get stream for visualization:', error);
+      }
+    } else {
+      // Already has permission, get stream for visualization
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        streamRef.current = stream;
+        setupAudioAnalyser(stream);
+      } catch (error) {
+        console.log('🎤 Could not get stream for visualization:', error);
       }
     }
 
@@ -443,6 +526,13 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         console.log('🎤 Speech recognition ENDED');
         console.log('🎤 Current transcript ref:', transcriptRef.current);
         
+        // Cleanup audio analyser and stream
+        cleanupAudioAnalyser();
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+          streamRef.current = null;
+        }
+        
         if (isIOS() && transcriptRef.current) {
           console.log('🎤 iOS: Using interim transcript as final');
           setIsProcessing(true);
@@ -491,10 +581,19 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       setUseWhisperFallback(true);
       await startWhisperRecording();
     }
-  }, [language, getLanguageCode, onTranscription, isIOS, permissionGranted, requestMicrophonePermission, isNativeSupported, isMediaRecorderSupported, startWhisperRecording]);
+  }, [language, getLanguageCode, onTranscription, isIOS, permissionGranted, requestMicrophonePermission, isNativeSupported, isMediaRecorderSupported, startWhisperRecording, setupAudioAnalyser, cleanupAudioAnalyser]);
 
   const stopRecording = useCallback(() => {
     console.log('Stopping recording, isRecording:', isRecording, 'useWhisperFallback:', useWhisperFallback);
+    
+    // Cleanup audio analyser
+    cleanupAudioAnalyser();
+    
+    // Cleanup stream for native speech recognition
+    if (streamRef.current && !useWhisperFallback) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
     
     if (useWhisperFallback) {
       stopWhisperRecording();
@@ -507,9 +606,9 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     }
     
     setIsRecording(false);
-  }, [isRecording, useWhisperFallback, stopWhisperRecording]);
+  }, [isRecording, useWhisperFallback, stopWhisperRecording, cleanupAudioAnalyser]);
 
-  return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning, useWhisperFallback };
+  return { isRecording, isProcessing, startRecording, stopRecording, isSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels };
 }
 
 // Voice option type
@@ -776,7 +875,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     });
   }, [mobileFloating]);
   
-  const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning, useWhisperFallback } = useVoiceRecorder(
+  const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning, useWhisperFallback, audioLevels } = useVoiceRecorder(
     handleTranscription,
     language
   );
@@ -1486,22 +1585,19 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   {/* Recording indicator with waveform */}
                   {(isRecording || isProcessing) && (
                     <div className="flex flex-col items-center gap-2 mb-3">
-                      {/* Audio waveform visualizer */}
+                      {/* Audio waveform visualizer - real-time audio levels */}
                       {isRecording && !isProcessing && (
                         <div className="flex items-center justify-center gap-[3px] h-8">
-                          {[...Array(12)].map((_, i) => (
+                          {audioLevels.slice(0, 12).map((level, i) => (
                             <motion.div
                               key={i}
                               className="w-1 bg-destructive rounded-full"
                               animate={{
-                                height: [8, 20 + Math.random() * 12, 8],
+                                height: Math.max(4, 4 + level * 28),
                               }}
                               transition={{
-                                duration: 0.4 + Math.random() * 0.3,
-                                repeat: Infinity,
-                                repeatType: "reverse",
-                                delay: i * 0.05,
-                                ease: "easeInOut",
+                                duration: 0.05,
+                                ease: "linear",
                               }}
                             />
                           ))}
@@ -1740,22 +1836,19 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       {/* Desktop Recording indicator with waveform */}
       {(isRecording || isProcessing) && (
         <div className="flex flex-col items-center gap-2 mb-2 py-2 bg-muted/50 rounded-lg">
-          {/* Audio waveform visualizer */}
+          {/* Audio waveform visualizer - real-time audio levels */}
           {isRecording && !isProcessing && (
             <div className="flex items-center justify-center gap-[3px] h-6">
-              {[...Array(16)].map((_, i) => (
+              {audioLevels.map((level, i) => (
                 <motion.div
                   key={i}
                   className="w-1 bg-destructive rounded-full"
                   animate={{
-                    height: [6, 16 + Math.random() * 10, 6],
+                    height: Math.max(3, 3 + level * 21),
                   }}
                   transition={{
-                    duration: 0.4 + Math.random() * 0.3,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    delay: i * 0.04,
-                    ease: "easeInOut",
+                    duration: 0.05,
+                    ease: "linear",
                   }}
                 />
               ))}
