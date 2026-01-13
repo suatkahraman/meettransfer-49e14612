@@ -1764,6 +1764,114 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         <Send className="h-3.5 w-3.5" />
                       )}
                     </Button>
+                    
+                    {/* Mobile Voice Settings Popover */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 rounded-lg shrink-0 touch-manipulation"
+                        >
+                          {isVoiceEnabled ? (
+                            <Volume2 className="h-3.5 w-3.5 text-primary" />
+                          ) : (
+                            <VolumeX className="h-3.5 w-3.5 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent 
+                        align="end" 
+                        side="top" 
+                        className="w-64 p-2.5"
+                        sideOffset={8}
+                      >
+                        <div className="space-y-3">
+                          {/* Voice toggle */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium">
+                              {language === "TR" ? "Sesli Yanıt" : "Voice Response"}
+                            </span>
+                            <Button
+                              variant={isVoiceEnabled ? "default" : "outline"}
+                              size="sm"
+                              onClick={toggleVoice}
+                              className="h-6 px-2 text-[10px]"
+                            >
+                              {isVoiceEnabled 
+                                ? (language === "TR" ? "Açık" : "On")
+                                : (language === "TR" ? "Kapalı" : "Off")
+                              }
+                            </Button>
+                          </div>
+
+                          {/* Voice selection */}
+                          {availableVoices.length > 0 && (
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-medium text-muted-foreground">
+                                {language === "TR" ? "Ses Seçimi" : "Voice"}
+                              </label>
+                              <div className="grid grid-cols-2 gap-1">
+                                {availableVoices.slice(0, 4).map((voice) => (
+                                  <Button
+                                    key={voice.id}
+                                    variant={selectedVoiceId === voice.id ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => selectVoice(voice.id)}
+                                    className="h-6 text-[10px] justify-start px-1.5"
+                                  >
+                                    <span className="truncate">{voice.name}</span>
+                                    {voice.gender !== 'neutral' && (
+                                      <span className="ml-0.5 opacity-60 text-[9px]">
+                                        {voice.gender === 'female' ? '♀' : '♂'}
+                                      </span>
+                                    )}
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Speech rate */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <label className="text-[10px] font-medium text-muted-foreground">
+                                {language === "TR" ? "Hız" : "Speed"}
+                              </label>
+                              <span className="text-[10px] font-mono bg-muted px-1 py-0.5 rounded">
+                                {speechRate.toFixed(1)}x
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-5 w-5"
+                                onClick={() => changeRate(Math.max(0.5, speechRate - 0.25))}
+                                disabled={speechRate <= 0.5}
+                              >
+                                <ChevronDown className="h-2.5 w-2.5" />
+                              </Button>
+                              <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-primary rounded-full transition-all"
+                                  style={{ width: `${((speechRate - 0.5) / 1.5) * 100}%` }}
+                                />
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-5 w-5"
+                                onClick={() => changeRate(Math.min(2, speechRate + 0.25))}
+                                disabled={speechRate >= 2}
+                              >
+                                <ChevronDown className="h-2.5 w-2.5 rotate-180" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
               </motion.div>
