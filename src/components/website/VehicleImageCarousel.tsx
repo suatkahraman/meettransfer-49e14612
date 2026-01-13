@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, memo } from "react";
+import { motion } from "framer-motion";
 
 interface VehicleImageCarouselProps {
   images: string[];
@@ -9,7 +9,7 @@ interface VehicleImageCarouselProps {
   isHovered?: boolean;
 }
 
-export const VehicleImageCarousel = ({ 
+export const VehicleImageCarousel = memo(({ 
   images, 
   alt, 
   className = "",
@@ -17,12 +17,26 @@ export const VehicleImageCarousel = ({
   isHovered = false 
 }: VehicleImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
+  const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set([0]));
+  const preloadedRef = useRef<Set<string>>(new Set());
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Initialize loaded state for all images
+  // Preload images once on mount - avoid repeated DOM manipulation
   useEffect(() => {
-    setImagesLoaded(new Array(images.length).fill(false));
-  }, [images.length]);
+    if (images.length <= 1) return;
+
+    // Preload all images in memory without adding to DOM
+    images.forEach((src, index) => {
+      if (preloadedRef.current.has(src)) return;
+      
+      const img = new Image();
+      img.onload = () => {
+        setImagesLoaded(prev => new Set([...prev, index]));
+        preloadedRef.current.add(src);
+      };
+      img.src = src;
+    });
+  }, [images]);
 
   // Auto-rotate images
   useEffect(() => {
@@ -35,57 +49,43 @@ export const VehicleImageCarousel = ({
     return () => clearInterval(timer);
   }, [images.length, interval, isHovered]);
 
-  const handleImageLoad = (index: number) => {
-    setImagesLoaded((prev) => {
-      const newState = [...prev];
-      newState[index] = true;
-      return newState;
-    });
-  };
-
   if (images.length === 0) return null;
 
+  const isCurrentLoaded = imagesLoaded.has(currentIndex);
+
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <AnimatePresence mode="wait">
+    <div ref={containerRef} className={`relative overflow-hidden ${className}`}>
+      {/* Render all images but only show current one - prevents DOM flicker */}
+      {images.map((src, index) => (
         <motion.img
-          key={currentIndex}
-          src={images[currentIndex]}
-          alt={`${alt} ${currentIndex + 1}`}
-          onLoad={() => handleImageLoad(currentIndex)}
-          initial={{ opacity: 0, scale: 1.05 }}
+          key={src}
+          src={src}
+          alt={`${alt} ${index + 1}`}
+          initial={false}
           animate={{ 
-            opacity: imagesLoaded[currentIndex] ? 1 : 0, 
-            scale: isHovered ? 1.1 : 1 
+            opacity: index === currentIndex && imagesLoaded.has(index) ? 1 : 0,
+            scale: index === currentIndex && isHovered ? 1.1 : 1,
+            zIndex: index === currentIndex ? 10 : 1
           }}
-          exit={{ opacity: 0 }}
           transition={{ 
-            opacity: { duration: 0.5 },
+            opacity: { duration: 0.4 },
             scale: { duration: 0.3 }
           }}
           className="absolute inset-0 w-full h-full object-cover"
+          loading={index === 0 ? "eager" : "lazy"}
+          onLoad={() => {
+            setImagesLoaded(prev => new Set([...prev, index]));
+          }}
         />
-      </AnimatePresence>
-
-      {/* Preload other images */}
-      {images.map((src, index) => (
-        index !== currentIndex && (
-          <img
-            key={`preload-${index}`}
-            src={src}
-            alt=""
-            onLoad={() => handleImageLoad(index)}
-            className="hidden"
-          />
-        )
       ))}
 
       {/* Dots indicator */}
       {images.length > 1 && (
-        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
+        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1 z-20">
           {images.map((_, index) => (
             <button
               key={index}
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setCurrentIndex(index);
@@ -100,12 +100,14 @@ export const VehicleImageCarousel = ({
         </div>
       )}
 
-      {/* Loading skeleton */}
-      {!imagesLoaded[currentIndex] && (
-        <div className="absolute inset-0 bg-muted animate-pulse" />
+      {/* Loading skeleton - only show if first image hasn't loaded */}
+      {!isCurrentLoaded && (
+        <div className="absolute inset-0 bg-muted animate-pulse z-0" />
       )}
     </div>
   );
-};
+});
+
+VehicleImageCarousel.displayName = "VehicleImageCarousel";
 
 export default VehicleImageCarousel;
