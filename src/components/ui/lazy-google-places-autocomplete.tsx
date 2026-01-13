@@ -170,7 +170,7 @@ const AutocompleteInput = memo(({
         {/* Icon */}
         {icon && (
           <motion.div 
-            className="absolute left-3 top-1/2 -translate-y-1/2 z-10"
+            className="absolute left-3.5 md:left-3 top-1/2 -translate-y-1/2 z-10"
             animate={{
               color: isFocused ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
               scale: isFocused ? 1.15 : 1,
@@ -189,9 +189,9 @@ const AutocompleteInput = memo(({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-10"
+              className="absolute right-3.5 md:right-3 top-1/2 -translate-y-1/2 z-10"
             >
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <Loader2 className="h-5 w-5 md:h-4 md:w-4 animate-spin text-muted-foreground" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -202,8 +202,8 @@ const AutocompleteInput = memo(({
           className={cn(
             "h-14 md:h-12 min-h-[56px] md:min-h-[48px] transition-all duration-150 touch-manipulation text-base md:text-sm",
             "active:bg-muted/70 active:scale-[0.995]",
-            icon && "pl-11 md:pl-10",
-            isLoading && "pr-10",
+            icon && "pl-12 md:pl-10",
+            isLoading && "pr-12 md:pr-10",
             isFloating && "pt-5 pb-1",
             isFocused && "border-primary ring-2 ring-primary/20",
             className
@@ -221,13 +221,13 @@ const AutocompleteInput = memo(({
         <motion.label
           className={cn(
             "absolute pointer-events-none transition-all duration-200 text-muted-foreground",
-            icon ? "left-11 md:left-10" : "left-3"
+            icon ? "left-12 md:left-10" : "left-3.5 md:left-3"
           )}
           initial={false}
           animate={{
             top: isFloating ? "4px" : "50%",
             y: isFloating ? 0 : "-50%",
-            fontSize: isFloating ? "10px" : "14px",
+            fontSize: isFloating ? "10px" : "16px",
             color: isFocused ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
             fontWeight: isFloating ? 500 : 400,
           }}

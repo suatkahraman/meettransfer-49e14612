@@ -54,15 +54,15 @@ export const FloatingLabelDatePicker = React.forwardRef<
         <motion.label
           initial={false}
           animate={{
-            y: isFloating ? -22 : 0,
+            y: isFloating ? -24 : 0,
             x: isFloating ? -4 : 0,
             scale: isFloating ? 0.75 : 1,
             color: (isFocused || open) ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
           }}
           transition={{ duration: 0.2, ease: "easeOut" }}
           className={cn(
-            "absolute left-10 top-1/2 -translate-y-1/2 pointer-events-none z-10 origin-left",
-            "text-sm font-medium bg-card px-1",
+            "absolute left-11 md:left-10 top-1/2 -translate-y-1/2 pointer-events-none z-10 origin-left",
+            "text-base md:text-sm font-medium bg-card px-1",
             isFloating && "text-xs"
           )}
         >
@@ -79,7 +79,7 @@ export const FloatingLabelDatePicker = React.forwardRef<
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             className={cn(
-              "w-full h-12 justify-start bg-muted/50 border-border rounded-xl text-sm transition-all duration-200 touch-manipulation",
+              "w-full h-14 md:h-12 min-h-[56px] md:min-h-[48px] justify-start bg-muted/50 border-border rounded-xl text-base md:text-sm transition-all duration-200 touch-manipulation",
               "focus:ring-2 focus:ring-primary/20 focus:border-primary hover:bg-muted/70 active:bg-muted/80",
               (isFocused || open) && "border-primary shadow-sm shadow-primary/10",
               !hasValue && "text-transparent",
@@ -88,11 +88,11 @@ export const FloatingLabelDatePicker = React.forwardRef<
           >
             <motion.span
               animate={{ color: (isFocused || open) ? "hsl(var(--primary))" : undefined }}
-              className="mr-2 flex-shrink-0"
+              className="mr-2.5 md:mr-2 flex-shrink-0 [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4"
             >
-              {icon || <CalendarIcon className="h-4 w-4" />}
+              {icon || <CalendarIcon className="h-5 w-5 md:h-4 md:w-4" />}
             </motion.span>
-            <span className={cn("truncate", !hasValue && "text-muted-foreground")}>
+            <span className={cn("truncate text-base md:text-sm", !hasValue && "text-muted-foreground")}>
               {hasValue ? format(date, dateFormat) : label}
             </span>
           </Button>
