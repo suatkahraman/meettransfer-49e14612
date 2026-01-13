@@ -8,15 +8,16 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
-import { AnimatePresence } from "framer-motion";
 
-// Critical lightweight components - import directly
-import {
-  HeroHeader,
-  HeroTrustBadges,
-  CityVideo,
-  BookingData,
-} from "@/components/hero";
+// Lazy load AnimatePresence - framer-motion is heavy
+const AnimatePresence = lazy(() => 
+  import("framer-motion").then(m => ({ default: m.AnimatePresence }))
+);
+
+// Critical lightweight components - import directly (no barrel export)
+import { HeroHeader } from "@/components/hero/HeroHeader";
+import { HeroTrustBadges } from "@/components/hero/HeroTrustBadges";
+import type { CityVideo, BookingData } from "@/components/hero/types";
 
 // Lazy load heavier form components - they render after initial paint
 const RideFormContent = lazy(() => import("@/components/hero/RideFormContent").then(m => ({ default: m.RideFormContent })));
