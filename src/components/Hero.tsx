@@ -428,14 +428,14 @@ export const Hero = () => {
       <div className="absolute top-20 right-[10%] w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-40 left-[5%] w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
 
-      <div className="container relative z-10 px-4 py-8 lg:py-16">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(100vh-8rem)]">
-          {/* Left Side - Form (Mobile: First) */}
+      <div className="container relative z-10 px-4 py-6 md:py-8 lg:py-16">
+        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-6 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100vh-6rem)] md:min-h-[calc(100vh-8rem)]">
+          {/* Left Side - Form (Mobile: First, Tablet: 3 cols) */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="order-1"
+            className="order-1 md:col-span-3 lg:col-span-1"
           >
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
@@ -767,40 +767,42 @@ export const Hero = () => {
             </div>
           </motion.div>
 
-          {/* Right Side - Visual (Mobile: Second/Hidden on very small) */}
+          {/* Right Side - Visual (Tablet: 2 cols compact, Desktop: full) */}
           <motion.div 
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="order-2 hidden md:block"
+            className="order-2 hidden md:block md:col-span-2 lg:col-span-1"
           >
             <div className="relative">
               {/* Main Image with Overlay */}
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl">
                 <motion.img 
                   src={heroMercedes}
                   alt="Mercedes Vito VIP Transfer"
-                  className="w-full h-auto object-cover"
+                  className="w-full h-48 md:h-56 lg:h-auto object-cover"
                   initial={{ scale: 1.1 }}
                   animate={{ scale: 1 }}
                   transition={{ duration: 1 }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
-                {/* Overlay Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-6">
+                {/* Overlay Content - Compact on tablet */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-6">
                   <div className="text-white">
-                    <h3 className="text-lg font-bold mb-2">{t("premiumFleet") || "Premium Mercedes Fleet"}</h3>
-                    <div className="flex flex-wrap gap-3">
-                      <div className="flex items-center gap-1.5 text-sm bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                        <Wifi className="h-3.5 w-3.5" />
-                        <span>Free WiFi</span>
+                    <h3 className="text-sm lg:text-lg font-bold mb-1 lg:mb-2">{t("premiumFleet") || "Premium Mercedes Fleet"}</h3>
+                    <div className="flex flex-wrap gap-1.5 lg:gap-3">
+                      <div className="flex items-center gap-1 text-xs lg:text-sm bg-white/20 backdrop-blur-sm rounded-full px-2 lg:px-3 py-0.5 lg:py-1">
+                        <Wifi className="h-3 lg:h-3.5 w-3 lg:w-3.5" />
+                        <span className="hidden lg:inline">Free WiFi</span>
+                        <span className="lg:hidden">WiFi</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-sm bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                        <Baby className="h-3.5 w-3.5" />
-                        <span>Baby Seat</span>
+                      <div className="flex items-center gap-1 text-xs lg:text-sm bg-white/20 backdrop-blur-sm rounded-full px-2 lg:px-3 py-0.5 lg:py-1">
+                        <Baby className="h-3 lg:h-3.5 w-3 lg:w-3.5" />
+                        <span className="hidden lg:inline">Baby Seat</span>
+                        <span className="lg:hidden">Seat</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-sm bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                      <div className="hidden lg:flex items-center gap-1.5 text-sm bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
                         <Briefcase className="h-3.5 w-3.5" />
                         <span>Meet & Greet</span>
                       </div>
@@ -809,43 +811,44 @@ export const Hero = () => {
                 </div>
               </div>
 
-              {/* Floating Stats Cards */}
+              {/* Floating Stats Cards - Smaller on tablet */}
               <motion.div 
-                className="absolute -top-4 -right-4 bg-card rounded-xl shadow-xl p-4 border border-border/50"
+                className="absolute -top-2 lg:-top-4 -right-2 lg:-right-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Globe className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Globe className="h-3.5 lg:h-5 w-3.5 lg:w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="text-xl font-bold text-foreground">100+</div>
-                    <div className="text-xs text-muted-foreground">{t("cities") || "Cities"}</div>
+                    <div className="text-base lg:text-xl font-bold text-foreground">100+</div>
+                    <div className="text-[10px] lg:text-xs text-muted-foreground">{t("cities") || "Cities"}</div>
                   </div>
                 </div>
               </motion.div>
 
               <motion.div 
-                className="absolute -bottom-4 -left-4 bg-card rounded-xl shadow-xl p-4 border border-border/50"
+                className="absolute -bottom-2 lg:-bottom-4 -left-2 lg:-left-4 bg-card rounded-lg lg:rounded-xl shadow-xl p-2 lg:p-4 border border-border/50"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-                    <Plane className="h-5 w-5 text-accent" />
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                    <Plane className="h-3.5 lg:h-5 w-3.5 lg:w-5 text-accent" />
                   </div>
                   <div>
-                    <div className="text-xl font-bold text-foreground">670+</div>
-                    <div className="text-xs text-muted-foreground">{t("airports") || "Airports"}</div>
+                    <div className="text-base lg:text-xl font-bold text-foreground">670+</div>
+                    <div className="text-[10px] lg:text-xs text-muted-foreground">{t("airports") || "Airports"}</div>
                   </div>
                 </div>
               </motion.div>
 
+              {/* Right stat - Hidden on tablet, visible on desktop */}
               <motion.div 
-                className="absolute top-1/2 -right-6 bg-card rounded-xl shadow-xl p-4 border border-border/50"
+                className="absolute top-1/2 -right-6 bg-card rounded-xl shadow-xl p-4 border border-border/50 hidden lg:block"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.9 }}
@@ -861,28 +864,28 @@ export const Hero = () => {
                 </div>
               </motion.div>
 
-              {/* City Marquee Below Image */}
-              <div className="mt-6">
+              {/* City Marquee Below Image - Hidden on tablet */}
+              <div className="mt-4 lg:mt-6 hidden lg:block">
                 <CityMarquee />
               </div>
 
-              {/* Feature List */}
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl p-3 border border-border/30">
-                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-foreground">{t("freeCancellation") || "Free Cancellation"}</span>
+              {/* Feature List - Compact grid on tablet */}
+              <div className="mt-4 lg:mt-6 grid grid-cols-2 gap-2 lg:gap-3">
+                <div className="flex items-center gap-1.5 lg:gap-2 bg-card/80 backdrop-blur-sm rounded-lg lg:rounded-xl p-2 lg:p-3 border border-border/30">
+                  <Check className="h-3 lg:h-4 w-3 lg:w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-[10px] lg:text-sm text-foreground truncate">{t("freeCancellation") || "Free Cancel"}</span>
                 </div>
-                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl p-3 border border-border/30">
-                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-foreground">{t("flightTracking") || "Flight Tracking"}</span>
+                <div className="flex items-center gap-1.5 lg:gap-2 bg-card/80 backdrop-blur-sm rounded-lg lg:rounded-xl p-2 lg:p-3 border border-border/30">
+                  <Check className="h-3 lg:h-4 w-3 lg:w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-[10px] lg:text-sm text-foreground truncate">{t("flightTracking") || "Flight Track"}</span>
                 </div>
-                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl p-3 border border-border/30">
-                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-foreground">{t("noHiddenFees") || "No Hidden Fees"}</span>
+                <div className="flex items-center gap-1.5 lg:gap-2 bg-card/80 backdrop-blur-sm rounded-lg lg:rounded-xl p-2 lg:p-3 border border-border/30">
+                  <Check className="h-3 lg:h-4 w-3 lg:w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-[10px] lg:text-sm text-foreground truncate">{t("noHiddenFees") || "No Hidden Fees"}</span>
                 </div>
-                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl p-3 border border-border/30">
-                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-foreground">24/7 {t("support") || "Support"}</span>
+                <div className="flex items-center gap-1.5 lg:gap-2 bg-card/80 backdrop-blur-sm rounded-lg lg:rounded-xl p-2 lg:p-3 border border-border/30">
+                  <Check className="h-3 lg:h-4 w-3 lg:w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-[10px] lg:text-sm text-foreground truncate">24/7 {t("support") || "Support"}</span>
                 </div>
               </div>
             </div>
