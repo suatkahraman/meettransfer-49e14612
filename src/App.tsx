@@ -16,6 +16,7 @@ import HashScroll from "@/components/HashScroll";
 import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
 import { UpdateNotification } from "./components/UpdateNotification";
 import { PWAUpdatePrompt } from "./components/website/PWAUpdatePrompt";
+import { PWAInstallPrompt } from "./components/website/PWAInstallPrompt";
 
 // Critical pages - lazy loaded with prefetch for better UX
 const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
@@ -197,6 +198,7 @@ const App = () => (
             <AIChatProvider>
             <UpdateNotification />
             <PWAUpdatePrompt />
+            <PWAInstallPrompt />
             <AuthProvider>
               <Routes>
               {/* Localized Website Pages - Support all languages */}
