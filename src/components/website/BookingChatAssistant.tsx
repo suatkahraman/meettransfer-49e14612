@@ -832,6 +832,16 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     setIsTyping(true);
     setStreamingContent("");
 
+    // Close keyboard on mobile by blurring input
+    if (mobileFloating && inputRef.current) {
+      inputRef.current.blur();
+    }
+
+    // Scroll to bottom to show user message immediately
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+
     try {
       // Build conversation history for context (exclude welcome message)
       const conversationHistory = messages
