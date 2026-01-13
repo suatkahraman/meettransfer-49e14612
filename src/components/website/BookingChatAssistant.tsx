@@ -549,63 +549,59 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       setKeyboardHeight(0);
       return;
     }
-    
+
     const viewport = window.visualViewport;
     if (!viewport) return;
 
-    let prevKeyboardHeight = 0;
     const isIOS = isIOSDevice();
 
-    const handleResize = () => {
-      // Calculate keyboard height by comparing viewport height with window height
+    // On iOS, visualViewport can change even without the keyboard (address bar / scroll).
+    // Track a "baseline" diff and only treat large deltas as the keyboard.
+    let minDiff = Number.POSITIVE_INFINITY;
+    let prevKeyboardH = 0;
+
+    const calcDiff = () => {
       const windowHeight = window.innerHeight;
       const viewportHeight = viewport.height;
-      const viewportOffsetTop = viewport.offsetTop || 0;
-      
-      // iOS Safari reports offsetTop when scrolled, use it for more accurate calculation
-      const keyboardH = isIOS 
-        ? Math.max(0, windowHeight - viewportHeight - viewportOffsetTop)
-        : Math.max(0, windowHeight - viewportHeight);
-      
-      // Detect keyboard closing (was open, now closed)
-      if (prevKeyboardHeight > 50 && keyboardH < 50) {
-        // Blur the input when keyboard closes for better UX
-        inputRef.current?.blur();
-        
-        // iOS: Reset any residual scroll position
-        if (isIOS) {
-          window.scrollTo(0, 0);
-        }
+      const offsetTop = isIOS ? viewport.offsetTop || 0 : 0;
+      return Math.max(0, windowHeight - viewportHeight - offsetTop);
+    };
+
+    const handleViewportChange = () => {
+      const diff = calcDiff();
+      minDiff = Math.min(minDiff, diff);
+
+      const rawKeyboardH = Math.max(0, diff - minDiff);
+      // Ignore small deltas that are usually Safari chrome changes, not the keyboard
+      const keyboardH = rawKeyboardH > 120 ? rawKeyboardH : 0;
+
+      const inputEl = inputRef.current;
+      const isInputFocused = !!inputEl && document.activeElement === inputEl;
+
+      // Keyboard closing: blur only if our input is still focused (avoid false positives)
+      if (prevKeyboardH > 0 && keyboardH === 0 && isInputFocused) {
+        inputEl?.blur();
       }
-      
-      // Detect keyboard opening
-      if (prevKeyboardHeight < 50 && keyboardH > 50 && isIOS) {
-        // iOS: Ensure input is visible after keyboard opens
+
+      // iOS: when keyboard opens, keep the latest message + input visible
+      if (isIOS && prevKeyboardH === 0 && keyboardH > 0) {
         requestAnimationFrame(() => {
-          if (inputRef.current && document.activeElement === inputRef.current) {
-            // Use scrollIntoView with specific iOS-friendly options
-            inputRef.current.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'end',
-              inline: 'nearest'
-            });
-          }
+          scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
         });
       }
-      
-      prevKeyboardHeight = keyboardH;
+
+      prevKeyboardH = keyboardH;
       setKeyboardHeight(keyboardH);
     };
 
-    viewport.addEventListener('resize', handleResize);
-    viewport.addEventListener('scroll', handleResize);
-    
-    // Initial check
-    handleResize();
+    viewport.addEventListener("resize", handleViewportChange);
+    viewport.addEventListener("scroll", handleViewportChange);
+
+    handleViewportChange();
 
     return () => {
-      viewport.removeEventListener('resize', handleResize);
-      viewport.removeEventListener('scroll', handleResize);
+      viewport.removeEventListener("resize", handleViewportChange);
+      viewport.removeEventListener("scroll", handleViewportChange);
     };
   }, [mobileFloating, isOpen, isIOSDevice]);
 
@@ -709,11 +705,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   }, [messages]);
 
   useEffect(() => {
-    // Focus input when chat opens
-    if (isOpen && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+    // Focus input when chat opens (desktop only).
+    // On mobile/iOS this is unreliable (keyboard won't open unless focus is within a user gesture).
+    if (!isOpen || mobileFloating) return;
+
+    if (inputRef.current) {
+      const id = window.setTimeout(() => inputRef.current?.focus(), 100);
+      return () => window.clearTimeout(id);
     }
-  }, [isOpen]);
+  }, [isOpen, mobileFloating]);
 
   const [isTyping, setIsTyping] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
@@ -1215,36 +1215,25 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     onFocus={() => {
-                      // iOS Safari specific handling for keyboard focus
-                      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-                      
+                      const isIOS = isIOSDevice();
+
                       if (isIOS) {
-                        // iOS: Use longer delay and requestAnimationFrame for smoother scroll
-                        setTimeout(() => {
-                          requestAnimationFrame(() => {
-                            if (inputRef.current) {
-                              // Scroll the container instead of the input for iOS
-                              const container = inputRef.current.closest('[data-mobile-panel]');
-                              if (container) {
-                                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-                              }
-                              // Also try scrollIntoView as fallback
-                              inputRef.current.scrollIntoView({ 
-                                behavior: 'smooth', 
-                                block: 'end',
-                                inline: 'nearest'
-                              });
-                            }
+                        // iOS: let the keyboard + viewport settle, then keep the bottom visible
+                        window.setTimeout(() => {
+                          scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+                          inputRef.current?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "end",
+                            inline: "nearest",
                           });
-                        }, 350);
+                        }, 60);
                       } else {
-                        // Android/other: standard behavior
-                        setTimeout(() => {
-                          inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 300);
+                        window.setTimeout(() => {
+                          inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }, 200);
                       }
                     }}
+
                     placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
                     disabled={isLoading || isRecording}
                     className="h-11 rounded-xl text-sm flex-1 touch-manipulation"
