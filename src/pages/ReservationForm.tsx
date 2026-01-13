@@ -2438,7 +2438,7 @@ const ReservationForm = () => {
                           const { error } = await supabase.auth.signInWithOAuth({
                             provider: 'google',
                             options: {
-                              redirectTo: `${window.location.origin}/book`,
+                              redirectTo: `${window.location.origin}/book/complete`,
                             },
                           });
                           if (error) {

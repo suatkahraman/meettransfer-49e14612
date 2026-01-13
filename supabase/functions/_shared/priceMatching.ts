@@ -1225,10 +1225,12 @@ export function checkPriceSanity(
       if (airportInfo) {
         const minPrice = getMinPriceForVehicle(airportInfo, vehicle);
         
-        if (priceInEur < minPrice * 0.85) { // 15% tolerance
+        // Allow up to 7€ below minimum (fixed tolerance instead of percentage)
+        const toleranceAmount = 7;
+        if (priceInEur < minPrice - toleranceAmount) {
           return {
             isValid: false,
-            reason: `Fiyat ${price}${currency} çok düşük. ${airportInfo.description} için minimum: ${minPrice}€ (${vehicle})`,
+            reason: `Fiyat ${price}${currency} çok düşük. ${airportInfo.description} için minimum: ${minPrice}€ (${vehicle}). Tolerans: ${toleranceAmount}€`,
             minimumExpected: minPrice,
             actualPrice: price,
             routeKey: airportCityKey,
@@ -1249,11 +1251,12 @@ export function checkPriceSanity(
     if (cityInfo) {
       const minPrice = getMinPriceForVehicle(cityInfo, vehicle);
       
-      // Check if price is significantly below minimum (20% tolerance for city-to-city)
-      if (priceInEur < minPrice * 0.80) {
+      // Allow up to 7€ below minimum (fixed tolerance instead of percentage)
+      const toleranceAmount = 7;
+      if (priceInEur < minPrice - toleranceAmount) {
         return {
           isValid: false,
-          reason: `Fiyat ${price}${currency} çok düşük. ${cityInfo.description} için minimum: ${minPrice}€ (${vehicle})`,
+          reason: `Fiyat ${price}${currency} çok düşük. ${cityInfo.description} için minimum: ${minPrice}€ (${vehicle}). Tolerans: ${toleranceAmount}€`,
           minimumExpected: minPrice,
           actualPrice: price,
           routeKey: pairKey,
@@ -1271,7 +1274,9 @@ export function checkPriceSanity(
         // Assume 300km average for unknown major city pairs
         const estimatedMin = calculateKmBasedMinimum(300, vehicle);
         
-        if (priceInEur < estimatedMin * 0.5) { // 50% tolerance for unknown routes
+        // Allow up to 7€ tolerance for unknown routes too
+        const toleranceAmount = 7;
+        if (priceInEur < estimatedMin - toleranceAmount) {
           return {
             isValid: false,
             reason: `Fiyat ${price}${currency} şehirlerarası transfer için çok düşük görünüyor. ${pickupCity} - ${dropoffCity} (tahmini min: ${estimatedMin}€)`,
