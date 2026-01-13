@@ -115,6 +115,11 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }, []);
+  
+  // Detect Android
+  const isAndroid = useCallback(() => {
+    return /Android/i.test(navigator.userAgent);
+  }, []);
 
   // Map language codes to BCP-47 format for Web Speech API
   const getLanguageCode = useCallback((lang: string): string => {
@@ -268,6 +273,10 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       const base64Audio = btoa(binary);
       console.log('🎤 Whisper: Base64 audio length:', base64Audio.length);
 
+      // Detect MIME type from blob
+      const detectedMimeType = audioBlob.type || 'audio/webm';
+      console.log('🎤 Whisper: Sending audio with type:', detectedMimeType);
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-to-text`,
         {
@@ -277,7 +286,11 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
-          body: JSON.stringify({ audio: base64Audio, language }),
+          body: JSON.stringify({ 
+            audio: base64Audio, 
+            language,
+            mimeType: detectedMimeType 
+          }),
         }
       );
 
@@ -320,18 +333,63 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       // Setup audio analyser for visualization
       setupAudioAnalyser(stream);
       
-      // Determine supported MIME type
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-        ? 'audio/webm;codecs=opus'
-        : MediaRecorder.isTypeSupported('audio/webm')
-        ? 'audio/webm'
-        : MediaRecorder.isTypeSupported('audio/mp4')
-        ? 'audio/mp4'
-        : 'audio/wav';
+      // Determine supported MIME type - iOS Safari only supports audio/mp4
+      let mimeType = 'audio/webm';
       
-      console.log('🎤 Whisper: Using MIME type:', mimeType);
+      if (isIOS()) {
+        // iOS Safari: test mp4, m4a, or fallback
+        if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        } else if (MediaRecorder.isTypeSupported('audio/aac')) {
+          mimeType = 'audio/aac';
+        } else if (MediaRecorder.isTypeSupported('audio/mpeg')) {
+          mimeType = 'audio/mpeg';
+        } else {
+          // Try default, iOS 14.3+ should support some format
+          console.log('🎤 Whisper: No explicit MIME type supported on iOS, using default');
+          mimeType = '';
+        }
+      } else if (isAndroid()) {
+        // Android: prefer webm with opus codec
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
+        } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+          mimeType = 'audio/webm';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        }
+      } else {
+        // Desktop browsers
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
+        } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+          mimeType = 'audio/webm';
+        } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+          mimeType = 'audio/ogg;codecs=opus';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        }
+      }
       
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      console.log('🎤 Whisper: Platform:', isIOS() ? 'iOS' : isAndroid() ? 'Android' : 'Desktop');
+      console.log('🎤 Whisper: Using MIME type:', mimeType || 'default');
+      
+      // Create MediaRecorder with or without mimeType option
+      let mediaRecorder: MediaRecorder;
+      try {
+        if (mimeType) {
+          mediaRecorder = new MediaRecorder(stream, { mimeType });
+        } else {
+          // Use default options on iOS if no mimeType is supported
+          mediaRecorder = new MediaRecorder(stream);
+        }
+      } catch (recorderError) {
+        console.error('🎤 Whisper: MediaRecorder creation failed:', recorderError);
+        // Fallback: try without options
+        mediaRecorder = new MediaRecorder(stream);
+      }
+      const actualMimeType = mediaRecorder.mimeType || 'audio/webm';
+      console.log('🎤 Whisper: Actual MIME type from recorder:', actualMimeType);
       mediaRecorderRef.current = mediaRecorder;
       
       mediaRecorder.ondataavailable = (event) => {
@@ -348,8 +406,9 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
         cleanupAudioAnalyser();
         
         if (audioChunksRef.current.length > 0) {
-          const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-          console.log('🎤 Whisper: Total audio blob size:', audioBlob.size);
+          // Use actual mimeType from recorder, not the variable
+          const audioBlob = new Blob(audioChunksRef.current, { type: actualMimeType });
+          console.log('🎤 Whisper: Total audio blob size:', audioBlob.size, 'type:', actualMimeType);
           
           if (audioBlob.size > 1000) { // Only transcribe if there's meaningful audio
             await transcribeWithWhisper(audioBlob);
@@ -390,9 +449,19 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
     console.log('🎤 startRecording called');
     console.log('🎤 Browser info:', navigator.userAgent);
     console.log('🎤 Is iOS:', isIOS());
+    console.log('🎤 Is Android:', isAndroid());
     console.log('🎤 Permission granted:', permissionGranted);
     console.log('🎤 Native Speech API supported:', isNativeSupported);
     console.log('🎤 MediaRecorder supported:', isMediaRecorderSupported);
+    
+    // iOS Safari does NOT support Web Speech API at all - always use Whisper
+    // Even though webkitSpeechRecognition might exist, it doesn't work on iOS
+    if (isIOS()) {
+      console.log('🎤 iOS detected - using Whisper fallback (Web Speech API not reliable on iOS)');
+      setUseWhisperFallback(true);
+      await startWhisperRecording();
+      return;
+    }
     
     // If Web Speech API is not supported, use Whisper fallback
     if (!isNativeSupported) {
@@ -634,7 +703,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
       setUseWhisperFallback(true);
       await startWhisperRecording();
     }
-  }, [language, getLanguageCode, onTranscription, isIOS, permissionGranted, requestMicrophonePermission, isNativeSupported, isMediaRecorderSupported, startWhisperRecording, setupAudioAnalyser, cleanupAudioAnalyser]);
+  }, [language, getLanguageCode, onTranscription, isIOS, isAndroid, permissionGranted, requestMicrophonePermission, isNativeSupported, isMediaRecorderSupported, startWhisperRecording, setupAudioAnalyser, cleanupAudioAnalyser]);
 
   const stopRecording = useCallback(() => {
     console.log('Stopping recording, isRecording:', isRecording, 'useWhisperFallback:', useWhisperFallback);
