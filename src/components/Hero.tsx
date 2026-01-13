@@ -1072,12 +1072,14 @@ export const Hero = () => {
                             onMouseLeave={() => setHoveredVehicle(null)}
                           >
                             {/* Tooltip */}
-                            <VehicleTooltip 
-                              vehicleType={vehicle.value}
-                              isVisible={isHovered && !isDisabled}
-                              position="top"
-                              isTurkish={language === 'TR'}
-                            />
+                            <Suspense fallback={null}>
+                              <VehicleTooltip 
+                                vehicleType={vehicle.value}
+                                isVisible={isHovered && !isDisabled}
+                                position="top"
+                                isTurkish={language === 'TR'}
+                              />
+                            </Suspense>
                             
                             <motion.button
                               type="button"
