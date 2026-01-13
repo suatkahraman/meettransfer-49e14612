@@ -115,8 +115,8 @@ export const HeroVisualSection = memo(({
           {/* Main Video/Image */}
           <div className="relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl">
             {showVideo && currentVideo ? (
-              <div className="relative w-full h-48 md:h-56 lg:h-80">
-                {/* Render all videos but only show current - prevents DOM flicker */}
+              <div className="relative w-full h-48 md:h-56 lg:h-80 overflow-hidden">
+                {/* Render all videos but only show current - smooth crossfade with subtle scale */}
                 {cityVideos.map((video, index) => (
                   <motion.video
                     key={video.src}
@@ -128,9 +128,13 @@ export const HeroVisualSection = memo(({
                     initial={false}
                     animate={{ 
                       opacity: index === currentVideoIndex ? 1 : 0,
+                      scale: index === currentVideoIndex ? 1 : 1.05,
                       zIndex: index === currentVideoIndex ? 10 : 1
                     }}
-                    transition={{ duration: 0.6 }}
+                    transition={{ 
+                      opacity: { duration: 1.2, ease: "easeInOut" },
+                      scale: { duration: 1.5, ease: "easeOut" }
+                    }}
                   >
                     <source src={video.src} type="video/mp4" />
                   </motion.video>
