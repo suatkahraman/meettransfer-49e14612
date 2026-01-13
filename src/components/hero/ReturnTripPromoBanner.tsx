@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from "react";
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import { toast } from "sonner";
@@ -9,43 +9,8 @@ interface ReturnTripPromoBannerProps {
   onApplyPromoCode?: (code: string) => void;
 }
 
-// Countdown hook
-function useCountdown(targetDate: Date) {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
-
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const difference = targetDate.getTime() - now.getTime();
-
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / (1000 * 60)) % 60),
-          seconds: Math.floor((difference / 1000) % 60)
-        });
-      }
-    };
-
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-
-    return () => clearInterval(timer);
-  }, [targetDate]);
-
-  return timeLeft;
-}
-
 export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: ReturnTripPromoBannerProps) => {
   const promoCode = "RETURN30";
-  const expiryDate = new Date("2026-03-31T23:59:59");
-  const timeLeft = useCountdown(expiryDate);
 
   const handleClick = () => {
     if (onApplyPromoCode) {
@@ -66,8 +31,6 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
       );
     }
   };
-
-  const formatTimeUnit = (value: number) => value.toString().padStart(2, '0');
 
   return (
     <motion.div
@@ -116,28 +79,17 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
             </div>
           </div>
           
-          {/* Bottom Row - Countdown Timer */}
+          {/* Bottom Row - Expiry Date */}
           <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3">
-            {/* Countdown Timer */}
+            {/* Expiry Date Display */}
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3 text-muted-foreground" />
-              <div className="flex items-center gap-0.5 text-[10px] md:text-xs font-mono">
-                <span className="bg-muted/60 px-1.5 py-0.5 rounded text-foreground font-bold">
-                  {formatTimeUnit(timeLeft.days)}{language === 'TR' ? 'g' : 'd'}
-                </span>
-                <span className="text-muted-foreground">:</span>
-                <span className="bg-muted/60 px-1.5 py-0.5 rounded text-foreground font-bold">
-                  {formatTimeUnit(timeLeft.hours)}{language === 'TR' ? 's' : 'h'}
-                </span>
-                <span className="text-muted-foreground">:</span>
-                <span className="bg-muted/60 px-1.5 py-0.5 rounded text-foreground font-bold">
-                  {formatTimeUnit(timeLeft.minutes)}{language === 'TR' ? 'd' : 'm'}
-                </span>
-                <span className="text-muted-foreground hidden md:inline">:</span>
-                <span className="bg-muted/60 px-1.5 py-0.5 rounded text-foreground font-bold hidden md:inline">
-                  {formatTimeUnit(timeLeft.seconds)}{language === 'TR' ? 'sn' : 's'}
-                </span>
-              </div>
+              <span className="text-[10px] md:text-xs text-muted-foreground">
+                {language === 'TR' ? 'Son Geçerlilik:' : 'Valid until:'}
+              </span>
+              <span className="text-[10px] md:text-xs font-bold text-foreground">
+                31.03.2026
+              </span>
             </div>
             
             {/* Click hint - Desktop only */}
