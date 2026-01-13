@@ -1,9 +1,19 @@
 import { memo, lazy, Suspense, useState, useCallback, useRef } from "react";
-import { Users, Check, Info } from "lucide-react";
+import { Users, Check, Info, Briefcase, Snowflake, Wifi, Star, Tv, Crown, Armchair } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VehiclePrice } from "./types";
+
+// Feature icon mapping
+const featureIcons: Record<string, React.ElementType> = {
+  'snowflake': Snowflake,
+  'armchair': Armchair,
+  'wifi': Wifi,
+  'stars': Star,
+  'tv': Tv,
+  'crown': Crown,
+};
 
 // Vehicle images
 import vitoImg from "@/assets/vito-1.jpg";
@@ -145,15 +155,37 @@ export const VehicleSelector = memo(({
                   )}
                 </div>
                 
-                {/* Vehicle Name */}
-                <div className="text-xs sm:text-sm font-semibold truncate mb-0.5 pointer-events-none text-foreground">
-                  {vehicle.label.split(' ').pop()}
+                {/* Vehicle Name - Full label */}
+                <div className="text-xs sm:text-sm font-bold truncate mb-1 pointer-events-none text-foreground">
+                  {vehicle.label}
                 </div>
                 
-                {/* Passenger Count */}
-                <div className="flex items-center justify-center gap-1 text-[10px] sm:text-xs text-muted-foreground pointer-events-none">
-                  <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  <span>{vehicle.passengers}</span>
+                {/* Feature Icons Row */}
+                <div className="flex items-center justify-center gap-1.5 mb-1 pointer-events-none">
+                  {vehicle.features.slice(0, 3).map((feature, idx) => {
+                    const IconComponent = featureIcons[feature.icon];
+                    return IconComponent ? (
+                      <div 
+                        key={idx} 
+                        className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-muted/80 flex items-center justify-center"
+                        title={language === 'TR' ? feature.labelTr : feature.label}
+                      >
+                        <IconComponent className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-primary" />
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+                
+                {/* Passenger & Luggage Count */}
+                <div className="flex items-center justify-center gap-2 text-[10px] sm:text-xs text-muted-foreground pointer-events-none">
+                  <div className="flex items-center gap-0.5">
+                    <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    <span>{vehicle.passengers}</span>
+                  </div>
+                  <div className="flex items-center gap-0.5">
+                    <Briefcase className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    <span>{vehicle.luggage}</span>
+                  </div>
                 </div>
                 
                 {/* Price */}
