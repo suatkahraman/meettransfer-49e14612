@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Globe } from "lucide-react";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
-import { GLOBAL_OFFICES, SUPPORT_EMAIL } from "@/lib/contact";
+import { GLOBAL_OFFICES, SUPPORT_EMAIL, COMPANY_NAME } from "@/lib/contact";
 import { motion } from "framer-motion";
 
 const ContactPage = () => {
@@ -133,7 +133,7 @@ const ContactPage = () => {
         <section>
           <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-              {t("globalOffices")}
+              {COMPANY_NAME}
             </h2>
             <p className="text-muted-foreground">{t("globalOfficesDesc")}</p>
           </div>
