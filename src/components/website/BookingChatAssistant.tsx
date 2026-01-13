@@ -70,6 +70,7 @@ interface Message {
 
 interface BookingChatAssistantProps {
   onApplyBooking?: (data: BookingData) => void;
+  defaultOpen?: boolean;
 }
 
 // Check if Speech Recognition is supported
@@ -484,11 +485,11 @@ function getConversationKey(visitorId: string): string {
   return `meet_transfer_chat_${visitorId}`;
 }
 
-export default function BookingChatAssistant({ onApplyBooking }: BookingChatAssistantProps) {
+export default function BookingChatAssistant({ onApplyBooking, defaultOpen = false }: BookingChatAssistantProps) {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
