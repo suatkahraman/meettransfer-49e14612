@@ -1,57 +1,14 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowRight, Plane } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import cappadociaTransfer from "@/assets/cappadocia-transfer.png";
 import bodrumTransfer from "@/assets/bodrum-transfer.png";
 import istanbulTransfer from "@/assets/istanbul-transfer.png";
 import antalyaTransfer from "@/assets/antalya-transfer.png";
 import bursaTransfer from "@/assets/bursa-transfer-hero.jpg";
-
-interface LazyImageProps {
-  src: string;
-  alt: string;
-  className?: string;
-}
-
-const LazyImage = ({ src, alt, className }: LazyImageProps) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(false);
-
-  return (
-    <div className="relative w-full h-full">
-      {!isLoaded && (
-        <Skeleton className="absolute inset-0 w-full h-full" />
-      )}
-      <img 
-        src={isInView ? src : undefined}
-        data-src={src}
-        alt={alt}
-        loading="lazy"
-        decoding="async"
-        className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
-        onLoad={() => setIsLoaded(true)}
-        ref={(el) => {
-          if (el && !isInView) {
-            const observer = new IntersectionObserver(
-              ([entry]) => {
-                if (entry.isIntersecting) {
-                  setIsInView(true);
-                  observer.disconnect();
-                }
-              },
-              { rootMargin: '100px' }
-            );
-            observer.observe(el);
-          }
-        }}
-      />
-    </div>
-  );
-};
 
 export const Destinations = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -136,12 +93,14 @@ export const Destinations = () => {
                 className="block h-full"
               >
                 <div className={`relative overflow-hidden rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all duration-500 hover:shadow-xl h-full ${index === 0 ? 'min-h-[400px] lg:min-h-[500px]' : 'min-h-[280px]'}`}>
-                  {/* Image */}
+                  {/* Image with optimization */}
                   <div className="absolute inset-0">
-                    <LazyImage 
+                    <OptimizedImage 
                       src={destination.image} 
                       alt={t(destination.routeKey)}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      className="group-hover:scale-105 transition-transform duration-700"
+                      priority={index === 0}
+                      sizes={index === 0 ? "(max-width: 1024px) 100vw, 66vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"}
                     />
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />

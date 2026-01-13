@@ -1,4 +1,5 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 
 // Import partner logos
 import viatorLogo from "@/assets/partners/viator-logo.png";
@@ -43,13 +44,16 @@ const TrustedPartners = () => {
           {partners.map((partner, index) => (
             <div
               key={`first-${index}`}
-              className="flex-shrink-0 mx-6 md:mx-10 flex items-center justify-center"
+              className="flex-shrink-0 mx-6 md:mx-10 flex items-center justify-center h-10 md:h-14"
             >
               <img
                 src={partner.logo}
                 alt={partner.name}
-                className="h-10 md:h-14 w-auto object-contain transition-all duration-300 hover:scale-110"
+                width={100}
+                height={40}
+                className="h-full w-auto object-contain transition-all duration-300 hover:scale-110"
                 loading="lazy"
+                decoding="async"
               />
             </div>
           ))}
@@ -57,13 +61,16 @@ const TrustedPartners = () => {
           {partners.map((partner, index) => (
             <div
               key={`second-${index}`}
-              className="flex-shrink-0 mx-6 md:mx-10 flex items-center justify-center"
+              className="flex-shrink-0 mx-6 md:mx-10 flex items-center justify-center h-10 md:h-14"
             >
               <img
                 src={partner.logo}
                 alt={partner.name}
-                className="h-10 md:h-14 w-auto object-contain transition-all duration-300 hover:scale-110"
+                width={100}
+                height={40}
+                className="h-full w-auto object-contain transition-all duration-300 hover:scale-110"
                 loading="lazy"
+                decoding="async"
               />
             </div>
           ))}
