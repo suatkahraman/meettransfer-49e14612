@@ -229,8 +229,15 @@ export const Hero = () => {
       }
     };
     
-    // Small delay to prioritize critical content
-    const timer = setTimeout(loadVideosFromCDN, 300);
+    // On mobile, videos are not shown - load immediately for desktop
+    // On desktop, small delay to prioritize critical content first
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile) {
+      // Skip video loading on mobile - static image is used
+      return;
+    }
+    
+    const timer = setTimeout(loadVideosFromCDN, 100);
     return () => clearTimeout(timer);
   }, []);
   

@@ -21,11 +21,8 @@ export const HeroVisualSection = memo(({
 }: HeroVisualSectionProps) => {
   return (
     <>
-      {/* Mobile Visual Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
+      {/* Mobile Visual Section - No animation delay for LCP */}
+      <div
         className="order-2 md:hidden"
       >
         <div className="relative rounded-2xl overflow-hidden shadow-xl">
@@ -61,6 +58,9 @@ export const HeroVisualSection = memo(({
                 src={heroMercedes}
                 alt="VIP Transfer"
                 className="absolute inset-0 w-full h-full object-cover"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
@@ -119,7 +119,7 @@ export const HeroVisualSection = memo(({
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Desktop Visual Section */}
       <motion.div 
@@ -162,6 +162,9 @@ export const HeroVisualSection = memo(({
                 src={heroMercedes}
                 alt="VIP Transfer"
                 className="w-full h-48 md:h-56 lg:h-80 object-cover"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
