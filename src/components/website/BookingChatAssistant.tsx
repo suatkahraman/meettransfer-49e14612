@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { VoiceSettingsPanel } from "./VoiceSettingsPanel";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -2157,158 +2158,19 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       )}
                     </Button>
                     
-                    {/* Mobile Voice Settings Popover */}
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-12 w-12 rounded-xl shrink-0 touch-manipulation"
-                        >
-                          {isVoiceEnabled ? (
-                            <Volume2 className="h-5 w-5 text-primary" />
-                          ) : (
-                            <VolumeX className="h-5 w-5 text-muted-foreground" />
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent 
-                        align="end" 
-                        side="top" 
-                        className="w-64 p-2.5"
-                        sideOffset={8}
-                      >
-                        <div className="space-y-3">
-                          {/* Voice toggle */}
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium">
-                              {language === "TR" ? "Sesli Yanıt" : "Voice Response"}
-                            </span>
-                            <Button
-                              variant={isVoiceEnabled ? "default" : "outline"}
-                              size="sm"
-                              onClick={toggleVoice}
-                              className="h-6 px-2 text-[10px]"
-                            >
-                              {isVoiceEnabled 
-                                ? (language === "TR" ? "Açık" : "On")
-                                : (language === "TR" ? "Kapalı" : "Off")
-                              }
-                            </Button>
-                          </div>
-                          
-                          {/* Continuous conversation mode toggle */}
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium">
-                              {language === "TR" ? "Sürekli Konuşma" : "Continuous Mode"}
-                            </span>
-                            <Button
-                              variant={continuousMode ? "default" : "outline"}
-                              size="sm"
-                              onClick={toggleContinuousMode}
-                              className="h-6 px-2 text-[10px]"
-                            >
-                              {continuousMode 
-                                ? (language === "TR" ? "Açık" : "On")
-                                : (language === "TR" ? "Kapalı" : "Off")
-                              }
-                            </Button>
-                          </div>
-
-                          {/* Voice selection with gender filter */}
-                          {availableVoices.length > 0 && (
-                            <div className="space-y-1.5">
-                              <label className="text-[10px] font-medium text-muted-foreground">
-                                {language === "TR" ? "Ses Seçimi" : "Voice"}
-                              </label>
-                              
-                              {/* Gender quick select */}
-                              <div className="flex gap-1 mb-1">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-5 text-[9px] flex-1 px-1"
-                                  onClick={() => {
-                                    const femaleVoice = availableVoices.find(v => v.gender === 'female');
-                                    if (femaleVoice) selectVoice(femaleVoice.id);
-                                  }}
-                                >
-                                  ♀ {language === "TR" ? "Kadın" : "Female"}
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-5 text-[9px] flex-1 px-1"
-                                  onClick={() => {
-                                    const maleVoice = availableVoices.find(v => v.gender === 'male');
-                                    if (maleVoice) selectVoice(maleVoice.id);
-                                  }}
-                                >
-                                  ♂ {language === "TR" ? "Erkek" : "Male"}
-                                </Button>
-                              </div>
-                              
-                              <div className="grid grid-cols-2 gap-1">
-                                {availableVoices.slice(0, 4).map((voice) => (
-                                  <Button
-                                    key={voice.id}
-                                    variant={selectedVoiceId === voice.id ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => selectVoice(voice.id)}
-                                    className="h-6 text-[10px] justify-start px-1.5"
-                                  >
-                                    <span className="truncate">{voice.name}</span>
-                                    {voice.gender !== 'neutral' && (
-                                      <span className="ml-0.5 opacity-60 text-[9px]">
-                                        {voice.gender === 'female' ? '♀' : '♂'}
-                                      </span>
-                                    )}
-                                  </Button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Speech rate */}
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between">
-                              <label className="text-[10px] font-medium text-muted-foreground">
-                                {language === "TR" ? "Hız" : "Speed"}
-                              </label>
-                              <span className="text-[10px] font-mono bg-muted px-1 py-0.5 rounded">
-                                {speechRate.toFixed(1)}x
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-5 w-5"
-                                onClick={() => changeRate(Math.max(0.5, speechRate - 0.25))}
-                                disabled={speechRate <= 0.5}
-                              >
-                                <ChevronDown className="h-2.5 w-2.5" />
-                              </Button>
-                              <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-primary rounded-full transition-all"
-                                  style={{ width: `${((speechRate - 0.5) / 1.5) * 100}%` }}
-                                />
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-5 w-5"
-                                onClick={() => changeRate(Math.min(2, speechRate + 0.25))}
-                                disabled={speechRate >= 2}
-                              >
-                                <ChevronDown className="h-2.5 w-2.5 rotate-180" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    {/* Mobile Voice Settings - Full Screen Drawer */}
+                    <VoiceSettingsPanel
+                      language={language}
+                      isVoiceEnabled={isVoiceEnabled}
+                      toggleVoice={toggleVoice}
+                      continuousMode={continuousMode}
+                      toggleContinuousMode={toggleContinuousMode}
+                      availableVoices={availableVoices}
+                      selectedVoiceId={selectedVoiceId}
+                      selectVoice={selectVoice}
+                      speechRate={speechRate}
+                      changeRate={changeRate}
+                    />
                   </div>
                 </div>
               </motion.div>
