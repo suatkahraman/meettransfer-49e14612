@@ -18,20 +18,34 @@ export const VehicleImageCarousel = memo(({
   isHovered = false 
 }: VehicleImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [prevIndex, setPrevIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set([0]));
   const [isPaused, setIsPaused] = useState(false);
   const preloadedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Navigate to next/previous image
+  // Navigate to next/previous image with direction tracking
   const goToNext = useCallback(() => {
+    setSlideDirection('left');
+    setPrevIndex(currentIndex);
     setCurrentIndex((prev) => (prev + 1) % images.length);
-  }, [images.length]);
+  }, [images.length, currentIndex]);
 
   const goToPrev = useCallback(() => {
+    setSlideDirection('right');
+    setPrevIndex(currentIndex);
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  }, [images.length]);
+  }, [images.length, currentIndex]);
+
+  // Go to specific index
+  const goToIndex = useCallback((index: number) => {
+    if (index === currentIndex) return;
+    setSlideDirection(index > currentIndex ? 'left' : 'right');
+    setPrevIndex(currentIndex);
+    setCurrentIndex(index);
+  }, [currentIndex]);
 
   // Pause autoplay temporarily after swipe
   const pauseAutoplay = useCallback(() => {
@@ -95,11 +109,13 @@ export const VehicleImageCarousel = memo(({
     if (images.length <= 1 || isHovered || isPaused) return;
     
     const timer = setInterval(() => {
+      setSlideDirection('left');
+      setPrevIndex(currentIndex);
       setCurrentIndex((prev) => (prev + 1) % images.length);
     }, interval);
 
     return () => clearInterval(timer);
-  }, [images.length, interval, isHovered, isPaused]);
+  }, [images.length, interval, isHovered, isPaused, currentIndex]);
 
   if (images.length === 0) return null;
 
@@ -111,30 +127,47 @@ export const VehicleImageCarousel = memo(({
       className={`relative overflow-hidden touch-pan-y ${className}`}
       {...swipeHandlers}
     >
-      {/* Render all images but only show current one - prevents DOM flicker */}
-      {images.map((src, index) => (
-        <motion.img
-          key={src}
-          src={src}
-          alt={`${alt} ${index + 1}`}
-          initial={false}
-          animate={{ 
-            opacity: index === currentIndex && imagesLoaded.has(index) ? 1 : 0,
-            scale: index === currentIndex && isHovered ? 1.1 : 1,
-            zIndex: index === currentIndex ? 10 : 1
-          }}
-          transition={{ 
-            opacity: { duration: 0.4 },
-            scale: { duration: 0.3 }
-          }}
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          loading={index === 0 ? "eager" : "lazy"}
-          draggable={false}
-          onLoad={() => {
-            setImagesLoaded(prev => new Set([...prev, index]));
-          }}
-        />
-      ))}
+      {/* Slide animation variants */}
+      {images.map((src, index) => {
+        const isActive = index === currentIndex;
+        const wasActive = index === prevIndex;
+        
+        // Calculate x position based on slide direction
+        let xPosition = 0;
+        if (isActive) {
+          xPosition = 0; // Current slide is centered
+        } else if (wasActive) {
+          xPosition = slideDirection === 'left' ? -100 : 100; // Previous slide exits
+        } else {
+          xPosition = slideDirection === 'left' ? 100 : -100; // Hidden slides
+        }
+        
+        return (
+          <motion.img
+            key={src}
+            src={src}
+            alt={`${alt} ${index + 1}`}
+            initial={false}
+            animate={{ 
+              x: isActive ? '0%' : wasActive ? `${xPosition}%` : `${slideDirection === 'left' ? 100 : -100}%`,
+              opacity: (isActive || wasActive) && imagesLoaded.has(index) ? 1 : 0,
+              scale: isActive && isHovered ? 1.05 : 1,
+              zIndex: isActive ? 10 : wasActive ? 5 : 1
+            }}
+            transition={{ 
+              x: { type: "spring", stiffness: 300, damping: 30 },
+              opacity: { duration: 0.2 },
+              scale: { duration: 0.3 }
+            }}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            loading={index === 0 ? "eager" : "lazy"}
+            draggable={false}
+            onLoad={() => {
+              setImagesLoaded(prev => new Set([...prev, index]));
+            }}
+          />
+        );
+      })}
 
       {/* Dots indicator */}
       {images.length > 1 && (
@@ -145,7 +178,7 @@ export const VehicleImageCarousel = memo(({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setCurrentIndex(index);
+                goToIndex(index);
                 pauseAutoplay();
               }}
               className={`w-1.5 h-1.5 rounded-full transition-all ${
