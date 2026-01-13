@@ -776,7 +776,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     });
   }, [mobileFloating]);
   
-  const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning } = useVoiceRecorder(
+  const { isRecording, isProcessing, startRecording, stopRecording, isSupported: isSpeechSupported, showBrowserWarning, dismissWarning, useWhisperFallback } = useVoiceRecorder(
     handleTranscription,
     language
   );
@@ -1484,14 +1484,28 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}
                 >
                   {/* Recording indicator */}
-                  {isRecording && (
-                    <div className="flex items-center justify-center gap-2 text-xs text-destructive font-medium mb-2">
+                  {(isRecording || isProcessing) && (
+                    <div className="flex items-center justify-center gap-2 text-xs font-medium mb-2">
                       <motion.div
                         animate={{ scale: [1, 1.3, 1] }}
                         transition={{ repeat: Infinity, duration: 0.8 }}
-                        className="w-2 h-2 bg-destructive rounded-full"
+                        className={cn(
+                          "w-2 h-2 rounded-full",
+                          isProcessing ? "bg-primary" : "bg-destructive"
+                        )}
                       />
-                      {language === "TR" ? "Dinleniyor..." : "Listening..."}
+                      <span className={isProcessing ? "text-primary" : "text-destructive"}>
+                        {isProcessing 
+                          ? (language === "TR" ? "İşleniyor..." : "Processing...")
+                          : (language === "TR" ? "Dinleniyor..." : "Listening...")
+                        }
+                      </span>
+                      {useWhisperFallback && (
+                        <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] font-semibold rounded-full flex items-center gap-1">
+                          <Sparkles className="h-2.5 w-2.5" />
+                          AI
+                        </span>
+                      )}
                     </div>
                   )}
                   <div className="flex gap-2">
