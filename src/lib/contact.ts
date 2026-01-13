@@ -3,6 +3,9 @@
  * All contact details should be imported from this file
  */
 
+// Company name
+export const COMPANY_NAME = "Meet Transfer USA, LLC";
+
 // WhatsApp number for customer support and bookings
 // Format: country code + number without spaces or special characters
 export const WHATSAPP_NUMBER = "15558051101";

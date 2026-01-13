@@ -1,7 +1,7 @@
 import { Mail, Phone, Clock, Facebook, Instagram, Twitter, Youtube, Star } from "lucide-react";
 import { PrefetchLink } from "@/components/ui/prefetch-link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, SUPPORT_EMAIL } from "@/lib/contact";
+import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, SUPPORT_EMAIL, COMPANY_NAME } from "@/lib/contact";
 
 const TripAdvisorBadge = () => (
   <a
@@ -53,6 +53,7 @@ export const Footer = () => {
           {/* Brand & Description */}
           <div className="space-y-4">
             <h3 className="text-2xl font-bold">Meet Transfer</h3>
+            <p className="text-primary-foreground/90 text-sm font-medium">{COMPANY_NAME}</p>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
               {t('footerDescription')}
             </p>
@@ -135,7 +136,7 @@ export const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/20 pt-8 text-center text-primary-foreground/60 text-sm">
-          <p>© 2001 Meet Transfer. {t('footerRights')}</p>
+          <p>© 2001 {COMPANY_NAME}. {t('footerRights')}</p>
         </div>
       </div>
     </footer>
