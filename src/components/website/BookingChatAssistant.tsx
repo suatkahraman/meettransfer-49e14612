@@ -1940,19 +1940,113 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           )}
         </Button>
         
-        {/* Voice output toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleVoice}
-          className="h-10 w-10 rounded-lg shrink-0"
-        >
-          {isVoiceEnabled ? (
-            <Volume2 className="h-4 w-4 text-primary" />
-          ) : (
-            <VolumeX className="h-4 w-4 text-muted-foreground" />
-          )}
-        </Button>
+        {/* Voice output toggle with settings popover */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-lg shrink-0"
+            >
+              {isVoiceEnabled ? (
+                <Volume2 className="h-4 w-4 text-primary" />
+              ) : (
+                <VolumeX className="h-4 w-4 text-muted-foreground" />
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-72 p-3">
+            <div className="space-y-4">
+              {/* Voice toggle */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  {language === "TR" ? "Sesli Yanıt" : "Voice Response"}
+                </span>
+                <Button
+                  variant={isVoiceEnabled ? "default" : "outline"}
+                  size="sm"
+                  onClick={toggleVoice}
+                  className="h-7 px-3"
+                >
+                  {isVoiceEnabled 
+                    ? (language === "TR" ? "Açık" : "On")
+                    : (language === "TR" ? "Kapalı" : "Off")
+                  }
+                </Button>
+              </div>
+
+              {/* Voice selection */}
+              {availableVoices.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    {language === "TR" ? "Ses Seçimi" : "Voice Selection"}
+                  </label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {availableVoices.slice(0, 6).map((voice) => (
+                      <Button
+                        key={voice.id}
+                        variant={selectedVoiceId === voice.id ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => selectVoice(voice.id)}
+                        className="h-7 text-xs justify-start px-2"
+                      >
+                        <span className="truncate">{voice.name}</span>
+                        {voice.gender !== 'neutral' && (
+                          <span className="ml-1 opacity-60">
+                            {voice.gender === 'female' ? '♀' : '♂'}
+                          </span>
+                        )}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Speech rate */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    {language === "TR" ? "Konuşma Hızı" : "Speech Rate"}
+                  </label>
+                  <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
+                    {speechRate.toFixed(1)}x
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => changeRate(Math.max(0.5, speechRate - 0.25))}
+                    disabled={speechRate <= 0.5}
+                  >
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary rounded-full transition-all"
+                      style={{ width: `${((speechRate - 0.5) / 1.5) * 100}%` }}
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => changeRate(Math.min(2, speechRate + 0.25))}
+                    disabled={speechRate >= 2}
+                  >
+                    <ChevronDown className="h-3 w-3 rotate-180" />
+                  </Button>
+                </div>
+                <div className="flex justify-between text-[10px] text-muted-foreground px-1">
+                  <span>{language === "TR" ? "Yavaş" : "Slow"}</span>
+                  <span>{language === "TR" ? "Normal" : "Normal"}</span>
+                  <span>{language === "TR" ? "Hızlı" : "Fast"}</span>
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   );
