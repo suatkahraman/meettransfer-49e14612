@@ -1,8 +1,10 @@
 import { memo, lazy, Suspense, useCallback, useState, useEffect, ComponentType } from "react";
-import { Sparkles, MessageCircle } from "lucide-react";
+import { Sparkles, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { BookingData } from "./types";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface BookingChatAssistantProps {
   onApplyBooking?: (data: BookingData) => void;
@@ -33,6 +35,7 @@ const quickPrompts = {
 export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssistantProps) => {
   const prompts = quickPrompts[language as keyof typeof quickPrompts] || quickPrompts.EN;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Rotate prompts every 3 seconds
   useEffect(() => {
@@ -43,6 +46,7 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
   }, [prompts.length]);
 
   const handleQuickPrompt = useCallback((message: string) => {
+    setIsExpanded(true);
     window.dispatchEvent(
       new CustomEvent("booking-ai-open", { detail: { message } })
     );
@@ -52,49 +56,83 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
 
   return (
     <>
-      {/* Desktop: Full AI Assistant Section */}
-      <div id="ai-assistant" className="mb-4 relative hidden md:block">
-        {/* Content Container - Softer colors */}
-        <div className="relative bg-muted/50 rounded-xl p-3 border border-border backdrop-blur-sm">
-          {/* Badge */}
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="h-4 w-4 text-muted-foreground" />
-            
-            <span className="text-sm font-medium text-foreground">
-              {language === 'TR' 
-                ? "🌍 AI ile Transfer & Saatlik Kiralama" 
-                : "🌍 Book Transfer & Hourly Rental With AI"}
-            </span>
-            
-            {/* NEW Badge - Softer */}
-            <span className="px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[9px] font-bold rounded-md">
-              NEW
-            </span>
-          </div>
-
-          {/* Single Rotating Quick Prompt Button */}
-          <div className="mb-3">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => handleQuickPrompt(currentPrompt.message)}
-              className="h-8 text-xs px-3 py-1.5 rounded-full border-border bg-background hover:bg-primary/10 hover:border-primary/40 transition-all duration-300"
-            >
-              <MessageCircle className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-              <span className="transition-opacity duration-300">
-                {language === 'TR' ? 'AI ile Sor: ' : 'Ask AI: '}
-                {currentPrompt.label}
+      {/* Desktop: Collapsible AI Assistant Section */}
+      <div id="ai-assistant" className="mb-3 relative hidden md:block">
+        <div className="relative bg-muted/50 rounded-xl border border-border backdrop-blur-sm overflow-hidden">
+          {/* Collapsible Header */}
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full flex items-center justify-between p-2.5 hover:bg-muted/30 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-medium text-foreground">
+                {language === 'TR' ? 'AI Asistan' : 'AI Assistant'}
               </span>
-            </Button>
-          </div>
-          
-          {/* Chat Assistant */}
-          <div className="relative">
-            <Suspense fallback={<Skeleton className="h-[120px] w-full rounded-lg" />}>
-              <BookingChatAssistant onApplyBooking={onApplyBooking} />
-            </Suspense>
-          </div>
+              <span className="px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[8px] font-bold rounded">
+                NEW
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                {language === 'TR' ? 'Transfer & Kiralama' : 'Book with AI'}
+              </span>
+              {isExpanded ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          </button>
+
+          {/* Expandable Content */}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="p-2.5 pt-0 space-y-2">
+                  {/* Quick Prompt Button */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickPrompt(currentPrompt.message)}
+                    className="h-7 text-[10px] px-2.5 rounded-full border-border bg-background hover:bg-primary/10 hover:border-primary/40 transition-all"
+                  >
+                    <MessageCircle className="h-3 w-3 mr-1 text-muted-foreground" />
+                    <span>{language === 'TR' ? 'Sor: ' : 'Ask: '}{currentPrompt.label}</span>
+                  </Button>
+                  
+                  {/* Chat Assistant */}
+                  <Suspense fallback={<Skeleton className="h-[100px] w-full rounded-lg" />}>
+                    <BookingChatAssistant onApplyBooking={onApplyBooking} />
+                  </Suspense>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Collapsed Quick Action */}
+          {!isExpanded && (
+            <div className="px-2.5 pb-2.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => handleQuickPrompt(currentPrompt.message)}
+                className="h-6 text-[10px] px-2 text-muted-foreground hover:text-foreground"
+              >
+                <MessageCircle className="h-3 w-3 mr-1" />
+                {currentPrompt.label}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
