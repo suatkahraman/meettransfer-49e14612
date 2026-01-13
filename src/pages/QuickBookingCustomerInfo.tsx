@@ -228,7 +228,7 @@ export default function QuickBookingCustomerInfo() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/quick-booking/customer-info?reservationId=${reservationId}&reservationCode=${reservationCode}${returnReservationCode ? `&returnReservationCode=${returnReservationCode}` : ''}&googleAuth=true`,
+          redirectTo: `${window.location.origin}/quick-booking-info?reservationId=${reservationId}&reservationCode=${reservationCode}${returnReservationCode ? `&returnReservationCode=${returnReservationCode}` : ''}&googleAuth=true`,
         },
       });
       
