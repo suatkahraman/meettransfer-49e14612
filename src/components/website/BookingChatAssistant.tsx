@@ -812,12 +812,12 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const [availableVoices, setAvailableVoices] = useState<VoiceOption[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
-  const [speechRate, setSpeechRate] = useState(1.0);
-  // Optimized voice settings for natural, persuasive, human-like speech
+  const [speechRate, setSpeechRate] = useState(0.85); // Slower for better comprehension
+  // Optimized voice settings for slow, clear, natural speech
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
-    stability: 0.65,      // More consistent, professional
-    similarityBoost: 0.80, // Strong voice character
-    style: 0.45,          // Warmer, more expressive
+    stability: 0.75,       // High stability for clear, consistent pronunciation
+    similarityBoost: 0.85, // Strong voice character
+    style: 0.35,           // Moderate style, not too expressive for clarity
   });
   const [useElevenLabs, setUseElevenLabs] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);

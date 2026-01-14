@@ -45,7 +45,7 @@ export function VoiceSettingsPanel({
   selectVoice,
   speechRate,
   changeRate,
-  voiceSettings = { stability: 0.5, similarityBoost: 0.75, style: 0.3 },
+  voiceSettings = { stability: 0.75, similarityBoost: 0.85, style: 0.35 },
   changeVoiceSettings,
   triggerClassName,
 }: VoiceSettingsPanelProps) {
