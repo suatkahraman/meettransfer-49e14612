@@ -152,26 +152,49 @@ export function PWAUpdatePrompt() {
     };
   }, []);
 
-  const handleUpdate = useCallback(() => {
+  const handleUpdate = useCallback(async () => {
     setIsUpdating(true);
+    const registration = registrationRef.current;
     const updateSW = updateSWRef.current;
-    const waiting = registrationRef.current?.waiting;
 
-    // Preferred flow (vite-plugin-pwa helper)
-    if (updateSW) {
-      void updateSW(true);
+    try {
+      // First, check for any newer updates before applying
+      console.log("[PWA Update] Checking for latest updates before applying...");
+      await registration?.update();
+      
+      // Small delay to allow any new SW to be detected
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Now get the latest waiting worker (could be newer than when prompt was shown)
+      const latestWaiting = registration?.waiting;
+      console.log("[PWA Update] Applying latest update:", latestWaiting?.scriptURL);
+
+      // Preferred flow (vite-plugin-pwa helper) - this will skip to the latest SW
+      if (updateSW) {
+        void updateSW(true);
+        setShowPrompt(false);
+        return;
+      }
+
+      // Hard fallback - tell the waiting SW to take over
+      if (latestWaiting) {
+        latestWaiting.postMessage({ type: "SKIP_WAITING" });
+        setShowPrompt(false);
+        return;
+      }
+
+      // Final fallback - just reload
+      window.location.reload();
+    } catch (error) {
+      console.error("[PWA Update] Error during update:", error);
+      // Even on error, try to apply whatever update is available
+      if (updateSW) {
+        void updateSW(true);
+      } else {
+        window.location.reload();
+      }
       setShowPrompt(false);
-      return;
     }
-
-    // Hard fallback
-    if (waiting) {
-      waiting.postMessage({ type: "SKIP_WAITING" });
-      setShowPrompt(false);
-      return;
-    }
-
-    window.location.reload();
   }, []);
 
   const handleDismiss = useCallback(() => {
