@@ -510,32 +510,40 @@ export default function QuickBookingConfirm() {
   };
 
   // Calculate return price
+  // IMPORTANT: booking.return_price from admin already includes the 30% discount!
+  // So we should NOT apply 30% discount again when promo code is valid
   const getReturnPrice = () => {
     if (!hasReturnTrip) return null;
     const price = getSelectedPrice();
     if (!price) return null;
     
-    // Check if admin set a specific return price
+    // Check if admin set a specific return price (already discounted by admin)
+    // Admin stores the DISCOUNTED price directly in return_price
     if (booking?.return_price != null && selectedVehicle === booking.vehicle_type) {
-      if (isPromoCodeValid) {
-        return Math.round(booking.return_price * 0.7);
-      }
+      // Don't apply promo discount again - it's already applied!
       return booking.return_price;
     }
     
-    // Calculate based on selected vehicle price
-    if (isPromoCodeValid) {
+    // Calculate based on selected vehicle price (for different vehicle selection)
+    if (isPromoCodeValid || booking?.promo_code) {
       return Math.round(price * 0.7);
     }
     return price;
   };
 
+  // Get the original (non-discounted) return price for display purposes
   const getOriginalReturnPrice = () => {
     if (!hasReturnTrip) return null;
     const price = getSelectedPrice();
     if (!price) return null;
     
+    // If admin set return_price, calculate what the original would have been
+    // return_price is already discounted by 30%, so original = return_price / 0.7
     if (booking?.return_price != null && selectedVehicle === booking.vehicle_type) {
+      if (booking?.promo_code) {
+        // Admin stored discounted price, calculate original for strikethrough display
+        return Math.round(booking.return_price / 0.7);
+      }
       return booking.return_price;
     }
     
@@ -550,10 +558,15 @@ export default function QuickBookingConfirm() {
   };
 
   const getDiscountAmount = () => {
-    if (!hasReturnTrip || !isPromoCodeValid) return null;
+    if (!hasReturnTrip) return null;
+    
+    // Only show discount if promo code is valid or booking has a promo code
+    const hasPromo = isPromoCodeValid || booking?.promo_code;
+    if (!hasPromo) return null;
+    
     const originalReturn = getOriginalReturnPrice();
     const discountedReturn = getReturnPrice();
-    if (originalReturn && discountedReturn) {
+    if (originalReturn && discountedReturn && originalReturn !== discountedReturn) {
       return originalReturn - discountedReturn;
     }
     return null;
@@ -741,10 +754,14 @@ export default function QuickBookingConfirm() {
             setPreviousVehiclePrices(oldPricesMap);
             setDiscountJustApplied(true);
             
-            // Update booking state with new price
+            // Update booking state with new price (including return price if exists)
+            const oldReturnPrice = booking.return_price;
+            const newReturnPrice = discountResult.new_return_price || oldReturnPrice;
+            
             setBooking({ 
               ...booking, 
               price: newPrice,
+              return_price: newReturnPrice,
               status: "price_sent",
             });
             
@@ -1608,14 +1625,14 @@ export default function QuickBookingConfirm() {
                 <div className="flex justify-between items-center text-xs sm:text-sm">
                   <span className="flex items-center gap-1 sm:gap-2">
                     {t("qbReturnTransfer")}
-                    {isPromoCodeValid && (
+                    {(isPromoCodeValid || booking?.promo_code) && (
                       <span className="text-[10px] sm:text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-1.5 sm:px-2 py-0.5 rounded-full">
                         30% OFF
                       </span>
                     )}
                   </span>
                   <span className="font-medium">
-                    {isPromoCodeValid && getOriginalReturnPrice() && (
+                    {(isPromoCodeValid || booking?.promo_code) && getOriginalReturnPrice() && getOriginalReturnPrice() !== getReturnPrice() && (
                       <span className="line-through text-muted-foreground mr-1 sm:mr-2 text-xs">
                         {currencySymbol}{getOriginalReturnPrice()}
                       </span>
@@ -1623,7 +1640,7 @@ export default function QuickBookingConfirm() {
                     {currencySymbol}{getReturnPrice()?.toFixed(0)}
                   </span>
                 </div>
-                {isPromoCodeValid && getDiscountAmount() && (
+                {(isPromoCodeValid || booking?.promo_code) && getDiscountAmount() && (
                   <div className="flex justify-between items-center text-xs sm:text-sm text-green-600 dark:text-green-400">
                     <span className="flex items-center gap-1 sm:gap-2">
                       <Tag className="h-3 w-3 sm:h-4 sm:w-4" />
