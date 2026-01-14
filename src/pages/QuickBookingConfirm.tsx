@@ -1169,17 +1169,24 @@ export default function QuickBookingConfirm() {
                 
                 {/* Pre-selected Return Trip from first page */}
                 {booking.has_return_trip && (
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-700">
-                    <RotateCcw className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-700">
+                    <RotateCcw className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
                     <div className="flex-1">
                       <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">
                         {t("qbReturnTrip") || "Return Trip"}: {booking.return_date && format(parseISO(booking.return_date), "dd/MM")} {booking.return_time && `- ${booking.return_time}`}
                       </p>
                     </div>
                     {booking.return_price && (
-                      <span className="text-xs font-semibold text-green-600">
-                        {currencySymbol}{booking.return_price}
-                      </span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {booking.promo_code && booking.price && (
+                          <span className="text-xs line-through text-muted-foreground">
+                            {currencySymbol}{booking.price}
+                          </span>
+                        )}
+                        <span className="text-sm font-bold text-green-600 bg-green-100 dark:bg-green-900/50 px-2 py-1 rounded">
+                          {currencySymbol}{booking.return_price}
+                        </span>
+                      </div>
                     )}
                   </div>
                 )}
@@ -1258,18 +1265,37 @@ export default function QuickBookingConfirm() {
             </p>
             
             {/* Return price if applicable */}
-            {(hasReturnTrip || booking.has_return_trip) && (
-              <div className="mt-3 pt-3 border-t border-border/50">
-                <div className="flex items-center justify-center gap-2 text-sm">
-                  <RotateCcw className="h-4 w-4 text-green-600" />
-                  <span className="text-muted-foreground">{t("returnTransfer") || "Return"}:</span>
-                  <span className="font-bold text-green-600">{currencySymbol}{getReturnPrice()}</span>
+            {(hasReturnTrip || booking.has_return_trip) && (() => {
+              const returnPrice = getReturnPrice();
+              const basePrice = getSelectedPrice();
+              const hasPromoDiscount = isPromoCodeValid && hasReturnTrip && !booking.has_return_trip;
+              const originalReturnPrice = hasPromoDiscount ? basePrice : null;
+              
+              return (
+                <div className="mt-3 pt-3 border-t border-border/50">
+                  <div className="flex items-center justify-center gap-2 flex-wrap">
+                    <RotateCcw className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-muted-foreground">{t("returnTransfer") || "Return Trip"}:</span>
+                    {hasPromoDiscount && originalReturnPrice && (
+                      <>
+                        <span className="text-sm line-through text-muted-foreground">
+                          {currencySymbol}{originalReturnPrice}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-0.5 rounded-full">
+                          <Tag className="h-3 w-3" />
+                          -{activePromo?.discountPercentage || 25}%
+                        </span>
+                      </>
+                    )}
+                    <span className="text-xl font-bold text-green-600">{currencySymbol}{returnPrice}</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mt-3 p-2 bg-primary/10 rounded-lg">
+                    <span className="text-muted-foreground text-sm">{t("total") || "Total"}:</span>
+                    <span className="text-2xl font-bold text-primary">{currencySymbol}{getTotalPrice()}</span>
+                  </div>
                 </div>
-                <p className="text-lg font-bold text-primary mt-2">
-                  {t("total") || "Total"}: {currencySymbol}{getTotalPrice()}
-                </p>
-              </div>
-            )}
+              );
+            })()}
           </div>
 
           {/* Return Trip Option (if not already set) */}
