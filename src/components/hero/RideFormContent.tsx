@@ -272,14 +272,14 @@ export const RideFormContent = memo(({
             <div className="flex items-center gap-2">
               <RotateCcw className="h-4 w-4" />
               <span className="text-sm font-medium">
-                {language === "TR" ? "Ek Seçenekler" : "Extra Options"}
+                {t("extraOptions") || "Extra Options"}
               </span>
               {hasExtras && (
                 <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
                   {[
-                    hasReturnTrip && (language === "TR" ? "Dönüş" : "Return"),
-                    babySeatCount > 0 && `${babySeatCount} ${language === "TR" ? "koltuk" : "seat"}`,
-                    luggageCount > 0 && `${luggageCount} ${language === "TR" ? "bavul" : "bag"}`
+                    hasReturnTrip && (t("returnShort") || "Return"),
+                    babySeatCount > 0 && `${babySeatCount} ${t("seatLabel") || "seat"}`,
+                    luggageCount > 0 && `${luggageCount} ${t("bagLabel") || "bag"}`
                   ].filter(Boolean).join(", ")}
                 </span>
               )}
