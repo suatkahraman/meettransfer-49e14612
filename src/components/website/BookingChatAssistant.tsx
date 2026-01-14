@@ -2954,11 +2954,26 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               language={language}
                               discountPercentage={msg.bookingData?.discountPercentage || undefined}
                               onSelectVehicle={(vehicleType) => {
-                                // Sync selected vehicle AND passenger count to form
+                                // Sync all booking data to form when vehicle is selected
                                 if (onApplyBooking) {
-                                  const passengerCount = msg.passengerCount || msg.bookingData?.passengers || 2;
-                                  console.log("[ChatVehicleCards Mobile] Syncing to form - vehicle:", vehicleType, "passengers:", passengerCount);
-                                  onApplyBooking({ vehicleType, passengers: passengerCount } as BookingData);
+                                  const syncData: Partial<BookingData> = { vehicleType };
+                                  
+                                  // Add passenger count
+                                  const passengerCount = msg.passengerCount || msg.bookingData?.passengers;
+                                  if (passengerCount) syncData.passengers = passengerCount;
+                                  
+                                  // Add date if available
+                                  if (msg.bookingData?.date) syncData.date = msg.bookingData.date;
+                                  
+                                  // Add time if available
+                                  if (msg.bookingData?.time) syncData.time = msg.bookingData.time;
+                                  
+                                  // Add locations if available
+                                  if (msg.bookingData?.pickup) syncData.pickup = msg.bookingData.pickup;
+                                  if (msg.bookingData?.dropoff) syncData.dropoff = msg.bookingData.dropoff;
+                                  
+                                  console.log("[ChatVehicleCards Mobile] Syncing all data to form:", syncData);
+                                  onApplyBooking(syncData as BookingData);
                                 }
                                 // Update message's bookingData to reflect selection
                                 setMessages(prev => prev.map((m, i) => 
@@ -3562,11 +3577,26 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     language={language}
                     discountPercentage={msg.bookingData?.discountPercentage || undefined}
                     onSelectVehicle={(vehicleType) => {
-                      // Sync selected vehicle AND passenger count to form
+                      // Sync all booking data to form when vehicle is selected
                       if (onApplyBooking) {
-                        const passengerCount = msg.passengerCount || msg.bookingData?.passengers || 2;
-                        console.log("[ChatVehicleCards Desktop] Syncing to form - vehicle:", vehicleType, "passengers:", passengerCount);
-                        onApplyBooking({ vehicleType, passengers: passengerCount } as BookingData);
+                        const syncData: Partial<BookingData> = { vehicleType };
+                        
+                        // Add passenger count
+                        const passengerCount = msg.passengerCount || msg.bookingData?.passengers;
+                        if (passengerCount) syncData.passengers = passengerCount;
+                        
+                        // Add date if available
+                        if (msg.bookingData?.date) syncData.date = msg.bookingData.date;
+                        
+                        // Add time if available
+                        if (msg.bookingData?.time) syncData.time = msg.bookingData.time;
+                        
+                        // Add locations if available
+                        if (msg.bookingData?.pickup) syncData.pickup = msg.bookingData.pickup;
+                        if (msg.bookingData?.dropoff) syncData.dropoff = msg.bookingData.dropoff;
+                        
+                        console.log("[ChatVehicleCards Desktop] Syncing all data to form:", syncData);
+                        onApplyBooking(syncData as BookingData);
                       }
                       // Update message's bookingData to reflect selection
                       setMessages(prev => prev.map((m, idx) => 
