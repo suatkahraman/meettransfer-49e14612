@@ -1268,8 +1268,27 @@ export default function QuickBookingConfirm() {
             {(hasReturnTrip || booking.has_return_trip) && (() => {
               const returnPrice = getReturnPrice();
               const basePrice = getSelectedPrice();
-              const hasPromoDiscount = isPromoCodeValid && hasReturnTrip && !booking.has_return_trip;
-              const originalReturnPrice = hasPromoDiscount ? basePrice : null;
+              
+              // Check if promo discount was applied - either on this page or from first page
+              const hasPromoOnThisPage = isPromoCodeValid && hasReturnTrip && !booking.has_return_trip;
+              const hasPromoFromFirstPage = booking.has_return_trip && booking.promo_code && booking.return_price && basePrice;
+              const hasPromoDiscount = hasPromoOnThisPage || hasPromoFromFirstPage;
+              
+              // Calculate original price (before discount)
+              let originalReturnPrice: number | null = null;
+              if (hasPromoOnThisPage && basePrice) {
+                originalReturnPrice = basePrice;
+              } else if (hasPromoFromFirstPage && booking.return_price && basePrice) {
+                // If return_price is less than base price, there was a discount
+                if (booking.return_price < basePrice) {
+                  originalReturnPrice = basePrice;
+                }
+              }
+              
+              // Determine discount percentage
+              const discountPercent = hasPromoOnThisPage 
+                ? (activePromo?.discountPercentage || 25)
+                : 25; // Default for pre-applied promos
               
               return (
                 <div className="mt-3 pt-3 border-t border-border/50">
@@ -1283,7 +1302,7 @@ export default function QuickBookingConfirm() {
                         </span>
                         <span className="inline-flex items-center gap-1 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-0.5 rounded-full">
                           <Tag className="h-3 w-3" />
-                          -{activePromo?.discountPercentage || 25}%
+                          -{discountPercent}%
                         </span>
                       </>
                     )}
