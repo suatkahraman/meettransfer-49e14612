@@ -132,7 +132,23 @@ export default function QuickBookingCustomerInfo() {
         return;
       }
 
-      setBookingData(data);
+      // Cast all_vehicle_prices from Json to Record<string, number>
+      const allVehiclePrices = data.all_vehicle_prices as Record<string, number> | null;
+
+      setBookingData({
+        pickup: data.pickup,
+        dropoff: data.dropoff,
+        pickup_date: data.pickup_date,
+        pickup_time: data.pickup_time,
+        vehicle_type: data.vehicle_type,
+        price: data.price,
+        price_currency: data.price_currency || "EUR",
+        passengers: data.passengers,
+        all_vehicle_prices: allVehiclePrices,
+        customer_email: data.customer_email,
+        customer_phone: data.customer_phone,
+        customer_name: data.customer_name,
+      });
       setSelectedVehicle(selectedVehicleParam || data.vehicle_type);
 
       if (data.customer_name || data.customer_email || data.customer_phone) {
