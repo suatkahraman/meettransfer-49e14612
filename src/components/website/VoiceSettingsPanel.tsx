@@ -213,52 +213,96 @@ export function VoiceSettingsPanel({
               </div>
             )}
 
-            {/* Speech Rate */}
+            {/* Speech Rate - iOS optimized with touch slider */}
             <div className="space-y-3">
               <div className="flex items-center justify-between px-1">
                 <p className="text-sm font-medium">
                   {language === "TR" ? "Konuşma Hızı" : "Speech Rate"}
                 </p>
                 <span className="text-sm font-mono bg-muted px-2 py-1 rounded-lg">
-                  {speechRate.toFixed(1)}x
+                  {speechRate.toFixed(2)}x
                 </span>
               </div>
               
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/50">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-11 w-11 rounded-xl"
-                  onClick={() => changeRate(Math.max(0.5, speechRate - 0.25))}
-                  disabled={speechRate <= 0.5}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                
-                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-primary rounded-full"
-                    initial={false}
-                    animate={{ width: `${((speechRate - 0.5) / 1.5) * 100}%` }}
-                    transition={{ duration: 0.2 }}
-                  />
+              <div className="p-4 rounded-xl bg-muted/50 space-y-3">
+                {/* Speed preset buttons */}
+                <div className="grid grid-cols-5 gap-1">
+                  {[0.7, 0.85, 1.0, 1.1, 1.2].map((rate) => (
+                    <Button
+                      key={rate}
+                      variant={Math.abs(speechRate - rate) < 0.05 ? "default" : "outline"}
+                      size="sm"
+                      className="h-10 text-xs px-1 touch-manipulation"
+                      onClick={() => changeRate(rate)}
+                    >
+                      {rate}x
+                    </Button>
+                  ))}
                 </div>
                 
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-11 w-11 rounded-xl"
-                  onClick={() => changeRate(Math.min(2, speechRate + 0.25))}
-                  disabled={speechRate >= 2}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                {/* Fine-tune controls */}
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-11 w-11 rounded-xl shrink-0 touch-manipulation"
+                    onClick={() => changeRate(Math.max(0.7, speechRate - 0.05))}
+                    disabled={speechRate <= 0.7}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  
+                  {/* Touch-friendly slider for iOS */}
+                  <div 
+                    className="flex-1 h-8 bg-muted rounded-full overflow-hidden relative cursor-pointer touch-manipulation"
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const percentage = x / rect.width;
+                      // Map 0-1 to 0.7-1.2
+                      const newRate = 0.7 + (percentage * 0.5);
+                      changeRate(Math.max(0.7, Math.min(1.2, newRate)));
+                    }}
+                    onTouchMove={(e) => {
+                      const touch = e.touches[0];
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = touch.clientX - rect.left;
+                      const percentage = Math.max(0, Math.min(1, x / rect.width));
+                      const newRate = 0.7 + (percentage * 0.5);
+                      changeRate(Math.max(0.7, Math.min(1.2, newRate)));
+                    }}
+                  >
+                    <motion.div 
+                      className="h-full bg-primary rounded-full"
+                      initial={false}
+                      animate={{ width: `${((speechRate - 0.7) / 0.5) * 100}%` }}
+                      transition={{ duration: 0.1 }}
+                    />
+                    {/* Drag handle */}
+                    <motion.div
+                      className="absolute top-1/2 -translate-y-1/2 w-6 h-6 bg-primary rounded-full shadow-lg border-2 border-background"
+                      initial={false}
+                      animate={{ left: `calc(${((speechRate - 0.7) / 0.5) * 100}% - 12px)` }}
+                      transition={{ duration: 0.1 }}
+                    />
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-11 w-11 rounded-xl shrink-0 touch-manipulation"
+                    onClick={() => changeRate(Math.min(1.2, speechRate + 0.05))}
+                    disabled={speechRate >= 1.2}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               
               <div className="flex justify-between text-xs text-muted-foreground px-1">
-                <span>{language === "TR" ? "Yavaş" : "Slow"}</span>
-                <span>{language === "TR" ? "Normal" : "Normal"}</span>
-                <span>{language === "TR" ? "Hızlı" : "Fast"}</span>
+                <span>0.7x {language === "TR" ? "Yavaş" : "Slow"}</span>
+                <span>1.0x {language === "TR" ? "Normal" : "Normal"}</span>
+                <span>1.2x {language === "TR" ? "Hızlı" : "Fast"}</span>
               </div>
             </div>
 

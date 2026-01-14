@@ -2064,14 +2064,19 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       setIsTyping(false);
       setStreamingContent("");
 
+      // Check for FORM_REDIRECT command and clean it from display
+      const hasFormRedirect = fullContent.includes('[FORM_REDIRECT]');
+      const cleanedContent = fullContent.replace(/\[FORM_REDIRECT\]/g, '').trim();
+
       // Parse booking data from the complete response
-      const bookingData = extractBookingDataFromResponse(fullContent);
+      const bookingData = extractBookingDataFromResponse(cleanedContent);
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: cleanResponseForDisplay(fullContent),
-        bookingData
+        content: cleanResponseForDisplay(cleanedContent),
+        bookingData,
+        showRedirectButton: hasFormRedirect // Show redirect button if AI says so
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -2079,6 +2084,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       // Speak the assistant response
       if (isVoiceEnabled) {
         speak(assistantMessage.content);
+      }
+      
+      // If AI triggered form redirect and we have booking data, auto-apply it
+      if (hasFormRedirect && bookingData && onApplyBooking) {
+        console.log("AI triggered FORM_REDIRECT, applying booking data:", bookingData);
+        // Small delay so user can see the message
+        setTimeout(() => {
+          handleApplyBooking(bookingData);
+        }, 1500);
       }
 
       // If booking has some data, make a non-streaming call to get additional info
