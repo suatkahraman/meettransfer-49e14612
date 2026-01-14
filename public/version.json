@@ -5,6 +5,12 @@
     "TR": "Acenta şehir seçimi güncellendi, PWA güncelleme sistemi iyileştirildi",
     "EN": "Agency city selection updated, PWA update system improved",
     "DE": "Agenturstadt-Auswahl aktualisiert, PWA-Update-System verbessert",
-    "FR": "Sélection de ville d'agence mise à jour, système de mise à jour PWA amélioré"
+    "FR": "Sélection de ville d'agence mise à jour, système de mise à jour PWA amélioré",
+    "RU": "Обновлен выбор города агентства, улучшена система обновления PWA",
+    "IT": "Aggiornata la selezione della città dell'agenzia, migliorato il sistema di aggiornamento PWA",
+    "ES": "Actualizada la selección de ciudad de agencia, mejorado el sistema de actualización PWA",
+    "AR": "تم تحديث اختيار مدينة الوكالة، تم تحسين نظام تحديث PWA",
+    "UK": "Оновлено вибір міста агентства, покращено систему оновлення PWA",
+    "JA": "代理店の都市選択が更新され、PWA更新システムが改善されました"
   }
 }
