@@ -115,6 +115,23 @@ export default function QuickBookingCustomerInfo() {
     const checkGoogleAuth = async () => {
       const googleAuth = searchParams.get("googleAuth");
       const storedBookingId = sessionStorage.getItem('quickBookingId');
+      const storedToken = sessionStorage.getItem('quickBookingToken');
+      const storedVehicle = sessionStorage.getItem('quickBookingVehicle');
+      const storedPrice = sessionStorage.getItem('quickBookingPrice');
+      const storedCurrency = sessionStorage.getItem('quickBookingCurrency');
+      const storedHasReturnTrip = sessionStorage.getItem('quickBookingHasReturnTrip');
+      const storedReturnDate = sessionStorage.getItem('quickBookingReturnDate');
+      const storedReturnTime = sessionStorage.getItem('quickBookingReturnTime');
+      const storedPaymentMethod = sessionStorage.getItem('quickBookingPaymentMethod');
+      const storedPromoCode = sessionStorage.getItem('quickBookingPromoCode');
+      
+      console.log("Checking Google OAuth return:", {
+        googleAuth,
+        storedBookingId,
+        storedToken,
+        storedVehicle,
+        currentBookingId: bookingId,
+      });
       
       if (googleAuth === "true" && storedBookingId) {
         console.log("Google OAuth return detected, checking session...");
@@ -126,11 +143,24 @@ export default function QuickBookingCustomerInfo() {
           console.log("Google user authenticated:", session.user.email);
           setIsGoogleUser(true);
           
-          // Restore form data from session storage
-          const storedVehicle = sessionStorage.getItem('quickBookingVehicle');
-          const storedPrice = sessionStorage.getItem('quickBookingPrice');
-          
+          // Restore stored values
           if (storedVehicle) setSelectedVehicle(storedVehicle);
+          if (storedHasReturnTrip === 'true') {
+            setHasReturnTrip(true);
+            if (storedReturnDate || storedReturnTime) {
+              setReturnTripData({
+                date: storedReturnDate || "",
+                time: storedReturnTime || "",
+              });
+            }
+          }
+          if (storedPaymentMethod === 'payment_link' || storedPaymentMethod === 'cash') {
+            setPaymentMethod(storedPaymentMethod);
+          }
+          if (storedPromoCode) {
+            setPromoCode(storedPromoCode);
+            setIsPromoCodeValid(true); // Assume it was validated before OAuth
+          }
           
           // Pre-fill form with Google user data
           setFormData(prev => ({
@@ -139,17 +169,23 @@ export default function QuickBookingCustomerInfo() {
             name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || "",
           }));
           
-          // Clear session storage
+          // Clear session storage after restoring
           sessionStorage.removeItem('quickBookingId');
           sessionStorage.removeItem('quickBookingToken');
           sessionStorage.removeItem('quickBookingVehicle');
           sessionStorage.removeItem('quickBookingPrice');
+          sessionStorage.removeItem('quickBookingCurrency');
+          sessionStorage.removeItem('quickBookingHasReturnTrip');
+          sessionStorage.removeItem('quickBookingReturnDate');
+          sessionStorage.removeItem('quickBookingReturnTime');
+          sessionStorage.removeItem('quickBookingPaymentMethod');
+          sessionStorage.removeItem('quickBookingPromoCode');
         }
       }
     };
     
     checkGoogleAuth();
-  }, [searchParams]);
+  }, [searchParams, bookingId]);
 
   useEffect(() => {
     if (bookingId) {
@@ -167,6 +203,22 @@ export default function QuickBookingCustomerInfo() {
       return () => clearTimeout(timer);
     }
   }, [submitted, navigate]);
+
+  // Auto-submit for Google users when all required data is ready
+  useEffect(() => {
+    if (
+      isGoogleUser && 
+      !autoSubmitting && 
+      !submitted && 
+      bookingData && 
+      formData.name.trim() && 
+      formData.email.trim() &&
+      formData.phone.trim().length >= 7
+    ) {
+      console.log("Auto-submit conditions met for Google user, triggering submit...");
+      handleGoogleSubmit();
+    }
+  }, [isGoogleUser, bookingData, formData.name, formData.email, formData.phone, autoSubmitting, submitted]);
 
   const fetchBooking = async () => {
     try {
@@ -475,15 +527,31 @@ export default function QuickBookingCustomerInfo() {
     
     setGoogleLoading(true);
     try {
+      // Store all current form state in sessionStorage for restoration after OAuth
       sessionStorage.setItem('quickBookingId', bookingId);
       sessionStorage.setItem('quickBookingToken', token);
       sessionStorage.setItem('quickBookingVehicle', selectedVehicle);
       sessionStorage.setItem('quickBookingPrice', getSelectedPrice().toString());
+      sessionStorage.setItem('quickBookingCurrency', bookingData?.price_currency || currencyParam);
+      sessionStorage.setItem('quickBookingHasReturnTrip', hasReturnTrip.toString());
+      sessionStorage.setItem('quickBookingReturnDate', returnTripData.date);
+      sessionStorage.setItem('quickBookingReturnTime', returnTripData.time);
+      sessionStorage.setItem('quickBookingPaymentMethod', paymentMethod);
+      sessionStorage.setItem('quickBookingPromoCode', promoCode);
+      
+      console.log("Saving booking state before Google OAuth:", {
+        bookingId,
+        token,
+        selectedVehicle,
+        price: getSelectedPrice(),
+        hasReturnTrip,
+        paymentMethod,
+      });
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/quick-booking-info?bookingId=${bookingId}&googleAuth=true`,
+          redirectTo: `${window.location.origin}/quick-booking-info?bookingId=${bookingId}&token=${token}&googleAuth=true`,
         },
       });
       

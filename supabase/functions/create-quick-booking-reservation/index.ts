@@ -27,6 +27,7 @@ interface CreateReservationRequest {
   customerPhone?: string;
   customerEmail?: string;
   customerPassword?: string;
+  isGoogleUser?: boolean;
 }
 
 serve(async (req) => {
@@ -47,7 +48,8 @@ serve(async (req) => {
       name: requestData.customerName,
       email: requestData.customerEmail,
       phone: requestData.customerPhone,
-      hasPassword: !!requestData.customerPassword
+      hasPassword: !!requestData.customerPassword,
+      isGoogleUser: requestData.isGoogleUser || false,
     });
 
     // Fetch the quick booking request to get agency info, luggage/baby seat, and notes
