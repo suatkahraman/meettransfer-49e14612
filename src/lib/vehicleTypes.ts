@@ -89,6 +89,26 @@ export interface VehicleTypeInfo {
 // Central vehicle type configuration - SYNC WITH edge functions _shared/vehicleConfig.ts
 export const VEHICLE_TYPES: VehicleTypeInfo[] = [
   {
+    value: 'sedan',
+    label: 'Sedan',
+    passengers: 3,
+    luggage: 2,
+    description: 'Elegant sedan for solo travelers or couples. Perfect for business meetings and intimate airport transfers with professional chauffeur.',
+    descriptionTr: 'Tek yolcular veya çiftler için zarif sedan. İş toplantıları ve profesyonel şoförle samimi havalimanı transferleri için mükemmel.',
+    features: [
+      { icon: 'snowflake', label: 'Air Conditioning', labelTr: 'Klima' },
+      { icon: 'armchair', label: 'Leather Seats', labelTr: 'Deri Koltuk' },
+      { icon: 'wifi', label: 'Free WiFi', labelTr: 'Ücretsiz WiFi' },
+      { icon: 'battery-charging', label: 'USB Charging', labelTr: 'USB Şarj' },
+      { icon: 'droplets', label: 'Bottled Water', labelTr: 'Su İkramı' },
+    ],
+    images: [
+      { src: vitoAirportPremium, alt: "Luxury sedan airport transfer with professional chauffeur" },
+      { src: luxuryAirportTransferTurkey, alt: "Executive sedan transfer Turkey" },
+      { src: meetTransferChauffeurPromo, alt: "Meet Transfer sedan chauffeur service" },
+    ],
+  },
+  {
     value: 'mercedes-vito',
     label: 'Mercedes Vito',
     passengers: 6,

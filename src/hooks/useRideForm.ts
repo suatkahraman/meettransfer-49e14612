@@ -314,12 +314,12 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     if (data.vehicleType) {
       // Extended vehicle mapping for AI assistant sync
       const vehicleMap: Record<string, string> = {
+        'sedan': 'sedan',
         'mercedes-vito': 'mercedes-vito',
         'vip-mercedes': 'vip-mercedes',
         'maybach-minibus': 'maybach-minibus',
         'minibus': 'minibus',
         // Alternative names from AI (multi-language)
-        'sedan': 'mercedes-vito',
         'vito': 'mercedes-vito',
         'mercedes': 'mercedes-vito',
         'vip': 'vip-mercedes',

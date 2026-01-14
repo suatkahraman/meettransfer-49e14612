@@ -10,6 +10,7 @@ export interface VehicleTypeConfig {
 
 // Central vehicle types - matches frontend
 export const VEHICLE_TYPES: VehicleTypeConfig[] = [
+  { value: 'sedan', label: 'Sedan', passengers: 3, luggage: 2 },
   { value: 'mercedes-vito', label: 'Mercedes Vito', passengers: 6, luggage: 6 },
   { value: 'vip-mercedes', label: 'VIP Mercedes', passengers: 5, luggage: 5 },
   { value: 'maybach-minibus', label: 'Maybach Minibus', passengers: 4, luggage: 4 },
@@ -30,6 +31,7 @@ export function getVehicleLabel(vehicleType: string): string {
 // When exact vehicle not found, try these in order
 export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   // Primary vehicle types (new naming convention)
+  'sedan': ['sedan', 'mercedes-vito'],
   'mercedes-vito': ['mercedes-vito'],
   'mercedes-vito-vip': ['mercedes-vito-vip'],
   'mercedes-maybach': ['mercedes-maybach'],
@@ -55,6 +57,7 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   'VIP': ['mercedes-vito-vip', 'vip-mercedes'],
   'Minivan': ['mercedes-vito'],
   'Minibus': ['mercedes-sprinter', 'minibus'],
+  'Sedan': ['sedan', 'mercedes-vito'],
 };
 
 // Get vehicle fallback list for price matching
