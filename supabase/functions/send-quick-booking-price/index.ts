@@ -125,10 +125,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Get discount percentage from promo code - default is 25%
     const PROMO_CODE_CONFIG: Record<string, number> = {
       'MEET25RETURN': 25,
-      'MEET30RETURN': 30,
       'GIDISDONUS': 25,
       'RETURN25': 25,
-      'RETURN30': 30,
       'MEET10': 10,
       'WELCOME10': 10,
     };

@@ -693,7 +693,7 @@ export default function QuickBookingCustomerInfo() {
                 <div className="space-y-2">
                   <Label htmlFor="promoCode" className="flex items-center gap-2">
                     <Tag className="h-4 w-4" />
-                    {t("qbPromoCodeLabel") || "Promo Code (30% off return)"}
+                    {t("qbPromoCodeLabel") || "Promo Code (25% off return)"}
                   </Label>
                   <div className="relative">
                     <Input
@@ -709,7 +709,7 @@ export default function QuickBookingCustomerInfo() {
                   </div>
                   {isPromoCodeValid && (
                     <p className="text-sm text-green-600 flex items-center gap-1">
-                      <CheckCircle2 className="h-4 w-4" /> 30% {t("qbDiscountApplied") || "discount applied to return!"}
+                      <CheckCircle2 className="h-4 w-4" /> 25% {t("qbDiscountApplied") || "discount applied to return!"}
                     </p>
                   )}
                 </div>

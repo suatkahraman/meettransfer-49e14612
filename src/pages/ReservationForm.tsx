@@ -468,7 +468,7 @@ const ReservationForm = () => {
   
   // Build valid promo codes list from active promo + fallback codes
   const getValidPromoCodes = useCallback(() => {
-    const baseCodes = ['meet30return', 'gidisdonus', 'return30', 'meet30'];
+    const baseCodes = ['meet25return', 'gidisdonus', 'return25', 'meet25'];
     if (activePromo?.code) {
       baseCodes.push(activePromo.code.toLowerCase());
     }

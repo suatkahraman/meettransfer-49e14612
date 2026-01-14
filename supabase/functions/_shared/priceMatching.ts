@@ -905,7 +905,7 @@ export function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
 // Vehicle matching is now in vehicleConfig.ts - re-exported above
 
 // ==================== DISCOUNT CALCULATION ====================
-export const VALID_PROMO_CODES = ['MEET30RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30', 'MEET10', 'WELCOME10'];
+export const VALID_PROMO_CODES = ['MEET25RETURN', 'GIDISDONUS', 'RETURN25', 'MEET25', 'MEET10', 'WELCOME10'];
 
 export interface PromoCodeInfo {
   code: string;
@@ -917,10 +917,8 @@ export interface PromoCodeInfo {
 // Default promo code configuration - can be overridden by database
 export const PROMO_CODE_CONFIG: Record<string, PromoCodeInfo> = {
   'MEET25RETURN': { code: 'MEET25RETURN', discountPercent: 25, appliesToReturn: true, appliesToTotal: false },
-  'MEET30RETURN': { code: 'MEET30RETURN', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
   'GIDISDONUS': { code: 'GIDISDONUS', discountPercent: 25, appliesToReturn: true, appliesToTotal: false },
   'RETURN25': { code: 'RETURN25', discountPercent: 25, appliesToReturn: true, appliesToTotal: false },
-  'RETURN30': { code: 'RETURN30', discountPercent: 30, appliesToReturn: true, appliesToTotal: false },
   'MEET10': { code: 'MEET10', discountPercent: 10, appliesToReturn: false, appliesToTotal: true },
   'WELCOME10': { code: 'WELCOME10', discountPercent: 10, appliesToReturn: false, appliesToTotal: true },
 };
@@ -965,8 +963,8 @@ export async function getActiveReturnPromoCode(supabase: any): Promise<PromoCode
       .maybeSingle();
 
     if (error || !data) {
-      console.log('No active return promo code found in DB, using fallback MEET30RETURN');
-      return PROMO_CODE_CONFIG['MEET30RETURN'];
+      console.log('No active return promo code found in DB, using fallback MEET25RETURN');
+      return PROMO_CODE_CONFIG['MEET25RETURN'];
     }
 
     console.log('Active return promo code from DB:', data.code, data.discount_percentage + '%');
@@ -978,7 +976,7 @@ export async function getActiveReturnPromoCode(supabase: any): Promise<PromoCode
     };
   } catch (err) {
     console.error('Error fetching active return promo code:', err);
-    return PROMO_CODE_CONFIG['MEET30RETURN'];
+    return PROMO_CODE_CONFIG['MEET25RETURN'];
   }
 }
 

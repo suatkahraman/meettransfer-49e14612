@@ -5105,10 +5105,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogIsWorthItDesc: "Havalimanı özel transferlerinin gerçek maliyet ve faydalarını analiz ediyoruz.",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "Dönüş transferlerinde %30 İNDİRİM",
+    blogCtaDiscountBadge: "Dönüş transferlerinde %25 İNDİRİM",
     blogCtaTitle: "Premium Transferinizi Rezerve Edin",
-    blogCtaReturnDiscount: "Gidiş-Dönüş Transferler – %30 İNDİRİM!",
-    blogCtaReturnDiscountDesc: "Havalimanı gidiş ve dönüş transferlerinizi birlikte rezerve edin ve anında %30 tasarruf edin",
+    blogCtaReturnDiscount: "Gidiş-Dönüş Transferler – %25 İNDİRİM!",
+    blogCtaReturnDiscountDesc: "Havalimanı gidiş ve dönüş transferlerinizi birlikte rezerve edin ve anında %25 tasarruf edin",
     blogCtaPromoCode: "Dönüş promosyon kodu",
     blogCtaDescription: "Profesyonel şoförler, lüks Mercedes filosu, 7/24 karşılama. Gizli ücret olmadan sabit fiyatlar.",
     blogCtaRequestPrice: "Fiyat İste",

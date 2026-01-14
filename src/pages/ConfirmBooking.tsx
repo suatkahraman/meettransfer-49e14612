@@ -89,7 +89,7 @@ export default function ConfirmBooking() {
           <div className="bg-muted/50 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium mb-2">🎁 Special Offer</p>
             <p className="text-sm text-muted-foreground">
-              Book a round-trip (return transfer) and receive a <strong>30% discount</strong> on
+              Book a round-trip (return transfer) and receive a <strong>25% discount</strong> on
               your return transfer!
             </p>
           </div>

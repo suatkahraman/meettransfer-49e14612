@@ -859,7 +859,7 @@ export default function AdminQuickBookings() {
                                 <Badge variant="secondary" className="w-fit mt-1 text-xs bg-green-100 text-green-700 border-green-200">
                                   <RefreshCw className="h-3 w-3 mr-1" />
                                   Dönüş
-                                  {request.promo_code && " %30"}
+                                  {request.promo_code && " %25"}
                                 </Badge>
                               )}
                             </div>

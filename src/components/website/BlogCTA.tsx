@@ -85,7 +85,7 @@ const BlogCTA = ({ destination = "", className = "" }: BlogCTAProps) => {
               <p className="text-xs text-muted-foreground">{t("blogCtaFeature2")}</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-primary">30%</p>
+              <p className="text-2xl font-bold text-primary">25%</p>
               <p className="text-xs text-muted-foreground">{t("blogCtaFeature3")}</p>
             </div>
             <div className="text-center">
