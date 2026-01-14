@@ -39,6 +39,13 @@ export interface BookingData {
   time?: string | null;
   passengers?: number | null;
   vehicleType?: string | null;
+  // Return trip info
+  returnDate?: string | null;
+  returnTime?: string | null;
+  hasReturnTrip?: boolean | null;
+  // Extras
+  babySeatCount?: number | null;
+  luggageCount?: number | null;
 }
 
 export type PlaceSelectedHandler = (value: string, details?: PlaceDetails) => void;
