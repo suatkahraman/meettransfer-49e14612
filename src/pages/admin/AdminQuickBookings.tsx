@@ -1300,33 +1300,134 @@ export default function AdminQuickBookings() {
         </DialogContent>
       </Dialog>
 
-      {/* Send Price Dialog */}
+      {/* Send Price Dialog - Enhanced with Customer & Route Details */}
       <Dialog open={priceDialogOpen} onOpenChange={setPriceDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
+              <DollarSign className="h-5 w-5 text-primary" />
               Fiyat Gönder
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Route info */}
             {selectedRequest && (
-              <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
-                <p className="font-medium">{selectedRequest.pickup}</p>
-                <p className="text-muted-foreground">↓</p>
-                <p className="font-medium">{selectedRequest.dropoff}</p>
-                <div className="flex items-center gap-2 mt-2 pt-2 border-t">
-                  <Badge variant="outline" className="bg-primary/10">
-                    <Car className="h-3 w-3 mr-1" />
-                    {vehicleLabels[selectedRequest.vehicle_type] || selectedRequest.vehicle_type}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    <Users className="h-3 w-3 inline mr-1" />
-                    {selectedRequest.passengers} yolcu
-                  </span>
-                </div>
-              </div>
+              <>
+                {/* Customer Info Card - Prominent */}
+                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Users className="h-5 w-5 text-blue-600" />
+                          <span className="font-bold text-lg text-blue-900 dark:text-blue-100">
+                            {selectedRequest.customer_name || "Anonim Müşteri"}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                          {selectedRequest.customer_phone && (
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Phone className="h-4 w-4" />
+                              <a href={`tel:${selectedRequest.customer_phone}`} className="hover:text-primary hover:underline font-medium">
+                                {selectedRequest.customer_phone}
+                              </a>
+                            </div>
+                          )}
+                          {selectedRequest.customer_email && (
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Mail className="h-4 w-4" />
+                              <a href={`mailto:${selectedRequest.customer_email}`} className="hover:text-primary hover:underline text-xs truncate max-w-[180px]">
+                                {selectedRequest.customer_email}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                        {selectedRequest.agency && (
+                          <Badge variant="outline" className="mt-2 bg-purple-50 text-purple-700 border-purple-200">
+                            <Building2 className="h-3 w-3 mr-1" />
+                            {selectedRequest.agency.agency_name}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-right text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {format(parseISO(selectedRequest.pickup_date), "dd MMM", { locale: tr })}
+                        </div>
+                        <div className="flex items-center gap-1 mt-1">
+                          <Clock className="h-3 w-3" />
+                          {selectedRequest.pickup_time}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Route Card - Prominent */}
+                <Card className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-emerald-200 dark:border-emerald-800">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="flex flex-col items-center">
+                          <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                          <div className="w-0.5 h-8 bg-gradient-to-b from-emerald-500 to-teal-500" />
+                          <div className="w-3 h-3 rounded-full bg-teal-500" />
+                        </div>
+                        <div className="flex-1 space-y-3">
+                          <div>
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider">Kalkış</p>
+                            <p className="font-bold text-emerald-900 dark:text-emerald-100">{selectedRequest.pickup}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider">Varış</p>
+                            <p className="font-bold text-teal-900 dark:text-teal-100">{selectedRequest.dropoff}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Vehicle & Passenger Details */}
+                      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-emerald-200 dark:border-emerald-800">
+                        <Badge className="bg-primary/10 text-primary border-primary/20">
+                          <Car className="h-3 w-3 mr-1" />
+                          {vehicleLabels[selectedRequest.vehicle_type] || selectedRequest.vehicle_type}
+                        </Badge>
+                        <Badge variant="outline">
+                          <Users className="h-3 w-3 mr-1" />
+                          {selectedRequest.passengers} yolcu
+                        </Badge>
+                        {selectedRequest.luggage_count !== null && selectedRequest.luggage_count > 0 && (
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                            <Briefcase className="h-3 w-3 mr-1" />
+                            {selectedRequest.luggage_count} valiz
+                          </Badge>
+                        )}
+                        {selectedRequest.baby_seat_count !== null && selectedRequest.baby_seat_count > 0 && (
+                          <Badge variant="outline" className="bg-pink-50 text-pink-700 border-pink-200">
+                            <Baby className="h-3 w-3 mr-1" />
+                            {selectedRequest.baby_seat_count} bebek koltuğu
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Customer Notes - If exists */}
+                {selectedRequest.customer_notes && (
+                  <Card className="bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800">
+                    <CardContent className="p-3">
+                      <div className="flex items-start gap-2">
+                        <MessageSquare className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs font-medium text-amber-800 dark:text-amber-200 mb-1">Müşteri Notu:</p>
+                          <p className="text-sm text-amber-700 dark:text-amber-300 whitespace-pre-wrap">
+                            {selectedRequest.customer_notes}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
             )}
 
             {/* Return trip info badge */}
