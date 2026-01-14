@@ -1168,6 +1168,7 @@ export type Database = {
           confirmation_token: string
           confirmed_at: string | null
           created_at: string | null
+          created_via_ai: boolean | null
           customer_email: string | null
           customer_name: string | null
           customer_notes: string | null
@@ -1207,6 +1208,7 @@ export type Database = {
           confirmation_token?: string
           confirmed_at?: string | null
           created_at?: string | null
+          created_via_ai?: boolean | null
           customer_email?: string | null
           customer_name?: string | null
           customer_notes?: string | null
@@ -1246,6 +1248,7 @@ export type Database = {
           confirmation_token?: string
           confirmed_at?: string | null
           created_at?: string | null
+          created_via_ai?: boolean | null
           customer_email?: string | null
           customer_name?: string | null
           customer_notes?: string | null
