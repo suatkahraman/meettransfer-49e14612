@@ -235,6 +235,16 @@ const translations: Record<Language, Record<string, string>> = {
     benefit2: "No hidden fees",
     benefit3: "You only confirm if you agree with the price",
     
+    // How It Works Section
+    howItWorks: "How It Works",
+    howItWorksDesc: "Book your premium airport transfer in just a few clicks",
+    howStep1Title: "Select Your Route",
+    howStep1Desc: "Enter pickup and dropoff locations, select your preferred date and time. Compare all vehicle options with transparent pricing.",
+    howStep2Title: "Confirm & Pay Securely",
+    howStep2Desc: "Add passenger details and any extras. Complete your booking with our secure payment system and receive instant confirmation.",
+    howStep3Title: "Meet Your Chauffeur",
+    howStep3Desc: "Receive your driver's details 6 hours before pickup. They'll greet you with a name sign and track your flight for any delays.",
+    
     // Customer Reviews Section
     customerReviewsTitle: "What Our Customers Say",
     seeAllReviews: "See All Reviews",
@@ -10854,6 +10864,16 @@ const translations: Record<Language, Record<string, string>> = {
     benefit1: "Otomatik fiyatlandırma yok",
     benefit2: "Gizli ücret yok",
     benefit3: "Sadece fiyatı kabul ederseniz onaylarsınız",
+    
+    // How It Works Section
+    howItWorks: "Nasıl Çalışır",
+    howItWorksDesc: "Premium havalimanı transferinizi birkaç tıkla rezerve edin",
+    howStep1Title: "Güzergahınızı Seçin",
+    howStep1Desc: "Alış ve bırakış noktalarınızı girin, tercih ettiğiniz tarih ve saati seçin. Şeffaf fiyatlandırma ile tüm araç seçeneklerini karşılaştırın.",
+    howStep2Title: "Onaylayın ve Güvenle Ödeyin",
+    howStep2Desc: "Yolcu bilgilerinizi ve ekstralarınızı ekleyin. Güvenli ödeme sistemimizle rezervasyonunuzu tamamlayın ve anında onay alın.",
+    howStep3Title: "Şoförünüzle Buluşun",
+    howStep3Desc: "Alış saatinden 6 saat önce şoför bilgilerinizi alın. İsim tabelasıyla sizi karşılayacak ve uçuş gecikmelerini takip edecekler.",
     
     // Customer Reviews Section
     customerReviewsTitle: "Müşterilerimiz Ne Diyor",
